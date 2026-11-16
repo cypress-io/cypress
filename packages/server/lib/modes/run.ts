@@ -15,6 +15,7 @@ import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
+import { endRunOnConfigProcessExit, isConfigProcessExit, wasConfigProcessExitReported } from '../util/config_process_exit'
 import * as env from '../util/env'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
@@ -26,7 +27,8 @@ import type { Browser } from '../browsers/types'
 import type { Data } from '../util/fs'
 import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
-import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
+import type { CypressRunResult } from './results'
+import { createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
@@ -47,6 +49,14 @@ let isRunCancelled = false
 
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+
+// WebKit records video through Playwright, which ties each recording to a single page and only
+// finalizes the file when that page closes (https://github.com/cypress-io/cypress/issues/23815).
+// That conflicts with single-tab mode reusing one page across specs, so when video is enabled
+// WebKit recycles the tab per spec instead. See the call sites for each per-spec consequence.
+function isWebKitRecordingVideo (browser: Browser, videoRecording?: VideoRecording) {
+  return browser.family === 'webkit' && !!videoRecording
+}
 
 let earlyExitTerminator = new EarlyExitTerminator()
 
@@ -304,6 +314,9 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
 
             ffmpegController.writeVideoFrame(data)
           },
+          get startedVideoCapture () {
+            return ffmpegController.startedVideoCapture
+          },
           async restart () {
             await videoRecording.api.useFfmpegVideoController(_ffmpegOpts)
           },
@@ -494,12 +507,14 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
   }
 
   // TODO: remove the need to extend options and avoid the type error
-  // @ts-expect-error
+  // @ts-expect-error - setScreenshotMetadata is not declared on the run options type
   options.setScreenshotMetadata = (data) => {
     return currentSetScreenshotMetadata(data)
   }
 
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
+  // WebKit + video recycles the tab per spec via the standard new-tab path (connectToNewSpec, see
+  // isWebKitRecordingVideo), so skip the in-place single-tab navigation and fall through to it.
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser && !isWebKitRecordingVideo(browser, options.videoRecording)) {
     // reset browser state to match default behavior when opening/closing a new tab
     const resetBrowserStateStartedAt = Date.now()
 
@@ -614,10 +629,10 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManagerShape }) {
+async function waitForTestsToFinishRunning (options: { project: Project, browser: Browser, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManagerShape }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
+  const { project, browser, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
 
   const results = await listenForProjectEnd(project, exit)
 
@@ -724,8 +739,25 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
   const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
-  if (usingExperimentalSingleTabMode && !isLastSpec) {
+  debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists, isWebKitRecordingVideo: isWebKitRecordingVideo(browser, videoRecording) })
+
+  // WebKit + video already closed the page (and the runner socket) in endVideoCapture, so destroyAut
+  // would wait forever for an 'aut:destroy:complete' reply that never arrives. The tab is recreated
+  // per spec anyway (see isWebKitRecordingVideo), so skip it.
+  if (usingExperimentalSingleTabMode && !isLastSpec && !isWebKitRecordingVideo(browser, videoRecording)) {
+    debug('single-tab mode: destroying AUT before next spec')
     await project.server.destroyAut()
+
+    // Even though single-tab mode intentionally keeps the same browser tab open
+    // between specs, we still need to reset the server's network/proxy state so it
+    // does not leak across specs. The default per-tab flow does this (below) via
+    // project.server.reset() after the tab is closed, which clears the pre-request
+    // correlation queue, response buffers, service worker manager, remote states,
+    // and stored credentials. Skipping it in single-tab mode allowed that state to
+    // accumulate over long runs, producing rare, order-dependent failures.
+    // See: https://github.com/cypress-io/cypress/issues/24146
+    debug('resetting server state between specs in single-tab run mode')
+    project.server.reset()
   }
 
   // we do not support experimentalSingleTabRunMode for e2e. We always want to close the tab on the last spec to ensure that things get cleaned up properly at the end of the run
@@ -877,14 +909,9 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       }
     }
 
-    const { results } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
+    const { results, browserNeedsRelaunch } = await runSpec(config, spec, options, estimated, isFirstSpecInBrowser, index === length - 1)
 
-    if (results?.error?.includes('We detected that the Chrome process just crashed with code')) {
-      // If the browser has crashed, make sure isFirstSpecInBrowser is set to true as the browser will be relaunching
-      isFirstSpecInBrowser = true
-    } else {
-      isFirstSpecInBrowser = false
-    }
+    isFirstSpecInBrowser = browserNeedsRelaunch
 
     span?.end()
 
@@ -972,6 +999,8 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
 async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: Project, browser: Browser, onError: (err: Error) => void, config: Cfg, quiet: boolean, exit: boolean, testingType: TestingType, socketId: string, webSecurity: boolean, projectRoot: string, protocolManager?: ProtocolManagerShape } & Pick<Cfg, 'video' | 'videosFolder' | 'videoCompression'>, estimated, isFirstSpecInBrowser, isLastSpec) {
   const { project, browser, onError } = options
+  // waitForTestsToFinishRunning replaces the terminator once this spec finishes
+  const specEarlyExitTerminator = earlyExitTerminator
 
   const { isHeadless } = browser
 
@@ -995,7 +1024,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
     telemetry.startSpan({ name: 'video:capture' })
 
-    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording) {
+    // WebKit + video can't reuse a controller across specs (its page-scoped video is finalized on
+    // close), so create a fresh recording per spec (see isWebKitRecordingVideo).
+    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording && !isWebKitRecordingVideo(browser, project.videoRecording)) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
       return await startVideoRecording({ ...opts, previous: project.videoRecording })
@@ -1015,6 +1046,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       spec,
       config,
       project,
+      browser,
       estimated,
       screenshots,
       videoRecording,
@@ -1047,7 +1079,9 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
     }),
   ])
 
-  return { results }
+  const { exitErrorType } = specEarlyExitTerminator
+
+  return { results, browserNeedsRelaunch: exitErrorType === 'BROWSER_CRASHED' || exitErrorType === 'TESTS_DID_NOT_START_FAILED' }
 }
 
 export interface ReadyOptions {
@@ -1104,15 +1138,25 @@ async function ready (options: ReadyOptions) {
 
   const onError = options.onError = (err) => {
     debug('onError', new Error().stack)
+
+    if (isConfigProcessExit(err)) {
+      return endRunOnConfigProcessExit(err)
+    }
+
+    if (wasConfigProcessExitReported()) {
+      return
+    }
+
     earlyExitTerminator.exitEarly(err)
   }
 
   // alias and coerce to null
-  let specPatternFromCli = options.spec || null
+  const specPatternFromCli = options.spec || null
 
   // ensure the project exists
   // and open up the project
-  const browsers = await browserUtils.get()
+  // Use the data context's cached detection so browsers are detected once per run
+  const browsers: FoundBrowser[] = await require('@packages/data-context').getCtx().browser.machineBrowsers()
 
   debug('found all system browsers %o', browsers.map(createPublicBrowser))
   // TODO: refactor this so we don't need to extend options

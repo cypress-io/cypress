@@ -27,4 +27,4 @@ const clean = () => {
 
 const build = gulp.series(clean, gulp.parallel(assets, cname))
 
-exports.build = build
+module.exports.build = build

@@ -1,24 +1,21 @@
 import _ from 'lodash'
 import Debug from 'debug'
+import { getAllStringMatcherFields, PLAIN_FIELDS } from '@packages/network-interception'
 import type {
-  NetStubbingState,
-  GetFixtureFn,
   BackendRoute,
-} from './types'
-import {
-  PLAIN_FIELDS,
+  GetFixtureFn,
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
+  BackendStaticResponse,
   NetEvent,
-} from '../types'
+} from '@packages/network-interception'
+import type { NetStubbingState } from './types'
 import {
-  getAllStringMatcherFields,
   sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
 import { InterceptedRequest } from './intercepted-request'
 import type { SocketBroadcaster } from '@packages/socket'
-import type { BackendStaticResponse } from '../internal-types'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
@@ -42,14 +39,8 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
   state.routes.push(route)
 }
 
-function getRequest (state: NetStubbingState, requestId: string) {
-  return Object.values(state.requests).find(({ id }) => {
-    return requestId === id
-  })
-}
-
 function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscribe) {
-  const request = getRequest(state, options.requestId)
+  const request = state.requests[options.requestId]
 
   if (!request) {
     return
@@ -59,7 +50,7 @@ function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscrib
 }
 
 async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
-  const request = getRequest(state, options.requestId)
+  const request = state.requests[options.requestId]
 
   if (!request) {
     return
@@ -88,7 +79,8 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
       return
     }
 
-    let { value, type } = obj
+    const { type } = obj
+    let { value } = obj
 
     if (type === 'regex') {
       const lastSlashI = value.lastIndexOf('/')

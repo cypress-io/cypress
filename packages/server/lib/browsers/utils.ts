@@ -2,10 +2,11 @@ import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
+import { mergeLaunchOptions } from '../plugins/merge_plugin_results'
 import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
 import type { Browser } from './types'
-import type { CriClient } from './cri-client'
+import type { CriClient } from './cdp-protocol/cri-client'
 import * as profileCleaner from '../util/profile_cleaner'
 import * as appData from '../util/app_data'
 import path from 'path'
@@ -14,6 +15,7 @@ import { telemetry } from '@packages/telemetry'
 import { fs } from '../util/fs'
 import * as extension from '@packages/extension'
 import getPort from 'get-port'
+import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload'
 
 declare global {
   interface Window {
@@ -218,28 +220,26 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
     errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
   }
 
-  _.forEach(launchOptions, (val, key) => {
-    const pluginResultValue = pluginConfigResult[key]
-
-    if (pluginResultValue) {
-      if (_.isPlainObject(val)) {
-        launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
-
-        return
-      }
-
-      launchOptions[key] = pluginResultValue
-
-      return
-    }
-  })
+  Object.assign(launchOptions, mergeLaunchOptions(launchOptions, pluginConfigResult))
 
   return launchOptions
 }
 
-const getWebKitBrowserVersion = async () => {
+const getWebKitBrowserVersion = async (pwWebkitModulePath?: string) => {
   try {
-    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
+    // Resolve `playwright-core` relative to the resolved `playwright-webkit`
+    // module first, then fall back to the project's working directory.
+    //
+    // In system tests the project runs from a temp dir outside the monorepo
+    // where only `playwright-webkit` is symlinked into `node_modules` (see
+    // `scaffoldCommonNodeModules`). Its transitive `playwright-core` dependency
+    // is not resolvable from `process.cwd()`, so detection used to fall back to
+    // '0' and display "WebKit 0". Since `playwright-webkit` always depends on
+    // `playwright-core`, resolving from the webkit module's location finds the
+    // correct `browsers.json`.
+    const paths = pwWebkitModulePath ? [path.dirname(pwWebkitModulePath), process.cwd()] : [process.cwd()]
+    // eslint-disable-next-line n/no-extraneous-require -- playwright-webkit owns the playwright-core version
+    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths }))
     const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
     const browsersJsonContents = await fs.readFile(browsersJsonPath, 'utf8')
     const browsersJson = JSON.parse(browsersJsonContents)
@@ -263,7 +263,7 @@ async function getWebKitBrowser () {
   try {
     const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
     const mod = await import(modulePath) as typeof import('playwright-webkit')
-    const version = await getWebKitBrowserVersion()
+    const version = await getWebKitBrowserVersion(modulePath)
 
     const browser: FoundBrowser = {
       name: 'webkit',
@@ -278,7 +278,7 @@ async function getWebKitBrowser () {
 
     return browser
   } catch (err) {
-    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
+    debug('There was an error constructing the WebKit browser: %o', { err })
 
     return
   }
@@ -404,7 +404,7 @@ const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = [
   return errors.throwErr('BROWSER_NOT_FOUND_BY_NAME', browserName, formatBrowsersToOptions(browsers))
 }
 
-const initializeCDP = async (criClient: CriClient, automation: Automation) => {
+const initializeCDP = async (criClient: CriClient, automation: Automation, useBrowserNetworkInterception: boolean) => {
   await criClient.send('Runtime.enable')
   await criClient.send('Runtime.addBinding', {
     name: 'cypressUtilityBinding',
@@ -432,8 +432,28 @@ const initializeCDP = async (criClient: CriClient, automation: Automation) => {
     }
   })
 
+  // Window-realm half of the #34652 fix. The worker-realm half, the shared
+  // mechanism, and its limits are documented in disable-navigation-preload.ts.
+  //
+  // This neutralizes navigationPreload.enable() called from page JS, and
+  // best-effort disables preload on registrations persisted from an earlier
+  // run (whose scripts the worker-realm half never sees).
+  //
+  // It is placed first in the bootstrap source, try/caught, and shares no
+  // bindings with the blocks after it, so nothing later in the script can
+  // prevent it from running.
+  //
+  // Gated on useBrowserNetworkInterception (resolved from isBrowserNetworkMode
+  // at launch): navigation preload bypasses CDP Fetch, but the MITM path still
+  // intercepts it at the network layer, so only the browser network path needs
+  // this.
+  const disableNavigationPreloadInWindow = useBrowserNetworkInterception
+    ? `;${DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION};`
+    : ''
+
   await criClient.send('Page.addScriptToEvaluateOnNewDocument', {
     source: `
+    ${disableNavigationPreloadInWindow}
     const binding = window['cypressUtilityBinding']
     delete window['cypressUtilityBinding']
     ;(${listenForDownload.toString()})(binding)
@@ -510,6 +530,8 @@ const listenForDownload = (binding) => {
 }
 
 const browserUtils = {
+
+  getWebKitBrowserVersion,
 
   extendLaunchOptionsFromPlugins,
 

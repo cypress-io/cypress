@@ -67,7 +67,7 @@ describe('lib/errors', () => {
     })
 
     it('logs err.message', () => {
-      const err = errors.getError('NO_PROJECT_ID', '/path/to/project/cypress.config.js')
+      const err = errors.getError('CANNOT_RECORD_NO_PROJECT_ID', '/path/to/project/cypress.config.js')
 
       const ret = errors.log(err)
 

@@ -18,11 +18,13 @@ vi.mock('@cypress/webpack-preprocessor', async (importOriginal) => {
   }
 })
 
-vi.mock('get-tsconfig', () => ({
-  default: {
-    getTsconfig: vi.fn(),
-  },
-}))
+vi.mock('get-tsconfig', () => {
+  return {
+    default: {
+      getTsconfig: vi.fn(),
+    },
+  }
+})
 
 describe('webpack-batteries-included-preprocessor', () => {
   let preprocessor: typeof import('../../index')
@@ -39,15 +41,15 @@ describe('webpack-batteries-included-preprocessor', () => {
       const result = getFullWebpackOptions('foo')
 
       expect(result.node.global).toBe(true)
-      expect(result.module.rules).toHaveLength(3)
-      expect(result.resolve.extensions).toEqual(['.js', '.json', '.jsx', '.mjs', '.coffee'])
+      expect(result.module.rules).toHaveLength(2)
+      expect(result.resolve.extensions).toEqual(['.js', '.json', '.jsx', '.mjs'])
     })
 
     it('adds typescript config if path is specified', () => {
       const result = getFullWebpackOptions('file/path', 'typescript/path')
 
-      expect(result.module.rules).toHaveLength(4)
-      expect(result.module.rules[3].use[0].loader).toContain('ts-loader')
+      expect(result.module.rules).toHaveLength(3)
+      expect(result.module.rules[2].use[0].loader).toContain('ts-loader')
     })
 
     it('adds the BundleAnalyzerPlugin if the user is trying to debug their bundle', async () => {
@@ -301,6 +303,82 @@ describe('webpack-batteries-included-preprocessor', () => {
 
         expect(tsLoader.options.configFile).toBeUndefined()
         expect(tsLoader.options.compilerOptions).toBeUndefined()
+      })
+    })
+
+    describe('with typescript 7 or newer', () => {
+      const fixtureTsconfigPath = path.resolve(__dirname, '../../test/fixtures/tsconfig.json')
+
+      const entryName = (entry: unknown) => (Array.isArray(entry) ? entry[0] : entry) as string
+
+      it.each(['7.0.0', '7.0.2', '7.1.0-beta', '8.0.0'] as const)(
+        'when resolved version is %s, uses babel-loader with @babel/preset-typescript instead of ts-loader',
+        (resolvedVersion) => {
+          vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue(resolvedVersion)
+
+          vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
+            config: {
+              compilerOptions: {
+                module: 'ESNext',
+                moduleResolution: 'Bundler',
+              },
+            },
+            path: fixtureTsconfigPath,
+          })
+
+          const preprocessorCB = preprocessor({
+            typescript: true,
+            webpackOptions,
+          })
+
+          preprocessorCB({
+            filePath: 'foo.ts',
+            outputPath: '.js',
+          } as any)
+
+          const rule = webpackOptions.module.rules[0]
+          const loader = rule.use[0]
+          const presets = loader.options.presets.map(entryName)
+          const plugins = loader.options.plugins.map(entryName)
+
+          expect(rule.test.toString()).toEqual(/\.m?tsx?$/.toString())
+          expect(loader.loader).toContain('babel-loader')
+          expect(loader.loader).not.toContain('ts-loader')
+          expect(presets.some((p: string) => p.includes('preset-typescript'))).toBe(true)
+          // emitDecoratorMetadata parity: metadata transform must precede the decorators transform
+          const metadataIdx = plugins.findIndex((p: string) => p.includes('babel-plugin-transform-typescript-metadata'))
+          const decoratorsIdx = plugins.findIndex((p: string) => p.includes('plugin-proposal-decorators'))
+
+          expect(metadataIdx).toBeGreaterThanOrEqual(0)
+          expect(decoratorsIdx).toBeGreaterThan(metadataIdx)
+        },
+      )
+
+      it('still registers the tsconfig paths plugin so path aliases resolve', () => {
+        vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('7.0.2')
+
+        vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
+          config: {
+            compilerOptions: {
+              module: 'ESNext',
+              moduleResolution: 'Bundler',
+            },
+          },
+          path: fixtureTsconfigPath,
+        })
+
+        const preprocessorCB = preprocessor({
+          typescript: true,
+          webpackOptions,
+        })
+
+        preprocessorCB({
+          filePath: 'foo.ts',
+          outputPath: '.js',
+        } as any)
+
+        expect(webpackOptions.resolve.extensions).toEqual(expect.arrayContaining(['.ts', '.tsx']))
+        expect(webpackOptions.resolve.plugins).toHaveLength(1)
       })
     })
   })

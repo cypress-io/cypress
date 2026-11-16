@@ -42,19 +42,11 @@ exports['e2e promises / failing1'] = `
   │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  2                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     promises.cy.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/promises.cy.js/catches regular promise errors (     (1280x720)
-     failed).png                                                                                    
-  -  /XXX/XXX/XXX/cypress/screenshots/promises.cy.js/catches promise errors and calls     (1280x720)
-      done with err even when async (failed).png                                                    
 
 
 ====================================================================================================

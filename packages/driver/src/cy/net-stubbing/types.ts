@@ -1,1 +1,1 @@
-export * from '@packages/net-stubbing/lib/types'
+export * from '@packages/network-interception'

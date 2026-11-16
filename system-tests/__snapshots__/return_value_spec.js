@@ -79,21 +79,11 @@ Error: Resolution method is overspecified. Specify a callback *or* return a Prom
   │ Failing:      3                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  3                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     return_value.cy.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value.cy.js/errors when invoking command     (1280x720)
-     s and return a different value (failed).png                                                    
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value.cy.js/errors when invoking command     (1280x720)
-     s in custom command and returning different value (failed).png                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/return_value.cy.js/errors when not invoking com     (1280x720)
-     mands, invoking done callback, and returning a promise (failed).png                            
 
 
 ====================================================================================================

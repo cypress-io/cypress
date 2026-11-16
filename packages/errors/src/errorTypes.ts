@@ -50,7 +50,7 @@ export interface ClonedError {
   name: string
   columnNumber?: string
   lineNumber?: string
-  fileName?: String
+  fileName?: string
   stack?: string
   message?: string
   [key: string]: any

@@ -16,7 +16,7 @@ export async function makePackage () {
       name: 'packageName',
       type: 'input',
       message: 'What is the package name?',
-      validate: (val) => /[A-z\-]+/.test(val),
+      validate: (val) => /[A-z-]+/.test(val),
     },
     {
       name: 'target',
@@ -102,7 +102,6 @@ export async function makePackage () {
             'noImplicitAny': true,
             'resolveJsonModule': true,
             'noUncheckedIndexedAccess': true,
-            'importsNotUsedAsValues': 'error',
             'types': [],
           },
         },

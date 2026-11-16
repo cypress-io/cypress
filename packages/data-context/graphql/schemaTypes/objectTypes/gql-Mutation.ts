@@ -339,7 +339,7 @@ export const mutation = mutationType({
       },
       resolve: async (_, args, ctx) => {
         ctx.actions.wizard.resetWizard()
-        let path = args.path
+        const path = args.path
 
         if (!path) {
           await ctx.actions.project.addProjectFromElectronNativeFolderSelect()
@@ -475,8 +475,8 @@ export const mutation = mutationType({
       args: {
         path: nonNull(stringArg()),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.project.openDirectoryInIDE(args.path)
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.project.openDirectoryInIDE(args.path)
 
         return true
       },
@@ -503,8 +503,8 @@ export const mutation = mutationType({
           type: FileDetailsInput,
         })),
       },
-      resolve: (_, args, ctx) => {
-        ctx.actions.file.openFile(
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.file.openFile(
           args.input.filePath,
           args.input.line || 1,
           args.input.column || 1,
@@ -667,24 +667,6 @@ export const mutation = mutationType({
       },
     })
 
-    t.boolean('_clearCloudCache', {
-      description: 'Internal use only, clears the cloud cache',
-      resolve: (source, args, ctx) => {
-        ctx.cloud.reset()
-
-        return true
-      },
-    })
-
-    t.json('_showUrqlCache', {
-      description: 'Internal use only, clears the cloud cache',
-      resolve: async (source, args, ctx) => {
-        const { data } = await ctx.cloud.getCache()
-
-        return data
-      },
-    })
-
     t.boolean('setRunAllSpecs', {
       description: 'List of specs to run for the "Run All Specs" Feature',
       args: {
@@ -751,7 +733,7 @@ export const mutation = mutationType({
         })))),
       },
       resolve: (source, args, ctx) => {
-        ctx.coreData.cloudProject.testsForRunResults = args.testsBySpec.reduce<{[index: string]: string[]}>((acc, spec) => {
+        ctx.coreData.cloudProject.testsForRunResults = args.testsBySpec.reduce<{ [index: string]: string[] }>((acc, spec) => {
           acc[spec.specPath] = spec.tests
 
           return acc

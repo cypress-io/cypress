@@ -1,17 +1,22 @@
 import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 
-import Agent, { AgentProps } from '../agents/agent-model'
-import Command, { CommandProps } from '../commands/command-model'
+import type { AgentProps } from '../agents/agent-model'
+import Agent from '../agents/agent-model'
+import type { CommandProps } from '../commands/command-model'
+import Command from '../commands/command-model'
 import Err from '../errors/err-model'
-import Route, { RouteProps } from '../routes/route-model'
+import type { RouteProps } from '../routes/route-model'
+import Route from '../routes/route-model'
 import type Test from '../test/test-model'
 import type { UpdatableTestProps, TestProps } from '../test/test-model'
 import type { TestState, FileDetails } from '@packages/types'
-import Hook, { HookName } from '../hooks/hook-model'
+import type { HookName } from '../hooks/hook-model'
+import Hook from '../hooks/hook-model'
 import type { LogProps } from '../runnables/runnables-store'
 import type Log from '../instruments/instrument-model'
-import Session, { SessionProps } from '../sessions/sessions-model'
+import type { SessionProps } from '../sessions/sessions-model'
+import Session from '../sessions/sessions-model'
 
 export default class Attempt {
   agents: Agent[] = []
@@ -26,7 +31,6 @@ export default class Attempt {
   _testOuterStatus?: TestState = undefined
   _invocationCount: number = 0
   invocationDetails?: FileDetails
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   hookCount: { [name in HookName]: number } = {
     'before all': 0,
     'before each': 0,
@@ -35,16 +39,17 @@ export default class Attempt {
     'test body': 0,
     'studio commands': 0,
   }
-  _isOpen: boolean|null = null
+
+  _isOpen: boolean | null = null
 
   isOpenWhenLast: boolean | null = null
-  _callbackAfterUpdate: Function | null = null
+  _callbackAfterUpdate: (() => void) | null = null
   testId: string
 
   id: number
   test: Test
 
-  _logs: {[key: string]: Log} = {}
+  _logs: { [key: string]: Log } = {}
 
   constructor (props: TestProps, test: Test) {
     makeObservable(this, {
@@ -160,8 +165,7 @@ export default class Attempt {
     const log = this._logs[props.id]
 
     if (log) {
-      // @ts-ignore satisfied by CommandProps
-      if (props.sessionInfo) {
+      if ('sessionInfo' in props && props.sessionInfo) {
         this._updateOrAddSession(props as unknown as SessionProps) // update sessionInstrumentPanel details
       }
 
@@ -181,14 +185,15 @@ export default class Attempt {
   }
 
   commandMatchingErr (): Command | undefined {
-    if (!this.err) {
+    const err = this.err
+
+    if (!err) {
       return undefined
     }
 
     return _(this.hooks)
     .map((hook) => {
-      // @ts-ignore
-      return hook.commandMatchingErr(this.err)
+      return hook.commandMatchingErr(err)
     })
     .compact()
     .last()

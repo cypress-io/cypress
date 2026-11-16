@@ -13,7 +13,7 @@ import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/expor
 export class OTLPTraceExporter
   extends OTLPTraceExporterHttp {
   ws: any
-  delayedExport: {items: ReadableSpan[], resultCallback: (result: ExportResult) => void}[]
+  delayedExport: { items: ReadableSpan[], resultCallback: (result: ExportResult) => void }[]
   constructor () {
     super({})
     this.delayedExport = []

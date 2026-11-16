@@ -1,4 +1,11 @@
 version: 2
+percy:
+  # Hold snapshots locally and upload them only when the run completes, rather
+  # than streaming each one to Percy as it is captured. Percy bills per snapshot
+  # at upload time, so when a parallel shard is canceled early (e.g. fail-fast on
+  # a detected failure) its already-captured snapshots are discarded instead of
+  # billed. See BrowserStack/Percy parallel troubleshooting for context.
+  defer-uploads: true
 snapshot:
   widths:
     - 1280

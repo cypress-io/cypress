@@ -1,3 +1,41 @@
+# [@[secure]/puppeteer-v1.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/puppeteer-v0.1.10...@[secure]/puppeteer-v1.0.0) (2026-11-12)
+
+
+### breaking
+
+* **puppeteer:** upgrade puppeteer-core to v24 and release 1.0 ([#35203](https://github.com/[secure]-io/[secure]/issues/35203)) ([dab2626](https://github.com/[secure]-io/[secure]/commit/dab2626dda6671f3ead0324f65b1cae96084acda))
+
+
+### BREAKING CHANGES
+
+* **puppeteer:** @[secure]/puppeteer now requires Cypress 14.0.0 or later
+and bundles puppeteer-core v24 instead of v21. Message handlers receive
+a Puppeteer Browser directly, so Puppeteer's breaking changes from v22
+through v24 can affect handler code, including the removal of
+page.waitForTimeout(), page.$x() and page.waitForXPath(), the rename of
+createIncognitoBrowserContext() to createBrowserContext(), and
+Uint8Array return types for screenshots and PDFs. See "Upgrading to
+1.0" in the README.
+
+
+Claude-Session: https://claude.ai/code/session_01MgZqAWLsFxezM5PLQTBjzz
+
+Co-authored-by: Claude <noreply@anthropic.com>
+
+# [@[secure]/puppeteer-v0.1.10](https://github.com/[secure]-io/[secure]/compare/@[secure]/puppeteer-v0.1.9...@[secure]/puppeteer-v0.1.10) (2026-09-30)
+
+
+### Bug Fixes
+
+* **puppeteer:** lowercase the [secure] type reference so types resolve on case-sensitive file systems ([#34954](https://github.com/[secure]-io/[secure]/issues/34954)) ([83ab206](https://github.com/[secure]-io/[secure]/commit/83ab20656626a93eb9079e7aee670d008f0821d3))
+
+# [@[secure]/puppeteer-v0.1.9](https://github.com/[secure]-io/[secure]/compare/@[secure]/puppeteer-v0.1.8...@[secure]/puppeteer-v0.1.9) (2026-09-24)
+
+
+### Bug Fixes
+
+* **puppeteer:** always disconnect, report falsy rejections, and fix retry timeout ([#34907](https://github.com/[secure]-io/[secure]/issues/34907)) ([aecb1cb](https://github.com/[secure]-io/[secure]/commit/aecb1cb6419a2a8a5e220639daa447cdb3143cb8))
+
 # [@cypress/puppeteer-v0.1.8](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.7...@cypress/puppeteer-v0.1.8) (2025-10-03)
 
 # [@cypress/puppeteer-v0.1.7](https://github.com/cypress-io/cypress/compare/@cypress/puppeteer-v0.1.6...@cypress/puppeteer-v0.1.7) (2025-09-18)

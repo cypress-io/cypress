@@ -1,4 +1,5 @@
-import { expect, it, describe, beforeEach, vi, Mock } from 'vitest'
+import type { Mock } from 'vitest'
+import { expect, it, describe, beforeEach, vi } from 'vitest'
 import webpack from 'webpack'
 import Bluebird from 'bluebird'
 import preprocessor from '../../index'
@@ -92,7 +93,7 @@ describe('webpack preprocessor', function () {
     })
 
     it('defaultOptions are deeply cloned, preserving regexes', () => {
-      // @ts-expect-error
+      // @ts-expect-error - `test` is not on every member of the `module.rules` union
       expect(preprocessor.defaultOptions.webpackOptions.module.rules[0]?.test).toBeInstanceOf(RegExp)
     })
   })
@@ -238,7 +239,7 @@ describe('webpack preprocessor', function () {
 
       it('watches when shouldWatch is true', async function () {
         file.shouldWatch = true
-        // @ts-expect-error
+        // @ts-expect-error - `watch` is typed with only a callback, but webpack calls it with `(watchOptions, callback)`
         compilerApi.watch.mockImplementation((watchOptions, callback) => {
           callback(null, statsApi as unknown as webpack.Stats)
 
@@ -251,7 +252,7 @@ describe('webpack preprocessor', function () {
 
       it('includes watchOptions if provided', async function () {
         file.shouldWatch = true
-        // @ts-expect-error
+        // @ts-expect-error - `watch` is typed with only a callback, but webpack calls it with `(watchOptions, callback)`
         compilerApi.watch.mockImplementation((watchOptions, callback) => {
           callback(null, statsApi as unknown as webpack.Stats)
 
@@ -283,7 +284,7 @@ describe('webpack preprocessor', function () {
         let onWatchHandler: (err: Error | null, stats: webpack.Stats) => void
         let onCompile: () => void
 
-        // @ts-expect-error
+        // @ts-expect-error - `watch` is typed with only a callback, but webpack calls it with `(watchOptions, callback)`
         compilerApi.watch.mockImplementation((webpackOptions, callback: (err: Error | null, stats: webpack.Stats) => void) => {
           onWatchHandler = callback
 
@@ -327,7 +328,7 @@ describe('webpack preprocessor', function () {
 
       it('closes bundler when shouldWatch is true and `close` is emitted', async function () {
         file.shouldWatch = true
-        // @ts-expect-error
+        // @ts-expect-error - `watch` is typed with only a callback, but webpack calls it with `(watchOptions, callback)`
         compilerApi.watch.mockImplementation((watchOptions, callback) => {
           callback(null, statsApi as unknown as webpack.Stats)
 
@@ -508,8 +509,7 @@ describe('webpack preprocessor', function () {
         }))
       })
 
-      // eslint-disable-next-line quotes
-      const TS_LOADER_NAMES = ['ts-loader', "ts-loader", 'foo/ts-loader/dist/index.js']
+      const TS_LOADER_NAMES = ['ts-loader', 'ts-loader', 'foo/ts-loader/dist/index.js']
 
       const runTsLoaderOverrideSuite = (versionLabel: string, tsBehavior: TypeScriptVersionBehavior) => {
         describe(`when ${versionLabel}`, function () {

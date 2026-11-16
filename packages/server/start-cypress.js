@@ -4,7 +4,7 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
-const { GracefulExit } = require('./lib/util/graceful-exit')
+const { GracefulExit, getPeerWaitTimeoutMs } = require('./lib/util/graceful-exit')
 const { NetProfiler } = require('./lib/util/net_profiler')
 const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 const { suppress } = require('./lib/util/suppress_warnings')
@@ -16,6 +16,12 @@ const debug = Debug('cypress:server:start-cypress')
 process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
 configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
 process.env['CYPRESS'] = 'true'
+
+// Store the user's value so the config process can restore it for their Node code. This has to run here,
+// because the V8 snapshot can defer loading lib/request (which sets it to '0') until after that process is forked.
+if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
+  process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED
+}
 
 // are we in the main node process or the electron process?
 const isRunningElectron = isElectronRunning()
@@ -71,7 +77,7 @@ if (isRunningElectron) {
     } catch (error) {
       debug('Error during telemetry shutdown on exit: %o', error)
     }
-  }, 'finalize telemetry')
+  }, 'finalize telemetry', getPeerWaitTimeoutMs())
 
   const v8SnapshotSpan = telemetry.startSpan({ name: 'v8snapshot:startup', opts: { startTime: global.cypressServerStartTime } })
 

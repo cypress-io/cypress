@@ -51,6 +51,54 @@ describe('server sent events', () => {
     }).should('deep.eq', ['1', '2', '3', '4', '5'])
   })
 
+  // https://github.com/cypress-io/cypress/issues/35256
+  // The stream ends for two reasons. The HTTP proxy path reads the whole body
+  // before it calls a response handler, so an endless stream never reaches the
+  // handler. The CDP path passes the stream through as it arrives, but
+  // res.text() only resolves once the stream ends.
+
+  it('receives the stream when a response handler changes the content-type', () => {
+    cy.intercept('http://127.0.0.1:3039/sse/finite', (req) => {
+      req.on('response', (res) => {
+        res.headers['content-type'] = 'text/plain'
+      })
+    })
+
+    cy.window()
+    .then((win) => win.fetch('http://127.0.0.1:3039/sse/finite').then((res) => res.text()))
+    .should('equal', 'data: one\n\ndata: two\n\n')
+  })
+
+  it('reads SSE framing from a fetch ReadableStream before cancelling', () => {
+    cy.window().then((win) => {
+      // the proxy only exempts a response from gzip compression when the
+      // request's accept header is exactly 'text/event-stream' - otherwise
+      // gzip buffers these tiny 100ms chunks indefinitely and the reader
+      // never sees a byte
+      return win.fetch('http://127.0.0.1:3039/sse', { headers: { accept: 'text/event-stream' } })
+      .then((response) => {
+        const reader = response.body.getReader()
+        const decoder = new win.TextDecoder()
+
+        // the server writes a leading `:ok` comment before the first `data:`
+        // frame, so keep reading chunks until an actual event arrives
+        const readUntilData = (received) => {
+          return reader.read().then(({ value, done }) => {
+            if (done) return received
+
+            const next = received + decoder.decode(value, { stream: true })
+
+            if (next.includes('data:')) return next
+
+            return readUntilData(next)
+          })
+        }
+
+        return readUntilData('').finally(() => reader.cancel())
+      })
+    }).should('include', 'data:')
+  })
+
   it('aborts proxied connections to prevent client connection buildup', () => {
     // there shouldn't be any leftover connections either
     cy.request('http://localhost:3038/clients')

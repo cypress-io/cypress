@@ -1,3 +1,20 @@
+# [@[secure]/angular-v5.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/angular-v4.1.0...@[secure]/angular-v5.0.0) (2026-08-26)
+
+
+### breaking
+
+* merge @[secure]/angular-zoneless upstream into @[secure]/angular and remove angular support for angular 18, 19 and 20. ([4d8e35c](https://github.com/[secure]-io/[secure]/commit/4d8e35ca7b49e732a05742ae2e410e173b8d89f2))
+* release 5.0.0 of @[secure]/angular ([69b1587](https://github.com/[secure]-io/[secure]/commit/69b158762292f29979285d7c90025298807651a1))
+* remove @angular/platform-[secure]-dynamic in favor of @angular/platform-[secure] for @[secure]/angular ([f47feda](https://github.com/[secure]-io/[secure]/commit/f47fedadd4bdfcfb6cff5c9db2289c0d32f72a84))
+
+
+### BREAKING CHANGES
+
+* remove @angular/platform-[secure]-dynamic in favor of @angular/platform-[secure] for @[secure]/angular
+* merge @[secure]/angular-zoneless upstream into @[secure]/angular and remove angular support for angular 18, 19, and 20. Additionally, @[secure]/schematic only supports Cypress 16 and doesnt scaffold the angular-zoneless mount handler any longer. This is a breaking change to Cypress, @[secure]/angular, and @[secure]/schematic. Additionally, @[secure]/angular-zoneless will be deprecated on NPM due to the upstream move
+i
+* updates build targets of @[secure]/angular from es2020 to es2022. Though breaking, this should be minimally disruptive.
+
 # [@cypress/angular-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/angular-v4.0.0...@cypress/angular-v4.1.0) (2025-12-05)
 
 

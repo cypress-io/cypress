@@ -1,9 +1,5 @@
 import TestingTypePicker from './TestingTypePicker.vue'
 import { TestingTypePickerFragmentDoc } from '../generated/graphql-test'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
-
-const { component, e2e, componentDisabled } = defaultMessages.testingType
 
 describe('TestingTypePicker', () => {
   it('renders "configured" and "not configured" states', () => {
@@ -22,19 +18,19 @@ describe('TestingTypePicker', () => {
     })
 
     cy.get('[data-cy-testingtype="e2e"]').within(() => {
-      cy.contains(e2e.name).should('be.visible')
-      cy.contains(e2e.description).should('be.visible')
-      cy.contains(defaultMessages.setupPage.testingCard.notConfigured).should('be.visible')
+      cy.contains('E2E Testing').should('be.visible')
+      cy.contains('Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations.').should('be.visible')
+      cy.contains('Not Configured').should('be.visible')
     })
 
     cy.get('[data-cy-testingtype="component"]').within(() => {
-      cy.contains(component.name).should('be.visible')
-      cy.contains(component.description).should('be.visible')
-      cy.contains(defaultMessages.setupPage.testingCard.configured).should('be.visible')
+      cy.contains('Component Testing').should('be.visible')
+      cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
+      cy.contains('Configured').should('be.visible')
     })
 
-    cy.contains(e2e.name).click()
-    cy.contains(component.name).click()
+    cy.contains('E2E Testing').click()
+    cy.contains('Component Testing').click()
     cy.get('@pick').should('have.been.calledTwice')
   })
 
@@ -49,11 +45,11 @@ describe('TestingTypePicker', () => {
     })
 
     cy.get('[data-cy-testingtype="component"]').within(() => {
-      cy.contains(component.name).should('be.visible')
-      cy.contains(componentDisabled.description.replace('{0}', componentDisabled.link)).should('be.visible')
-      cy.contains(defaultMessages.setupPage.testingCard.disabled).should('be.visible')
+      cy.contains('Component Testing').should('be.visible')
+      cy.contains('To test your components you must install Cypress as an NPM dependency for this project.').should('be.visible')
+      cy.contains('Disabled').should('be.visible')
 
-      cy.contains(componentDisabled.link).should('have.attr', 'href', 'https://on.cypress.io/installing-cypress')
+      cy.contains('install Cypress').should('have.attr', 'href', 'https://on.cypress.io/installing-cypress')
     }).click()
 
     cy.get('@pick').should('not.have.been.called')

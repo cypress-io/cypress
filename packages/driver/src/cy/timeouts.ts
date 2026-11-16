@@ -36,4 +36,4 @@ export const create = (state: StateFunc) => ({
   },
 })
 
-export interface ITimeouts extends ReturnType<typeof create> { }
+export type ITimeouts = ReturnType<typeof create>

@@ -3,7 +3,8 @@ import type { CloudRunStatus } from '../../src/generated/graphql-test'
 import type { AutSnapshot } from '../../src/runner/iframe-model'
 
 export const autSnapshot: AutSnapshot = {
-  id: 1,
+  id: 'log-http://localhost:3000-1',
+  testId: 'r3',
   name: 'DOM Test Snapshot',
   $el: null,
   coords: [0, 0],
@@ -12,7 +13,7 @@ export const autSnapshot: AutSnapshot = {
     y: 0,
   },
   highlightAttr: '',
-  // @ts-ignore
+  // @ts-expect-error - the fixture snapshots carry only the names the reporter shows, not full AutSnapshots
   snapshots: [{ name: 'Before' }, { name: 'After' }],
   htmlAttrs: {},
   viewportHeight: 500,

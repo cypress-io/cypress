@@ -6,7 +6,7 @@ import path from 'path'
 import fs from 'fs'
 
 import { restoreLoadHook, sourceDefaultWebpackDependencies } from '../src/helpers/sourceRelativeWebpackModules'
-import { WebpackDevServerConfig } from '../src/devServer'
+import type { WebpackDevServerConfig } from '../src/devServer'
 
 type ProjectDirs = typeof fixtureDirs
 
@@ -20,6 +20,11 @@ const WEBPACK_REACT: Partial<Record<ProjectDirs[number], {
   'webpack5_wds5-react': {
     webpack: 5,
     webpackDevServer: 5,
+    htmlWebpackPlugin: 5,
+  },
+  'webpack5_wds6-react': {
+    webpack: 5,
+    webpackDevServer: 6,
     htmlWebpackPlugin: 5,
   },
 }

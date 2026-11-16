@@ -2,15 +2,19 @@ import debug from 'debug'
 import { strict as assert } from 'assert'
 import { readFileSync } from 'fs'
 import path from 'path'
-import { execSync, ExecSyncOptions, StdioOptions } from 'child_process'
-import { BlueprintConfig, scriptFromBlueprint } from './blueprint'
+import type { ExecSyncOptions, StdioOptions } from 'child_process'
+import { execSync } from 'child_process'
+import type { BlueprintConfig } from './blueprint'
+import { scriptFromBlueprint } from './blueprint'
 import type { CreateBundleOpts, CreateSnapshotScriptOpts, Metadata } from '../types'
-import {
+import type {
   CreateBundle,
-  packherd,
   CreateBundleOpts as PackherdCreateBundleOpts,
   CreateBundleResult,
   CreateBundleSourcemap,
+} from '@tooling/packherd'
+import {
+  packherd,
 } from '@tooling/packherd'
 import { dependencyMapArrayFromInputs } from '../meta/dependency-map'
 import { writeConfigJSON } from './write-config-json'
@@ -355,17 +359,15 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
 
         return Promise.resolve(result)
       } catch (err: any) {
-        if (err.stderr != null) {
-          logError(err.stderr.toString())
-        }
-
         if (err.stdout != null) {
           logDebug(err.stdout.toString())
         }
 
-        logError(err)
+        // The bundler's stderr names the exact offending file, so surface it on the rejected error.
+        const stderr = err.stderr?.toString().trim()
+        const detail = stderr ? `\n${stderr}` : `\n${err}`
 
-        return Promise.reject(new Error(`Failed command: "${cmd}"`))
+        return Promise.reject(new Error(`Failed command: "${cmd}"${detail}`))
       } finally {
         if (!keepConfig) {
           const err = tryRemoveFileSync(configPath)

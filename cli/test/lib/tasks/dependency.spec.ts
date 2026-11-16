@@ -7,7 +7,6 @@ import { describe, it, expect } from 'vitest'
  */
 describe('dependencies', () => {
   it('process dependency exists in package.json and is available', async () => {
-    // @ts-expect-error resolveJsonModule is set to true in tsconfig.json
     const { dependencies } = (await import('../../../package.json')).default
 
     expect(dependencies.process).toBeDefined()
@@ -18,8 +17,6 @@ describe('dependencies', () => {
   })
 
   it('buffer dependency exists in package.json and is available', async () => {
-    // @ts-expect-error resolveJsonModule is set to true in tsconfig.json
-
     const { dependencies } = (await import('../../../package.json')).default
 
     expect(dependencies.buffer).toBeDefined()

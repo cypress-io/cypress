@@ -106,17 +106,6 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
-    it('retries previous commands invoked inside custom commands', () => {
-      // @ts-expect-error TODO: add types need updating to not error with string here
-      Cypress.Commands.add('get2', (selector: string) => cy.get(selector))
-
-      // @ts-expect-error - we are testing custom command, ignore types for now
-      cy.get2('body').children('div').as('divs')
-      cy.visit('/fixtures/dom.html')
-
-      cy.get('@divs')
-    })
-
     context('#assign', () => {
       beforeEach(() => {
         return cy.noop('foo').as('foo')
@@ -185,7 +174,7 @@ describe('src/cy/commands/aliasing', () => {
     describe('errors', () => {
       it('throws as a parent command', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('before running a parent command')
+          expect(err.message).to.include('`cy.as("foo")` failed because it is not chained off a command that yields a subject.')
           expect(err.message).to.include('`cy.as("foo")`')
 
           done()

@@ -8,7 +8,11 @@ import browserUtils from '../../lib/browsers'
 import { fs as fsUtil } from '../../lib/util/fs'
 import { getCtx } from '../../lib/makeDataContext'
 import { OpenProject } from '../../lib/open_project'
+import { ProjectBase } from '../../lib/project-base'
+import { ServerBase } from '../../lib/server-base'
+import devServer from '../../lib/plugins/dev-server'
 import * as errors from '../../lib/errors'
+import { EarlyExitTerminator } from '../../lib/util/graceful_crash_handling'
 
 describe('lib/modes/run', () => {
   let browserConnectTimeoutPlaceholder
@@ -83,15 +87,15 @@ describe('lib/modes/run', () => {
 
     sinon.stub(fsUtil, 'access').withArgs(options.projectRoot).resolves()
     sinon.stub(process, 'chdir').withArgs(options.projectRoot).returns()
-    // @ts-expect-error
+    // @ts-expect-error - partial Stats stub
     sinon.stub(fs, 'statSync').withArgs(options.projectRoot).returns({
       isDirectory: () => true,
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - withArgs resolves against the callback overload of pathExists
     sinon.stub(fsExtra, 'pathExists').withArgs(`${options.projectRoot}/${mockedRelativeSupportFilePath}`).resolves(true)
     /// mock the project config IPC loadConfig to avoid communicating over sub processes, which will not work here since we are mocking the directory
-    // @ts-expect-error
+    // @ts-expect-error - initialConfig is stubbed as a JSON string
     sinon.stub(ProjectConfigIpc.prototype, 'loadConfig').callsFake(() => {
       return Promise.resolve({
         requires: [],
@@ -121,7 +125,7 @@ describe('lib/modes/run', () => {
   it('recovers when the browser is closed unexpectedly by not sending "shouldLaunchNewTab" on newly created browser instances (creates the CRI client in the actual implementation)', async () => {
     let launchAttemptOfBarSpec = 0
 
-    // @ts-expect-error
+    // @ts-expect-error - fake resolves without a BrowserInstance
     sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, spec, browserOpts) => {
       switch (spec as unknown as string) {
         case 'foo.cy.ts':
@@ -165,6 +169,14 @@ describe('lib/modes/run', () => {
     await run(options, Promise.resolve())
   })
 
+  it('reuses the browsers the data context detected instead of detecting them again', async () => {
+    sinon.stub(OpenProject.prototype, 'launch').resolves()
+
+    await run(options, Promise.resolve())
+
+    expect(browserUtils.get).not.to.have.been.called
+  })
+
   it('falls back to cwd when projectRoot is unset', async () => {
     const fallbackRoot = '/path/to/cwd/fallback'
     const mockedRelativeSupportFilePath = 'cypress/support/e2e.js'
@@ -175,21 +187,20 @@ describe('lib/modes/run', () => {
       cwd: fallbackRoot,
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - access is already stubbed in the beforeEach
     fsUtil.access.withArgs(fallbackRoot).resolves()
-    // @ts-expect-error
+    // @ts-expect-error - chdir is already stubbed in the beforeEach
     process.chdir.withArgs(fallbackRoot).returns()
-    // @ts-expect-error
+    // @ts-expect-error - statSync is already stubbed in the beforeEach
     fs.statSync.withArgs(fallbackRoot).returns({
       isDirectory: () => true,
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - pathExists is already stubbed in the beforeEach
     fsExtra.pathExists.withArgs(`${fallbackRoot}/${mockedRelativeSupportFilePath}`).resolves(true)
-    // @ts-expect-error
+    // @ts-expect-error - getFilesByGlob is already stubbed in the beforeEach
     FileDataSource.prototype.getFilesByGlob.withArgs(fallbackRoot, 'cypress/support/e2e.{js,jsx,ts,tsx}').resolves([`${fallbackRoot}/${mockedRelativeSupportFilePath}`])
 
-    // @ts-expect-error
     sinon.stub(OpenProject.prototype, 'launch').resolves()
 
     await run(options, Promise.resolve())
@@ -210,7 +221,7 @@ describe('lib/modes/run', () => {
   it('retries launching the browser when FIREFOX_COULD_NOT_CONNECT is thrown', async () => {
     let launchAttempt = 0
 
-    // @ts-expect-error
+    // @ts-expect-error - fake resolves without a BrowserInstance
     sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, _spec, _browserOpts) => {
       launchAttempt++
 
@@ -229,5 +240,167 @@ describe('lib/modes/run', () => {
     // Initial launch + retry for the first spec, then a successful launch per
     // remaining spec — assert we retried at least once past the initial failure.
     expect(launchAttempt).to.be.greaterThan(1)
+  })
+
+  // like the real listenForProjectEnd, the first spec doesn't end until it exits early
+  function endFirstSpecOnEarlyExit (launches: unknown[]) {
+    const firstSpecEnded = Promise.withResolvers<unknown>()
+    const exitEarly = EarlyExitTerminator.prototype.exitEarly
+
+    sinon.stub(EarlyExitTerminator.prototype, 'exitEarly').callsFake(function (this: EarlyExitTerminator, err) {
+      exitEarly.call(this, err)
+      firstSpecEnded.resolve({ stats: { failures: 1 } })
+    })
+
+    // each spec's results are read before that spec launches
+    Object.defineProperty(globalThis.CY_TEST_MOCK, 'listenForProjectEnd', {
+      get: () => launches.length === 0 ? firstSpecEnded.promise : { stats: { failures: 0 } },
+    })
+  }
+
+  it('launches a fresh browser for the next spec when the browser never connected', async () => {
+    const launches: { spec: string, shouldLaunchNewTab: boolean }[] = []
+
+    endFirstSpecOnEarlyExit(launches)
+
+    // @ts-expect-error - fake resolves without a BrowserInstance
+    sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, spec, browserOpts) => {
+      launches.push({ spec: spec as unknown as string, shouldLaunchNewTab: browserOpts.shouldLaunchNewTab })
+
+      if (spec as unknown as string === 'foo.cy.ts') {
+        return Promise.reject(errors.get('FIREFOX_COULD_NOT_CONNECT', new Error('No connection to WebDriver Bidi was established')))
+      }
+
+      return Promise.resolve()
+    })
+
+    await run(options, Promise.resolve())
+
+    expect(launches.filter(({ spec }) => spec === 'foo.cy.ts')).to.have.length(3)
+    expect(launches.find(({ spec }) => spec === 'bar.cy.ts')?.shouldLaunchNewTab).to.equal(false)
+    expect(launches.find(({ spec }) => spec === 'baz.cy.ts')?.shouldLaunchNewTab).to.equal(true)
+  })
+
+  it('launches a fresh browser for the next spec when the browser crashed', async () => {
+    const launches: { spec: string, shouldLaunchNewTab: boolean }[] = []
+
+    endFirstSpecOnEarlyExit(launches)
+
+    // @ts-expect-error - fake resolves without a BrowserInstance
+    sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, spec, browserOpts) => {
+      launches.push({ spec: spec as unknown as string, shouldLaunchNewTab: browserOpts.shouldLaunchNewTab })
+
+      if (spec as unknown as string === 'foo.cy.ts') {
+        browserOpts.onError(errors.get('BROWSER_CRASHED', 'Edge', null, 'SIGTRAP'))
+      }
+
+      return Promise.resolve()
+    })
+
+    await run(options, Promise.resolve())
+
+    expect(launches.find(({ spec }) => spec === 'bar.cy.ts')?.shouldLaunchNewTab).to.equal(false)
+    expect(launches.find(({ spec }) => spec === 'baz.cy.ts')?.shouldLaunchNewTab).to.equal(true)
+  })
+
+  describe('experimentalSingleTabRunMode', () => {
+    // In single-tab run mode the browser tab is intentionally kept open between
+    // specs, so the default per-tab teardown (which closes the tab and then calls
+    // project.server.reset()) is skipped. We still need to reset the server's
+    // network/proxy state between specs so it does not leak across specs and cause
+    // rare, order-dependent failures. See cypress-io/cypress#24146.
+    beforeEach(() => {
+      const componentSupportFile = `${options.projectRoot}/cypress/support/component.js`
+
+      // component testing resolves the component support file (not the e2e one)
+      // @ts-expect-error - getFilesByGlob is already stubbed in the outer beforeEach
+      FileDataSource.prototype.getFilesByGlob
+      .withArgs(options.projectRoot, 'cypress/support/component.{js,jsx,ts,tsx}')
+      .resolves([componentSupportFile])
+
+      // config resolves the support file by checking that it exists on disk
+      // @ts-expect-error - pathExists is already stubbed in the outer beforeEach
+      fsExtra.pathExists.withArgs(componentSupportFile).resolves(true)
+
+      // load a component testing config
+      // @ts-expect-error - loadConfig is already stubbed in the outer beforeEach
+      ProjectConfigIpc.prototype.loadConfig.callsFake(() => {
+        return Promise.resolve({
+          requires: [],
+          initialConfig: JSON.stringify({
+            component: {
+              specPattern: '**/*.cy.ts',
+            },
+          }),
+        })
+      })
+
+      // enable experimentalSingleTabRunMode on the resolved config the run reads from
+      const realGetConfig = ProjectBase.prototype.getConfig
+
+      sinon.stub(ProjectBase.prototype, 'getConfig').callsFake(function (this: ProjectBase) {
+        const config = realGetConfig.call(this)
+
+        config.experimentalSingleTabRunMode = true
+
+        return config
+      })
+
+      // component testing starts a dev server to derive config.baseUrl; stub it so the
+      // run can proceed without standing up a real bundler/dev server
+      sinon.stub(devServer, 'start').resolves({ port: 1234, close: () => {} })
+
+      // component testing requires config.baseUrl (normally the dev server URL). Inject
+      // one into the config the server opens with, and skip the live connectivity check
+      // so the real server can open in the harness without a listening dev server.
+      // @ts-expect-error - _retryBaseUrlCheck is private
+      sinon.stub(ServerBase.prototype, '_retryBaseUrlCheck').resolves()
+      const realServerOpen = ServerBase.prototype.open
+
+      sinon.stub(ServerBase.prototype, 'open').callsFake(function (this: ServerBase<any>, config, openOptions) {
+        config.baseUrl = config.baseUrl || 'http://localhost:1234'
+
+        return realServerOpen.call(this, config, openOptions)
+      })
+
+      // we're exercising the per-spec teardown (waitForTestsToFinishRunning), not the
+      // browser connection, so short-circuit waiting for the browser to connect
+      globalThis.CY_TEST_MOCK!.waitForBrowserToConnect = true
+    })
+
+    it('resets server network state between specs so state does not leak across the shared tab', async () => {
+      // record the order of teardown operations across the spec run so we can assert
+      // that a server reset happens between specs (not only on the final spec)
+      const teardownOrder: string[] = []
+
+      sinon.stub(ServerBase.prototype, 'destroyAut').callsFake(() => {
+        teardownOrder.push('destroyAut')
+
+        return Promise.resolve()
+      })
+
+      sinon.stub(ServerBase.prototype, 'reset').callsFake(() => {
+        teardownOrder.push('reset')
+      })
+
+      options = { ...options, testingType: 'component' }
+
+      await run(options, Promise.resolve())
+
+      // 3 specs run in a single tab: the AUT is destroyed after each of the 2
+      // non-last specs (the last spec closes the tab instead)
+      expect(teardownOrder.filter((op) => op === 'destroyAut'), 'AUT destroyed after each non-last spec').to.have.length(2)
+
+      // the server is reset after every spec, including *between* specs. Before the
+      // fix, single-tab mode skipped the reset between specs, so reset only ran once
+      // (on the final spec) and this ordering would instead be:
+      //   ['destroyAut', 'destroyAut', 'reset']
+      expect(teardownOrder.slice(0, 4), 'server reset runs between specs in single-tab mode').to.deep.equal([
+        'destroyAut',
+        'reset',
+        'destroyAut',
+        'reset',
+      ])
+    })
   })
 })

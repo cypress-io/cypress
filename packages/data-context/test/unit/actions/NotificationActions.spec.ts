@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { NotificationActions } from '../../../src/actions/NotificationActions'
-import { CloudRunStatus, RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
+import type { CloudRunStatus, RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
 import { createTestDataContext, createRelevantRun } from '../helper'
 
 describe('NotificationActions', () => {
@@ -159,7 +159,7 @@ describe('NotificationActions', () => {
 
           actions.maybeSendRunNotification(run1, run2)
 
-          // @ts-expect-error
+          // @ts-expect-error - `status` is a plain string, not the lowercased status union
           expect(sendRunCompletedNotificationStub).toHaveBeenCalledWith(run2, status.toLocaleLowerCase())
         })
       })

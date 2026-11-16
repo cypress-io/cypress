@@ -1,7 +1,8 @@
 import fs from 'fs/promises'
 import { existsSync } from 'fs'
 import type { ProtocolManager } from '../protocol'
-import { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult, Artifact, ArtifactKinds } from './artifact'
+import type { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult } from './artifact'
+import { Artifact, ArtifactKinds } from './artifact'
 import Debug from 'debug'
 const debug = Debug('cypress:server:cloud:artifacts:protocol')
 
@@ -15,7 +16,7 @@ interface ProtocolUploadStrategyResult {
 }
 
 const createProtocolUploadStrategy = (protocolManager: ProtocolManager) => {
-  const strategy: ArtifactUploadStrategy<Promise<ProtocolUploadStrategyResult | {}>> =
+  const strategy: ArtifactUploadStrategy<Promise<ProtocolUploadStrategyResult | Record<string, never>>> =
     async (filePath, uploadUrl, fileSize) => {
       const fatalError = protocolManager.getFatalError()
 

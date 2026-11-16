@@ -23,14 +23,12 @@ describe('e2e user agent', () => {
     settings: {
       userAgent: 'foo bar baz agent',
       e2e: {
-        allowCypressEnv: false,
         baseUrl: 'http://localhost:4545',
       },
     },
   })
 
   systemTests.it('passes', {
-    browser: '!webkit', // TODO(webkit): fix+unskip
     spec: 'user_agent.cy.js',
     snapshot: true,
   })

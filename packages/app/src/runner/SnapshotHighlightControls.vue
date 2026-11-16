@@ -9,16 +9,13 @@
     <label
       id="toggle-highlights"
       class="cursor-pointer"
-    >{{ t('runner.snapshot.highlightsLabel') }}
+    >Highlights
     </label>
   </div>
 </template>
 
 <script lang="ts" setup>
 import Switch from '@cy/components/Switch.vue'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   value?: boolean

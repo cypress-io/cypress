@@ -9,7 +9,7 @@
       v-if="navIsAlwaysCollapsed"
       class="cursor-pointer left-full top-0 bottom-0 w-[16px] z-1 absolute group hocus:outline-transparent"
       type="button"
-      :aria-label="isNavBarExpanded ? t('sidebar.toggleLabel.expanded') : t('sidebar.toggleLabel.collapsed')"
+      :aria-label="isNavBarExpanded ? 'Collapse sidebar' : 'Expand sidebar'"
       data-cy="toggle-sidebar"
       :aria-expanded="isNavBarExpanded"
       aria-controls="sidebar"
@@ -33,7 +33,7 @@
       />
       <nav
         class="space-y-1 bg-gray-1000 flex-1"
-        :aria-label="t('sidebar.nav.ariaLabel')"
+        aria-label="Pages"
       >
         <RouterLink
           v-for="item in navigation"
@@ -68,13 +68,13 @@
               right-0 bottom-0 w-[32px] duration-300
               inline-block absolute hover:border-gray-500"
           :class="{ 'translate-y-[-48px]': !isNavBarExpanded }"
-          :aria-label="t('sidebar.keyboardShortcuts.title')"
+          aria-label="Keyboard shortcuts"
           @click="bindingsOpen = true"
         >
           <i-cy-command-key_x16 class="h-[16px] w-[16px] icon-dark-gray-500" />
         </button>
         <template #popper>
-          {{ t('sidebar.keyboardShortcuts.title') }}
+          Keyboard shortcuts
         </template>
       </Tooltip>
       <KeyboardBindingsModal
@@ -91,9 +91,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, FunctionalComponent, ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
+import type { Component } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import SidebarNavigationRow, { Badge, IconStatus } from './SidebarNavigationRow.vue'
+import SidebarNavigationRow from './SidebarNavigationRow.vue'
+import type { Badge, IconStatus } from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
   IconTechnologyCodeEditor,
@@ -104,15 +106,13 @@ import {
 import { OutlineStatusIcon } from '@cypress-design/vue-statusicon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
-import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
+import { SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
+import type { SidebarNavigationFragment } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
-import { useI18n } from '@cy/i18n'
 import { useRoute, RouterLink } from 'vue-router'
 import SidebarNavigationHeader from './SidebarNavigationHeader.vue'
 import { useDebounceFn, useWindowSize } from '@vueuse/core'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
-
-const { t } = useI18n()
 
 gql`
 fragment SidebarNavigation_Settings on Query {
@@ -172,6 +172,8 @@ const props = defineProps<{
 
 const NAV_EXPAND_MIN_SCREEN_WIDTH = 1100
 
+const testFailures = (n: number) => n === 1 ? `${n} test failure` : `${n} test failures`
+
 const userProjectStatusStore = useUserProjectStatusStore()
 
 const debugBadge = ref<Badge | undefined>()
@@ -221,26 +223,26 @@ watchEffect(() => {
     switch (status) {
       case 'RUNNING':
         if ((totalFailed || 0) > 0) {
-          setRunsIconStatus({ value: 'failing', label: t('sidebar.runs.failing', totalFailed || 0) })
+          setRunsIconStatus({ value: 'failing', label: `Latest run is failing with ${testFailures(totalFailed || 0)}` })
         } else {
-          setRunsIconStatus({ value: 'running', label: t('sidebar.runs.running') })
+          setRunsIconStatus({ value: 'running', label: 'Latest run is in progress' })
         }
 
         break
       case 'PASSED':
-        setRunsIconStatus({ value: 'passed', label: t('sidebar.runs.passed') })
+        setRunsIconStatus({ value: 'passed', label: 'Latest run passed' })
         break
       case 'FAILED':
-        setRunsIconStatus({ value: 'failed', label: t('sidebar.runs.failed', totalFailed || 0) })
+        setRunsIconStatus({ value: 'failed', label: `Latest run had ${testFailures(totalFailed || 0)}` })
         break
       case 'CANCELLED':
-        setRunsIconStatus({ value: 'cancelled', label: t('sidebar.runs.cancelled') })
+        setRunsIconStatus({ value: 'cancelled', label: 'Latest run has been cancelled' })
         break
       case 'ERRORED':
       case 'NOTESTS':
       case 'OVERLIMIT':
       case 'TIMEDOUT':
-        setRunsIconStatus({ value: 'errored', label: t((totalFailed && totalFailed > 0 ? 'sidebar.runs.erroredWithFailures' : 'sidebar.runs.errored'), totalFailed || 0) })
+        setRunsIconStatus({ value: 'errored', label: totalFailed && totalFailed > 0 ? `Latest run had an error with ${testFailures(totalFailed)}` : 'Latest run had an error' })
         break
       default:
         setRunsIconStatus(undefined)
@@ -270,7 +272,7 @@ watchEffect(() => {
     }
 
     if (status === 'PASSED') {
-      setDebugBadge({ value: '0', status: 'success', label: t('sidebar.debug.passed') })
+      setDebugBadge({ value: '0', status: 'success', label: 'Relevant run passed' })
 
       return
     }
@@ -287,7 +289,7 @@ watchEffect(() => {
       setDebugBadge({
         value: countToDisplay,
         status: 'failed',
-        label: t('sidebar.debug.failed', totalFailed || 0),
+        label: `Relevant run had ${testFailures(totalFailed || 0)}`,
       })
 
       return
@@ -299,10 +301,10 @@ watchEffect(() => {
 
       if (totalFailed === 0) {
         status = 'success'
-        label = t('sidebar.debug.passing')
+        label = 'Relevant run is passing'
       } else {
         status = 'failed'
-        label = t('sidebar.debug.failing', totalFailed || 0)
+        label = `Relevant run is failing with ${testFailures(totalFailed || 0)}`
       }
 
       setDebugBadge({
@@ -315,8 +317,8 @@ watchEffect(() => {
     }
 
     const errorLabel = totalFailed && totalFailed > 0
-      ? t('sidebar.debug.erroredWithFailures', totalFailed)
-      : t('sidebar.debug.errored')
+      ? `Relevant run had an error with ${testFailures(totalFailed)}`
+      : 'Relevant run had an error'
 
     setDebugBadge({ value: countToDisplay, status: 'error', label: errorLabel })
 
@@ -326,7 +328,7 @@ watchEffect(() => {
 
 interface NavigationItem {
   name: string
-  icon: FunctionalComponent
+  icon: Component
   pageComponent: string
   params?: Record<string, any>
   badge?: Badge

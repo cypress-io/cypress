@@ -6,6 +6,7 @@ import systemTests from '../lib/system-tests'
 import { globAsync as glob } from '@packages/server/lib/util/glob'
 import * as videoCapture from '@packages/server/lib/video_capture'
 import Fixtures from '../lib/fixtures'
+import { getChapters } from '../lib/video'
 
 import {
   createRoutes,
@@ -49,12 +50,13 @@ describe('e2e video compression', () => {
       snapshot: false,
       headed,
       config: {
-        allowCypressEnv: true,
         video: true,
         videoCompression: 32,
         env: {
-          NUM_TESTS,
           MS_PER_TEST,
+        },
+        expose: {
+          NUM_TESTS,
         },
       },
       async onRun (exec, browserName) {
@@ -87,22 +89,15 @@ describe('e2e video compression', () => {
         // TODO(origin): this was taking longer and failing in webkit
         expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, humanInterval('20 seconds'))
 
-        const { chapters } = await videoCapture.getChapters(files[0])
+        const chapters = await getChapters(files[0])
 
-        // There are 40 chapters but we test only the first one
-        // because what we want to check is if chapters are added properly.
-        // In a chapter object, there are properties like 'end' and 'end_time'.
-        // We don't check them here because they return the test time in milliseconds.
-        // They cannot be guessed correctly and they can cause flakiness.
-        expect(chapters[0].id).to.eq(0)
+        // Only the first of the 40 chapters is checked: its end time depends on
+        // how long the test took, so assert only that it is a finite number.
+        expect(chapters).to.have.length.above(0)
+        expect(chapters[0].timeBase).to.eq('1/1000')
         expect(chapters[0].start).to.eq(0)
-        expect(chapters[0].start_time).to.eq(0)
-        expect(chapters[0]['TAG:title']).to.eq('num: 1 makes some long tests')
-        expect(chapters[0].time_base).to.eq('1/1000')
-        expect(chapters[0].end).to.be.a('number')
-        expect(Number.isNaN(chapters[0].end)).to.be.false
-        expect(chapters[0].end_time).to.be.a('number')
-        expect(Number.isNaN(chapters[0].end_time)).to.be.false
+        expect(chapters[0].title).to.eq('num: 1 makes some long tests')
+        expect(Number.isFinite(chapters[0].end)).to.be.true
 
         expect(stdout).to.match(/Compression progress:\s+\d{1,3}%/)
       },
@@ -116,7 +111,6 @@ describe('video compression 0', () => {
     browser: 'chrome',
     spec: 'video_compression.cy.js',
     config: {
-      allowCypressEnv: true,
       video: true,
       videoCompression: 0,
     },
@@ -127,7 +121,7 @@ describe('video compression 0', () => {
 const { instanceId } = postRunInstanceResponse
 
 describe('video compression true', () => {
-  // @see ./record_spec.js for additional references
+  // @see ./record_spec.ts for additional references
   setupStubbedServer(createRoutes())
 
   systemTests.it('coerces true to 32 CRF', {
@@ -137,7 +131,6 @@ describe('video compression true', () => {
     spec: 'video_compression.cy.js',
     record: true,
     config: {
-      allowCypressEnv: true,
       // override the value in the config to set videoCompression to true
       videoCompression: true,
       video: true,

@@ -1,4 +1,8 @@
 version: 2
+percy:
+  # Upload snapshots only once the run completes so canceled parallel shards
+  # don't bill snapshots that were captured but never finalized.
+  defer-uploads: true
 snapshot:
   widths:
     - 400

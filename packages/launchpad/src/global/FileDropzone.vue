@@ -17,20 +17,18 @@
           <i-cy-drag-project_x80
             class="mx-auto h-[80px] mb-[-4px] w-[80px] icon-dark-indigo-500 icon-light-indigo-200"
           />
-          <span class="font-light text-body-gray-700 text-[18px]">
-            <i18n-t
-              scope="global"
-              keypath="globalPage.empty.dropText"
-            >
-              <button class="font-medium text-indigo-500 hocus-link-default">
-                <!--
-              This button allows keyboard users to fire a click event with the Enter or Space keys,
-              which will be handled by the dropzone's existing click handler.
-                -->
-                {{ t('globalPage.empty.browseManually') }}
-              </button>
-            </i18n-t>
-          </span>
+          <!--
+            The text sits directly against the tags because Vue turns a line break
+            next to text into a space, which would change the sentence's spacing.
+          -->
+          <span class="font-light text-body-gray-700 text-[18px]">Drag your project directory here or <button
+            class="font-medium text-indigo-500 hocus-link-default"
+            data-cy="browse-manually"
+          >
+            <!--
+            This button allows keyboard users to fire a click event with the Enter or Space keys,
+            which will be handled by the dropzone's existing click handler.
+            -->browse manually.</button></span>
         </div>
       </Dropzone>
     </FileSelector>
@@ -49,9 +47,6 @@
 import { FileSelector, Dropzone } from 'vue3-file-selector'
 import { ref, watch, onMounted } from 'vue'
 
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 const projectUpload = ref<HTMLDivElement>()
 const files = ref<FileList | []>([] as any)
 

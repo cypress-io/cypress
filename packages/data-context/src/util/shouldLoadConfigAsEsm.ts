@@ -13,7 +13,6 @@ import path from 'path'
 const getNearestPackageJsonType = (filePath: string): string | undefined => {
   let dir = path.dirname(filePath)
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const pkgPath = path.join(dir, 'package.json')
 

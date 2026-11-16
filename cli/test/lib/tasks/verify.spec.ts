@@ -1,17 +1,20 @@
-import { vi, describe, it, beforeEach, afterEach, expect, MockInstance } from 'vitest'
+import type { MockInstance } from 'vitest'
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import path from 'path'
 import chalk from 'chalk'
 import _ from 'lodash'
+import execa from 'execa'
+import Debug from 'debug'
 import os from 'os'
 import { stripIndent } from 'common-tags'
 import mockfs from 'mock-fs'
 import { geteuid } from 'process'
 import { Console } from 'console'
 import fs from 'fs-extra'
-import si, { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
+import si from 'systeminformation'
 import _xvfb from '@cypress/xvfb'
-import stripAnsi from 'strip-ansi'
-import { Listr } from 'listr2'
+import { stripVTControlCharacters as stripAnsi } from 'util'
 
 import util from '../../../lib/util'
 import logger from '../../../lib/logger'
@@ -29,7 +32,7 @@ vi.mock('systeminformation', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       osInfo: vi.fn(),
     },
@@ -51,7 +54,7 @@ vi.mock('lodash', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       random: vi.fn(),
     },
@@ -64,7 +67,7 @@ vi.mock('process', async (importActual) => {
   return {
     geteuid: vi.fn(),
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       geteuid: vi.fn(),
     },
@@ -76,7 +79,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
       release: vi.fn(),
@@ -85,12 +88,16 @@ vi.mock('os', async (importActual) => {
   }
 })
 
+// `getRealArch()` falls through to the `arch` package, which reports the real
+// machine, so pin it alongside the mocked `os.arch()`
+vi.mock('arch', () => ({ default: () => 'x64' }))
+
 vi.mock('../../../lib/exec/xvfb', async (importActual) => {
   const actual = await importActual()
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
       stop: vi.fn(),
@@ -105,7 +112,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       getCacheDir: vi.fn(),
       isCi: vi.fn(),
@@ -279,6 +286,81 @@ describe('lib/tasks/verify', () => {
     await start()
 
     expect(util.exec).toHaveBeenCalledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
+  })
+
+  describe('the environment of the smoke test', () => {
+    // execa adds process.env to the env it is given, so what the child sees is only
+    // known by running one
+    const envSeenByChild = async (name: string): Promise<string> => {
+      const [, , options] = vi.mocked(util.exec).mock.calls[0] as unknown as [string, string[], { env: NodeJS.ProcessEnv }]
+
+      const { stdout } = await execa(process.execPath, ['-e', `process.stdout.write(String(process.env.${name}))`], options as any)
+
+      return stdout
+    }
+
+    beforeEach(() => {
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+    })
+
+    it('does not pass on a variable the caller removed', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      await start({ env: _.omit(process.env, 'ELECTRON_RUN_AS_NODE') })
+
+      expect(await envSeenByChild('ELECTRON_RUN_AS_NODE')).toBe('undefined')
+    })
+
+    it('passes on the rest of the environment as it is when the test runs', async () => {
+      vi.stubEnv('KEPT_BY_VERIFY_SPEC', 'yes')
+
+      await start({ env: _.omit(process.env, 'ELECTRON_RUN_AS_NODE') })
+
+      expect(await envSeenByChild('KEPT_BY_VERIFY_SPEC')).toBe('yes')
+    })
+
+    it('passes on a variable the caller changed or added', async () => {
+      vi.stubEnv('CHANGED_BY_VERIFY_SPEC', 'before')
+
+      await start({ env: { ...process.env, CHANGED_BY_VERIFY_SPEC: 'after', ADDED_BY_VERIFY_SPEC: 'new' } })
+
+      expect(await envSeenByChild('CHANGED_BY_VERIFY_SPEC')).toBe('after')
+      expect(await envSeenByChild('ADDED_BY_VERIFY_SPEC')).toBe('new')
+    })
+
+    it('passes on everything when no environment is given', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      await start()
+
+      expect(await envSeenByChild('ELECTRON_RUN_AS_NODE')).toBe('1')
+    })
+
+    it('does not write the environment to the debug log', async () => {
+      const debugOutput: string[] = []
+
+      vi.spyOn(process.stderr, 'write').mockImplementation((chunk: any) => {
+        debugOutput.push(chunk.toString())
+
+        return true
+      })
+
+      vi.stubEnv('A_SECRET_FOR_VERIFY_SPEC', 'hunter2')
+      Debug.enable('cypress:cli')
+
+      try {
+        await start({ env: _.omit(process.env, 'ELECTRON_RUN_AS_NODE') })
+      } finally {
+        Debug.disable()
+      }
+
+      expect(debugOutput.join('')).toContain('verifying Cypress app with options')
+      expect(debugOutput.join('')).not.toContain('hunter2')
+    })
   })
 
   it('adds --no-sandbox when user is non-root', async () => {
@@ -477,6 +559,26 @@ describe('lib/tasks/verify', () => {
       expect(plain(output)).toContain('Opening Cypress...')
     })
 
+    it('names the system libraries the app could not load, with the packages that provide them', async () => {
+      const output = createStdoutCapture()
+      const stderr = [
+        'error while loading shared libraries: libnss3.so: cannot open shared object file: No such file or directory',
+        'error while loading shared libraries: libweird.so.9: cannot open shared object file: No such file or directory',
+      ].join('\n')
+
+      vi.mocked(util.exec).mockRejectedValue({ code: 127, stderr })
+
+      await start({ force: true }).catch((err) => logger.error(err))
+
+      const out = plain(output)
+
+      expect(out).toContain('Cypress failed to start')
+      expect(out).toContain('apt-get install -y libnss3')
+      expect(out).toContain('apt-file search libweird.so.9')
+      // the original output is still shown
+      expect(out).toContain('cannot open shared object file')
+    })
+
     it('clears verified version from state if verification fails', async () => {
       const output = createStdoutCapture()
 
@@ -567,6 +669,45 @@ describe('lib/tasks/verify', () => {
         // like in the case of DISPLAY=987
         firstSpawnError.stderr = stripIndent`
             [some noise here] Gtk: cannot open display: 987
+              and maybe a few other lines here with weird indent
+          `
+
+        firstSpawnError.stdout = ''
+
+        // the second time the binary returns expected ping
+        // @ts-expect-error - mock args
+        vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
+          if (args[0] === executablePath) {
+            return Promise.resolve({
+              stdout: '222',
+            })
+          }
+        })
+
+        return Promise.reject(firstSpawnError)
+      })
+
+      await start()
+
+      expect(util.exec).toHaveBeenCalledTimes(2)
+      // user should have been warned
+      expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining(
+        'This is likely due to a misconfigured DISPLAY environment variable.',
+      ))
+    })
+
+    it('retries with our Xvfb on Linux when the X server is missing', async () => {
+      // initially we think the user has everything set
+      vi.mocked(xvfb.isNeeded).mockReturnValue(false)
+      vi.mocked(util.isPossibleLinuxWithIncorrectDisplay).mockReturnValue(true)
+      // @ts-expect-error - mock args
+      vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
+        const firstSpawnError: any = new Error('')
+
+        // this message contains Electron error shown if X11 is incorrect
+        // like in the case of DISPLAY=987
+        firstSpawnError.stderr = stripIndent`
+            [some noise here] Missing X server or $DISPLAY
               and maybe a few other lines here with weird indent
           `
 
@@ -1011,7 +1152,7 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }: a
   }
   const binaryStateText = JSON.stringify(binaryState)
 
-  let mockFiles: any = {
+  const mockFiles: any = {
     [binaryStateFolder]: {
       'binary_state.json': binaryStateText,
     },

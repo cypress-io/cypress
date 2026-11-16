@@ -11,8 +11,6 @@
     "noUnusedParameters": false,
     "allowJs": true,
     "noUncheckedIndexedAccess": true,
-    "ignoreDeprecations": "5.0",
-    "importsNotUsedAsValues": "error",
     "skipLibCheck": true,
     "declaration": true,
     "resolveJsonModule": true,

@@ -82,13 +82,16 @@ describe('cookies', () => {
     .its('body').should('deep.eq', { shouldExpire: 'oneHour' })
 
     const hostName = new Cypress.Location(httpUrl).getHostName()
+    const isLoopbackHost = ['localhost', '127.0.0.1'].includes(hostName)
 
-    // TODO(origin): remove 'if' check once https://github.com/cypress-io/cypress/issues/24332 is resolved
-    if (!['localhost', '127.0.0.1'].includes(hostName)) {
-      // secure cookies should not have been attached
-      cy.request(`${httpUrl}/requestCookies`)
-      .its('body').should('deep.eq', {})
-    }
+    // localhost and the 127.0.0.0/8 loopback range are "potentially
+    // trustworthy" origins, so browsers treat them as secure contexts and still
+    // attach secure cookies to http requests for those hosts. For any other
+    // host, secure cookies must never be attached to an http request.
+    const expectedHttpCookies = isLoopbackHost ? { shouldExpire: 'oneHour' } : {}
+
+    cy.request(`${httpUrl}/requestCookies`)
+    .its('body').should('deep.eq', expectedHttpCookies)
 
     cy.visit(`${httpsUrl}/expirationMaxAge`)
     cy.getCookies().should('be.empty')
@@ -171,7 +174,7 @@ describe('cookies', () => {
           })
 
           cy.getCookies()
-          .then((cookies) => {
+          .should((cookies) => {
             expect(cookies).to.have.length(1)
             expect(cookies[0]).to.include({
               name: 'domaincookie',
@@ -189,7 +192,7 @@ describe('cookies', () => {
           })
 
           cy.getCookies()
-          .then((cookies) => {
+          .should((cookies) => {
             expect(cookies).to.have.length(1)
             expect(cookies[0]).to.include({
               name: 'domaincookie',
@@ -300,7 +303,7 @@ describe('cookies', () => {
 
               cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${baseUrl}`)
 
-              cy.getAllCookies().then((cookies) => {
+              cy.getAllCookies().should((cookies) => {
                 // reverse them so they'll be in the order they were set
                 cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 

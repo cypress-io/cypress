@@ -1,5 +1,3 @@
-/// <reference path="../support/e2e.ts" />
-
 import dedent from 'dedent'
 
 describe('Config options', () => {
@@ -12,7 +10,7 @@ describe('Config options', () => {
     cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.reporter().find('.passed > .num').should('contain', 1)
   })
 
   it('supports nested config', () => {
@@ -24,7 +22,7 @@ describe('Config options', () => {
     cy.specsPageIsVisible()
     cy.contains('foo.cy.js').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.reporter().find('.passed > .num').should('contain', 1)
   })
 
   it('supports @cypress/webpack-dev-server', () => {
@@ -36,7 +34,7 @@ describe('Config options', () => {
     cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.reporter().find('.passed > .num').should('contain', 1)
   })
 
   it('supports webpackConfig as an async function', () => {
@@ -48,7 +46,7 @@ describe('Config options', () => {
     cy.specsPageIsVisible()
     cy.contains('App.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 2)
+    cy.reporter().find('.passed > .num').should('contain', 2)
 
     cy.withCtx(async (ctx) => {
       const verifyFile = await ctx.file.readFileInProject('wrote-to-file')
@@ -85,7 +83,7 @@ describe('Config options', () => {
     cy.specsPageIsVisible()
     cy.contains('relative-url.cy.jsx').click()
     cy.waitForSpecToFinish()
-    cy.get('.passed > .num').should('contain', 1)
+    cy.reporter().find('.passed > .num').should('contain', 1)
   })
 })
 
@@ -129,13 +127,13 @@ describe('sourcemaps', () => {
       cy.specsPageIsVisible()
       cy.contains(specName).click()
       cy.waitForSpecToFinish()
-      cy.get('.failed > .num').should('contain', 2)
+      cy.reporter().find('.failed > .num').should('contain', 2)
       cy.window().then((win) => {
-        // @ts-expect-error
+        // @ts-expect-error - getEventManager is attached to the runner window and not typed on AUTWindow
         cy.stub(win.getEventManager(), 'emit').as('emit')
       })
 
-      cy.get('.runnable-err-file-path', { timeout: 250 }).eq(1).as('filePath')
+      cy.reporter().find('.runnable-err-file-path', { timeout: 250 }).eq(1).as('filePath')
       cy.get('@filePath').should('contain', `${specName}:${line}:${column}`)
       cy.get('@filePath').then(($el) => {
         $el.find('span').trigger('click')

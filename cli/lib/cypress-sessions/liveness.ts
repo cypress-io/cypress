@@ -1,0 +1,84 @@
+import Debug from 'debug'
+
+import { sessionProbePath } from './record'
+import type { LiveSessionState, CypressSession } from './record'
+
+const debug = Debug('cypress:cli:cypress-sessions')
+
+const PROBE_HOST = '127.0.0.1'
+const DEFAULT_PROBE_TIMEOUT_MS = 2000
+
+export const isPidAlive = (pid: number): boolean => {
+  try {
+    process.kill(pid, 0)
+
+    return true
+  } catch (err: any) {
+    return err?.code === 'EPERM'
+  }
+}
+
+// The server reports `cdpBrowserWsUrl` from in-memory state that it only clears
+// when the browser *process* exits, so a closed browser window whose process
+// lingers leaves the url stale. Hit the browser's own DevTools HTTP endpoint
+// (Chromium exposes `/json/version` whenever the CDP port is open) to confirm
+// the browser is really reachable before trusting the url.
+const cdpEndpointReachable = async (cdpBrowserWsUrl: string, timeoutMs: number): Promise<boolean> => {
+  let versionUrl: string
+
+  try {
+    const { protocol, host } = new URL(cdpBrowserWsUrl)
+
+    versionUrl = `${protocol === 'wss:' ? 'https:' : 'http:'}//${host}/json/version`
+  } catch (err) {
+    debug('could not derive a CDP version url from %s: %o', cdpBrowserWsUrl, err)
+
+    return false
+  }
+
+  try {
+    const response = await fetch(versionUrl, { signal: AbortSignal.timeout(timeoutMs) })
+
+    return response.ok
+  } catch (err) {
+    debug('CDP endpoint unreachable at %s: %o', versionUrl, err)
+
+    return false
+  }
+}
+
+export const verifySessionRecord = async (record: CypressSession, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<LiveSessionState | null> => {
+  const url = `http://${PROBE_HOST}:${record.serverPort}${sessionProbePath(record.sessionId)}`
+
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) })
+
+    if (response.status !== 200) {
+      return null
+    }
+
+    const live = await response.json() as { sessionId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown }
+
+    if (live.sessionId !== record.sessionId) {
+      return null
+    }
+
+    const cdpBrowserWsUrl = typeof live.cdpBrowserWsUrl === 'string' ? live.cdpBrowserWsUrl : null
+    const attached = cdpBrowserWsUrl !== null && await cdpEndpointReachable(cdpBrowserWsUrl, timeoutMs)
+
+    // The browser identity describes what the session has open, not what is
+    // reachable over CDP — a browser tap cannot drive still has to be nameable.
+    return {
+      ...record,
+      cdpBrowserWsUrl: attached ? cdpBrowserWsUrl : null,
+      browserName: typeof live.browserName === 'string' ? live.browserName : null,
+      browserFamily: typeof live.browserFamily === 'string' ? live.browserFamily : null,
+      machineId: typeof live.machineId === 'string' ? live.machineId : null,
+      userId: typeof live.userId === 'string' ? live.userId : null,
+    }
+  } catch (err) {
+    debug('liveness probe failed for pid %d on port %d: %o', record.pid, record.serverPort, err)
+
+    return null
+  }
+}

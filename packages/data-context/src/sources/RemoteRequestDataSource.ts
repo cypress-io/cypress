@@ -1,6 +1,8 @@
-import { CombinedError, stringifyVariables } from '@urql/core'
+import type { CombinedError } from '@urql/core'
+import { stringifyVariables } from '@urql/core'
 import type { NexusGenAbstractTypeMembers, NexusGenInterfaces, RemoteFetchableStatus } from '../gen/nxs.gen'
-import { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, visit, print, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, parseType, VariableNode, GraphQLObjectType } from 'graphql'
+import { visit, print, parseType } from 'graphql'
+import type { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, VariableNode, GraphQLObjectType } from 'graphql'
 import crypto from 'crypto'
 import _ from 'lodash'
 import type { DataContext } from '../DataContext'
@@ -27,7 +29,7 @@ interface OperationDefinition {
   operation: string
   operationDoc: DocumentNode
   operationHash: string
-  operationVariableDefs: [string, {type: TypeNode, defaultValue?: ValueNode}][]
+  operationVariableDefs: [string, { type: TypeNode, defaultValue?: ValueNode }][]
   remoteQueryField: string
   fieldArgMapping: Record<string, string>
 }
@@ -312,7 +314,7 @@ export class RemoteRequestDataSource {
 
     const remoteFieldArgs = queryFieldDef.args
 
-    const operationVariableDefs: [string, {type: TypeNode, defaultValue?: ValueNode}][] = []
+    const operationVariableDefs: [string, { type: TypeNode, defaultValue?: ValueNode }][] = []
     const fieldArgs: [string, ValueNode][] = []
 
     const fieldArgMapping: Record<string, string> = {}
@@ -371,7 +373,7 @@ export class RemoteRequestDataSource {
   // Gather the referenced variables from each of the field nodes we
   // are generating a query with
   #getReferencedVariables (selectionNodes: readonly SelectionNode[], outerVariableDefs: readonly VariableDefinitionNode[]) {
-    const variableDefinitions: Record<string, {type: TypeNode, defaultValue?: ValueNode}> = {}
+    const variableDefinitions: Record<string, { type: TypeNode, defaultValue?: ValueNode }> = {}
 
     selectionNodes.map((node) => {
       visit(node, {
@@ -410,7 +412,7 @@ export class RemoteRequestDataSource {
       fieldName: string
       fieldArgs: [string, ValueNode][]
       fieldNodes: readonly SelectionNode[]
-      operationVariableDefs: [string, {type: TypeNode, defaultValue?: ValueNode}][]
+      operationVariableDefs: [string, { type: TypeNode, defaultValue?: ValueNode }][]
     },
   ): DocumentNode {
     const { operationVariableDefs = [], fieldArgs = [] } = params

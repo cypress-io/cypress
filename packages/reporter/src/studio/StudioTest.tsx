@@ -1,21 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { observer } from 'mobx-react'
-import { RunnablesStore } from '../runnables/runnables-store'
+import type { RunnablesStore } from '../runnables/runnables-store'
 import { Duration } from '../duration/duration'
 import Controls from '../header/controls'
-import { AppState } from '../lib/app-state'
-import Tooltip from '@cypress/react-tooltip'
+import type { AppState } from '../lib/app-state'
+import Tooltip from '../lib/tooltip'
 import cx from 'classnames'
 import Attempts from '../attempts/attempts'
 import { useScrollIntoView } from '../lib/useScrollIntoView'
 import { IconArrowLeft, IconChevronDownSmall, IconStatusFailedSolid, IconStatusPassedSolid, IconStatusQueuedOutline, IconStatusRunningOutline } from '@cypress-design/react-icon'
-import Test from '../test/test-model'
-import { StatsStore } from '../header/stats-store'
+import type Test from '../test/test-model'
+import type { StatsStore } from '../header/stats-store'
 import Button from '@cypress-design/react-button'
 import events from '../lib/events'
 
 const getConnectors = (num: number) => {
-  let connectors: JSX.Element[] = []
+  const connectors: JSX.Element[] = []
 
   for (let i = 0; i < num; i++) {
     connectors.push(
@@ -37,7 +37,7 @@ const getParentTitlesListElements = (parentTitles: string[]) => {
 }
 
 const StatusIcon = ({ test }: { test: Test }) => {
-  let className = 'state-icon'
+  const className = 'state-icon'
 
   if (test.state === 'active') {
     return <IconStatusRunningOutline className={className} data-cy='running-icon' size='16' fillColor='gray-700' strokeColor='indigo-400' />
@@ -129,7 +129,7 @@ export const StudioTest = observer(({ appState, runnablesStore, statsStore }: St
                 <Tooltip title={<ul className='studio-tooltip__breadcrumb-list' ref={tooltipRef}>
                   {getParentTitlesListElements(parentTitles)}
                 </ul>}
-                wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
+                  wrapperClassName='studio-header__test-tooltip-wrapper' className={cx(
                   'studio-tooltip cy-tooltip',
                 )}>
                   {testTitle}

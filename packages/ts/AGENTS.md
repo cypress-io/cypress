@@ -9,11 +9,9 @@ yarn workspace @packages/ts test
 
 **Architecture**
 
-- `index.js` — Entry point; re-exports the configured ts-node/typescript-cached-transpile setup
 - `register.js` — Registers ts-node for require-time TypeScript transpilation in a single directory
 - `registerDir.js` — Registers ts-node for an entire directory tree
 - `tsconfig.json` — Base TypeScript config shared across the monorepo
-- `tsconfig.dom.json` — TypeScript config variant for browser/DOM contexts
 - `tslint.json` — TSLint config (legacy linting) shared across packages
 
 **Gotchas / Notes**

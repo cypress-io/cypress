@@ -1,5 +1,6 @@
 import { describe, beforeEach, expect, it } from 'vitest'
-import { HttpBuffers, HttpBuffer } from '../../../../lib/http/util/buffers'
+import type { HttpBuffer } from '../../../../lib/http/util/buffers'
+import { HttpBuffers } from '../../../../lib/http/util/buffers'
 
 describe('http/util/buffers', () => {
   let buffers: HttpBuffers

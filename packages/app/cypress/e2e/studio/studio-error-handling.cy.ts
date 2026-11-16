@@ -11,7 +11,7 @@ describe('Cypress Studio - Error Handling and Retry Logic', () => {
 
       loadProjectAndRunSpec()
 
-      cy.contains('visits a basic html page')
+      cy.reporter().contains('visits a basic html page')
       .closest('.runnable-wrapper')
       .findByTestId('launch-studio')
       .click()
@@ -41,7 +41,7 @@ describe('Cypress Studio - Error Handling and Retry Logic', () => {
 
       loadProjectAndRunSpec()
 
-      cy.contains('visits a basic html page')
+      cy.reporter().contains('visits a basic html page')
       .closest('.runnable-wrapper')
       .findByTestId('launch-studio')
       .click()
@@ -79,7 +79,7 @@ describe('Cypress Studio - Error Handling and Retry Logic', () => {
 
       loadProjectAndRunSpec()
 
-      cy.contains('visits a basic html page')
+      cy.reporter().contains('visits a basic html page')
       .closest('.runnable-wrapper')
       .findByTestId('launch-studio')
       .click()
@@ -118,7 +118,7 @@ describe('Cypress Studio - Error Handling and Retry Logic', () => {
 
       loadProjectAndRunSpec()
 
-      cy.contains('visits a basic html page')
+      cy.reporter().contains('visits a basic html page')
       .closest('.runnable-wrapper')
       .findByTestId('launch-studio')
       .click()
@@ -162,7 +162,7 @@ describe('Cypress Studio - Error Handling and Retry Logic', () => {
 
       loadProjectAndRunSpec()
 
-      cy.contains('visits a basic html page')
+      cy.reporter().contains('visits a basic html page')
       .closest('.runnable-wrapper')
       .findByTestId('launch-studio')
       .click()

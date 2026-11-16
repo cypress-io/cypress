@@ -1,10 +1,12 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
-import { ComputedRef, Ref, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import _ from 'lodash'
-import { FuzzyFoundSpec, getPlatform } from './tree/useCollapsibleTree'
+import { getPlatform } from './tree/useCollapsibleTree'
+import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 
-export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
+export function fuzzySortSpecs<T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
   const normalizedSearchValue = normalizeSpecValue(searchValue)
 
   const fuzzySortResult = fuzzySort

@@ -5,7 +5,12 @@ context('non proxied e2e', () => {
       const pngPath = `${path}/cy-non-proxied.png`
 
       // use google chrome to screenshot what the server shows
-      cy.exec(`"${Cypress.browser.path}" --headless --disable-gpu --no-sandbox --user-data-dir=${path}/nonproxiedprofile --screenshot=${pngPath} ${Cypress.config('proxyUrl')}`)
+      cy.task('screenshot:with:browser', {
+        browserPath: Cypress.browser.path,
+        userDataDir: `${path}/nonproxiedprofile`,
+        screenshotPath: pngPath,
+        url: Cypress.config('proxyUrl'),
+      })
 
       cy.readFile(pngPath, 'base64')
       .then((actual) => {

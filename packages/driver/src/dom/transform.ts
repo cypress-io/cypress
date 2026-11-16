@@ -112,7 +112,7 @@ const elIsBackface = (list: TransformInfo[]) => {
   if (list.length > 1 && list[1].transformStyle === 'preserve-3d') {
     // When the target is backface-invisible a2-1-1 ~ a2-1-4
     if (list[0].backfaceVisibility === 'hidden') {
-      let normal = finalNormal(0, list)
+      const normal = finalNormal(0, list)
 
       if (checkBackface(normal)) {
         return true
@@ -122,7 +122,7 @@ const elIsBackface = (list: TransformInfo[]) => {
       if (list[1].backfaceVisibility === 'hidden') {
         // If it is not none, it is visible. Check a2-3-1
         if (list[0].transform === 'none') {
-          let normal = finalNormal(1, list)
+          const normal = finalNormal(1, list)
 
           if (checkBackface(normal)) {
             return true
@@ -131,7 +131,7 @@ const elIsBackface = (list: TransformInfo[]) => {
       }
 
       // Check 90deg a2-2-3, a2-2-4.
-      let normal = finalNormal(0, list)
+      const normal = finalNormal(0, list)
 
       return isElementOrthogonalWithView(normal)
     }
@@ -144,7 +144,7 @@ const elIsBackface = (list: TransformInfo[]) => {
       }
 
       if (list[i].backfaceVisibility === 'hidden' && list[i].transform.startsWith('matrix3d')) {
-        let normal = findNormal(parseMatrix3D(list[i].transform))
+        const normal = findNormal(parseMatrix3D(list[i].transform))
 
         if (checkBackface(normal)) {
           return true

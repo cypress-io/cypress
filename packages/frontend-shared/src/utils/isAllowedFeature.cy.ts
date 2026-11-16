@@ -1,6 +1,6 @@
 import { isAllowedFeature } from './isAllowedFeature'
-import { UserProjectStatusStore, useUserProjectStatusStore, CLOUD_STATUSES, ProjectStatus } from '../store'
-import type { CloudStatus } from '../store'
+import { useUserProjectStatusStore, CLOUD_STATUSES } from '../store'
+import type { CloudStatus, UserProjectStatusStore, ProjectStatus } from '../store'
 import { BannerIds } from '@packages/types'
 import interval from 'human-interval'
 

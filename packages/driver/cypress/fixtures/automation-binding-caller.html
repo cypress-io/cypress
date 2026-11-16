@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <script>
+    const params = new URLSearchParams(location.search)
+    const send = window[params.get('bindingName')]
+    const hasBinding = typeof send === 'function'
+
+    if (hasBinding) {
+      send(params.get('packet'))
+    }
+
+    parent.postMessage({ hasBinding }, '*')
+  </script>
+</body>
+</html>

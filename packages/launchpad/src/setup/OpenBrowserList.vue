@@ -18,7 +18,7 @@
       >
         <RadioGroupLabel
           :for="browser.id"
-          class="rounded border text-center min-h-[144px] pt-6 pb-4 w-[160px] relative block radio-label"
+          class="rounded border text-center min-h-[144px] pt-6 pb-4 w-[160px] relative block radio-label overflow-hidden"
           :class="{
             'border-jade-300 ring-2 ring-jade-100 focus:border-jade-400 focus:border focus:outline-none': checked,
             'border-gray-100 bg-gray-50 before:hocus:cursor-not-allowed': browser.disabled || !browser.isVersionSupported,
@@ -44,6 +44,30 @@
                   Unsupported browser
                 </div>
                 {{ browser.warning }}
+              </div>
+            </template>
+          </Tooltip>
+          <Tooltip
+            v-if="browser.isDeprecated"
+            color="dark"
+            placement="top"
+            popper-class="max-w-sm"
+            :popper-triggers="['hover']"
+          >
+            <DeprecatedRibbon />
+            <template #popper>
+              <div class="text-left p-2 text-gray-300 text-[14px] leading-[20px]">
+                <div class="font-medium text-white mb-2">
+                  Deprecated browser
+                </div>
+                Electron is deprecated as a test browser and will be removed in a future version of Cypress. Switch to Chrome or another installed browser to avoid a breaking change when you upgrade.
+                <ExternalLink
+                  href="https://on.cypress.io/launching-browsers"
+                  class="text-indigo-300 hocus:text-indigo-200 block mt-2"
+                  data-cy="deprecated-browser-link"
+                >
+                  See supported browsers
+                </ExternalLink>
               </div>
             </template>
           </Tooltip>
@@ -122,7 +146,7 @@
               @click="emit('focusBrowser')"
             >
               <ExportIcon class="mr-[8px] icon-dark-gray-500" />
-              {{ browserText.focus }}
+              Focus
             </Button>
             <Button
               size="40"
@@ -132,7 +156,7 @@
               @click="emit('closeBrowser')"
             >
               <PowerStandbyIcon class="mr-[8px] icon-dark-gray-500" />
-              {{ browserText.close }}
+              Close
             </Button>
           </template>
         </template>
@@ -147,14 +171,13 @@
         <ArrowRightIcon
           class="mr-[8px] icon-dark-gray-500 transform transition-transform ease-in duration-200 inline-block group-hocus:icon-dark-indigo-500 rotate-180 group-hocus:translate-x-[-2px]"
         />
-        {{ browserText.switchTestingType }}
+        Switch testing type
       </Button>
     </div>
   </form>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import Button from '@cypress-design/vue-button'
 import { computed } from 'vue'
 import { useMutation, gql, useSubscription } from '@urql/vue'
@@ -167,6 +190,9 @@ import ArrowRightIcon from '~icons/cy/arrow-right_x16'
 import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
+import DeprecatedRibbon from '@packages/frontend-shared/src/components/DeprecatedRibbon.vue'
+import { sortBrowsersByDeprecation } from '@packages/frontend-shared/src/utils/sortBrowsersByDeprecation'
+import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 import type { OpenBrowserListFragment } from '../generated/graphql'
 import { OpenBrowserList_SetBrowserDocument, OpenBrowserList_BrowserStatusChangeDocument } from '../generated/graphql'
@@ -193,6 +219,7 @@ fragment OpenBrowserList on CurrentProject {
     name
     displayName
     isVersionSupported
+    isDeprecated
     warning
     majorVersion
   }
@@ -225,11 +252,8 @@ const emit = defineEmits<{
   (e: 'focusBrowser'): void
 }>()
 
-const { t } = useI18n()
-
 const browsers = computed(() => {
-  // Need to slice(). `sort()` mutates, and props are supposed to be `readonly`.
-  return (props.gql.browsers ?? []).slice().sort((a, b) => a.displayName > b.displayName ? 1 : -1)
+  return sortBrowsersByDeprecation(props.gql.browsers ?? [])
 })
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)
@@ -253,21 +277,18 @@ const selectedBrowserName = computed(() => {
 })
 
 const browserText = computed(() => {
-  const tArgs = { browser: selectedBrowserName.value }
+  const browser = selectedBrowserName.value ?? ''
 
   return {
     e2e: {
-      start: t('openBrowser.startE2E', tArgs),
-      opening: t('openBrowser.openingE2E', tArgs),
+      start: `Start E2E Testing in ${browser}`,
+      opening: `Opening E2E Testing in ${browser}`,
     },
     component: {
-      start: t('openBrowser.startComponent', tArgs),
-      opening: t('openBrowser.openingComponent', tArgs),
+      start: `Start Component Testing in ${browser}`,
+      opening: `Opening Component Testing in ${browser}`,
     },
-    running: t('openBrowser.running', tArgs),
-    focus: t('openBrowser.focus'),
-    close: t('openBrowser.close'),
-    switchTestingType: t('openBrowser.switchTestingType'),
+    running: `Running ${browser}`,
   }
 })
 

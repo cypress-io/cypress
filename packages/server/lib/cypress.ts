@@ -6,11 +6,10 @@
 // synchronous requires the first go around just to
 // essentially do it all again when we boot the correct
 // mode.
-import os from 'os'
 import type { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
-import { toObject, toArray } from './util/args'
+import { toObject } from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
@@ -160,8 +159,9 @@ export = {
 
     debug('from argv %o got options %o', argv, options)
 
+    // `cypress open` takes no --key, so open mode can only get a record key from the environment
     // @ts-expect-error TODO: Fix type that says attachRecordKey is not a function
-    telemetry.exporter()?.attachRecordKey(options.key)
+    telemetry.exporter()?.attachRecordKey(options.key ?? process.env.CYPRESS_RECORD_KEY)
 
     if (options.headless) {
       // --headless is same as --headed false

@@ -1,6 +1,6 @@
 # Mocking ES6 imports
 
-Vue component in [Hello.vue](Hello.vue) imports a named ES6 import from [greeting.js](greeting.js). From the test [spec.js](spec.js) we can mock that import to make testing simpler.
+Vue component in [Hello.vue](Hello.vue) imports a named ES6 import from [greeting.ts](greeting.ts). From the test [spec.cy.ts](spec.cy.ts) we can mock that import to make testing simpler.
 
 ![Test with mocking and without](images/mocking.png)
 

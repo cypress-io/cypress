@@ -1,5 +1,11 @@
 import { getPathForPlatform } from './support/getPathForPlatform'
 
+const configErrorTitle = 'Cypress configuration error'
+
+const expectConfigErrorTitle = () => {
+  cy.contains('h1', configErrorTitle, { timeout: 10000 })
+}
+
 const expectStackToBe = (mode: 'open' | 'closed') => {
   cy.get(`[data-cy="stack-open-${mode === 'open' ? 'true' : 'false'}"]`)
 }
@@ -27,7 +33,7 @@ describe('Config files error handling', () => {
       await ctx.actions.file.removeFileInProject('cypress.config.js')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
   })
@@ -50,7 +56,7 @@ describe('Config files error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
   })
@@ -61,7 +67,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('plugins-root-sync-error')
     cy.openProject('plugins-root-sync-error', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     expectStackToBe('open')
   })
 
@@ -69,7 +75,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('plugins-root-syntax-error')
     cy.openProject('plugins-root-syntax-error', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     expectStackToBe('open')
   })
 
@@ -85,7 +91,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('plugins-function-sync-error')
     cy.openProject('plugins-function-sync-error', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     expectStackToBe('open')
   })
 
@@ -93,7 +99,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-invalid-browser')
     cy.openProject('config-with-invalid-browser', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     expectStackToBe('closed')
   })
 
@@ -101,7 +107,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('plugins-function-sync-error')
     cy.openProject('plugins-function-sync-error', ['--e2e'])
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     expectStackToBe('open')
   })
 
@@ -109,7 +115,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-ts-syntax-error')
     cy.openProject('config-with-ts-syntax-error')
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
 
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.contains('h2', 'TransformError')
@@ -121,7 +127,7 @@ describe('Launchpad: Error System Tests', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress', { timeout: 10000 })
   })
@@ -131,21 +137,21 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-ts-syntax-error')
     cy.openProject('config-with-ts-syntax-error')
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
 
     // Try again while the config is still invalid
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.wait('@resetErrorsAndLoadConfig')
 
     // Wait until config error is on screen again
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.ts', 'export default { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Welcome to Cypress')
   })
@@ -154,7 +160,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-import-error')
     cy.openProject('config-with-import-error')
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.contains('h2', 'Error')
     cy.contains('p', 'Your configFile is invalid:')
@@ -168,7 +174,7 @@ describe('Launchpad: Error System Tests', () => {
     cy.scaffoldProject('config-with-ts-module-error')
     cy.openProject('config-with-ts-module-error')
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.contains('h2', 'TransformError')
     cy.contains('p', 'Your configFile is invalid:')
@@ -184,7 +190,7 @@ describe('setupNodeEvents', () => {
     cy.openProject('config-update-in-setup-node-events')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     cy.findAllByTestId('collapsible').should('be.visible')
     cy.get('h2').contains('Error running e2e.setupNodeEvents()')
     cy.get('p').contains('The experimentalSkipDomainInjection experiment is over.')
@@ -196,7 +202,7 @@ describe('setupNodeEvents', () => {
     cy.openProject('config-update-in-setup-node-events-clone')
     cy.visitLaunchpad()
     cy.findByText('E2E Testing').click()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     cy.percySnapshot()
 
     cy.get('p').contains('The experimentalSkipDomainInjection experiment is over.')
@@ -230,12 +236,18 @@ describe('setupNodeEvents', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = { e2e: { supportFile: false } }')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
   })
 
   it('handles multiple config errors and then recovers', () => {
+    // Each 'Try again' fires this mutation to reset the error and reload the config. The
+    // old error stays mounted with identical markup until the mutation resolves, so waiting
+    // on it anchors the recovery assertions to the reloaded state instead of racing against
+    // the stale error DOM.
+    cy.intercept('mutation-Main_ResetErrorsAndLoadConfig').as('resetErrorsAndLoadConfig')
+
     cy.scaffoldProject('pristine')
     cy.openProject('pristine')
     cy.withCtx(async (ctx) => {
@@ -245,23 +257,25 @@ describe('setupNodeEvents', () => {
     cy.openProject('pristine')
 
     cy.visitLaunchpad()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     cy.get('[data-cy="alert-body"]').should('contain', 'Expected baseUrl to be a fully qualified URL')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { baseUrl: 'http://ocalhost:3000', e2e: { supportFile: false } }`)
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
+    cy.wait('@resetErrorsAndLoadConfig')
     cy.get('[data-cy-testingType=e2e]').click()
-    cy.contains('h1', cy.i18n.launchpadErrors.generic.configErrorTitle, { timeout: 10000 })
+    expectConfigErrorTitle()
     cy.get('[data-cy="alert-body"]').should('contain', 'The baseUrl configuration option is invalid when set from the root of the config object')
 
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'http://localhost:3000', supportFile: false } }`)
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
+    cy.wait('@resetErrorsAndLoadConfig')
     cy.contains('h1', 'Choose a browser', { timeout: 10000 })
     cy.get('[data-cy="alert"]').should('contain', 'Warning: Cannot Connect Base Url Warning')
   })
@@ -277,12 +291,12 @@ describe('setupNodeEvents', () => {
     cy.get('[data-cy-testingtype=component]').click()
 
     cy.get('body')
-    .should('contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('contain.text', configErrorTitle)
     .and('contain.text', 'The returned value of the devServer function is not valid.')
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
+    .contains('Stack trace')
 
     cy.log('Fix error and validate it reloads configuration')
 
@@ -293,10 +307,10 @@ describe('setupNodeEvents', () => {
         }`)
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('not.contain.text', configErrorTitle)
     .should('contain.text', 'Welcome to Cypress!')
   })
 })

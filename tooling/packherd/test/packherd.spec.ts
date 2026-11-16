@@ -1,12 +1,14 @@
-import {
+import type {
   CreateBundle,
   CreateBundleOpts,
   CreateBundleResult,
   CreateBundleOutputFile,
+} from '../src/packherd'
+import {
   packherd,
 } from '../src/packherd'
 import { expect } from 'chai'
-import type{ Metafile } from 'esbuild'
+import type { Metafile } from 'esbuild'
 import Fixtures from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
 import path from 'path'

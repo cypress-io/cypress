@@ -79,9 +79,3 @@ export const build = gulp.series(
     buildLib,
   ),
 )
-
-const watchBuild = () => {
-  return gulp.watch('app/**/*', build)
-}
-
-export const watch = gulp.series(build, watchBuild)

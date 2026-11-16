@@ -139,7 +139,11 @@ describe('NetworkInterceptionCore', () => {
   it('delegates correlateBrowserPreRequest to requestInterception port', async () => {
     const correlateBrowserPreRequest = vi.fn().mockResolvedValue(undefined)
     const core = new NetworkInterceptionCore({
-      requestInterception: { correlateBrowserPreRequest, forwardToOrigin: vi.fn() },
+      requestInterception: {
+        correlateBrowserPreRequest,
+        forwardToOrigin: vi.fn(),
+        endRequestIfBlocked: vi.fn(),
+      },
     })
     const ctx = { req: {} }
 
@@ -151,7 +155,11 @@ describe('NetworkInterceptionCore', () => {
   it('delegates forwardToOrigin to requestInterception port', () => {
     const forwardToOrigin = vi.fn()
     const core = new NetworkInterceptionCore({
-      requestInterception: { correlateBrowserPreRequest: vi.fn(), forwardToOrigin },
+      requestInterception: {
+        correlateBrowserPreRequest: vi.fn(),
+        forwardToOrigin,
+        endRequestIfBlocked: vi.fn(),
+      },
     })
     const ctx = { req: {} }
 
@@ -177,6 +185,29 @@ describe('NetworkInterceptionCore', () => {
 
     await expect(core.correlateBrowserPreRequest({})).rejects.toThrow(/requestInterception/)
     expect(() => core.forwardToOrigin({})).toThrow(/requestInterception/)
+    await expect(core.endRequestIfBlocked({})).rejects.toThrow(/requestInterception/)
+  })
+
+  it('skips request policies when policyRegistration is not configured', async () => {
+    const endRequestIfBlocked = vi.fn(async (_ctx, runPolicies) => {
+      await runPolicies()
+    })
+    const core = new NetworkInterceptionCore({
+      requestInterception: {
+        endRequestIfBlocked,
+        correlateBrowserPreRequest: vi.fn(),
+        forwardToOrigin: vi.fn(),
+      },
+    })
+
+    await expect(core.runRequestPolicies({ req: { proxiedUrl: 'http://example.com' } })).resolves.toEqual({
+      ended: false,
+      state: {},
+    })
+
+    await core.endRequestIfBlocked({ req: { proxiedUrl: 'http://example.com' } })
+
+    expect(endRequestIfBlocked).toHaveBeenCalledOnce()
   })
 
   it('throws when responseInterception port is missing', async () => {
@@ -209,5 +240,33 @@ describe('NetworkInterceptionCore', () => {
     await expect(core.setInjectionLevel({})).rejects.toThrow(/documentPreparation/)
     await expect(core.injectHtml({})).rejects.toThrow(/documentPreparation/)
     await expect(core.removeSecurity({})).rejects.toThrow(/documentPreparation/)
+  })
+
+  it('delegates capture, cookie, and command log ports', async () => {
+    const notifyIncomingRequest = vi.fn()
+    const attachCrossOriginCookies = vi.fn().mockResolvedValue(undefined)
+    const copyCookiesFromResponse = vi.fn().mockResolvedValue(undefined)
+    const notifyResponseStreamReceived = vi.fn().mockResolvedValue(undefined)
+    const notifyResponseEndedWithEmptyBody = vi.fn()
+
+    const core = new NetworkInterceptionCore({
+      commandLog: { notifyIncomingRequest, logInterception: vi.fn() },
+      cookieState: { attachCrossOriginCookies, copyCookiesFromResponse },
+      networkCapture: { notifyResponseStreamReceived, notifyResponseEndedWithEmptyBody },
+    })
+
+    const ctx = { req: {} }
+
+    core.notifyIncomingRequest(ctx)
+    await core.attachCrossOriginCookies(ctx)
+    await core.copyCookiesFromResponse(ctx)
+    await core.notifyResponseStreamReceived(ctx)
+    core.notifyResponseEndedWithEmptyBody(ctx, { isCached: false })
+
+    expect(notifyIncomingRequest).toHaveBeenCalledWith(ctx)
+    expect(attachCrossOriginCookies).toHaveBeenCalledWith(ctx)
+    expect(copyCookiesFromResponse).toHaveBeenCalledWith(ctx)
+    expect(notifyResponseStreamReceived).toHaveBeenCalledWith(ctx)
+    expect(notifyResponseEndedWithEmptyBody).toHaveBeenCalledWith(ctx, { isCached: false })
   })
 })

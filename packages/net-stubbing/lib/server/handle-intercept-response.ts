@@ -5,14 +5,12 @@ import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 import type { ResponseMiddleware } from '@packages/proxy'
 import {
-  CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
-} from '../types'
-import {
-  getBodyStream,
   mergeDeletedHeaders,
   mergeWithPreservedBuffers,
-} from './util'
+} from '@packages/network-interception'
+import type { CyHttpMessages } from '@packages/network-interception'
+import { getBodyStream } from './util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
 

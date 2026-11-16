@@ -4,7 +4,6 @@ const { defineConfig } = require('cypress')
 require
 
 module.exports = defineConfig({
-  allowCypressEnv: false,
   e2e: {
     supportFile: false,
   },

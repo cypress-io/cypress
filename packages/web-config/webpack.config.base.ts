@@ -1,10 +1,8 @@
 import chalk from 'chalk'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import webpack from 'webpack'
-// @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 
-// @ts-ignore
 import sassGlobImporter = require('node-sass-glob-importer')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
@@ -20,14 +18,13 @@ if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reload
 
 process.env.NODE_ENV = env
 
-// @ts-ignore
 const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
   moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
 })
 
 // We intentionally set the evalDevToolPlugin property to true on the plugin instance to be able to determine if the plugin is present in the driver.
 // If present, we strip it out. Otherwise, we do not get code frames in the driver tests. @see https://github.com/cypress-io/cypress/blob/v14.3.2/packages/driver/cypress/plugins/index.js#L24
-// @ts-expect-error
+// @ts-expect-error - evalDevToolPlugin is a marker Cypress adds to the plugin, not part of webpack's type
 evalDevToolPlugin.evalDevToolPlugin = true
 
 const optimization = {
@@ -47,7 +44,7 @@ const stats = {
   builtAt: true,
   colors: true,
   modules: true,
-  excludeModules: /(main|test-entry).scss/,
+  excludeModules: /main.scss/,
   timings: true,
 }
 
@@ -57,14 +54,10 @@ const ignoreWarnings = [{
   module: /node_modules\/mocha\/lib\/esm-utils\.js/,
 }]
 
-function makeSassLoaders ({ modules }: { modules: boolean }) {
-  const exclude = [/node_modules/]
-
-  if (!modules) exclude.push(/\.modules?\.s[ac]ss$/i)
-
+function makeSassLoaders () {
   return {
-    test: modules ? /\.modules?\.s[ac]ss$/i : /\.s[ac]ss$/i,
-    exclude,
+    test: /\.s[ac]ss$/i,
+    exclude: [/node_modules/],
     enforce: 'pre',
     use: [
       {
@@ -79,7 +72,7 @@ function makeSassLoaders ({ modules }: { modules: boolean }) {
         options: {
           // sourceMap: true,
           // esModule: false,
-          modules,
+          modules: false,
         },
       }, // translates CSS into CommonJS
       {
@@ -106,7 +99,7 @@ function makeSassLoaders ({ modules }: { modules: boolean }) {
         },
       }, // compiles Sass to CSS, using Node Sass by default
     ],
-  }
+  } satisfies webpack.RuleSetRule
 }
 
 // the chrome version should be synced with
@@ -172,8 +165,7 @@ export const getCommonConfig = () => {
             { loader: MiniCSSExtractWebpackPlugin.loader },
           ],
         },
-        makeSassLoaders({ modules: false }),
-        makeSassLoaders({ modules: true }),
+        makeSassLoaders(),
         {
           test: /\.(eot|ttf|woff|woff2)$/,
           type: 'asset/resource',
@@ -226,7 +218,7 @@ export const getCommonConfig = () => {
       //    because it is fast and maps to filenames while showing compiled source
       // 'SourceMapDevToolPlugin' is used in production for the same reasons as 'eval', but it
       //    shows full source and does not cause crossorigin errors like 'eval' (in Chromium < 63)
-      // files will be mapped like: `cypress://../driver/cy/commands/click.coffee`
+      // files will be mapped like: `cypress://../driver/cy/commands/click.ts`
 
       // other sourcemap options:
       // [new webpack.SourceMapDevToolPlugin({
@@ -259,7 +251,7 @@ export const getCommonConfig = () => {
     ],
 
     cache: true,
-  }
+  } satisfies webpack.Configuration
 
   return commonConfig
 }
@@ -338,7 +330,7 @@ export const getSimpleConfig = () => ({
       },
     ],
   },
-})
+} satisfies webpack.Configuration)
 
 export { HtmlWebpackPlugin }
 

@@ -8,7 +8,7 @@ describe('issue 18042', () => {
       passCount: 1,
     })
 
-    cy.contains('Spies / Stubs (1)').click()
-    cy.get('.call-count').eq(1).should('have.text', '1')
+    cy.reporter().find('.hook-header').contains('Spies / Stubs (1)').click()
+    cy.reporter().find('.call-count').eq(1).should('have.text', '1')
   })
 })

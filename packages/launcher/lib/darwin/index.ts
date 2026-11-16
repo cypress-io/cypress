@@ -1,5 +1,7 @@
-import { findApp, FindAppParams } from './util'
+import type { FindAppParams } from './util'
+import { findApp } from './util'
 import type { Browser, DetectedBrowser } from '@packages/types'
+import type { VersionStringCache } from '../types'
 import * as linuxHelper from '../linux'
 import { notInstalledErr } from '../errors'
 import Debug from 'debug'
@@ -113,21 +115,21 @@ export const getVersionNumber = linuxHelper.getVersionNumber
 
 export const getPathData = linuxHelper.getPathData
 
-export function detect (browser: Browser): Promise<DetectedBrowser> {
-  let findAppParams = get(browsers, [browser.name, browser.channel])
+export function detect (browser: Browser, versionStringCache?: VersionStringCache): Promise<DetectedBrowser> {
+  const findAppParams = get(browsers, [browser.name, browser.channel])
 
   if (!findAppParams) {
     // ok, maybe it is custom alias?
     debugVerbose('could not find %s in findApp map, falling back to linux detection method', browser.name)
 
-    return linuxHelper.detect(browser)
+    return linuxHelper.detect(browser, versionStringCache)
   }
 
   return findApp(findAppParams)
   .catch((err) => {
     debugVerbose('could not detect %s using findApp %o, falling back to linux detection method', browser.name, err)
 
-    return linuxHelper.detect(browser)
+    return linuxHelper.detect(browser, versionStringCache)
   })
   .then((val) => {
     // When two channels share the same app bundle (Mozilla's macOS Beta installer reuses

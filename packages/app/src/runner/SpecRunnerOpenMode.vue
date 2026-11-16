@@ -57,8 +57,11 @@
           />
         </HideDuringScreenshot>
       </template>
-      <template #panel2>
-        <HideDuringScreenshot class="h-full">
+      <template #panel2="{ isDragging }">
+        <HideDuringScreenshot
+          class="h-full"
+          :class="{ 'pointer-events-none': isDragging }"
+        >
           <div
             v-if="!hideCommandLog"
             v-once
@@ -472,5 +475,5 @@ onBeforeUnmount(() => {
 </route>
 
 <style scoped lang="scss">
-@import "./spec-runner-scoped.scss";
+@use "./spec-runner-scoped.scss";
 </style>

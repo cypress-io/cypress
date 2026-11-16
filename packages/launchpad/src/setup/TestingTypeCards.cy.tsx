@@ -2,8 +2,6 @@ import {
   TestingTypeCardsFragmentDoc,
 } from '../generated/graphql-test'
 import TestingTypeCards from './TestingTypeCards.vue'
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 
 describe('TestingTypeCards', () => {
   it('renders correct label when no testingType has been configured', () => {
@@ -19,7 +17,7 @@ describe('TestingTypeCards', () => {
         return <TestingTypeCards gql={gqlVal} />
       },
     }).then(() => {
-      cy.findAllByText(defaultMessages.setupPage.testingCard.notConfigured).should('have.length', 2)
+      cy.findAllByText('Not Configured').should('have.length', 2)
 
       cy.contains('Build and test the entire experience of your application').should('be.visible')
       cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
@@ -39,7 +37,7 @@ describe('TestingTypeCards', () => {
         return <TestingTypeCards gql={gqlVal} />
       },
     }).then(() => {
-      cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 2)
+      cy.findAllByText('Configured').should('have.length', 2)
       cy.contains('Build and test the entire experience of your application').should('be.visible')
       cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
     })
@@ -58,8 +56,8 @@ describe('TestingTypeCards', () => {
         return <TestingTypeCards gql={gqlVal} />
       },
     }).then(() => {
-      cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 1)
-      cy.findAllByText(defaultMessages.setupPage.testingCard.notConfigured).should('have.length', 1)
+      cy.findAllByText('Configured').should('have.length', 1)
+      cy.findAllByText('Not Configured').should('have.length', 1)
 
       cy.contains('Build and test the entire experience of your application').should('be.visible')
       cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
@@ -82,7 +80,7 @@ describe('TestingTypeCards', () => {
 
     cy.contains('Build and test the entire experience of your application').should('be.visible')
     cy.contains('Build and test your components from your design system in isolation in order to ensure each state matches your expectations.').should('be.visible')
-    cy.findAllByText(defaultMessages.setupPage.testingCard.configured).should('have.length', 1)
-    cy.findAllByText(defaultMessages.setupPage.testingCard.running).should('have.length', 1)
+    cy.findAllByText('Configured').should('have.length', 1)
+    cy.findAllByText('Running').should('have.length', 1)
   })
 })

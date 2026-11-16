@@ -4,7 +4,7 @@ import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
-import { CdpAutomation, screencastOpts } from './cdp_automation'
+import { CdpAutomation, screencastOpts } from './cdp-protocol/cdp_automation'
 import * as savedState from '../saved_state'
 import utils from './utils'
 import * as errors from '../errors'
@@ -17,7 +17,7 @@ import type { CDPSocketServer } from '@packages/socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
-import type { CriClient } from './cri-client'
+import type { CriClient } from './cdp-protocol/cri-client'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -35,6 +35,10 @@ const ELECTRON_DEBUG_EVENTS = [
 
 let instance: BrowserInstance | null = null
 let browserCriClient: BrowserCriClient | null = null
+
+// Outlives each spec's window, so the reset when the next spec launches can
+// clear the origins the previous spec's window requested.
+const storageOrigins = new Set<string>()
 
 const tryToCall = function (win, method) {
   try {
@@ -81,7 +85,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
+  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, undefined, false, false, storageOrigins)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -153,7 +157,9 @@ async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpA
 
 export = {
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
-    const _this = this
+    // onNewWindow's own `this` is the window that opened the child, so it
+    // reaches this module through launchChild
+    const launchChild = (url: string, parent: BrowserWindow) => this._launchChild(url, parent, projectRoot, state, options, automation)
 
     const defaults: Windows.WindowOptions = {
       x: state.browserX || undefined,
@@ -208,6 +214,7 @@ export = {
         }
       },
       async onNewWindow (this: BrowserWindow, { url }) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- nulled once the window closes, which `this` can't be
         let _win: BrowserWindow | null = this
 
         _win.on('closed', () => {
@@ -217,7 +224,7 @@ export = {
         })
 
         try {
-          const child = await _this._launchChild(url, _win, projectRoot, state, options, automation)
+          const child = await launchChild(url, _win)
 
           // close child on parent close
           _win.on('close', () => {
@@ -337,12 +344,10 @@ export = {
     }
 
     const setProxy = () => {
-      let ps
-
-      ps = options.proxyServer
+      const ps = options.proxyServer
 
       if (ps) {
-        return this._setProxy(win.webContents, ps)
+        return this._setProxy(win.webContents, ps, options.proxyBypassList)
       }
     }
 
@@ -364,12 +369,12 @@ export = {
         cdpSocketServer?.attachCDPClient(cdpAutomation),
         handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
-        utils.initializeCDP(pageCriClient, automation),
-        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
-        // Note that we are omitting `file_systems` as it is very non-performant to clear:
-        // https://github.com/cypress-io/cypress/pull/32703
-        pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }),
-        pageCriClient.send('Network.clearBrowserCache'),
+        utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
+        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron.
+        // The session clear reaches every origin, including ones left by an earlier `cypress open`,
+        // but has no option for interest groups or shared storage, which the per-origin reset covers.
+        this._clearStorageData(win.webContents),
+        cdpAutomation.onRequest('reset:browser:state', undefined),
       ])
     }
 
@@ -378,9 +383,13 @@ export = {
 
     // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
     if (cdpAutomation) {
-      // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
-      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
-      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+      const pageCriClient = browserCriClient?.currentlyAttachedTarget
+
+      if (pageCriClient) {
+        // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
+        await cdpAutomation._handlePausedRequests(pageCriClient)
+        cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+      }
     }
 
     await win.loadURL(url)
@@ -452,6 +461,17 @@ export = {
     return webContents.session.clearCache()
   },
 
+  _clearStorageData (webContents) {
+    debug('clearing storage data')
+
+    // Clears every origin in the session, which Chrome's CDP no longer allows
+    // in one call. `filesystem` is left out because it is very slow to clear:
+    // https://github.com/cypress-io/cypress/pull/32703
+    return webContents.session.clearStorageData({
+      storages: ['cookies', 'indexdb', 'localstorage', 'shadercache', 'serviceworkers', 'cachestorage'],
+    })
+  },
+
   _getUserAgent (webContents) {
     const userAgent = webContents.session.getUserAgent()
 
@@ -470,18 +490,18 @@ export = {
     // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
     browserCriClient?.currentlyAttachedTarget?.send('Network.setUserAgentOverride', {
       userAgent,
+    }).catch((error) => {
+      debug('failed to set user agent through CDP, relying on the session %o', { error })
     })
 
     return webContents.session.setUserAgent(userAgent)
   },
 
-  _setProxy (webContents, proxyServer) {
+  _setProxy (webContents, proxyServer, proxyBypassList?: string) {
     return webContents.session.setProxy({
       proxyRules: proxyServer,
-      // this should really only be necessary when
-      // running Chromium versions >= 72
-      // https://github.com/cypress-io/cypress/issues/1872
-      proxyBypassRules: '<-loopback>',
+      // without any rules, Chromium's implicit rules keep loopback off the proxy
+      ...(proxyBypassList ? { proxyBypassRules: proxyBypassList } : {}),
     })
   },
 
@@ -502,6 +522,10 @@ export = {
       browserCriClient?.close(options.gracefulShutdown).catch(() => {})
       browserCriClient = null
     }
+  },
+
+  markBrowserCrashed () {
+    browserCriClient?.markCrashed()
   },
 
   connectToNewSpec (browser: Browser, options: ElectronOpts, automation: Automation) {

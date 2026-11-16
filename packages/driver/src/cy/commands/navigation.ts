@@ -6,11 +6,13 @@ import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 import { bothUrlsMatchAndOneHasHash } from '../navigation'
-import { $Location, LocationObject } from '../../cypress/location'
+import type { LocationObject } from '../../cypress/location'
+import { $Location } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
 import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
 import type { StateFunc } from '../../cypress/state'
+import type { $Cy } from '../../cypress/cy'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
@@ -443,7 +445,7 @@ interface InternalVisitOptions extends Partial<Cypress.VisitOptions> {
   hasAlreadyVisitedUrl: boolean
 }
 
-export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFunc, config: Cypress.Config, args: any[]) => {
+export const reload = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: Cypress.Cypress['config'], args: any[]) => {
   let forceReload
   let userOptions
   const throwArgsErr = () => {
@@ -475,13 +477,11 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
   }
 
   // clear the current timeout
-  // @ts-expect-error
-  cy.clearTimeout('reload')
+  cy.clearTimeout()
 
   let cleanup: (() => any) | null = null
   const options = _.defaults({}, userOptions, {
     log: true,
-    // @ts-expect-error
     timeout: config('pageLoadTimeout'),
   })
 
@@ -532,7 +532,6 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
     if (Cypress.isBrowser('webkit')) {
       // Make sure the reload command can communicate with the AUT.
       // if we failed for any other reason, we need to display the correct error to the user.
-      // @ts-expect-error
       Cypress.ensure.commandCanCommunicateWithAUT(cy)
     }
 
@@ -540,10 +539,9 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
   })
 }
 
-export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFunc, config: Cypress.Config, numberOrString: number | string, userOptions = {}) => {
+export const go = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: Cypress.Cypress['config'], numberOrString: number | string, userOptions = {}) => {
   const options: Record<string, any> = _.defaults({}, userOptions, {
     log: true,
-    // @ts-expect-error
     timeout: config('pageLoadTimeout'),
   })
 
@@ -569,7 +567,6 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
         }
 
         // clear the current timeout
-        // @ts-expect-error
         cy.clearTimeout()
 
         cy.once('window:before:unload', beforeUnload)
@@ -593,9 +590,11 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
         const retWin = () => state('window')
 
         // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to navigate the history
-        Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
+        const navigated = Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
 
-        Promise
+        // the automation round trip can outlast the 100ms unload check, so only start it once the navigation is issued
+        return Promise
+        .resolve(navigated)
         .delay(100)
         .then(() => {
           knownCommandCausedInstability = false
@@ -626,7 +625,6 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
       if (Cypress.isBrowser('webkit')) {
         // Make sure the reload command can communicate with the AUT.
         // if we failed for any other reason, we need to display the correct error to the user.
-        // @ts-expect-error
         Cypress.ensure.commandCanCommunicateWithAUT(cy)
       }
 
@@ -657,16 +655,22 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
   return $errUtils.throwErrByPath('go.invalid_argument', { onFail: options._log })
 }
 
+export const resetServerState = (Cypress, state) => {
+  state('redirectionCount', {})
+
+  // `blockHosts` is enforced server-side from a process-global config, so only the primary
+  // origin sends it, already resolved with any test config override by the time this fires
+  const options = Cypress.isCrossOriginSpecBridge ? {} : { blockHosts: Cypress.config('blockHosts') ?? null }
+
+  // reset any state on the backend
+  // TODO: this is a bug in e2e it needs to be returned
+  return Cypress.backend('reset:server:state', options)
+}
+
 export default (Commands, Cypress, cy, state, config) => {
   reset()
 
-  Cypress.on('test:before:run:async', () => {
-    state('redirectionCount', {})
-
-    // reset any state on the backend
-    // TODO: this is a bug in e2e it needs to be returned
-    return Cypress.backend('reset:server:state')
-  })
+  Cypress.on('test:before:run:async', () => resetServerState(Cypress, state))
 
   Cypress.on('test:before:run', reset)
 
@@ -803,7 +807,9 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       if (options.retryOnStatusCodeFailure && !options.failOnStatusCode) {
-        $errUtils.throwErrByPath('visit.status_code_flags_invalid')
+        $errUtils.throwErrByPath('visit.status_code_flags_invalid', {
+          args: _.pick(options, 'failOnStatusCode', 'retryOnStatusCodeFailure'),
+        })
       }
 
       if (!isValidVisitMethod(options.method)) {
@@ -1040,7 +1046,8 @@ export default (Commands, Cypress, cy, state, config) => {
 
         return requestUrl(url, options)
         .then((resp: any = {}) => {
-          let { url, originalUrl, cookies, redirects, filePath } = resp
+          const { cookies, redirects, filePath } = resp
+          let { url, originalUrl } = resp
 
           // reapply the existing hash
           url += existingHash

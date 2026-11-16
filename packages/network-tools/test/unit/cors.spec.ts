@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { parseUrlIntoHostProtocolDomainTldPort, urlOriginsMatch, urlSameSiteMatch, urlMatchesPolicyProps, urlMatchesOriginProtectionSpace, getSuperDomainOrigin, policyFromConfig } from '../../lib'
-import { Policy } from '../../lib/cors'
+import type { Policy } from '../../lib/cors'
 import type { ParsedHostWithProtocolAndHost } from '../../lib/types'
 
 describe('lib/cors', () => {
   describe('.parseUrlIntoHostProtocolDomainTldPort', () => {
-    const expectUrlToBeParsedCorrectly = (url, obj) => {
+    const expectUrlToBeParsedCorrectly = (url: string, obj: ParsedHostWithProtocolAndHost) => {
       expect(parseUrlIntoHostProtocolDomainTldPort(url)).toEqual(obj)
     }
 
@@ -108,6 +108,21 @@ describe('lib/cors', () => {
         subdomain: null,
         protocol: 'http:',
       })
+    })
+
+    it('does not throw on relative or invalid urls', () => {
+      // the legacy url parser tolerated these; the WHATWG parser throws, so we
+      // fall back to a degraded result rather than propagating the error
+      expect(() => parseUrlIntoHostProtocolDomainTldPort('/foo/bar')).not.toThrow()
+      expect(() => parseUrlIntoHostProtocolDomainTldPort('http://example.com:99999')).not.toThrow()
+    })
+  })
+
+  describe('.urlOriginsMatch with invalid urls', () => {
+    it('does not treat distinct invalid urls as same-origin', () => {
+      // both urls fail WHATWG parsing (out-of-range port); they must not collapse
+      // to the same degraded parse and be reported as same-origin
+      expect(urlOriginsMatch('http://a.example.com:99999', 'http://b.example.com:99999')).toBe(false)
     })
   })
 
@@ -485,7 +500,7 @@ describe('lib/cors', () => {
       expect(urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' did not match origin protection space '${origin}' when it should have`).toBe(true)
     }
 
-    const assertDoesNotMatchOriginProtectionSpace = (urlStr, origin) => {
+    const assertDoesNotMatchOriginProtectionSpace = (urlStr: string, origin: string) => {
       expect(urlMatchesOriginProtectionSpace(urlStr, origin), `the url: '${urlStr}' matched origin protection space '${origin}' when it should not have`).toBe(false)
     }
 

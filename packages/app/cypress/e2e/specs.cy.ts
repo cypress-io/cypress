@@ -1,4 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { SinonStub } from 'sinon'
 import { getPathForPlatform } from '../../src/paths'
 
@@ -16,58 +15,58 @@ describe('App: Specs', () => {
         // another for creating a new blank spec.
         cy.findAllByTestId('card').eq(0).as('ScaffoldCard')
         .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.e2e.importFromScaffold.header,
+          cy.getByRole('button', {
+            name: 'Scaffold example specs',
           }).should('be.visible')
           .and('not.be.disabled')
 
-          cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.description)
+          cy.contains('We\'ll generate several example specs to help guide you on how to write tests in Cypress.')
           .should('be.visible')
         })
 
         cy.findAllByTestId('card').eq(1).as('TemplateSpecCard')
         .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.e2e.importTemplateSpec.header,
+          cy.getByRole('button', {
+            name: 'Create new spec',
           }).should('be.visible')
           .and('not.be.disabled')
 
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.description)
+          cy.contains('We\'ll generate a template spec file which can be used to start testing your application.')
           .should('be.visible')
         })
       })
 
       it('shows create first spec page with scaffold and create template spec options', () => {
-        cy.findByRole('heading', {
-          level: 1,
-          name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-        }).should('be.visible')
+        cy.getByRole('heading', {
+          name: 'Create your first spec',
+        }).filter('h1').should('be.visible')
 
         cy.findByTestId('create-spec-page-description').should('be.visible')
-        .and('contain', defaultMessages.createSpec.page.defaultPatternNoSpecs.e2e.description)
+        .and('contain', 'Since this project looks new, we recommend that you use the specs and tests that we\'ve written for you to get started.')
 
         cy.get('@ScaffoldCard').should('be.visible')
         cy.get('@TemplateSpecCard').should('be.visible')
 
         cy.findByTestId('no-specs-message').should('be.visible')
-        .and('contain', defaultMessages.createSpec.noSpecsMessage)
+        .and('contain', 'If you feel that you\'re seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.')
 
-        cy.findByRole('button', { name: defaultMessages.createSpec.viewSpecPatternButton })
+        cy.getByRole('button', { name: 'View spec pattern' })
         .should('be.visible')
         .and('not.be.disabled')
         .click()
 
-        cy.findByRole('dialog', {
-          name: defaultMessages.components.specPatternModal.title,
+        cy.getByRole('dialog', {
+          name: 'Spec pattern settings',
+          native: false,
         }).should('be.visible').within(() => {
           cy.validateExternalLink({ name: 'Need help', href: 'https://on.cypress.io/test-type-options' })
-          cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+          cy.getByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
           cy.get('[data-cy="file-match-indicator"]').contains('No matches')
           cy.get('[data-cy="spec-pattern"]').contains('cypress/e2e/**/*.cy.{js,jsx,ts,tsx}')
         })
 
         cy.get('@CloseDialogButton').click()
-        cy.findByRole('dialog').should('not.exist')
+        cy.getByRole('dialog', { native: false }).should('not.exist')
       })
 
       context('scaffold examples', () => {
@@ -101,10 +100,11 @@ describe('App: Specs', () => {
         it('scaffolds example files when card is clicked', { viewportHeight: 1200 }, () => {
           cy.get('@ScaffoldCard').click()
 
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader,
+          cy.getByRole('dialog', {
+            name: 'Great! We added the following files to your project:',
+            native: false,
           }).within(() => {
-            cy.findByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
+            cy.getByRole('button', { name: 'Close' }).should('be.visible').as('CloseDialogButton')
           })
 
           cy.withCtx(async (ctx, options) => {
@@ -124,7 +124,7 @@ describe('App: Specs', () => {
 
           // Dismisses dialog with close button press
           cy.get('@CloseDialogButton').click()
-          cy.findByRole('dialog').should('not.exist')
+          cy.getByRole('dialog', { native: false }).should('not.exist')
 
           expectedScaffoldPaths.forEach((spec) => {
             // Validate that links for each generated spec are rendered
@@ -135,16 +135,17 @@ describe('App: Specs', () => {
         it('dismisses scaffold dialog with action button press', () => {
           cy.get('@ScaffoldCard').click()
 
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader,
+          cy.getByRole('dialog', {
+            name: 'Great! We added the following files to your project:',
+            native: false,
           }).within(() => {
-            cy.findByRole('button', {
-              name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedButton,
+            cy.getByRole('button', {
+              name: 'Okay, I got it!',
             }).click()
           })
 
           // Dismisses dialog with close button press
-          cy.findByRole('dialog').should('not.exist')
+          cy.getByRole('dialog', { native: false }).should('not.exist')
         })
       })
 
@@ -158,32 +159,32 @@ describe('App: Specs', () => {
           cy.get('[aria-label="Close"]').click()
           cy.get('[data-cy="create-spec-modal"]').should('not.exist')
           cy.get('@TemplateSpecCard').click()
-          cy.contains('button', defaultMessages.components.button.back).click()
+          cy.contains('button', 'Back').click()
           cy.get('[data-cy="create-spec-modal"]').within(() => {
-            cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importTemplateSpec.header).click()
+            cy.get('[data-cy="card"]').contains('Create new spec').click()
           })
 
           // cy.percySnapshot('Default') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importTemplateSpec.inputPlaceholder)
+          cy.findAllByLabelText('Enter a relative path...')
           .as('enterSpecInput')
 
           cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/spec.cy.ts'))
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning).should('not.exist')
+          cy.contains('This path is invalid because it doesn\'t match the following ').should('not.exist')
           cy.get('@enterSpecInput').clear()
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning).should('not.exist')
+          cy.contains('This path is invalid because it doesn\'t match the following ').should('not.exist')
 
           // Shows entered file does not match spec pattern
           cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning)
-          cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+          cy.contains('This path is invalid because it doesn\'t match the following ')
+          cy.contains('button', 'Create spec').should('be.disabled')
 
           // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.js'))
-          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+          cy.contains('button', 'Create spec').should('not.be.disabled').click()
+          cy.contains('h2', 'Great! The spec was successfully added')
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.js')).click()
 
@@ -201,18 +202,18 @@ describe('App: Specs', () => {
         it('should not show trouble rendering alert', () => {
           cy.get('@TemplateSpecCard').click()
 
-          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importTemplateSpec.inputPlaceholder)
+          cy.findAllByLabelText('Enter a relative path...')
           .as('enterSpecInput')
 
           // Create spec
-          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+          cy.contains('button', 'Create spec').should('not.be.disabled').click()
+          cy.contains('h2', 'Great! The spec was successfully added')
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/spec.cy.ts')).click()
 
           cy.get('pre').should('contain', 'describe(\'template spec\'')
 
-          cy.findByRole('link', { name: 'Okay, run the spec' })
+          cy.getByRole('link', { name: 'Okay, run the spec' })
           .should('have.attr', 'href', `#/specs/runner?file=cypress/e2e/spec.cy.ts`).click()
 
           cy.contains('Review the docs').should('not.exist')
@@ -239,23 +240,23 @@ describe('App: Specs', () => {
         // another for creating a new blank spec.
         cy.findAllByTestId('card').eq(0).as('ScaffoldCard')
         .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.e2e.importFromScaffold.header,
+          cy.getByRole('button', {
+            name: 'Scaffold example specs',
           }).should('be.visible')
           .and('not.be.disabled')
 
-          cy.contains(defaultMessages.createSpec.e2e.importFromScaffold.description)
+          cy.contains('We\'ll generate several example specs to help guide you on how to write tests in Cypress.')
           .should('be.visible')
         })
 
         cy.findAllByTestId('card').eq(1).as('TemplateSpecCard')
         .within(() => {
-          cy.findByRole('button', {
-            name: defaultMessages.createSpec.e2e.importTemplateSpec.header,
+          cy.getByRole('button', {
+            name: 'Create new spec',
           }).should('be.visible')
           .and('not.be.disabled')
 
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.description)
+          cy.contains('We\'ll generate a template spec file which can be used to start testing your application.')
           .should('be.visible')
         })
       })
@@ -270,32 +271,32 @@ describe('App: Specs', () => {
           cy.get('[aria-label="Close"]').click()
           cy.get('[data-cy="create-spec-modal"]').should('not.exist')
           cy.get('@TemplateSpecCard').click()
-          cy.contains('button', defaultMessages.components.button.back).click()
+          cy.contains('button', 'Back').click()
           cy.get('[data-cy="create-spec-modal"]').within(() => {
-            cy.get('[data-cy="card"]').contains(defaultMessages.createSpec.e2e.importTemplateSpec.header).click()
+            cy.get('[data-cy="card"]').contains('Create new spec').click()
           })
 
           // cy.percySnapshot('Default') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importTemplateSpec.inputPlaceholder)
+          cy.findAllByLabelText('Enter a relative path...')
           .as('enterSpecInput')
 
           cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('cypress/e2e/spec.cy.ts'))
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning).should('not.exist')
+          cy.contains('This path is invalid because it doesn\'t match the following ').should('not.exist')
           cy.get('@enterSpecInput').clear()
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning).should('not.exist')
+          cy.contains('This path is invalid because it doesn\'t match the following ').should('not.exist')
 
           // Shows entered file does not match spec pattern
           cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning)
-          cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+          cy.contains('This path is invalid because it doesn\'t match the following ')
+          cy.contains('button', 'Create spec').should('be.disabled')
 
           // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('cypress/e2e/MyTest.cy.ts'))
-          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+          cy.contains('button', 'Create spec').should('not.be.disabled').click()
+          cy.contains('h2', 'Great! The spec was successfully added')
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('cypress/e2e/MyTest.cy.ts')).click()
 
@@ -328,7 +329,7 @@ describe('App: Specs', () => {
             },
           ]
 
-          ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
+          ctx.coreData.localSettings.preferences.preferredEditorBinary = '/usr/bin/test-editor'
         })
 
         cy.startAppServer('e2e')
@@ -337,21 +338,20 @@ describe('App: Specs', () => {
       })
 
       it('shows No Specs page with specPattern from config', () => {
-        cy.findByRole('heading', {
-          level: 1,
-          name: defaultMessages.createSpec.page.customPatternNoSpecs.title,
-        }).should('be.visible')
+        cy.getByRole('heading', {
+          name: 'No specs found',
+        }).filter('h1').should('be.visible')
 
         cy.findByTestId('create-spec-page-description')
         .should('be.visible')
-        .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
+        .and('contain', 'We couldn\'t find any files matching the following spec patterns. You may need to move your specs or update your ')
 
         cy.findByTestId('file-match-indicator').should('contain', 'No matches')
-        cy.findByRole('button', { name: 'open in IDE' })
+        cy.getByRole('button', { name: 'open in IDE' })
         cy.findByTestId('spec-pattern').should('contain', 'src/**/*.{cy,spec}.{js,jsx}')
 
-        cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
-        cy.findByRole('button', { name: 'New spec' })
+        cy.contains('button', 'Update spec pattern')
+        cy.getByRole('button', { name: 'New spec' })
       })
 
       it('opens config file in ide from SpecPattern', () => {
@@ -359,10 +359,10 @@ describe('App: Specs', () => {
           o.sinon.stub(ctx.actions.file, 'openFile')
         })
 
-        cy.findByRole('button', { name: 'open in IDE' }).click()
+        cy.getByRole('button', { name: 'open in IDE' }).click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
@@ -374,7 +374,7 @@ describe('App: Specs', () => {
         cy.get('[data-cy="no-specs-specPattern"]').click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
@@ -383,57 +383,57 @@ describe('App: Specs', () => {
           o.sinon.stub(ctx.actions.file, 'openFile')
         })
 
-        cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
+        cy.contains('button', 'Update spec pattern').click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
       it('shows new spec button to start creation workflow', () => {
-        cy.findByRole('button', { name: 'New spec' }).click()
+        cy.getByRole('button', { name: 'New spec' }).click()
 
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+        cy.getByRole('dialog', { name: 'Create new spec', native: false }).within(() => {
           cy.findAllByTestId('card').eq(0)
-          .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
+          .and('contain', 'Scaffold example specs')
 
           cy.findAllByTestId('card').eq(1)
-          .and('contain', defaultMessages.createSpec.e2e.importTemplateSpec.header)
+          .and('contain', 'Create new spec')
         })
       })
 
       context('scaffold starter spec', () => {
         it('should generate template spec', () => {
-          cy.findByRole('button', { name: 'New spec' }).click()
+          cy.getByRole('button', { name: 'New spec' }).click()
 
-          cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+          cy.getByRole('dialog', { name: 'Create new spec', native: false }).within(() => {
             cy.findAllByTestId('card').eq(0)
-            .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
+            .and('contain', 'Scaffold example specs')
 
             cy.findAllByTestId('card').eq(1)
-            .and('contain', defaultMessages.createSpec.e2e.importTemplateSpec.header)
+            .and('contain', 'Create new spec')
             .click()
           })
 
-          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importTemplateSpec.inputPlaceholder)
+          cy.findAllByLabelText('Enter a relative path...')
           .as('enterSpecInput')
 
           cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/spec.cy.js'))
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning).should('not.exist')
+          cy.contains('This path is invalid because it doesn\'t match the following ').should('not.exist')
           cy.get('@enterSpecInput').clear()
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning).should('not.exist')
+          cy.contains('This path is invalid because it doesn\'t match the following ').should('not.exist')
 
           // Shows entered file does not match spec pattern
           cy.get('@enterSpecInput').type(getPathForPlatform('cypress/e2e/no-match'))
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning)
-          cy.contains('button', defaultMessages.createSpec.createSpec).should('be.disabled')
+          cy.contains('This path is invalid because it doesn\'t match the following ')
+          cy.contains('button', 'Create spec').should('be.disabled')
 
           // cy.percySnapshot('Invalid spec error') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
           // Create spec
           cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/MyTest.cy.js'))
-          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+          cy.contains('button', 'Create spec').should('not.be.disabled').click()
+          cy.contains('h2', 'Great! The spec was successfully added')
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/MyTest.cy.js')).click()
 
@@ -464,43 +464,43 @@ describe('App: Specs', () => {
           cy.contains('src/e2e/**/*.{js,jsx}', { timeout: 12000 }).should('be.visible')
           cy.contains('No specs found').should('be.visible')
 
-          cy.findByRole('button', { name: 'New spec' }).click()
+          cy.getByRole('button', { name: 'New spec' }).click()
           cy.findAllByTestId('card')
-          .and('contain', defaultMessages.createSpec.e2e.importTemplateSpec.header)
+          .and('contain', 'Create new spec')
           .eq(1)
           .click()
 
-          cy.findAllByLabelText(defaultMessages.createSpec.e2e.importTemplateSpec.inputPlaceholder)
+          cy.findAllByLabelText('Enter a relative path...')
           .as('enterSpecInput')
 
           cy.get('@enterSpecInput').invoke('val').should('eq', getPathForPlatform('src/e2e/spec.js'))
-          cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.invalidSpecWarning).should('not.exist')
+          cy.contains('This path is invalid because it doesn\'t match the following ').should('not.exist')
 
-          cy.contains('button', defaultMessages.createSpec.createSpec).should('not.be.disabled').click()
-          cy.contains('h2', defaultMessages.createSpec.successPage.header)
+          cy.contains('button', 'Create spec').should('not.be.disabled').click()
+          cy.contains('h2', 'Great! The spec was successfully added')
 
           cy.get('[data-cy="file-row"]').contains(getPathForPlatform('src/e2e/spec.js')).should('be.visible')
         })
       })
 
       it('shows extension warning', () => {
-        cy.findByRole('button', { name: 'New spec' }).click()
+        cy.getByRole('button', { name: 'New spec' }).click()
 
-        cy.findByRole('dialog', { name: defaultMessages.createSpec.newSpecModalTitle }).within(() => {
+        cy.getByRole('dialog', { name: 'Create new spec', native: false }).within(() => {
           cy.findAllByTestId('card').eq(0)
-          .and('contain', defaultMessages.createSpec.e2e.importFromScaffold.header)
+          .and('contain', 'Scaffold example specs')
 
           cy.findAllByTestId('card').eq(1)
-          .and('contain', defaultMessages.createSpec.e2e.importTemplateSpec.header)
+          .and('contain', 'Create new spec')
           .click()
         })
 
-        cy.findAllByLabelText(defaultMessages.createSpec.e2e.importTemplateSpec.inputPlaceholder)
+        cy.findAllByLabelText('Enter a relative path...')
         .as('enterSpecInput')
 
         cy.get('@enterSpecInput').clear().type(getPathForPlatform('src/e2e/MyTest.spec.jsx'))
 
-        cy.contains(defaultMessages.createSpec.e2e.importTemplateSpec.specExtensionWarning)
+        cy.contains('We recommend naming your spec to match the following pattern: ')
         // cy.percySnapshot('Non-recommended spec pattern warning') // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
         cy.contains('span', '{filename}.cy.jsx')
@@ -518,7 +518,7 @@ describe('App: Specs', () => {
 
       context('scaffold example files', () => {
         it('should create example files on an empty project', () => {
-          cy.contains('[data-cy="card"]', defaultMessages.createSpec.e2e.importFromScaffold.header).click()
+          cy.contains('[data-cy="card"]', 'Scaffold example specs').click()
 
           cy.get('[data-cy="create-spec-modal"] a').should('have.attr', 'href').and('eq', 'https://on.cypress.io/writing-and-organizing-tests')
 
@@ -528,7 +528,7 @@ describe('App: Specs', () => {
             expect(stats?.isFile()).to.be.true
           }, { path: getPathForPlatform('cypress/e2e/1-getting-started/todo.cy.js') })
 
-          cy.findByRole('dialog', { name: defaultMessages.createSpec.e2e.importFromScaffold.specsAddedHeader }).should('be.visible')
+          cy.getByRole('dialog', { name: 'Great! We added the following files to your project:', native: false }).should('be.visible')
         })
       })
     })
@@ -536,8 +536,8 @@ describe('App: Specs', () => {
 
   function selectTemplateSpecCard () {
     cy.findAllByTestId('card').should('have.length', 2)
-    cy.findByRole('button', { name: 'Create from component' }).should('be.visible')
-    cy.findByRole('button', { name: 'Create new spec' }).should('be.visible').click()
+    cy.getByRole('button', { name: 'Create from component' }).should('be.visible')
+    cy.getByRole('button', { name: 'Create new spec' }).should('be.visible').click()
   }
 
   describe('Testing Type: Component', {
@@ -558,7 +558,7 @@ describe('App: Specs', () => {
       it('shows Create new spec card', () => {
         cy.get('@TemplateSpecCard')
         .within(() => {
-          cy.findByRole('button', {
+          cy.getByRole('button', {
             name: 'Create new spec',
           }).should('be.visible')
           .and('not.be.disabled')
@@ -569,17 +569,19 @@ describe('App: Specs', () => {
         beforeEach(() => {
           cy.get('@TemplateSpecCard').click()
 
-          cy.findByRole('dialog', {
+          cy.getByRole('dialog', {
             name: 'Enter the path for your new spec',
+            native: false,
           }).as('CreateEmptySpecDialog')
 
-          cy.findByRole('button', { name: 'Close' }).as('DialogCloseButton')
+          cy.getByRole('button', { name: 'Close' }).as('DialogCloseButton')
         })
 
         it('shows dialog that can be dismissed with Close (x) button press', () => {
           cy.get('@DialogCloseButton').click()
-          cy.findByRole('dialog', {
+          cy.getByRole('dialog', {
             name: 'Enter the path for your new spec',
+            native: false,
           }).should('not.exist')
         })
 
@@ -589,26 +591,27 @@ describe('App: Specs', () => {
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
-            cy.findByRole('button', { name: 'Create spec' }).click()
+            cy.getByRole('button', { name: 'Create spec' }).click()
           })
 
-          cy.findByRole('dialog', {
-            name: defaultMessages.createSpec.successPage.header,
+          cy.getByRole('dialog', {
+            name: 'Great! The spec was successfully added',
+            native: false,
           }).as('SuccessDialog').within(() => {
             cy.contains(getPathForPlatform('cypress/my-empty-spec.cy.js')).should('be.visible')
-            cy.findByRole('button', { name: 'Close' }).should('be.visible')
+            cy.getByRole('button', { name: 'Close' }).should('be.visible')
 
-            cy.findByRole('link', { name: 'Okay, run the spec' })
+            cy.getByRole('link', { name: 'Okay, run the spec' })
             .should('have.attr', 'href', `#/specs/runner?file=cypress/my-empty-spec.cy.js`)
 
-            cy.findByRole('button', { name: 'Create another spec' }).click()
+            cy.getByRole('button', { name: 'Create another spec' }).click()
           })
 
           // 'Create new spec' dialog presents with options when user indicates they want to create
           // another spec.
           cy.findAllByTestId('card').should('have.length', 2)
-          cy.findByRole('button', { name: 'Create new spec' }).should('be.visible')
-          cy.findByRole('button', { name: 'Create from component' }).should('be.visible')
+          cy.getByRole('button', { name: 'Create new spec' }).should('be.visible')
+          cy.getByRole('button', { name: 'Create from component' }).should('be.visible')
         })
 
         it('navigates to spec runner when selected', () => {
@@ -617,11 +620,11 @@ describe('App: Specs', () => {
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
-            cy.findByRole('button', { name: 'Create spec' }).click()
+            cy.getByRole('button', { name: 'Create spec' }).click()
           })
 
-          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
-            cy.findByRole('link', {
+          cy.getByRole('dialog', { name: 'Great! The spec was successfully added', native: false }).within(() => {
+            cy.getByRole('link', {
               name: 'Okay, run the spec',
             }).should('have.attr', 'href', '#/specs/runner?file=cypress/my-empty-spec.cy.js').click()
           })
@@ -637,11 +640,11 @@ describe('App: Specs', () => {
 
             cy.findByLabelText('Enter a relative path...').clear().type('cypress/my-empty-spec.cy.js')
 
-            cy.findByRole('button', { name: 'Create spec' }).click()
+            cy.getByRole('button', { name: 'Create spec' }).click()
           })
 
-          cy.findByRole('dialog', { name: defaultMessages.createSpec.successPage.header }).within(() => {
-            cy.findByRole('link', {
+          cy.getByRole('dialog', { name: 'Great! The spec was successfully added', native: false }).within(() => {
+            cy.getByRole('link', {
               name: 'Okay, run the spec',
             }).should('have.attr', 'href', '#/specs/runner?file=cypress/my-empty-spec.cy.js').click()
           })
@@ -653,7 +656,7 @@ describe('App: Specs', () => {
           cy.log('should not contain the link if you navigate away and back')
           // A bit of a hack, but our cy-in-cy test needs to wait for the reporter to fully render before pressing the "f" key to expand the "Search specs" menu.
           // Otherwise, the "f" keypress happens before the event is registered, which causes the "Search Specs" menu to not expand.
-          cy.get('[data-cy="runnable-header"]').should('be.visible')
+          cy.reporter().find('[data-cy="runnable-header"]').should('be.visible')
           cy.get('body').type('f')
           cy.get('[data-cy=spec-file-item]').first().click()
           cy.get('#spec-runner-header').should('not.contain', 'Review the docs')
@@ -680,7 +683,7 @@ describe('App: Specs', () => {
             },
           ]
 
-          ctx.coreData.localSettings.preferences.preferredEditorBinary = 'test-editor'
+          ctx.coreData.localSettings.preferences.preferredEditorBinary = '/usr/bin/test-editor'
         })
 
         cy.startAppServer('component')
@@ -689,21 +692,20 @@ describe('App: Specs', () => {
       })
 
       it('shows No Specs page with specPattern from config', () => {
-        cy.findByRole('heading', {
-          level: 1,
-          name: defaultMessages.createSpec.page.customPatternNoSpecs.title,
-        }).should('be.visible')
+        cy.getByRole('heading', {
+          name: 'No specs found',
+        }).filter('h1').should('be.visible')
 
         cy.findByTestId('create-spec-page-description')
         .should('be.visible')
-        .and('contain', defaultMessages.createSpec.page.customPatternNoSpecs.description.split('{0}')[0])
+        .and('contain', 'We couldn\'t find any files matching the following spec patterns. You may need to move your specs or update your ')
 
         cy.findByTestId('file-match-indicator').should('contain', 'No matches')
-        cy.findByRole('button', { name: 'open in IDE' })
+        cy.getByRole('button', { name: 'open in IDE' })
         cy.findByTestId('spec-pattern').should('contain', 'src/specs-folder/*.cy.{js,jsx}')
 
-        cy.contains('button', defaultMessages.createSpec.updateSpecPattern)
-        cy.findByRole('button', { name: 'New spec' })
+        cy.contains('button', 'Update spec pattern')
+        cy.getByRole('button', { name: 'New spec' })
       })
 
       it('opens config file in ide from SpecPattern', () => {
@@ -711,10 +713,10 @@ describe('App: Specs', () => {
           o.sinon.stub(ctx.actions.file, 'openFile')
         })
 
-        cy.findByRole('button', { name: 'open in IDE' }).click()
+        cy.getByRole('button', { name: 'open in IDE' }).click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
@@ -723,29 +725,29 @@ describe('App: Specs', () => {
           o.sinon.stub(ctx.actions.file, 'openFile')
         })
 
-        cy.contains('button', defaultMessages.createSpec.updateSpecPattern).click()
+        cy.contains('button', 'Update spec pattern').click()
 
         cy.withCtx((ctx, o) => {
-          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress\.config\.js$`)), 1, 1)
+          expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/cypress\.config\.js$/), 1, 1)
         })
       })
 
       it('shows new spec button to start creation workflow', () => {
-        cy.findByRole('button', { name: 'New spec' }).click()
+        cy.getByRole('button', { name: 'New spec' }).click()
 
         selectTemplateSpecCard()
 
-        cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('be.visible')
+        cy.getByRole('dialog', { name: 'Enter the path for your new spec', native: false }).should('be.visible')
       })
 
       it('shows create first spec page with create template spec option and goes back if it is cancel', () => {
-        cy.findByRole('button', { name: 'New spec' }).click()
+        cy.getByRole('button', { name: 'New spec' }).click()
 
         selectTemplateSpecCard()
 
         cy.contains('Back').click()
 
-        cy.findByRole('dialog', { name: 'Enter the path for your new spec' }).should('not.exist')
+        cy.getByRole('dialog', { name: 'Enter the path for your new spec', native: false }).should('not.exist')
       })
 
       it('generates spec with file name that does not contain a known spec extension', () => {
@@ -764,20 +766,22 @@ describe('App: Specs', () => {
         cy.contains('src/specs-folder/*.{js,jsx}', { timeout: 12000 }).should('be.visible')
         cy.contains('No specs found').should('be.visible')
 
-        cy.findByRole('button', { name: 'New spec' }).click()
+        cy.getByRole('button', { name: 'New spec' }).click()
 
         selectTemplateSpecCard()
 
-        cy.findByRole('dialog', {
+        cy.getByRole('dialog', {
           name: 'Enter the path for your new spec',
+          native: false,
         }).within(() => {
           cy.findByLabelText('Enter a relative path...').invoke('val').should('eq', getPathForPlatform('src/specs-folder/ComponentName.jsx'))
 
-          cy.findByRole('button', { name: 'Create spec' }).click()
+          cy.getByRole('button', { name: 'Create spec' }).click()
         })
 
-        cy.findByRole('dialog', {
-          name: defaultMessages.createSpec.successPage.header,
+        cy.getByRole('dialog', {
+          name: 'Great! The spec was successfully added',
+          native: false,
         }).as('SuccessDialog').within(() => {
           cy.contains(getPathForPlatform('src/specs-folder/ComponentName.js')).should('be.visible')
         })
@@ -793,10 +797,9 @@ describe('App: Specs', () => {
       cy.visitApp()
       cy.specsPageIsVisible('new-project')
 
-      cy.findByRole('heading', {
-        level: 1,
-        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-      }).should('be.visible')
+      cy.getByRole('heading', {
+        name: 'Create your first spec',
+      }).filter('h1').should('be.visible')
     })
 
     it('updates spec list when files are added to/removed from areas matching specPattern', () => {
@@ -806,10 +809,9 @@ describe('App: Specs', () => {
       })
 
       // No Specs Found page renders, as the added dir does not match the specPattern
-      cy.findByRole('heading', {
-        level: 1,
-        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-      }).should('be.visible')
+      cy.getByRole('heading', {
+        name: 'Create your first spec',
+      }).filter('h1').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         // Directory contents are moved into cypress/e2e dir
@@ -838,10 +840,9 @@ describe('App: Specs', () => {
       })
 
       // No Specs Found page now renders, as all previously matching specs were moved
-      cy.findByRole('heading', {
-        level: 1,
-        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-      }).should('be.visible')
+      cy.getByRole('heading', {
+        name: 'Create your first spec',
+      }).filter('h1').should('be.visible')
     })
 
     it('updates spec list when directories are added to/removed from areas matching specPattern', () => {
@@ -851,10 +852,9 @@ describe('App: Specs', () => {
       })
 
       // No Specs Found page renders, as the added dir does not match the specPattern
-      cy.findByRole('heading', {
-        level: 1,
-        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-      }).should('be.visible')
+      cy.getByRole('heading', {
+        name: 'Create your first spec',
+      }).filter('h1').should('be.visible')
 
       cy.withCtx(async (ctx) => {
         // Directory contents are moved into cypress/e2e dir
@@ -881,10 +881,9 @@ describe('App: Specs', () => {
       })
 
       // No Specs Found page now renders, as all previously matching specs were moved
-      cy.findByRole('heading', {
-        level: 1,
-        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-      }).should('be.visible')
+      cy.getByRole('heading', {
+        name: 'Create your first spec',
+      }).filter('h1').should('be.visible')
     })
 
     it('debounces spec updates if many additions occur', () => {
@@ -914,10 +913,9 @@ describe('App: Specs', () => {
         }
       }, { specs })
 
-      cy.findByRole('heading', {
-        level: 1,
-        name: defaultMessages.createSpec.page.defaultPatternNoSpecs.title,
-      }).should('be.visible')
+      cy.getByRole('heading', {
+        name: 'Create your first spec',
+      }).filter('h1').should('be.visible')
 
       cy.withRetryableCtx((ctx) => {
         // setSpecs is debounced, the number of calls should be less than the number of files removed

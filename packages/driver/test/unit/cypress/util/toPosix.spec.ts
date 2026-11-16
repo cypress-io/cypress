@@ -2,7 +2,8 @@
  * @vitest-environment jsdom
  */
 
-import { vi, describe, it, expect, beforeEach, MockedFunction } from 'vitest'
+import type { MockedFunction } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 import { toPosix } from '../../../../src/cypress/util/to_posix'
 
@@ -12,7 +13,7 @@ describe('toPosix', () => {
   beforeEach(() => {
     config = vi.fn()
 
-    // @ts-expect-error
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config,
     }
@@ -36,5 +37,10 @@ describe('toPosix', () => {
     it('performs as an identity function', () => {
       expect(toPosix('/some/file')).toEqual('/some/file')
     })
+  })
+
+  it('returns nullish inputs unchanged', () => {
+    expect(toPosix(undefined as any)).toEqual(undefined)
+    expect(toPosix(null as any)).toEqual(null)
   })
 })

@@ -7,6 +7,6 @@ describe('Test Isolation', () => {
 
     cy.visitApp(`/specs/runner?file=cypress/e2e/test-isolation.spec.js`)
 
-    cy.get('.passed > .num').should('contain', 3)
+    cy.reporter().find('.passed > .num').should('contain', 3)
   })
 })

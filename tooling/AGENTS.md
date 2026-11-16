@@ -37,8 +37,8 @@ yarn workspace @tooling/<name> clean         # Remove dist/
 
 - **Split runtime/build packages**: `@tooling/v8-snapshot` handles snapshot generation. The runtime side that loads and uses the snapshot at app startup lives in `@packages/v8-snapshot-require`.
 
-- **v8-snapshot build step copies blueprint**: The `build` script for `@tooling/v8-snapshot` includes `cpr ./src/blueprint ./dist/blueprint` after `tsc` because the `src/blueprint/` directory contains plain `.js` files (not TypeScript) that the TypeScript compiler does not copy automatically.
+- **`@tooling/v8-snapshot` must be built with `yarn build`, never bare `tsc`** — see [`v8-snapshot/AGENTS.md`](./v8-snapshot/AGENTS.md) for the command and the failure mode.
 
 - **Platform-specific snapshot binaries**: `@tooling/v8-snapshot` depends on optional `@cypress/snapbuild-*` packages for each target platform. These are used by `src/snapbuild/snapbuild.ts` and may not be present in all environments; the build falls back to downloading via `@tooling/electron-mksnapshot`.
 
-- **Nx implicit dependency**: `@tooling/v8-snapshot` declares `@packages/data-context` as an implicit Nx dependency, meaning changes to `data-context` trigger v8-snapshot rebuilds in CI.
+- **Nx implicit dependency**: `@tooling/v8-snapshot` declares `@packages/data-context` as an implicit Nx dependency — see [`v8-snapshot/AGENTS.md`](./v8-snapshot/AGENTS.md).

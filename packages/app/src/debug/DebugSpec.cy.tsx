@@ -1,6 +1,5 @@
-import DebugSpec, { Spec, TestResults } from './DebugSpec.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
+import DebugSpec from './DebugSpec.vue'
+import type { Spec, TestResults } from './DebugSpec.vue'
 
 const resultCounts = (min: number, max: number) => {
   return {
@@ -9,7 +8,7 @@ const resultCounts = (min: number, max: number) => {
   }
 }
 
-const multipleGroups: {[groupId: string]: any} = {
+const multipleGroups: { [groupId: string]: any } = {
   '123': {
     os: {
       name: 'Linux',
@@ -36,7 +35,7 @@ const multipleGroups: {[groupId: string]: any} = {
   },
 }
 
-const singleGroup: {[groupId: string]: any} = {
+const singleGroup: { [groupId: string]: any } = {
   '123': {
     os: {
       name: 'Linux',
@@ -51,7 +50,7 @@ const singleGroup: {[groupId: string]: any} = {
   },
 }
 
-const testResultMultipleGroups: {[thumbprint: string]: TestResults[]} = {
+const testResultMultipleGroups: { [thumbprint: string]: TestResults[] } = {
   'abcd': [
     {
       id: '676df87878',
@@ -124,7 +123,7 @@ const testResultMultipleGroups: {[thumbprint: string]: TestResults[]} = {
   ],
 }
 
-const testResultSingleGroup: {[thumbprint: string]: TestResults[]} = {
+const testResultSingleGroup: { [thumbprint: string]: TestResults[] } = {
   'abcd': [
     {
       id: '676df87878',
@@ -200,7 +199,7 @@ describe('<DebugSpec/> with multiple test results', () => {
     cy.findByTestId('spec-path').should('have.text', 'cypress/tests/auth.spec.ts')
     cy.contains('auth').should('be.visible')
     cy.findByTestId('run-failures').should('not.be.disabled')
-    .contains(defaultMessages.debugPage.runFailures.btn)
+    .contains('Run Failures')
 
     cy.findByTestId('spec-header-metadata').should('be.visible')
     cy.findByTestId('debugHeader-results').should('be.visible')
@@ -271,7 +270,7 @@ describe('<DebugSpec/> responsive UI', () => {
       },
     }
 
-    const testResult: {[thumbprint: string]: TestResults[]} = {
+    const testResult: { [thumbprint: string]: TestResults[] } = {
       'abcd': [
         {
           id: '676df87878',
@@ -379,7 +378,7 @@ describe('testing groupings', () => {
       },
     }
 
-    const repeatedValueGroups: {[groupId: string]: any} = {
+    const repeatedValueGroups: { [groupId: string]: any } = {
       '456': {
         os: {
           name: 'Apple',
@@ -406,7 +405,7 @@ describe('testing groupings', () => {
       },
     }
 
-    const tests: {[thumbprint: string]: TestResults[]} = {
+    const tests: { [thumbprint: string]: TestResults[] } = {
       'abcd': [
         {
           id: '676df87878',
@@ -574,8 +573,8 @@ describe('Open in IDE', () => {
   it('shows openInIDE if file is found locally', () => {
     renderDebugSpec()
 
-    cy.findByLabelText(defaultMessages.debugPage.openFile.openInIDE).as('openInIDE').realHover()
-    cy.findByTestId('open-in-ide-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.openInIDE)
+    cy.findByLabelText('Open in IDE').as('openInIDE').realHover()
+    cy.findByTestId('open-in-ide-tooltip').should('be.visible').and('contain', 'Open in IDE')
 
     cy.get('@openInIDE').click()
 
@@ -586,7 +585,7 @@ describe('Open in IDE', () => {
   it('shows disabled openInIDE if file is not found locally', () => {
     renderDebugSpec({ foundLocally: false })
 
-    cy.findByLabelText(defaultMessages.debugPage.openFile.notFoundLocally).as('openInIDE').realHover()
-    cy.findByTestId('open-in-ide-disabled-tooltip').should('be.visible').and('contain', defaultMessages.debugPage.openFile.notFoundLocally)
+    cy.findByLabelText('Opening in IDE is disabled because the spec is not found in this project').as('openInIDE').realHover()
+    cy.findByTestId('open-in-ide-disabled-tooltip').should('be.visible').and('contain', 'Opening in IDE is disabled because the spec is not found in this project')
   })
 })

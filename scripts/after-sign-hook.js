@@ -3,7 +3,7 @@
 // "afterSign": "./scripts/after-sign-hook.js"
 const fs = require('fs')
 const path = require('path')
-let electron_notarize = require('@electron/notarize')
+const electron_notarize = require('@electron/notarize')
 
 module.exports = async function (params) {
   // Only notarize the app on Mac OS.
@@ -22,9 +22,9 @@ module.exports = async function (params) {
   console.log('afterSign hook triggered in', params.appOutDir)
 
   // Same appId in electron-builder.
-  let appId = 'com.electron.cypress'
+  const appId = 'com.electron.cypress'
 
-  let appPath = path.join(params.appOutDir, `${params.packager.appInfo.productFilename}.app`)
+  const appPath = path.join(params.appOutDir, `${params.packager.appInfo.productFilename}.app`)
 
   if (!fs.existsSync(appPath)) {
     throw new Error(`Cannot find application at: ${appPath}`)

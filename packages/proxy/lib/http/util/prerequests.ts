@@ -57,6 +57,7 @@ class QueueMap<T> {
 
     this.queues[queueKey].push(value)
   }
+
   shift (queueKey: string): T | undefined {
     const queue = this.queues[queueKey]
 
@@ -68,12 +69,14 @@ class QueueMap<T> {
 
     return item
   }
+
   removeMatching (filterFn: (value: T) => boolean) {
     Object.entries(this.queues).forEach(([queueKey, queue]) => {
       this.queues[queueKey] = queue.filter(filterFn)
       if (this.queues[queueKey].length === 0) delete this.queues[queueKey]
     })
   }
+
   removeExact (queueKey: string, value: T) {
     const i = this.queues[queueKey]?.findIndex((v) => v === value)
 
@@ -183,7 +186,17 @@ export class PreRequests {
     }
 
     metrics.browserPreRequestsReceived++
-    const pendingRequest = this.pendingRequests.shift(key)
+    let pendingRequest = this.pendingRequests.shift(key)
+
+    // A timed-out request stays queued so its own late pre-request can still be correlated.
+    // A pre-request the browser sent after that request reached the proxy cannot be its own,
+    // so the stale entry would otherwise consume it and leave the next request waiting for
+    // a pre-request that has already been dropped, for every later request with this key.
+    while (pendingRequest?.timedOut && browserPreRequest.cdpRequestWillBeSentTimestamp &&
+      browserPreRequest.cdpRequestWillBeSentTimestamp > pendingRequest.proxyRequestReceivedTimestamp) {
+      debug('Dropping timed-out pending request %s: pre-request %s was sent after it reached the proxy', key, browserPreRequest.requestId)
+      pendingRequest = this.pendingRequests.shift(key)
+    }
 
     if (pendingRequest) {
       let cdpLagDuration; let proxyRequestCorrelationDuration = 0
@@ -386,5 +399,14 @@ export class PreRequests {
     this.pendingRequests = new QueueMap<PendingRequest>()
     this.pendingUrlsWithoutPreRequests = new QueueMap<PendingUrlWithoutPreRequest>()
     this.pendingPreRequestsToRemove = new Map()
+  }
+
+  /**
+   * Stops the sweep timer. Call when abandoning this PreRequests instance
+   * (e.g. replacing NetworkProxy on the CDP Fetch path) so intervals do not leak.
+   */
+  dispose () {
+    clearInterval(this.sweepIntervalTimer)
+    this.reset()
   }
 }

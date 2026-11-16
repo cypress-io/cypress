@@ -56,30 +56,47 @@ const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<
       // Close the count-only handle — the Node fallback re-opens the zip for extraction.
       zipFile.close()
 
-      const started = new Date()
-
+      let started = Date.now()
       let percent = 0
       let count = 0
+      let lastNotifiedPercent: number | undefined
+      let lastNotifiedAt = 0
 
       const notify = (percent: number): void => {
-        const elapsed = +new Date() - +started
+        const now = Date.now()
 
-        const eta = util.calculateEta(percent, elapsed)
+        lastNotifiedPercent = percent
+        lastNotifiedAt = now
+
+        const eta = util.calculateEta(percent, now - started)
 
         progress.onProgress(percent, util.secsRemaining(eta))
       }
 
+      // Extractors tick for every entry or chunk of tool output, far more
+      // often than the shown percent changes.
       const tick = (): any => {
         count += 1
 
         percent = ((count / total) * 100)
-        const displayPercent = percent.toFixed(0)
+        const displayPercent = Math.round(percent)
 
-        return notify(Number(displayPercent))
+        if (displayPercent === lastNotifiedPercent && Date.now() - lastNotifiedAt < util.progressThrottleMs) {
+          return
+        }
+
+        return notify(displayPercent)
       }
 
       const unzipWithNode = async (): Promise<any> => {
         debug('unzipping with node.js (slow)')
+
+        // When this is the fallback, the OS tool may already have ticked part
+        // of the archive and used up time, but extraction starts over from the
+        // first entry, so the progress and the ETA must too.
+        count = 0
+        started = Date.now()
+        lastNotifiedPercent = undefined
 
         try {
           await unzipTools.extractWithYauzl(zipFilePath, installDir, tick)

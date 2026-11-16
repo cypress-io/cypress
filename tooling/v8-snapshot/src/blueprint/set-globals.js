@@ -1,12 +1,11 @@
-// eslint-disable-next-line no-unused-vars
-/* globals globalFunctionTrampoline, window, document, __pathResolver */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- read by globals.js once blueprint.ts concatenates the two
+/* globals globalFunctionTrampoline, __pathResolver */
 
 /**
  * Replaces globals that have been stubbed during snapshot creation with the
  * instances that are present in the app on startup.
  */
 
-// eslint-disable-next-line no-unused-vars
 (function () {
   let numberOfSetGlobalsCalls = 0
 

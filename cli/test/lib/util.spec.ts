@@ -1,9 +1,9 @@
-import { vi, describe, it, beforeEach, expect } from 'vitest'
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import assert from 'assert'
 import hasha from 'hasha'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
-import { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
 
 describe('util', () => {
   beforeEach(() => {
@@ -18,6 +18,14 @@ describe('util', () => {
       expect(util.isBrokenGtkDisplay(text)).toEqual(true)
       // and not for the other messages
       expect(util.isBrokenGtkDisplay('display was set incorrectly')).toEqual(false)
+    })
+  })
+
+  describe('.isBrokenGtkDisplay with a missing X server', () => {
+    it('detects the Electron missing X server message', () => {
+      const text = '[1234:0101/000000.000000:ERROR:ozone_platform_x11.cc(245)] Missing X server or $DISPLAY'
+
+      expect(util.isBrokenGtkDisplay(text)).toEqual(true)
     })
   })
 
@@ -152,7 +160,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -171,7 +179,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: false,
@@ -190,7 +198,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -211,7 +219,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: false,
@@ -233,7 +241,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -257,7 +265,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             isatty: vi.fn(),
@@ -302,7 +310,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             isatty: vi.fn(),
@@ -335,6 +343,52 @@ describe('util', () => {
         FORCE_STDOUT_TTY: false,
         FORCE_STDERR_TTY: false,
       })
+    })
+  })
+
+  describe('.getTerminalSize', () => {
+    const setStream = (stream: NodeJS.WriteStream, isTTY: boolean, columns?: number, rows?: number) => {
+      vi.spyOn(stream, 'isTTY', 'get').mockReturnValue(isTTY)
+      vi.spyOn(stream, 'columns', 'get').mockReturnValue(columns as number)
+      vi.spyOn(stream, 'rows', 'get').mockReturnValue(rows as number)
+    }
+
+    beforeEach(() => {
+      for (const stream of [process.stdout, process.stderr]) {
+        for (const key of ['isTTY', 'columns', 'rows']) {
+          Object.defineProperty(stream, key, { configurable: true, get: () => undefined })
+        }
+      }
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      for (const stream of [process.stdout, process.stderr]) {
+        for (const key of ['isTTY', 'columns', 'rows']) {
+          delete (stream as any)[key]
+        }
+      }
+    })
+
+    it('forwards the stdout terminal size', () => {
+      setStream(process.stdout, true, 133, 41)
+      setStream(process.stderr, true, 90, 30)
+
+      expect(util.getTerminalSize()).toEqual({ FORCE_TTY_COLUMNS: '133', FORCE_TTY_ROWS: '41' })
+    })
+
+    it('forwards the stderr terminal size when stdout is not a terminal', () => {
+      setStream(process.stdout, false)
+      setStream(process.stderr, true, 90, 30)
+
+      expect(util.getTerminalSize()).toEqual({ FORCE_TTY_COLUMNS: '90', FORCE_TTY_ROWS: '30' })
+    })
+
+    it('forwards nothing when neither stream is a terminal', () => {
+      setStream(process.stdout, false)
+      setStream(process.stderr, false)
+
+      expect(util.getTerminalSize()).toEqual({})
     })
   })
 
@@ -472,7 +526,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             platform: vi.fn(),
@@ -485,7 +539,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             osInfo: vi.fn(),

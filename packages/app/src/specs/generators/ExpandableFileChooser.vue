@@ -27,7 +27,7 @@
     <FileMatch
       ref="fileMatchRef"
       v-model:pattern="filePathSearch"
-      v-model:extensionPattern="localExtensionPattern"
+      v-model:extension-pattern="localExtensionPattern"
       class="bg-white pt-[24px] pb-[12px] top-[0px] z-10 sticky"
       :matches="matches"
     >
@@ -66,13 +66,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { debouncedWatch, useDebounce, useElementSize } from '@vueuse/core'
-import { useI18n } from '@cy/i18n'
 
 import NoResults from '@cy/components/NoResults.vue'
 import CreateSpecModalBody from './CreateSpecModalBody.vue'
 import ExpandableFileList from './ExpandableFileList.vue'
 import FileMatch from '../../components/FileMatch.vue'
-import { gql } from '@urql/core'
 import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
 
 const props = withDefaults(defineProps<{
@@ -84,21 +82,10 @@ const props = withDefaults(defineProps<{
   loading: false,
 })
 
-const { t } = useI18n()
-
-gql`
-fragment FileChooser on FileParts {
-  relative
-  id
-  ...FileListItem
-}
-`
-
 const emits = defineEmits<{
   (eventName: 'update:extensionPattern', value: string)
 }>()
 
-// eslint-disable-next-line
 const initialExtensionPattern = props.extensionPattern
 const localExtensionPattern = ref(props.extensionPattern)
 const filePathSearch = ref('')
@@ -143,7 +130,7 @@ const matches = computed(() => {
 const noResults = computed(() => {
   return {
     search: filePathSearch.value || debouncedExtensionPattern.value,
-    message: filePathSearch.value ? t('noResults.defaultMessage') : t('components.fileSearch.noMatchesForExtension'),
+    message: filePathSearch.value ? 'No results matched your search:' : 'No files found when searching for the file extension',
     clear: () => {
       if (filePathSearch.value) {
         filePathSearch.value = ''

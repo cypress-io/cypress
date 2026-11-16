@@ -31,23 +31,21 @@ export interface ResultCountsProps {
   order?: string[]
 }
 
-import { computed, FunctionalComponent, SVGAttributes } from 'vue'
+import { computed } from 'vue'
+import type { FunctionalComponent, SVGAttributes } from 'vue'
 import SkippedIcon from '~icons/cy/status-skipped_x12.svg'
 import PassedIcon from '~icons/cy/status-passed_x12.svg'
 import FailedIcon from '~icons/cy/status-failed_x12.svg'
 import PendingIcon from '~icons/cy/status-pending_x12.svg'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const props = defineProps<ResultCountsProps>()
 
-type CountType= 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
+type CountType = 'SKIPPED' | 'PENDING' | 'PASSED' | 'FAILED'
 
 interface Status {
   value: number | string | null
   class: string
-  icon: FunctionalComponent<SVGAttributes, {}>
+  icon: FunctionalComponent<SVGAttributes>
   name: string
 }
 
@@ -57,25 +55,25 @@ const ORDER_MAP = computed<Record<CountType, Status>>(() => {
       value: props.totalSkipped!,
       class: 'icon-dark-gray-400',
       icon: SkippedIcon,
-      name: t('runs.results.skipped'),
+      name: 'skipped',
     },
     'PENDING': {
       value: props.totalPending!,
       class: 'icon-dark-gray-400 icon-light-white',
       icon: PendingIcon,
-      name: t('runs.results.pending'),
+      name: 'pending',
     },
     'PASSED': {
       value: props.totalPassed!,
       class: 'icon-dark-jade-400',
       icon: PassedIcon,
-      name: t('runs.results.passed'),
+      name: 'passed',
     },
     'FAILED': {
       value: props.totalFailed!,
       class: 'icon-dark-red-400',
       icon: FailedIcon,
-      name: t('runs.results.failed'),
+      name: 'failed',
     },
   }
 })

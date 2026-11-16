@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 // Assert that either the the dialog is presented or the mutation is emitted, depending on
 // whether the test has a preferred IDE defined.
@@ -20,8 +19,8 @@ const verifyIdeOpen = ({ fileName, filePath, action, hasPreferredIde, line, colu
   } else {
     action()
 
-    cy.contains(defaultMessages.globalPage.externalEditorPreferences).should('be.visible')
-    cy.findByRole('button', { name: defaultMessages.actions.close }).click()
+    cy.contains('External editor preferences').should('be.visible')
+    cy.getByRole('button', { name: 'Close' }).click()
   }
 }
 
@@ -69,7 +68,7 @@ const verifyFailure = (options) => {
   stackRegex = regex || stackRegex || new RegExp(`${fileName}:${line || '\\d+'}${stackColumnArray.length ? `:(${stackColumnArray.join('|')})` : ''}`)
   codeFrameRegex = regex || codeFrameRegex || new RegExp(`${fileName}:${line || '\\d+'}${codeFrameColumnArray.length ? `:(${codeFrameColumnArray.join('|')})` : ''}`)
 
-  cy.contains('.runnable-title', specTitle).closest('.runnable').as('Root')
+  cy.reporter().contains('.runnable-title', specTitle).closest('.runnable').as('Root')
 
   cy.get('@Root').within(() => {
     cy.contains('Stack trace').click()
@@ -218,7 +217,7 @@ export const createVerify = ({ fileName, filePath, hasPreferredIde, mode }): Cha
 export const verifyInternalFailure = (props) => {
   const { specTitle, method, stackMethod } = props
 
-  cy.contains('.runnable-title', specTitle).closest('.runnable').within(() => {
+  cy.reporter().contains('.runnable-title', specTitle).closest('.runnable').within(() => {
     cy.get('.runnable-err-message')
     .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
 

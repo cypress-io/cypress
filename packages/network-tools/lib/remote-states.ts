@@ -1,4 +1,4 @@
-import { getDomainNameFromParsedHost, parseUrlIntoHostProtocolDomainTldPort } from './cors'
+import { getSuperDomainFromParsedHost, parseUrlIntoHostProtocolDomainTldPort } from './cors'
 import Debug from 'debug'
 import _ from 'lodash'
 import type { DocumentDomainInjection } from './document-domain-injection'
@@ -21,6 +21,30 @@ export interface RemoteState {
   origin: string
   fileServer: string | null
   props: ParsedHostWithProtocolAndHost | null
+}
+
+/** Rewrite a strategy:'file' AUT-origin URL onto the dedicated file server. */
+export function toFileServerUrl (url: string, state: RemoteState): string | undefined {
+  if (state.strategy !== 'file' || !state.fileServer) {
+    return undefined
+  }
+
+  let parsed: URL
+
+  try {
+    parsed = new URL(url)
+  } catch {
+    return undefined
+  }
+
+  // Compare URL.origin, not a string prefix — prefix matching treats
+  // userinfo like http://localhost:2020@evil.com as under the file origin
+  // and would rewrite (and authorize) a request to the attacker host.
+  if (parsed.origin !== state.origin) {
+    return undefined
+  }
+
+  return `${state.fileServer}${parsed.pathname}${parsed.search}${parsed.hash}`
 }
 
 interface RemoteStatesServerPorts {
@@ -111,9 +135,8 @@ export class RemoteStates {
   }
 
   private _stateFromUrl (url: string): RemoteState {
-    const remoteOrigin = origin(url)
-    const remoteProps = parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
-
+    // non fully-qualified urls (e.g. '<root>' or a local file path) have no
+    // origin to parse, so short-circuit before reaching the WHATWG URL parser
     if ((url === '<root>') || !fullyQualifiedRe.test(url)) {
       return {
         origin: `http://${DEFAULT_DOMAIN_NAME}:${this.ports.server}`,
@@ -124,11 +147,14 @@ export class RemoteStates {
       }
     }
 
+    const remoteOrigin = origin(url)
+    const remoteProps = parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
+
     return {
       origin: remoteOrigin,
       strategy: 'http',
       fileServer: null,
-      domainName: getDomainNameFromParsedHost(remoteProps),
+      domainName: getSuperDomainFromParsedHost(remoteProps),
       props: remoteProps,
     }
   }

@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import ReactDOM from 'react-dom/client'
 import { getContainerEl } from '@cypress/mount-utils'
 import {

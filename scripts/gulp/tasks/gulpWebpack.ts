@@ -1,5 +1,4 @@
 import chalk from 'chalk'
-import pDefer from 'p-defer'
 import { monorepoPaths } from '../monorepoPaths'
 import { universalSpawn } from '../utils/childProcessUtils'
 import { addChildProcess } from './gulpRegistry'
@@ -34,7 +33,7 @@ type RunWebpackCfg = {
 
 export async function runWebpack (cfg: RunWebpackCfg) {
   const { cwd, args = [], env = process.env, prefix, enableLiveReload = false } = cfg
-  const dfd = pDefer()
+  const dfd = Promise.withResolvers()
   const spawned = universalSpawn('webpack',
     args,
     {

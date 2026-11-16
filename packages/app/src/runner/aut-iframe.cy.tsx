@@ -1,6 +1,7 @@
 import { AutIframe } from './aut-iframe'
 import { createEventManager } from '../../cypress/component/support/ctSupport'
 import { getElementDimensions } from './dimensions'
+import { logger } from './logger'
 
 describe('AutIframe', () => {
   let autIframe: AutIframe
@@ -57,10 +58,9 @@ describe('AutIframe', () => {
       getComputedStyleCallCount = 0
 
       const $el = Cypress.$(testElement)
-      const $body = Cypress.$('body')
 
       // When dimensions are provided, _addElementBoxModelLayers should NOT call getComputedStyle
-      const container = (autIframe as any)._addElementBoxModelLayers($el, $body, dimensions)
+      const container = (autIframe as any)._addElementBoxModelLayers($el, dimensions)
 
       // Verify getComputedStyle was NOT called in _addElementBoxModelLayers
       // (it should use transform and zIndex from the provided dimensions)
@@ -103,10 +103,9 @@ describe('AutIframe', () => {
       getComputedStyleCallCount = 0
 
       const $el = Cypress.$(testElement)
-      const $body = Cypress.$('body')
 
       // Call without providing dimensions (will call getElementDimensions internally)
-      const container = (autIframe as any)._addElementBoxModelLayers($el, $body)
+      const container = (autIframe as any)._addElementBoxModelLayers($el)
 
       // getElementDimensions will call getComputedStyle once and return transform/zIndex,
       // so _addElementBoxModelLayers won't need to call it again
@@ -151,8 +150,8 @@ describe('AutIframe', () => {
       const result = autIframe.create()
 
       result.autSnapshotIframes.forEach((iframe) => {
-        expect(iframe[0].id).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
-        expect(iframe[0].title).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
+        expect(iframe[0].id).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: 'Test Project'`)
+        expect(iframe[0].title).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: 'Test Project'`)
         expect(iframe[0].className).to.equal('aut-snapshot-iframe')
       })
     })
@@ -172,7 +171,7 @@ describe('AutIframe', () => {
     it('should remove both aut iframe and snapshot iframe', () => {
       const result = autIframe.create()
       let autIframeRemoved = false
-      let snapshotIframesRemoved = [false, false]
+      const snapshotIframesRemoved = [false, false]
 
       // Mock remove methods
       result.autIframe.remove = () => {
@@ -197,6 +196,66 @@ describe('AutIframe', () => {
 
     it('should throw error when destroy is called without create', () => {
       expect(() => autIframe.destroy()).to.throw('Cannot call #remove without first calling #create')
+    })
+  })
+
+  context('.doesAUTMatchTopSuperDomainOrigin', () => {
+    let iframe: HTMLIFrameElement
+
+    const attachIframe = (src?: string) => {
+      iframe = document.createElement('iframe')
+
+      if (src) {
+        iframe.src = src
+      }
+
+      document.body.appendChild(iframe)
+      autIframe.$iframe = Cypress.$(iframe) as JQuery<HTMLIFrameElement>
+    }
+
+    beforeEach(() => {
+      const eventManager = createEventManager()
+
+      // Location is a driver internal, so it is absent from the public Cypress types
+      eventManager._testingOnlySetCypress({ Location: (Cypress as any).Location })
+      autIframe = new AutIframe('Test Project', eventManager, Cypress.$)
+    })
+
+    afterEach(() => {
+      iframe?.remove()
+    })
+
+    it('is true when the AUT is on about:blank', () => {
+      attachIframe()
+
+      expect(autIframe.doesAUTMatchTopSuperDomainOrigin()).to.be.true
+    })
+
+    it('is true when the AUT shares a super domain origin with top', () => {
+      attachIframe(window.location.href)
+
+      expect(autIframe.doesAUTMatchTopSuperDomainOrigin()).to.be.true
+    })
+  })
+
+  context('.restoreDom', () => {
+    it('does not wait on a load event that cannot fire when the AUT has no src to remove', () => {
+      const iframe = document.createElement('iframe')
+
+      document.body.appendChild(iframe)
+
+      autIframe.$iframe = Cypress.$(iframe) as JQuery<HTMLIFrameElement>
+      autIframe.doesAUTMatchTopSuperDomainOrigin = () => false
+
+      const logError = cy.stub(logger, 'logError')
+      const one = cy.spy(autIframe.$iframe, 'one')
+
+      autIframe.restoreDom({ body: { get: () => document.createElement('body') }, htmlAttrs: {} })
+
+      expect(one).not.to.be.called
+      expect(logError).to.be.calledOnce
+
+      iframe.remove()
     })
   })
 })

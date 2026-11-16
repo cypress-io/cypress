@@ -3,12 +3,11 @@ import Debug from 'debug'
 import _ from 'lodash'
 import dayjs from 'dayjs'
 import $errUtils from '../cypress/error_utils'
-import { USKeyboard } from '../cypress/UsKeyboardLayout'
+import { USKeyboard } from '@packages/types'
 import $dom from '../dom'
 import $document from '../dom/document'
-import $elements, { HTMLTextLikeInputElement } from '../dom/elements'
-// eslint-disable-next-line no-duplicate-imports
-import type { HTMLTextLikeElement } from '../dom/elements'
+import $elements from '../dom/elements'
+import type { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/elements'
 import $selection from '../dom/selection'
 import $utils from '../cypress/utils'
 import $window from '../dom/window'
@@ -31,7 +30,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
 type SimulatedDefault = (
   el: HTMLElement,
   key: KeyDetails,
-  options: typeOptions
+  options: typeOptions,
 ) => void
 
 type KeyInfo = KeyDetails | ShortcutDetails
@@ -68,8 +67,10 @@ const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.[0-9]{1,3})?/
 const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
-const isValidNumberInputChar = /[-+eE\d\.]/
-const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}$/
+const isValidNumberInputChar = /[-+eE\d.]/
+// Unanchored at the end so that each arrow in a run such as
+// {upArrow}{upArrow} is accepted on its own as typing reaches it
+const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}/
 
 const INITIAL_MODIFIERS = {
   alt: false,
@@ -302,7 +303,7 @@ const parseCharsBetweenCurlyBraces = (chars: string) => {
 
 const shouldIgnoreEvent = <
   T extends KeyEventType,
-  K extends { [key in T]?: boolean }
+  K extends { [key in T]?: boolean },
 >(
   eventName: T,
   options: K,
@@ -388,7 +389,7 @@ const validateTyping = (
   el: HTMLElement,
   keys: KeyInfo[],
   currentIndex: number,
-  onFail: Function,
+  onFail: Log | ((err: Error) => unknown),
   skipCheckUntilIndex: number | undefined,
   force: boolean,
 ) => {
@@ -396,7 +397,7 @@ const validateTyping = (
   const allChars = joinKeyArrayToString(keys)
 
   if (skipCheckUntilIndex) {
-    return { skipCheckUntilIndex: skipCheckUntilIndex-- }
+    return { skipCheckUntilIndex }
   }
 
   debug('validateTyping:', chars, el)
@@ -696,16 +697,16 @@ interface typeOptions {
   release?: boolean
   _log?: Log
   delay?: number
-  onError?: Function
-  onEvent?: Function
-  onBeforeEvent?: Function
-  onFocusChange?: Function
-  onBeforeType?: Function
-  onAfterType?: Function
-  onValueChange?: Function
-  onEnterPressed?: Function
-  onNoMatchingSpecialChars?: Function
-  onBeforeSpecialCharAction?: Function
+  onError?: (...args: any[]) => unknown
+  onEvent?: (id: string, key: string, event: Event, dispatched: boolean) => unknown
+  onBeforeEvent?: (...args: any[]) => unknown
+  onFocusChange?: (...args: any[]) => unknown
+  onBeforeType?: (totalKeys: number) => unknown
+  onAfterType?: () => unknown
+  onValueChange?: (originalText: string, el: HTMLElement) => unknown
+  onEnterPressed?: (el: HTMLElement) => unknown
+  onNoMatchingSpecialChars?: (chars: string, allChars: string) => unknown
+  onBeforeSpecialCharAction?: (...args: any[]) => unknown
   prevValue?: string
 }
 
@@ -774,9 +775,7 @@ export class Keyboard {
           const activeEl = this.getActiveEl(options)
 
           if (key.type === 'shortcut') {
-            this.simulateShortcut(activeEl, key, options)
-
-            return null
+            return this.simulateShortcut(activeEl, key, options)
           }
 
           debug('typing key:', key.key)
@@ -842,9 +841,7 @@ export class Keyboard {
             return null
           }
 
-          this.typeSimulatedKey(activeEl, key, options)
-
-          return null
+          return this.typeSimulatedKey(activeEl, key, options)
         }
       },
     )
@@ -1016,7 +1013,7 @@ export class Keyboard {
     debug('event options:', eventType, eventOptions)
     if (eventConstructor === 'TextEvent' && win[eventConstructor]) {
       event = document.createEvent('TextEvent')
-      // @ts-ignore
+      // @ts-expect-error - initTextEvent is deprecated and not in the DOM lib types
       event.initTextEvent(
         eventType,
         eventOptions.bubbles,
@@ -1245,7 +1242,14 @@ export class Keyboard {
     this.simulatedKeydown(el, key, options)
     const elToKeyup = this.getActiveEl(options)
 
-    this.simulatedKeyup(elToKeyup, key, options)
+    // keyup is deferred to the next microtask so listeners that update state in a
+    // native microtask on input (as real browsers allow) run before keyup handlers.
+    // Use the native Promise scheduler; bluebird's Promise.resolve() does not share
+    // the same microtask queue as DOM Promise.resolve() callbacks.
+    // @see https://github.com/cypress-io/cypress/issues/14864
+    return globalThis.Promise.resolve().then(() => {
+      this.simulatedKeyup(elToKeyup, key, options)
+    })
   }
 
   simulateShortcut (el: HTMLElement, key: ShortcutDetails, options) {
@@ -1254,16 +1258,19 @@ export class Keyboard {
     })
 
     this.simulatedKeydown(el, key.key, options)
-    this.simulatedKeyup(el, key.key, options)
 
-    options.id = _.uniqueId('char')
+    return globalThis.Promise.resolve().then(() => {
+      this.simulatedKeyup(el, key.key, options)
 
-    const elToKeyup = this.getActiveEl(options)
+      const elToKeyup = this.getActiveEl(options)
 
-    key.modifiers.reverse().forEach((key) => {
-      delete key.events.keyup
       options.id = _.uniqueId('char')
-      this.simulatedKeyup(elToKeyup, key, options)
+
+      key.modifiers.reverse().forEach((key) => {
+        delete key.events.keyup
+        options.id = _.uniqueId('char')
+        this.simulatedKeyup(elToKeyup, key, options)
+      })
     })
   }
 
@@ -1358,7 +1365,7 @@ let _defaults
 
 const reset = () => {
   _defaults = {
-    keystrokeDelay: 10,
+    keystrokeDelay: null,
   }
 }
 

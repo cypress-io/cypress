@@ -1,11 +1,6 @@
-import type { OpenFileInIdeQuery } from '../../src/generated/graphql-test'
 import RelevantRunsDataSource_RunsByCommitShas from '../fixtures/gql-RelevantRunsDataSource_RunsByCommitShas.json'
 import DebugDataPassing from '../fixtures/debug-Passing/gql-Debug.json'
 import DebugDataFailing from '../fixtures/debug-Failing/gql-Debug.json'
-
-Cypress.on('window:before:load', (win) => {
-  win.__CYPRESS_GQL_NO_SOCKET__ = 'true'
-})
 
 // These mocks all the responses so we can get deterministic
 // results to test the debug page.
@@ -52,14 +47,11 @@ describe('App - Debug Page', () => {
 
     cy.get('[data-cy="debug-badge"]').should('be.visible').contains('0')
 
-    cy.intercept('mutation-useRecordEvent_recordEvent').as('recordEvent')
     cy.findByTestId('sidebar-link-debug-page').click()
 
     cy.findByTestId('debug-container').should('be.visible')
 
-    cy.wait('@recordEvent')
-
-    cy.withCtx((ctx, { sinon }) => {
+    cy.withRetryableCtx((ctx, { sinon }) => {
       expect(ctx.actions.eventCollector.recordEvent).to.have.been.calledWith(sinon.match({
         campaign: 'Navigated To Debug Page',
         medium: 'sidebar',
@@ -111,17 +103,13 @@ describe('App - Debug Page', () => {
       return obj.result
     }, { RelevantRunsDataSource_RunsByCommitShas, DebugDataFailing })
 
-    cy.intercept('query-OpenFileInIDE', (req) => {
-      req.on('response', (res) => {
-        const gqlData = res.body.data as OpenFileInIdeQuery
-
-        gqlData.localSettings.preferences.preferredEditorBinary = 'code'
-      })
-    })
-
-    cy.intercept('mutation-OpenFileInIDE_Mutation').as('openFileInIDE')
-
     cy.withCtx((ctx, { sinon }) => {
+      ctx.coreData.localSettings.availableEditors = [
+        ...ctx.coreData.localSettings.availableEditors,
+        { id: 'code', binary: 'code', name: 'Visual Studio Code' },
+      ]
+
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
       sinon.stub(ctx.actions.file, 'openFile')
     })
 
@@ -165,14 +153,13 @@ describe('App - Debug Page', () => {
     cy.findByTestId('run-failures').should('exist').should('have.attr', 'href', '#/specs/runner?file=src/NewComponent.spec.jsx&mode=debug')
 
     cy.findByLabelText('Open in IDE').click()
-    cy.wait('@openFileInIDE')
-    cy.withCtx((ctx) => {
+    cy.withRetryableCtx((ctx) => {
       expect(ctx.actions.file.openFile).to.have.been.calledWith('src/NewComponent.spec.jsx', 1, 1)
     })
   })
 
   it('shows running and updating build', () => {
-    cy.remoteGraphQLIntercept((obj, _testState, options) => {
+    cy.remoteGraphQLIntercept((obj, testState, options) => {
       if (obj.operationName === 'RelevantRunsDataSource_RunsByCommitShas') {
         obj.result.data = options.RelevantRunsDataSource_RunsByCommitShas.data
       }
@@ -213,7 +200,6 @@ describe('App - Debug Page', () => {
       }
 
       if (obj.operationName === 'RelevantRunSpecsDataSource_Specs' && obj.result.data) {
-        // NOTE Figure out how to manually trigger polling instead of adjusting polling intervals
         obj.result.data.pollingIntervals = {
           __typename: 'CloudPollingIntervals',
           runByNumber: 1.5, //Increase polling interval for debugging test
@@ -222,7 +208,7 @@ describe('App - Debug Page', () => {
         if (run.totalInstanceCount === run.completedInstanceCount) {
           obj.result.data.pollingIntervals.runByNumber = 100
         } else {
-          run.completedInstanceCount = run.completedInstanceCount !== undefined ? ++run.completedInstanceCount : 0
+          run.completedInstanceCount = testState.completedInstanceCount ?? 1
         }
 
         obj.result.data.cloudNodesByIds = [
@@ -245,8 +231,18 @@ describe('App - Debug Page', () => {
 
     cy.get('[data-cy=debug-testing-progress]').contains('Testing in progress...')
     cy.findByTestId('debug-testing-progress').contains('1 of 3 specs completed')
+
+    cy.withCtx((_ctx, o) => {
+      o.testState.completedInstanceCount = 2
+    })
+
     cy.findByTestId('debug-testing-progress').contains('2 of 3 specs completed')
-    cy.findByTestId('debug-testing-progress').contains('3 of 3 specs completed')
+
+    cy.withCtx((_ctx, o) => {
+      o.testState.completedInstanceCount = 3
+    })
+
+    cy.findByTestId('debug-testing-progress').should('not.exist')
     cy.get('[data-cy="debug-badge"]').contains('1').should('be.visible')
 
     cy.findByTestId('spec-contents').within(() => {

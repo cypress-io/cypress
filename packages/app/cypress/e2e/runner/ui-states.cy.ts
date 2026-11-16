@@ -12,7 +12,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       passCount: 1,
     })
 
-    cy.contains('test hooks').should('be.visible')
+    cy.reporter().contains('test hooks').should('be.visible')
     snapshotReporter()
   })
 
@@ -22,7 +22,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       passCount: 1,
     })
 
-    cy.contains('Nested Tests').should('be.visible')
+    cy.reporter().contains('Nested Tests').should('be.visible')
     snapshotReporter()
   })
 
@@ -33,7 +33,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 1,
       })
 
-      cy.contains('part 1 - basic commands').should('be.visible').click()
+      cy.reporter().contains('part 1 - basic commands').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -43,7 +43,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 2,
       })
 
-      cy.contains('part 2 - traversal and navigation').should('be.visible')
+      cy.reporter().contains('part 2 - traversal and navigation').should('be.visible')
       .click()
 
       snapshotReporter()
@@ -55,7 +55,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 3,
       })
 
-      cy.contains('part 3 - element manipulation').should('be.visible')
+      cy.reporter().contains('part 3 - element manipulation').should('be.visible')
       .click()
 
       snapshotReporter()
@@ -67,7 +67,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 4,
       })
 
-      cy.contains('part 4 - advanced interactions').should('be.visible')
+      cy.reporter().contains('part 4 - advanced interactions').should('be.visible')
       .click()
 
       snapshotReporter()
@@ -79,7 +79,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 1,
       })
 
-      cy.contains('commands that do not appear in command log').should('be.visible').click()
+      cy.reporter().contains('commands that do not appear in command log').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -89,7 +89,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 2,
       })
 
-      cy.contains('form interaction command options').should('be.visible').click()
+      cy.reporter().contains('form interaction command options').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -99,7 +99,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 3,
       })
 
-      cy.contains('DOM traversal command options').should('be.visible').click()
+      cy.reporter().contains('DOM traversal command options').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -109,7 +109,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 4,
       })
 
-      cy.contains('element state and navigation command options').should('be.visible').click()
+      cy.reporter().contains('element state and navigation command options').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -119,7 +119,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 5,
       })
 
-      cy.contains('element traversal and file operations command options').should('be.visible').click()
+      cy.reporter().contains('element traversal and file operations command options').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -129,7 +129,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 6,
       })
 
-      cy.contains('scrolling and form interaction command options').should('be.visible').click()
+      cy.reporter().contains('scrolling and form interaction command options').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -139,7 +139,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 7,
       })
 
-      cy.contains('user interaction and window command options').should('be.visible').click()
+      cy.reporter().contains('user interaction and window command options').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -149,7 +149,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 8,
       })
 
-      cy.contains('verify element visibility state').should('be.visible').click()
+      cy.reporter().contains('verify element visibility state').should('be.visible').click()
       snapshotReporter()
     })
 
@@ -159,7 +159,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         passCount: 9,
       })
 
-      cy.contains('grouped commands').should('be.visible').click()
+      cy.reporter().contains('grouped commands').should('be.visible').click()
       snapshotReporter()
     })
   })
@@ -170,7 +170,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       failCount: 1,
     })
 
-    cy.contains('Request Statuses').should('be.visible')
+    cy.reporter().contains('Request Statuses').should('be.visible')
     snapshotReporter()
   })
 
@@ -180,7 +180,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
       failCount: 1,
     })
 
-    cy.contains('events - page events').should('be.visible')
+    cy.reporter().contains('events - page events').should('be.visible')
     snapshotReporter()
   })
 
@@ -191,7 +191,7 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         failCount: 1,
       })
 
-      cy.contains('simple error with docs link').should('be.visible')
+      cy.reporter().contains('simple error with docs link').should('be.visible')
       snapshotReporter()
     })
 
@@ -201,8 +201,8 @@ describe('src/cypress/runner ui states', { retries: 0, defaultCommandTimeout: 60
         failCount: 2,
       })
 
-      cy.contains('simple error with docs link').click()
-      cy.contains('long error').should('be.visible')
+      cy.reporter().contains('simple error with docs link').click()
+      cy.reporter().contains('long error').should('be.visible')
       snapshotReporter()
     })
   })

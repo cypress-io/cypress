@@ -2,6 +2,7 @@ const runChildProcess = async (entryPoint) => {
   // FIXME: use a bridge here to import TypeScript into a CommonJS context
   // Once everything is converted to ESM, we can remove this and use import() directly at the top of the file.
   require('tsx/cjs')
+  require('./lib/util/patch_promise_then').patchPromiseThen()
   require(entryPoint)
 }
 
@@ -14,10 +15,12 @@ const startCypress = async () => {
     // load these files in one by one as we aren't sure if its source TypeScript (development mode) or transpiled JavaScript (production mode).
     // once the file is converted to TypeScript, we can remove these one-off tsx.require calls.
     // One off require calls to tsx are needed for now to prevent side effects when building the binary.
+    const { patchPromiseThen } = require('./lib/util/patch_promise_then')
     const { initializeStartTime } = require('./lib/util/performance_benchmark')
 
     unregister()
 
+    patchPromiseThen()
     initializeStartTime()
 
     // No typescript requires before this point please

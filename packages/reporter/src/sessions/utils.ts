@@ -1,4 +1,6 @@
-function determineTagType (state: string) {
+import type { TagType } from '../lib/tag'
+
+function determineTagType (state: string): TagType {
   switch (state) {
     case 'failed':
       return 'failed-status'
@@ -9,7 +11,7 @@ function determineTagType (state: string) {
   }
 }
 
-export type SessionStatus = 'creating' | 'created' | 'restoring' |'restored' | 'recreating' | 'recreated' | 'failed'
+export type SessionStatus = 'creating' | 'created' | 'restoring' | 'restored' | 'recreating' | 'recreated' | 'failed'
 
 export {
   determineTagType,

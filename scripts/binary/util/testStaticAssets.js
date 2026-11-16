@@ -1,10 +1,8 @@
-/* eslint-disable arrow-body-style */
-
 const la = require('lazy-ass')
 const fs = require('fs-extra')
 const _ = require('lodash')
 const glob = require('glob')
-const chalk = require('chalk').default
+const chalk = require('chalk')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
 
@@ -29,7 +27,7 @@ const testStaticAssets = async (buildResourcePath) => {
       testAssetStrings: [
         [
           (str) => !str.split('\n').slice(-1)[0].includes('//# sourceMappingURL'),
-          'sourcemaps were detected, ensure `web-config/webpack.base.config.ts` does not have sourcemaps enabled in production',
+          'sourcemaps were detected, ensure `web-config/webpack.config.base.ts` does not have sourcemaps enabled in production',
         ],
       ],
       minLineCount: 5000,
@@ -171,9 +169,8 @@ function includesCount (string, subString) {
 
   let n = 0
   let pos = 0
-  let step = subString.length
+  const step = subString.length
 
-  // eslint-disable-next-line
   while (true) {
     pos = string.indexOf(subString, pos)
     if (pos >= 0) {

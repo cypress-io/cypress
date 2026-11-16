@@ -37,7 +37,7 @@ For more detailed installation instructions, see the [CircleCI Local CLI documen
 When files in `.circleci/src/` are modified, the pre-commit hook automatically runs:
 
 ```bash
-yarn pack-ci --verify
+yarn pack-ci --validate
 ```
 
 This command:

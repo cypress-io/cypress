@@ -50,6 +50,16 @@ export class AuthActions {
       operationVariables: {},
     })
 
+    const viewerId = result.data?.cloudViewer?.id
+
+    if (viewerId) {
+      this.ctx.update((coreData) => {
+        if (coreData.user) {
+          coreData.user.id = viewerId
+        }
+      })
+    }
+
     if (!result.data?.cloudViewer && !result.error?.networkError) {
       this.ctx.coreData.user = null
       await this.logout()
@@ -118,6 +128,11 @@ export class AuthActions {
     }
 
     this.setAuthenticatedUser(user)
+
+    // The login callback carries no cloud user id; checkAuth backfills it.
+    this.checkAuth().catch((err) => {
+      this.ctx.logTraceError(err)
+    })
 
     this.#cancelActiveLogin = null
 

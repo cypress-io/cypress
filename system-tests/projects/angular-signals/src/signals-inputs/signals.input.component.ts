@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common'
 
 @Component({
   selector: 'signals-input-component',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './signals.input.component.html',
 })

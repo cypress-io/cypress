@@ -1,4 +1,4 @@
-import type { SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import type { ICypress } from '../../cypress'
 
 // cross-origin cookies collected by the the proxy are sent down to the driver
@@ -43,7 +43,6 @@ export const handleCrossOriginCookies = (Cypress: ICypress) => {
       // this event allows running a handler before stability is released.
       // this prevents subsequent commands from running until the cookies
       // are set via automation
-      // @ts-ignore
       Cypress.once('before:stability:release', syncCookiesViaAutomation)
     }
   })

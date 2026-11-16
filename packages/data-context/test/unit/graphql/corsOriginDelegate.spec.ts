@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals'
 import type { Request } from 'express'
 import type { CorsOptions } from 'cors'
 
-import { corsOriginDelegate, isOriginAllowed } from '../../../graphql/corsOriginDelegate'
+import { corsOriginDelegate, isHostAllowed, isOriginAllowed } from '../../../graphql/corsOriginDelegate'
 
 const OWN_PORT = 4444
 
@@ -53,7 +53,7 @@ describe('corsOriginDelegate', () => {
   })
 
   it('denies non-localhost origins on the GraphQL endpoint', () => {
-    expect(evaluate(makeReq({ origin: 'https://evil.example.com', path: '/__launchpad/graphql' })).origin).toBe(false)
+    expect(evaluate(makeReq({ origin: 'https://other.example.com', path: '/__launchpad/graphql' })).origin).toBe(false)
     expect(evaluate(makeReq({ origin: 'https://cloud.cypress.io', path: '/__launchpad/graphql' })).origin).toBe(false)
   })
 
@@ -72,7 +72,7 @@ describe('corsOriginDelegate', () => {
   })
 
   it('denies arbitrary origins on /cloud-notification', () => {
-    expect(evaluate(makeReq({ origin: 'https://evil.example.com', path: '/cloud-notification' })).origin).toBe(false)
+    expect(evaluate(makeReq({ origin: 'https://other.example.com', path: '/cloud-notification' })).origin).toBe(false)
   })
 })
 
@@ -96,7 +96,7 @@ describe('isOriginAllowed', () => {
   })
 
   it('denies non-localhost origins regardless of port', () => {
-    expect(isOriginAllowed('https://evil.example.com', 4444)).toBe(false)
+    expect(isOriginAllowed('https://other.example.com', 4444)).toBe(false)
     expect(isOriginAllowed('https://cloud.cypress.io', 4444)).toBe(false)
   })
 
@@ -106,5 +106,32 @@ describe('isOriginAllowed', () => {
 
   it('denies malformed origins', () => {
     expect(isOriginAllowed('not a url', 4444)).toBe(false)
+  })
+})
+
+describe('isHostAllowed', () => {
+  it('allows localhost hosts on the server\'s port', () => {
+    expect(isHostAllowed(`localhost:${OWN_PORT}`, OWN_PORT)).toBe(true)
+    expect(isHostAllowed(`127.0.0.1:${OWN_PORT}`, OWN_PORT)).toBe(true)
+    expect(isHostAllowed(`[::1]:${OWN_PORT}`, OWN_PORT)).toBe(true)
+  })
+
+  it('denies a non-localhost host on the server\'s port', () => {
+    expect(isHostAllowed(`app.other.example.com:${OWN_PORT}`, OWN_PORT)).toBe(false)
+  })
+
+  it('denies a localhost host on a different port or with no port', () => {
+    expect(isHostAllowed('localhost:9999', OWN_PORT)).toBe(false)
+    expect(isHostAllowed('localhost', OWN_PORT)).toBe(false)
+  })
+
+  it('denies a missing host or port', () => {
+    expect(isHostAllowed(undefined, OWN_PORT)).toBe(false)
+    expect(isHostAllowed(`localhost:${OWN_PORT}`, undefined)).toBe(false)
+  })
+
+  it('denies a host that smuggles a path or credentials', () => {
+    expect(isHostAllowed(`other.example.com/@localhost:${OWN_PORT}`, OWN_PORT)).toBe(false)
+    expect(isHostAllowed(`localhost:${OWN_PORT}@other.example.com:${OWN_PORT}`, OWN_PORT)).toBe(false)
   })
 })

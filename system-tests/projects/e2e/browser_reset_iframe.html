@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script>
+    // Loaded only as an iframe on a second origin, so the browser reset has to
+    // find this origin from its requests rather than from a cy.visit.
+    const write = new URLSearchParams(location.search).has('write')
+    const request = indexedDB.open('iframeList', 1)
+
+    request.onupgradeneeded = (e) => {
+      if (write) {
+        e.target.result.createObjectStore('iframeList')
+      }
+    }
+
+    request.onsuccess = (e) => {
+      const db = e.target.result
+      const hasStore = db.objectStoreNames.contains('iframeList')
+
+      // close the connection so it can't block the browser state reset
+      // from deleting the database
+      db.close()
+      parent.postMessage({ type: 'browser-reset-iframe', hasStore }, '*')
+    }
+
+    request.onerror = () => {
+      parent.postMessage({ type: 'browser-reset-iframe', error: String(request.error) }, '*')
+    }
+  </script>
+</head>
+<body></body>
+</html>

@@ -3,7 +3,6 @@ import chalk from 'chalk'
 import { Listr, PRESET_TIMESTAMP } from 'listr2'
 import Debug from 'debug'
 import { stripIndent } from 'common-tags'
-import Bluebird from 'bluebird'
 import logSymbols from 'log-symbols'
 import os from 'os'
 import { throwFormErrorText, errors } from '../errors'
@@ -55,7 +54,15 @@ const checkExecutable = async (binaryDir: string): Promise<void> => {
 const runSmokeTest = (binaryDir: string, options: any): any => {
   let executable = state.getPathToExecutable(binaryDir)
 
-  const needsXvfb = xvfb.isNeeded()
+  const env: NodeJS.ProcessEnv = options.env ?? process.env
+
+  // The smoke test is run with the environment as it is when it runs, because starting
+  // Xvfb sets DISPLAY after this point, and execa adds that to what it is given. So a
+  // variable the caller took out has to be named with no value to stay out.
+  const removedFromEnv = _.mapValues(_.pickBy(process.env, (_value, key) => !(key in env)), () => undefined)
+  const changedInEnv = _.pickBy(env, (value, key) => process.env[key] !== value)
+
+  const needsXvfb = xvfb.isNeeded(env)
 
   debug('needs Xvfb?', needsXvfb)
 
@@ -93,7 +100,8 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
 
     const stdioOptions = _.extend({}, {
       env: {
-        ...process.env,
+        ...removedFromEnv,
+        ...changedInEnv,
         FORCE_COLOR: '0',
       },
       timeout: options.smokeTestTimeout,
@@ -124,7 +132,7 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
     } catch (err: any) {
       debug('Smoke test failed:', err)
 
-      let errMessage = err.stderr || err.message
+      const errMessage = err.stderr || err.message
 
       debug('error message:', errMessage)
 
@@ -213,10 +221,7 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
 
       await state.clearBinaryStateAsync(binaryDir)
 
-      await Promise.all([
-        runSmokeTest(binaryDir, options),
-        Bluebird.delay(1500), // good user experience
-      ])
+      await runSmokeTest(binaryDir, options)
 
       debug('write verified: true')
 
@@ -244,7 +249,7 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
 }
 
 export const start = async (options: any = {}): Promise<void> => {
-  debug('verifying Cypress app with options %j', options)
+  debug('verifying Cypress app with options %j', _.omit(options, 'env'))
 
   _.defaults(options, {
     dev: false,

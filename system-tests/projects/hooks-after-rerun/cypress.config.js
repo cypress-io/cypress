@@ -1,7 +1,6 @@
 const state = {}
 
 module.exports = {
-  'allowCypressEnv': false,
   'e2e': {
     'record': false,
     setupNodeEvents (on, config) {

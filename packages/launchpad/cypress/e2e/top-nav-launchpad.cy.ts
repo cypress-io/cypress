@@ -1,11 +1,8 @@
 import type { SinonStub } from 'sinon'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type Sinon from 'sinon'
 import { CYPRESS_REMOTE_MANIFEST_URL, NPM_CYPRESS_REGISTRY_URL } from '@packages/types'
 
 const pkg = require('@packages/root')
-
-const loginText = defaultMessages.topNav.login
 
 const headerBarId = 'header-bar-content'
 
@@ -102,7 +99,7 @@ describe('Launchpad Top Nav Workflows', () => {
           cy.findByText('Latest').should('be.visible')
         })
 
-        cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' })
+        cy.findByTestId('cypress-update-popover').getByRole('button', { name: 'Update to 10.1.0' })
 
         cy.findByTestId('current-hint').within(() => {
           cy.validateExternalLink({ name: '10.0.0', href: 'https://on.cypress.io/changelog#10-0-0' })
@@ -116,7 +113,7 @@ describe('Launchpad Top Nav Workflows', () => {
       })
 
       it('hides dropdown when version in header is clicked', () => {
-        cy.findByTestId('cypress-update-popover').findAllByRole('button').first().as('topNavVersionButton').click()
+        cy.findByTestId('cypress-update-popover').getByRole('button').first().as('topNavVersionButton').click()
 
         cy.get('@topNavVersionButton').should('have.attr', 'aria-expanded', 'true')
 
@@ -128,15 +125,15 @@ describe('Launchpad Top Nav Workflows', () => {
       it('shows upgrade modal when update button is pressed', () => {
         cy.findByTestId('top-nav-version-list').contains('v10.0.0 • Upgrade').click()
 
-        cy.findByTestId('cypress-update-popover').findByRole('button', { name: 'Update to 10.1.0' }).click()
+        cy.findByTestId('cypress-update-popover').getByRole('button', { name: 'Update to 10.1.0' }).click()
 
-        cy.findByRole('dialog', { name: 'Upgrade to Cypress 10.1.0' }).as('upgradeModal').within(() => {
+        cy.getByRole('dialog', { name: 'Upgrade to Cypress 10.1.0', native: false }).as('upgradeModal').within(() => {
           cy.contains('You are currently running Version 10.0.0 of Cypress').should('be.visible')
           cy.findAllByDisplayValue('npm install -D cypress@10.1.0').should('be.visible')
-          cy.findByRole('button', { name: 'Close' }).click()
+          cy.getByRole('button', { name: 'Close' }).click()
         })
 
-        cy.findAllByRole('dialog').should('not.exist')
+        cy.getByRole('dialog', { native: false }).should('not.exist')
       })
     })
 
@@ -177,15 +174,15 @@ describe('Launchpad Top Nav Workflows', () => {
         cy.openProject('launchpad')
         cy.visitLaunchpad()
 
-        cy.findByTestId(headerBarId).findByRole('button', { name: 'Docs', expanded: false }).as('docsButton')
+        cy.findByTestId(headerBarId).getByRole('button', { name: 'Docs' }).filter('[aria-expanded="false"]').as('docsButton')
       })
 
       it('shows popover with additional doc links', () => {
         cy.get('@docsButton').click().should('have.attr', 'aria-expanded', 'true')
 
-        cy.findByRole('heading', { name: 'Getting started', level: 2 })
-        cy.findByRole('heading', { name: 'References', level: 2 })
-        cy.findByRole('heading', { name: 'Run in CI/CD', level: 2 })
+        cy.getByRole('heading', { name: 'Getting started' }).filter('h2')
+        cy.getByRole('heading', { name: 'References' }).filter('h2')
+        cy.getByRole('heading', { name: 'Run in CI/CD' }).filter('h2')
 
         const expectedLinks = [
           {
@@ -226,17 +223,17 @@ describe('Launchpad Top Nav Workflows', () => {
           o.sinon.stub(ctx.actions.project, 'setPromptShown')
         })
 
-        cy.findByRole('button', { name: 'Set up CI' }).click()
+        cy.getByRole('button', { name: 'Set up CI' }).click()
         cy.findByText('Configure CI').should('be.visible')
-        cy.findByRole('button', { name: 'Close' }).click()
+        cy.getByRole('button', { name: 'Close' }).click()
 
         cy.withCtx((ctx) => {
           expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('ci1')
         })
 
-        cy.findByRole('button', { name: 'Run tests faster' }).click()
+        cy.getByRole('button', { name: 'Run tests faster' }).click()
         cy.findByText('Run tests faster in CI').should('be.visible')
-        cy.findByRole('button', { name: 'Close' }).click()
+        cy.getByRole('button', { name: 'Close' }).click()
 
         cy.withCtx((ctx) => {
           expect(ctx.actions.project.setPromptShown).to.have.been.calledWith('orchestration1')
@@ -265,6 +262,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
         cy.visitLaunchpad()
         cy.contains('launchpad')
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the prompt never opens, so give it time to open first
         cy.wait(1000)
         cy.contains('Configure CI').should('not.exist')
       })
@@ -279,7 +277,7 @@ describe('Launchpad Top Nav Workflows', () => {
         cy.loginUser()
         cy.visitLaunchpad()
 
-        cy.findByTestId(headerBarId).findByRole('button', { name: 'Profile and logout', expanded: false }).as('logInButton')
+        cy.findByTestId(headerBarId).getByRole('button', { name: 'Profile and logout' }).filter('[aria-expanded="false"]').as('logInButton')
       })
 
       it('shows user in top nav when logged in', () => {
@@ -305,7 +303,7 @@ describe('Launchpad Top Nav Workflows', () => {
           })
         })
 
-        cy.findByRole('button', { name: 'Log out' }).click()
+        cy.getByRole('button', { name: 'Log out' }).click()
 
         cy.findByTestId(headerBarId).findByText('Log in').should('be.visible')
       })
@@ -327,7 +325,7 @@ describe('Launchpad Top Nav Workflows', () => {
           return obj.result
         })
 
-        cy.findByTestId(headerBarId).findByRole('button', { name: 'Profile and logout', expanded: false }).as('logInButton')
+        cy.findByTestId(headerBarId).getByRole('button', { name: 'Profile and logout' }).filter('[aria-expanded="false"]').as('logInButton')
 
         cy.get('@logInButton').click()
 
@@ -340,7 +338,7 @@ describe('Launchpad Top Nav Workflows', () => {
 
         cy.findByTestId(headerBarId).within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
-          cy.findByRole('button', { name: 'Log in' }).click()
+          cy.getByRole('button', { name: 'Log in' }).click()
         })
       })
     })
@@ -383,23 +381,21 @@ describe('Launchpad Top Nav Workflows', () => {
       function logIn ({ expectedNextStepText, displayName }: LoginOptions) {
         cy.findByTestId(headerBarId).within(() => {
           cy.findByTestId('user-avatar-title').should('not.exist')
-          cy.findByRole('button', { name: 'Log in' }).click()
+          cy.getByRole('button', { name: 'Log in' }).click()
         })
 
-        cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
-          // The login flow auto-starts when the modal opens; the CTA transitions through pending states
-          cy.findByRole('button', { name: 'Opening browser' }).should('be.visible').and('be.disabled')
-          cy.findByRole('button', { name: 'Waiting for browser...' }).should('be.visible').and('be.disabled')
+        cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).as('logInModal').within(() => {
+          cy.getByRole('button', { name: /Opening browser|Waiting for browser/ }).should('be.visible').and('be.disabled')
         })
 
-        cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
+        cy.getByRole('dialog', { name: 'Login successful', native: false }).within(() => {
           cy.findByText('You are now logged in as', { exact: false }).should('be.visible')
-          cy.validateExternalLink({ name: displayName, href: 'https://on.cypress.io/dashboard/profile' })
+          cy.validateExternalLink({ name: displayName, href: 'https://on.cypress.io/dashboard/profile?utm_medium=Nav&utm_campaign=Profile&utm_source=Binary%3A+Launchpad' })
 
           // The dialog can be closed at this point by either the header close button or the Continue button
           // The Continue button is tested here
-          cy.findByRole('button', { name: 'Close' }).should('be.visible').and('not.be.disabled')
-          cy.findByRole('button', { name: expectedNextStepText }).click()
+          cy.getByRole('button', { name: 'Close' }).should('be.visible').and('not.be.disabled')
+          cy.getByRole('button', { name: expectedNextStepText }).click()
         })
       }
 
@@ -433,7 +429,7 @@ describe('Launchpad Top Nav Workflows', () => {
             expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
           })
 
-          cy.findByRole('dialog', { name: 'Create project' }).should('be.visible')
+          cy.getByRole('dialog', { name: 'Create project', native: false }).should('be.visible')
         })
       })
 
@@ -476,13 +472,13 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.contains('E2E Testing').click()
 
-          cy.contains(defaultMessages.setupWizard.chooseBrowser.title).should('be.visible')
+          cy.contains('Choose a browser').should('be.visible')
 
           mockLogInActionsForUser(mockUserNoName)
 
           logIn({ expectedNextStepText: 'Continue', displayName: mockUserNoName.email })
-          cy.contains('[data-cy=standard-modal] h2', defaultMessages.specPage.banners.record.title).should('be.visible')
-          cy.contains('[data-cy=standard-modal]', defaultMessages.specPage.banners.record.content).should('be.visible')
+          cy.contains('[data-cy=standard-modal] h2', 'Record your first run').should('be.visible')
+          cy.contains('[data-cy=standard-modal]', 'Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools.').should('be.visible')
           cy.contains('button', 'Copy').should('be.visible')
         })
 
@@ -501,18 +497,18 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.findByTestId(headerBarId).within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log in' }).click()
+            cy.getByRole('button', { name: 'Log in' }).click()
           })
 
-          cy.findByRole('dialog').within(() => {
+          cy.getByRole('dialog', { native: false }).within(() => {
             cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
-            cy.contains(loginText.titleBrowserError).should('be.visible')
-            cy.contains(loginText.bodyBrowserError).should('be.visible')
-            cy.contains(loginText.bodyBrowserErrorDetails).should('be.visible')
+            cy.contains('Browser error').should('be.visible')
+            cy.contains('The browser could not be opened.').should('be.visible')
+            cy.contains('Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:').should('be.visible')
 
             // in this state, there is no retry UI, we ask the user to visit the auth url on their own
-            cy.contains('button', loginText.actionTryAgain).should('not.be.visible')
-            cy.contains('button', loginText.actionCancel).should('not.be.visible')
+            cy.contains('button', 'Try again').should('not.be.visible')
+            cy.contains('button', 'Cancel').should('not.be.visible')
           })
         })
 
@@ -531,16 +527,16 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.findByTestId(headerBarId).within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log in' }).click()
+            cy.getByRole('button', { name: 'Log in' }).click()
           })
 
-          cy.findByRole('dialog').within(() => {
-            cy.contains(loginText.titleFailed).should('be.visible')
-            cy.contains(loginText.bodyError).should('be.visible')
+          cy.getByRole('dialog', { native: false }).within(() => {
+            cy.contains('Login failed').should('be.visible')
+            cy.contains('An error occurred while attempting to log in:').should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
 
-            cy.contains('button', loginText.actionTryAgain).should('be.visible').as('tryAgain')
-            cy.contains('button', loginText.actionCancel).should('be.visible')
+            cy.contains('button', 'Try again').should('be.visible').as('tryAgain')
+            cy.contains('button', 'Cancel').should('be.visible')
           })
 
           // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
@@ -559,8 +555,8 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.get('@tryAgain').click()
 
-          cy.findByRole('dialog', { name: loginText.titleInitial }).within(() => {
-            cy.contains(loginText.actionWaiting).should('be.visible')
+          cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).within(() => {
+            cy.contains('Waiting for browser...').should('be.visible')
           })
         })
 
@@ -579,20 +575,20 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.findByTestId(headerBarId).within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
+            cy.getByRole('button', { name: 'Log in' }).as('loginButton').click()
           })
 
-          cy.findByRole('dialog').within(() => {
-            cy.contains(loginText.titleFailed).should('be.visible')
-            cy.contains(loginText.bodyError).should('be.visible')
+          cy.getByRole('dialog', { native: false }).within(() => {
+            cy.contains('Login failed').should('be.visible')
+            cy.contains('An error occurred while attempting to log in:').should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
           })
 
           // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
 
-          cy.findByRole('dialog', { name: loginText.titleFailed }).within(() => {
-            cy.contains('button', loginText.actionTryAgain).should('be.visible')
-            cy.contains('button', loginText.actionCancel).click()
+          cy.getByRole('dialog', { name: 'Login failed', native: false }).within(() => {
+            cy.contains('button', 'Try again').should('be.visible')
+            cy.contains('button', 'Cancel').click()
           })
 
           cy.withCtx((ctx, o) => {
@@ -612,7 +608,7 @@ describe('Launchpad Top Nav Workflows', () => {
             expect(ctx._apis.authApi.logIn).to.have.been.called
           })
 
-          cy.findByRole('dialog', { name: loginText.titleInitial }).should('be.visible')
+          cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).should('be.visible')
         })
 
         it('closing modal correctly clears error state', () => {
@@ -630,15 +626,15 @@ describe('Launchpad Top Nav Workflows', () => {
 
           cy.findByTestId(headerBarId).within(() => {
             cy.findByTestId('user-avatar-title').should('not.exist')
-            cy.findByRole('button', { name: 'Log in' }).as('loginButton').click()
+            cy.getByRole('button', { name: 'Log in' }).as('loginButton').click()
           })
 
-          cy.findByRole('dialog').within(() => {
-            cy.contains(loginText.titleFailed).should('be.visible')
-            cy.contains(loginText.bodyError).should('be.visible')
+          cy.getByRole('dialog', { native: false }).within(() => {
+            cy.contains('Login failed').should('be.visible')
+            cy.contains('An error occurred while attempting to log in:').should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
 
-            cy.findByLabelText(defaultMessages.actions.close).click()
+            cy.findByLabelText('Close').click()
           })
 
           cy.withCtx((ctx, o) => {
@@ -658,7 +654,7 @@ describe('Launchpad Top Nav Workflows', () => {
             expect(ctx._apis.authApi.logIn).to.have.been.called
           })
 
-          cy.findByRole('dialog', { name: loginText.titleInitial }).should('be.visible')
+          cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).should('be.visible')
         })
       })
 
@@ -731,7 +727,7 @@ describe('Launchpad Top Nav Workflows', () => {
             expect((ctx._apis.authApi.logIn as SinonStub).lastCall.args[2]).to.eq('Nav')
           })
 
-          cy.findByRole('dialog', { name: 'Create project' }).should('be.visible')
+          cy.getByRole('dialog', { name: 'Create project', native: false }).should('be.visible')
         })
       })
     })

@@ -5,7 +5,7 @@ import type {
   StaticResponseWithOptions,
   BackendStaticResponseWithArrayBuffer,
   FixtureOpts,
-} from '@packages/net-stubbing/lib/types'
+} from '@packages/network-interception'
 import {
   caseInsensitiveHas,
 } from '@packages/net-stubbing/lib/util'
@@ -25,10 +25,6 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   if (forceNetworkError && (body || statusCode || headers)) {
     err('`forceNetworkError`, if passed, must be the only option in the StaticResponse.')
-  }
-
-  if (forceNetworkError && Cypress.isBrowser('webkit')) {
-    err('`forceNetworkError` was passed, but it is not currently supported in experimental WebKit.')
   }
 
   if (body && fixture) {

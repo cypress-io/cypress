@@ -48,6 +48,7 @@ schemas/               JSON schema definitions
 - The `browser` field in `package.json` points to `src/index.ts` (source), which allows Vite-based consumers (`app`, `launchpad`, `frontend-shared`) to import TypeScript directly without a pre-build step.
 - The GraphQL schema is built in two phases: (1) `build:schema` emits a JSON SDL, (2) `build:graphql` runs graphql-codegen against it for downstream consumers.
 - **CI coverage for schema / codegen**: The CircleCI `build` job runs `yarn build`, which invokes `lerna run build` and therefore this package’s `build` script (`build:schema`, `build:graphql`, `nexus-build`). Changes to `PACKAGE_MANAGERS` in `@packages/types`, Nexus `PackageManagerEnum`, or hand-edited `schemas/schema.graphql` must leave `yarn workspace @packages/data-context build` (and committed generated artifacts where applicable) passing so PRs stay green.
+- `ProjectConfigIpc` forks the config/plugins child (`@packages/server` `lib/plugins/child/require_async_child.ts`) using the user's resolved Node (`coreData.app.nodePath`), not the bundled/dev Node. Code reachable from that child must stay within the user-Node floor (`engines.node` in `cli/package.json`). See root `AGENTS.md` → Runtime targets.
 
 ## Integration Points
 

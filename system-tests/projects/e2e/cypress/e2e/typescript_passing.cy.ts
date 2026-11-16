@@ -4,7 +4,7 @@ import bar from '../../lib/bar'
 import dom from '../../lib/dom'
 
 describe('imports work', () => {
-  it('foo coffee', () => {
+  it('foo imports', () => {
     // @ts-ignore
     expect(foo()).to.eq('foo')
   })

@@ -3,8 +3,10 @@ import { jest } from '@jest/globals'
 import path from 'path'
 import fs from 'fs-extra'
 import { Response } from 'cross-fetch'
-import Fixtures, { fixtureDirs, scaffoldProject, removeProject } from '@tooling/system-tests'
-import { DataContext, DataContextConfig } from '../../src'
+import type { fixtureDirs } from '@tooling/system-tests'
+import Fixtures, { scaffoldProject, removeProject } from '@tooling/system-tests'
+import type { DataContextConfig } from '../../src'
+import { DataContext } from '../../src'
 import { graphqlSchema } from '../../graphql/schema'
 import { remoteSchemaWrapped as schemaCloud } from '../../graphql/stitching/remoteSchemaWrapped'
 import type { BrowserApiShape } from '../../src/sources/BrowserDataSource'
@@ -63,6 +65,8 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       resetAuthState: jest.fn(),
     } as unknown as AuthApiShape,
     projectApi: {
+      setSessionLoadError: jest.fn().mockResolvedValue(undefined),
+      clearSessionLoadError: jest.fn().mockResolvedValue(undefined),
       closeActiveProject: jest.fn(),
       insertProjectToCache: jest.fn().mockResolvedValue(undefined),
       getProjectRootsFromCache: jest.fn().mockResolvedValue([]),

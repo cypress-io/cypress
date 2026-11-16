@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { Interception, Route } from '@packages/net-stubbing/lib/types'
+import type { Interception, Route } from '@packages/network-interception'
 import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
 import $errUtils from './error_utils'
 import Debug from 'debug'
@@ -37,7 +37,7 @@ function getDisplayUrl (url: string) {
 
 function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
   const last = _.last(req.interceptions)
-  let alias = last ? last.interception.request.alias || last.route.alias : undefined
+  const alias = last ? last.interception.request.alias || last.route.alias : undefined
 
   return {
     alias,
@@ -77,7 +77,7 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
           return 'pending'
         }
 
-        if (req.responseReceived.status >= 200 && req.responseReceived.status <= 299) {
+        if (req.responseReceived.status >= 200 && req.responseReceived.status <= 399) {
           return 'successful'
         }
 
@@ -273,7 +273,6 @@ export default class ProxyLogging {
 
     proxyRequest.updateConsoleProps()
 
-    // @ts-ignore
     const hasResponseSnapshot = proxyRequest.log?.get('snapshots')?.find((v) => v.name === 'response')
 
     if (!hasResponseSnapshot) proxyRequest.log?.snapshot('response')

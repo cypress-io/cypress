@@ -75,7 +75,7 @@ describe('<form> submissions', () => {
     }
 
     it('image/png', () => {
-      testUpload('../../static/javascript-logo.png')
+      testUpload('javascript-logo.png')
     })
 
     it('application/pdf', () => {

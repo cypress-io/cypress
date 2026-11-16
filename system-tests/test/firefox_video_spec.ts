@@ -57,12 +57,13 @@ describe('e2e firefox video', () => {
     spec: 'video_compression.cy.js,simple_passing.cy.js',
     snapshot: false,
     config: {
-      allowCypressEnv: true,
       video: true,
       videoCompression: false,
       env: {
-        NUM_TESTS,
         MS_PER_TEST,
+      },
+      expose: {
+        NUM_TESTS,
       },
     },
     async onRun (exec) {

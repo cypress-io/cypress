@@ -17,7 +17,7 @@ import type { AfterSpecDurations } from '@packages/types'
 import { agent } from '@packages/network'
 import type { CombinedAgent } from '@packages/network'
 
-import { apiUrl, apiRoutes, makeRoutes } from '../routes'
+import { getApiUrl, apiRoutes, makeRoutes } from '../routes'
 import { getText } from '../../util/status_code'
 import * as enc from '../encryption'
 import getEnvInformationForProjectRoot from '../environment'
@@ -71,6 +71,7 @@ const runnerCapabilities = {
   'dynamicSpecsInSerialMode': true,
   'skipSpecAction': true,
   'protocolMountVersion': 2,
+  'filterTestsAction': true,
 }
 
 let responseCache = {}
@@ -138,11 +139,10 @@ const rp = request.defaults((params, callback) => {
 
       params.transform = async function (body, response) {
         const { statusCode } = response
-        const options = this // request promise options
-
         const throwStatusCodeErrWithResp = (message, responseBody) => {
-          // @ts-ignore - server's check-ts fails on this, but driver's check-ts does not, so expect-error is not appropriate
-          throw new RequestErrors.StatusCodeError(response.statusCode, message, options, responseBody)
+          // `this` is the request-promise options that rp calls transform with
+          // @ts-expect-error - StatusCodeError expects request's Options, which require url, but RequestPromiseOptions makes it optional
+          throw new RequestErrors.StatusCodeError(response.statusCode, message, this, responseBody)
         }
 
         // response is valid and we are encrypting
@@ -465,7 +465,7 @@ export default {
           projectId: options.projectId,
           testingType: options.testingType,
           cloudApi: {
-            url: apiUrl,
+            url: getApiUrl(),
             retryWithBackoff: this.retryWithBackoff,
             requestPromise: this.rp,
           },
@@ -634,6 +634,7 @@ export default {
     return retryWithBackoff(async (attemptIndex) => {
       const { projectRoot, timeout, ...preflightRequestBody } = preflightInfo
 
+      const apiUrl = getApiUrl()
       const preflightBaseProxy = apiUrl.replace('api', 'api-proxy')
 
       const envInformation = await getEnvInformationForProjectRoot(projectRoot, process.pid.toString())

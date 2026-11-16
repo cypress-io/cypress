@@ -17,7 +17,7 @@
       data-cy="no-specs-message"
       class="leading-normal mb-[16px] text-gray-600 text-[16px]"
     >
-      {{ t('createSpec.noSpecsMessage') }}
+      If you feel that you're seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.
     </p>
     <Button
       data-cy="view-spec-pattern"
@@ -27,14 +27,13 @@
       class="mx-auto duration-300 hocus:ring-gray-50 hocus:border-gray-200"
       @click="showSpecPatternModal = true"
     >
-      {{ t('createSpec.viewSpecPatternButton') }}
+      View spec pattern
     </Button>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { useI18n } from '@cy/i18n'
 import SettingsIcon from '~icons/cy/settings_x16'
 import Button from '@cy/components/Button.vue'
 import CreateSpecCards from './CreateSpecCards.vue'
@@ -42,8 +41,6 @@ import { gql } from '@urql/vue'
 import type { CreateSpecContentFragment } from '../generated/graphql'
 import SpecPatternModal from '../components/SpecPatternModal.vue'
 import { getFilteredGeneratorList } from './generators'
-
-const { t } = useI18n()
 
 gql`
 fragment CreateSpecContent on Query {

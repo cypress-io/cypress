@@ -2,7 +2,8 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-import appState, { AppState } from '../lib/app-state'
+import type { AppState } from '../lib/app-state'
+import appState from '../lib/app-state'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import type HookModel from './hook-model'
@@ -24,7 +25,7 @@ const HookHeader = ({ model, number }: HookHeaderProps) => (
 interface HookComponentProps {
   model: HookModel
   showNumber: boolean
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const Hook: React.FC<HookComponentProps> = observer(({ model, showNumber, scrollIntoView }: HookComponentProps) => (
@@ -61,7 +62,7 @@ interface HooksModel {
 interface HooksProps {
   state?: AppState
   model: HooksModel
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const Hooks: React.FC<HooksProps> = observer(({ state = appState, model, scrollIntoView }: HooksProps) => (

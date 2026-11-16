@@ -49,6 +49,13 @@ describe('e2e js error handling', () => {
     spec: 'js_error_handling_failing.cy.js',
     snapshot: true,
     expectedExitCode: 5,
+    config: { screenshotOnRunFailure: false },
+    processEnv: {
+      // Firefox reports a zero-byte reset as a successful empty response when its
+      // last retry reuses a connection that just served a 304, so avoid revalidations
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=2089197
+      FIREFOX_DISABLE_HTTP_CACHE: 1,
+    },
     onStdout (stdout) {
       // firefox has a stack line for the cross-origin error that other browsers don't
       return stdout

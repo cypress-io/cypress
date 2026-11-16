@@ -25,7 +25,7 @@
 <script lang="ts" setup>
 import HighlightedText from './HighlightedText.vue'
 
-withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[] }>(), {
+withDefaults(defineProps<{ name?: string, expanded?: boolean, indexes?: number[] }>(), {
   name: '',
   expanded: false,
   indexes: () => [],

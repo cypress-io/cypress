@@ -1,3 +1,4 @@
+import { debug } from '../debug'
 import type { BackendStaticResponse } from '../types/internal-types'
 import type { Subscription } from '../types/external-types'
 import type { BackendRoute } from '../types/backend-route'
@@ -31,6 +32,7 @@ export function planSubscriptions (options: PlanSubscriptionsOptions): PlannedRo
 
     if (isSyncRequest && route.hasInterceptor) {
       if (proxiedUrl) {
+        debug.core('skipping sync intercept for %s (route %s)', proxiedUrl, route.id)
         onSyncInterceptSkipped?.(proxiedUrl)
       }
 
@@ -54,6 +56,8 @@ export function planSubscriptions (options: PlanSubscriptionsOptions): PlannedRo
       })],
     })
   }
+
+  debug.core('planned subscriptions for %d route(s) %o', planned.length, planned.map((p) => p.routeId))
 
   return planned
 }

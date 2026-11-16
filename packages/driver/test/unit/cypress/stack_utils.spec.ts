@@ -6,7 +6,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 import source_map_utils from '../../../src/cypress/source_map_utils'
 import stack_utils from '../../../src/cypress/stack_utils'
 import stackFrameFixture from './__fixtures__/getInvocationDetails_spec_stackframes.json'
-import { Browser } from '@packages/types'
+import type { Browser } from '@packages/types'
 
 vi.mock('../../../src/cypress/source_map_utils', () => {
   return {
@@ -18,7 +18,7 @@ vi.mock('../../../src/cypress/source_map_utils', () => {
 
 describe('stack_utils', () => {
   beforeEach(() => {
-    // @ts-expect-error
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config: vi.fn(),
       isBrowser: vi.fn(() => true),
@@ -186,6 +186,8 @@ describe('stack_utils', () => {
             'test',
           )
 
+          if (!result) throw new Error('expected invocation details')
+
           expect(result.stack).toEqual(stack)
         })
       })
@@ -241,8 +243,54 @@ describe('stack_utils', () => {
             'test',
           )
 
+          if (!result) throw new Error('expected invocation details')
+
           expect(result.stack).toEqual(stack)
         })
+      })
+    })
+  })
+
+  describe('normalizedStack', () => {
+    describe('webkit', () => {
+      beforeEach(() => {
+        vi.mocked(Cypress.isBrowser).mockImplementation((browser) => browser === 'webkit')
+      })
+
+      const normalize = (message: string, stack: string) => {
+        const err = new Error(message)
+
+        err.stack = stack
+
+        return stack_utils.normalizedStack(err)
+      }
+
+      it('fills in missing function names and locations', () => {
+        expect(normalize('boom', 'foo@http://localhost/a.js:1:2\n@http://localhost/a.js:3:4\nglobal code@\nmap@[native code]')).toEqual(
+          'Error: boom\nfoo@http://localhost/a.js:1:2\n<unknown>@http://localhost/a.js:3:4\nglobal code@<unknown>\nmap@[native code]',
+        )
+      })
+
+      it('removes the CyWebKitError line', () => {
+        expect(normalize('boom', '__CyWebKitError@http://localhost/a.js:1:2\nfoo@http://localhost/a.js:3:4')).toEqual(
+          'Error: boom\nfoo@http://localhost/a.js:3:4',
+        )
+      })
+
+      it('splits a line at its last @', () => {
+        expect(normalize('boom', 'foo@bar@')).toEqual(
+          'Error: boom\nfoo@bar@<unknown>',
+        )
+      })
+
+      it('normalizes a stack with a very long message line in linear time', () => {
+        const message = `expected <body> to contain text 'Noted.', but the text was '${'word '.repeat(30000)}'`
+        const stack = `Error: ${message}\nfoo@http://localhost/a.js:1:2`
+
+        const start = performance.now()
+
+        expect(normalize(message, stack)).toEqual(stack)
+        expect(performance.now() - start).toBeLessThan(1000)
       })
     })
   })

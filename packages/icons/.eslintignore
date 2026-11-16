@@ -1,8 +1,0 @@
-**/dist
-index.js
-index.mjs
-**/*.d.ts
-**/*.d.mts
-**/package-lock.json
-**/tsconfig.json
-**/cypress/fixtures

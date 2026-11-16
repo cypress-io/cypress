@@ -9,7 +9,7 @@ vi.mock('fs-extra', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       readFile: vi.fn(),
       outputFile: vi.fn(),
@@ -162,7 +162,7 @@ describe('lib/ca', () => {
       const MOCK_KEY_PRIVATE_PEM = `-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEA3/Acf8Fy6ECV88Qsz9fVA61cSK5Ki+wS88SYdz41xFp7ssew\r\nwYZvB9Aqii4vu8/to1AItLTV7I5ZEJEZJvlffK7fp15WMEqlpEHVAb3DoNw5ZAPY\r\n56liRHMi0RPV6t/QsyKTP/LYgNaDt+A9HE/My+E/+VfniOOE36tL9UxD+gipffLt\r\n+17c2oeT3Vzin3K4VuxNGtaFwUKUR+XJWcpGxxa/3GT3F6Xfmy1JTnDaFVGHL6ug\r\nW56z8uDyf8UUNaA8HSo2Ak+2Mc32xS0/+5FUSHdp5J8/ghjvnrRl01qmjnKVNSU8\r\n9wYPdoNw0D2N4uOoV2W8J2F76Gq1qlSO6bM1pwIDAQABAoIBAAcN6M/rd6OyWSbv\r\nMJwxh9/QR75wYx/KRYSRVl43QvlXAluM59gI1JmR6K0mrFFFyQ4ieMu8gJqtl0eq\r\n0niEVYo3dgsvMRbfWx10B3JBGJcKKPKqHlyZ3OMcH2Ynsk7uUwQ5nBrhGwnf+BFE\r\nSpiIOQLZKys/JieNR0PGgSOOjfuj2BoS+RMl30tRFOY/4QZP4oyuG/DND77+Cz/z\r\n7vBvF/78HoXfqbSQfLjT+D7kOvTVwF+jDYCUjMpo9uhQfWEA0a0+E8ZdIfzvtEca\r\nzhY18T0hvcDiq+revXjG9uOh7dPls1INdZazM85asife7GVmVEMmAsTXBlPU5wi0\r\nulqso60CgYEA/nRFSASQi5ySyt6De3PKEWc5GhFBVrA5YANKd2olMKvNbkm6W4TZ\r\n9mvJKxHmc2uTIOaRBAgOOZgNrYX2GgFC38IrNPtYBxTl+YmbFX+n4Z7Rp5s+HMz/\r\nVP6e8BLNaSYBT3Cqj1Nb/qfeqHgGmTs2Wk1qWeonyeoXyTO5fWd2JWMCgYEA4Uxh\r\nreKZr6Uz0BWhga7c74fkOg38CWzyW6OBuizlsxUCkzt4gGOXHOqb2O/pN/f2bBDB\r\nME4aErHngRTqW4vSpLPPsgvAxR1Q/dB8YUpesnO1pTFVIcWyVK/HIfo8Fg8ohNpE\r\nyEeemEVvtXz4nLK/Q8/KqV9KCuuCXucaqG4W0+0CgYEAvqTCm7i/y7pdyR16CW6x\r\ngOSDxeITwC18b1FH47xlbNfrrKwUsikRXS1YpapdrTB2JXpaQFkAv2oLJW1u/ADh\r\n5+AEm0eNppCj1Zih1zOzxrlFf3wyx0VYMIgs8NZFjHhrFuflAkmEbYG8syBqYTgZ\r\n+wJxojhr4z4+4AKfATQZMt0CgYATAdenzNs8Z0qUvo5um2sGRkep4i4mOWvE8Wlr\r\nZIhIcHhUJYtIAZ7pEJ3vUmYxk5jViyBRS/WFKD8os7QF3yj5PjZChh1QQ+XmU+V6\r\na8TLd1mWwy+0drJR1LaPFkZlcgfwFV4CK5Cktg7zl8R9q9LZDLnDSke73hyUlxi3\r\npvoEDQKBgQCgJVyo0p3x8bQe8RLKHb6la710I12Px4+sujImdG5+Spqrxyq5ii36\r\nbj/U3txxbqRg8RIzBZ1Zvde8TKt7RyhFqpkCfBQkqd/5/zriHOQZ7lgSNtjq5cYB\r\nEQ/JzKUoa0lAEuAxWQ7eSs8qy+Q36VphSTcNAqCt7rFhWmuASJVObg==\r\n-----END RSA PRIVATE KEY-----\r\n`
       const MOCK_KEY_PUBLIC_PEM = `-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3/Acf8Fy6ECV88Qsz9fV\r\nA61cSK5Ki+wS88SYdz41xFp7ssewwYZvB9Aqii4vu8/to1AItLTV7I5ZEJEZJvlf\r\nfK7fp15WMEqlpEHVAb3DoNw5ZAPY56liRHMi0RPV6t/QsyKTP/LYgNaDt+A9HE/M\r\ny+E/+VfniOOE36tL9UxD+gipffLt+17c2oeT3Vzin3K4VuxNGtaFwUKUR+XJWcpG\r\nxxa/3GT3F6Xfmy1JTnDaFVGHL6ugW56z8uDyf8UUNaA8HSo2Ak+2Mc32xS0/+5FU\r\nSHdp5J8/ghjvnrRl01qmjnKVNSU89wYPdoNw0D2N4uOoV2W8J2F76Gq1qlSO6bM1\r\npwIDAQAB\r\n-----END PUBLIC KEY-----\r\n`
 
-      // @ts-expect-error
+      // @ts-expect-error - mock implementation doesn't match fs.readFile's overloads
       vi.mocked(fs.readFile).mockImplementation((pathToRead: string) => {
         if (pathToRead === `${tmpDir}/ca_version.txt`) {
           // return version 1 to match current CA_VERSION
@@ -217,7 +217,7 @@ describe('lib/ca', () => {
     })
 
     it('clears out CA folder with old CA_VERSION and regenerates certs and keys', async function () {
-      // @ts-expect-error
+      // @ts-expect-error - mock implementation doesn't match fs.readFile's overloads
       vi.mocked(fs.readFile).mockImplementation((pathToRead: string) => {
         if (pathToRead === `${tmpDir}/ca_version.txt`) {
           // return version 0 to return version mismatch

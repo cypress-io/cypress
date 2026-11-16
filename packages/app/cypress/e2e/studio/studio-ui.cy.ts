@@ -1,13 +1,12 @@
 import { launchStudio, loadProjectAndRunSpec } from './helper'
-import pDefer from 'p-defer'
 
 describe('Cypress Studio - UI and Panel Management', () => {
   it('shows Run test button label in single-test mode', () => {
     launchStudio()
 
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.get('button.restart').trigger('mouseover')
-    cy.get('.cy-tooltip').should('have.text', 'Run test R')
+    cy.reporter().find('button.restart').trigger('mouseover')
+    cy.reporter().find('.cy-tooltip').should('have.text', 'Run test R')
   })
 
   it('shows Run All Tests button label on welcome screen', () => {
@@ -17,8 +16,8 @@ describe('Cypress Studio - UI and Panel Management', () => {
     cy.findByTestId('studio-panel').should('be.visible')
     cy.findByTestId('new-test-features').should('be.visible')
 
-    cy.get('button.restart').trigger('mouseover')
-    cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+    cy.reporter().find('button.restart').trigger('mouseover')
+    cy.reporter().find('.cy-tooltip').should('have.text', 'Run All Tests R')
   })
 
   it('shows Run All Tests button label on new test screen', () => {
@@ -26,8 +25,8 @@ describe('Cypress Studio - UI and Panel Management', () => {
 
     cy.findByTestId('studio-panel').should('be.visible')
     cy.findByTestId('test-name-input').should('be.visible')
-    cy.get('button.restart').trigger('mouseover')
-    cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+    cy.reporter().find('button.restart').trigger('mouseover')
+    cy.reporter().find('.cy-tooltip').should('have.text', 'Run All Tests R')
   })
 
   it('closes studio panel when clicking studio button (from the cloud)', () => {
@@ -42,10 +41,10 @@ describe('Cypress Studio - UI and Panel Management', () => {
     // Original spec should pass
     cy.waitForSpecToFinish({ passCount: 1 })
 
-    cy.get('.command').should('have.length', 1)
+    cy.reporter().find('.command').should('have.length', 1)
 
     // Assert the spec was executed without any new commands.
-    cy.get('.command-name-visit').within(() => {
+    cy.reporter().find('.command-name-visit').within(() => {
       cy.contains('visit')
       cy.contains('cypress/e2e/index.html')
     })
@@ -75,7 +74,7 @@ describe('studio functionality', () => {
   })
 
   it('immediately loads the studio panel from existing test', () => {
-    const deferred = pDefer()
+    const deferred = Promise.withResolvers<void>()
 
     loadProjectAndRunSpec()
 
@@ -87,7 +86,7 @@ describe('studio functionality', () => {
       return deferred.promise
     }).as('indexHtml')
 
-    cy.contains('visits a basic html page')
+    cy.reporter().contains('visits a basic html page')
     .closest('.runnable-wrapper')
     .findByTestId('launch-studio')
     .click()
@@ -128,14 +127,14 @@ describe('studio functionality', () => {
     cy.findByTestId('new-test-features').should('be.visible')
 
     // verify test body section is visible after refresh
-    cy.get('.runnable-instruments').should('be.visible')
-    cy.get('.runnable-commands-region').should('be.visible')
+    cy.reporter().find('.runnable-instruments').should('be.visible')
+    cy.reporter().find('.runnable-commands-region').should('be.visible')
 
     // verify the test body hook is present
-    cy.get('.hook-item').contains('test body').should('be.visible')
+    cy.reporter().find('.hook-item').contains('test body').should('be.visible')
 
     // verify commands are visible within the test body
-    cy.get('.command-name-visit').should('be.visible')
+    cy.reporter().find('.command-name-visit').should('be.visible')
 
     // Verify URL parameters show suite mode, not test mode
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
@@ -156,24 +155,24 @@ describe('studio functionality', () => {
     // Now restart the spec, which will call interceptTest with the running test
     // This is where the bug would manifest - it would incorrectly switch from
     // "new test" mode to "edit the running test" mode
-    cy.get('button.restart').click()
+    cy.reporter().find('button.restart').click()
 
-    cy.get('.test').should('have.length', 1)
-    cy.get('.test').first().should('have.class', 'runnable-active')
+    cy.reporter().find('.test').should('have.length', 1)
+    cy.reporter().find('.test').first().should('have.class', 'runnable-active')
 
     // verify we're still in new test mode
     cy.findByTestId('studio-panel').should('be.visible')
     cy.findByTestId('new-test-features').should('be.visible')
 
     // these should not exist if we stayed in new test mode
-    cy.findByTestId('studio-single-test-title').should('not.exist')
+    cy.reporter().findByTestId('studio-single-test-title').should('not.exist')
     cy.findByTestId('record-button-recording').should('not.exist')
 
     // verify URL still shows suite mode, not edit test mode
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
   })
 
-  it('opens a cloud studio session with AI enabled', () => {
+  it('opens a cloud studio session with AI enabled for a logged in user', () => {
     cy.mockNodeCloudRequest({
       url: '/studio/config?projectSlug=n69px6',
       method: 'get',
@@ -208,7 +207,7 @@ describe('studio functionality', () => {
       url: 'http://localhost:3000/cypress/e2e/index.html',
     })
 
-    launchStudio()
+    launchStudio({ shouldLogin: true })
 
     // expand the recommendation
     cy.get('[aria-label="Expand recommendation"]').first().click()

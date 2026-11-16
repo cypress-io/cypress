@@ -69,7 +69,7 @@ describe('lib/util/replace_stream', function () {
   describe('original `replacestream` tests', function () {
     it('should be able to replace within a chunk', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/<\/head>/, `${script}</head>`)
+        const replace = replaceStream(/<\/head>/, `${script}</head>`)
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.stringContaining(script))
@@ -91,7 +91,7 @@ describe('lib/util/replace_stream', function () {
     })
 
     it('should be able to replace between chunks', function () {
-      let haystacks = [
+      const haystacks = [
         ['<!DOCTYPE html>',
           '<html>',
           ' <head>',
@@ -105,7 +105,7 @@ describe('lib/util/replace_stream', function () {
       ]
 
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/<\/head>/, `${script}</head>`)
+        const replace = replaceStream(/<\/head>/, `${script}</head>`)
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.stringContaining(script))
@@ -121,7 +121,7 @@ describe('lib/util/replace_stream', function () {
     })
 
     it('should be able to handle no matches', function () {
-      let haystacks = [
+      const haystacks = [
         ['<!DOCTYPE html>',
           '<html>',
           ' <head>',
@@ -135,7 +135,7 @@ describe('lib/util/replace_stream', function () {
       ]
 
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/<\/head>/, `${script}</head>`)
+        const replace = replaceStream(/<\/head>/, `${script}</head>`)
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.not.stringContaining(script))
@@ -152,7 +152,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to handle dangling tails', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/<\/head>/, `${script}</head>`)
+        const replace = replaceStream(/<\/head>/, `${script}</head>`)
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.stringContaining('</he'))
@@ -171,10 +171,10 @@ describe('lib/util/replace_stream', function () {
 
     it('should replace characters specified and not modify partial matches', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/ab/, 'Z')
+        const replace = replaceStream(/ab/, 'Z')
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-          let expected = [
+          const expected = [
             'Z',
             'a',
             'a',
@@ -196,10 +196,10 @@ describe('lib/util/replace_stream', function () {
 
     it('should handle partial matches between complete matches', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/ab/g, 'Z')
+        const replace = replaceStream(/ab/g, 'Z')
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-          let expected = [
+          const expected = [
             'Z',
             'a',
             'Z',
@@ -221,10 +221,10 @@ describe('lib/util/replace_stream', function () {
 
     it('should only replace characters specified', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/ab/, 'Z')
+        const replace = replaceStream(/ab/, 'Z')
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-          let expected = [
+          const expected = [
             'Z',
             'a',
             'b',
@@ -244,7 +244,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to use a replace function', function () {
       return new Promise<void>((resolve) => {
-        let haystacks = [
+        const haystacks = [
           ['<!DOCTYPE html>',
             '<html>',
             ' <head>',
@@ -258,7 +258,7 @@ describe('lib/util/replace_stream', function () {
         ]
 
         // @ts-expect-error - replace function is not typed
-        let replace = replaceStream(/<\/head>/, function (match: string) {
+        const replace = replaceStream(/<\/head>/, function (match: string) {
           expect(match).toEqual('</head>')
 
           return `${script}</head>`
@@ -279,7 +279,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to replace within a chunk using regex', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/<\/head>/, `${script}</head>`)
+        const replace = replaceStream(/<\/head>/, `${script}</head>`)
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.stringContaining(script))
@@ -302,7 +302,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to replace between chunks using regex', function () {
       return new Promise<void>((resolve) => {
-        let haystacks = [
+        const haystacks = [
           ['<!DOCTYPE html>',
             '<html>',
             ' <head>',
@@ -315,7 +315,7 @@ describe('lib/util/replace_stream', function () {
             '</html>'].join('\n'),
         ]
 
-        let replace = replaceStream(/fe+d/, 'foooooooood')
+        const replace = replaceStream(/fe+d/, 'foooooooood')
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.stringContaining('foooooooood'))
@@ -332,7 +332,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to handle no matches using regex', function () {
       return new Promise<void>((resolve) => {
-        let haystacks = [
+        const haystacks = [
           ['<!DOCTYPE html>',
             '<html>',
             ' <head>',
@@ -345,7 +345,7 @@ describe('lib/util/replace_stream', function () {
             '</html>'].join('\n'),
         ]
 
-        let replace = replaceStream(/<\/head>/, `${script}</head>`)
+        const replace = replaceStream(/<\/head>/, `${script}</head>`)
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.not.stringContaining(script))
@@ -362,7 +362,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to handle dangling tails using regex', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/<\/head>/, `${script}</head>`)
+        const replace = replaceStream(/<\/head>/, `${script}</head>`)
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.stringContaining('</he'))
@@ -381,7 +381,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to handle multiple searches and replaces using regex',
       function () {
-        let haystacks = [
+        const haystacks = [
           ['<!DOCTYPE html>',
             '<html>',
             ' <head>',
@@ -399,10 +399,10 @@ describe('lib/util/replace_stream', function () {
         ]
 
         return new Promise<void>((resolve) => {
-          let replace = replaceStream(/<\/p>/g, ', world</p>')
+          const replace = replaceStream(/<\/p>/g, ', world</p>')
 
           replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-            let expected = [
+            const expected = [
               '<!DOCTYPE html>',
               '<html>',
               ' <head>',
@@ -432,7 +432,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be possible to specify the regexp flags when using a regex',
       function () {
-        let haystacks = [
+        const haystacks = [
           ['<!DOCTYPE html>',
             '<html>',
             ' <head>',
@@ -450,10 +450,10 @@ describe('lib/util/replace_stream', function () {
         ]
 
         return new Promise<void>((resolve) => {
-          let replace = replaceStream(/<\/P>/gm, ', world</P>')
+          const replace = replaceStream(/<\/P>/gm, ', world</P>')
 
           replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-            let expected = [
+            const expected = [
               '<!DOCTYPE html>',
               '<html>',
               ' <head>',
@@ -483,10 +483,10 @@ describe('lib/util/replace_stream', function () {
 
     it('should replace characters specified and not modify partial matches using regex', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/ab/, 'Z')
+        const replace = replaceStream(/ab/, 'Z')
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-          let expected = [
+          const expected = [
             'Z',
             'a',
             'a',
@@ -508,10 +508,10 @@ describe('lib/util/replace_stream', function () {
 
     it('should handle partial matches between complete matches using regex', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/ab/g, 'Z')
+        const replace = replaceStream(/ab/g, 'Z')
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-          let expected = [
+          const expected = [
             'Z',
             'a',
             'Z',
@@ -533,10 +533,10 @@ describe('lib/util/replace_stream', function () {
 
     it('should only replace characters specified using regex', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/ab/, 'Z')
+        const replace = replaceStream(/ab/, 'Z')
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-          let expected = [
+          const expected = [
             'Z',
             'a',
             'b',
@@ -556,7 +556,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to change each replacement value with a function using regex',
       function () {
-        let haystacks = [
+        const haystacks = [
           ['<!DOCTYPE html>',
             '<html>',
             ' <head>',
@@ -574,12 +574,12 @@ describe('lib/util/replace_stream', function () {
         ]
 
         return new Promise<void>((resolve) => {
-          let greetings = ['Hi', 'Hey', 'Gday', 'Bonjour', 'Greetings']
+          const greetings = ['Hi', 'Hey', 'Gday', 'Bonjour', 'Greetings']
 
-          let replace = replaceStream(/Hello/g, greetings.shift.bind(greetings))
+          const replace = replaceStream(/Hello/g, greetings.shift.bind(greetings))
 
           replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-            let expected = [
+            const expected = [
               '<!DOCTYPE html>',
               '<html>',
               ' <head>',
@@ -609,10 +609,10 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to replace captures using $1 notation', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/(a)(b)/g, 'this is $1 and this is $2 and this is again $1')
+        const replace = replaceStream(/(a)(b)/g, 'this is $1 and this is $2 and this is again $1')
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
-          let expected = [
+          const expected = [
             'this is a and this is b and this is again a',
             'a',
             'this is a and this is b and this is again a',
@@ -634,7 +634,7 @@ describe('lib/util/replace_stream', function () {
 
     it('should be able to replace when the match is a tail using a regex', function () {
       return new Promise<void>((resolve) => {
-        let replace = replaceStream(/<\/html>/g, `${script}</html>`)
+        const replace = replaceStream(/<\/html>/g, `${script}</html>`)
 
         replace.pipe(concatStream({ encoding: 'string' }, function (data) {
           expect(data).toEqual(expect.stringContaining(script))

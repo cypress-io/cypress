@@ -1,4 +1,4 @@
-import type { CyHttpMessages } from '@packages/net-stubbing/lib/types'
+import type { CyHttpMessages } from '@packages/network-interception'
 import type { HandlerFn } from '.'
 import { parseJsonBody } from './utils'
 
@@ -16,7 +16,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
 
   request.state = 'Complete'
 
-  // @ts-ignore
+  // @ts-expect-error - the handler expects a ResponseComplete, not the IncomingResponse
   userHandler && await userHandler(request.response!)
 
   return null

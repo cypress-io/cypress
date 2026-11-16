@@ -46,7 +46,40 @@
       dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
       // the actual integrity of the file is: <%=data.integrityValue%>
       dynamicIntegrityScript.setAttribute('integrity', "<%=data.integrityValue%>")
-      
+
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+  <% } %>
+
+  <% if(data && data.dynamicScriptPropertyInjection) { %>
+    <!-- dynamic script injection, integrity set via the reflected property from a variable (webpack-subresource-integrity pattern) -->
+    <script type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('script')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-script'
+      dynamicIntegrityScript.type = 'text/javascript'
+      dynamicIntegrityScript.src = 'integrity.js'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
+      // the actual integrity of the file is: <%=data.integrityValue%>
+      const scriptIntegrity = "<%=data.integrityValue%>"
+      dynamicIntegrityScript.integrity = scriptIntegrity
+
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>
+  <% } %>
+
+  <% if(data && data.dynamicLinkPropertyInjection) { %>
+    <!-- dynamic link injection, integrity set via the reflected property from a variable -->
+    <script id="dynamic-link-property-injection" type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
+      dynamicIntegrityScript.rel = "stylesheet"
+      dynamicIntegrityScript.href = 'integrity.css'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      // the actual integrity of the file is: <%=data.integrityValue%>
+      const linkIntegrity = "<%=data.integrityValue%>"
+      dynamicIntegrityScript.integrity = linkIntegrity
+
       document.querySelector('head').appendChild(dynamicIntegrityScript)
     </script>
   <% } %>

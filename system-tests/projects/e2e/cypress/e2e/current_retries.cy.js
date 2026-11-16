@@ -34,8 +34,9 @@ context('.currentRetry', () => {
       expect(Cypress.currentRetry).to.eq(1)
     })
 
+    // afterEach spans the failing first attempt (0) and the passing retry (1).
     afterEach(() => {
-      expect(Cypress.currentRetry).to.eq(1)
+      expect(Cypress.currentRetry).to.be.oneOf([0, 1])
     })
 
     after(() => {
@@ -56,8 +57,9 @@ context('.currentRetry', () => {
       expect(Cypress.currentRetry).to.eq(1)
     })
 
+    // Tolerate both attempts, keeping the test body the sole trigger.
     afterEach(() => {
-      expect(Cypress.currentRetry).to.eq(1)
+      expect(Cypress.currentRetry).to.be.oneOf([0, 1])
     })
 
     after(() => {

@@ -5,6 +5,22 @@ process.env.PROJECT_BASE_DIR = process.env.PROJECT_BASE_DIR ?? path.join(__dirna
 
 const isDev = env === 'dev'
 
+// The binary ships compiled JavaScript and no TypeScript compiler, so registering ts-node there
+// only spends startup time. The source tree still needs it when run with CYPRESS_INTERNAL_ENV=production.
+function canRegisterTypeScript () {
+  if (isDev) {
+    return true
+  }
+
+  try {
+    require.resolve('typescript')
+
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
 function runWithSnapshot (forceTypeScript) {
   const { snapshotRequire } = require('@packages/v8-snapshot-require')
   const projectBaseDir = process.env.PROJECT_BASE_DIR
@@ -32,7 +48,9 @@ function runWithSnapshot (forceTypeScript) {
 
 const hookRequire = ({ forceTypeScript }) => {
   if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof getSnapshotResult === 'undefined') {
-    require('@packages/ts/register')
+    if (canRegisterTypeScript()) {
+      require('@packages/ts/register')
+    }
   } else {
     runWithSnapshot(forceTypeScript)
   }

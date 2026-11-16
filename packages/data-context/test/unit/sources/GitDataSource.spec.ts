@@ -1,9 +1,8 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import path from 'path'
 import os from 'os'
-import simpleGit from 'simple-git'
+import { simpleGit } from 'simple-git'
 import fs from 'fs-extra'
-import pDefer from 'p-defer'
 import chokidar from 'chokidar'
 
 import { scaffoldMigrationProject } from '../helper'
@@ -22,15 +21,15 @@ describe('GitDataSource', () => {
     e2eFolder = path.join(projectPath, 'cypress', 'e2e')
     const allSpecs = await fs.readdir(e2eFolder)
 
-    if (process.env.CI) {
-      // need to set a user on CI
-      // run sequentially: concurrent writes to ~/.gitconfig race on the
-      // .gitconfig.lock file and intermittently fail with "could not lock"
-      await git.addConfig('user.name', 'Test User', true, 'global')
-      await git.addConfig('user.email', 'test-user@example.com', true, 'global')
-    }
-
     await git.init()
+
+    // scope the identity to this throwaway repo. Writing it to the global
+    // gitconfig would leave the machine committing as `Test User` afterwards,
+    // and signing is irrelevant here but fails without the machine's key
+    await git.addConfig('user.name', 'Test User')
+    await git.addConfig('user.email', 'test-user@example.com')
+    await git.addConfig('commit.gpgsign', 'false')
+
     await git.add(allSpecs.map((spec) => path.join(e2eFolder, spec)))
     await git.commit('add all specs')
   })
@@ -45,7 +44,7 @@ describe('GitDataSource', () => {
 
   it(`gets correct status for files on ${os.platform()}`, async function () {
     const onBranchChange = jest.fn()
-    const dfd = pDefer()
+    const dfd = Promise.withResolvers()
 
     // create a file and modify a file to express all
     // git states we are interested in (created, unmodified, modified)
@@ -120,7 +119,7 @@ describe('GitDataSource', () => {
     .map((filename) => path.join(e2eFolder, filename))
     .map((filepath) => toPosix(filepath))
 
-    const dfd = pDefer()
+    const dfd = Promise.withResolvers()
 
     gitInfo = new GitDataSource({
       isRunMode: false,
@@ -152,9 +151,62 @@ describe('GitDataSource', () => {
     })
   })
 
+  it(`reads committed files whose names contain shell or pathspec syntax as literal paths on ${os.platform()}`, async () => {
+    const filenames = [
+      'pwn$(touch${IFS}injected).cy.js',
+      'pwn`touch${IFS}injected`.cy.js',
+      'file withSpace.cy.js',
+      'file\'withOneSingleQuote.cy.js',
+      '[xy].cy.js',
+    ]
+
+    if (os.platform() !== 'win32') {
+      // Double quote not a legal character on NTFS
+      filenames.push('file"withOneDoubleQuote.cy.js')
+    }
+
+    const specs = filenames.map((filename) => toPosix(path.join(e2eFolder, filename)))
+
+    await Promise.all(specs.map((spec) => fs.createFile(spec)))
+    await git.add(specs)
+    await git.commit('add specs with special names')
+
+    // a later commit that `[xy].cy.js` would match if it were read as a glob
+    const globMatch = path.join(e2eFolder, 'x.cy.js')
+
+    await fs.createFile(globMatch)
+    await git.add([globMatch])
+    await git.commit('add glob match')
+
+    const projectContents = await fs.readdir(projectPath)
+    const dfd = Promise.withResolvers()
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: jest.fn(),
+      onGitInfoChange: dfd.resolve,
+      onError: jest.fn(),
+    })
+
+    gitInfo.setSpecs(specs)
+
+    await dfd.promise
+
+    expect(await fs.readdir(projectPath)).toEqual(projectContents)
+
+    for (const spec of specs) {
+      expect(gitInfo.gitInfoFor(spec)).toMatchObject({
+        statusType: 'unmodified',
+        author: 'Test User',
+        subject: 'add specs with special names',
+      })
+    }
+  })
+
   it(`watches switching branches on ${os.platform()}`, async () => {
     const stub = jest.fn()
-    const dfd = pDefer()
+    const dfd = Promise.withResolvers()
 
     stub.mockImplementationOnce(dfd.resolve)
 
@@ -170,7 +222,7 @@ describe('GitDataSource', () => {
 
     expect(result).toEqual((await git.branch()).current)
 
-    const switchBranch = pDefer()
+    const switchBranch = Promise.withResolvers()
 
     stub.mockImplementationOnce(switchBranch.resolve)
 
@@ -194,7 +246,7 @@ describe('GitDataSource', () => {
 
     const errorStub = jest.fn()
     const stub = jest.fn()
-    const dfd = pDefer()
+    const dfd = Promise.withResolvers()
 
     stub.mockImplementationOnce(dfd.resolve)
 
@@ -215,7 +267,7 @@ describe('GitDataSource', () => {
 
   describe('Git Hashes - no fake timers', () => {
     it('does not include commits that are part of the Git tree from a merge', async () => {
-      const dfd = pDefer()
+      const dfd = Promise.withResolvers()
 
       const logCallback = jest.fn()
 

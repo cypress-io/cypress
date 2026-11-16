@@ -19,6 +19,11 @@ describe('WIZARD_DEPENDENCY_TYPESCRIPT', () => {
     expect(satisfies('6.0.2')).toBe(true)
   })
 
+  it('accepts TypeScript 7.x per minVersion', () => {
+    expect(satisfies('7.0.0')).toBe(true)
+    expect(satisfies('7.0.2')).toBe(true)
+  })
+
   it('rejects TypeScript below 5', () => {
     expect(satisfies('4.9.5')).toBe(false)
   })

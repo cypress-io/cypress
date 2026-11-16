@@ -3,6 +3,7 @@ import _ from 'lodash'
 import os from 'os'
 
 import type { FoundBrowser } from '@packages/types'
+import { isDeprecatedBrowser } from '@packages/types'
 import type { DataContext } from '..'
 
 let isPowerShellAvailable: undefined | boolean
@@ -23,7 +24,7 @@ if (os.platform() === 'win32') {
 
 const platform = os.platform()
 
-function getBrowserKey<T extends {name: string, version: string | number}> (browser: T) {
+function getBrowserKey<T extends { name: string, version: string | number }> (browser: T) {
   return `${browser.name}-${browser.version}`
 }
 
@@ -130,5 +131,9 @@ export class BrowserDataSource {
 
   isVersionSupported (obj: FoundBrowser) {
     return Boolean(!obj.unsupportedVersion)
+  }
+
+  isDeprecated (obj: FoundBrowser) {
+    return isDeprecatedBrowser(obj)
   }
 }

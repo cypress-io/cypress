@@ -1,4 +1,5 @@
-import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
+import type { SinonSpy, SinonFakeTimers } from 'sinon'
+import sinon from 'sinon'
 
 import scroller from '../../../src/lib/scroller'
 
@@ -70,9 +71,6 @@ describe('scroller', () => {
 
   beforeEach(() => {
     clock = sinon.useFakeTimers()
-  })
-
-  beforeEach(() => {
     scroller.__reset()
   })
 

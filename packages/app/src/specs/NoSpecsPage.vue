@@ -14,10 +14,11 @@
         data-cy="create-spec-page-description"
         class="leading-normal mb-[32px] text-gray-600 text-[18px]"
       >
-        <i18n-t
-          scope="global"
-          :keypath="descriptionKeyPath"
-        >
+        <template v-if="props.isDefaultSpecPattern">
+          {{ DEFAULT_PATTERN_DESCRIPTIONS[props.gql.currentProject.currentTestingType] }}
+        </template>
+        <template v-else>
+          We couldn't find any files matching the following spec patterns. You may need to move your specs or update your
           <OpenConfigFileInIDE
             v-if="props.gql.currentProject.configFileAbsolutePath"
             v-slot="{onClick}"
@@ -32,28 +33,28 @@
             </button>
           </OpenConfigFileInIDE>
           <span v-else>specPattern</span>
-        </i18n-t>
+          to find them.
+        </template>
       </p>
     </div>
 
     <DefaultSpecPatternNoContent
       v-if="props.isDefaultSpecPattern"
       :gql="props.gql"
-      @showCreateSpecModal="showCreateSpecModal"
+      @show-create-spec-modal="showCreateSpecModal"
     />
     <CustomPatternNoSpecContent
       v-else
       :gql="props.gql.currentProject"
-      @showCreateSpecModal="showCreateSpecModal"
+      @show-create-spec-modal="showCreateSpecModal"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import DefaultSpecPatternNoContent from './DefaultSpecPatternNoContent.vue'
 import { gql } from '@urql/vue'
-import type { NoSpecsPageFragment } from '../generated/graphql'
+import type { NoSpecsPageFragment, TestingTypeEnum } from '../generated/graphql'
 import CustomPatternNoSpecContent from './CustomPatternNoSpecContent.vue'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
 
@@ -89,10 +90,9 @@ const showCreateSpecModal = (id?: string) => {
   emit('showCreateSpecModal', id)
 }
 
-const descriptionKeyPath = computed(() => {
-  return props.isDefaultSpecPattern ?
-    `createSpec.page.defaultPatternNoSpecs.${props.gql.currentProject?.currentTestingType}.description` :
-    'createSpec.page.customPatternNoSpecs.description'
-})
+const DEFAULT_PATTERN_DESCRIPTIONS: Record<TestingTypeEnum, string> = {
+  component: 'Since this project looks new, we recommend that you get started by creating a spec for one of your components.',
+  e2e: 'Since this project looks new, we recommend that you use the specs and tests that we\'ve written for you to get started.',
+}
 
 </script>

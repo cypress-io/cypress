@@ -1,0 +1,3 @@
+# CircleCI Configuration
+
+@AGENTS.md

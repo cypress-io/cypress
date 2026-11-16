@@ -9,10 +9,9 @@ import browser from 'webextension-polyfill'
 import { automation } from '../../../app/v2/background'
 
 vi.mock('../../../app/v2/client', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('../../../app/v2/client')>()
 
   return {
-    // @ts-expect-error
     ...actual,
     connect: vi.fn(),
   }
@@ -46,8 +45,8 @@ const PORT = 12345
 
 describe('app/background', () => {
   let httpSrv: http.Server
-  let server: http.Server
-  let connectWrapper: (options?: Record<string, unknown>) => Promise<SocketShape>
+  let server: SocketIOServer
+  let connectWrapper: () => Promise<SocketShape>
 
   beforeEach(async () => {
     vi.resetAllMocks()
@@ -55,7 +54,6 @@ describe('app/background', () => {
 
     httpSrv = http.createServer()
 
-    // @ts-expect-error
     server = new SocketIOServer(httpSrv, { path: '/__socket' })
 
     // use an event emitter and wrap in in a vitest mock to assert on calls
@@ -69,12 +67,12 @@ describe('app/background', () => {
 
     browser.runtime.getBrowserInfo = vi.fn().mockResolvedValue({ name: 'Firefox' })
 
-    connectWrapper = async (options = {}) => {
+    connectWrapper = async () => {
       const ws = automation.connect(`http://localhost:${PORT}`, '/__socket.io')
 
       // skip 'connect' and 'automation:client:connected' and trigger
       // the handler that kicks everything off
-      ws.emit('automation:config', options)
+      ws.emit('automation:config')
 
       await new Promise<void>((resolve) => setTimeout(resolve, 1))
 
@@ -86,8 +84,8 @@ describe('app/background', () => {
     })
   })
 
-  afterEach(function () {
-    server.close()
+  afterEach(async function () {
+    await server.close()
 
     return new Promise<void>((resolve) => {
       httpSrv.close(() => {
@@ -115,7 +113,7 @@ describe('app/background', () => {
   describe('cookies', () => {
     it('onChanged does not emit when cause is overwrite', async function () {
       const ws = await connectWrapper()
-      // @ts-expect-error
+      // @ts-expect-error - the vi.mock factory replaces addListener with vi.fn(), which the polyfill types do not reflect
       const fn = browser.cookies.onChanged.addListener.mock.calls[0][0]
 
       fn({ cause: 'overwrite' })

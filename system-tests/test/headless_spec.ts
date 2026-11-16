@@ -1,4 +1,5 @@
-import systemTests, { BrowserName } from '../lib/system-tests'
+import type { BrowserName } from '../lib/system-tests'
+import systemTests from '../lib/system-tests'
 
 describe('e2e headless', function () {
   systemTests.setup()

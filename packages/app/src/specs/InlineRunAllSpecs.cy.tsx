@@ -5,6 +5,10 @@ describe('<InlineRunAllSpecs/>', { viewportHeight: 50, viewportWidth: 150 }, () 
     beforeEach(() => {
       const runAllStub = cy.stub().as('runAllStub')
 
+      // realHover() leaves the real pointer in place across tests and retries, which
+      // opens the tooltip on mount if it lands over the trigger. Park it elsewhere first.
+      cy.get('body').realHover({ position: 'topLeft' })
+
       cy.mount(() => {
         return (
           <div class="flex justify-center">

@@ -1,6 +1,8 @@
-import sinon, { SinonFakeTimers } from 'sinon'
+import type { SinonFakeTimers } from 'sinon'
+import sinon from 'sinon'
 
-import CommandModel, { CommandProps } from '../../../src/commands/command-model'
+import type { CommandProps } from '../../../src/commands/command-model'
+import CommandModel from '../../../src/commands/command-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
@@ -155,7 +157,7 @@ describe('Command model', () => {
       let command: CommandModel
 
       beforeEach(() => {
-        command = new CommandModel(commandProps({ state: null }))
+        command = new CommandModel(commandProps({ state: null } as unknown as Partial<CommandProps>))
         clock.tick(300)
         command.update({ state: 'pending' } as CommandProps)
       })

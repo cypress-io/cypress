@@ -17,6 +17,7 @@ import * as capture from '../capture'
 import * as env from '../util/env'
 import * as ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
+import { getEligibleTestTitles, getFilterMessage } from '../cloud/filter_tests'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
 import type { Cfg } from '../project-base'
@@ -171,7 +172,8 @@ const updateInstanceStdout = async (options: any = {}) => {
 
 const postInstanceResults = (options: any = {}) => {
   const { runId, instanceId, results, group, parallel, ciBuildId } = options
-  let { stats, tests, video, screenshots, reporterStats, error } = results
+  const { stats, reporterStats, error } = results
+  let { tests, video, screenshots } = results
 
   video = Boolean(video)
 
@@ -240,7 +242,8 @@ const createRun = Promise.method((options: any = {}) => {
     ciBuildId: null,
   })
 
-  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, project } = options
+  const { projectRoot, projectId, platform, git, parallel, group, tags, testingType, autoCancelAfterFailures, project } = options
+  let { recordKey, specPattern, specs, ciBuildId } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -521,7 +524,7 @@ interface InstanceOptions {
 }
 
 async function createInstance (options: InstanceOptions) {
-  let { spec, runId, group, groupId, parallel, machineId, ciBuildId, platform } = options
+  const { spec, runId, group, groupId, parallel, machineId, ciBuildId, platform } = options
 
   const resolvedSpec = spec ? getSpecRelativePath(spec) : null
 
@@ -647,6 +650,9 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
       let captured: ReturnType<typeof capture.stdout> | null = null
       let instanceId = null
+      // FILTER actions arrive per spec, but the rerun indicator is run-level —
+      // only surface it once for the whole run.
+      let hasShownRerunWarning = false
 
       const beforeSpecRun = () => {
         telemetry.startSpan({ name: 'record:beforeSpecRun' })
@@ -815,7 +821,26 @@ const createRunAndRecordSpecs = (options: any = {}) => {
             return
           }
 
-          return cb(response)
+          // When Cloud sends a per-spec FILTER action (test-level rerun
+          // optimization), compute the keep-list of test full titles the browser
+          // should execute. `undefined` means no filtering — run the spec in full.
+          const filteredTests = getEligibleTestTitles(response.actions)
+
+          // An empty (but defined) keep-list has no eligible tests to filter down
+          // to, so the runner/reporter both treat it the same as "no filtering" -
+          // don't warn about a rerun optimization that isn't actually taking effect.
+          const filterMessage = getFilterMessage(response.actions)
+
+          if (filteredTests?.length && filterMessage && !hasShownRerunWarning) {
+            hasShownRerunWarning = true
+            errorsWarning('CLOUD_RERUN_FAILED_TESTS', { message: filterMessage })
+          }
+
+          cb({ filteredTests })
+
+          // Returned so the project can tell the reporter to omit the skipped
+          // (non-executed) tests from what is reported to Cloud.
+          return filteredTests
         } catch (err: unknown) {
           onError(err)
           debug('postInstanceTests failed, allowing browser to hang until it is killed: Error %o', { err })

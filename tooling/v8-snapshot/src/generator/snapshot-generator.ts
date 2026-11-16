@@ -3,7 +3,8 @@ import debug from 'debug'
 import fs from 'fs'
 import { dirname, join, basename } from 'path'
 import { minify } from 'terser'
-import { createSnapshotScript, SnapshotScript } from './create-snapshot-script'
+import type { SnapshotScript } from './create-snapshot-script'
+import { createSnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
 import { determineDeferred } from '../doctor/determine-deferred'
 import {
@@ -15,7 +16,8 @@ import {
   getBundlerPath,
   resolveElectronVersion,
 } from '../utils'
-import { createExportScript, ExportScript } from './create-snapshot-bundle'
+import type { ExportScript } from './create-snapshot-bundle'
+import { createExportScript } from './create-snapshot-bundle'
 import { Flag, GeneratorFlags } from './snapshot-generator-flags'
 import { syncAndRun } from '@tooling/electron-mksnapshot'
 import tempDir from 'temp-dir'
@@ -507,22 +509,19 @@ export class SnapshotGenerator {
 
       return { v8ContextFile: this.v8ContextFile, snapshotBinDir: this.snapshotBinDir }
     } catch (err: any) {
-      if (err.stderr || err.stdout) {
-        if (err.stderr != null) {
-          logError(err.stderr.toString())
-        }
-
-        if (err.stdout != null) {
-          logDebug(err.stdout.toString())
-        }
-      } else {
-        logError(err.toString())
+      if (err.stdout != null) {
+        logDebug(err.stdout.toString())
       }
 
       // If things went wrong print instructions on how to execute the
       // `mksnapshot` command directly to trouble shoot
       runInstructions()
-      throw new Error('Failed `mksnapshot` command')
+
+      // mksnapshot's stderr explains why it failed, so surface it on the thrown error.
+      const stderr = err.stderr?.toString().trim()
+      const detail = stderr || err.toString()
+
+      throw new Error(`Failed \`mksnapshot\` command\n${detail}`, { cause: err })
     }
   }
 

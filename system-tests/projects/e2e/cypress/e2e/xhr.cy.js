@@ -7,7 +7,9 @@ describe('xhrs', () => {
       }
     }
 
-    cy.intercept(/api/, getResp()).as('getApi')
+    // Match only our app's /api/ path. A bare /api/ also matches Chrome
+    // background URLs such as clientservices.googleapis.com/... and flakes CI.
+    cy.intercept(/\/api\//, getResp()).as('getApi')
     cy.visit('/index.html')
     cy.window().then((win) => {
       const xhr = new win.XMLHttpRequest
@@ -164,7 +166,7 @@ describe('xhrs', () => {
       cy.get('#create').click()
       cy.wait('@createUser')
       .its('request.body')
-      .should('equal', '{\"some\":\"data\"}')
+      .should('equal', '{"some":"data"}')
     })
 
     // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. https://github.com/cypress-io/cypress/issues/24492

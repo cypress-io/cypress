@@ -1,31 +1,173 @@
 export * from './types'
 
-import * as Find from './find'
+import {
+  getParentNode,
+  getParent,
+  getAllParents,
+  findParent,
+  getFirstParentWithTagName,
+  getFirstCommonAncestor,
+  getFirstDeepestElement,
+  elementFromPoint,
+  isAncestor,
+  isChild,
+  isDescendent,
+  isUndefinedOrHTMLBodyDoc,
+  getElements,
+  getContainsSelector,
+  getInputFromLabel,
+} from './find'
 
-import * as ComplexElements from './complexElements'
+import {
+  isDisabled,
+  isButtonLike,
+  isTextLike,
+  isFocused,
+  isFocusable,
+  isFocusedOrInFocused,
+  isFocusableWhenNotDisabled,
+  getFirstFocusableEl,
+  getActiveElByDocument,
+  isScrollable,
+  getFirstFixedOrStickyPositionParent,
+  getFirstStickyPositionParent,
+  getFirstScrollableParent,
+  elOrAncestorIsFixedOrSticky,
+  canSetSelectionRangeElement,
+} from './complexElements'
 
-import * as ShadowElements from './shadow'
+import {
+  isShadowRoot,
+  isWithinShadowRoot,
+  getShadowElementFromPoint,
+  getShadowRoot,
+  findAllShadowRoots,
+} from './shadow'
 
-import * as ElementHelpers from './elementHelpers'
+import {
+  getTagName,
+  isElement,
+  isInput,
+  isTextarea,
+  isButton,
+  isSelect,
+  isOption,
+  isOptgroup,
+  isBody,
+  isIframe,
+  isHTML,
+  isSvg,
+  isValueNumberTypeElement,
+  isNeedSingleValueChangeInputElement,
+  isAttrType,
+} from './elementHelpers'
 
-import * as NativeProps from './nativeProps'
+import {
+  tryCallNativeMethod,
+  callNativeMethod,
+  getNativeProp,
+  setNativeProp,
+} from './nativeProps'
 
-import * as InputElements from './input'
+import {
+  isInputType,
+  isReadOnlyInputOrTextarea,
+  isReadOnlyInput,
+  isInputAllowingImplicitFormSubmission,
+} from './input'
 
-import * as ContentEditable from './contentEditable'
+import {
+  isContentEditable,
+  hasContenteditableAttr,
+  getHostContenteditable,
+  isDesignModeDocumentElement,
+} from './contentEditable'
 
-import * as DetachedElements from './detached'
+import {
+  isDetached,
+  isAttached,
+  isDetachedEl,
+  isAttachedEl,
+} from './detached'
 
-import * as ElementUtils from './utils'
+import {
+  normalizeWhitespaces,
+  isSame,
+  isSelector,
+  switchCase,
+  stringify,
+} from './utils'
 
 export default {
-  ...Find,
-  ...ComplexElements,
-  ...ShadowElements,
-  ...ElementHelpers,
-  ...NativeProps,
-  ...InputElements,
-  ...ContentEditable,
-  ...DetachedElements,
-  ...ElementUtils,
+  getParentNode,
+  getParent,
+  getAllParents,
+  findParent,
+  getFirstParentWithTagName,
+  getFirstCommonAncestor,
+  getFirstDeepestElement,
+  elementFromPoint,
+  isAncestor,
+  isChild,
+  isDescendent,
+  isUndefinedOrHTMLBodyDoc,
+  getElements,
+  getContainsSelector,
+  getInputFromLabel,
+  isDisabled,
+  isButtonLike,
+  isTextLike,
+  isFocused,
+  isFocusable,
+  isFocusedOrInFocused,
+  isFocusableWhenNotDisabled,
+  getFirstFocusableEl,
+  getActiveElByDocument,
+  isScrollable,
+  getFirstFixedOrStickyPositionParent,
+  getFirstStickyPositionParent,
+  getFirstScrollableParent,
+  elOrAncestorIsFixedOrSticky,
+  canSetSelectionRangeElement,
+  isShadowRoot,
+  isWithinShadowRoot,
+  getShadowElementFromPoint,
+  getShadowRoot,
+  findAllShadowRoots,
+  getTagName,
+  isElement,
+  isInput,
+  isTextarea,
+  isButton,
+  isSelect,
+  isOption,
+  isOptgroup,
+  isBody,
+  isIframe,
+  isHTML,
+  isSvg,
+  isValueNumberTypeElement,
+  isNeedSingleValueChangeInputElement,
+  isAttrType,
+  tryCallNativeMethod,
+  callNativeMethod,
+  getNativeProp,
+  setNativeProp,
+  isInputType,
+  isReadOnlyInputOrTextarea,
+  isReadOnlyInput,
+  isInputAllowingImplicitFormSubmission,
+  isContentEditable,
+  hasContenteditableAttr,
+  getHostContenteditable,
+  isDesignModeDocumentElement,
+  isDetached,
+  isAttached,
+  isDetachedEl,
+  isAttachedEl,
+  normalizeWhitespaces,
+  isSame,
+  isSelector,
+  switchCase,
+  stringify,
 }

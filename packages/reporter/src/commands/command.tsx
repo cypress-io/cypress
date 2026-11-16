@@ -3,7 +3,7 @@ import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
 import React, { useState, useEffect, useCallback } from 'react'
-import Tooltip from '@cypress/react-tooltip'
+import Tooltip from '../lib/tooltip'
 import Button from '@cypress-design/react-button'
 
 import appState from '../lib/app-state'
@@ -41,7 +41,7 @@ const asterisksRegex = /^\*\*(.+?)\*\*$/gs
 // `expected **<span>** to have CSS property **background-color** with the value **rgb(0, 0, 0)**, but the value was **rgba(0, 0, 0, 0)**`
 // `expected **foo** to have length above **1** but got **0**`
 // `Custom message expected **<span>** to exist in the DOM`
-const assertionRegex = /^.*?expected | to[^\*]+| not[^\*]+| with[^\*]+|,? but[^\*]+/g
+const assertionRegex = /^.*?expected | to[^*]+| not[^*]+| with[^*]+|,? but[^*]+/g
 
 // used to format the display of command messages and error messages
 // we use markdown syntax within our error messages (code ticks, urls, etc)
@@ -250,7 +250,7 @@ const Aliases: React.FC<AliasesProps> = observer(({ model }: AliasesProps) => {
 
         return (
           <Tag
-            key={alias}
+            key={String(alias)}
             content={aliases.join(', ')}
             type={model.aliasType}
             tooltipMessage={`${model.displayMessage} aliased as: ${aliases.map((alias) => `'${alias}'`).join(', ')}`}
@@ -331,7 +331,7 @@ interface CommandProps {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
   groupId?: number
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
@@ -344,8 +344,7 @@ const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId
     {!!groupId && model.type === 'system' && model.state === 'failed' && <StateIcon data-cy='failed-icon-indicator' aria-hidden state={model.state} iconSize='12' />}
     {model.referencesAlias ?
       <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-      : <Message model={model} />
-    }
+      : <Message model={model} />}
   </span>
 ))
 
@@ -463,7 +462,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
   const getFeedbackUrl = useCallback(
     async () => {
       try {
-        // @ts-ignore
+        // @ts-expect-error - the declared backendRequestHandler type has an emitter parameter that the driver's implementation does not take
         const result = await Cypress.backendRequestHandler(
           'prompt:backend:request',
           'prompt:get-feedback-url',
@@ -636,7 +635,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
             testId={model.testId}
             commandId={model.id}
             // if the err is recovered and the current command is a log group, nest the test error within the group
-            groupLevel={model.group && model.hasChildren ? ++groupLevel : groupLevel}
+            groupLevel={model.group && model.hasChildren ? groupLevel + 1 : groupLevel}
           />
         </li>
       )}

@@ -54,7 +54,7 @@ describe('configChange subscription', () => {
       cy.waitForSpecToFinish()
 
       // wait until it has passed
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
       cy.get('[data-cy="viewport-size"]').contains('1000x660')
 
       // update the config - the spec should re-execute with the new viewportHeight
@@ -66,7 +66,7 @@ describe('configChange subscription', () => {
       cy.get('[data-cy="loading-spinner"]').should('not.be.exist')
 
       cy.waitForSpecToFinish()
-      cy.get('[data-model-state="passed"]').should('contain', 'renders the test content')
+      cy.reporter().find('[data-model-state="passed"]').should('contain', 'renders the test content')
       cy.get('[data-cy="viewport-size"]').contains('1000x777')
     })
   })

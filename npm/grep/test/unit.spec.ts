@@ -54,6 +54,10 @@ describe('utils', () => {
 
       expect(parsed).toEqual(null)
     })
+
+    it('returns null for a whitespace-only string', () => {
+      expect(parseTitleGrep('   ')).toEqual(null)
+    })
   })
 
   describe('parseFullTitleGrep', () => {
@@ -64,6 +68,17 @@ describe('utils', () => {
         { title: 'hello', invert: false },
         { title: 'one', invert: false },
         { title: 'two', invert: true },
+      ])
+    })
+
+    it('drops empty parts', () => {
+      expect(parseFullTitleGrep('hello;')).toEqual([
+        { title: 'hello', invert: false },
+      ])
+
+      expect(parseFullTitleGrep('hello;;  ;world')).toEqual([
+        { title: 'hello', invert: false },
+        { title: 'world', invert: false },
       ])
     })
   })
@@ -160,6 +175,7 @@ describe('utils', () => {
     })
 
     // TODO: would need to change the tokenizer
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('parses tag1 but not tag2', () => {
       const parsed = parseTagsGrep('@tag1-@tag2')
 
@@ -434,6 +450,12 @@ describe('utils', () => {
     it('passes for substring', () => {
       shouldIt('hello w', 'hello world', true)
       shouldIt('-hello w', 'hello world', false)
+    })
+
+    it('ignores a trailing separator', () => {
+      shouldIt('hello w;', 'hello world', true)
+      shouldIt('hello w; ', 'goodbye world', false)
+      shouldIt('-hello w;', 'hello world', false)
     })
   })
 

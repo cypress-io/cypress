@@ -1,16 +1,16 @@
-/* eslint-disable no-dupe-class-members */
 import Bluebird from 'bluebird'
 import { EventEmitter } from 'events'
 import type { MobxRunnerStore } from '../store/mobx-runner-store'
-import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
+import { SPEC_BRIDGE_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
 import { logger } from './logger'
 import type { SocketShape } from '@packages/socket/browser/client'
 import { automation, useRunnerUiStore, useSpecStore } from '../store'
 import { useScreenshotStore } from '../store/screenshot-store'
-import { EntrySource, useStudioStore } from '../store/studio-store'
+import type { EntrySource } from '../store/studio-store'
+import { useStudioStore } from '../store/studio-store'
 import { getAutIframeModel } from '.'
 import { handlePausing } from './events/pausing'
 import { addTelemetryListeners } from './events/telemetry'
@@ -29,14 +29,33 @@ type $Cypress = any
 
 const noop = () => {}
 
-let crossOriginOnMessageRef = ({ data, source }: MessageEvent<{
-  data: any
-  source: Window
-}>) => {
+let crossOriginOnMessageRef = (event: MessageEvent) => {
   return undefined
 }
-let crossOriginLogs: {[key: string]: Cypress.Log} = {}
+let crossOriginLogs: { [key: string]: Cypress.Log } = {}
 let hasMochaRunEnded: boolean = false
+
+// Posted by the cross-origin AUT injection before a spec bridge attaches to it.
+const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error', 'cross:origin:aut:set:cookie']
+
+const isFromSpecBridge = ({ data, source, origin }: MessageEvent) => {
+  const iframe = document.getElementById(`${SPEC_BRIDGE_FRAME_NAME_IDENTIFIER}: ${data.origin}`)
+
+  return iframe instanceof HTMLIFrameElement
+    && iframe.classList.contains('spec-bridge-iframe')
+    && !!source
+    && iframe.contentWindow === source
+    && new URL(iframe.src).origin === origin
+}
+
+const isFromAut = ({ data, source }: MessageEvent) => {
+  if (!source || document.querySelector<HTMLIFrameElement>('iframe.aut-iframe')?.contentWindow !== source) {
+    return false
+  }
+
+  return AUT_CROSS_ORIGIN_EVENTS.includes(data.event)
+    || (data.event === 'cross:origin:backend:request' && data.data?.args?.[0] === 'request:sent:with:credentials')
+}
 
 interface AddGlobalListenerOptions {
   element: AutomationElementId
@@ -58,7 +77,6 @@ export class EventManager {
   reporterBus: EventEmitter = new EventEmitter()
   localBus: EventEmitter = new EventEmitter()
   Cypress?: $Cypress
-  selectorPlaygroundModel: any
   cypressInCypressMochaEvents: CypressInCypressMochaEvent[] = []
   // Used for testing the experimentalSingleTabRunMode experiment. Ensures AUT is correctly destroyed between specs.
   ws: SocketShape
@@ -71,13 +89,8 @@ export class EventManager {
   constructor (
     // import '@packages/driver'
     private $CypressDriver: any,
-    // import * as MobX
-    private Mobx: typeof MobX,
-    // selectorPlaygroundModel singleton
-    selectorPlaygroundModel: any,
     ws: SocketShape,
   ) {
-    this.selectorPlaygroundModel = selectorPlaygroundModel
     this.ws = ws
     this.specStore = useSpecStore()
     this.studioStore = useStudioStore()
@@ -87,6 +100,10 @@ export class EventManager {
 
   getCypress () {
     return Cypress
+  }
+
+  get runComplete (): boolean {
+    return hasMochaRunEnded
   }
 
   addGlobalListeners (state: MobxRunnerStore, options: AddGlobalListenerOptions) {
@@ -117,19 +134,6 @@ export class EventManager {
     this.ws.emit('is:automation:client:connected', connectionInfo, (isConnected: boolean) => {
       const connected = isConnected ? automation.CONNECTED : automation.MISSING
 
-      // legacy MobX integration
-      // TODO: UNIFY-1318 - can we delete this, or does the driver depend on this somehow?
-      this.Mobx.runInAction(() => {
-        state.automation = connected
-      })
-
-      this.ws.on('automation:disconnected', () => {
-        this.Mobx.runInAction(() => {
-          state.automation = automation.DISCONNECTED
-        })
-      })
-
-      // unified integration
       this.ws.on('automation:disconnected', () => {
         runnerUiStore.setAutomationStatus('DISCONNECTED')
       })
@@ -211,10 +215,6 @@ export class EventManager {
       logCommand(testId, logId)
     })
 
-    this.reporterBus.on('set:user:editor', (editor) => {
-      this.ws.emit('set:user:editor', editor)
-    })
-
     this.reporterBus.on('runner:restart', rerun)
 
     const sendEventIfSnapshotProps = (testId, logId, event) => {
@@ -266,10 +266,6 @@ export class EventManager {
 
     this.reporterBus.on('open:login:connect:modal', (args) => {
       this.localBus.emit('open:login:connect:modal', args)
-    })
-
-    this.reporterBus.on('get:user:editor', (cb) => {
-      this.ws.emit('get:user:editor', cb)
     })
 
     this.reporterBus.on('open:file:unified', (file: FileDetails) => {
@@ -356,11 +352,10 @@ export class EventManager {
       this.ws.emit('aut:destroy:complete')
     })
 
-    // @ts-ignore
     const $window = this.$CypressDriver.$(window)
 
     // This is a test-only event. It's used to
-    // trigger a rerun for the driver rerun.cy.js spec.
+    // trigger a rerun for the driver rerun.cy.ts spec.
     $window.on('test:trigger:rerun', rerun)
 
     // when we actually unload then
@@ -428,6 +423,10 @@ export class EventManager {
     }
 
     Cypress = this.Cypress = this.$CypressDriver.create(config)
+    // This instance's run has not ended. The flag is module-scoped so it
+    // outlives the instance that set it, and would otherwise report the
+    // previous run's completion until this one emits run:start.
+    hasMochaRunEnded = false
     this.localBus.emit('cypress:created', Cypress)
 
     // expose Cypress globally
@@ -519,9 +518,18 @@ export class EventManager {
 
           const runnables = Cypress.runner.normalizeAll(runState.tests, hideCommandLog, testFilter)
 
-          const run = () => {
+          const run = (recordResponse?: { filteredTests?: string[] }) => {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
+
+            // In run mode, Cloud may return a keep-list of tests to execute for
+            // test-level rerun optimization (the FILTER action). Tell the runner
+            // to run only those tests and skip the rest.
+            const filteredTests = recordResponse?.filteredTests
+
+            if (filteredTests?.length) {
+              Cypress.runner.setTestFilter(filteredTests)
+            }
 
             this._runDriver(runState, testState)
           }
@@ -545,6 +553,14 @@ export class EventManager {
           }
 
           if (runState.currentId) {
+            // re-apply the test-level rerun keep-list before resuming: the FILTER
+            // action is only delivered on the first load, so on a cross-origin
+            // reload we re-prune from the persisted run state (prune first so the
+            // index-based resume operates on the surviving tests)
+            if (runState.filteredTests?.length) {
+              Cypress.runner.setTestFilter(runState.filteredTests)
+            }
+
             // if we have a currentId it means
             // we need to tell the Cypress to skip
             // ahead to that test
@@ -660,14 +676,14 @@ export class EventManager {
 
     Cypress.on('run:start', async () => {
       hasMochaRunEnded = false
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
       }
     })
 
     Cypress.on('run:end', async () => {
       hasMochaRunEnded = true
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('end:memory:profiling')
       }
     })
@@ -696,8 +712,8 @@ export class EventManager {
           return
         }
 
-        // @ts-ignore
         // TODO: UNIFY-1318 - strongly typed event emitter.
+        // @ts-expect-error - the event args are an array, not the tuple emit expects
         return this.emit(event, ...args)
       })
     })
@@ -715,9 +731,7 @@ export class EventManager {
 
       this.studioStore.interceptTest(test)
 
-      // if the experimental flag is on and we are in a chromium based browser,
-      // check the memory pressure to determine if garbage collection is needed
-      if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
+      if (Cypress.config('manageBrowserMemory') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('check:memory:pressure', {
           test: { title: attributes.title, order: attributes.order, currentRetry: attributes.currentRetry },
         })
@@ -862,7 +876,17 @@ export class EventManager {
      */
     try {
       window.top.removeEventListener('message', crossOriginOnMessageRef, false)
-      crossOriginOnMessageRef = ({ data, source }) => {
+      crossOriginOnMessageRef = (event) => {
+        const { data, source } = event
+
+        if (typeof data?.event !== 'string' || !data.event.startsWith('cross:origin:')) {
+          return undefined
+        }
+
+        if (!isFromSpecBridge(event) && !isFromAut(event)) {
+          return undefined
+        }
+
         Cypress?.primaryOriginCommunicator.onMessage({ data, source })
 
         return undefined
@@ -919,8 +943,6 @@ export class EventManager {
     if (!Cypress) {
       return
     }
-
-    state.setIsLoading(true)
 
     if (!isRerun) {
       // only clear test state when a new spec is selected
@@ -1030,6 +1052,14 @@ export class EventManager {
     this._unpinSnapshot()
     this._hideSnapshot()
     this.reporterBus.emit('reporter:snapshot:unpinned')
+  }
+
+  // Sync the reporter's command-log pin state when a pin originates outside the
+  // reporter (e.g. the tap CLI). The AUT render is already done via the native
+  // `pin:snapshot` path, so — unlike snapshotUnpinned — this only notifies the
+  // reporter; it does not touch the snapshot store.
+  snapshotPinned (testId: string, logId: number | string) {
+    this.reporterBus.emit('reporter:snapshot:pinned', testId, logId)
   }
 
   _unpinSnapshot () {

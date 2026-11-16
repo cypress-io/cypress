@@ -1,0 +1,30 @@
+diff --git a/node_modules/@wdio/utils/build/node.js b/node_modules/@wdio/utils/build/node.js
+index 4c7a0a3..7502c0e 100644
+--- a/node_modules/@wdio/utils/build/node.js
++++ b/node_modules/@wdio/utils/build/node.js
+@@ -6,6 +6,7 @@ import cp2 from "node:child_process";
+ import getPort from "get-port";
+ import waitPort from "wait-port";
+ import logger2 from "@wdio/logger";
++import debugModule from 'debug';
+ import split2 from "split2";
+ import { deepmerge } from "deepmerge-ts";
+ import { start as startSafaridriver } from "safaridriver";
+@@ -33,6 +34,8 @@ import { download as downloadGeckodriver } from "geckodriver";
+ import { download as downloadEdgedriver } from "edgedriver";
+ import { locateChrome, locateFirefox, locateApp } from "locate-app";
+ var log = logger("webdriver");
++// wrap in cypress debugger statement to avoid extraneous messages to the console
++log.setLevel(debugModule.enabled('cypress-verbose:server:browsers:webdriver') ? 'info' : 'silent')
+ var EXCLUDED_PARAMS = ["version", "help"];
+ var canAccess = (file) => {
+   if (!file) {
+@@ -300,6 +303,8 @@ function isEdge(browserName) {
+ 
+ // src/node/startWebDriver.ts
+ var log2 = logger2("@wdio/utils");
++// wrap in cypress debugger statement to avoid extraneous messages to the console
++log2.setLevel(debugModule.enabled('cypress-verbose:server:browsers:webdriver') ? 'info' : 'silent')
+ var DRIVER_WAIT_TIMEOUT = 10 * 1e3;
+ var DRIVER_RETRY_INTERVAL = 100;
+ async function startWebDriver(options) {

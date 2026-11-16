@@ -4,7 +4,6 @@ import { devServer as cypressWebpackDevServer } from '@cypress/webpack-dev-serve
 
 export const baseConfig: Cypress.ConfigOptions = {
   projectId: 'ypt4pf',
-  experimentalMemoryManagement: true,
   experimentalWebKitSupport: true,
   env: {
     CI: process.env.CI,
@@ -27,6 +26,7 @@ export const baseConfig: Cypress.ConfigOptions = {
   e2e: {
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
+    removeSRIAttributes: true,
     setupNodeEvents: (on, config) => {
       on('task', {
         log (message) {

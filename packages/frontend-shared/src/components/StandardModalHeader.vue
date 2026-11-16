@@ -21,7 +21,7 @@
     </div>
 
     <button
-      :aria-label="t(`actions.close`)"
+      aria-label="Close"
       class="border-transparent rounded-full outline-none border group"
       @click="$emit('close')"
     >
@@ -33,9 +33,6 @@
 <script lang="ts" setup>
 import { DialogTitle } from '@headlessui/vue'
 import ExternalLink from '../gql-components/ExternalLink.vue'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 withDefaults(defineProps<{
   helpLink: string

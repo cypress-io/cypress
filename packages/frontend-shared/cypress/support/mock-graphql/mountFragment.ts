@@ -10,13 +10,11 @@ import urql, { useQuery } from '@urql/vue'
 import type { TypedDocumentNode } from '@urql/vue'
 import type { FragmentDefinitionNode } from 'graphql'
 import { print } from 'graphql'
-import { SubscriptionHook, testUrqlClient } from './clientTestUrqlClient'
-import type { MutationResolverCallback as MutationResolver } from './clientTestUrqlClient'
+import { testUrqlClient } from './clientTestUrqlClient'
+import type { SubscriptionHook, MutationResolverCallback as MutationResolver } from './clientTestUrqlClient'
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
-import { createI18n } from '@cy/i18n'
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 import { getOperationNameFromDocument } from './clientTestUtils'
 
@@ -27,7 +25,7 @@ export interface MountFnOptions {
 export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
-    // @ts-ignore todo: figure out the correct types
+    // @ts-expect-error - TODO: the generic mount signature does not match the mount command type
     <C extends Parameters<typeof mount>[0]>(comp: C, options: Parameters<typeof mount>[1] = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
@@ -41,8 +39,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
         options?.global?.plugins?.push(pluginFn())
       })
 
-      options.global.plugins.push(createI18n())
-
       const context = makeClientTestContext()
 
       options.global.plugins.push({
@@ -51,7 +47,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
         },
       })
 
-      // @ts-ignore todo: figure out the correct types
+      // @ts-expect-error - TODO: the generic mount signature does not match the mount command type
       return mount(comp, options)
     },
   )
@@ -68,7 +64,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
           'transition-group': false,
         },
         plugins: [
-          createI18n(),
           {
             install (app) {
               app.use(urql, testUrqlClient(context, options.onResult, mutationResolvers, registerSubscriptionHook))
@@ -85,11 +80,10 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     let queryVariablesSegment = ''
 
     if (options.variableTypes) {
-      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `\$${name}: ${type}`).join(',')
+      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `$${name}: ${type}`).join(',')
       queryVariablesSegment = `(${queryVariablesSegment})`
     }
 
-    // @ts-ignore todo: figure out the correct types
     return mount(defineComponent({
       name: `MountFragment`,
       setup () {
@@ -162,7 +156,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     subscriptionHooks.set(name, hook)
   }
 
-  function stubSubscriptionEvent <T extends TypedDocumentNode<any, any>> (
+  function stubSubscriptionEvent<T extends TypedDocumentNode<any, any>> (
     document: T,
     emitEvent: () => ResultOf<T>,
   ) {
@@ -228,7 +222,7 @@ type MountFragmentConfig<T extends TypedDocumentNode<any, any>> = {
   /**
    * Render is passed the result of the "frag" and mounts the component under test
    */
-  render: (frag: Exclude<ResultOf<T>, undefined>) => JSX.Element
+  render: (frag: Exclude<ResultOf<T>, undefined>) => import('vue').VNode
   expectError?: boolean
 } & CyMountOptions<unknown>
 
@@ -239,7 +233,7 @@ type MountFragmentListConfig<T extends TypedDocumentNode<any, any>> = {
   count?: number
   variableTypes?: Record<keyof VariablesOf<T>, string>
   variables?: VariablesOf<T>
-  render: (frag: Exclude<ResultOf<T>, undefined>[]) => JSX.Element
+  render: (frag: Exclude<ResultOf<T>, undefined>[]) => import('vue').VNode
   onResult?: (result: ResultOf<T>, ctx: ClientTestContext) => ResultOf<T> | void
   expectError?: boolean
 } & CyMountOptions<unknown>

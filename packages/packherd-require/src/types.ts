@@ -23,7 +23,7 @@ export type ModuleDefinition = (
   module: { exports: NodeModule['exports'] },
   __filename: string,
   __dirname: string,
-  require: NodeRequireFunction
+  require: NodeRequireFunction,
 ) => NodeModule
 
 /**
@@ -99,7 +99,7 @@ export type ModuleBuiltin = typeof import('module') & {
 export type ModuleNeedsReload = (
   moduleId: string,
   loadedModules: Set<string>,
-  moduleCache: Record<string, NodeModule>
+  moduleCache: Record<string, NodeModule>,
 ) => boolean
 
 // -----------------
@@ -131,7 +131,7 @@ export type TranspileCacheOpts = {
  */
 export type InitTranspileCache = (
   projectBasedir: string,
-  opts?: Partial<TranspileCacheOpts>
+  opts?: Partial<TranspileCacheOpts>,
 ) => TranspileCache | undefined
 
 /**

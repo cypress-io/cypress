@@ -13,7 +13,7 @@ function getZIndex (el) {
 }
 
 export function getOrCreateHelperDom ({ body, className, css, studioActive = false }) {
-  let containers = body.querySelectorAll(`.${className}`)
+  const containers = body.querySelectorAll(`.${className}`)
 
   if (containers.length > 0) {
     const shadowRoot = containers[0].shadowRoot

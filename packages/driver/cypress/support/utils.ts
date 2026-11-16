@@ -1,23 +1,29 @@
 const { $, _, Promise } = Cypress
 
+// the reporter renders inside a same-origin iframe in the runner UI, so
+// reporter queries must target that document
+const getReporterDocument = () => {
+  return top!.document.querySelector<HTMLIFrameElement>('#reporter-frame')!.contentDocument!
+}
+
 export const getCommandLogWithText = (command, type?) => {
   if (!type) {
     type = 'method'
   }
 
   // Open current test if not already open, so we can find the command log
-  cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top?.document).click()
+  cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', getReporterDocument()).click()
 
   return cy
-  .$$(`.test.runnable-active .command-${type}:contains(${command})`, top?.document)
+  .$$(`.test.runnable-active .command-${type}:contains(${command})`, getReporterDocument())
   .closest('.command')
 }
 
 // This work around is super hacky to get the appState from the Test Mobx Observable Model
 // this is needed to pause the runner to assert on the test
 export const findAppStateFromTest = function (dom) {
-  let key = _.keys(dom).find((key) => key.startsWith('__reactFiber')) as string
-  let internalInstance = dom[key]
+  const key = _.keys(dom).find((key) => key.startsWith('__reactFiber')) as string
+  const internalInstance = dom[key]
 
   if (internalInstance == null) return null
 
@@ -29,6 +35,7 @@ export const findAppStateFromTest = function (dom) {
 export const clickCommandLog = (sel, type?) => {
   // trigger the LONG_RUNNING_THRESHOLD to display the command line
   // this adds time to test but makes a more accurate test as React 18+ does not rerender when setting internals
+  // eslint-disable-next-line cypress/no-unnecessary-waiting -- LONG_RUNNING_THRESHOLD has to pass before the command shows in the log
   return cy.wait(2000)
   .then(() => {
     const commandLogEl = getCommandLogWithText(sel, type)
@@ -49,10 +56,10 @@ export const clickCommandLog = (sel, type?) => {
 
     inner.get(0).click()
 
-    // wait slightly for a repaint of the reporter
-    cy.wait(10).then(() => {
+    // retry until the reporter repaints
+    cy.wrap(null, { log: false }).should(() => {
       // make sure command was pinned, otherwise throw a better error message
-      expect(cy.$$('.runnable-active .command-pin', top?.document).length, 'command should be pinned').ok
+      expect(cy.$$('.runnable-active .command-pin', getReporterDocument()).length, 'command should be pinned').ok
     })
   })
 }
@@ -174,7 +181,7 @@ export const makeRequestForCookieBehaviorTests = (
   }
 
   return new Promise<void>((resolve, reject) => {
-    let xhr = new XMLHttpRequest()
+    const xhr = new XMLHttpRequest()
 
     xhr.open('GET', url)
     xhr.withCredentials = Cypress._.isBoolean(credentials) ? credentials : false
@@ -191,7 +198,6 @@ export const makeRequestForCookieBehaviorTests = (
 }
 
 function runCommands () {
-  cy.exec('echo "hello"')
   cy.readFile('cypress/fixtures/app.json')
   cy.writeFile('cypress/_test-output/written.json', 'contents')
   cy.task('return:arg', 'arg')

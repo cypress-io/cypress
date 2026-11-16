@@ -1,17 +1,19 @@
-import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
-import { NetworkInterceptionCore } from '@packages/network-interception'
-import { ProxyDocumentPreparationAdapter } from '../../../lib/adapters/proxy-document-preparation'
-import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../../lib/adapters'
+import type { HttpMiddleware } from '../../../lib/http'
+import { HttpStages, _runStage } from '../../../lib/http'
+import { NetworkPolicyRegistry } from '@packages/network-interception'
+import { createProxyNetworkInterception } from '../../../lib/adapters/create-proxy-network-interception'
 
 export function createTestNetworkInterceptionCore () {
-  return new NetworkInterceptionCore({
-    requestInterception: new ProxyRequestInterceptionAdapter(),
-    responseInterception: new ProxyResponseInterceptionAdapter(),
-    documentPreparation: new ProxyDocumentPreparationAdapter(),
+  return createProxyNetworkInterception({
+    policyRegistration: new NetworkPolicyRegistry(),
   })
 }
 
-export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
+type TestMiddlewareStack = HttpMiddleware<any>[] | Record<string, HttpMiddleware<any>>
+
+export function testMiddleware (middleware: TestMiddlewareStack, ctx: Record<string, any> = {}, onErrorHandler?: (error: Error) => void) {
+  const { onlyRunMiddleware: _onlyRunMiddleware, onError: ctxOnError, ...ctxRest } = ctx
+
   const fullCtx = {
     debug: () => {},
     req: {},
@@ -23,12 +25,12 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
       0: middleware,
     },
 
-    ...ctx,
+    ...ctxRest,
   }
 
-  const onError = (error) => {
+  const onError = onErrorHandler ?? ctxOnError ?? ((error) => {
     throw error
-  }
+  })
 
   return _runStage(HttpStages.IncomingRequest, fullCtx, onError).then(() => {
     Object.assign(ctx, fullCtx)

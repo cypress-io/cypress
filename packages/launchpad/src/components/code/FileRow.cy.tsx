@@ -1,7 +1,4 @@
-/* eslint-disable no-irregular-whitespace */
 import FileRow from './FileRow.vue'
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 
 const content = `import { defineConfig } from 'cypress'
 
@@ -16,9 +13,7 @@ export default defineConfig({
 })`
 
 const description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.'
-const messages = defaultMessages.setupPage.configFile
-
-const changesRequiredDescription = messages.changesRequiredDescription.replace('{0}', '')
+const changesRequiredDescription = 'Please merge the code below with your existing '
 
 describe('FileRow', () => {
   it('renders each status, the expected files, and expected styles', () => {
@@ -110,7 +105,7 @@ describe('FileRow', () => {
     ))
 
     cy.contains('cypress/integration/command.js')
-    cy.contains(messages.changesRequiredLabel).should('be.visible')
+    cy.contains('Changes required').should('be.visible')
     cy.get('[data-cy=changes-required-badge]').should('not.exist') // Hide badge when row is expanded
     cy.contains(changesRequiredDescription).should('be.visible')
     cy.get('pre').should('have.length', 2)
@@ -118,7 +113,10 @@ describe('FileRow', () => {
     cy.get('.shiki').should('be.visible')
     cy.contains('cypress/integration/command.js').click()
 
-    cy.get('.shiki').should('not.be.visible')
+    // The Collapsible wrapper sets aria-hidden="true" and collapses to
+    // max-height: 0 when closed. The modern visibility algorithm doesn't
+    // detect the resulting overflow clipping, so assert aria-hidden instead.
+    cy.get('.shiki').closest('[aria-hidden]').should('have.attr', 'aria-hidden', 'true')
   })
 
   it('responds nice to small screens', { viewportWidth: 500 }, () => {
@@ -137,7 +135,7 @@ describe('FileRow', () => {
     ))
 
     cy.contains('cypress/integration/command.js')
-    cy.contains(messages.changesRequiredLabel).should('be.visible')
+    cy.contains('Changes required').should('be.visible')
     cy.get('[data-cy=changes-required-badge]').should('not.exist')
     cy.contains(changesRequiredDescription).should('be.visible')
     cy.get('pre').should('exist')

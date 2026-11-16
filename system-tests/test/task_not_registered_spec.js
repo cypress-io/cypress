@@ -7,9 +7,9 @@ describe('e2e task', () => {
     return systemTests.exec(this, {
       project: 'task-not-registered',
       spec: 'task_not_registered.cy.js',
-      sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
+      config: { screenshotOnRunFailure: false },
     })
   })
 })

@@ -7,7 +7,7 @@ import type { MountOptions, Component } from 'svelte'
 
 const DEFAULT_COMP_NAME = 'unknown'
 
-export interface MountReturn{
+export interface MountReturn {
   component: Record<string, any>
 }
 
@@ -22,7 +22,7 @@ const cleanup = () => {
 // Extract the component name from the object passed to mount
 const getComponentDisplayName = (Component: Component<Record<string, any>, Record<string, any>, any>): string => {
   if (Component.name) {
-    const [, match] = /Proxy\<(\w+)\>/.exec(Component.name) || []
+    const [, match] = /Proxy<(\w+)>/.exec(Component.name) || []
 
     return match || Component.name
   }
@@ -50,7 +50,7 @@ const getComponentDisplayName = (Component: Component<Record<string, any>, Recor
  */
 export function mount (
   Component: Component<Record<string, any>, Record<string, any>, any>,
-  options: Omit<MountOptions, 'target'> & {log?: boolean} = {},
+  options: Omit<MountOptions, 'target'> & { log?: boolean } = {},
 ): Cypress.Chainable<MountReturn> {
   // In Svelte 5, the component name is no longer easily discoverable and logs as "wrapper"
   // so we default the logging of it to false as it doesn't provide a lot of value
@@ -72,6 +72,7 @@ export function mount (
 
     // by waiting, we are delaying test execution for the next tick of event loop
     // and letting hooks and component lifecycle methods to execute mount
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- the zero-length wait is the event-loop tick described above
     return cy.wait(0, { log: false }).then(() => {
       if (options.log !== false) {
         const mountMessage = `<${getComponentDisplayName(Component)} ... />`

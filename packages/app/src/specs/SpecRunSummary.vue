@@ -64,7 +64,9 @@
 
 import { computed } from 'vue'
 import type { CloudSpecRun, SpecDataAggregate } from '../../../data-context/src/gen/cloud-source-types.gen'
-import ResultCounts, { ResultCountsProps } from '@packages/frontend-shared/src/components/ResultCounts.vue'
+import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
+import type { ResultCountsProps } from '@packages/frontend-shared/src/components/ResultCounts.vue'
+
 import { getTimeAgo, getDurationString } from '@packages/frontend-shared/src/utils/time'
 import SpecNameDisplay from './SpecNameDisplay.vue'
 

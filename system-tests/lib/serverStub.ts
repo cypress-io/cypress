@@ -1,11 +1,12 @@
 import crypto from 'crypto'
 import _ from 'lodash'
-import Bluebird from 'bluebird'
+import { setTimeout as delay } from 'node:timers/promises'
 import bodyParser from 'body-parser'
 import Debug from 'debug'
 import type { RequestHandler } from 'express'
 
-import { getExample, assertSchema, RecordSchemaVersions } from './validations/cloudValidations'
+import type { RecordSchemaVersions } from './validations/cloudValidations'
+import { getExample, assertSchema } from './validations/cloudValidations'
 
 import * as jose from 'jose'
 import base64Url from 'base64url'
@@ -72,7 +73,7 @@ export const postRunResponseWithProtocolDisabled = (response = postRunResponse) 
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
-};
+}
 const sendUploadUrls = function (req, res) {
   const { body } = req
 
@@ -136,6 +137,7 @@ type RouteHandler = {
   resSchema?: {
     [K in keyof RecordSchemaVersions]: [K, keyof RecordSchemaVersions[K]]
   }[keyof RecordSchemaVersions]
+  onReqBody?: (body: Record<string, unknown>) => void
   res?: RequestHandler | object
 }
 
@@ -224,11 +226,10 @@ export const routeHandlers: Record<string, RouteHandler> = {
   putScreenshots: {
     method: 'put',
     url: '/screenshots/:name',
-    res (req, res) {
-      return Bluebird.delay(300)
-      .then(() => {
-        return res.sendStatus(200)
-      })
+    async res (req, res) {
+      await delay(300)
+
+      return res.sendStatus(200)
     },
   },
   getCaptureScript: {
@@ -298,7 +299,7 @@ const getResponse = function (responseSchema) {
 
   const [name, version] = responseSchema
 
-  // @ts-expect-error
+  // @ts-expect-error - the schema name and version come from an untyped tuple, which cannot satisfy the generated schema keys
   return getExample(name, version, 'res')
 }
 
@@ -337,7 +338,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
 
     try {
       if (expectedRequestSchema) {
-        // @ts-expect-error
+        // @ts-expect-error - the schema name and version come from an untyped tuple, which cannot satisfy the generated schema keys
         assertSchema(reqName, reqVersion, 'req')(body)
       }
 
@@ -352,7 +353,6 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
         body,
       })
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.log('Schema Error:', err.message)
       debug(err)
 
@@ -388,7 +388,6 @@ const assertResponseBodySchema = function (req, res, next) {
       try {
         assertSchema(resName, resVersion, 'res')(body)
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.log('Schema Error:', err.message)
 
         return res.status(412).json(err)
@@ -443,6 +442,7 @@ const onServer = (routes) => {
   })
 }
 
+/* eslint-disable mocha/no-sibling-hooks -- each helper registers its hooks in the suite that calls it, so they are never siblings */
 export const enableCaptureProtocol = (stub = PROTOCOL_STUB_VALID) => {
   beforeEach(() => {
     protocolStub = stub
@@ -487,6 +487,7 @@ export const disableCaptureProtocolUploadUrl = () => {
     CAPTURE_PROTOCOL_ENABLED = true
   })
 }
+/* eslint-enable mocha/no-sibling-hooks */
 
 export const setupStubbedServer = (routes) => {
   systemTests.setup({

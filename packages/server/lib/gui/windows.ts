@@ -136,6 +136,11 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
 
   if (options.show === false) {
     options.frame = false
+    // Windows reserves part of a frameless window's client area for resize
+    // targets when it keeps a thick frame, shrinking the web contents and
+    // every screenshot and video frame taken of it
+    // @see https://github.com/cypress-io/cypress/issues/34771
+    options.thickFrame = false
   }
 
   options.webPreferences.webSecurity = !!options.chromeWebSecurity

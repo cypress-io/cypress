@@ -5,8 +5,6 @@ import type { SpecFile } from './spec'
 
 export const PLUGINS_STATE = ['uninitialized', 'initializing', 'initialized', 'error'] as const
 
-export type PluginsState = typeof PLUGINS_STATE[number]
-
 export const CODE_LANGUAGES = [
   {
     type: 'js',
@@ -21,8 +19,6 @@ export const CODE_LANGUAGES = [
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
 
 export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun'] as const
-
-export type PackageManager = typeof PACKAGE_MANAGERS[number]
 
 export const GET_MAJOR_VERSION_FOR_CONTENT = () => {
   // @packages/root's Rollup build replaces the 0.0.0-development sentinel with
@@ -60,3 +56,9 @@ export const NPM_CYPRESS_REGISTRY_URL = 'https://registry.npmjs.org/cypress'
  * This number is fairly arbitrary.
  */
 export const MAX_VISIBILITY_CHECK_ELEMENTS = 10
+
+export const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
+
+export const RUNNABLE_PROPS = [
+  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'failedFromHookName', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+] as const

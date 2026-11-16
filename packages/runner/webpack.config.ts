@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
@@ -7,25 +6,24 @@ import type webpack from 'webpack'
 const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()
 
-// @ts-ignore
-const babelLoader = _.find(commonConfig.module.rules, (rule) => {
-  // @ts-ignore
-  return _.includes(rule.use.loader, 'babel-loader')
+const [babelLoader] = commonConfig.module.rules.flatMap(({ use }) => {
+  return use && !Array.isArray(use) && use.loader.includes('babel-loader') ? [use] : []
 })
 
-// @ts-ignore
-babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
-  'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+const prismPlugin = [require.resolve('babel-plugin-prismjs'), {
+  'languages': ['javascript', 'typescript', 'jsx', 'tsx'],
   'plugins': ['line-numbers', 'line-highlight'],
   'theme': 'default',
   'css': false,
-}])
+}]
 
-// @ts-ignore
+// @ts-expect-error - plugins is typed from web-config's own entries, none of which take prism's options
+babelLoader.options.plugins.push(prismPlugin)
+
 const mainConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
-    cypress_runner: [path.resolve(__dirname, 'src/index.js')],
+    cypress_runner: [path.resolve(__dirname, 'src/index.ts')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -41,11 +39,10 @@ mainConfig.resolve = {
   },
 }
 
-// @ts-ignore
 const crossOriginConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
-    cypress_cross_origin_runner: [path.resolve(__dirname, 'src/cross-origin.js')],
+    cypress_cross_origin_runner: [path.resolve(__dirname, 'src/cross-origin.ts')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -53,7 +50,6 @@ const crossOriginConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
 const mainInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
@@ -66,7 +62,6 @@ const mainInjectionConfig: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
 const crossOriginInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
@@ -82,14 +77,12 @@ const crossOriginInjectionConfig: webpack.Configuration = {
 export default async function () {
   await waitUntilIconsBuilt()
 
-  const cyIcons = require('@packages/icons')
+  const cyIcons = await import('@packages/icons')
 
   mainConfig.plugins = [
-    // @ts-ignore
     ...mainConfig.plugins,
     new CopyWebpackPlugin({
       patterns: [{
-        // @ts-ignore // There's a race condition in how these types are generated.
         from: cyIcons.getPathToFavicon('favicon.ico'),
       }],
     }),

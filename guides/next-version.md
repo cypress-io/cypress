@@ -8,6 +8,7 @@ The `get-next-version.js` script follows these steps:
 
 1. If the environment variable `NEXT_VERSION` exists, print `NEXT_VERSION` and exit.
 2. Otherwise, analyze the commits to the current branch since the last release, using semantic commit messages. Print out the calculated version.
+    * The last release is the newest published version in the major of the nearest `vX.Y.Z` tag on the branch. On `develop` that is npm's `latest`. On a previous-major branch such as `v15`, it is the newest `15.x` release.
     * Only commits that touch files in `packages/*` or `cli/*` are considered.
         * This is done so that commits to the `npm/` packages do not necessarily bump the CLI and binary versions.
     * This project uses the [`angular` commit message style](https://gist.github.com/brianclements/841ea7bffdb01346392c/8e1f9b44d3fc7a4f2b448581071f9805f759c912).

@@ -1,6 +1,6 @@
 # plugins
 
-Spec file [plugin-spec.js](plugin-spec.js) shows how to load plugins while doing testing. The plugins might require options, which you can pass using array syntax
+Spec file [plugin.cy.ts](plugin.cy.ts) shows how to load plugins while doing testing. The plugins might require options, which you can pass using array syntax
 
 ```js
 const use = [

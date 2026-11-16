@@ -1,4 +1,5 @@
-import systemTests, { ItOptions } from '../lib/system-tests'
+import type { ItOptions } from '../lib/system-tests'
+import systemTests from '../lib/system-tests'
 
 function smokeTestDockerImage (title: string, dockerImage: string, expectedExitCode: number, onRun?: ItOptions['onRun']) {
   systemTests.it(title, {
@@ -16,7 +17,7 @@ function smokeTestDockerImage (title: string, dockerImage: string, expectedExitC
 describe('e2e binary CI environments', () => {
   smokeTestDockerImage(
     'bare node image fails (lacks xvfb)',
-    'node:22', 1,
+    'node:24', 1,
     async (exec) => {
       const { stdout } = await exec()
 
@@ -26,11 +27,11 @@ describe('e2e binary CI environments', () => {
 
   smokeTestDockerImage(
     'ubuntu 22 passes',
-    'cypress/base-internal:ubuntu22-node22', 0,
+    'cypress/base-internal:ubuntu22-node24', 0,
   )
 
   smokeTestDockerImage(
     'ubuntu 24 passes',
-    'cypress/base-internal:ubuntu24-node22', 0,
+    'cypress/base-internal:ubuntu24-node24', 0,
   )
 })

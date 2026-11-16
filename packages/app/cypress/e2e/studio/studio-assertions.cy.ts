@@ -74,7 +74,7 @@ describe('studio functionality', () => {
 
       cy.waitForSpecToFinish()
 
-      cy.contains('No commands were issued in this test.').should('not.exist')
+      cy.reporter().contains('No commands were issued in this test.').should('not.exist')
 
       cy.getAutIframe().within(() => {
         // Show menu
@@ -103,7 +103,7 @@ describe('studio functionality', () => {
 
       cy.waitForSpecToFinish()
 
-      cy.contains('No commands were issued in this test.').should('not.exist')
+      cy.reporter().contains('No commands were issued in this test.').should('not.exist')
 
       cy.getAutIframe().within(() => {
         // Show menu

@@ -6,15 +6,38 @@ import os from 'os'
 /** Window after teardown starts in which extra signals are treated as duplicate delivery, not a second user interrupt. */
 const SIGNAL_DEDUP_MS = 200
 
+/**
+ * Share of the teardown budget one step may spend. Steps wait on peers we are about to outlive anyway
+ * (the config child over IPC, the browser over CDP and signals), so without a per-step bound the first
+ * to stall spends the whole budget and the force-exit cuts off every other step. Below 1 so a stalled
+ * step yields in time for the rest to finish.
+ */
+const STEP_BUDGET_FRACTION = 0.8
+
 function getTeardownTimeoutMs (): number {
   const n = Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT)
 
+  // the disconnect ack in @packages/data-context ProjectConfigManager derives from this default
   return Number.isFinite(n) && n > 0 ? n : 5000
+}
+
+function getDefaultStepTimeoutMs (): number {
+  return Math.max(1, Math.floor(getTeardownTimeoutMs() * STEP_BUDGET_FRACTION))
+}
+
+// Bound for teardown work that waits on a process we do not control, so it settles well inside the
+// step whose budget it shares. Kept equal to TEARDOWN_BUDGET_FRACTION in @packages/data-context
+// ProjectConfigManager, which bounds the other peer wait and cannot import from here.
+export const PEER_WAIT_BUDGET_FRACTION = 0.4
+
+export function getPeerWaitTimeoutMs (): number {
+  return Math.max(1, Math.floor(getTeardownTimeoutMs() * PEER_WAIT_BUDGET_FRACTION))
 }
 
 export interface ExitStep {
   name: string
   fn: (code: number) => Promise<number | void> | void
+  timeoutMs?: number
 }
 
 export type ExitStepKey = string
@@ -29,7 +52,10 @@ export class GracefulExit {
   private readonly signalHandlers: Array<{ signal: NodeJS.Signals, listener: (sig: NodeJS.Signals) => void }> = []
   private processTeardown: Promise<number | void> | null = null
   private teardownStartedAt: number | null = null
+  private forceExitTimeout: NodeJS.Timeout | undefined
   private steps: Map<string, ExitStep> = new Map()
+  private pendingSteps: Map<string, string> = new Map()
+  private stepTimeouts: Set<NodeJS.Timeout> = new Set()
   private debug: Debug.Debugger
 
   /**
@@ -103,19 +129,23 @@ export class GracefulExit {
       process.removeListener(signal, listener)
     }
 
+    inst.clearForceExitTimeout()
+    inst.clearStepTimeouts()
+
     inst.steps.clear()
+    inst.pendingSteps.clear()
     inst.processTeardown = null
     inst.teardownStartedAt = null
     GracefulExit.instance = null
   }
 
-  static addStep (teardownFn: ExitStep['fn'], stepName?: string): ExitStepKey {
+  static addStep (teardownFn: ExitStep['fn'], stepName?: string, timeoutMs?: number): ExitStepKey {
     GracefulExit.singleton.debug('adding step to graceful exit: %s', stepName)
 
     const key = randomUUID()
     const name = stepName ?? teardownFn.name ?? key
 
-    GracefulExit.singleton.steps.set(key, { name, fn: teardownFn })
+    GracefulExit.singleton.steps.set(key, { name, fn: teardownFn, timeoutMs })
 
     return key
   }
@@ -125,49 +155,78 @@ export class GracefulExit {
   }
 
   static get isShuttingDown (): boolean {
-    return GracefulExit.singleton.processTeardown != null
+    return GracefulExit.singleton.teardownStartedAt != null
   }
 
-  private async flushSteps (code: number): Promise<number> {
-    let hadErrors = false
+  private async flushSteps (code: number): Promise<void> {
+    await Promise.all(Array.from(this.steps.entries()).map(async ([key, { name, fn, timeoutMs }]) => {
+      const startedAt = Date.now()
+      const budget = timeoutMs ?? getDefaultStepTimeoutMs()
+      let timer: NodeJS.Timeout | undefined
 
-    await Promise.all(Array.from(this.steps.entries()).map(async ([key, { name, fn }]) => {
+      this.pendingSteps.set(key, name)
+
       try {
         this.debug(`<${key}> executing teardown step: %s`, name)
 
-        await fn(code)
+        const outcome = await Promise.race([
+          Promise.resolve(fn(code)).then(() => 'settled' as const),
+          new Promise<'timedOut'>((resolve) => {
+            timer = setTimeout(() => resolve('timedOut'), budget)
+            this.stepTimeouts.add(timer)
+          }),
+        ])
 
-        this.debug(`<${key}> teardown step completed: %s`, name)
+        if (outcome === 'timedOut') {
+          this.debug(`<${key}> teardown step abandoned after %dms: %s`, budget, name)
+          console.log(`The "${name}" teardown step did not finish within ${budget}ms. This does not affect the exit code (${code}).`)
+        } else {
+          this.debug(`<${key}> teardown step completed in %dms: %s`, Date.now() - startedAt, name)
+        }
       } catch (error) {
-        console.error(error)
-        this.debug(`<${key}> Error executing teardown step: ${name}`, error)
-        hadErrors = true
+        this.debug(`<${key}> Error executing teardown step after ${Date.now() - startedAt}ms: ${name}`, error)
+        console.log(`An error occurred during the "${name}" teardown step. This does not affect the exit code (${code}).`)
+        console.log(error)
+      } finally {
+        if (timer) {
+          this.stepTimeouts.delete(timer)
+          clearTimeout(timer)
+        }
+
+        this.pendingSteps.delete(key)
       }
     }))
+  }
 
-    if (hadErrors) {
-      console.error('Additional errors occurred during teardown. Exiting with code 1.')
+  private clearForceExitTimeout (): void {
+    if (this.forceExitTimeout) {
+      clearTimeout(this.forceExitTimeout)
+      this.forceExitTimeout = undefined
+    }
+  }
 
-      return 1
+  // A step timer outliving its teardown settles that abandoned flush, which then exits the process.
+  private clearStepTimeouts (): void {
+    for (const timer of this.stepTimeouts) {
+      clearTimeout(timer)
     }
 
-    return code
+    this.stepTimeouts.clear()
   }
 
   private async flushAndExit (code: number): Promise<number | void> {
-    let finalExitCode = code ?? 0
-
     try {
-      finalExitCode = await this.flushSteps(code)
-      this.debug('steps flushed successfully', code, finalExitCode)
+      await this.flushSteps(code)
+      this.debug('steps flushed successfully', code)
     } catch (error) {
-     this.debug('Error flushing steps: ', error)
-      finalExitCode = 1
+      this.debug('Error flushing steps: ', error)
     } finally {
+      this.clearForceExitTimeout()
       this.processTeardown = null
       this.teardownStartedAt = null
       this.steps.clear()
-      process.exit(finalExitCode)
+      this.pendingSteps.clear()
+      process.exit(code)
     }
   }
 
@@ -178,25 +237,24 @@ export class GracefulExit {
       return exit.processTeardown
     }
 
-    let forceExitTimeout: NodeJS.Timeout | undefined = undefined
-
     exit.teardownStartedAt = Date.now()
     exit.processTeardown = Promise.race([
-      GracefulExit.singleton.flushAndExit(code).then(() => {
-        clearTimeout(forceExitTimeout)
-      }),
+      GracefulExit.singleton.flushAndExit(code),
       new Promise<void>((resolve) => {
-        forceExitTimeout = setTimeout(() => {
+        exit.forceExitTimeout = setTimeout(() => {
           try {
             const ms = getTeardownTimeoutMs()
+            const pending = Array.from(new Set(exit.pendingSteps.values()))
+            const waitingOn = pending.length ? ` Still waiting on: ${pending.join(', ')}.` : ''
 
-            console.error(`Failed to gracefully exit after ${ms}ms. Exiting with code 1. Configure with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT (milliseconds).`)
+            console.log(`Failed to gracefully exit after ${ms}ms.${waitingOn} This does not affect the exit code (${code}).`)
           } catch (e) {
-            console.error('Error forcing exit: ', e)
+            console.log('Error forcing exit: ', e)
           } finally {
-            clearTimeout(forceExitTimeout)
+            exit.clearForceExitTimeout()
+            exit.clearStepTimeouts()
             resolve()
-            process.exit(1)
+            process.exit(code)
           }
         }, getTeardownTimeoutMs())
       }),

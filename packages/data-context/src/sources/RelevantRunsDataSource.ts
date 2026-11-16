@@ -44,7 +44,7 @@ export class RelevantRunsDataSource {
   #pollingInterval: number = 30
   #cached: RelevantRun = RUNS_EMPTY_RETURN
 
-  #runsPoller?: Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum}>
+  #runsPoller?: Poller<'relevantRunChange', RelevantRun, { name: RelevantRunLocationEnum }>
 
   constructor (private ctx: DataContext) {}
 
@@ -114,11 +114,12 @@ export class RelevantRunsDataSource {
     const runs = cloudProject.runsByCommitShas?.filter((run): run is CloudRun => {
       return run != null && !!run.runNumber && !!run.status && !!run.commitInfo?.sha
     }).map((run): RelevantRunInfo => {
+      // Safe because the filter above only keeps runs with these fields set
       return {
         runId: run.id,
         runNumber: run.runNumber!,
         status: run.status!,
-        sha: run.commitInfo?.sha!,
+        sha: run.commitInfo!.sha!,
         totalFailed: run.totalFailed || 0,
       }
     }) || []

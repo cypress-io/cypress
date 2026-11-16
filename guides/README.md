@@ -19,7 +19,6 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 * [Determining the next version of Cypress to be released](./next-version.md)
 * [E2E Open Mode Testing](./e2e-open-testing.md)
 * [Error handling](./error-handling.md)
-* [ESLint Migration Guide: Monorepo Alignment](./eslint-migration.md)
 * [GraphQL Subscriptions - Overview and Test Guide](./graphql-subscriptions.md)
 * [Patching packages](./patch-package.md)
 * [Protocol development](./protocol-development.md)

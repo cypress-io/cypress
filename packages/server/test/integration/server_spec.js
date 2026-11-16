@@ -97,6 +97,11 @@ describe('Server', () => {
                 use: () => { },
               }
 
+              // these requests arrive in absolute form, and CONNECT for https,
+              // like a proxied browser — which only happens on the MITM path,
+              // and the server refuses CONNECT until a launch resolves it
+              await this.server.setNetworkMode(false)
+
               await this.server.startWebsockets(automationStub, config, {})
               if (initialUrl) {
                 this.server.remoteStates.set(initialUrl)
@@ -1300,7 +1305,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${superDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${superDomain}"`)
         })
       })
 
@@ -1312,7 +1317,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${secondSuperDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${secondSuperDomain}"`)
         })
       })
 
@@ -1324,7 +1329,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${superDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${superDomain}"`)
         })
       })
     })

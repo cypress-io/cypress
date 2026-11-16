@@ -8,7 +8,6 @@ import debug from 'debug'
 const debugInstance = debug('cypress:grep:compare-results')
 
 export default defineConfig({
-  allowCypressEnv: false,
   e2e: {
     defaultCommandTimeout: 1000,
     setupNodeEvents (on, config) {
@@ -28,7 +27,7 @@ export default defineConfig({
         }
 
         // compare the file to the expected output
-        let actualArr = []
+        const actualArr = []
 
         // @ts-expect-error - runs is not typed
         for (const run of results.runs) {

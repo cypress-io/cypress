@@ -1,5 +1,6 @@
 import type { Debugger } from 'debug'
-import { TransformOptions, transformSync } from 'esbuild'
+import type { TransformOptions } from 'esbuild'
+import { transformSync } from 'esbuild'
 import type { TranspileCache } from './types'
 import path from 'path'
 import { installSourcemapSupport } from './sourcemap-support'
@@ -11,7 +12,7 @@ type EnhancedModule = NodeModule & {
 }
 
 const DEFAULT_TRANSFORM_OPTS: TransformOptions = {
-  target: ['node20'],
+  target: ['node22'],
   loader: 'ts',
   format: 'cjs',
   sourcemap: 'inline',

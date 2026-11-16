@@ -3,6 +3,6 @@ declare module '@cypress/get-windows-proxy' {
     httpProxy: string
     noProxy: string
   }
-  function getWindowsProxy(): Optional<ProxyConfig>
+  function getWindowsProxy (): Optional<ProxyConfig>
   export = getWindowsProxy
 }

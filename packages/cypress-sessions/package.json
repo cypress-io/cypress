@@ -1,0 +1,31 @@
+{
+  "name": "@packages/cypress-sessions",
+  "version": "0.0.0-development",
+  "private": true,
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn clean && tsc",
+    "clean": "rimraf -rf ./{dist,coverage}",
+    "lint": "eslint",
+    "test": "vitest",
+    "watch": "tsc --watch"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "@types/node": "^22.18.7",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^10.14.0",
+    "jiti": "^2.4.2",
+    "rimraf": "^6.1.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  }
+}

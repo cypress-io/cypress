@@ -1,11 +1,11 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import debugLib from 'debug'
 
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunsDataSource } from '../../../src/sources'
 import { FAKE_PROJECT_WITH_ERROR, FAKE_PROJECT_MULTIPLE_COMPLETED, FAKE_PROJECT_MULTIPLE_COMPLETED_PLUS_RUNNING, FAKE_PROJECT_MULTIPLE_COMPLETED_SAME_SHA_PLUS_RUNNING, FAKE_PROJECT_NO_RUNS, FAKE_PROJECT_ONE_RUNNING_RUN, FAKE_SHAS } from './fixtures/graphqlFixtures'
-import { RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
+import type { RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
 
 const debug = debugLib('cypress:data-context:test:unit:sources:RelevantRunsDataSource')
 
@@ -62,7 +62,7 @@ describe('RelevantRunsDataSource', () => {
     }
 
     const testScenario = async (testData: TestProject, expectedResult: RelevantRunInfo[]) => {
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(testData)
 
       const testShas: string[] = getShasForTestData(testData)
@@ -106,9 +106,9 @@ describe('RelevantRunsDataSource', () => {
 
     it('returns the same current if current already set only one running', async () => {
       jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
 
       const firstResult = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
@@ -128,11 +128,11 @@ describe('RelevantRunsDataSource', () => {
 
     it('returns the same current if current already set and updates after movesToNext is called', async () => {
       jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_MULTIPLE_COMPLETED)
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
       const maybeSendRunNotificationStub = jest.spyOn(ctx.actions.notification, 'maybeSendRunNotification')
@@ -159,7 +159,7 @@ describe('RelevantRunsDataSource', () => {
       await dataSource.checkRelevantRuns([FAKE_SHAS[1], FAKE_SHAS[0]], true)
 
       expect(maybeSendRunNotificationStub).toHaveBeenCalledWith(
-        // @ts-expect-error
+        // @ts-expect-error - the expected run leaves out `runId`
         { runNumber: 1, status: 'RUNNING', sha: 'fcb90f', totalFailed: 0 },
         { runNumber: 4, status: 'FAILED', sha: 'fc753a', totalFailed: 1 },
       )
@@ -213,9 +213,9 @@ describe('RelevantRunsDataSource', () => {
 
     it('moves to new sha once completed', async () => {
       jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
       const subscription = ctx.emitter.subscribeTo('relevantRunChange')

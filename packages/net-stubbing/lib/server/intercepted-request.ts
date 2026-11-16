@@ -3,18 +3,18 @@ import type { IncomingMessage } from 'http'
 import type { Readable } from 'stream'
 import type {
   CypressIncomingRequest,
-  CypressOutgoingResponse,
+  CypressOutgoingResponseLike,
 } from '@packages/proxy'
 import type {
   NetEvent,
   Subscription,
-} from '../types'
-import type { BackendRoute, NetStubbingState } from './types'
+  BackendStaticResponse,
+  BackendRoute } from '@packages/network-interception'
+import type { NetStubbingState } from './types'
 import { planSubscriptions } from '@packages/network-interception'
 import * as errors from '@packages/errors'
 import { emit, sendStaticResponse } from './util'
 import type { SocketBroadcaster } from '@packages/socket'
-import type { BackendStaticResponse } from '../internal-types'
 
 export class InterceptedRequest {
   id: string
@@ -23,6 +23,7 @@ export class InterceptedRequest {
     immediateStaticResponse?: BackendStaticResponse
     subscriptions: Subscription[]
   }> = []
+
   includeBodyInAfterResponse: boolean = false
   responseSent: boolean = false
   lastEvent?: string
@@ -30,7 +31,7 @@ export class InterceptedRequest {
   /**
    * A callback that can be used to make the request go outbound through the rest of the request proxy steps.
    */
-  continueRequest: Function
+  continueRequest: () => void
   /**
    * Finish the current request with a response.
    */
@@ -40,7 +41,7 @@ export class InterceptedRequest {
    */
   continueResponse?: (newResStream?: Readable) => void
   req: CypressIncomingRequest
-  res: CypressOutgoingResponse
+  res: CypressOutgoingResponseLike
   state: NetStubbingState
   socket: SocketBroadcaster
 

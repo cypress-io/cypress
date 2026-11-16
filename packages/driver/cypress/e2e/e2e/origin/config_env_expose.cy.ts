@@ -1,4 +1,4 @@
-['config', 'env', 'expose'].forEach((fnName) => {
+['config', 'expose'].forEach((fnName) => {
   describe(`cy.origin- Cypress.${fnName}()`, { browser: '!webkit' }, () => {
     const USED_KEYS = {
       foo: 'cy-origin-foo',
@@ -15,29 +15,23 @@
         return { [key]: value }
       }
 
-      if (fnName === 'env') {
-        return { env: { [key]: value } }
-      }
-
       return { expose: { [key]: value } }
     }
 
     afterEach(() => {
-      // @ts-ignore
-      window.top.__cySkipValidateConfig = true
+      window.top!.__cySkipValidateConfig = true
     })
 
     if (fnName === 'config') {
       it(`throws if mutating read-only config values with Cypress.config()`, (done) => {
-        // @ts-ignore
-        window.top.__cySkipValidateConfig = false
+        window.top!.__cySkipValidateConfig = false
         cy.on('fail', (err) => {
           expect(err.message).to.include('`Cypress.config()` can never override `chromeWebSecurity` because it is a read-only configuration option.')
           done()
         })
 
         cy.origin('http://www.foobar.com:3500', () => {
-          // @ts-ignore
+          // @ts-expect-error - deliberately sets read-only config to assert it throws
           Cypress.config('chromeWebSecurity', false)
         })
       })

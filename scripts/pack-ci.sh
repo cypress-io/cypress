@@ -129,6 +129,16 @@ for cfg_path in "${dirs_to_process[@]}"; do
   fi
 done
 
+# The packed config being valid does not mean each conditional job still carries
+# the filter its guard needs — that is a cross-file invariant the CircleCI
+# validator knows nothing about. See cypress-io/cypress#34782.
+if [ "$VALIDATE" = true ]; then
+  echo "🔍 Auditing conditional job filters..."
+  if ! node ./scripts/audit-ci-job-filters.js; then
+    exit 1
+  fi
+fi
+
 if [ ${#dirs_to_process[@]} -eq 0 ]; then
   echo "ℹ️  No configurations to process"
 else

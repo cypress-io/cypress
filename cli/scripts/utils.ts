@@ -4,6 +4,7 @@
  * definition files that we will need to include with our NPM package.
  */
 export const includeTypes: string[] = [
+  'aria-query',
   'bluebird',
   'lodash',
   'mocha',

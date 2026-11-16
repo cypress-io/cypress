@@ -29,7 +29,7 @@ exports[`package.json build > outputs expected properties 1`] = `
   "name": "test",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git",
+    "url": "git+https://github.com/cypress-io/cypress.git",
   },
   "scripts": {
     "postinstall": "node dist/index.js --exec install",

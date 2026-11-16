@@ -27,6 +27,14 @@ function unknownOption (this: any, flag: string, type: string = 'option'): void 
   logger.error(`  error: unknown ${type}:`, flag)
   logger.error()
   this.outputHelp()
+
+  // A command that took exitOverride() means to handle its own failure — exiting
+  // here would skip the rest of its run, including anything it does on the way
+  // out. `cypress tap` relies on this to report the invocation before leaving.
+  if (this._exitCallback) {
+    this._exitCallback(new commander.CommanderError(1, 'commander.unknownOption', `unknown ${type}: ${flag}`))
+  }
+
   process.exit(1)
 }
 commander.Command.prototype.unknownOption = unknownOption
@@ -126,6 +134,9 @@ const descriptions: any = {
   headless: 'hide the browser instead of running headed (default for cypress run)',
   inspect: 'enable the Node.js inspector to debug the Cypress development process. only available when used with --dev',
   inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
+  session: 'target a local Cypress session by its process id (PID)',
+  json: 'print the raw JSON result instead of the human-readable rendering',
+  tapTimeout: 'how long to wait on any single call into the Cypress session, in milliseconds (default 30000)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   passWithNoTests: 'pass when no tests are found',
@@ -151,6 +162,7 @@ const knownCommands = [
   'install',
   'open',
   'run',
+  'tap',
   'verify',
   '-v',
   '--version',
@@ -429,21 +441,7 @@ const cliModule = {
       args = process.argv
     }
 
-    const { CYPRESS_INTERNAL_ENV, CYPRESS_DOWNLOAD_USE_CA } = process.env
-
-    if (process.env.CYPRESS_DOWNLOAD_USE_CA) {
-      let msg = `
-        ${logSymbols.warning} Warning: It looks like you're setting CYPRESS_DOWNLOAD_USE_CA=${CYPRESS_DOWNLOAD_USE_CA}
-
-        The environment variable "CYPRESS_DOWNLOAD_USE_CA" is no longer required to be set.
-        
-        You can safely unset this environment variable.
-      `
-
-      logger.log()
-      logger.warn(stripIndent(msg))
-      logger.log()
-    }
+    const { CYPRESS_INTERNAL_ENV } = process.env
 
     if (!util.isValidCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
       debug('invalid CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)
@@ -456,7 +454,7 @@ const cliModule = {
     if (util.isNonProductionCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
       debug('non-production CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)
 
-      let msg = `
+      const msg = `
         ${logSymbols.warning} Warning: It looks like you're passing CYPRESS_INTERNAL_ENV=${CYPRESS_INTERNAL_ENV}
 
         The environment variable "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
@@ -592,6 +590,26 @@ const cliModule = {
       }
 
       cache[command]()
+    })
+
+    program
+    .command('tap')
+    .usage('[command] [args...]')
+    .description('Discover, control, and query an open-mode Cypress session from the command line')
+    .helpOption(false)
+    .allowUnknownOption(true)
+    .option('-s, --session <pid>', text('session'), coerceAnyStringToInt)
+    .option('--json', text('json'))
+    .option('--timeout <ms>', text('tapTimeout'), coerceAnyStringToInt)
+    .action(async function (this: any, opts: any, args: string[]) {
+      try {
+        const { default: tapModule } = await import('./exec/tap')
+        const code = await tapModule.start(args || [], _.pick(opts, ['session', 'json', 'timeout']))
+
+        process.exit(code)
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     maybeAddDevFlag(program

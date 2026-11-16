@@ -1,7 +1,10 @@
-import { baseConfig, cliOverrides } from '@packages/eslint-config'
+import { baseConfig, cliOverrides, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
+  ...jsonConfig,
+  ...nodeConfig,
+  ...vitestConfig,
   ...cliOverrides,
   {
     files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
@@ -27,7 +30,7 @@ export default [
     },
   },
   {
-    files: ['src/**/*.js', 'src/**/*.ts', 'expects/**/*.js', 'expects/**/*.ts'],
+    files: ['src/**/*.js', 'src/**/*.ts'],
     languageOptions: {
       globals: {
         process: 'readonly',

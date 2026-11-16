@@ -258,6 +258,26 @@ describe('src/cy/commands/actions/selectFile', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/21936
+      // The fixture cache caused the file name to be dropped when the same fixture
+      // was aliased in a subsequent test, since the cache hit skipped recording it.
+      it('preserves the file name when an aliased fixture is cached', () => {
+        // prime the fixture cache
+        cy.fixture('valid.json', null)
+
+        // a subsequent alias of the same fixture reads from the cache, and should
+        // still carry the inferred file name through to selectFile
+        cy.fixture('valid.json', null).as('myCachedFixture')
+
+        cy.get('#basic').selectFile('@myCachedFixture')
+        .then((input) => {
+          const $input = input[0] as HTMLInputElement
+
+          expect($input.files?.[0].name).to.eq('valid.json')
+          expect($input.files?.[0].type).to.eq('application/json')
+        })
+      })
+
       // Because this is such an important recipe for users, it gets a separate test
       // even though readFile already has unit tests around reading files as buffers.
       it('works with files read with null encoding', () => {
@@ -362,7 +382,7 @@ describe('src/cy/commands/actions/selectFile', () => {
     }, () => {
       it('is a child command', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('A child command must be chained after a parent because it operates on a previous subject.')
+          expect(err.message).to.include('`cy.selectFile()` runs on the subject yielded by the command it is chained off')
           done()
         })
 
@@ -808,7 +828,7 @@ is being covered by another element:
 
       it('drops files onto any element and triggers events', (done) => {
         const $body = cy.$$('body')
-        let events: any[] = []
+        const events: any[] = []
 
         $body.on('input', (e) => {
           throw new Error('should not trigger input')

@@ -5,10 +5,11 @@ import _ from 'lodash'
 import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
-import { createRetryingSocket, getAddress } from './connect'
+import { ALPNProtocols, createRetryingSocket, getAddress } from './connect'
 import { lenientOptions } from './http-utils'
 import { clientCertificateStoreSingleton } from './client-certificates'
-import { CaOptions, getCaOptions } from './ca'
+import type { CaOptions } from './ca'
+import { getCaOptions } from './ca'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -68,6 +69,7 @@ type RequestOptionsWithProxy = WithProxyOpts<http.RequestOptions>
 
 type HttpsRequestOptions = https.RequestOptions & {
   minVersion?: 'TLSv1'
+  ALPNProtocols?: string[]
 }
 
 type HttpsRequestOptionsWithProxy = WithProxyOpts<HttpsRequestOptions>
@@ -107,7 +109,7 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
   const isHttps = opts.proxy.protocol === 'https:'
   const port = opts.proxy.port || (isHttps ? 443 : 80)
 
-  let connectOpts: any = {
+  const connectOpts: any = {
     port: Number(port),
     host: opts.proxy.hostname,
     useTls: isHttps,
@@ -141,13 +143,6 @@ export const isResponseStatusCode200 = (head: string) => {
 export const regenerateRequestHead = (req: http.ClientRequest) => {
   delete req._header
   req._implicitHeader()
-  if (req.output && req.output.length > 0) {
-    // the _header has already been queued to be written to the socket
-    const first = req.output[0]
-    const endOfHeaders = first.indexOf(_.repeat(CRLF, 2)) + 4
-
-    req.output[0] = req._header + first.substring(endOfHeaders)
-  }
 }
 
 // this function has to be sync via callback because it is called by the Agent.addRequest method, which expect a sync function
@@ -202,33 +197,8 @@ export class CombinedAgent {
 
   // called by Node.js whenever a new request is made internally
   // NOTE: this function has to be sync via callback because it is called by the Agent.addRequest method, which expect a sync function
-  addRequest (req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
+  addRequest (req: http.ClientRequest, options: http.RequestOptions) {
     _.merge(req, lenientOptions)
-
-    // Legacy API: addRequest(req, host, port, localAddress)
-    // https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
-    if (typeof options === 'string') {
-      // @ts-ignore
-      options = {
-        host: options,
-        port: port!,
-        localAddress,
-      }
-    }
-
-    // If the path property is a fully qualified URL, which is what as Axios appears to set,
-    // parse the URL and set the href, path, and port based on this path
-    if (typeof options.path === 'string' && /^http(s)?:\/\//.test(options.path)) {
-      const pathUrl = new URL(options.path)
-      const portToSet = pathUrl.port ?? options.port
-
-      options.href = options.path
-      options.path = pathUrl.pathname
-
-      if (portToSet) {
-        options.port = Number(portToSet)
-      }
-    }
 
     const isHttps = isRequestHttps(options)
 
@@ -260,7 +230,7 @@ export class CombinedAgent {
       if (isHttps) {
         _.assign(options, clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(uri))
 
-        return this.httpsAgent.addRequest(req, options as https.RequestOptions)
+        return this.httpsAgent.addRequest(req, options)
       }
 
       return this.httpAgent.addRequest(req, options)
@@ -268,7 +238,13 @@ export class CombinedAgent {
   }
 }
 
-const getProxyOrTargetOverrideForUrl = (href: string) => {
+/**
+ * Returns the proxy URL a request to `href` would go through, or an empty string if it
+ * would be dialed directly. Use this instead of `getProxyForUrl` when you need the proxy
+ * itself, since `getProxyForUrl` doesn't know about the `HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS`
+ * override below.
+ */
+export const getProxyOrTargetOverrideForUrl = (href: string): string => {
   // HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS is used for Cypress in Cypress E2E testing and will
   // force the parent Cypress server to treat the child Cypress server like a proxy without
   // having HTTP_PROXY set and will force traffic ONLY bound to that origin to behave
@@ -322,7 +298,6 @@ class HttpAgent extends http.Agent {
     const proxy = url.parse(options.proxy)
 
     // set req.path to the full path so the proxy can resolve it
-    // @ts-ignore: Cannot assign to 'path' because it is a constant or a read-only property.
     req.path = options.href
 
     delete req._header // so we can set headers again
@@ -358,30 +333,38 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  async addRequest (req: http.ClientRequest, options: https.RequestOptions) {
+  async addRequest (req: http.ClientRequest, options: http.RequestOptions): Promise<void> {
+    const opts = options as https.RequestOptions
+
     // Ensure we have a proper port defined otherwise node has assumed we are port 80
     // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
     // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
     // https://github.com/cypress-io/request/blob/master/request.js#L301-L303)
-    if (!options?.uri?.port && options?.uri?.protocol === 'https:') {
-      options.uri = {
-        ...options.uri,
+    if (!opts?.uri?.port && opts?.uri?.protocol === 'https:') {
+      opts.uri = {
+        ...opts.uri,
         port: String(443),
       }
 
-      options.port = 443
+      opts.port = 443
     }
 
     if (baseCaOptions) {
-      super.addRequest(req, mergeCAOptions(options, baseCaOptions))
+      super.addRequest(req, mergeCAOptions(opts, baseCaOptions) as http.RequestOptions)
     } else {
       await baseCaOptionsPromise.then((caOptions) => {
-        super.addRequest(req, mergeCAOptions(options, caOptions))
+        super.addRequest(req, mergeCAOptions(opts, caOptions) as http.RequestOptions)
       })
     }
   }
 
   createConnection (options: HttpsRequestOptions, cb?: any): any {
+    // Safe to set after the socket pool has keyed this request: `https.Agent.getName()`
+    // ignores ALPNProtocols, and every connection advertises the same list. Making the
+    // list conditional would need it folded into the key, or sockets would be reused
+    // across differing negotiations.
+    options.ALPNProtocols = [...ALPNProtocols]
+
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
@@ -398,7 +381,6 @@ class HttpsAgent extends https.Agent {
       }
     }
 
-    // @ts-ignore
     cb?.(null, super.createConnection(options) as any)
   }
 

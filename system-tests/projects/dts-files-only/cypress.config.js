@@ -1,3 +1,2 @@
 module.exports = {
-  allowCypressEnv: false,
 }

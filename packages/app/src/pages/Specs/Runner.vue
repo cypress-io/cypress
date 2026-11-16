@@ -25,14 +25,16 @@
 </template>
 
 <script lang="ts" setup>
-import { gql, useQuery, SubscriptionHandlerArg } from '@urql/vue'
-import { SpecPageContainerDocument, SpecPageContainer_SpecsChangeDocument, Runner_ConfigChangeDocument, Runner_ConfigChangeSubscription } from '../../generated/graphql'
+import { gql, useQuery } from '@urql/vue'
+import { SpecPageContainerDocument, SpecPageContainer_SpecsChangeDocument, Runner_ConfigChangeDocument } from '../../generated/graphql'
 import SpecRunnerContainerOpenMode from '../../runner/SpecRunnerContainerOpenMode.vue'
 import SpecRunnerContainerRunMode from '../../runner/SpecRunnerContainerRunMode.vue'
 import { useEventManager } from '../../runner/useEventManager'
 import { useSpecStore } from '../../store'
 import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 import { useSubscription } from '../../graphql'
+import type { SubscriptionHandlerArg } from '@urql/vue'
+import type { Runner_ConfigChangeSubscription } from '../../generated/graphql'
 
 gql`
 query SpecPageContainer {

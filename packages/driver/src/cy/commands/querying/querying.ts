@@ -79,6 +79,7 @@ function getAlias (selector, log, cy) {
       if (match && match[1] === '0') {
         $errUtils.throwErrByPath('get.alias_zero', {
           args: { alias: aliasObj.alias },
+          errProps: { retry: false },
         })
       }
 
@@ -143,7 +144,7 @@ function getAlias (selector, log, cy) {
 }
 
 function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | Cypress.LogTimeoutOptions = {}, queryCommand: QueryCommandOptions = '') {
-  if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+  if (!isEmpty(queryCommand) && _.isPlainObject(options) && Object.prototype.hasOwnProperty.call(options, 'timeout') && !_.isFinite(options.timeout)) {
     $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
       args: { timeout: options.timeout },
     })
@@ -269,10 +270,11 @@ export default (Commands, Cypress, cy, state) => {
     // find elements by the :cy-contains pseudo selector
     // and any submit inputs with the attributeContainsWord selector
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
+    const displayName = $utils.stringify(_.compact([filter, text]))
 
     const log = Cypress.log({
-      message: $utils.stringify(_.compact([filter, text])),
-      type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
+      message: displayName,
+      type: this.hasPreviouslyLinkedCommand() ? 'child' : 'parent',
       hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
@@ -282,7 +284,13 @@ export default (Commands, Cypress, cy, state) => {
     const getFn = cy.now('get', selector, getOptions)
 
     const getPhrase = () => {
-      if (filter && !(cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>).is('body')) {
+      // `withinSubject` is unset until a subject element has been searched, which never
+      // happens when the subject is empty: a page without a <body>, or a `.within()`
+      // element missing from the page. onFail runs before every retry, so
+      // throwing here would also stop `contains` from retrying.
+      const isWithinElement = !!getOptions.withinSubject && !cy.$$(getOptions.withinSubject).is('body')
+
+      if (filter && isWithinElement) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} and with the selector: '${filter}' `
@@ -292,7 +300,7 @@ export default (Commands, Cypress, cy, state) => {
         return `within the selector: '${filter}' `
       }
 
-      if (!(cy.$$(getOptions.withinSubject) as JQuery<HTMLElement>).is('body')) {
+      if (isWithinElement) {
         const node = $dom.stringify(getOptions.withinSubject, 'short')
 
         return `within the element: ${node} `
@@ -335,7 +343,7 @@ export default (Commands, Cypress, cy, state) => {
       Cypress.ensure.isType(subject, ['optional', 'element', 'window', 'document'], this.get('name'), cy)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
-        subject = cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
+        subject = cy.$$(cy.getSubjectFromChain(withinSubject || [cy.$$('body')]))
       }
 
       let $el = cy.$$()
@@ -352,6 +360,11 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       $el = $dom.getFirstDeepestElement($el)
+
+      // Each jQuery call above returns a fresh collection, dropping the `selector`
+      // assertions use to name a missing subject. Prefer the searched content over
+      // the `:cy-contains` selector, which is an implementation detail.
+      $el.selector = displayName
 
       log && cy.state('current') === this && log.set({
         $el,
