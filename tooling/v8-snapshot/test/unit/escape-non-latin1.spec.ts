@@ -112,6 +112,10 @@ describe('escapeNonLatin1', () => {
       { index: 18, delta: -2 },
     ])
   })
+
+  it('records a line break at the separator, after any backslashes before it in a comment', () => {
+    expect(escapeNonLatin1('// \\\\\u2028x').edits).to.deep.equal([{ index: 5, delta: 0, lineBreak: true }])
+  })
 })
 
 describe('assertLatin1', () => {

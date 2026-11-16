@@ -11,11 +11,7 @@ type Range = { start: number, end: number }
 type Node = Range & { type: string }
 type Context = 'string' | 'regex' | 'template' | 'tagged-template' | 'identifier'
 
-/**
- * A replacement made by {@link escapeNonLatin1}: `delta` code units were added
- * at `index` of the original source, or, with `lineBreak`, the line terminator
- * at `index` became a `\n`.
- */
+/** `delta` code units added at `index` of the original source, or with `lineBreak` the terminator at `index` became `\n` */
 export type Edit = { index: number, delta: number, lineBreak?: true }
 
 function unicodeEscape (char: string) {
@@ -159,12 +155,10 @@ export function escapeNonLatin1 (source: string): { code: string, edits: Edit[] 
       case 'identifier':
         return SURROGATE.test(char) ? fail(index, 'astral character in an identifier') : unicodeEscape(char)
       default:
-        if (inComment(index)) {
-          // A line terminator ends a `//` comment and counts as a newline for automatic semicolon insertion
-          return backslashes + (isLineSeparator ? '\n' : unicodeEscape(char))
-        }
+        // A line terminator ends a `//` comment, whose trailing backslashes are kept, and counts as a newline for automatic semicolon insertion
+        if (isLineSeparator) return `${backslashes}\n`
 
-        if (isLineSeparator) return '\n'
+        if (inComment(index)) return backslashes + unicodeEscape(char)
 
         if (WHITESPACE.test(char)) return ' '
 

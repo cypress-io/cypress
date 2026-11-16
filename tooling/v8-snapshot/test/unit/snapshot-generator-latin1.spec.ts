@@ -95,7 +95,7 @@ describe('shiftGeneratedColumns', () => {
   })
 
   it('keeps each mapping on its token when escaping adds columns and line breaks', () => {
-    const script = 'a=1 /*\u2028*/ b="\u2019";c=2 // \u2028d=3\ne="\u2019";f=4'
+    const script = 'a=1 /*\u2028*/ b="\u2019";c=2 // \\\\\u2028d=3\ne="\u2019";f=4'
     const { code, edits } = escapeNonLatin1(script)
     const tokens = ['a', 'b', 'c', 'd', 'e', 'f']
     const position = (source: string, token: string) => {
