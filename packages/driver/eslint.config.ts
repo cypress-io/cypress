@@ -1,7 +1,8 @@
-import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, regexpConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
   ...jsonConfig,
   // Shipped entry points outside the shared src/** glob
   ...compatConfig.map((block) => ({ ...block, files: [...(block.files ?? []), 'index.ts'] })),

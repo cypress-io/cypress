@@ -1,8 +1,9 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, regexpConfig } from '@packages/eslint-config'
 
 export default [
   { ignores: ['**/dist', '**/*.d.ts', '**/package-lock.json', '**/tsconfig.json', '**/cypress/fixtures'] },
   ...baseConfig,
+  ...regexpConfig,
   ...jsonConfig,
   {
     files: ['**/*.{js,ts,jsx,tsx}'],

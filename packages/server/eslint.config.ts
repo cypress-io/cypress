@@ -1,8 +1,9 @@
-import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, undeclaredWorkspaceImports, userNodeConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, regexpConfig, undeclaredWorkspaceImports, userNodeConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
   ...jsonConfig,
   ...nodeConfig,
   undeclaredWorkspaceImports(['hook-require.js'], ['@packages/v8-snapshot-require']),

@@ -1,8 +1,9 @@
-import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, regexpConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
   ...jsonConfig,
   ...nodeConfig,
   undeclaredWorkspaceImports(['src/setup/v8-snapshot-entry*.ts'], ['@packages/server']),

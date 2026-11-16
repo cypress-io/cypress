@@ -1,7 +1,8 @@
-import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, regexpConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
   ...jsonConfig,
   ...compatConfig,
   {
