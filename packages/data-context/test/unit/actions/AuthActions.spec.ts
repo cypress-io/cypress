@@ -153,7 +153,7 @@ describe('AuthActions', () => {
       const loginPromise = actions.login('Binary: App', 'In-App')
 
       actions.resetAuthState()
-      completeLogin({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      completeLogin({ name: 'Priya Raman', email: 'priya.raman@example.com', authToken: '4f9c2a7e-8b1d-4c3e-9a6f-2d7e5b8c1a90' })
 
       await loginPromise
       expect(ctx.coreData.user).toBeNull()

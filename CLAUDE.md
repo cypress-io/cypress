@@ -47,6 +47,7 @@
 - Keep follow-up work from the same task, such as review fixes and related instruction updates, on that task's branch. Create a separate branch only when the user asks for one.
 - After committing a merge of `develop`, run `git diff --name-only origin/develop` and check that every file listed is in the PR's scope. The pre-commit hook runs `eslint --fix` on every staged file, merged-in ones included, and `package-json/order-properties` reorders keys in `package.json` files that `develop` committed unsorted. Restore any such file with `git checkout origin/develop -- <file>` and commit with `--no-verify`.
 - When a change could reasonably be filed as `fix` or `chore` (for example, removing data the app sends to Cypress Cloud), ask the user which prefix to use before adding a `cli/CHANGELOG.md` entry. A `chore` gets no entry.
+- Give test fixtures realistic made-up data, such as a full name, an `@example.com` email and a token-shaped value, not placeholders like `'foo'`.
 - Before committing or pushing, `yarn check-ts`, `yarn lint`, `yarn health-check` (knip), and relevant unit tests must pass locally. CI currently does not block expensive e2e jobs when these fail.
 
 @AGENTS.md
