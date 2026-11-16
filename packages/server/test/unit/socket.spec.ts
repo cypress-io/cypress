@@ -544,6 +544,35 @@ describe('lib/socket', () => {
         expect(request.mock.calls.map(([message]) => message)).toEqual(['get:cookies', 'set:cookie', 'get:cookie'])
       })
 
+      it('reaches the browser before a request sent after it', async () => {
+        let finishLookup: (cookies: unknown[]) => void = () => {}
+        const lookup = new Promise<unknown[]>((resolve) => finishLookup = resolve)
+        const lookupStarted = new Promise<void>((resolve) => {
+          request.mockImplementation(async (message) => {
+            if (message !== 'get:cookies') return
+
+            resolve()
+
+            return lookup
+          })
+        })
+
+        options.onRequest = vi.fn().mockImplementation(async () => request.mock.calls.map(([message]) => message))
+        options.onResolveUrl = vi.fn().mockImplementation(async () => request.mock.calls.map(([message]) => message))
+
+        const written = setCookie('foo=bar')
+        const requested = new Promise<{ response: unknown }>((resolve) => client.emit('backend:request', 'http:request', {}, resolve))
+        const visited = new Promise<{ response: unknown }>((resolve) => client.emit('backend:request', 'resolve:url', 'http://localhost/', {}, resolve))
+
+        await lookupStarted
+        await new Promise((resolve) => setTimeout(resolve, 50))
+        finishLookup([])
+        await written
+
+        expect(await requested).toEqual({ response: ['get:cookies', 'set:cookie'] })
+        expect(await visited).toEqual({ response: ['get:cookies', 'set:cookie'] })
+      })
+
       it('does not hold a cookie command behind a write that never finishes', async () => {
         const timeouts = vi.spyOn(globalThis, 'setTimeout')
         const lookupStarted = new Promise<void>((resolve) => {

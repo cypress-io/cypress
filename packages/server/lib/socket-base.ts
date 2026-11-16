@@ -212,6 +212,11 @@ export class SocketBase implements SocketBroadcaster {
     // document.cookie writes from a cross-origin AUT that have not reached the browser yet
     const documentCookieWrites = new Set<Promise<void>>()
 
+    // anything that reads the browser's cookies after a document.cookie write has to see that write
+    const afterDocumentCookieWrites = <T>(fn: () => T | Promise<T>): T | Promise<T> => {
+      return documentCookieWrites.size ? Promise.all(documentCookieWrites).then(fn) : fn()
+    }
+
     const getFixture = (path, opts) => fixtureGet(config.fixturesFolder, path, opts)
 
     this.getIos().forEach((io) => {
@@ -306,12 +311,7 @@ export class SocketBase implements SocketBroadcaster {
           debug('automation:request %s %o', message, data)
 
           const request = async () => {
-            // a cookie command sent after a document.cookie write has to see that write
-            if (message.includes('cookie') && documentCookieWrites.size) {
-              await Promise.all(documentCookieWrites)
-            }
-
-            return automationRequest(message, data)
+            return message.includes('cookie') ? afterDocumentCookieWrites(() => automationRequest(message, data)) : automationRequest(message, data)
           }
 
           return request()
@@ -554,10 +554,10 @@ export class SocketBase implements SocketBroadcaster {
               case 'resolve:url': {
                 const [url, resolveOpts] = args
 
-                return options.onResolveUrl(url, userAgent, automationRequest, resolveOpts)
+                return afterDocumentCookieWrites(() => options.onResolveUrl(url, userAgent, automationRequest, resolveOpts))
               }
               case 'http:request':
-                return options.onRequest(userAgent, automationRequest, args[0])
+                return afterDocumentCookieWrites(() => options.onRequest(userAgent, automationRequest, args[0]))
               case 'reset:server:state':
                 return options.onResetServerState(args[0])
               case 'get:fixture':
