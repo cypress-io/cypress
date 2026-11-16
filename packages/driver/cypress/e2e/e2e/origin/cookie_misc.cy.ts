@@ -341,7 +341,8 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
       cy.origin(`https://app.foobar.com:3503`, () => {
         cy.window().then((win) => {
-          return cy.wrap(win.fetch(`/set-cookie?cookie=foo=bar; Path=/; HttpOnly`))
+          // no other test sets this name, so a cookie left over from one cannot be read as this one
+          return cy.wrap(win.fetch(`/set-cookie?cookie=httpOnlyCookie=bar; Path=/; HttpOnly`))
         })
 
         cy.reload()
@@ -350,12 +351,12 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
     it('does not read HttpOnly cookies', () => {
       cy.origin(`https://app.foobar.com:3503`, () => {
-        cy.document().its('cookie').should('not.include', 'foo=')
-        cy.getCookie('foo').its('value').should('eq', 'bar')
+        cy.document().its('cookie').should('not.include', 'httpOnlyCookie=')
+        cy.getCookie('httpOnlyCookie').its('value').should('eq', 'bar')
       })
     })
 
-    const writes = ['foo=changed; Path=/', 'foo=changed', 'foo=; Path=/; Max-Age=0', 'foo=; Max-Age=0']
+    const writes = ['httpOnlyCookie=changed; Path=/', 'httpOnlyCookie=changed', 'httpOnlyCookie=; Path=/; Max-Age=0', 'httpOnlyCookie=; Max-Age=0']
 
     writes.forEach((cookie) => {
       it(`does not replace or expire HttpOnly cookies with "${cookie}"`, () => {
@@ -370,7 +371,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
           // a write without a Path is for /fixtures, so it can add a cookie there
           cy.getAllCookies().then((cookies) => {
-            const atRoot = cookies.filter(({ name, path }) => name === 'foo' && path === '/')
+            const atRoot = cookies.filter(({ name, path }) => name === 'httpOnlyCookie' && path === '/')
 
             expect(atRoot.map(({ value, httpOnly }) => ({ value, httpOnly }))).to.deep.equal([{ value: 'bar', httpOnly: true }])
           })
