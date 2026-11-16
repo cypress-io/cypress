@@ -69,6 +69,7 @@ describe('lib/automation/cookie/document-cookie', () => {
       await write('foo=bar; Domain=github.io', 'https://github.io/')
 
       expect(automation.setCookie.mock.calls.map(([cookie]) => cookie.domain)).toEqual(['localhost', '127.0.0.1', 'web', 'github.io'])
+      expect(cookieJar.getAllCookies().map(({ domain }) => domain).sort()).toEqual(['127.0.0.1', 'github.io', 'localhost', 'web'])
     })
 
     it('a Domain in its canonical form', async () => {
@@ -283,6 +284,23 @@ describe('lib/automation/cookie/document-cookie', () => {
       await expect(earlier).rejects.toThrow('refused')
 
       expect(jarValues()).toEqual([{ key: 'foo', value: 'baz' }])
+    })
+
+    it('goes back to the cookie from before both writes when two writes to the same cookie are refused', async () => {
+      let refuse: (err: Error) => void = () => {}
+
+      cookieJar.setCookie('foo=old; Path=/', 'https://www.foobar.com/', 'strict')
+      automation.setCookie.mockReturnValueOnce(new Promise((_resolve, reject) => refuse = reject))
+      automation.setCookie.mockRejectedValueOnce(new Error('refused'))
+
+      const earlier = write('foo=bar; Path=/')
+      const later = write('foo=baz; Path=/')
+
+      refuse(new Error('refused'))
+      await expect(earlier).rejects.toThrow('refused')
+      await expect(later).rejects.toThrow('refused')
+
+      expect(jarValues()).toEqual([{ key: 'foo', value: 'old' }])
     })
   })
 

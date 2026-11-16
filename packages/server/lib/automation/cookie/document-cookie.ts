@@ -29,6 +29,9 @@ const parseUrl = (url: unknown) => {
   }
 }
 
+// a write that failed after a later write replaced it, mapped to the cookie it had replaced
+const undone = new WeakMap<Cookie, Cookie | undefined>()
+
 // browsers treat localhost as a secure context, so it may set Secure cookies over http
 const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
 
@@ -79,12 +82,22 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
   }
 
   const undo = () => {
-    // a later write to the same cookie owns the entry now
-    if (findStored() !== written) return
+    // a later write to the same cookie owns the entry now, and must not restore this one
+    if (findStored() !== written) {
+      if (written) undone.set(written, replaced)
+
+      return
+    }
+
+    let restored = replaced
+
+    while (restored && undone.has(restored)) {
+      restored = undone.get(restored)
+    }
 
     cookieJar.removeCookie(stored)
 
-    if (replaced) cookieJar.setCookie(replaced, pageUrl.href, 'strict')
+    if (restored) cookieJar.setCookie(restored, pageUrl.href, 'strict')
   }
 
   try {
