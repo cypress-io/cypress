@@ -734,13 +734,15 @@ export class Log {
       return
     }
 
-    // a remote element has nothing in the runner to highlight, only a snapshot to count
+    // a remote element has nothing in the runner to highlight, only a snapshot to count, and
+    // the IDs Test Replay gave its elements, for highlighting them in a replay
     if (isRemoteElement($el)) {
       this.unset('$el')
 
       return this.set({
         numElements: $el.length,
         visible: this.isVisible($el.length, () => $el.elements.filter((el) => el.visible).length),
+        protocolElementIds: _.compact(_.map($el.elements, 'protocolElementId')),
       })
     }
 
