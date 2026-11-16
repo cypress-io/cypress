@@ -1,0 +1,18 @@
+# The browser floor from AGENTS.md "Runtime targets": the last 3 major versions
+# of each supported browser.
+#
+# The file name keeps browserslist from finding it on its own. Webpack switches
+# its default target from `web` to `browserslist` as soon as any `.browserslistrc`,
+# `browserslist` file or `browserslist` package.json key sits above a build, and
+# autoprefixer and babel would change their output too. Tools read this file by
+# path instead: `browserslist(undefined, { config })`, or webpack's
+# `target: 'browserslist:<path>'`. The `compat/compat` lint rule reads it that way.
+#
+# WebKit: Cypress runs the WebKit bundled with the installed `playwright-webkit`,
+# not the user's system Safari. "last 3 Safari major versions" approximates that
+# build, which tracks recent Safari releases.
+
+last 3 Chrome major versions
+last 3 Firefox major versions
+last 3 Edge major versions
+last 3 Safari major versions
