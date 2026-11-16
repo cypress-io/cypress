@@ -386,6 +386,21 @@ describe('src/cy/commands/files', () => {
         cy.readFile('foo.json')
       })
 
+      it('throws the assertion error when it times out while re-reading the file', function (done) {
+        const runPrivileged = backend.withArgs('run:privileged')
+
+        runPrivileged.callsFake(() => new Cypress.Promise(() => { /* re-read never settles */ }))
+        runPrivileged.onFirstCall().resolves({ contents: 'foo' })
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'foo\' to equal \'contents\'')
+
+          done()
+        })
+
+        cy.readFile('foo.json').should('equal', 'contents')
+      })
+
       it('throws a specific error when file exists when it shouldn\'t', function (done) {
         backend.resolves(okResponse)
 
