@@ -32,7 +32,12 @@ export const reactConfig = (files: string[]): Linter.Config => {
       },
     },
     rules: {
-      ...recommended.rules,
+      // `recommended` makes many rules warnings, which never fail `yarn lint`,
+      // so their findings would go unfixed
+      ...Object.fromEntries(Object.keys(recommended.rules ?? {}).map((ruleId) => [ruleId, 'error'])),
+      // An anonymous component shows up unnamed in React DevTools and in the
+      // component stack of React's error messages
+      '@eslint-react/no-missing-component-display-name': 'error',
       '@eslint-react/dom-no-unknown-property': 'error',
       '@eslint-react/dom-no-unsafe-target-blank': 'error',
       // Index keys only break lists whose items move, and React files here

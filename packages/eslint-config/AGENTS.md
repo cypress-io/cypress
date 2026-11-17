@@ -181,14 +181,15 @@ These opt in:
 - `runner`: `unified-runner.tsx`.
 - `vite-plugin-cypress-esm`: its component tests, `cypress/**/*.tsx`.
 - `webpack-batteries-included-preprocessor`: the JSX fixtures under `test/fixtures`.
-- `system-tests`: the `.jsx` and `.tsx` files under `projects/**` and `project-fixtures/**`, all of which belong to React or Next.js projects, plus the `.js` files of the Next.js projects (`project-fixtures/next` and `projects/nextjs-*`), whose pages are JSX. A new Next.js fixture that writes JSX in `.js` files needs adding to that list. `dom-no-render` is off there: some fixtures mount with the legacy `ReactDOM.render`, which React 18 still runs, the way apps written before `createRoot` do. The layout rules the React plugin brings are off for them too, like `baseConfig`'s for every fixture, because system-test snapshots assert on line and column numbers.
+- `system-tests`: the `.jsx` and `.tsx` files under `projects/**` and `project-fixtures/**`, all of which belong to React or Next.js projects, plus the `.js` files of the Next.js projects (`project-fixtures/next` and `projects/nextjs-*`), whose pages are JSX. A new Next.js fixture that writes JSX in `.js` files needs adding to that list. `dom-no-render` is off there: some fixtures mount with the legacy `ReactDOM.render`, which React 18 still runs, the way apps written before `createRoot` do. Any layout rule the React plugin brings is off for them too, like `baseConfig`'s for every fixture, because system-test snapshots assert on line and column numbers. It brings none today; the switch-off covers a later version that adds one.
 
 A workspace with new React files opts them in the same way. `data-context`'s React scaffold fixtures under `test/unit` are the exception: its config ignores them, because its specs assert on how those inputs are written.
 
 On top of `recommended-typescript`:
 
 - `settings['react-x'].version` is `'18'`. `@cypress/react` supports React 18, so the rules that steer toward React 19 APIs (`no-forward-ref`, `no-context-provider`, `no-use-context`) stay quiet. Raise it only once React 18 support is dropped.
-- `dom-no-unknown-property` and `dom-no-unsafe-target-blank` are errors. They aren't in `recommended`.
+- Every rule it enables is an error, including the many `recommended` makes warnings: lint scripts don't pass `--max-warnings 0`, so a warning never fails `yarn lint` and would go unfixed.
+- `dom-no-unknown-property`, `dom-no-unsafe-target-blank` and `no-missing-component-display-name` are on, though not in `recommended`. Give a component the last one reports, such as one wrapped in `forwardRef` or `observer`, a `displayName`.
 - `no-array-index-key`, `set-state-in-effect`, `use-state`, `no-children-only` and `no-clone-element` are off. `reactConfig.ts` gives the reason for each.
 
 The plugin brings its own hooks rules (`rules-of-hooks`, `exhaustive-deps`) and purity rules, so don't add `eslint-plugin-react-hooks`. An effect that runs once on mount on purpose takes `// eslint-disable-next-line @eslint-react/exhaustive-deps -- <reason>` above the line the rule reports. As with `vue/no-v-html`, a `dangerouslySetInnerHTML` that renders HTML built to be rendered takes a `@eslint-react/dom-no-dangerously-set-innerhtml` disable naming where the HTML comes from. In JSX children, write the directive as `{/* eslint-disable-next-line ... */}`.

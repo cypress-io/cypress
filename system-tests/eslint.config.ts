@@ -134,7 +134,8 @@ export default [
     files: fixtureReactFiles,
     rules: {
       // the fixture block above turns off baseConfig's layout rules, but the
-      // React plugin is only loaded for these files
+      // React plugin is only loaded for these files. It has no layout rules
+      // today, so this only covers a later version that adds one
       ...layoutRulesOff([fixtureReactConfig]),
       // some fixtures mount with the legacy `ReactDOM.render`, which React 18
       // still runs, the way apps written before `createRoot` do
