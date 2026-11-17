@@ -41,6 +41,39 @@ describe('commands', () => {
     })
   })
 
+  describe('command name class', () => {
+    const mountCommand = (name: string) => {
+      cy.mount(
+        <div>
+          <Command
+            model={new CommandModel({
+              name,
+              state: 'passed',
+              numElements: 1,
+              hookId: '1',
+              id: 1,
+              testId: '1',
+            })}
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+    }
+
+    it('uses the command name as the class suffix', () => {
+      mountCommand('get')
+
+      cy.get('li.command').should('have.class', 'command-name-get')
+    })
+
+    it('collapses each run of whitespace in the command name into one dash', () => {
+      mountCommand('my  custom\tcommand')
+
+      cy.get('li.command').should('have.class', 'command-name-my-custom-command')
+    })
+  })
+
   describe('sessionPill', () => {
     const statusList: Array<{
       state: TestState

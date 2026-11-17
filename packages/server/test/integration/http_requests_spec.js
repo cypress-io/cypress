@@ -2450,7 +2450,7 @@ describe('Routes', () => {
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
                 expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}';$/)
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'$/)
               })
             })
 
@@ -2472,7 +2472,7 @@ describe('Routes', () => {
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
                 expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}';$/)
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'$/)
               })
             })
 
@@ -2494,7 +2494,7 @@ describe('Routes', () => {
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
                 expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; default-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}';$/)
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; default-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'$/)
               })
             })
 
@@ -2516,7 +2516,7 @@ describe('Routes', () => {
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
                 expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'; default-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}';$/)
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'; default-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'$/)
               })
             })
 
@@ -2538,7 +2538,7 @@ describe('Routes', () => {
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
                 expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'; script-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'; default-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}';$/)
+                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'; script-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'; default-src 'fake-src' 'nonce-[A-Za-z0-9+/]+={0,2}'$/)
               })
             })
 

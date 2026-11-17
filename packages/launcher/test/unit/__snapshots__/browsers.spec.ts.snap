@@ -13,7 +13,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "family": "chromium",
     "name": "chrome",
     "validator": [Function],
-    "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/,
   },
   {
     "binary": "google-chrome-beta",
@@ -21,7 +21,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "displayName": "Chrome Beta",
     "family": "chromium",
     "name": "chrome",
-    "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/m,
+    "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/,
   },
   {
     "binary": "google-chrome-canary",
@@ -29,7 +29,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "displayName": "Chrome Canary",
     "family": "chromium",
     "name": "chrome",
-    "versionRegex": /Google Chrome Canary \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome Canary \\(\\\\S\\+\\)/,
   },
   {
     "binary": "chrome",
@@ -37,7 +37,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "displayName": "Chrome for Testing",
     "family": "chromium",
     "name": "chrome-for-testing",
-    "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/,
   },
   {
     "binary": [
@@ -48,7 +48,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "displayName": "Chromium",
     "family": "chromium",
     "name": "chromium",
-    "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+    "versionRegex": /Chromium \\(\\\\S\\+\\)/,
   },
   {
     "binary": "firefox",
@@ -69,7 +69,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "family": "firefox",
     "name": "firefox",
     "validator": [Function],
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\[\\^\\\\sb\\]\\*b\\\\S\\*\\)\\$/m,
   },
   {
     "binary": [
@@ -81,7 +81,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "family": "firefox",
     "name": "firefox",
     "validator": [Function],
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+a\\\\S\\*\\)\\$/m,
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\[\\^\\\\sa\\]\\*a\\\\S\\*\\)\\$/m,
   },
   {
     "binary": [
@@ -92,7 +92,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "displayName": "Edge",
     "family": "chromium",
     "name": "edge",
-    "versionRegex": /Microsoft Edge \\(\\\\S\\+\\)/im,
+    "versionRegex": /Microsoft Edge \\(\\\\S\\+\\)/i,
   },
   {
     "binary": [
@@ -103,7 +103,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "displayName": "Edge Beta",
     "family": "chromium",
     "name": "edge",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= beta\\)\\|\\(\\?<=beta \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= beta\\)\\|\\(\\?<=beta \\)\\\\S\\*\\)/i,
   },
   {
     "binary": [
@@ -114,7 +114,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "displayName": "Edge Canary",
     "family": "chromium",
     "name": "edge",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= canary\\)\\|\\(\\?<=canary \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= canary\\)\\|\\(\\?<=canary \\)\\\\S\\*\\)/i,
   },
   {
     "binary": [
@@ -125,7 +125,7 @@ exports[`browsers > returns the expected list of browsers 1`] = `
     "displayName": "Edge Dev",
     "family": "chromium",
     "name": "edge",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= dev\\)\\|\\(\\?<=dev \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= dev\\)\\|\\(\\?<=dev \\)\\\\S\\*\\)/i,
   },
 ]
 `;

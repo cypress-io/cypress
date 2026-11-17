@@ -54,6 +54,14 @@ describe('lib/agent-info', () => {
     expect(detectAgent({ EDITOR: '/home/devin/.local/bin/vim' })).toBeUndefined()
   })
 
+  it.each(['devin', 'devin.exe'])('matches a bare %s editor command', (editor) => {
+    expect(detectAgent({ EDITOR: editor })).toBe('devin')
+  })
+
+  it.each(['mydevin', '/usr/bin/notdevin', '/usr/bin/devin-editor', '/usr/bin/devin.exe.bak', '/usr/bin/devinexe', '/usr/bin/devin_exe'])('does not match the %s editor', (editor) => {
+    expect(detectAgent({ EDITOR: editor })).toBeUndefined()
+  })
+
   describe('TTY-gated matches', () => {
     // vitest runs without a TTY, so isTTY is absent rather than false and cannot be spied on.
     const restores: (() => void)[] = []

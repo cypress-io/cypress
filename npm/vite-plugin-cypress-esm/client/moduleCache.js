@@ -66,7 +66,7 @@ function createProxyModule (module) {
       if (typeof describedValue === 'function') {
         // This is how you can see if something is a class
         // TODO: Revisit, there has to be a better way to do this
-        const isClass = /^class\s[^{]+\{.+?\}/ms.test(describedValue.toString())
+        const isClass = /^class\s[^{]*\{.+?\}/ms.test(describedValue.toString())
 
         if (isClass) {
           log(`🏗️ Handling ${key} as a constructor`)

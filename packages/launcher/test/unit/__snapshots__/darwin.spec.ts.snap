@@ -21,7 +21,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "validator": [Function],
     "version": "someVersion",
-    "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/,
   },
   {
     "binary": "google-chrome-beta",
@@ -37,7 +37,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "chrome",
     "path": "/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta",
     "version": "someVersion",
-    "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/m,
+    "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/,
   },
   {
     "binary": "google-chrome-canary",
@@ -53,7 +53,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "chrome",
     "path": "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
     "version": "someVersion",
-    "versionRegex": /Google Chrome Canary \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome Canary \\(\\\\S\\+\\)/,
   },
   {
     "binary": "chrome",
@@ -69,7 +69,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "chrome-for-testing",
     "path": "/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
     "version": "someVersion",
-    "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/,
   },
   {
     "binary": [
@@ -88,7 +88,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "chromium",
     "path": "/Applications/Chromium.app/Contents/MacOS/Chromium",
     "version": "someVersion",
-    "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+    "versionRegex": /Chromium \\(\\\\S\\+\\)/,
   },
   {
     "binary": "firefox",
@@ -125,7 +125,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "path": "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox",
     "validator": [Function],
     "version": "someVersion",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\[\\^\\\\sb\\]\\*b\\\\S\\*\\)\\$/m,
   },
   {
     "binary": [
@@ -145,7 +145,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "path": "/Applications/Firefox Nightly.app/Contents/MacOS/firefox",
     "validator": [Function],
     "version": "someVersion",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+a\\\\S\\*\\)\\$/m,
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\[\\^\\\\sa\\]\\*a\\\\S\\*\\)\\$/m,
   },
   {
     "binary": [
@@ -164,7 +164,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "edge",
     "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
     "version": "someVersion",
-    "versionRegex": /Microsoft Edge \\(\\\\S\\+\\)/im,
+    "versionRegex": /Microsoft Edge \\(\\\\S\\+\\)/i,
   },
   {
     "binary": [
@@ -183,7 +183,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "edge",
     "path": "/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta",
     "version": "someVersion",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= beta\\)\\|\\(\\?<=beta \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= beta\\)\\|\\(\\?<=beta \\)\\\\S\\*\\)/i,
   },
   {
     "binary": [
@@ -202,7 +202,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "edge",
     "path": "/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary",
     "version": "someVersion",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= canary\\)\\|\\(\\?<=canary \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= canary\\)\\|\\(\\?<=canary \\)\\\\S\\*\\)/i,
   },
   {
     "binary": [
@@ -221,7 +221,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "edge",
     "path": "/Applications/Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev",
     "version": "someVersion",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= dev\\)\\|\\(\\?<=dev \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= dev\\)\\|\\(\\?<=dev \\)\\\\S\\*\\)/i,
   },
 ]
 `;

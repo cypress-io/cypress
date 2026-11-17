@@ -194,7 +194,7 @@ describe('detectLanguage', () => {
 
       await fs.rm(path.join(projectRoot, 'cypress.config.ts'))
 
-      ;['ts', 'mts'].forEach((extension) => {
+      ;['ts', 'mts', 'TS', 'MTS'].forEach((extension) => {
         const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
 
         expect(actual).toEqual('ts')
@@ -206,7 +206,19 @@ describe('detectLanguage', () => {
 
       await fs.rm(path.join(projectRoot, 'cypress.config.js'))
 
-      ;['js', 'cjs', 'mjs'].forEach((extension) => {
+      ;['js', 'cjs', 'mjs', 'ts.js', 'JS'].forEach((extension) => {
+        const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
+
+        expect(actual).toEqual('js')
+      })
+    })
+
+    it('falls back to the project when a custom config file extension only ends in ts', async () => {
+      const projectRoot = await scaffoldMigrationProject('config-with-js')
+
+      await fs.rm(path.join(projectRoot, 'cypress.config.js'))
+
+      ;['mmts', 'xts', 'cypress-ts'].forEach((extension) => {
         const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
 
         expect(actual).toEqual('js')

@@ -295,6 +295,20 @@ describe('stack_utils', () => {
     })
   })
 
+  describe('getSourceStack', () => {
+    it.each([
+      ['Context.eval/<@http://localhost:3500/__cypress/tests?p=spec.cy.js:10:5', 'Context.eval'],
+      ['Context.eval/</<@http://localhost:3500/__cypress/tests?p=spec.cy.js:10:5', 'Context.eval/'],
+      ['Context.eval</<@http://localhost:3500/__cypress/tests?p=spec.cy.js:10:5', 'Context.eval'],
+      ['    at Context.eval (http://localhost:3500/__cypress/tests?p=spec.cy.js:10:5)', 'Context.eval'],
+      ['a/<b@http://localhost:3500/__cypress/tests?p=spec.cy.js:10:5', 'a/<b'],
+    ])('names the function of %j %j', (line, functionName) => {
+      const { parsed } = stack_utils.getSourceStack(line)
+
+      expect(parsed?.[0]).toHaveProperty('function', functionName)
+    })
+  })
+
   describe('normalizedUserInvocationStack', () => {
     it('should remove cross origin stack lines', () => {
       const userInvocationStack = `    at cy.<computed> [as prompt] (cypress:///../driver/src/cypress/cy.ts:657:86)
@@ -335,6 +349,15 @@ describe('stack_utils', () => {
       expect(result).toContain('at eval (eval at invokeOriginFn')
       expect(result).toContain('at invokeOriginFn')
       expect(result).toContain('at SpecBridgeCommunicator.eval')
+    })
+
+    it('merges line numbers from a Firefox stack, whose lines do not end in a parenthesis', () => {
+      const userInvocationStack = 'eval@http://localhost:3500/__cypress/spec-bridge.js:2:16'
+      const originUserInvocationStack = 'Context.eval@http://localhost:9500/__cypress/tests?p=cypress/e2e/run/cross-origin.cy.ts:14:12'
+
+      const result = stack_utils.mergeCrossOriginUserInvocationStack(userInvocationStack, originUserInvocationStack)
+
+      expect(result).toBe('Context.eval@http://localhost:9500/__cypress/tests?p=cypress/e2e/run/cross-origin.cy.ts:15:16')
     })
 
     it('should handle edge case where origin line is 1', () => {

@@ -1,6 +1,7 @@
 import os from 'os'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { appendElectronSwitches } from '../../lib/append_electron_switches'
+import { DEFAULT_ELECTRON_FLAGS } from '../../lib/util/chromium_flags'
 
 describe('lib/append_electron_switches', () => {
   beforeEach(() => {
@@ -94,6 +95,25 @@ describe('lib/append_electron_switches', () => {
       expect(mockApp.commandLine.appendSwitch).toHaveBeenCalledWith('--ipsum', '0')
       expect(mockApp.commandLine.appendSwitch).toHaveBeenCalledWith('--bar', '--baz=quux')
       expect(mockApp.commandLine.appendSwitch).toHaveBeenCalledWith('--lorem', '--ipsum=dolor --sit=amet')
+    })
+
+    it('splits launch args on runs of whitespace outside of quotes only', async () => {
+      vi.stubEnv('ELECTRON_EXTRA_LAUNCH_ARGS', `  --foo   --bar="baz quux"\t--lorem=ip"sum do"lor --empty='' `)
+
+      const mockApp = {
+        disableHardwareAcceleration: vi.fn(),
+        commandLine: {
+          appendSwitch: vi.fn(),
+        },
+      } as unknown as Electron.App
+
+      appendElectronSwitches(mockApp)
+      expect(vi.mocked(mockApp.commandLine.appendSwitch).mock.calls.slice(DEFAULT_ELECTRON_FLAGS.length)).toEqual([
+        ['--foo'],
+        ['--bar', 'baz quux'],
+        ['--lorem', 'ip"sum do"lor'],
+        ['--empty', ''],
+      ])
     })
   })
 })

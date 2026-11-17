@@ -59,6 +59,7 @@ describe('src/cy/chai/message_format', () => {
       [`expected **'  love'** to equal **'  love'**`, `expected **'&nbsp;&nbsp;love'** to equal **'&nbsp;&nbsp;love'**`],
       [`expected **'a\tb\n'** to equal **'\u00a0x'**`, `expected **'a\tb\n'** to equal **'&nbsp;x'**`],
       [`expected **'42'** to equal **''**`, `expected **'42'** to equal **''**`],
+      [`expected **[ '1', '23', 'a4' ]** to include **'5'**`, `expected **[ '1', '23', a4 ]** to include **'5'**`],
       [`expected **'it\\'s'** to equal **'x'**`, `expected **it's** to equal **x**`],
       [`expected **'C:\\Users\\cy\\file.txt'** to equal **'C:\\Users\\cy\\other.txt'**`, 'expected **C:\\Users\\cy\\file.txt** to equal **C:\\Users\\cy\\other.txt**'],
       [`expected **{ a: 'b' }** to have property **'a'**`, 'expected **{ a: b }** to have property **a**'],

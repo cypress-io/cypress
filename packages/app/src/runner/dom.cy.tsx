@@ -1,4 +1,4 @@
-import { getOrCreateHelperDom } from './dom'
+import { getOrCreateHelperDom, getSelectorHighlightStyles, INT32_MAX } from './dom'
 
 describe('dom utilities', () => {
   describe('getOrCreateHelperDom', () => {
@@ -56,6 +56,33 @@ describe('dom utilities', () => {
       // Verify we got the same elements back
       expect(secondResult.container).to.equal(firstResult.container)
       expect(secondResult.vueContainer).to.equal(firstResult.vueContainer)
+    })
+  })
+
+  describe('getSelectorHighlightStyles', () => {
+    const zIndexOf = (zIndex: string) => {
+      const el = document.createElement('div')
+
+      el.style.position = 'relative'
+      el.style.zIndex = zIndex
+      document.body.appendChild(el)
+
+      const [styles] = getSelectorHighlightStyles([el])
+
+      document.body.removeChild(el)
+
+      return styles.zIndex
+    }
+
+    it('uses INT32_MAX as the zIndex for auto and 0', () => {
+      expect(zIndexOf('auto')).to.equal(INT32_MAX)
+      expect(zIndexOf('0')).to.equal(INT32_MAX)
+    })
+
+    it('uses the computed zIndex for other values', () => {
+      expect(zIndexOf('10')).to.equal(10)
+      expect(zIndexOf('100')).to.equal(100)
+      expect(zIndexOf('-1')).to.equal(-1)
     })
   })
 })

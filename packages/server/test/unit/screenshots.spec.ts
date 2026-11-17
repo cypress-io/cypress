@@ -746,6 +746,16 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
       })
     })
 
+    it('splits spec name and name on backslashes and mixed separators', async () => {
+      const p = await screenshots.getPath({
+        specName: 'examples\\user/list.js',
+        titles: ['bar', 'baz'],
+        name: 'quux\\lorem/ipsum',
+      }, 'png', 'path/to/screenshots')
+
+      expect(p).toBe('path/to/screenshots/examples/user/list.js/quux/lorem/ipsum.png')
+    })
+
     it('concats spec name, screenshotsFolder, and titles', () => {
       return screenshots.getPath({
         specName: 'examples/user/list.js',

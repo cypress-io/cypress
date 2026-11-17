@@ -327,6 +327,7 @@ describe('MtlsBridge', () => {
       ['a line break', 'evilcom443xxxxxxx.a.com', 'evil.com:443\r\nX: .a.com'],
       ['a NUL', 'localhostx.a.com', 'localhost\0.a.com'],
       ['a trailing line break', 'xy.a.com', 'x.a.com\n'],
+      ['a colon', 'evilxx.a.com', 'evil:x.a.com'],
     ])('closes a connection whose servername carries %s', async (_kind, placeholder, servername) => {
       await expect(sendSplicedHello([wildcard], placeholder, servername)).resolves.toStrictEqual([])
     })
