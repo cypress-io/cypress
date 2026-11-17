@@ -1381,6 +1381,41 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    describe('input[type=url]', () => {
+      it('moves the caret with {leftarrow}', () => {
+        cy.get('#url-with-value').invoke('val', 'https://www.example.com')
+
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}').then(($input) => {
+          expect($input).to.have.value('https://www.example.com')
+          expect($input[0].selectionStart).to.eq('https://www.example.'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.example.'.length)
+        })
+      })
+
+      it('inserts text in the middle of the value', () => {
+        cy.get('#url-with-value').invoke('val', 'https://www.example.com')
+
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}{leftarrow}/shop').then(($input) => {
+          expect($input).to.have.value('https://www.example/shop.com')
+          expect($input[0].selectionStart).to.eq('https://www.example/shop'.length)
+        })
+      })
+
+      it('types at the caret position the app set', () => {
+        cy.get('#url-with-value').invoke('val', 'www.example.com')
+
+        cy.get<HTMLInputElement>('#url-with-value').then(($input) => {
+          $input[0].focus()
+          $input[0].setSelectionRange(0, 0)
+        })
+
+        cy.get<HTMLInputElement>('#url-with-value').type('https://').then(($input) => {
+          expect($input).to.have.value('https://www.example.com')
+          expect($input[0].selectionStart).to.eq('https://'.length)
+        })
+      })
+    })
+
     describe('input[type=password]', () => {
       it('can change values', () => {
         cy.get('#password-without-value').type('password').then(($text) => {
