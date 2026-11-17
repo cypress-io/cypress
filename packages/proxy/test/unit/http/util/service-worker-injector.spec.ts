@@ -14,7 +14,7 @@ self.addEventListener('fetch', (event) => {
 // wrapped fetch listener can be dispatched against, rather than only string-asserted.
 // With reservedPathPrefixes it runs the browser network path's form: the
 // instrumentation expression, evaluated ahead of the unmodified script.
-const runInjectedServiceWorker = (options: { reservedPathPrefixes?: string[], hasBinding?: boolean } = {}) => {
+const runInjectedServiceWorker = (options: { reservedPathPrefixes?: string[], hasBinding?: boolean, instrumentationEvaluations?: number } = {}) => {
   const listeners: { type: string, listener: (...args: any[]) => unknown }[] = []
   const clientEvents: any[] = []
   let onfetchSlot: ((...args: any[]) => unknown) | null = null
@@ -54,7 +54,12 @@ const runInjectedServiceWorker = (options: { reservedPathPrefixes?: string[], ha
   })
 
   if (options.reservedPathPrefixes) {
-    new Function('self', getServiceWorkerInstrumentationExpression({ reservedPathPrefixes: options.reservedPathPrefixes }))(fakeSelf)
+    const expression = getServiceWorkerInstrumentationExpression({ reservedPathPrefixes: options.reservedPathPrefixes })
+
+    for (let i = 0; i < (options.instrumentationEvaluations ?? 1); i++) {
+      new Function('self', expression)(fakeSelf)
+    }
+
     new Function('self', APP_SERVICE_WORKER_BODY)(fakeSelf)
   } else {
     new Function('self', injectIntoServiceWorker(Buffer.from(APP_SERVICE_WORKER_BODY)))(fakeSelf)
@@ -121,7 +126,7 @@ describe('lib/http/util/service-worker-injector', () => {
       const preloadIndex = actual.indexOf(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
       const injectorIndex = actual.indexOf('__cypressInjectIntoServiceWorker')
 
-      expect(preloadIndex).toBe(0)
+      expect(preloadIndex).toBeGreaterThan(-1)
       expect(preloadIndex).toBeLessThan(injectorIndex)
     })
 
@@ -131,6 +136,18 @@ describe('lib/http/util/service-worker-injector', () => {
       expect(sw.clientEvents).toEqual([
         { type: 'hasFetchHandler', payload: { hasFetchHandler: true }, scope: 'https://example.com/' },
       ])
+    })
+
+    // a crash-reloaded worker can be sent the expression by both the page
+    // connection's crash handler and the browser connection's crash hold
+    it('instruments a worker once when the expression is evaluated twice before its script runs', async () => {
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes, instrumentationEvaluations: 2 })
+
+      await sw.dispatchFetch('https://example.com/api/users')
+
+      expect(sw.appFetchCalls()).toEqual(['https://example.com/api/users'])
+      expect(sw.fetchRequestEvents()).toHaveLength(1)
+      expect(sw.clientEvents.filter((event) => event.type === 'hasFetchHandler')).toHaveLength(1)
     })
 
     it('does not call a binding that does not exist yet when the script adds a fetch handler', () => {

@@ -334,6 +334,8 @@ ${body};
 __cypressIsScriptEvaluated = true;`
 }
 
+const INSTRUMENTED_FLAG_NAME = '__cypressServiceWorkerInstrumented'
+
 /**
  * Builds the instrumentation as an expression to evaluate in a service worker that
  * is paused before its script runs. Used on the browser network (CDP Fetch) path,
@@ -346,8 +348,17 @@ __cypressIsScriptEvaluated = true;`
  * this, so it can still be missing while the worker's script evaluates; events are
  * only sent once it exists. Navigation preload is disabled first, ahead of any
  * user code; see disable-navigation-preload.ts (#34652) for why.
+ *
+ * A crash-reloaded worker can be sent this more than once before it runs, so it
+ * applies only once per worker global. Wrapping the fetch listeners twice would
+ * report each request twice, and the extra report would be matched to a later
+ * request for the same URL. A reload gets a fresh global, so it is still
+ * instrumented.
  * @param options.reservedPathPrefixes see __cypressInjectIntoServiceWorker
  */
 export const getServiceWorkerInstrumentationExpression = (options: { reservedPathPrefixes: string[] }) => {
-  return `${DISABLE_NAVIGATION_PRELOAD_EXPRESSION};(${__cypressInjectIntoServiceWorker})(${JSON.stringify(options.reservedPathPrefixes)}, () => typeof self.${serviceWorkerClientEventHandlerName} === 'function');`
+  return `if (!self.${INSTRUMENTED_FLAG_NAME}) {
+Object.defineProperty(self, '${INSTRUMENTED_FLAG_NAME}', { value: true });
+${DISABLE_NAVIGATION_PRELOAD_EXPRESSION};(${__cypressInjectIntoServiceWorker})(${JSON.stringify(options.reservedPathPrefixes)}, () => typeof self.${serviceWorkerClientEventHandlerName} === 'function');
+}`
 }
