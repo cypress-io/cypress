@@ -45,7 +45,7 @@ interface AttemptProps {
 const Attempt: React.FC<AttemptProps> = observer(({ model, scrollIntoView }) => {
   const [isMounted, setIsMounted] = useState(false)
 
-  // eslint-disable-next-line @eslint-react/exhaustive-deps -- runs after every render, scrolling from the second one on
+  // eslint-disable-next-line @eslint-react/exhaustive-deps -- runs after every render on purpose, so each re-render after mount scrolls the attempt into view
   useEffect(() => {
     if (isMounted) {
       scrollIntoView()

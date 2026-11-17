@@ -12,7 +12,7 @@ export default function User (props: { id: string }) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // ignore responses for an id that is no longer current
+    // cancel the request, and ignore its response, once the id is no longer current
     const controller = new AbortController()
 
     setUser(null)

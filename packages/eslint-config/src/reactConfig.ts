@@ -38,8 +38,9 @@ export const reactConfig = (files: string[]): Linter.Config => {
       // Index keys only break lists whose items move, and React files here
       // index lists that are static or only appended to
       '@eslint-react/no-array-index-key': 'off',
-      // Performance advice: these flag a state update in an effect, such as a
-      // mount flag, and an eager initial value passed to `useState`
+      // These give performance advice rather than catch bugs: they flag a state
+      // update in an effect, such as a mount flag, and an eager initial value
+      // passed to `useState`
       '@eslint-react/set-state-in-effect': 'off',
       '@eslint-react/use-state': 'off',
       // `Children.only` and `cloneElement` still work; these discourage the
