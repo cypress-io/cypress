@@ -17,6 +17,8 @@ interface WriteCase {
   page?: string
   // Firefox handles the write differently from the cookie spec, which the patch follows
   notFirefox?: boolean
+  // the first Firefox version known to handle the write the way Chrome does
+  firefoxFrom?: number
 }
 
 interface RecordArgs {
@@ -150,7 +152,8 @@ const cases: WriteCase[] = [
   { write: '__Host-foo=bar; Secure; Path=/fixtures', https: true },
   { write: '__Host-foo=bar; Secure; Path=/; Domain=www.{site}', https: true },
   { write: '__host-foo=bar; Path=/', https: true },
-  { write: '__Host-foo=bar; Secure', title: '__Host-foo=bar; Secure from a page at /', https: true, page: '/' },
+  // Firefox 154 stores this cookie at the page's default path
+  { write: '__Host-foo=bar; Secure', title: '__Host-foo=bar; Secure from a page at /', https: true, page: '/', firefoxFrom: 159 },
   { write: '__Host-foo=bar; Secure; Path=/', title: '__Host-foo=bar; Secure; Path=/ from a page at /', https: true, page: '/' },
   { write: '__Http-foo=bar; Secure; Path=/', https: true },
   { write: '__Host-Http-foo=bar; Secure; Path=/', https: true },
@@ -176,8 +179,10 @@ const cases: WriteCase[] = [
 // Compares what a document.cookie write does in the primary origin, where the
 // browser handles it, with what the same write does inside cy.origin().
 describe('document.cookie writes in cy.origin() match the browser', { browser: '!webkit' }, () => {
-  cases.forEach(({ write, title, https, existing, pushState, page, notFirefox }) => {
-    it(`${title || write} (${https ? 'https' : 'http'})`, { browser: notFirefox ? '!firefox' : undefined }, () => {
+  cases.forEach(({ write, title, https, existing, pushState, page, notFirefox, firefoxFrom }) => {
+    it(`${title || write} (${https ? 'https' : 'http'})`, { browser: notFirefox ? '!firefox' : undefined }, function () {
+      if (firefoxFrom && Cypress.isBrowser('firefox') && Number(Cypress.browser.majorVersion) < firefoxFrom) return this.skip()
+
       const args = (site: string): RecordArgs => {
         const origin = https ? `https://www.${site}:3502` : `http://www.${site}:3500`
 
