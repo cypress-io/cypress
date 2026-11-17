@@ -13,6 +13,4 @@ export const END_TAG = '<<<CYPRESS.STDERR.END>>>'
 /**
  * A regex that will match output from the 'debug' package
  */
-// this regexp needs to match control characters
-// eslint-disable-next-line no-control-regex
-export const DEBUG_PREFIX = /^\s+(?:\u001b\[[0-9;]*m)*((\S+):)+/u
+export const DEBUG_PREFIX = /^\s+\S+:/

@@ -23,7 +23,7 @@ const SNAPSHOT_CACHE_FAILURE = '[SNAPSHOT_CACHE_FAILURE]'
  * @category snapshot
  */
 const REFERENCE_ERROR_DEFER =
-  /^(Reference|Type)?Error: (.+ is not defined|Cannot read property|Cannot read properties)/i
+  /^(?:Reference|Type)?Error: (?:.+ is not defined|Cannot read property|Cannot read properties)/i
 
 /**
  * This error is raised due to missing functions, most likely due to incorrect rewrite
@@ -32,7 +32,7 @@ const REFERENCE_ERROR_DEFER =
  * @category snapshot
  */
 const REFERENCE_ERROR_NOREWRITE =
-  /^(Reference|Type)?Error: (.+ is not a function|__.+__ is not defined)/i
+  /^(?:Reference|Type)?Error: (?:.+ is not a function|__.+__ is not defined)/i
 
 /**
  * The history of warnings we processed already.

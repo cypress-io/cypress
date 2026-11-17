@@ -99,7 +99,7 @@ export function transformSpec ({
     name = name.slice(1)
   }
 
-  const LEADING_SLASH = /^\/|/g
+  const LEADING_SLASH = /^\//
   const relativeToCommonRoot = absolute.replace(commonRoot, '').replace(LEADING_SLASH, '')
 
   return {

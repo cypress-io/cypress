@@ -78,7 +78,7 @@ function spawnViteDevServer (
 ) {
   return spawnUntilMatch(prefix, {
     command,
-    match: /VITE v(\d+.)+ ready in \d+/,
+    match: /VITE v\d[\d.]*\s+ready in \d+/,
     options,
   })
 }

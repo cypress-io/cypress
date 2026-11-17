@@ -29,7 +29,7 @@ import { IconGeneralChatBubble, IconTechnologyAngleBrackets } from '@cypress-des
 import { SelfHealedBadge } from '../lib/selfHealedBadge'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
-const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
+const nameClassName = (name: string) => name.replace(/\s+/g, '-')
 
 const md = new Markdown()
 const mdOnlyHTML = new Markdown('zero').enable(['html_inline', 'html_block'])

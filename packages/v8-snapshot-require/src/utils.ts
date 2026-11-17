@@ -9,4 +9,4 @@ import path from 'path'
 export const forwardSlash =
   path.sep === path.posix.sep
     ? (p: string) => p
-    : (p: string) => p.replace(/(\\)+/g, '/')
+    : (p: string) => p.replace(/\\+/g, '/')

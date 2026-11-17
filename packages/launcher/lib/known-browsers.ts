@@ -121,6 +121,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'beta',
     displayName: 'Edge Beta',
+    // eslint-disable-next-line regexp/no-super-linear-backtracking -- runs on one line of an installed browser's --version output
     versionRegex: /Microsoft Edge.+?(\S*(?= beta)|(?<=beta )\S*)/i,
     binary: ['edge-beta', 'microsoft-edge-beta'],
   },
@@ -129,6 +130,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'canary',
     displayName: 'Edge Canary',
+    // eslint-disable-next-line regexp/no-super-linear-backtracking -- runs on one line of an installed browser's --version output
     versionRegex: /Microsoft Edge.+?(\S*(?= canary)|(?<=canary )\S*)/i,
     binary: ['edge-canary', 'microsoft-edge-canary'],
   },
@@ -137,6 +139,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'dev',
     displayName: 'Edge Dev',
+    // eslint-disable-next-line regexp/no-super-linear-backtracking -- runs on one line of an installed browser's --version output
     versionRegex: /Microsoft Edge.+?(\S*(?= dev)|(?<=dev )\S*)/i,
     binary: ['edge-dev', 'microsoft-edge-dev'],
   },

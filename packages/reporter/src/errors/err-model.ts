@@ -70,7 +70,7 @@ export default class Err {
   }
 
   get isCommandErr () {
-    return /(AssertionError|CypressError)/.test(this.name)
+    return /AssertionError|CypressError/.test(this.name)
   }
 
   update (props?: Partial<ErrProps>) {

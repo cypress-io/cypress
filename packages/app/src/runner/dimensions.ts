@@ -47,7 +47,7 @@ export const getElementDimensions = (el: HTMLElement) => {
   // Use INT32_MAX for auto/0 z-index values (matching getZIndex behavior)
   const INT32_MAX = 2147483647
   const parsedZIndex = parseFloat(zIndexValue)
-  const zIndex = /^(auto|0)$/.test(zIndexValue) || isNaN(parsedZIndex) ? INT32_MAX : parsedZIndex
+  const zIndex = /^(?:auto|0)$/.test(zIndexValue) || isNaN(parsedZIndex) ? INT32_MAX : parsedZIndex
 
   return {
     // offset disregards margin but takes into account border + padding

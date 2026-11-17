@@ -42,7 +42,7 @@ const AGENTS: readonly (readonly [AgentName, readonly EnvCheck[]])[] = [
   ['auggie', ['AUGMENT_AGENT']],
   ['goose', ['GOOSE_PROVIDER']],
   ['junie', ['JUNIE_DATA', 'JUNIE_SHIM_PATH']],
-  ['devin', [envMatcher('EDITOR', /(^|[\\/])devin(\.exe)?$/)]],
+  ['devin', [envMatcher('EDITOR', /(?:^|[\\/])devin(?:\.exe)?$/)]],
   ['cursor', ['CURSOR_AGENT']],
   ['kiro', [envMatcher('TERM_PROGRAM', /kiro/, { noTTY: true })]],
 ]

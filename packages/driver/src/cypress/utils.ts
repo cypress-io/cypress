@@ -11,7 +11,7 @@ import $errUtils from './error_utils'
 
 const customProtocolRegex = /^[^:/]+:\/{1,3}/
 // Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
-const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
+const webpackDevtoolNamespaceRegex = /webpack:\/{2}[^.]*\.\//
 
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g

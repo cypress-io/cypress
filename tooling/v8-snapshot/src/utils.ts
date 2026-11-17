@@ -278,7 +278,7 @@ export function installedElectronResourcesFilePath (
 }
 
 // at Object.__commonJS../node_modules/mute-stream/mute.js (/Volumes/d/dev/cy/perf-tr1/v8-snapshot/example-multi/cache/snapshot.js:10555:43)
-const commonJsModuleRx = /(at Object.__commonJS\.)([^(]+)([^ :]+) *:(\d+)(.+)/
+const commonJsModuleRx = /(at Object.__commonJS\.)([^(]+)(\([^ :]+) *:(\d+)(\D.*)/
 
 /**
  * Pretty prints errors related to module's being included in the snapshot.

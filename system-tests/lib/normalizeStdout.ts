@@ -13,6 +13,7 @@ export const pathUpToProjectName = Fixtures.projectPath('')
 // a single placeholder. They are kept as separate groups (rather than a single
 // repeating group) so the `headless` capture stays `undefined` when absent —
 // the harness asserts on it directly in system-tests.ts.
+// eslint-disable-next-line regexp/no-empty-alternative -- `replaceBrowserName` concatenates the group, so it must be '' rather than undefined when absent
 export const browserNameVersionRe = /(Browser:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(headless\))?(\s\(deprecated\))?(\s+)/
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
@@ -94,7 +95,7 @@ const replaceUploadActivityIndicator = function (str: string, preamble: string, 
 // so that the stdout can contain stack traces of different lengths
 export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
   // matches the newline preceding the stack and any leading whitespace
-  const leadingNewLinesAndWhitespace = `(?:\\n?[^\\S\\n\\r]*)`
+  const leadingNewLinesAndWhitespace = `\\n?[^\\S\\n\\r]*`
   // matches against the potential file location patterns, including:
   // foo.js:1:2 - file locations including line/column numbers
   // <unknown> - rendered when location cannot be determined
@@ -109,8 +110,9 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   const condensedStyleLine = `.*@${location}`
   // matches against remainder of stack trace until blank lines found.
   // includes group to normalize whitespace between newlines in Firefox
-  const remainderOfStack = `[\\n\\S\\s]*?(\\n\\s*?\\n|$)`
+  const remainderOfStack = `[\\s\\S]*?(\\n\\s*?\\n|$)`
 
+  // eslint-disable-next-line regexp/no-super-linear-backtracking -- only runs on Cypress's own stdout in system tests, and the lazy scan to the next blank line is what finds the end of a stack
   const stackTraceRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
 
   return str.replace(stackTraceRegex, (match: string, trailingWhitespace: string | undefined, offset: number) => {
@@ -188,7 +190,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Different browsers have different cross-origin error messages
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
-  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt \d+\/\d+\)\n/g, '')
   // Strip browser-connect retries that a later attempt recovered from; issue_7217 snapshots a run
   // where every attempt fails, so the lines stay when the run aborts.
   .replace(/(?:\nTimed out waiting for the browser to connect\. Retrying(?: again)?\.\.\.\n)+(?!\nTimed out waiting for the browser to connect|\nThe browser never connected)/g, '')

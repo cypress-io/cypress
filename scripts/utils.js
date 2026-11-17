@@ -47,7 +47,7 @@ function getJustVersion (npmNameOrUrl) {
   if (is.url(npmNameOrUrl)) {
     // try finding semver in the url
     // https://something/0.20.3/something...
-    const re = /\/(\d+\.\d+\.\d+(-\w+)?)\//
+    const re = /\/(\d+\.\d+\.\d+(?:-\w+)?)\//
     const matches = re.exec(npmNameOrUrl)
 
     if (matches) {

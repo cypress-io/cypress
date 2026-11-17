@@ -13,7 +13,7 @@ import { RUNNABLE_LOGS, RUNNABLE_PROPS } from '@packages/types'
 import type { Emissions, SerializedTest, TestFilter } from '@packages/types'
 import { SKIPPED_DUE_TO_BROWSER_MESSAGE } from './mocha'
 
-const mochaCtxKeysRe = /^(_runnable|test)$/
+const mochaCtxKeysRe = /^(?:_runnable|test)$/
 const betweenQuotesRe = /"(.+?)"/
 
 const HOOKS = ['beforeAll', 'beforeEach', 'afterEach', 'afterAll'] as const

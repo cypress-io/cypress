@@ -29,7 +29,7 @@ export {
 
 const debug = Debug('cypress:config:browser')
 
-const dashesOrUnderscoresRe = /^(_-)+/
+const dashesOrUnderscoresRe = /^(?:_-)+/
 
 // takes an array and creates an index object of [keyKey]: [valueKey]
 function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T, defaultValueFallback?: any) {

@@ -29,7 +29,7 @@ export const buildErrorLocationFromTransformError = (
   .replace(/^.*\n/g, 'Error compiling file\n')
 
   // Regex to pull out the error from the message body of a tsx TransformError. It displays the relative path to a file
-  const transformErrorRegex = /\n(.*?):(\d+):(\d+):/g
+  const transformErrorRegex = /\n(.*?):(\d+):(\d+):/
   const failurePath = transformErrorRegex.exec(cleanMessage)
 
   return {

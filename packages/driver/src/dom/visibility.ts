@@ -6,7 +6,7 @@ import $coordinates from './coordinates'
 import * as $transform from './transform'
 const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
 import { modernIsHidden } from './visibility/modernIsHidden'
-const fixedOrAbsoluteRe = /(fixed|absolute)/
+const fixedOrAbsoluteRe = /fixed|absolute/
 
 const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
 

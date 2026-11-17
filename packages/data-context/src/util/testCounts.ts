@@ -21,7 +21,7 @@ export async function getTestCounts (specs: SpecWithRelativeRoot[]) {
       })
       .on('line', (line) => {
         // test for "it(" appearing at beginning of line or with space before
-        const isTest = /(^| )it\(/.test(line)
+        const isTest = /(?:^| )it\(/.test(line)
 
         if (isTest) {
           testCounts++

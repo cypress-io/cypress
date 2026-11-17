@@ -163,7 +163,7 @@ async function validateChangelog ({ changedFiles, nextVersion, commits, changelo
 
   const hasChangeLogUpdate = changedFiles.includes('cli/CHANGELOG.md')
   const binaryFiles = changedFiles.filter((filename) => {
-    return /^(cli|packages)/.test(filename) && filename !== 'cli/CHANGELOG.md'
+    return /^(?:cli|packages)/.test(filename) && filename !== 'cli/CHANGELOG.md'
   })
 
   const errors = []

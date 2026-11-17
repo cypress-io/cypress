@@ -20,7 +20,7 @@ dayjs.extend(relativeTime)
 // matches <timestamp> <when> <author>
 // $ git log -1 --pretty=format:%ci %ar %an <file>
 // eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
-const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s([^|]*)\|([^|]*)\|([^|]*)/
+const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+]\d{4})\s(\d+ \w+(?:, \d+ \w+)? ago)\s([^|]*)\|([^|]*)\|([^|]*)/
 const GIT_LOG_ARGS = ['--literal-pathspecs', 'log', '--max-count=1', '--pretty=format:%ci %ar %an|%h|%s']
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000

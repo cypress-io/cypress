@@ -76,7 +76,7 @@ export function scrollTo (target, duration, settings) {
       // A number will pass the regex
       case 'number': break
       case 'string':
-        if (/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(targ)) {
+        if (/^(?:[+-]=?)?\d+(?:\.\d+)?(?:px|%)?$/.test(targ)) {
           targ = both(targ)
           // We are done
           break

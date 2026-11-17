@@ -435,7 +435,7 @@ const util = {
   },
 
   isSemver (str: string): boolean {
-    return /^(\d+\.)?(\d+\.)?(\*|\d+)$/.test(str)
+    return /^(?:\d+\.)?(?:\d+\.)?(?:\*|\d+)$/.test(str)
   },
 
   isExecutableAsync (filePath: string): any {

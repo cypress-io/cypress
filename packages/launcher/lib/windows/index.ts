@@ -202,7 +202,7 @@ export function getVersionNumber (version: string) {
 }
 
 export function getPathData (pathStr: string): PathData {
-  const test = new RegExp(/^.+\.exe:(.+)$/)
+  const test = new RegExp(/^.+\.exe:.+$/)
   const res = test.exec(pathStr)
   let path = pathStr
 

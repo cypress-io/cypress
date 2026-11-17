@@ -38,7 +38,7 @@ export interface MtlsBridgeOptions {
 // Only letters, digits, `-` and `_` in dot-separated labels. A wildcard pattern's `*` matches
 // any character but `/`, so without this a name carrying CR/LF or NUL would reach the
 // upstream proxy's CONNECT line and the resolver intact.
-const DNS_NAME = /^[a-z0-9_-]+(\.[a-z0-9_-]+)*$/
+const DNS_NAME = /^[a-z0-9_-]+(?:\.[a-z0-9_-]+)*$/
 
 /**
  * The host to dial for a connection to this listener, or null when there is none it may

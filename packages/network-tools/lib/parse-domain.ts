@@ -24,7 +24,7 @@ const TLDTS_OPTS = {
  * callers such as `isHostOnlyCookie` did not see `parseDomain` return null when tldts
  * has no PSL row (empty `publicSuffix`).
  */
-const LEGACY_CUSTOM_TLDS_RE = /(^[\d.]+$|\.[^.]+$)/
+const LEGACY_CUSTOM_TLDS_RE = /^[\d.]+$|\.[^.]+$/
 
 function legacyCustomTldSplit (hostname: string): ParsedDomainParts | null {
   if (!LEGACY_CUSTOM_TLDS_RE.test(hostname)) {

@@ -1,6 +1,6 @@
 import type { OutgoingHttpHeaders } from 'http'
 
-const cspRegExp = /[; ]*([^\n\r; ]+) ?([^\n\r;]+)*/g
+const cspRegExp = /[; ]*([^\n\r; ]+) ?([^\n\r;]*)/g
 
 export const cspHeaderNames = ['content-security-policy', 'content-security-policy-report-only'] as const
 

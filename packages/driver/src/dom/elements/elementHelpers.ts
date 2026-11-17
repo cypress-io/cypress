@@ -18,7 +18,7 @@ export const textLikeInputTypes = [
   'tel',
 ] as const
 
-const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
+const inputTypeNeedSingleValueChangeRe = /^(?:date|time|week|month|datetime-local)$/
 
 const valueIsNumberTypeRe = /progress|meter|li/
 

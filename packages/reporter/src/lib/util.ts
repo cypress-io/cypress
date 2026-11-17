@@ -49,7 +49,7 @@ const getFilenameParts = (spec: string): [string, string] => {
   }
 
   // if it contains .cy, .spec, or .test, split it before that
-  const specIndex = specWithoutPath.match(/(?=(\.cy|\.spec|\.test))/)?.index
+  const specIndex = specWithoutPath.match(/(?=\.cy|\.spec|\.test)/)?.index
 
   if (specIndex && specIndex > -1) {
     return splitFilename(specWithoutPath, specIndex)

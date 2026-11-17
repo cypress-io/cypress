@@ -14,7 +14,7 @@ import type { StateFunc } from './state'
 
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
-const groupsOrTableRe = /^(groups|table)$/
+const groupsOrTableRe = /^(?:groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id testId snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount defaultCollapsedState displayName end err event functionName groupLevel hookId instrument isStubbed group hidden message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')

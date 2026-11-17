@@ -17,7 +17,7 @@ describe('e2e typescript in spec and support file', function () {
       snapshot: true,
       expectedExitCode: 1,
       onStdout: (stdout) => {
-        stdout = stdout.replace(new RegExp('^(.*)npm/(webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js)$', 'm'), ' * relative/path/to/$2')
+        stdout = stdout.replace(/^.*npm\/(webpack-batteries-included-preprocessor\/node_modules\/ts-loader\/index\.js)$/m, ' * relative/path/to/$1')
 
         return systemTests.normalizeWebpackErrors(stdout)
       },

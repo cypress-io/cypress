@@ -485,7 +485,7 @@ describe('network stubbing', () => {
           .get(`/http://localhost:${destinationPort}/csp-header-single?headerName=${headerName}`)
           .set('Accept', 'text/html,application/xhtml+xml')
 
-          expect(resp.headers[headerName.toLowerCase()]).toEqual(expect.stringMatching(/^script-src 'self' localhost 'nonce-[A-Za-z0-9+/=]+|=[^=]|={3,}$'$/))
+          expect(resp.headers[headerName.toLowerCase()]).toEqual(expect.stringMatching(/^script-src 'self' localhost 'nonce-[A-Za-z0-9+/]+={0,2}'$/))
         })
 
         it('modifies CSP header if injecting JS and original response had multiple CSP headers and directives', async () => {
@@ -493,7 +493,7 @@ describe('network stubbing', () => {
           .get(`/http://localhost:${destinationPort}/csp-header-multiple?headerName=${headerName}`)
           .set('Accept', 'text/html,application/xhtml+xml')
 
-          expect(resp.headers[headerName.toLowerCase()]).toEqual(expect.stringMatching(/^default-src 'self' 'nonce-[A-Za-z0-9+/=]+|=[^=]|={3,}', script-src 'self' localhost 'nonce-[A-Za-z0-9+/=]+|=[^=]|={3,}$'$/))
+          expect(resp.headers[headerName.toLowerCase()]).toEqual(expect.stringMatching(/^default-src 'self' 'nonce-[A-Za-z0-9+/]+={0,2}', script-src 'self' localhost 'nonce-[A-Za-z0-9+/]+={0,2}'$/))
         })
 
         if (headerName !== headerName.toLowerCase()) {

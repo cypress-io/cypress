@@ -65,7 +65,7 @@ const monthRe = /^\d{4}-(0\d|1[0-2])/
 const weekRe = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
 const timeRe = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.\d{1,3})?/
 const dateTimeRe = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d{1,3})?/
-const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)(e[-+]?\d+)?$/i
+const numberRe = /^-?(?:\d+|\d+\.\d+|\.\d+)(?:e[-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /(\{.+?\})/
 const isValidNumberInputChar = /[-+e\d.]/i
 // Unanchored at the end so that each arrow in a run such as
