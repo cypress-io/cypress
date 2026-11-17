@@ -33,7 +33,9 @@ const parseUrl = (url: unknown) => {
 const undone = new WeakMap<Cookie, Cookie | undefined>()
 
 // the newest write in flight for each cookie
-const latest = new Map<string, Cookie>()
+const latest = new Map<string, { cookie: Cookie, order: number }>()
+
+let writes = 0
 
 // browsers treat localhost as a secure context, so it may set Secure cookies over http
 const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
@@ -71,23 +73,27 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
   const stored = { name: cookie.key, domain: cookie.domain, path: cookie.path }
 
   const key = JSON.stringify(stored)
+  const order = ++writes
   const findStored = () => cookieJar.getAllCookies().find((c) => c.key === stored.name && c.domain === stored.domain && c.path === stored.path)
   let replaced: Cookie | undefined
   let written: Cookie | undefined
 
   const write = () => {
+    // a write that started after this one has the jar entry, and the browser sets it after this one
+    if ((latest.get(key)?.order ?? 0) > order) return true
+
     replaced = findStored()
 
     try {
       cookieJar.setCookie(cookie, pageUrl.href, 'strict', { http: false })
       written = findStored()
 
-      if (written) latest.set(key, written)
+      if (written) latest.set(key, { cookie: written, order })
     } catch (err) {
       debug('ignoring document.cookie write %s: %s', cookieString, err.message)
     }
 
-    return written
+    return !!written
   }
 
   const undo = () => {
@@ -97,7 +103,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
     // a later write to the same cookie owns the entry now, and must not restore this one.
     // a jar read purges an expired cookie, which leaves its write the owner
-    if (current !== written && (current || latest.get(key) !== written)) {
+    if (current !== written && (current || latest.get(key)?.cookie !== written)) {
       undone.set(written, replaced)
 
       return
@@ -149,6 +155,6 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
       throw err
     }
   } finally {
-    if (latest.get(key) === written) latest.delete(key)
+    if (written && latest.get(key)?.cookie === written) latest.delete(key)
   }
 }

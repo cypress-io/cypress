@@ -327,6 +327,24 @@ describe('lib/automation/cookie/document-cookie', () => {
       expect(secureRequestCookies()).toEqual(['foo=bar'])
     })
 
+    it('leaves a later write in the jar when its own jar write was held back', async () => {
+      let answer: (cookies: typeof existing) => void = () => {}
+
+      automation.getCookies.mockReturnValueOnce(new Promise((resolve) => answer = resolve))
+      automation.getCookies.mockReturnValueOnce(new Promise(() => {}))
+
+      const held = write('foo=baz; Path=/', 'http://www.foobar.com/')
+
+      cookieJar.removeAllCookies()
+      write('foo=later; Path=/', 'http://www.foobar.com/')
+
+      answer([])
+      await held
+
+      expect(browserCookie()).toMatchObject({ name: 'foo', value: 'baz' })
+      expect(secureRequestCookies()).toEqual(['foo=later'])
+    })
+
     it('writes once the browser no longer has that cookie', async () => {
       await write('foo=baz; Path=/', 'http://www.foobar.com/')
 
