@@ -160,13 +160,29 @@ const getDependencyPathsToKeep = async (buildAppDir, additionalEntryPoints = [])
 
 // Optional dependencies such as fsevents or @swc/core are only installed on some platforms and are
 // required inside try/catch, so leave whatever cannot be resolved as a runtime require.
-const externalizeUnresolvable = (unresolved) => {
+// A relative runtime require (such as a native addon's `../build/Release/x.node`) runs from the bundle's
+// directory, so it is rewritten relative to the bundle.
+const externalizeUnresolvable = (bundleDir, unresolved) => {
+  const external = (args) => {
+    if (!args.path.startsWith('.')) {
+      return { path: args.path, external: true }
+    }
+
+    const fromBundle = path.relative(bundleDir, path.resolve(args.resolveDir, args.path)).split(path.sep).join(path.posix.sep)
+
+    return { path: fromBundle.startsWith('.') ? fromBundle : `./${fromBundle}`, external: true }
+  }
+
   return {
     name: 'externalize-unresolvable',
     setup (build) {
       build.onResolve({ filter: /.*/ }, async (args) => {
         if (args.pluginData?.externalizeUnresolvable || args.kind === 'entry-point') {
           return undefined
+        }
+
+        if (args.path.endsWith('.node')) {
+          return external(args)
         }
 
         const result = await build.resolve(args.path, {
@@ -179,7 +195,7 @@ const externalizeUnresolvable = (unresolved) => {
         if (result.errors.length) {
           unresolved.add(`${args.path} (from ${args.importer})`)
 
-          return { path: args.path, external: true }
+          return external(args)
         }
 
         return result
@@ -245,9 +261,9 @@ const createStartCypressBundle = async (buildAppDir) => {
     minify: true,
     // error stacks and code that reads `constructor.name` need the original names
     keepNames: true,
-    external: ['electron', '*.node'],
+    external: ['electron'],
     banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
-    plugins: [externalizeUnresolvable(unresolved), keepModuleLocation(unixBuildAppDir, requireResolveTargets)],
+    plugins: [externalizeUnresolvable(path.join(buildAppDir, 'packages/server'), unresolved), keepModuleLocation(unixBuildAppDir, requireResolveTargets)],
   })
 
   console.log(`start-cypress bundle: ${Object.keys(esbuildResult.metafile.inputs).length} modules; left as runtime requires: ${[...unresolved].join(', ') || 'none'}`)
@@ -389,6 +405,7 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
 
 module.exports = {
   createExactCaseChecker,
+  createStartCypressBundle,
   buildEntryPointAndCleanup,
   cleanupUnneededDependencies,
 }
