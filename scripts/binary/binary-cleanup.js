@@ -244,10 +244,25 @@ const keepModuleLocation = (buildAppDir, requireResolveTargets) => {
   }
 }
 
+// request-promise loads a private copy of @cypress/request by clearing require.cache, which bundled modules
+// bypass, so in the bundle it would patch the copy that every other request uses and reject non-2xx responses.
+const loadFromDisk = (filter, loadedFromDisk) => {
+  return {
+    name: 'load-from-disk',
+    setup (build) {
+      build.onResolve({ filter }, (args) => {
+        loadedFromDisk.add(require.resolve(args.path, { paths: [args.resolveDir] }))
+
+        return { path: args.path, external: true }
+      })
+    },
+  }
+}
+
 // The binary loads this bundle instead of requiring the main process module graph file by file.
 const createStartCypressBundle = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
-  const requireResolveTargets = new Set()
+  const loadedFromDisk = new Set()
   const unresolved = new Set()
 
   const esbuildResult = await esbuild.build({
@@ -263,14 +278,18 @@ const createStartCypressBundle = async (buildAppDir) => {
     keepNames: true,
     external: ['electron'],
     banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
-    plugins: [externalizeUnresolvable(path.join(buildAppDir, 'packages/server'), unresolved), keepModuleLocation(unixBuildAppDir, requireResolveTargets)],
+    plugins: [
+      loadFromDisk(/^@cypress\/request-promise(\/|$)/, loadedFromDisk),
+      externalizeUnresolvable(path.join(buildAppDir, 'packages/server'), unresolved),
+      keepModuleLocation(unixBuildAppDir, loadedFromDisk),
+    ],
   })
 
   console.log(`start-cypress bundle: ${Object.keys(esbuildResult.metafile.inputs).length} modules; left as runtime requires: ${[...unresolved].join(', ') || 'none'}`)
 
   return {
     bundledDependencies: Object.keys(esbuildResult.metafile.inputs).map((input) => `./${input}`),
-    requireResolveTargets: [...requireResolveTargets].map((target) => path.relative(buildAppDir, target).split(path.sep).join(path.posix.sep)),
+    loadedFromDisk: [...loadedFromDisk].map((target) => path.relative(buildAppDir, target).split(path.sep).join(path.posix.sep)),
   }
 }
 
@@ -305,17 +324,17 @@ const buildEntryPointAndCleanup = async (appDir) => {
   const buildAppDir = await fs.realpath(appDir)
 
   // 1. Bundle the main process module graph. Files that are only reached through it can then be removed from the binary,
-  // except those that something resolves on disk with require.resolve.
-  const { bundledDependencies, requireResolveTargets } = await createStartCypressBundle(buildAppDir)
+  // except those that are still loaded from disk.
+  const { bundledDependencies, loadedFromDisk } = await createStartCypressBundle(buildAppDir)
 
   const [keptDependencies, serverEntryPointBundleDependencies] = await Promise.all([
     // 2. Retrieve all dependencies that are loaded from disk and so must be kept in the binary
-    getDependencyPathsToKeep(buildAppDir, requireResolveTargets.filter((target) => /\.(c?js|json)$/.test(target))),
+    getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(c?js|json)$/.test(target))),
     // 3. Create a bundle for the server entry point. This will be used to start the server in the binary. It returns the dependencies that are pulled in by this bundle that potentially can now be removed
     createServerEntryPointBundle(buildAppDir),
   ])
 
-  keptDependencies.push(...requireResolveTargets)
+  keptDependencies.push(...loadedFromDisk)
 
   // package.json and other data files stay: Node reads them to resolve the packages that are still loaded from disk
   const potentiallyRemovedDependencies = [

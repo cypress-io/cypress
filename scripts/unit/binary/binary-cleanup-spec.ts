@@ -66,6 +66,18 @@ describe('binary-cleanup', () => {
       await fs.remove(appDir)
     })
 
+    it('loads @cypress/request-promise from disk', async () => {
+      const requestPromisePath = path.join(appDir, 'node_modules', '@cypress', 'request-promise', 'index.js')
+
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = require('@cypress/request-promise')`)
+      await fs.outputFile(requestPromisePath, `module.exports = __filename`)
+
+      const { loadedFromDisk } = await createStartCypressBundle(appDir)
+
+      expect(require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))).to.equal(requestPromisePath)
+      expect(loadedFromDisk).to.include('node_modules/@cypress/request-promise/index.js')
+    })
+
     it('loads a native addon from the package that requires it', async () => {
       await createStartCypressBundle(appDir)
 
