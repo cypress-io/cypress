@@ -283,7 +283,7 @@ const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
     )}
     {!!model.displayMessage && <span
       className='command-message-text'
-      // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- markdown-it renders the command message, escaping its HTML in assertions
+      // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- markdown-it renders the command message, except for visit, request and origin, whose URL passes through unescaped
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
     {model.isSelfHealed && (

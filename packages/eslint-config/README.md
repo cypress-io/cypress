@@ -22,7 +22,7 @@ This package provides a unified ESLint configuration that combines multiple popu
 - **Cypress**: `eslint-plugin-cypress` recommended rules
 - **Mocha**: `eslint-plugin-mocha` recommended rules for testing
 - **Vue**: `eslint-plugin-vue` recommended rules
-- **React**: `@eslint-react/eslint-plugin` recommended rules (React 18), opt-in via `reactConfig`
+- **React**: `@eslint-react/eslint-plugin`'s `recommended-typescript` rules with a few changes (React 18), opt-in via `reactConfig`. See [`reactConfig`](./AGENTS.md#reactconfig)
 - **Stylistic**: `@stylistic/eslint-plugin` with custom formatting rules
 - **Import**: `eslint-plugin-import-x` for import/export validation
 - **GraphQL**: `@graphql-eslint/eslint-plugin` for `gql` template literals, opt-in via `graphqlConfig`

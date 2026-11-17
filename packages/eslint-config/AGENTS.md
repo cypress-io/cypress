@@ -171,7 +171,7 @@ Specs are left out (`config` and `reporter` predate this and keep theirs): they 
 reactConfig(['**/*.{js,jsx,ts,tsx}']),
 ```
 
-The rules are opt-in because the Vue packages write components in Vue JSX, which React rules misread: `class`, for example, is reported as an unknown property. Nothing in `app`, `launchpad` or `frontend-shared` needs to turn them off. `reactConfig` requires the plugin when it is called rather than importing it, so the workspaces that don't opt in start ESLint without loading it.
+The rules are opt-in because the Vue packages write components in Vue JSX, which React rules misread: `class`, for example, is reported as an unknown property. Nothing in `app`, `launchpad` or `frontend-shared` needs to turn them off. `reactConfig` requires the plugin when it is called rather than importing it, so the workspaces that don't opt in start ESLint without loading it. The plugin is ESM-only and its `exports` map has only an `import` condition, so Node's own `require` refuses it with `ERR_PACKAGE_PATH_NOT_EXPORTED`: the call works because ESLint loads `eslint.config.ts` through jiti, whose `require` resolves ESM. A loader other than jiti needs the plugin imported instead.
 
 These opt in:
 
@@ -191,7 +191,7 @@ On top of `recommended-typescript`:
 
 The plugin brings its own hooks rules (`rules-of-hooks`, `exhaustive-deps`) and purity rules, so don't add `eslint-plugin-react-hooks`. An effect that runs once on mount on purpose takes `// eslint-disable-next-line @eslint-react/exhaustive-deps -- <reason>` above the line the rule reports. As with `vue/no-v-html`, a `dangerouslySetInnerHTML` that renders HTML built to be rendered takes a `@eslint-react/dom-no-dangerously-set-innerhtml` disable naming where the HTML comes from. In JSX children, write the directive as `{/* eslint-disable-next-line ... */}`.
 
-The plugin has no counterpart for `eslint-plugin-react`'s `no-string-refs`, `no-unescaped-entities`, `no-is-mounted`, `require-render-return` or `jsx-no-duplicate-props`; TypeScript reports duplicate props in `.tsx`. `jsx-uses-vars`, `react-in-jsx-scope` and `jsx-uses-react` have no counterpart either, and need none: ESLint 10 marks variables used in JSX itself, and React 18's JSX transform doesn't need `React` in scope.
+The plugin has no counterpart for `eslint-plugin-react`'s `no-string-refs`, `no-unescaped-entities`, `no-is-mounted`, `require-render-return` or `jsx-no-duplicate-props`. The parser still rejects an unescaped `>` or `}` in JSX text, and `tsc` reports duplicate props in `.tsx` files, but a duplicate prop in a `.js` or `.jsx` file now goes unreported (see [Known gaps](#known-gaps)). `jsx-uses-vars`, `react-in-jsx-scope` and `jsx-uses-react` have no counterpart either, and need none: ESLint 10 marks variables used in JSX itself, and React 18's JSX transform doesn't need `React` in scope.
 
 ## `vitestConfig`
 
@@ -254,4 +254,5 @@ graphql-eslint's processor refuses `.vue` files under flat config, and its docum
 
 ## Known gaps
 
+- No rule reports a duplicate JSX prop, such as two `className`s, in `.js` or `.jsx` files. `eslint-plugin-react`'s `jsx-no-duplicate-props` did; `@eslint-react/eslint-plugin` has no counterpart, and TypeScript only checks `.tsx`.
 - `jsonConfig` does not collapse `{ }` to `{}`. `jsonc/object-curly-spacing` skips empty objects, and no off-the-shelf rule covers them.
