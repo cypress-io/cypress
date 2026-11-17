@@ -184,10 +184,12 @@ export class CDPSocketServer extends EventEmitter {
     super.emit('connection', this._cdpSocket)
   }
 
-  // @ts-expect-error - TODO: emit is async, so it returns a Promise where EventEmitter's emit returns boolean
-  emit = async (event: string, ...args: any[]) => {
-    // tslint:disable-next-line:no-floating-promises
-    this._cdpSocket?.emit(event, ...args)
+  emit = (event: string, ...args: any[]) => {
+    // Broadcasts don't wait on the browser. The socket only rejects when the
+    // payload fails to encode, which is logged rather than thrown at the caller.
+    this._cdpSocket?.emit(event, ...args).catch((error) => {
+      debugVerbose('error encoding message for browser %o', { event, error })
+    })
 
     return true
   }

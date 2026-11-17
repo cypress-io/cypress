@@ -44,7 +44,7 @@ export interface GetCodeModalContentsProps {
 }
 
 export type GetCodeModalContentsShape = (
-  props: GetCodeModalContentsProps
+  props: GetCodeModalContentsProps,
 ) => VNode
 
 export interface CyPromptEventManager {
@@ -63,7 +63,7 @@ export interface MoreInfoNeededModalContentsProps {
 }
 
 export type MoreInfoNeededModalContentsShape = (
-  props: MoreInfoNeededModalContentsProps
+  props: MoreInfoNeededModalContentsProps,
 ) => VNode
 
 export interface CyPromptAppDefaultShape {

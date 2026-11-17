@@ -94,6 +94,7 @@ const CYPRESS_ENV_PREFIX_LENGTH = CYPRESS_ENV_PREFIX.length
 // Names the app reads itself, which are not settings for the project's tests
 const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
+  'CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM',
   'CYPRESS_AGENT_MODE',
 ]
 
@@ -317,7 +318,7 @@ export function relativeToProjectRoot (projectRoot: string, file: string) {
   }
 
   // captures leading slash(es), both forward slash and back slash
-  const leadingSlashRe = /^[\/|\\]*(?![\/|\\])/
+  const leadingSlashRe = /^[/|\\]*(?![/|\\])/
 
   return file.replace(projectRoot, '').replace(leadingSlashRe, '')
 }

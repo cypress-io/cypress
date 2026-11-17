@@ -32,8 +32,8 @@ const sharedPromiseSetup = ({
   communicator,
   timeout = 1000,
 }: {
-  resolve: Function
-  reject: Function
+  resolve: (value: any) => void
+  reject: (err: Error) => void
   event: string
   specBridgeName: string
   communicator: EventEmitter

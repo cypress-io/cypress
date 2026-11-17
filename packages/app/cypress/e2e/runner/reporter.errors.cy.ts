@@ -40,8 +40,8 @@ describe('errors ui', {
 
     verify('in file outside project', {
       message: 'An outside error',
-      stackRegex: /\/throws\-error\.js:5:8/,
-      codeFrameRegex: /\/throws\-error\.js:5:9/,
+      stackRegex: /\/throws-error\.js:5:8/,
+      codeFrameRegex: /\/throws-error\.js:5:9/,
       codeFrameText: `thrownewError('An outside error')`,
     })
   })
@@ -78,7 +78,7 @@ describe('errors ui', {
       notInMessage: [
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
       hasCodeFrame: false,
     })
 
@@ -91,7 +91,7 @@ describe('errors ui', {
       notInMessage: [
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors.html\?error-on-visit:\d+:\d+/,
       hasCodeFrame: false,
     })
 
@@ -105,7 +105,7 @@ describe('errors ui', {
       notInMessage: [
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
       hasCodeFrame: false,
     })
 
@@ -131,7 +131,7 @@ describe('errors ui', {
       notInMessage: [
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
       hasCodeFrame: false,
     })
 
@@ -142,7 +142,7 @@ describe('errors ui', {
         'The following error originated from your application code',
         'It was caused by an unhandled promise rejection',
       ],
-      regex: /localhost\:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
+      regex: /localhost:\d+\/cypress\/fixtures\/errors.html:\d+:\d+/,
       hasCodeFrame: false,
     })
 

@@ -152,8 +152,14 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
       // detected by static analysis — so fall back to running every spec and
       // let the run-time filter select the individual tests.
       console.log('@cypress/grep: could not pre-filter specs because none appeared to contain tests matching the filter:')
-      grep ? console.log('@cypress/grep:   grep: %s', grep) : null
-      grepTags ? console.log('@cypress/grep:   grepTags: %s', grepTags) : null
+      if (grep) {
+        console.log('@cypress/grep:   grep: %s', grep)
+      }
+
+      if (grepTags) {
+        console.log('@cypress/grep:   grepTags: %s', grepTags)
+      }
+
       console.log('@cypress/grep: running all specs and applying the filter to individual tests at run-time instead.')
     }
   }

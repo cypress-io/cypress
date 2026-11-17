@@ -3,15 +3,12 @@
     data-cy="settings-config"
   >
     <template #title>
-      {{ t('settingsPage.config.title') }}
+      Resolved configuration
     </template>
     <template #description>
-      <i18n-t
-        scope="global"
-        keypath="settingsPage.config.description"
-      >
-        <OpenConfigFileInIDE :gql="props.gql" />
-      </i18n-t>
+      Since the options in the
+      <OpenConfigFileInIDE :gql="props.gql" />
+      can be set dynamically by your development environment, please refer to the legend below to understand how the configuration options are resolved.
     </template>
     <div class="flex w-full">
       <ConfigCode
@@ -30,13 +27,10 @@
 <script lang="ts" setup>
 import { gql } from '@urql/vue'
 import SettingsSection from '../SettingsSection.vue'
-import { useI18n } from '@cy/i18n'
 import ConfigLegend from './ConfigLegend.vue'
 import ConfigCode from './ConfigCode.vue'
 import type { ConfigFragment } from '../../generated/graphql'
 import OpenConfigFileInIDE from '@packages/frontend-shared/src/gql-components/OpenConfigFileInIDE.vue'
-
-const { t } = useI18n()
 
 gql`
 fragment Config on CurrentProject {

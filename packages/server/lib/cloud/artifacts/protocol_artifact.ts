@@ -16,7 +16,7 @@ interface ProtocolUploadStrategyResult {
 }
 
 const createProtocolUploadStrategy = (protocolManager: ProtocolManager) => {
-  const strategy: ArtifactUploadStrategy<Promise<ProtocolUploadStrategyResult | {}>> =
+  const strategy: ArtifactUploadStrategy<Promise<ProtocolUploadStrategyResult | Record<string, never>>> =
     async (filePath, uploadUrl, fileSize) => {
       const fatalError = protocolManager.getFatalError()
 

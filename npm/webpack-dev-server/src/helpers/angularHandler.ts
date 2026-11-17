@@ -200,7 +200,7 @@ export async function getAngularCliModules (projectRoot: string) {
 
       return module
     } catch (e) {
-      throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`)
+      throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`, { cause: e })
     }
   }))
 

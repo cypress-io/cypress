@@ -55,9 +55,24 @@ describe('Debug page empty states', { defaultCommandTimeout: 250 }, () => {
     })
 
     context('slideshow', () => {
+      const slides: Record<1 | 2 | 3, { title: string, description: string }> = {
+        1: {
+          title: 'Review how many tests failed during a CI test run',
+          description: 'The Debug page shows the latest completed test run for your current checked out commit.',
+        },
+        2: {
+          title: 'Check if failed CI test runs also fail locally',
+          description: 'Use the Test Runner to run only the tests that failed in your last recorded run.',
+        },
+        3: {
+          title: 'Locally debug failed test runs with visual artifacts',
+          description: 'Easily review screenshots, videos and logs from your tests.',
+        },
+      }
+
       function moveThroughSlideshow (options: { percy?: boolean }) {
-        for (const step of [1, 2, 3]) {
-          const { title, description } = cy.i18n.debugPage.emptyStates.slideshow[`step${step}`]
+        for (const step of [1, 2, 3] as const) {
+          const { title, description } = slides[step]
 
           cy.contains(title)
           cy.contains(description)

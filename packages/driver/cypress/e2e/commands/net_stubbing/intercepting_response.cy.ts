@@ -649,6 +649,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         const err = new Error('bar')
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps the test running until the response handler's error fails it
         cy.intercept(`${url}*`, (req) => {
           req.reply(() => {
             throw err

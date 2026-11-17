@@ -17,13 +17,13 @@ declare module '~icons/*' {
 
 declare module '~icons/cy/*' {
   import type { FunctionalComponent, SVGAttributes } from 'vue'
-  const component: FunctionalComponent<SVGAttributes, {}>
+  const component: FunctionalComponent<SVGAttributes>
   export default component
 }
 
 declare module '~icons/logos/*' {
   import type { FunctionalComponent, SVGAttributes } from 'vue'
-  const component: FunctionalComponent<SVGAttributes, {}>
+  const component: FunctionalComponent<SVGAttributes>
   export default component
 }
 

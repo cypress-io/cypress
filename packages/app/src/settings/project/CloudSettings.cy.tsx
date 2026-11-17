@@ -1,5 +1,3 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { CloudSettingsFragmentDoc } from '../../generated/graphql-test'
 import CloudSettings from './CloudSettings.vue'
 
@@ -16,8 +14,8 @@ describe('<CloudSettings />', () => {
       },
     })
 
-    cy.findByText(defaultMessages.settingsPage.projectId.title).should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.recordKey.title).should('be.visible')
+    cy.findByText('Project ID').should('be.visible')
+    cy.findByText('Record key').should('be.visible')
 
     cy.percySnapshot()
   })
@@ -39,9 +37,9 @@ describe('<CloudSettings />', () => {
       },
     })
 
-    cy.findByText(defaultMessages.settingsPage.projectId.title).should('not.exist')
-    cy.findByText(defaultMessages.runs.connect.buttonUser).should('be.visible')
-    cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
+    cy.findByText('Project ID').should('not.exist')
+    cy.findByText('Connect to Cypress Cloud').should('be.visible')
+    cy.findByText('Record key').should('not.exist')
   })
 
   it('hides Record Key when not present', () => {
@@ -61,7 +59,7 @@ describe('<CloudSettings />', () => {
       },
     })
 
-    cy.findByText(defaultMessages.settingsPage.recordKey.title).should('not.exist')
+    cy.findByText('Record key').should('not.exist')
 
     cy.get('button').contains('Connect to Cypress Cloud')
   })

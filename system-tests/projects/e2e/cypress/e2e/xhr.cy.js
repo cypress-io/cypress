@@ -166,7 +166,7 @@ describe('xhrs', () => {
       cy.get('#create').click()
       cy.wait('@createUser')
       .its('request.body')
-      .should('equal', '{\"some\":\"data\"}')
+      .should('equal', '{"some":"data"}')
     })
 
     // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. https://github.com/cypress-io/cypress/issues/24492

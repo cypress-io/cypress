@@ -9,7 +9,7 @@ import $jquery from '../dom/jquery'
 import { $Location } from './location'
 import $errUtils from './error_utils'
 
-const customProtocolRegex = /^[^:\/]+:\/{1,3}/
+const customProtocolRegex = /^[^:/]+:\/{1,3}/
 // Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
 const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 
@@ -56,7 +56,7 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
   [_.stubTrue, 'unknown'],
 ], ([fn, type]) => {
   return [fn, _.constant(type)]
-}) as unknown as [(val: any) => boolean, (val: Function) => Function][]
+}) as unknown as [(val: any) => boolean, (val: any) => string][]
 
 export default {
   warning (msg) {

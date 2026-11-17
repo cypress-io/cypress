@@ -5,6 +5,7 @@ import * as util from '../../../../lib/plugins/util'
 import * as preprocessor from '../../../../lib/plugins/child/preprocessor'
 
 // NOTE: todo come back to this
+// eslint-disable-next-line vitest/no-disabled-tests
 describe.skip('lib/plugins/child/preprocessor', () => {
   let ipc: { send: Mock, on: Mock, removeListener: Mock }
   let invoke: Mock

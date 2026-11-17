@@ -31,7 +31,6 @@ describe('<GeneratorSuccess />', () => {
     // max-height: 0 when closed. The modern visibility algorithm doesn't
     // detect the resulting overflow clipping, so assert aria-hidden instead.
     .get('code .line').first().closest('[aria-hidden]').should('have.attr', 'aria-hidden', 'true')
-    .wait(200) // just to show off the animation
     .get(targetSelector)
     .click()
     .get('code .line')

@@ -1,6 +1,5 @@
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 const setPlatformConfig = (platform: string) => {
   return cy.window().then((win) => {
@@ -18,9 +17,15 @@ describe('KeyboardBindingsModal', () => {
         return <KeyboardBindingsModal show />
       })
 
-      const expectedContent = defaultMessages.sidebar.keyboardShortcuts
+      const expectedContent = [
+        'Keyboard shortcuts',
+        'Re-run tests',
+        'Stop tests',
+        'Toggle specs list',
+        'Save Studio changes',
+      ]
 
-      Object.values(expectedContent).forEach((text) => {
+      expectedContent.forEach((text) => {
         cy.contains(text).should('be.visible')
       })
     })
@@ -31,16 +36,16 @@ describe('KeyboardBindingsModal', () => {
       })
 
       // Check that all keyboard shortcuts are displayed with their keys
-      cy.contains(defaultMessages.sidebar.keyboardShortcuts.rerun).should('be.visible')
+      cy.contains('Re-run tests').should('be.visible')
       cy.contains('r').should('be.visible')
 
-      cy.contains(defaultMessages.sidebar.keyboardShortcuts.stop).should('be.visible')
+      cy.contains('Stop tests').should('be.visible')
       cy.contains('s').should('be.visible')
 
-      cy.contains(defaultMessages.sidebar.keyboardShortcuts.toggle).should('be.visible')
+      cy.contains('Toggle specs list').should('be.visible')
       cy.contains('f').should('be.visible')
 
-      cy.contains(defaultMessages.sidebar.keyboardShortcuts.studioSave).should('be.visible')
+      cy.contains('Save Studio changes').should('be.visible')
     })
 
     it('does not render when show is false', () => {
@@ -59,7 +64,7 @@ describe('KeyboardBindingsModal', () => {
           return <KeyboardBindingsModal show />
         })
 
-        cy.contains(defaultMessages.sidebar.keyboardShortcuts.studioSave).should('be.visible')
+        cy.contains('Save Studio changes').should('be.visible')
         cy.contains('⌘').should('be.visible')
         cy.contains('+').should('be.visible')
         cy.contains('s').should('be.visible')
@@ -75,7 +80,7 @@ describe('KeyboardBindingsModal', () => {
           return <KeyboardBindingsModal show />
         })
 
-        cy.contains(defaultMessages.sidebar.keyboardShortcuts.studioSave).should('be.visible')
+        cy.contains('Save Studio changes').should('be.visible')
         cy.contains('Ctrl').should('be.visible')
         cy.contains('+').should('be.visible')
         cy.contains('s').should('be.visible')
@@ -91,7 +96,7 @@ describe('KeyboardBindingsModal', () => {
           return <KeyboardBindingsModal show />
         })
 
-        cy.contains(defaultMessages.sidebar.keyboardShortcuts.studioSave).should('be.visible')
+        cy.contains('Save Studio changes').should('be.visible')
         cy.contains('Ctrl').should('be.visible')
         cy.contains('+').should('be.visible')
         cy.contains('s').should('be.visible')

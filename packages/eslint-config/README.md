@@ -44,7 +44,7 @@ This package provides a unified ESLint configuration that combines multiple popu
 
 ### Temporarily Disabled Rules
 Some recommended rules are turned off because the codebase still has many violations. They are the rules set to `off` in the "gold standard, but have many violations" block of [`src/baseConfig.ts`](./src/baseConfig.ts):
-- Core rules: `no-useless-escape`, `prefer-rest-params`, `no-global-assign`, `no-async-promise-executor`
+- Core rules: `prefer-rest-params`, `no-async-promise-executor`
 - TypeScript-specific rules (`@typescript-eslint/*`)
 - Mocha testing rules (`mocha/no-exclusive-tests` stays an error)
 - Vue component rules
@@ -144,5 +144,5 @@ This package includes all necessary ESLint plugins and parsers as devDependencie
 
 - This configuration is designed for the Cypress monorepo and may need adjustments for other projects
 - Some recommended rules stay off until their existing violations are fixed; see [Temporarily Disabled Rules](#temporarily-disabled-rules)
-- The configuration uses the new flat config format (ESLint 9+)
+- The configuration uses the new flat config format (ESLint 10+)
 - TypeScript project service is enabled for better type-aware linting 

@@ -58,10 +58,9 @@ describe('AutIframe', () => {
       getComputedStyleCallCount = 0
 
       const $el = Cypress.$(testElement)
-      const $body = Cypress.$('body')
 
       // When dimensions are provided, _addElementBoxModelLayers should NOT call getComputedStyle
-      const container = (autIframe as any)._addElementBoxModelLayers($el, $body, dimensions)
+      const container = (autIframe as any)._addElementBoxModelLayers($el, dimensions)
 
       // Verify getComputedStyle was NOT called in _addElementBoxModelLayers
       // (it should use transform and zIndex from the provided dimensions)
@@ -104,10 +103,9 @@ describe('AutIframe', () => {
       getComputedStyleCallCount = 0
 
       const $el = Cypress.$(testElement)
-      const $body = Cypress.$('body')
 
       // Call without providing dimensions (will call getElementDimensions internally)
-      const container = (autIframe as any)._addElementBoxModelLayers($el, $body)
+      const container = (autIframe as any)._addElementBoxModelLayers($el)
 
       // getElementDimensions will call getComputedStyle once and return transform/zIndex,
       // so _addElementBoxModelLayers won't need to call it again
@@ -152,8 +150,8 @@ describe('AutIframe', () => {
       const result = autIframe.create()
 
       result.autSnapshotIframes.forEach((iframe) => {
-        expect(iframe[0].id).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
-        expect(iframe[0].title).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
+        expect(iframe[0].id).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: 'Test Project'`)
+        expect(iframe[0].title).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: 'Test Project'`)
         expect(iframe[0].className).to.equal('aut-snapshot-iframe')
       })
     })

@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 // Assert that either the the dialog is presented or the mutation is emitted, depending on
 // whether the test has a preferred IDE defined.
@@ -20,8 +19,8 @@ const verifyIdeOpen = ({ fileName, filePath, action, hasPreferredIde, line, colu
   } else {
     action()
 
-    cy.contains(defaultMessages.globalPage.externalEditorPreferences).should('be.visible')
-    cy.getByRole('button', { name: defaultMessages.actions.close }).click()
+    cy.contains('External editor preferences').should('be.visible')
+    cy.getByRole('button', { name: 'Close' }).click()
   }
 }
 

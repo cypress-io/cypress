@@ -607,7 +607,7 @@ describe('network stubbing', { retries: 15 }, function () {
           const url = uniqueRoute('/foo')
 
           testFail((err) => {
-            expect(err.message).to.contain('An invalid event name was passed as the first parameter to \`req.on()\`.')
+            expect(err.message).to.contain('An invalid event name was passed as the first parameter to `req.on()`.')
             done()
           })
 
@@ -621,7 +621,7 @@ describe('network stubbing', { retries: 15 }, function () {
           const url = uniqueRoute('/foo')
 
           testFail((err) => {
-            expect(err.message).to.contain('\`req.on()\` requires the second parameter to be a function.')
+            expect(err.message).to.contain('`req.on()` requires the second parameter to be a function.')
             done()
           })
 

@@ -15,7 +15,7 @@ const CA_VERSION = 1
 
 const generateKeyPairAsync = promisify(pki.rsa.generateKeyPair)
 
-const ipAddressRe = /^[\d\.]+$/
+const ipAddressRe = /^[\d.]+$/
 
 const CAattrs = [{
   name: 'commonName',
@@ -345,7 +345,7 @@ export class CA {
       } catch (err) {
         debug('CA version mismatch or is missing, removing all certs and keys in the CA folder')
         await ca.removeAll()
-        throw new Error('CA version mismatch or is missing, catch below and regenerate certs and keys')
+        throw new Error('CA version mismatch or is missing, catch below and regenerate certs and keys', { cause: err })
       }
 
       await ca.loadCA()

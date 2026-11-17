@@ -1,6 +1,4 @@
 import ExpandableFileChooser from './ExpandableFileChooser.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import data from '../../../cypress/fixtures/FileChooser.json'
 import type { FileParts } from '@packages/data-context/src/gen/graphcache-config.gen'
 
@@ -16,8 +14,8 @@ const nonExistentFileName = 'non existent file'
 const fileRowSelector = '[data-cy=file-list-row]'
 
 // Inputs
-const filenameInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byFilenameInput}"]:first`
-const extensionInputSelector = `[placeholder="${defaultMessages.components.fileSearch.byExtensionInput}"]`
+const filenameInputSelector = '[placeholder="Search by filename..."]:first'
+const extensionInputSelector = '[placeholder="Extensions to include e.g. *.tsx, *.vue"]'
 const fileMatchButtonSelector = '[data-cy=file-match-button]'
 
 // File Match Indicator
@@ -113,7 +111,7 @@ describe('<ExpandableFileChooser />', () => {
         .get(filenameInputSelector)
         .type(nonExistentFileName, { delay: 0 })
         .get(noResultsSelector)
-        .should('contain.text', defaultMessages.noResults.defaultMessage)
+        .should('contain.text', 'No results matched your search:')
         .and('contain.text', nonExistentFileName)
       })
 
@@ -146,7 +144,7 @@ describe('<ExpandableFileChooser />', () => {
       it('handles "no results" with the right text', () => {
         cy.mount(() => (<ExpandableFileChooser extensionPattern={extensionPattern} files={[]} />))
         .get(noResultsSelector)
-        .findByText(defaultMessages.components.fileSearch.noMatchesForExtension)
+        .findByText('No files found when searching for the file extension')
         .should('be.visible')
       })
 

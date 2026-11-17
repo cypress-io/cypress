@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type commander from 'commander'
 
-import { buildTapProgram } from '../../../lib/tap/build-program'
+import { buildNativeProgram, buildTapProgram } from '../../../lib/tap/build-program'
 import { buildTapSchema, type TapSchema } from '@packages/cypress-sessions'
 
 const schema: TapSchema = {
@@ -484,5 +484,93 @@ describe('lib/tap/build-program', () => {
         detail: '"login" is missing the required --token option.',
       }),
     )
+  })
+
+  it('marks a required value option in its description and spells it out in the usage line', () => {
+    const program = buildTapProgram({
+      schemaVersion: 1,
+      cypressVersion: '15.0.0',
+      commands: [{
+        name: 'login',
+        description: 'log in',
+        params: [{ name: 'user', type: 'string', required: true, description: 'who to log in as' }],
+        options: [
+          { name: 'token', alias: 'k', type: 'string', required: true, description: 'an auth token' },
+          { name: 'realm', type: 'string', required: false, description: 'which realm' },
+        ],
+      }],
+    }, vi.fn())
+    const help = subcommand(program, 'login').helpInformation().replace(/\s+/g, ' ')
+
+    expect(help).toContain('Usage: cypress tap login [options] --token <token> <user>')
+    expect(help).toContain('-k, --token <token> an auth token (required)')
+    expect(help).toContain('--realm <realm> which realm')
+    expect(help).not.toContain('which realm (required)')
+    expect(help).not.toContain('--realm <realm> <user>')
+  })
+
+  const dependentSchema: TapSchema = {
+    schemaVersion: 1,
+    cypressVersion: '15.0.0',
+    commands: [{
+      name: 'mark',
+      description: 'mark a test',
+      params: [],
+      options: [
+        { name: 'test-id', type: 'string', required: false, requires: { option: 'note', unless: 'clear', remedy: 'Pass `--note` too.' }, description: 'a test' },
+        { name: 'note', type: 'string', required: false, description: 'a note' },
+        { name: 'clear', type: 'boolean', required: false, description: 'clear marks' },
+      ],
+    }],
+  }
+
+  it('names the option that excuses a dependency in its description', () => {
+    const help = subcommand(buildTapProgram(dependentSchema, vi.fn()), 'mark').helpInformation().replace(/\s+/g, ' ')
+
+    expect(help).toContain('--test-id <test-id> a test (requires --note unless --clear)')
+  })
+
+  it('rejects an option passed without its companion before dispatching, unless excused', () => {
+    const dispatch = vi.fn()
+    const program = buildTapProgram(dependentSchema, dispatch)
+
+    expect(() => program.parse(['mark', '--test-id', 'r1'], { from: 'user' })).toThrowError(
+      expect.objectContaining({
+        code: 'MISSING_COMPANION_OPTION',
+        detail: 'You passed the `--test-id` flag without also passing the `--note` flag.\n\nPass `--note` too.',
+      }),
+    )
+
+    expect(dispatch).not.toHaveBeenCalled()
+
+    program.parse(['mark', '--test-id', 'r1', '--clear'], { from: 'user' })
+
+    expect(dispatch).toHaveBeenCalledWith('mark', {}, { 'test-id': 'r1', clear: 'true' })
+  })
+
+  it('enforces a dependency on a CLI-native command, which never reaches the session', () => {
+    const dispatch = vi.fn()
+    const program = buildNativeProgram({
+      name: 'probe',
+      description: 'probe the page',
+      details: 'Probes the page.',
+      options: [
+        { name: 'at', type: 'number', required: false, requires: { option: 'selector', remedy: 'Pass `--selector` too.' }, description: 'which match' },
+        { name: 'selector', type: 'string', required: false, description: 'a selector' },
+      ],
+      handler: vi.fn(),
+    }, dispatch)
+
+    expect(() => program.parse(['probe', '--at', '2'], { from: 'user' })).toThrowError(
+      expect.objectContaining({ code: 'MISSING_COMPANION_OPTION' }),
+    )
+
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  it('keeps the default usage for a command with no required options', () => {
+    const program = buildTapProgram(schema, vi.fn())
+
+    expect(subcommand(program, 'health').usage()).toBe('[options]')
   })
 })

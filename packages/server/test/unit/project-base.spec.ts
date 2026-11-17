@@ -312,6 +312,7 @@ describe('lib/project-base', () => {
     })
 
     // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('attaches warning to non-chrome browsers when chromeWebSecurity:false', async () => {
       const cfg = Object.assign({}, {
         supportFile,
@@ -349,6 +350,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
     // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
     // https://github.com/cypress-io/cypress/issues/17614
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('only attaches warning to non-chrome browsers when chromeWebSecurity:true', async () => {
       ctx.lifecycleManager.restore?.()
       vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockReturnValue({
@@ -575,6 +577,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('does not call startSpecWatcher if not in interactive mode', () => {
       const startSpecWatcherStub = vi.fn()
 
@@ -591,6 +594,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('calls startSpecWatcher if in interactive mode', () => {
       const startSpecWatcherStub = vi.fn()
 

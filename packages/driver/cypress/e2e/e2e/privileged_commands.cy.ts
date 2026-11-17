@@ -125,6 +125,7 @@ describe('privileged commands', () => {
     it('handles args being mutated', () => {
       const obj = { foo: 'bar' }
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- mutates the args while the privileged command is queued
       cy.wait(10).then(() => {
         obj.foo = 'baz'
       })
@@ -261,6 +262,7 @@ describe('privileged commands', () => {
               // that script from running
               cy.visit(`/aut-commands?appendToSpecFrame=true&strategy=${strategy}&command=${command}`)
               // wait 500ms then ensure the command did not run
+              // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the command never runs, so give it time to run first
               cy.wait(500).then(() => {
                 expect(ranCommand, `expected cy.${command}() not to run, but it did`).to.be.false
               })

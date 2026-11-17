@@ -2,7 +2,7 @@
   <Listbox
     :value="props.modelValue"
     as="div"
-    @update:modelValue="handleUpdate"
+    @update:model-value="handleUpdate"
   >
     <template #default="{ open }">
       <ListboxLabel
@@ -44,7 +44,7 @@
             "
           >
             <span v-if="!modelValue">
-              {{ placeholder ? placeholder : t('components.select.placeholder') }}
+              {{ placeholder ? placeholder : 'Choose an option...' }}
             </span>
             <slot
               v-else
@@ -165,9 +165,6 @@ export default {
 <script lang="ts" setup>
 import { Listbox, ListboxButton, ListboxLabel, ListboxOption, ListboxOptions } from '@headlessui/vue'
 import { get } from 'lodash'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 interface Option {
   [key: string]: any

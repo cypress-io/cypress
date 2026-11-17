@@ -10,7 +10,7 @@ interface File {
 }
 
 interface HandlesFileOpeningProps {
-  getRunner: Function
+  getRunner: () => EventEmitter
   selector: string
   file: File
   stackTrace?: boolean

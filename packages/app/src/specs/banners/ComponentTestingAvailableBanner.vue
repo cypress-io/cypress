@@ -16,7 +16,7 @@
   >
     <template #default="{ dismiss, bannerInstanceId }">
       <p class="pb-[16px] text-gray-700">
-        {{ t('specPage.banners.componentTesting.content') }}
+        You can now use Cypress to develop and test individual components without running your whole application. Generate the config in just a few clicks.
       </p>
       <div class="flex flex-row items-center text-sm border-t border-gray-100 pt-[8px] -mb-[8px] -mx-[16px] px-[16px]">
         <Button
@@ -26,14 +26,14 @@
           class="mr-[16px]"
           @click="handlePrimary(bannerInstanceId)"
         >
-          {{ t('specPage.banners.componentTesting.primaryAction') }}
+          Quick setup
         </Button>
         <ExternalLink
           data-cy="docs-link"
           :href="docsLink"
           @click="handleDocsClick(bannerInstanceId)"
         >
-          <span class="font-medium">{{ t('specPage.banners.componentTesting.secondaryAction') }}</span>
+          <span class="font-medium">Read our guide</span>
         </ExternalLink>
         <span class="flex-grow" />
         <ExternalLink
@@ -41,7 +41,7 @@
           :href="surveyLink"
           @click="handleSurveyClick(bannerInstanceId, dismiss)"
         >
-          <span class="font-medium">{{ t('specPage.banners.componentTesting.dismissAction') }}</span>
+          <span class="font-medium">Give feedback</span>
         </ExternalLink>
       </div>
     </template>
@@ -51,7 +51,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
 import Button from '@cypress-design/vue-button'
@@ -86,10 +85,9 @@ const props = defineProps<{
   machineId: string | undefined
 }>()
 
-const { t } = useI18n()
 const bannerId = BannerIds.CT_052023_AVAILABLE
 
-const title = computed(() => t('specPage.banners.componentTesting.title', [props.framework?.name]))
+const title = computed(() => `${props.framework.name} component testing is available for this project`)
 const iconFromType = computed(() => FrameworkBundlerLogos[props.framework?.type])
 
 const handlePrimary = async (bannerInstanceId: string) => {
