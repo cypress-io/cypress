@@ -153,6 +153,8 @@ function expandRegexChars (pattern: string) {
 function tokenValue (token: Token): unknown {
   const value: unknown = 'value' in token ? token.value : undefined
 
+  if (typeof value === 'bigint') return `${value}n`
+
   if (token.type === tokTypes.regexp && typeof value === 'object' && value !== null && 'pattern' in value && 'flags' in value && typeof value.pattern === 'string') {
     return `/${expandRegexChars(value.pattern)}/${value.flags}`
   }

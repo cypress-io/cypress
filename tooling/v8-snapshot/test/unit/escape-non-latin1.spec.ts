@@ -142,6 +142,11 @@ describe('assertSameTokens', () => {
     expect(() => assertSameTokens('/\u2019\\\u2019[\u2018]/', '/\\u2019\\u2019[\\u2018]/')).not.to.throw()
   })
 
+  it('compares BigInt literals', () => {
+    expect(() => assertSameTokens('1n', '1n')).not.to.throw()
+    expect(() => assertSameTokens('1n', '2n')).to.throw(/expected num "1n" but found num "2n"/)
+  })
+
   it('reports a changed cooked value', () => {
     expect(() => assertSameTokens('a = "\u2019"', 'a = "x"')).to.throw(/changed the tokens.*expected string "\u2019" but found string "x" at line 1, column 5/)
   })
