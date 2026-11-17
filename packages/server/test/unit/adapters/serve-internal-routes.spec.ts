@@ -2,6 +2,8 @@ import zlib from 'zlib'
 import _ from 'lodash'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
+import { HttpIntercept } from '@packages/network-interception'
+import { proxyHttpCodec } from '@packages/proxy/lib/adapters/http-codec'
 import { isAnsweredByCypress, isCypressServerOrigin, isInternalCypressRoute, cypressInternalLoopbackToken } from '../../../lib/adapters/internal-routes'
 import { createServeInternalRoutesMiddleware } from '../../../lib/adapters/serve-internal-routes'
 
@@ -730,5 +732,72 @@ describe('lib/adapters/internal-routes isAnsweredByCypress', () => {
 
   it('is true for own-origin internals outside cypress-in-cypress', () => {
     expect(answered({ url: 'http://localhost:1234/__/' })).toBe(true)
+  })
+})
+
+describe('serve-internal-routes over the Express pipeline (#34810)', () => {
+  it('writes the loop-guard 404 to the client response instead of dropping it', async () => {
+    // Composes the layers the way network-runtime.ts installs them: the
+    // intercept onion with the Express proxy codec, serveInternalRoutes first.
+    // A trusted loopback re-entry with no owning Express route produces a 404
+    // without calling next(); the codec must write it to ctx.res or the
+    // request hangs with no response.
+    const written: { statusCode?: number, body?: unknown } = {}
+    const writtenHeaders: Record<string, unknown> = {}
+    const res = {
+      headersSent: false,
+      writableFinished: false,
+      status (statusCode: number) {
+        written.statusCode = statusCode
+
+        return this
+      },
+      set (name: string, value: unknown) {
+        writtenHeaders[name] = value
+
+        return this
+      },
+      end (body?: unknown) {
+        written.body = body
+        this.writableFinished = true
+
+        return this
+      },
+    }
+
+    const ctx = {
+      req: {
+        proxiedUrl: 'http://127.0.0.1:1234/__/unknown',
+        method: 'GET',
+        headers: {
+          'x-cypress-internal-loopback': 'http://127.0.0.1:1234/__/unknown',
+          'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+        },
+      },
+      res,
+    }
+
+    const intercept = new HttpIntercept(proxyHttpCodec)
+    const origin = vi.fn()
+    const legacyPipeline = vi.fn()
+
+    intercept.use(createServeInternalRoutesMiddleware({
+      config,
+      request: { create: vi.fn() } as any,
+      isBrowserNetworkMode: false,
+    }))
+
+    // Stand-in for the legacy pipeline stage, which owns writing ctx.res on
+    // the normal path; the short-circuit must not reach it.
+    intercept.use(legacyPipeline)
+
+    await intercept.handle(ctx as any, origin)
+
+    expect(origin).not.toHaveBeenCalled()
+    expect(legacyPipeline).not.toHaveBeenCalled()
+    expect(written.statusCode).toBe(404)
+    expect(writtenHeaders).toStrictEqual({ 'content-type': 'text/plain' })
+    expect(written.body).toBe('Not Found')
+    expect(res.writableFinished).toBe(true)
   })
 })

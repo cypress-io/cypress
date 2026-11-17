@@ -1,6 +1,8 @@
 {
   "configMigration": true,
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "extends": [
     ":semanticCommits",
     "group:monorepos",

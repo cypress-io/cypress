@@ -23,4 +23,6 @@ export const addTestingTypeToCypressConfig: typeof AstUtils.addTestingTypeToCypr
 
 export * from './utils'
 
+export * from './developmentCloudWorkspaceUrl'
+
 export { isUnsafePort } from './unsafe_ports'
