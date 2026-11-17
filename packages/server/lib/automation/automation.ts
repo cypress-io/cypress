@@ -227,12 +227,10 @@ export class Automation {
           ])
           .spread((automationResult) => automationResult)
         case 'clear:cookie':
-          cookieJar.removeCookie(data)
-
           return this.cookies.clearCookie(data, automate)
           .then((cleared) => {
-            // the browser also clears a cookie set for a parent domain
-            if (cleared?.domain) cookieJar.removeCookie({ name: data.name, domain: cleared.domain.replace(/^\./, '') })
+            // the browser clears one cookie, which may be one set for a parent domain
+            cookieJar.removeCookie({ name: data.name, domain: cleared?.domain?.replace(/^\./, '') || data.domain })
 
             return cleared
           })

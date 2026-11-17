@@ -231,6 +231,14 @@ describe('lib/automation', () => {
       expect(jarCookies()).toStrictEqual(['bar=other foobar.com'])
     })
 
+    it('keeps a host cookie when the browser cleared the one for the parent domain', async () => {
+      cookieJar.setCookie('foo=host; Path=/', url, undefined)
+
+      await automation.normalize('clear:cookie', { name: 'foo', domain: 'app.foobar.com' }, async () => ({ name: 'foo', value: 'parent', domain: '.foobar.com', path: '/' }))
+
+      expect(jarCookies().sort()).toStrictEqual(['bar=other foobar.com', 'foo=host app.foobar.com'])
+    })
+
     it('keeps a parent-domain cookie the browser did not clear', async () => {
       await automation.normalize('clear:cookie', { name: 'foo', domain: 'app.foobar.com' }, async () => null)
 
