@@ -21,7 +21,7 @@ src/
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
   nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
-  reactConfig.ts        `reactConfig(files)`: opt-in React rules (@eslint-react/eslint-plugin), scoped to the React files given
+  reactConfig.ts        `reactConfig(files)`: opt-in React rules (@eslint-react/eslint-plugin), scoped to the React files given. Requires the plugin on call
   typeAwareConfig.ts    `noFloatingPromisesConfig(files)`: opt-in `@typescript-eslint/no-floating-promises` with a project service, scoped to the files given
   vitestConfig.ts       Opt-in linting of Vitest specs (@vitest/eslint-plugin), for workspaces whose unit tests run on Vitest
   rules/                Cypress-authored rules, registered under the `@cypress/dev` namespace
@@ -171,14 +171,17 @@ Specs are left out (`config` and `reporter` predate this and keep theirs): they 
 reactConfig(['**/*.{js,jsx,ts,tsx}']),
 ```
 
-The rules are opt-in because the Vue packages write components in Vue JSX, which React rules misread: `class`, for example, is reported as an unknown property. Nothing in `app`, `launchpad` or `frontend-shared` needs to turn them off.
+The rules are opt-in because the Vue packages write components in Vue JSX, which React rules misread: `class`, for example, is reported as an unknown property. Nothing in `app`, `launchpad` or `frontend-shared` needs to turn them off. `reactConfig` requires the plugin when it is called rather than importing it, so the workspaces that don't opt in start ESLint without loading it.
 
 These opt in:
 
 - `npm/react` and `reporter`: every file.
-- `system-tests`: the `.jsx` and `.tsx` files under `projects/**` and `project-fixtures/**`, all of which belong to React or Next.js projects. `dom-no-render` is off there: some fixtures mount with the legacy `ReactDOM.render`, which React 18 still runs, the way apps written before `createRoot` do.
+- `runner`: `unified-runner.tsx`.
+- `vite-plugin-cypress-esm`: its component tests, `cypress/**/*.tsx`.
+- `webpack-batteries-included-preprocessor`: the JSX fixtures under `test/fixtures`.
+- `system-tests`: the `.jsx` and `.tsx` files under `projects/**` and `project-fixtures/**`, all of which belong to React or Next.js projects, plus the `.js` files of the Next.js projects (`project-fixtures/next` and `projects/nextjs-*`), whose pages are JSX. A new Next.js fixture that writes JSX in `.js` files needs adding to that list. `dom-no-render` is off there: some fixtures mount with the legacy `ReactDOM.render`, which React 18 still runs, the way apps written before `createRoot` do. The layout rules the React plugin brings are off for them too, like `baseConfig`'s for every fixture, because system-test snapshots assert on line and column numbers.
 
-Not opted in yet, though they hold React files: `runner`'s `unified-runner.tsx`, `data-context`'s scaffold fixtures under `test/unit`, and the component specs and fixtures of `vite-plugin-cypress-esm` and `webpack-batteries-included-preprocessor`.
+A workspace with new React files opts them in the same way. `data-context`'s React scaffold fixtures under `test/unit` are the exception: its config ignores them, because its specs assert on how those inputs are written.
 
 On top of `recommended-typescript`:
 

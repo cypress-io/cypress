@@ -3,9 +3,17 @@ import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig, reactConfig } f
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
-const fixtureJsxFiles = fixtureDirs.map((dir) => `${dir}/*.{jsx,tsx}`)
+// Every JSX file under the fixtures belongs to a React or Next.js project. The
+// Next.js projects also write pages as JSX in `.js` files
+const fixtureReactFiles = [
+  ...fixtureDirs.map((dir) => `${dir}/*.{jsx,tsx}`),
+  'project-fixtures/next/**/*.js',
+  'projects/nextjs-*/**/*.js',
+]
 
-const plugins = Object.assign({}, ...baseConfig.map((config) => config.plugins ?? {}))
+const fixtureReactConfig = reactConfig(fixtureReactFiles)
+
+const plugins = Object.assign({}, ...[...baseConfig, fixtureReactConfig].map((config) => config.plugins ?? {}))
 
 const ruleMeta = (ruleId: string) => {
   const slash = ruleId.lastIndexOf('/')
@@ -24,12 +32,14 @@ const isLayoutRule = (ruleId: string) => {
   return meta?.type === 'layout' || meta?.fixable === 'whitespace'
 }
 
-const layoutRulesOff = Object.fromEntries(
-  baseConfig
-  .flatMap((config) => Object.keys(config.rules ?? {}))
-  .filter(isLayoutRule)
-  .map((ruleId) => [ruleId, 'off']),
-)
+const layoutRulesOff = (configs: typeof baseConfig) => {
+  return Object.fromEntries(
+    configs
+    .flatMap((config) => Object.keys(config.rules ?? {}))
+    .filter(isLayoutRule)
+    .map((ruleId) => [ruleId, 'off']),
+  )
+}
 
 export default [
   ...baseConfig,
@@ -77,7 +87,7 @@ export default [
       reportUnusedDisableDirectives: 'off',
     },
     rules: {
-      ...layoutRulesOff,
+      ...layoutRulesOff(baseConfig),
       // Angular resolves a constructor parameter's type to a DI token at
       // runtime, so a type-only import erases the token and the app fails to
       // compile (NG2003)
@@ -119,11 +129,13 @@ export default [
       'no-debugger': 'off',
     },
   },
-  // Every JSX file under the fixtures belongs to a React or Next.js project
-  reactConfig(fixtureJsxFiles),
+  fixtureReactConfig,
   {
-    files: fixtureJsxFiles,
+    files: fixtureReactFiles,
     rules: {
+      // the fixture block above turns off baseConfig's layout rules, but the
+      // React plugin is only loaded for these files
+      ...layoutRulesOff([fixtureReactConfig]),
       // some fixtures mount with the legacy `ReactDOM.render`, which React 18
       // still runs, the way apps written before `createRoot` do
       '@eslint-react/dom-no-render': 'off',

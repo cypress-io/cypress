@@ -1,13 +1,8 @@
-import eslintReact from '@eslint-react/eslint-plugin'
 import type { Linter } from 'eslint'
-
-const recommended = eslintReact.configs['recommended-typescript']
 
 const isObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null
 }
-
-const recommendedReactSettings = recommended.settings?.['react-x']
 
 /**
  * React rules, from `@eslint-react/eslint-plugin`'s `recommended-typescript`.
@@ -16,8 +11,15 @@ const recommendedReactSettings = recommended.settings?.['react-x']
  * so the rules are opt-in rather than part of `baseConfig`.
  */
 export const reactConfig = (files: string[]): Linter.Config => {
+  // Required on call rather than imported, so the workspaces without React
+  // files don't load the plugin every time ESLint starts
+  const { default: eslintReact }: typeof import('@eslint-react/eslint-plugin') = require('@eslint-react/eslint-plugin')
+  const recommended = eslintReact.configs['recommended-typescript']
+  const recommendedReactSettings = recommended.settings?.['react-x']
+
   return {
     ...recommended,
+    name: '@packages/eslint-config/react',
     files,
     settings: {
       ...recommended.settings,
