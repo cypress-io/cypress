@@ -18,6 +18,7 @@ const {
   validateCyPromptFile,
 } = require('./binary/binary-sources')
 const { needsSandbox } = require('../cli/lib/tasks/verify')
+const xvfb = require('../cli/lib/exec/xvfb').default
 const execa = require('execa')
 const meta = require('./binary/meta')
 
@@ -29,13 +30,25 @@ const createStartBundleCodeCache = async () => {
     args.push('--no-sandbox')
   }
 
-  const env = { ...process.env, CYPRESS_INTERNAL_WRITE_START_BUNDLE_CACHE: '1' }
+  const usingXvfb = xvfb.isNeeded()
 
-  // V8 rejects a code cache made under different flags, so NODE_OPTIONS must not leak into the app
-  delete env.NODE_OPTIONS
-  delete env.ELECTRON_RUN_AS_NODE
+  try {
+    if (usingXvfb) {
+      await xvfb.start()
+    }
 
-  await execa(`${meta.buildAppExecutable()}`, args, { env, extendEnv: false })
+    const env = { ...process.env, CYPRESS_INTERNAL_WRITE_START_BUNDLE_CACHE: '1' }
+
+    // V8 rejects a code cache made under different flags, so NODE_OPTIONS must not leak into the app
+    delete env.NODE_OPTIONS
+    delete env.ELECTRON_RUN_AS_NODE
+
+    await execa(`${meta.buildAppExecutable()}`, args, { env, extendEnv: false })
+  } finally {
+    if (usingXvfb) {
+      await xvfb.stop()
+    }
+  }
 }
 
 // Strip test keys and local development overrides from the server code that the binary ships
