@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import vm from 'vm'
-import { assertLatin1, escapeNonLatin1 } from '../../src/generator/escape-non-latin1'
+import { assertLatin1, assertSameTokens, escapeNonLatin1 } from '../../src/generator/escape-non-latin1'
 
 const evaluate = (source: string) => vm.runInNewContext(source)
 const escape = (source: string) => escapeNonLatin1(source).code
@@ -134,5 +134,27 @@ describe('assertLatin1', () => {
 
   it('reports the location of a char above U+00FF', () => {
     expect(() => assertLatin1('var a\nvar s = "\u2019"', 'snapshot.js')).to.throw(/snapshot\.js contains a character above U\+00FF at line 2, column 10/)
+  })
+})
+
+describe('assertSameTokens', () => {
+  it('passes regexes whose chars are written as escapes or identity escapes', () => {
+    expect(() => assertSameTokens('/\u2019\\\u2019[\u2018]/', '/\\u2019\\u2019[\\u2018]/')).not.to.throw()
+  })
+
+  it('reports a changed cooked value', () => {
+    expect(() => assertSameTokens('a = "\u2019"', 'a = "x"')).to.throw(/changed the tokens.*expected string "\u2019" but found string "x" at line 1, column 5/)
+  })
+
+  it('reports a line terminator that is lost between tokens', () => {
+    expect(() => assertSameTokens('return /* \u2028 */ 1', 'return /* \\u2028 */ 1')).to.throw(/expected num after a newline 1 but found num 1/)
+  })
+
+  it('reports a regex that matches different chars', () => {
+    expect(() => assertSameTokens('/\u2019/', '/\\\\u2019/')).to.throw(/changed the tokens/)
+  })
+
+  it('reports an escaped script that cannot be parsed', () => {
+    expect(() => assertSameTokens('a', 'a +')).to.throw(/left the snapshot script unparseable/)
   })
 })

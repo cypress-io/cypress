@@ -1,12 +1,24 @@
-import { parse } from 'acorn'
+import { createHash } from 'crypto'
+import { parse, tokTypes } from 'acorn'
+import type { Options, Token } from 'acorn'
 
 const NON_LATIN1 = /[^\0-\xff]/
 const BACKSLASHES_THEN_NON_LATIN1 = /(\\*)([^\0-\xff])/g
 const LINE_SEPARATORS = /[\u2028\u2029]/
 const SURROGATE = /[\ud800-\udfff]/
 const HIGH_SURROGATE = /[\ud800-\udbff]/
+const LINE_TERMINATOR = /[\n\r\u2028\u2029]/
+// A `\uXXXX` escape or a char above U+00FF, each after any backslashes
+const REGEX_CHAR = /(\\*)(?:\\u([0-9a-fA-F]{4})|([^\0-\xff]))/g
 // The non-Latin-1 code points of the ECMAScript WhiteSpace production
 const WHITESPACE = /[\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]/
+
+const PARSE_OPTIONS: Options = {
+  ecmaVersion: 'latest',
+  sourceType: 'script',
+  allowHashBang: true,
+  allowReturnOutsideFunction: true,
+}
 
 type Range = { start: number, end: number }
 type Node = Range & { type: string }
@@ -71,17 +83,15 @@ function leafContext (node: Node, inTaggedTemplate: boolean): Context | undefine
  * Finds the token each index sits in. Indexes in neither a token nor a comment
  * are between tokens.
  */
-function classify (source: string, indexes: number[]) {
+function classify (source: string, indexes: number[], onToken: (token: Token) => void) {
   const comments: Range[] = []
   let ast: Node
 
   try {
     ast = parse(source, {
-      ecmaVersion: 'latest',
-      sourceType: 'script',
-      allowHashBang: true,
-      allowReturnOutsideFunction: true,
+      ...PARSE_OPTIONS,
       onComment: (_block, _text, start, end) => comments.push({ start, end }),
+      onToken,
     })
   } catch (err) {
     throw new Error(
@@ -127,6 +137,108 @@ function classify (source: string, indexes: number[]) {
   return { contexts, inComment }
 }
 
+/** Writes escapes and identity escapes of chars above U+00FF in a regex pattern as the chars, which match the same */
+function expandRegexChars (pattern: string) {
+  return pattern.replace(REGEX_CHAR, (match, backslashes: string, hex: string | undefined, char: string | undefined) => {
+    const isEscaped = backslashes.length % 2 === 1
+
+    if (char !== undefined) return isEscaped ? backslashes.slice(1) + char : match
+
+    const code = parseInt(hex ?? '', 16)
+
+    return !isEscaped && code > 0xff ? backslashes + String.fromCharCode(code) : match
+  })
+}
+
+function tokenValue (token: Token): unknown {
+  const value: unknown = 'value' in token ? token.value : undefined
+
+  if (token.type === tokTypes.regexp && typeof value === 'object' && value !== null && 'pattern' in value && 'flags' in value && typeof value.pattern === 'string') {
+    return `/${expandRegexChars(value.pattern)}/${value.flags}`
+  }
+
+  return value
+}
+
+/**
+ * Describes each token by its type, its cooked value and whether a line
+ * terminator precedes it, which automatic semicolon insertion depends on.
+ */
+function tokenSignatures (source: string, onSignature: (signature: string, token: Token) => void) {
+  let previousEnd = 0
+
+  return (token: Token) => {
+    const afterNewline = LINE_TERMINATOR.test(source.slice(previousEnd, token.start))
+
+    previousEnd = token.end
+    onSignature(`${token.type.label}${afterNewline ? ' after a newline' : ''} ${JSON.stringify(tokenValue(token)) ?? ''}`, token)
+  }
+}
+
+function tokenDigest (source: string) {
+  const hash = createHash('sha1')
+  let pending = ''
+
+  return {
+    onToken: tokenSignatures(source, (signature) => {
+      pending += `${signature}\n`
+
+      if (pending.length > 1 << 20) {
+        hash.update(pending)
+        pending = ''
+      }
+    }),
+    digest: () => hash.update(pending).digest('hex'),
+  }
+}
+
+function firstDifference (original: string, escaped: string) {
+  const expected: string[] = []
+  let count = 0
+  let difference = ''
+
+  parse(original, { ...PARSE_OPTIONS, onToken: tokenSignatures(original, (signature) => expected.push(signature)) })
+  parse(escaped, {
+    ...PARSE_OPTIONS,
+    onToken: tokenSignatures(escaped, (signature, token) => {
+      if (!difference && signature !== expected[count]) {
+        difference = `expected ${expected[count] ?? 'no token'} but found ${signature} at ${describeLocation(escaped, token.start)}`
+      }
+
+      count++
+    }),
+  })
+
+  return difference
+}
+
+/**
+ * Throws unless `escaped` has the same tokens as the script `originalDigest`
+ * was taken from, so a mistake in the escaping cannot change what the snapshot
+ * runs.
+ */
+export function assertSameTokens (original: string, escaped: string, originalDigest = digestTokens(original)) {
+  const tokens = tokenDigest(escaped)
+
+  try {
+    parse(escaped, { ...PARSE_OPTIONS, onToken: tokens.onToken })
+  } catch (err) {
+    throw new Error(`Escaping the characters above U+00FF left the snapshot script unparseable: ${err instanceof Error ? err.message : err}`, { cause: err })
+  }
+
+  if (tokens.digest() === originalDigest) return
+
+  throw new Error(`Escaping the characters above U+00FF changed the tokens of the snapshot script: ${firstDifference(original, escaped)}`)
+}
+
+function digestTokens (source: string) {
+  const tokens = tokenDigest(source)
+
+  parse(source, { ...PARSE_OPTIONS, onToken: tokens.onToken })
+
+  return tokens.digest()
+}
+
 /**
  * Rewrites every character above U+00FF without changing the values, matches
  * or control flow of the script: as a `\uXXXX` escape (a surrogate pair for
@@ -145,7 +257,8 @@ export function escapeNonLatin1 (source: string): { code: string, edits: Edit[] 
 
   if (indexes.length === 0) return { code: source, edits: [] }
 
-  const { contexts, inComment } = classify(source, indexes)
+  const originalTokens = tokenDigest(source)
+  const { contexts, inComment } = classify(source, indexes, originalTokens.onToken)
   const edits: Edit[] = []
 
   const fail = (index: number, reason: string): never => {
@@ -196,6 +309,8 @@ export function escapeNonLatin1 (source: string): { code: string, edits: Edit[] 
 
     return replacement
   })
+
+  assertSameTokens(source, code, originalTokens.digest())
 
   return { code, edits }
 }
