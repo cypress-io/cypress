@@ -304,6 +304,73 @@ describe('lib/automation/cookie/document-cookie', () => {
     })
   })
 
+  describe('when a cookie in the server-side jar blocks the write', () => {
+    const secureRequestCookies = () => cookieJar.getCookies('https://www.foobar.com/').map(({ key, value }) => `${key}=${value}`)
+
+    beforeEach(() => {
+      cookieJar.setCookie('foo=bar; Path=/; Secure', 'https://www.foobar.com/', 'strict')
+    })
+
+    it('leaves the jar alone until the browser answers', async () => {
+      let answer: (cookies: typeof existing) => void = () => {}
+
+      automation.getCookies.mockReturnValue(new Promise((resolve) => answer = resolve))
+
+      const written = write('foo=baz; Path=/', 'http://www.foobar.com/')
+
+      expect(secureRequestCookies()).toEqual(['foo=bar'])
+
+      answer([{ name: 'foo', domain: 'www.foobar.com', path: '/', httpOnly: false, secure: true }])
+      await written
+
+      expect(automation.setCookie).not.toHaveBeenCalled()
+      expect(secureRequestCookies()).toEqual(['foo=bar'])
+    })
+
+    it('writes once the browser no longer has that cookie', async () => {
+      await write('foo=baz; Path=/', 'http://www.foobar.com/')
+
+      expect(browserCookie()).toMatchObject({ name: 'foo', value: 'baz' })
+      expect(secureRequestCookies()).toEqual(['foo=baz'])
+    })
+  })
+
+  describe('an expired cookie the browser refuses', () => {
+    const jarValues = () => cookieJar.getCookies('https://www.foobar.com/').map(({ key, value }) => `${key}=${value}`)
+
+    beforeEach(() => {
+      cookieJar.setCookie('foo=bar; Path=/', 'https://www.foobar.com/', 'strict')
+    })
+
+    it('goes back to the cookie it replaced after the jar has been read', async () => {
+      automation.setCookie.mockImplementation(async () => {
+        cookieJar.getCookies('https://www.foobar.com/')
+
+        throw new Error('refused')
+      })
+
+      await expect(write('foo=; Path=/; Max-Age=0')).rejects.toThrow('refused')
+
+      expect(jarValues()).toEqual(['foo=bar'])
+    })
+
+    it('leaves a later expired write in charge of the cookie', async () => {
+      let refuse: (err: Error) => void = () => {}
+
+      automation.setCookie.mockReturnValueOnce(new Promise((_resolve, reject) => refuse = reject))
+
+      const earlier = write('foo=; Path=/; Max-Age=0')
+
+      await write('foo=; Path=/; Max-Age=0')
+      cookieJar.getCookies('https://www.foobar.com/')
+
+      refuse(new Error('refused'))
+      await expect(earlier).rejects.toThrow('refused')
+
+      expect(jarValues()).toEqual([])
+    })
+  })
+
   it('ignores the write when the existing cookie lookup fails', async () => {
     automation.getCookies.mockRejectedValue(new Error('no automation client'))
 

@@ -137,3 +137,6 @@ export class CookieJar {
 }
 
 export const cookieJar = new CookieJar()
+
+// set:cookie payloads whose cookie the sender has already written to the jar
+export const writtenToJar = new WeakSet<SerializableAutomationCookie>()

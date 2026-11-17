@@ -5,7 +5,7 @@ import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationCommands, AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import type { SerializableAutomationCookie } from './cookie/jar'
-import { automationCookieToToughCookie, cookieJar } from './cookie/jar'
+import { automationCookieToToughCookie, cookieJar, writtenToJar } from './cookie/jar'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 import Debug from 'debug'
 import { AutomationNotImplemented } from './automation_not_implemented'
@@ -211,7 +211,8 @@ export class Automation {
           .then((automationCookie) => {
             // the sync runs only once the automation resolves, so a namespaced or
             // browser-rejected cookie never reaches the jar
-            syncSetCookieToJar(data)
+            // a newer write may own the jar entry by now, and a sync would put this one back
+            if (!writtenToJar.has(data)) syncSetCookieToJar(data)
 
             return automationCookie
           })

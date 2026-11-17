@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import _ from 'lodash'
 import { Automation } from '../../lib/automation'
-import { cookieJar } from '../../lib/automation/cookie/jar'
+import { cookieJar, writtenToJar } from '../../lib/automation/cookie/jar'
 
 describe('lib/automation', () => {
   let automation
@@ -178,6 +178,18 @@ describe('lib/automation', () => {
         throw new Error('expected set:cookie to reject')
       }, () => {
         expect(jarCookies()).toStrictEqual(['sid=auth'])
+      })
+    })
+
+    it('leaves the jar alone for a cookie its sender has already written there', () => {
+      const earlier = sessionCookie('earlier')
+
+      writtenToJar.add(earlier)
+      cookieJar.setCookie('sid=later; Path=/; SameSite=Lax', url, undefined)
+
+      return automation.normalize('set:cookie', earlier, acceptCookie)
+      .then(() => {
+        expect(jarCookies()).toStrictEqual(['sid=later'])
       })
     })
 
