@@ -33,9 +33,13 @@ const parseUrl = (url: unknown) => {
 const undone = new WeakMap<Cookie, Cookie | undefined>()
 
 // the newest write in flight for each cookie
-const latest = new Map<string, { cookie: Cookie, order: number }>()
+const latest = new Map<string, Cookie>()
 
-let writes = 0
+// the browser handles the writes to one cookie in the order the page made them
+const queue = new Map<string, Promise<void>>()
+
+// how many writes to each cookie are waiting for the browser before they write the jar
+const heldBack = new Map<string, number>()
 
 // browsers treat localhost as a secure context, so it may set Secure cookies over http
 const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
@@ -73,22 +77,22 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
   const stored = { name: cookie.key, domain: cookie.domain, path: cookie.path }
 
   const key = JSON.stringify(stored)
-  const order = ++writes
   const findStored = () => cookieJar.getAllCookies().find((c) => c.key === stored.name && c.domain === stored.domain && c.path === stored.path)
   let replaced: Cookie | undefined
   let written: Cookie | undefined
 
   const write = () => {
-    // a write that started after this one has the jar entry, and the browser sets it after this one
-    if ((latest.get(key)?.order ?? 0) > order) return true
+    // a jar read may have purged the expired cookie of a write still in flight
+    replaced = findStored() ?? latest.get(key)
 
-    replaced = findStored()
+    // tough-cookie refuses to replace an expired HttpOnly cookie that no read has purged yet
+    if (replaced && replaced.TTL() <= 0) cookieJar.removeCookie(stored)
 
     try {
       cookieJar.setCookie(cookie, pageUrl.href, 'strict', { http: false })
       written = findStored()
 
-      if (written) latest.set(key, { cookie: written, order })
+      if (written) latest.set(key, written)
     } catch (err) {
       debug('ignoring document.cookie write %s: %s', cookieString, err.message)
     }
@@ -103,7 +107,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
     // a later write to the same cookie owns the entry now, and must not restore this one.
     // a jar read purges an expired cookie, which leaves its write the owner
-    if (current !== written && (current || latest.get(key)?.cookie !== written)) {
+    if (current !== written && (current || written.TTL() > 0 || latest.get(key) !== written)) {
       undone.set(written, replaced)
 
       return
@@ -124,11 +128,18 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
     return c.TTL() > 0 && isBlockedByExisting({ name: c.key, domain: c.domain || '', path: c.path, httpOnly: c.httpOnly, secure: c.secure }, stored, isSecure)
   })
 
-  // set before the browser answers, so a request the page makes right after the write carries the
-  // cookie. the jar may be behind the browser, so a write its cookies block waits for the browser's answer
-  if (!isBlockedInJar && !write()) return
+  // the jar may be behind the browser, so a write its cookies block waits for the browser's
+  // answer, and so does a write that follows one still waiting
+  const isHeldBack = isBlockedInJar || heldBack.has(key)
 
-  try {
+  if (isHeldBack) {
+    heldBack.set(key, (heldBack.get(key) ?? 0) + 1)
+  // set before the browser answers, so a request the page makes right after the write carries the cookie
+  } else if (!write()) {
+    return
+  }
+
+  const sendToBrowser = async () => {
     try {
       const existing = await automation.getCookies({ name: cookie.key })
 
@@ -140,7 +151,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
       return undo()
     }
 
-    if (!written && !write()) return
+    if (isHeldBack && !write()) return
 
     const automationCookie = toughCookieToAutomationCookie(cookie, pageUrl.hostname)
 
@@ -154,7 +165,25 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
       throw err
     }
+  }
+
+  const previous = queue.get(key)
+  const sent = previous ? previous.then(sendToBrowser) : sendToBrowser()
+  const settled = sent.catch(() => {})
+
+  queue.set(key, settled)
+
+  try {
+    await sent
   } finally {
-    if (written && latest.get(key)?.cookie === written) latest.delete(key)
+    if (queue.get(key) === settled) queue.delete(key)
+
+    if (written && latest.get(key) === written) latest.delete(key)
+
+    if (isHeldBack) {
+      const count = (heldBack.get(key) ?? 1) - 1
+
+      count ? heldBack.set(key, count) : heldBack.delete(key)
+    }
   }
 }
