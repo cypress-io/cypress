@@ -362,6 +362,45 @@ describe('src/cy/commands/files', () => {
         cy.readFile('foo.json', null)
       })
 
+      it('throws the existence error when it times out while re-reading the file', function (done) {
+        const err: FileError = new Error('ENOENT: no such file or directory, open \'foo.json\'')
+
+        err.name = 'ENOENT'
+        err.code = 'ENOENT'
+        err.filePath = '/path/to/foo.json'
+
+        const runPrivileged = backend.withArgs('run:privileged')
+
+        runPrivileged.callsFake(() => new Cypress.Promise(() => { /* re-read never settles */ }))
+        runPrivileged.onFirstCall().rejects(err)
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(stripIndent`
+            Timed out retrying after 50ms: \`cy.readFile(\"foo.json\")\` failed because the file does not exist at the following path:
+
+            \`/path/to/foo.json\``)
+
+          done()
+        })
+
+        cy.readFile('foo.json')
+      })
+
+      it('throws the assertion error when it times out while re-reading the file', function (done) {
+        const runPrivileged = backend.withArgs('run:privileged')
+
+        runPrivileged.callsFake(() => new Cypress.Promise(() => { /* re-read never settles */ }))
+        runPrivileged.onFirstCall().resolves({ contents: 'foo' })
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'foo\' to equal \'contents\'')
+
+          done()
+        })
+
+        cy.readFile('foo.json').should('equal', 'contents')
+      })
+
       it('throws a specific error when file exists when it shouldn\'t', function (done) {
         backend.resolves(okResponse)
 
