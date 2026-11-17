@@ -1,4 +1,4 @@
-import { Cookie, CookieJar as ToughCookieJar } from 'tough-cookie'
+import { Cookie, CookieJar as ToughCookieJar, canonicalDomain } from 'tough-cookie'
 import type { AutomationCookie } from './automation'
 
 interface SerializableAutomationCookie extends Omit<AutomationCookie, 'expiry'> {
@@ -118,7 +118,9 @@ export class CookieJar {
   }
 
   // without a path, removes the cookie at every path
-  removeCookie ({ name, domain, path }: CookieData) {
+  removeCookie ({ name, domain: givenDomain, path }: CookieData) {
+    // the jar stores an IPv6 host without its brackets
+    const domain = canonicalDomain(givenDomain)
     const paths = path ? [path] : this.getAllCookies()
     .filter((cookie) => cookie.key === name && cookie.domain === domain)
     .map((cookie) => cookie.path)

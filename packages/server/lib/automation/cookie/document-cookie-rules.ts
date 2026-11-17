@@ -115,12 +115,14 @@ export const meetsDocumentCookieRules = (cookie: Pick<Cookie, 'key' | 'value' | 
 export const isBlockedByExisting = (existing: ExistingCookie, cookie: StoredCookie, isSecure: boolean) => {
   if (existing.name !== cookie.name) return false
 
-  const existingDomain = existing.domain.replace(/^\./, '')
+  // browsers report an IPv6 host in brackets and a domain cookie with a leading dot
+  const existingDomain = canonicalDomain(existing.domain)
+  const cookieDomain = canonicalDomain(cookie.domain)
   const existingPath = existing.path || '/'
 
-  if (existing.httpOnly && existingDomain === cookie.domain && existingPath === cookie.path) return true
+  if (existing.httpOnly && existingDomain === cookieDomain && existingPath === cookie.path) return true
 
   return !isSecure && !!existing.secure
-    && (!!domainMatch(existingDomain, cookie.domain) || !!domainMatch(cookie.domain, existingDomain))
+    && (!!domainMatch(existingDomain, cookieDomain) || !!domainMatch(cookieDomain, existingDomain))
     && pathMatch(cookie.path, existingPath)
 }

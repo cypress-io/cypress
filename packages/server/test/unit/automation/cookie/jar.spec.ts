@@ -21,6 +21,15 @@ describe('lib/automation/cookie/jar', () => {
       expect(stored()).toEqual(['bar www.foobar.com /fixtures', 'foo app.foobar.com /fixtures', 'foo www.foobar.com /'])
     })
 
+    it('removes a cookie for an IPv6 host given with its brackets', () => {
+      jar.removeAllCookies()
+      jar.setCookie('foo=1; Path=/', 'http://[::1]:3500/', undefined)
+
+      jar.removeCookie({ name: 'foo', domain: '[::1]' })
+
+      expect(stored()).toEqual([])
+    })
+
     it('removes the cookie at every path when none is given', () => {
       jar.removeCookie({ name: 'foo', domain: 'www.foobar.com' })
 
