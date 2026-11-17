@@ -610,8 +610,10 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 
   span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
 
-  // skip if we don't have the header or we're not in chromium
-  if (!hasHeader || this.getCurrentBrowser().family !== 'chromium') {
+  // skip if we don't have the header or we're not in chromium. The browser
+  // network path instruments the worker over CDP instead and leaves the
+  // script's bytes alone (#35204) - see getServiceWorkerPrelude.
+  if (!hasHeader || this.getCurrentBrowser().family !== 'chromium' || this.useBrowserNetworkInterception) {
     span?.end()
 
     return this.next()

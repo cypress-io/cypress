@@ -12,6 +12,7 @@ import { cypressSessions } from '../cypress-sessions'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape, CdpClientShape, OnExtraTargetCriClientReady, ExtraTargetDetach } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
+import { armServiceWorkerPrelude } from './cdp-protocol/service-worker-prelude'
 import { EXTRA_TARGET_HEADER } from './constants'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
@@ -253,6 +254,14 @@ export class BrowserCriClient {
    */
   reenableChildTargetInterception?: (targetId: string) => Promise<void>
   /**
+   * Set on the browser network path. Evaluated in each service worker this
+   * connection releases, just before the worker's script runs, in place of
+   * editing the script (#35204). Armed here rather than on the page
+   * connection because this connection releases last: a release that lands
+   * after the worker has paused for the prelude would end that pause.
+   */
+  getServiceWorkerPrelude?: () => string | undefined
+  /**
    * sessionId -> the target's full TargetInfo, captured in _onAttachToTarget
    * (the only place a TargetInfo is available) and evicted on
    * Target.detachedFromTarget / Target.targetDestroyed. The crash handler
@@ -404,6 +413,13 @@ export class BrowserCriClient {
           const targetId = targetInfo.targetId
 
           await this._holdForChildTargetInterception(targetId, childTargetInterceptionTimeoutMs, () => browserCriClient.reenableChildTargetInterception!(targetId))
+
+          // the reloaded worker evaluates its script again
+          const prelude = browserCriClient.getServiceWorkerPrelude?.()
+
+          if (prelude && sessionId) {
+            armServiceWorkerPrelude(browserClient, sessionId, prelude)
+          }
         }
       } catch (error) {
         debug('error deciding whether to hold session %s for interception coverage: %s', sessionId, error)
@@ -483,7 +499,17 @@ export class BrowserCriClient {
       // The basic approach here is we attach to targets and enable network traffic
       // We must attach in a paused state so that we can enable network traffic before the target starts running.
       // We don't track child tabs/page network traffic. 'other' targets can't have network enabled
-      if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
+      if (event.targetInfo.type === 'worker' || event.targetInfo.type === 'shared_worker' || event.targetInfo.type === 'service_worker') {
+        // A worker's Network.enable is answered by its own thread, which only
+        // runs once released below - and for a service worker on the browser
+        // network path, only this connection releases it (#35204). Awaiting
+        // it held the release behind the worker starting some other way, or
+        // forever. Sent first, so it still reaches the session ahead of
+        // Runtime.runIfWaitingForDebugger.
+        browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId).catch((error) => {
+          debug('error running Network.enable on worker %s: %o', targetId, error)
+        })
+      } else if (event.targetInfo.type !== 'page' && event.targetInfo.type !== 'other') {
         await browserClient.send('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS, event.sessionId)
       }
     } catch (error) {
@@ -495,8 +521,11 @@ export class BrowserCriClient {
     try {
       // attach a binding to the runtime so that the worker's client events
       // reach the listener registered above
+      // not awaited, for the same reason as Network.enable above
       if (event.targetInfo.type === 'service_worker') {
-        await browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId)
+        browserClient.send('Runtime.addBinding', { name: serviceWorkerClientEventHandlerName }, event.sessionId).catch((error) => {
+          debug('error adding service worker binding:', error)
+        })
       }
     } catch (error) {
       debug('error adding service worker binding:', error)
@@ -585,6 +614,12 @@ export class BrowserCriClient {
         debug('skipped-extension: service worker %s is the extension service worker, releasing without a hold', targetId)
       } else if (targetInfo.type === 'service_worker' && browserCriClient.waitForChildTargetInterception) {
         await this._holdForChildTargetInterception(targetId, childTargetInterceptionTimeoutMs, () => browserCriClient.waitForChildTargetInterception!(targetId))
+
+        const prelude = browserCriClient.getServiceWorkerPrelude?.()
+
+        if (prelude) {
+          armServiceWorkerPrelude(browserClient, sessionId, prelude)
+        }
       }
 
       // in these cases, we don't want to track the targets as extras.

@@ -23,6 +23,7 @@ import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './brow
 import { InterceptionEscapeDetector } from './browsers/cdp-protocol/interception-escape-detector'
 import type { InterceptionEscape } from './browsers/cdp-protocol/interception-escape-detector'
 import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
+import { getServiceWorkerPrelude } from '@packages/proxy/lib/http/util/service-worker-injector'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, isAnsweredByCypress, isReadMethod, resolveProxyUrlBase } from './adapters/internal-routes'
 
@@ -54,7 +55,7 @@ export type CreateCdpFetchRuntimeDeps = {
   // onChildTargetAttached is a settable hook: the runtime assigns it so
   // child sessions (service workers, origin-isolated iframes) get Fetch
   // enabled before they start running.
-  client: Pick<ICriClient, 'send' | 'on' | 'off' | 'onChildTargetAttached'>
+  client: Pick<ICriClient, 'send' | 'on' | 'off' | 'onChildTargetAttached' | 'serviceWorkerPrelude'>
   isAUTFrame?: (frameId: string) => Promise<boolean>
   // Protocol-neutral subscription to AUT document navigation commits,
   // provided by the automation layer (CdpAutomation.onAUTFrameNavigated).
@@ -209,6 +210,13 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     useBrowserNetworkInterception: true,
     // The proxy cannot reach the route definitions, so hand it the list the
     // service worker injector needs to make instrumented workers decline them.
+    reservedPathPrefixes: getCypressReservedPathPrefixes(deps.config),
+  })
+
+  // Instruments each service worker over CDP rather than by editing its
+  // script, which the proxy leaves alone on this path (#35204).
+  const serviceWorkerPrelude = getServiceWorkerPrelude({
+    disableServiceWorkerNavigationPreload: true,
     reservedPathPrefixes: getCypressReservedPathPrefixes(deps.config),
   })
 
@@ -427,6 +435,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         return fetchTransport.attachChildSession(sessionId)
       }
 
+      deps.client.serviceWorkerPrelude = serviceWorkerPrelude
+
       // Before the transport, so its pause ledger sees the first paused
       // requests once Fetch comes up.
       escapeDetector.start()
@@ -435,6 +445,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         await fetchTransport.start()
       } catch (err) {
         deps.client.onChildTargetAttached = undefined
+      deps.client.serviceWorkerPrelude = undefined
         escapeDetector.stop()
         unsubscribeAUTFrameNavigated?.()
         unsubscribeAUTFrameNavigated = undefined
@@ -455,6 +466,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     async stop () {
       stopped = true
       deps.client.onChildTargetAttached = undefined
+      deps.client.serviceWorkerPrelude = undefined
       escapeDetector.stop()
       unsubscribeAUTFrameNavigated?.()
       unsubscribeAUTFrameNavigated = undefined

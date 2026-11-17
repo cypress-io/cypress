@@ -97,6 +97,7 @@ export interface ICriClient {
    * when the proxy is disabled.
    */
   onChildTargetAttached?: (sessionId: string) => Promise<void>
+  serviceWorkerPrelude?: string
   /**
    * Resolves once session-scoped interception is confirmed in place for
    * targetId on this connection, or was never needed for it - see
@@ -171,6 +172,10 @@ export class CriClient implements ICriClient {
   private cdpConnection: CDPConnection
 
   public onChildTargetAttached?: (sessionId: string) => Promise<void>
+
+  // Set by the browser network runtime; the browser connection evaluates it
+  // in each service worker it releases (#35204).
+  public serviceWorkerPrelude?: string
 
   // Targets whose session-scoped interception this connection has confirmed
   // in place, via a fresh attach, a crash-reload re-arm, or a

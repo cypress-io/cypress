@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { injectIntoServiceWorker } from '../../../../lib/http/util/service-worker-injector'
+import { getServiceWorkerPrelude, injectIntoServiceWorker } from '../../../../lib/http/util/service-worker-injector'
 import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../../lib/http/util/disable-navigation-preload'
 
 const APP_SERVICE_WORKER_BODY = `
@@ -231,5 +231,40 @@ describe('lib/http/util/service-worker-injector', () => {
         { type: 'fetchRequest', payload: { url: 'https://other.example/__cypress/x', isControlled: false }, scope: 'https://example.com/' },
       ])
     })
+  })
+})
+
+describe('lib/http/util/service-worker-injector getServiceWorkerPrelude', () => {
+  it('carries the navigation preload expression and reserved paths, and no worker body', () => {
+    const prelude = getServiceWorkerPrelude({ disableServiceWorkerNavigationPreload: true, reservedPathPrefixes: ['/__/', '/__cypress/'] })
+
+    expect(prelude).toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
+    expect(prelude).toContain(JSON.stringify(['/__/', '/__cypress/']))
+    expect(prelude).not.toContain(APP_SERVICE_WORKER_BODY)
+  })
+
+  // The worker's own script runs after the prelude, in the same task, so
+  // listeners it adds during evaluation must not report yet.
+  it('marks the script evaluated only after the current task', () => {
+    vi.useFakeTimers()
+
+    try {
+      const fakeSelf: any = {
+        registration: { scope: 'https://example.com/' },
+        clients: { claim: async () => {}, matchAll: async () => [] },
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }
+
+      new Function('self', 'setTimeout', getServiceWorkerPrelude())(fakeSelf, setTimeout)
+
+      expect(fakeSelf.__cypressIsScriptEvaluated).toBe(false)
+
+      vi.runAllTimers()
+
+      expect(fakeSelf.__cypressIsScriptEvaluated).toBe(true)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

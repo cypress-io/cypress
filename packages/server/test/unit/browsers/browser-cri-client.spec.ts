@@ -418,6 +418,34 @@ describe('lib/browsers/browser-cri-client', function () {
       expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
+    // A paused worker answers Network.enable only once it is running, so
+    // awaiting it before the release can hold the worker forever (#35204).
+    for (const type of ['shared_worker', 'worker']) {
+      it(`releases a paused ${type} without waiting for Network.enable to answer`, async () => {
+        options.event.targetInfo.type = type
+        options.browserClient.send.withArgs('Network.enable', anyArg, 'session-id').returns(new Promise(() => {}))
+        options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        const commands = options.browserClient.send.mock.calls.map(([command]) => command)
+
+        expect(commands.indexOf('Network.enable')).toBeGreaterThan(-1)
+        expect(commands.indexOf('Network.enable')).toBeLessThan(commands.indexOf('Runtime.runIfWaitingForDebugger'))
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+    }
+
+    it('still releases a paused shared_worker when Network.enable rejects', async () => {
+      options.event.targetInfo.type = 'shared_worker'
+      options.browserClient.send.withArgs('Network.enable', anyArg, 'session-id').rejects(new Error('ProtocolError: Inspected target closed'))
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+    })
+
     it('is a noop sending Runtime.runIfWaitingForDebugger if resetting browser targets', async () => {
       options.browserCriClient.resettingBrowserTargets = true
       options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
@@ -887,6 +915,32 @@ describe('lib/browsers/browser-cri-client', function () {
         await attached
 
         expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      // The browser connection releases last, so arming here means no later
+      // release can end the pause the prelude is evaluated in (#35204).
+      it('arms the service worker prelude after the hold and before releasing', async () => {
+        options.browserCriClient.waitForChildTargetInterception = vi.fn(async () => {})
+        options.browserCriClient.getServiceWorkerPrelude = () => 'self.__cypressPreludeRan = true'
+        options.browserClient.off = vi.fn()
+        options.browserClient.send.withArgs('Debugger.enable').resolves({})
+        options.browserClient.send.withArgs('Debugger.setInstrumentationBreakpoint').resolves({ breakpointId: 'instrumentation:beforeScriptExecution' })
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        const commands = options.browserClient.send.mock.calls.map(([command]) => command)
+
+        expect(commands.indexOf('Debugger.setInstrumentationBreakpoint')).toBeGreaterThan(-1)
+        expect(commands.indexOf('Debugger.setInstrumentationBreakpoint')).toBeLessThan(commands.indexOf('Runtime.runIfWaitingForDebugger'))
+        expect(options.browserClient.on).toHaveBeenCalledWith('Debugger.paused.session-id', expect.any(Function))
+      })
+
+      it('does not arm a prelude when none is set', async () => {
+        options.browserCriClient.waitForChildTargetInterception = vi.fn(async () => {})
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expectNotCalledWith(options.browserClient.send, 'Debugger.enable')
       })
 
       it('releases the worker once the timeout elapses without confirmation', async () => {

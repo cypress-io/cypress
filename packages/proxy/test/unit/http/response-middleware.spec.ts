@@ -2716,7 +2716,9 @@ describe('http/response-middleware', function () {
       expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', { disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined }])
     })
 
-    it('passes the reserved path prefixes when useBrowserNetworkInterception is set on ctx', async function () {
+    // The browser network path instruments the worker over CDP instead, and
+    // an edited script reads as a new version on every update check (#35204).
+    it('leaves the service worker script untouched when useBrowserNetworkInterception is set on ctx', async function () {
       prepareContext({
         req: {
           proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
@@ -2730,10 +2732,8 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
 
-      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', {
-        disableServiceWorkerNavigationPreload: true,
-        reservedPathPrefixes: ['/__/', '/__cypress/'],
-      }])
+      expect(injectIntoServiceWorkerStub).not.toHaveBeenCalled()
+      expect(await streamToString(ctx.incomingResStream)).toBe('foo')
     })
 
     it('does not pass the reserved path prefixes when useBrowserNetworkInterception is unset on ctx', async function () {
@@ -2750,25 +2750,6 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeInjectServiceWorker], ctx)
 
       expect(injectIntoServiceWorkerStub.mock.calls[0][1]).toStrictEqual({ disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined })
-    })
-
-    it('prepends the navigation preload expression when useBrowserNetworkInterception is set on ctx', async function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
-          headers: {
-            'service-worker': 'script',
-          },
-        },
-        useBrowserNetworkInterception: true,
-      })
-
-      await testMiddleware([MaybeInjectServiceWorker], ctx)
-      expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo', expect.objectContaining({ disableServiceWorkerNavigationPreload: true }))
-
-      const rewritten = await streamToString(ctx.incomingResStream)
-
-      expect(rewritten).toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
     })
 
     it('does not prepend the navigation preload expression when useBrowserNetworkInterception is unset on ctx', async function () {
