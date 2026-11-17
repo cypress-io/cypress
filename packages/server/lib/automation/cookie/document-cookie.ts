@@ -41,6 +41,19 @@ const queue = new Map<string, Promise<void>>()
 // how many writes to each cookie are waiting for the browser before they write the jar
 const heldBack = new Map<string, number>()
 
+export const DOCUMENT_COOKIE_WRITE_TIMEOUT = 5000
+
+class BrowserTimeout extends Error {}
+
+// automation requests have no timeout, and a write the browser never answers must not hold up the writes behind it
+const answered = <T>(request: Promise<T>) => {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new BrowserTimeout('the browser did not answer')), DOCUMENT_COOKIE_WRITE_TIMEOUT)
+
+    request.then(resolve, reject).finally(() => clearTimeout(timer))
+  })
+}
+
 // browsers treat localhost as a secure context, so it may set Secure cookies over http
 const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
 
@@ -141,7 +154,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
   const sendToBrowser = async () => {
     try {
-      const existing = await automation.getCookies({ name: cookie.key })
+      const existing = await answered(automation.getCookies({ name: cookie.key }))
 
       if (existing.some((c) => isBlockedByExisting(c, stored, isSecure))) return undo()
     } catch (err) {
@@ -158,8 +171,11 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
     writtenToJar.add(automationCookie)
 
     try {
-      await automation.setCookie(automationCookie)
+      await answered(automation.setCookie(automationCookie))
     } catch (err) {
+      // the browser was told to set the cookie, and may still do it
+      if (err instanceof BrowserTimeout) return
+
       // the browser does not have the cookie, so the server-side jar must not either
       undo()
 

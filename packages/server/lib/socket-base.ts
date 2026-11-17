@@ -14,7 +14,7 @@ import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar } from './automation/cookie/jar'
-import { setDocumentCookie } from './automation/cookie/document-cookie'
+import { DOCUMENT_COOKIE_WRITE_TIMEOUT, setDocumentCookie } from './automation/cookie/document-cookie'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
@@ -32,8 +32,6 @@ type StartListeningCallbacks = {
 }
 
 const debug = Debug('cypress:server:socket-base')
-
-const DOCUMENT_COOKIE_WRITE_TIMEOUT = 5000
 
 function getInterceptRegistration (options: StartListeningOptions): ForInterceptRegistration {
   return options.interceptRegistration

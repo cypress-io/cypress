@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { setDocumentCookie } from '../../../../lib/automation/cookie/document-cookie'
 import type { DocumentCookieAutomation } from '../../../../lib/automation/cookie/document-cookie'
 import { cookieJar } from '../../../../lib/automation/cookie/jar'
@@ -440,6 +440,40 @@ describe('lib/automation/cookie/document-cookie', () => {
       await later
 
       expect(jarValues()).toEqual([])
+    })
+  })
+
+  describe('when the browser never answers', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('sends a later write to the same cookie once the wait is over', async () => {
+      automation.getCookies.mockReturnValueOnce(new Promise(() => {}))
+
+      const unanswered = write('foo=bar; Path=/')
+      const later = write('foo=baz; Path=/')
+
+      await vi.advanceTimersByTimeAsync(5000)
+      await Promise.all([unanswered, later])
+
+      expect(automation.setCookie.mock.calls.map(([cookie]) => cookie.value)).toEqual(['baz'])
+      expect(cookieJar.getAllCookies().map(({ value }) => value)).toEqual(['baz'])
+    })
+
+    it('keeps a cookie the browser was told to set', async () => {
+      automation.setCookie.mockReturnValueOnce(new Promise(() => {}))
+
+      const unanswered = write('foo=bar; Path=/')
+
+      await vi.advanceTimersByTimeAsync(5000)
+      await unanswered
+
+      expect(cookieJar.getAllCookies().map(({ value }) => value)).toEqual(['bar'])
     })
   })
 
