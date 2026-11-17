@@ -129,13 +129,6 @@ function getGitValue (
     .catch(() => null)
 }
 
-function getRemoteOrigin (folder?: string): Promise<string | null> {
-  const cwd = folder ? path.resolve(folder) : process.cwd()
-  const { remote } = getGitCommands()
-
-  return getGitValue(cwd, remote.envVar, remote.gitCmd, remote.transform) as Promise<string | null>
-}
-
 /**
  * Collects Git commit info using git CLI commands.
  * Falls back to environment variables if git commands fail.
@@ -165,6 +158,5 @@ function commitInfo (folder?: string): Promise<CommitInfo> {
 export = {
   commitInfo,
   getGitCommands,
-  getRemoteOrigin,
   sanitizeRemoteOrigin,
 }
