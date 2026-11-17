@@ -81,47 +81,42 @@ module.exports = async function (params) {
       win32: join(params.appOutDir, 'Cypress.exe'),
     }
 
-    if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
-      // rewrites of the same file must run in order
-      for (const [file, getSource, validate] of appFileRewrites) {
-        const filePath = path.join(outputFolder, file)
+    // rewrites of the same file must run in order
+    for (const [file, getSource, validate] of appFileRewrites) {
+      const filePath = path.join(outputFolder, file)
 
-        await fs.writeFile(filePath, await getSource(filePath))
-        await validate(filePath)
-      }
-
-      await flipFuses(
-        exePathPerPlatform[os.platform()],
-        {
-          version: FuseVersion.V1,
-          resetAdHocDarwinSignature: os.platform() === 'darwin' && os.arch() === 'arm64',
-          [FuseV1Options.EnableNodeCliInspectArguments]: false,
-        },
-      )
-
-      // esbuild reports real paths, so a symlink in the build path (macOS's /var) would put every module outside the app
-      const appDir = await fs.realpath(outputFolder)
-
-      // Consolidate first so that the bundles and the files kept on disk resolve the copies that ship
-      await consolidateDeps({ projectBaseDir: appDir })
-
-      const [startBundle, serverEntryPointBundledDependencies] = await Promise.all([
-        createStartCypressBundle(appDir),
-        createServerEntryPointBundle(appDir),
-      ])
-
-      await removeBundledDependencies(appDir, {
-        bundledDependencies: [...startBundle.bundledDependencies, ...serverEntryPointBundledDependencies],
-        loadedFromDisk: startBundle.loadedFromDisk,
-      })
-
-      await cleanupUnneededDependencies(outputFolder)
-
-      await createStartBundleCodeCache()
-    } else {
-      console.log(`value of DISABLE_SNAPSHOT_REQUIRE was ${process.env.DISABLE_SNAPSHOT_REQUIRE}. Skipping the main process bundle...`)
-      await cleanupUnneededDependencies(outputFolder)
+      await fs.writeFile(filePath, await getSource(filePath))
+      await validate(filePath)
     }
+
+    await flipFuses(
+      exePathPerPlatform[os.platform()],
+      {
+        version: FuseVersion.V1,
+        resetAdHocDarwinSignature: os.platform() === 'darwin' && os.arch() === 'arm64',
+        [FuseV1Options.EnableNodeCliInspectArguments]: false,
+      },
+    )
+
+    // esbuild reports real paths, so a symlink in the build path (macOS's /var) would put every module outside the app
+    const appDir = await fs.realpath(outputFolder)
+
+    // Consolidate first so that the bundles and the files kept on disk resolve the copies that ship
+    await consolidateDeps({ projectBaseDir: appDir })
+
+    const [startBundle, serverEntryPointBundledDependencies] = await Promise.all([
+      createStartCypressBundle(appDir),
+      createServerEntryPointBundle(appDir),
+    ])
+
+    await removeBundledDependencies(appDir, {
+      bundledDependencies: [...startBundle.bundledDependencies, ...serverEntryPointBundledDependencies],
+      loadedFromDisk: startBundle.loadedFromDisk,
+    })
+
+    await cleanupUnneededDependencies(outputFolder)
+
+    await createStartBundleCodeCache()
   } catch (error) {
     console.log(error)
     throw error
