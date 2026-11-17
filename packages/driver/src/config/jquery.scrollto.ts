@@ -75,6 +75,7 @@ export function scrollTo (target, duration, settings) {
     switch (typeof targ) {
       // A number will pass the regex
       case 'number': break
+      // @ts-expect-error - a selector falls through on purpose, so `case 'object'` can read the matched element's offset
       case 'string':
         if (/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(targ)) {
           targ = both(targ)
@@ -84,7 +85,6 @@ export function scrollTo (target, duration, settings) {
 
         // Relative/Absolute selector
         targ = win ? $(targ) : $(targ, elem)
-        break
         /* falls through */
       case 'object':
         if (targ.length === 0) return
