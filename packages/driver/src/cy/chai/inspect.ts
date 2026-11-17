@@ -277,7 +277,7 @@ export function create (chai) {
         return ctx.stylize(`${value.toString()}n`, 'bigint')
 
       default:
-        null
+        break
     }
     // For some reason typeof null is "object", so special case here.
     if (value === null) {

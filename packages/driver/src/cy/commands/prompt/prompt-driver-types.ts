@@ -43,7 +43,7 @@ interface SameOriginCypressInternal extends CypressInternalBase {
   isCrossOriginSpecBridge: false
   handlePrimaryOriginSocketEvent: (
     Cypress: CypressInternal,
-    eventName: string
+    eventName: string,
   ) => void
 }
 
@@ -69,7 +69,7 @@ export interface CyPromptErrorUtils {
   extendErrorMessages: (errorMessages: any) => void
   throwErrByPath: (
     errPath: `cloudPrompt.${string}`,
-    options?: CyPromptErrorUtilsOpts
+    options?: CyPromptErrorUtilsOpts,
   ) => never
 }
 
@@ -99,7 +99,7 @@ export interface CyPromptOptions {
   errorUtils: CyPromptErrorUtils
   getSourceDetailsForFirstLine: (
     stack: string,
-    projectRoot?: string
+    projectRoot?: string,
   ) =>
   | CyPromptStackLineDetail
   | Promise<CyPromptStackLineDetail | undefined>
@@ -117,7 +117,7 @@ export interface CyPromptCommandOptions {
 
 export interface CyPromptDriverDefaultShape {
   createCyPrompt: (
-    options: CyPromptOptions
+    options: CyPromptOptions,
   ) => MaybePromise<
     (args: {
       steps: string[]

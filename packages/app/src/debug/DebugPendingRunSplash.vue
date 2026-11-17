@@ -16,18 +16,15 @@
         data-cy="splash-subtitle"
         class="font-normal mt-[4px] text-md text-gray-600"
       >
-        {{ t('debugPage.pending.failuresHere') }}
+        Failures will be displayed here
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
 import { IconTechnologyDashboardRunning } from '@cypress-design/vue-icon'
 import { computed } from 'vue'
-
-const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   isCompletionScheduled?: boolean
@@ -37,10 +34,10 @@ const props = withDefaults(defineProps<{
 
 const title = computed(() => {
   if (props.isCompletionScheduled) {
-    return t('debugPage.pending.titleCompletionScheduled')
+    return 'Scheduled to complete...'
   }
 
-  return t('debugPage.pending.title')
+  return 'Testing in progress...'
 })
 
 </script>

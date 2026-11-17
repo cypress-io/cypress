@@ -24,7 +24,7 @@
           :header-class="`${props.headerClass} ${canCollapse ? 'group-hocus:underline' : ''}`"
           :prefix-icon="prefix?.icon"
           :prefix-icon-class="(open && collapsible) ? prefix?.classes + ' rotate-180' : prefix?.classes"
-          :suffix-icon-aria-label="props.dismissible ? t('components.alert.dismissAriaLabel') : ''"
+          :suffix-icon-aria-label="props.dismissible ? 'Dismiss' : ''"
           :suffix-icon="props.dismissible ? DeleteIcon : null"
           :suffix-button-class="classes.suffixButtonClass"
           :suffix-icon-class="classes.suffixIconClass"
@@ -90,10 +90,8 @@ import DeleteIcon from '~icons/cy/delete_x16.svg'
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { computed, useSlots } from 'vue'
 import ChevronDown from '~icons/cy/chevron-down-small_x16.svg'
-import { useI18n } from '@cy/i18n'
 import Collapsible from './Collapsible.vue'
 
-const { t } = useI18n()
 const slots = useSlots()
 
 defineEmits<{

@@ -165,7 +165,7 @@ export class RunnablesStore {
     const suite = new SuiteModel(suiteProps, level)
 
     this._runnablesQueue.push(suite)
-    suite.children = this._createRunnableChildren(props, ++level)
+    suite.children = this._createRunnableChildren(props, level + 1)
 
     return suite
   }

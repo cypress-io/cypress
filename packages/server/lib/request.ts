@@ -242,8 +242,6 @@ export class Request {
 
     let req = null
 
-    const self = this
-
     const delayStream = new stream.PassThrough()
     let reqBodyBuffer: ReturnType<typeof streamBuffer> | null = streamBuffer()
     const retryStream = duplexify(reqBodyBuffer, delayStream)
@@ -262,7 +260,7 @@ export class Request {
       cleanup()
     }
 
-    const tryStartStream = function () {
+    const tryStartStream = () => {
       // if our request has been aborted
       // in the time that we were waiting to retry
       // then immediately bail
@@ -270,7 +268,7 @@ export class Request {
         return
       }
 
-      const reqStream = self.r(opts)
+      const reqStream = this.r(opts)
       let didReceiveResponse = false
 
       const retry = function ({ delay, attempt }) {
@@ -324,7 +322,7 @@ export class Request {
         }
 
         // otherwise, see if we can retry another request under the hood...
-        return self.maybeRetryOnNetworkFailure(err, {
+        return this.maybeRetryOnNetworkFailure(err, {
           opts,
           retryIntervals,
           delaysRemaining,
@@ -346,7 +344,7 @@ export class Request {
         didReceiveResponse = true
 
         // ok, no net error, but what about a bad status code?
-        return self.maybeRetryOnStatusCodeFailure(incomingRes, {
+        return this.maybeRetryOnStatusCodeFailure(incomingRes, {
           opts,
           requestId,
           delaysRemaining,
@@ -427,8 +425,6 @@ export class Request {
       retryOnStatusCodeFailure,
     } = opts
 
-    const self = this
-
     const retry = ({ delay }) => {
       return Promise.delay(delay)
       .then(() => {
@@ -451,7 +447,7 @@ export class Request {
       })
     }).then((res) => {
       // ok, no net error, but what about a bad status code?
-      return self.maybeRetryOnStatusCodeFailure(res, {
+      return this.maybeRetryOnStatusCodeFailure(res, {
         opts,
         requestId,
         retryIntervals,
@@ -561,6 +557,15 @@ export class Request {
     })
   }
 
+  // followRedirect is called with the request being redirected as `this`, so it
+  // reaches this instance through the returned arrow
+  private redirectCookieSyncer (automationFn: AutomationFn) {
+    return (incomingRes: any, fromUrl: string, req: Record<string, any>, toUrl: string) => {
+      return this.setCookiesOnBrowser(incomingRes, fromUrl, automationFn)
+      .then(() => this.setRequestCookieHeader(req, toUrl, automationFn))
+    }
+  }
+
   private setCookiesOnBrowser (res: any, resUrl: string, automationFn: AutomationFn): Promise<any> {
     let cookies = res.headers['set-cookie']
 
@@ -664,7 +669,7 @@ export class Request {
       strictSSL: false,
     })
 
-    const self = this
+    const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
 
     const {
       followRedirect,
@@ -683,10 +688,8 @@ export class Request {
       // we need to override the init method and
       // first set the received cookies on the browser
       // and then grab the cookies for the new url
-      return self.setCookiesOnBrowser(incomingRes, currentUrl!, automationFn)
+      return syncRedirectCookies(incomingRes, currentUrl!, this, newUrl)
       .then(() => {
-        return self.setRequestCookieHeader(this, newUrl, automationFn)
-      }).then(() => {
         currentUrl = newUrl
 
         return true
@@ -768,8 +771,6 @@ export class Request {
       options.json = false
     }
 
-    const self = this
-
     const send = () => {
       const ms = Date.now()
 
@@ -783,6 +784,8 @@ export class Request {
       let currentUrl = options.url
 
       if (options.followRedirect) {
+        const syncRedirectCookies = this.redirectCookieSyncer(automationFn)
+
         options.followRedirect = function (incomingRes) {
           const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 
@@ -795,10 +798,8 @@ export class Request {
           // we need to override the init method and
           // first set the new cookies on the browser
           // and then grab the cookies for the new url
-          return self.setCookiesOnBrowser(incomingRes, currentUrl!, automationFn)
+          return syncRedirectCookies(incomingRes, currentUrl!, this, newUrl)
           .then(() => {
-            return self.setRequestCookieHeader(this, newUrl, automationFn)
-          }).then(() => {
             currentUrl = newUrl
 
             return true
@@ -828,7 +829,7 @@ export class Request {
     }
 
     if (options.cookies) {
-      return self.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
+      return this.setRequestCookieHeader(options, options.url!, automationFn, caseInsensitiveGet(options.headers!, 'cookie'))
       .then(send)
     }
 

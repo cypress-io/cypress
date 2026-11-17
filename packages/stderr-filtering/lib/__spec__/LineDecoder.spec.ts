@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { beforeEach, describe, it, expect } from 'vitest'
 import { LineDecoder } from '../LineDecoder'
 import { END_TAG } from '../constants'
 

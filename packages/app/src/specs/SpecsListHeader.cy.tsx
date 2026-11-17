@@ -1,7 +1,5 @@
 import SpecsListHeader from './SpecsListHeader.vue'
 import { defineComponent, ref, h } from 'vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 const buttonSelector = '[data-cy=new-spec-button]'
 
@@ -28,7 +26,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
 
     mountWithSearchRef()
 
-    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+    cy.findByLabelText('Search specs')
     .type(searchString, { delay: 0 })
     .get('@search').its('value').should('eq', searchString)
   })
@@ -39,7 +37,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
     cy.findByTestId('clear-search-button')
     .should('not.exist')
 
-    cy.findByLabelText(defaultMessages.specPage.searchPlaceholder)
+    cy.findByLabelText('Search specs')
     .type('abcd', { delay: 0 })
     .get('@search').its('value').should('eq', 'abcd')
 
@@ -76,7 +74,7 @@ describe('<SpecsListHeader />', { keystrokeDelay: 0 }, () => {
         />
       </div>))
 
-    cy.contains('button', defaultMessages.createSpec.viewSpecPatternButton)
+    cy.contains('button', 'View spec pattern')
     .click()
     .get('@show-spec-pattern-modal')
     .should('have.been.called')

@@ -53,6 +53,7 @@ This module should be primarily covered by system-tests / open-mode tests. All s
 
 - webpack4_wds4-react
 - webpack5_wds5-react
+- webpack5_wds6-react
 - webpack4_wds4-next-11
 
 ## Architecture

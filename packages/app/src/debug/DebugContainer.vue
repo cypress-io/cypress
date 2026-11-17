@@ -2,7 +2,7 @@
   <div class="h-full">
     <TransitionQuickFade mode="out-in">
       <NoInternetConnection v-if="!online">
-        {{ t('launchpadErrors.noInternet.connectProject') }}
+        Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch your latest runs for this project.
       </NoInternetConnection>
       <DebugLoading v-else-if="!userProjectStatusStore.hasInitiallyLoaded || userProjectStatusStore.project.isProjectConnected && isLoading" />
 
@@ -109,9 +109,6 @@ import type { CloudRunHidingReason } from './DebugOverLimit.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 import dayjs from 'dayjs'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 gql`
 fragment DebugLocalSpecs on Spec {

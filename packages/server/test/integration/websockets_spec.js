@@ -90,7 +90,7 @@ describe('Web Sockets', () => {
         agent,
       })
 
-      return client.on('error', (err) => {
+      client.on('error', (err) => {
         expect(err.code).to.eq('ECONNRESET')
         expect(err.message).to.eq('socket hang up')
 
@@ -119,7 +119,7 @@ describe('Web Sockets', () => {
         return done()
       })
 
-      return client.on('open', () => {
+      client.on('open', () => {
         return client.send('foo')
       })
     })
@@ -146,7 +146,7 @@ describe('Web Sockets', () => {
         return done()
       })
 
-      return client.on('open', () => {
+      client.on('open', () => {
         return client.send('foo')
       })
     })
@@ -177,7 +177,7 @@ describe('Web Sockets', () => {
         return done()
       })
 
-      return client.on('open', () => {
+      client.on('open', () => {
         return client.send('foo')
       })
     })
@@ -217,7 +217,7 @@ describe('Web Sockets', () => {
         return done()
       })
 
-      return client.on('open', () => {
+      client.on('open', () => {
         return client.send('foo')
       })
     })
@@ -252,7 +252,7 @@ describe('Web Sockets', () => {
             extraHeaders: { origin: new URL(wsUrl || this.cfg.proxyUrl).origin },
           })
 
-          return this.wsClient.on('connect', () => {
+          this.wsClient.on('connect', () => {
             return done()
           })
         })
@@ -262,7 +262,7 @@ describe('Web Sockets', () => {
         })
 
         it('continues to handle socket.io requests just fine', function (done) {
-          return this.wsClient.emit('backend:request', 'get:fixture', 'example.json', {}, (data) => {
+          this.wsClient.emit('backend:request', 'get:fixture', 'example.json', {}, (data) => {
             expect(data.response).to.deep.eq({ foo: 'bar' })
 
             return done()
@@ -291,7 +291,7 @@ describe('Web Sockets', () => {
             return done(new Error('should not have been able to connect'))
           })
 
-          return this.wsClient.io.on('error', () => {
+          this.wsClient.io.on('error', () => {
             return done()
           })
         })
@@ -308,7 +308,7 @@ describe('Web Sockets', () => {
             return done(new Error('should not have been able to connect'))
           })
 
-          return this.wsClient.io.on('error', () => {
+          this.wsClient.io.on('error', () => {
             return done()
           })
         })

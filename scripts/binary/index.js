@@ -23,7 +23,7 @@ const questionsRemain = require('./util/questions-remain')
 const uploadUtils = require('./util/upload')
 const { uploadArtifactToS3 } = require('./upload-build-artifact')
 const { moveBinaries } = require('./move-binaries')
-const { exec } = require('child_process')
+const { checkIfBinaryExistsOnCdn } = require('./check-binary-on-cdn')
 const xvfb = require('../../cli/lib/exec/xvfb').default
 const smoke = require('./smoke')
 const { needsSandbox } = require('../../cli/lib/tasks/verify')
@@ -441,30 +441,7 @@ const deploy = {
     })
   },
 
-  async checkIfBinaryExistsOnCdn (args = process.argv) {
-    console.log('#checkIfBinaryExistsOnCdn')
-
-    const url = await uploadArtifactToS3([...args, '--dry-run', 'true'])
-
-    console.log(`Checking if ${url} exists...`)
-
-    const binaryExists = await rp.head(url)
-    .then(() => true)
-    .catch(() => false)
-
-    if (binaryExists) {
-      console.log('A binary was already built for this operating system and commit hash. Skipping binary build process...')
-      exec('circleci-agent step halt', (_, __, stdout) => {
-        console.log(stdout)
-      })
-
-      return
-    }
-
-    console.log('Binary does not yet exist. Continuing to build binary...')
-
-    return binaryExists
-  },
+  checkIfBinaryExistsOnCdn,
 }
 
 module.exports = _.bindAll(deploy, _.functions(deploy))

@@ -150,6 +150,21 @@ describe('shouldStreamResponseBody', () => {
     runCases(cases)
   })
 
+  describe('Media resourceType', () => {
+    const rangeResponse: Protocol.Fetch.HeaderEntry[] = [
+      { name: 'content-type', value: 'video/mp4' },
+      { name: 'content-length', value: '104857600' },
+      { name: 'content-range', value: 'bytes 0-104857599/104857600' },
+    ]
+
+    runCases([
+      ['streams a 206 range response despite a content-length', { resourceType: 'Media', responseStatusCode: 206, responseHeaders: rangeResponse }, undefined, true],
+      ['streams a 200 response despite a content-length', { resourceType: 'Media', responseStatusCode: 200, responseHeaders: [{ name: 'content-length', value: '1024' }] }, undefined, true],
+      ['materializes when hasMatchingRoute returns true', { resourceType: 'Media', responseStatusCode: 206, responseHeaders: rangeResponse }, { hasMatchingRoute: () => true }, false],
+      ['materializes the same headers on a Fetch resourceType', { resourceType: 'Fetch', responseStatusCode: 206, responseHeaders: rangeResponse }, undefined, false],
+    ])
+  })
+
   describe('default options', () => {
     it('behaves as if all flags were off when no options argument is passed', () => {
       expect(shouldStreamResponseBody(createEvent({ responseHeaders: contentType('text/javascript') }))).toBe(true)

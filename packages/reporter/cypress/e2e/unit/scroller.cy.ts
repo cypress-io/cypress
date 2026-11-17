@@ -71,9 +71,6 @@ describe('scroller', () => {
 
   beforeEach(() => {
     clock = sinon.useFakeTimers()
-  })
-
-  beforeEach(() => {
     scroller.__reset()
   })
 

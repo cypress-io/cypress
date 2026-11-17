@@ -72,6 +72,7 @@ export function mount (
 
     // by waiting, we are delaying test execution for the next tick of event loop
     // and letting hooks and component lifecycle methods to execute mount
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- the zero-length wait is the event-loop tick described above
     return cy.wait(0, { log: false }).then(() => {
       if (options.log !== false) {
         const mountMessage = `<${getComponentDisplayName(Component)} ... />`

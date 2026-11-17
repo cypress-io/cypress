@@ -331,7 +331,7 @@ interface CommandProps {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
   groupId?: number
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const CommandDetails: React.FC<CommandDetailsProps> = observer(({ model, groupId, aliasesWithDuplicates }) => (
@@ -635,7 +635,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
             testId={model.testId}
             commandId={model.id}
             // if the err is recovered and the current command is a log group, nest the test error within the group
-            groupLevel={model.group && model.hasChildren ? ++groupLevel : groupLevel}
+            groupLevel={model.group && model.hasChildren ? groupLevel + 1 : groupLevel}
           />
         </li>
       )}

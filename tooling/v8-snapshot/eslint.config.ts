@@ -1,9 +1,11 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  undeclaredWorkspaceImports(['src/setup/v8-snapshot-entry*.ts'], ['@packages/server']),
   {
     ignores: [
       // inputs the specs bundle and snapshot, some of them vendored code
@@ -34,6 +36,15 @@ export default [
     files: ['src/blueprint/**'],
     rules: {
       'prefer-const': 'off',
+    },
+  },
+  {
+    // ESLint lints each file alone, so it reads the bindings set-globals.js
+    // reassigns as globals; globals-strict.js replaces real globals with
+    // proxies to catch unsafe use during snapshot creation
+    files: ['src/blueprint/set-globals.js', 'src/blueprint/globals-strict.js'],
+    rules: {
+      'no-global-assign': 'off',
     },
   },
 ]

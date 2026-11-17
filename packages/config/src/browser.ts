@@ -62,7 +62,7 @@ export type InvalidTestOverrideResult = {
 
 type ErrorHandler = (
   key: BreakingOptionErrorKey,
-  options: BreakingErrResult
+  options: BreakingErrResult,
 ) => void
 
 export function resetIssuedWarnings () {

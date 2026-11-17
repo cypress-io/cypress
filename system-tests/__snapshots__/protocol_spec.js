@@ -3134,7 +3134,7 @@ exports['e2e events'] = `
                 "testIsolation": false
               },
               "id": "r12",
-              "title": "test isolation false",
+              "title": "test isolation false after test isolation true",
               "root": false,
               "pending": false,
               "type": "suite",
@@ -3220,7 +3220,7 @@ exports['e2e events'] = `
                   },
                   "_titlePath": [
                     "test isolation",
-                    "test isolation false",
+                    "test isolation false after test isolation true",
                     "test 8"
                   ]
                 }

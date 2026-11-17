@@ -226,8 +226,8 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **Type-only imports**: `importsNotUsedAsValues: "error"` — use `import type` for type-only imports.
 - **Type guards over `as`** — Narrow with a type guard, an `asserts` function or an `in` check rather than an `as` assertion, and explain any assertion that remains with a "Safe because" comment. See [Type Assertions](./guides/typescript.md#type-assertions).
 - **Unused vars**: Unused variables and imports are errors. Unused function parameters and caught errors are allowed, since callbacks often have to accept arguments they ignore. In packages on the flat config, prefix a variable that exists only to be type-checked with `_`.
-- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
-- **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
+- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment). In a workspace that spreads `vitestConfig`, disable `vitest/no-focused-tests` instead, plus `mocha/no-exclusive-tests` in a spec that uses Vitest's globals rather than importing `it` from `vitest`.
+- **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why. In a workspace that spreads `vitestConfig`, a skip that has to stay also needs `eslint-disable-next-line vitest/no-disabled-tests` below that comment.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
 
@@ -265,7 +265,7 @@ Code in this monorepo runs in several runtimes, each with its own JavaScript / r
 - **Dev tooling, gulp, build/dev scripts** — the Node version in [`.node-version`](./.node-version).
 - **The bundled app (main/Electron process)** — the Node embedded in the `electron` version pinned in the root [`package.json`](./package.json) (look up that Electron release's Node/V8).
 - **The config/plugins child process** (`@packages/server` `lib/plugins/child/require_async_child.ts`, forked by `@packages/data-context` `ProjectConfigIpc`) and the **`cypress` CLI** (`cli/`) — the *user's* Node, whose supported range is `engines.node` in [`cli/package.json`](./cli/package.json). This floor is lower than the dev/bundled Node, so it is the binding constraint for that code.
-- **Browser-shipped bundles** (`@packages/app`, `@packages/frontend-shared`, `@packages/driver`) — the last 3 major versions of the supported browsers. Since Safari releases majors roughly annually, the last 3 major versions reach back years, making this the most conservative floor. `@packages/driver` runs in the user's AUT browser. For WebKit, Cypress runs the WebKit bundled with the installed `playwright-webkit` version — not the user's system Safari — so the WebKit floor tracks that dependency.
+- **Browser-shipped bundles** (`@packages/app`, `@packages/frontend-shared`, `@packages/driver`, `@packages/reporter`, `@packages/runner`; not `@packages/launchpad`, which only renders in Electron) — the last 3 major versions of the supported browsers. Since Safari releases majors roughly annually, the last 3 major versions reach back years, making this the most conservative floor. `@packages/driver` runs in the user's AUT browser. For WebKit, Cypress runs the WebKit bundled with the installed `playwright-webkit` version — not the user's system Safari — so the WebKit floor tracks that dependency. The floor is written down as a browserslist query in [`browser-bundles.browserslistrc`](./browser-bundles.browserslistrc), where `last 3 Safari major versions` stands in for that WebKit build. Read the file by path, never by moving it to a name browserslist finds on its own (the file's header says why). ESLint's [`compatConfig`](./packages/eslint-config/AGENTS.md#compatconfig) checks the bundles against it.
 
 Verify an API against the relevant floor (node.green for Node, caniuse/MDN for browsers) before relying on it.
 
@@ -279,10 +279,14 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 - Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
+### Dependency Updates
+
+Whether you're bumping a dependency or reviewing a Renovate PR, follow [Code Review of Dependency Updates](./CONTRIBUTING.md#code-review-of-dependency-updates). Read the changelog for every version in the range, not just the target release, and don't trust semver to flag breaking changes. Check the dependency's `engines.node` against the floor of the runtime that loads it (see [Runtime targets](#runtime-targets)), not the dev Node version.
+
 ## CI/CD
 
 - **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`. See [`.circleci/AGENTS.md`](.circleci/AGENTS.md) for when to add a branch to the full-CI allowlist (binary tests, Windows jobs, v8 snapshot validation).
-- **Supplementary**: GitHub Actions for security scanning (Snyk), SBOM generation, browser version auto-updates, and PR validation.
+- **Supplementary**: GitHub Actions for SBOM generation, browser version auto-updates, and PR validation.
 - **Base branch**: `develop` — all PRs target `develop`; release branches follow `release/X.Y.Z`.
 - **Multi-platform matrix**: Linux x64, Linux ARM64, macOS x64, macOS ARM64, Windows — all run in parallel. Coverage is per-job, not uniform: `unit-tests` runs only on linux-x64 and windows, so a unit test coupled to the host architecture passes CI and still fails locally on arm64. See [`cli/AGENTS.md`](./cli/AGENTS.md) for keeping specs host-independent.
 - **Release gate**: All tests must pass through the `ready-to-release` aggregation job before `npm-release` runs.

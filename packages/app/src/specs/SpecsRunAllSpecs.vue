@@ -18,21 +18,23 @@
       class="font-normal text-sm"
       data-cy="run-all-specs-text"
     >
-      {{ t('specPage.runSelectedSpecs', specNumber) }}
+      {{ runSelectedSpecsText }}
     </span>
   </button>
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue'
 import { IconActionPlaySmall } from '@cypress-design/vue-icon'
-import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
-
-defineProps<{
+const props = defineProps<{
   specNumber: number
   directory: string
 }>()
+
+const runSelectedSpecsText = computed(() => {
+  return props.specNumber === 1 ? 'Run 1 spec' : `Run ${props.specNumber} specs`
+})
 
 const emits = defineEmits<{
   (event: 'runAllSpecs'): void
