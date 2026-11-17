@@ -295,6 +295,35 @@ describe('stack_utils', () => {
     })
   })
 
+  describe('getSourceStack', () => {
+    const location = 'http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.js:10:5'
+
+    it.each([
+      ['Context.eval/<', 'Context.eval'],
+      ['Context.eval/</<', 'Context.eval'],
+      ['Context.eval/</</<', 'Context.eval'],
+      ['Context.eval</<', 'Context.eval'],
+      ['Context.eval</</<', 'Context.eval'],
+      ['Context.eval', 'Context.eval'],
+      ['bddInterface/</context.context', 'bddInterface/</context.context'],
+      ['submitOrder<', 'submitOrder<'],
+      ['/<', '<unknown>'],
+      ['/</<', '<unknown>'],
+      ['', '<unknown>'],
+    ])('names the Firefox frame %j as %j', (functionName, expected) => {
+      const { parsed, sourceMapped } = stack_utils.getSourceStack(`${functionName}@${location}`)
+
+      expect(parsed?.[0]).toHaveProperty('function', expected)
+      expect(sourceMapped).toBe(`at ${expected} (${location})`)
+    })
+
+    it('names a Chromium frame without Firefox markers', () => {
+      const { parsed } = stack_utils.getSourceStack(`    at Context.eval (${location})`)
+
+      expect(parsed?.[0]).toHaveProperty('function', 'Context.eval')
+    })
+  })
+
   describe('normalizedUserInvocationStack', () => {
     it('should remove cross origin stack lines', () => {
       const userInvocationStack = `    at cy.<computed> [as prompt] (cypress:///../driver/src/cypress/cy.ts:657:86)

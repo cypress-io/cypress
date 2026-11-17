@@ -338,12 +338,16 @@ const getSourceDetails = (generatedDetails) => {
   }
 }
 
-const functionExtrasRegex = /(\/<|<\/<)$/
+// Firefox appends `/<` to an anonymous function's name once per level of
+// nesting (`outer/</<`), and `<` to a function passed as an argument
+// (`outer</<`).
+const functionExtrasRegex = /<?(?:\/<)+$/
 
 const cleanFunctionName = (functionName) => {
   if (!_.isString(functionName)) return '<unknown>'
 
-  return _.trim(functionName.replace(functionExtrasRegex, ''))
+  // a name made only of markers belongs to a function nested in an anonymous one
+  return _.trim(functionName.replace(functionExtrasRegex, '')) || '<unknown>'
 }
 
 const parseLine = (line) => {
