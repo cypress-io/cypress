@@ -191,7 +191,7 @@ describe('document.cookie writes in cy.origin() match the browser', { browser: '
 
       record(args('foobar.com')).then((native) => {
         cy.origin(`${https ? 'https' : 'http'}://www.barbaz.com:${https ? 3502 : 3500}`, { args: args('barbaz.com') }, record).then((patched) => {
-          expect(patched).to.deep.equal(native)
+          expect(patched, `cy.origin() gave ${JSON.stringify(patched)}, the browser gave ${JSON.stringify(native)}`).to.deep.equal(native)
         })
       })
     })
