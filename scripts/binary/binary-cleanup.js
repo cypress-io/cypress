@@ -1,6 +1,5 @@
 const fs = require('fs-extra')
 const path = require('path')
-const { consolidateDeps } = require('@tooling/v8-snapshot')
 const del = require('del')
 const esbuild = require('esbuild')
 const tempDir = require('temp-dir')
@@ -158,197 +157,20 @@ const getDependencyPathsToKeep = async (buildAppDir, additionalEntryPoints = [])
   return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints, 'package.json']
 }
 
-// Optional dependencies such as fsevents or @swc/core are only installed on some platforms and are
-// required inside try/catch, so leave whatever cannot be resolved as a runtime require.
-// A relative runtime require (such as a native addon's `../build/Release/x.node`) runs from the bundle's
-// directory, so it is rewritten relative to the bundle.
-const externalizeUnresolvable = (bundleDir, unresolved) => {
-  const external = (args) => {
-    if (!args.path.startsWith('.')) {
-      return { path: args.path, external: true }
-    }
-
-    const fromBundle = path.relative(bundleDir, path.resolve(args.resolveDir, args.path)).split(path.sep).join(path.posix.sep)
-
-    return { path: fromBundle.startsWith('.') ? fromBundle : `./${fromBundle}`, external: true }
-  }
-
-  return {
-    name: 'externalize-unresolvable',
-    setup (build) {
-      build.onResolve({ filter: /.*/ }, async (args) => {
-        if (args.pluginData?.externalizeUnresolvable || args.kind === 'entry-point') {
-          return undefined
-        }
-
-        if (args.path.endsWith('.node')) {
-          return external(args)
-        }
-
-        const result = await build.resolve(args.path, {
-          kind: args.kind,
-          importer: args.importer,
-          resolveDir: args.resolveDir,
-          pluginData: { externalizeUnresolvable: true },
-        })
-
-        if (result.errors.length) {
-          unresolved.add(`${args.path} (from ${args.importer})`)
-
-          return external(args)
-        }
-
-        return result
-      })
-    },
-  }
-}
-
-const REQUIRE_RESOLVE_LITERAL = /\brequire\.resolve\(\s*(['"`])([^'"`]+)\1/g
-
-// Every module keeps its original __filename/__dirname and require.resolve base, so code that reads
-// files next to itself or resolves packages still sees its location on disk rather than the bundle's.
-const keepModuleLocation = (buildAppDir, requireResolveTargets) => {
-  return {
-    name: 'keep-module-location',
-    setup (build) {
-      build.onLoad({ filter: /\.(c?js)$/ }, async (args) => {
-        let contents = await fs.readFile(args.path, 'utf8')
-        const usesRequireResolve = contents.includes('require.resolve(')
-
-        if (!usesRequireResolve && !/\b__(dirname|filename)\b/.test(contents)) {
-          return { contents, loader: 'js' }
-        }
-
-        if (usesRequireResolve) {
-          for (const [, , request] of contents.matchAll(REQUIRE_RESOLVE_LITERAL)) {
-            try {
-              requireResolveTargets.add(require.resolve(request, { paths: [path.dirname(args.path)] }))
-            } catch {
-              // an optional package that is not installed resolves at runtime the same way it would unbundled
-            }
-          }
-
-          contents = contents.replace(/\brequire\.resolve\(/g, `require('module').createRequire(__filename).resolve(`)
-        }
-
-        const relativePath = path.relative(buildAppDir, args.path).split(path.sep).join(path.posix.sep)
-        const header = `var __filename = require('path').join(__cypressAppDir, ${JSON.stringify(relativePath)}), __dirname = require('path').dirname(__filename);`
-
-        // keep a shebang on the first line
-        contents = contents.startsWith('#!') ? contents.replace(/^(#!.*\n)/, `$1${header}`) : `${header}${contents}`
-
-        return { contents, loader: 'js' }
-      })
-    },
-  }
-}
-
-// request-promise loads a private copy of @cypress/request by clearing require.cache, which bundled modules
-// bypass, so in the bundle it would patch the copy that every other request uses and reject non-2xx responses.
-const loadFromDisk = (filter, loadedFromDisk) => {
-  return {
-    name: 'load-from-disk',
-    setup (build) {
-      build.onResolve({ filter }, (args) => {
-        loadedFromDisk.add(require.resolve(args.path, { paths: [args.resolveDir] }))
-
-        return { path: args.path, external: true }
-      })
-    },
-  }
-}
-
-// The binary loads this bundle instead of requiring the main process module graph file by file.
-const createStartCypressBundle = async (buildAppDir) => {
-  const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
-  const loadedFromDisk = new Set()
-  const unresolved = new Set()
-
-  const esbuildResult = await esbuild.build({
-    entryPoints: [path.join(unixBuildAppDir, 'packages/server/start-cypress.js')],
-    outfile: path.join(unixBuildAppDir, 'packages/server/start-cypress.bundle.js'),
-    bundle: true,
-    platform: 'node',
-    format: 'cjs',
-    metafile: true,
-    absWorkingDir: unixBuildAppDir,
-    minify: true,
-    // error stacks and code that reads `constructor.name` need the original names
-    keepNames: true,
-    external: ['electron'],
-    banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
-    plugins: [
-      loadFromDisk(/^@cypress\/request-promise(\/|$)/, loadedFromDisk),
-      externalizeUnresolvable(path.join(buildAppDir, 'packages/server'), unresolved),
-      keepModuleLocation(unixBuildAppDir, loadedFromDisk),
-    ],
-  })
-
-  console.log(`start-cypress bundle: ${Object.keys(esbuildResult.metafile.inputs).length} modules; left as runtime requires: ${[...unresolved].join(', ') || 'none'}`)
-
-  return {
-    bundledDependencies: Object.keys(esbuildResult.metafile.inputs).map((input) => `./${input}`),
-    loadedFromDisk: [...loadedFromDisk].map((target) => path.relative(buildAppDir, target).split(path.sep).join(path.posix.sep)),
-  }
-}
-
-const createServerEntryPointBundle = async (buildAppDir) => {
-  const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
-  const entryPoints = [path.join(unixBuildAppDir, 'packages/server/index.js')]
-  // Build the binary entry point ignoring anything that happens in start-cypress since that is bundled separately
-  const esbuildResult = await esbuild.build({
-    entryPoints,
-    bundle: true,
-    outdir: workingDir,
-    platform: 'node',
-    metafile: true,
-    absWorkingDir: unixBuildAppDir,
-    external: [
-      './transpile-ts',
-      './start-cypress',
-      'electron',
-    ],
-  })
-
-  console.log(`copying server entry point bundle from ${path.join(workingDir, 'index.js')} to ${path.join(buildAppDir, 'packages', 'server', 'index.js')}`)
-
-  await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
-
-  // Convert these inputs to a relative file path. Note that these paths are posix paths.
-  return [...Object.keys(esbuildResult.metafile.inputs)].filter((input) => input !== 'packages/server/index.js').map((input) => `./${input}`)
-}
-
-const buildEntryPointAndCleanup = async (appDir) => {
-  // esbuild reports real paths, so a symlink in the build path (macOS's /var) would put every module outside the app
-  const buildAppDir = await fs.realpath(appDir)
-
-  // 1. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`) first, so the module graphs below
-  // resolve the copies that ship
-  await consolidateDeps({ projectBaseDir: buildAppDir })
-
-  // 2. Bundle the main process module graph. Files that are only reached through it can then be removed from the binary,
-  // except those that are still loaded from disk.
-  const { bundledDependencies, loadedFromDisk } = await createStartCypressBundle(buildAppDir)
-
-  const [keptDependencies, serverEntryPointBundleDependencies] = await Promise.all([
-    // 3. Retrieve all dependencies that are loaded from disk and so must be kept in the binary
-    getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(c?js|json)$/.test(target))),
-    // 4. Create a bundle for the server entry point. This will be used to start the server in the binary. It returns the dependencies that are pulled in by this bundle that potentially can now be removed
-    createServerEntryPointBundle(buildAppDir),
-  ])
+// bundledDependencies are the files built into the start and server entry point bundles, and loadedFromDisk the
+// files the start bundle still requires at runtime, all relative to buildAppDir, which must be a real path
+const removeBundledDependencies = async (buildAppDir, { bundledDependencies, loadedFromDisk }) => {
+  // 1. Retrieve all dependencies that are loaded from disk and so must be kept in the binary
+  const keptDependencies = await getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(c?js|json)$/.test(target)))
 
   keptDependencies.push(...loadedFromDisk)
 
   // package.json and other data files stay: Node reads them to resolve the packages that are still loaded from disk
-  const potentiallyRemovedDependencies = [
-    ...bundledDependencies,
-    ...serverEntryPointBundleDependencies,
-  ].filter((dependency) => /\.c?js$/.test(dependency))
+  const potentiallyRemovedDependencies = bundledDependencies.filter((dependency) => /\.c?js$/.test(dependency))
 
   console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
 
-  // 5. Remove the bundled dependencies that are not in the list of kept dependencies from the binary
+  // 2. Remove the bundled dependencies that are not in the list of kept dependencies from the binary
   const existsWithExactCase = createExactCaseChecker(buildAppDir)
 
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
@@ -361,7 +183,7 @@ const buildEntryPointAndCleanup = async (appDir) => {
 
 const cleanupUnneededDependencies = async (buildAppDir) => {
   console.log(`removing unnecessary files from the binary to further lean out the distribution.`)
-  // 6. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
+  // 3. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
   // this is it's own function as we always want to clean out unneeded dependencies
   await del([
     // Remove test files
@@ -425,7 +247,6 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
 
 module.exports = {
   createExactCaseChecker,
-  createStartCypressBundle,
-  buildEntryPointAndCleanup,
+  removeBundledDependencies,
   cleanupUnneededDependencies,
 }

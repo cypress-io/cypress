@@ -4,7 +4,9 @@ const glob = require('glob')
 const os = require('os')
 const path = require('path')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
-const { buildEntryPointAndCleanup, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
+const { consolidateDeps } = require('@tooling/v8-snapshot')
+const { removeBundledDependencies, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
+const { createStartCypressBundle, createServerEntryPointBundle, createStartBundleCodeCache } = require('./binary/start-bundle')
 const {
   getEncryptionFileSource,
   getCloudEnvironmentFileSource,
@@ -17,39 +19,6 @@ const {
   getCyPromptFileSource,
   validateCyPromptFile,
 } = require('./binary/binary-sources')
-const { needsSandbox } = require('../cli/lib/tasks/verify')
-const xvfb = require('../cli/lib/exec/xvfb').default
-const execa = require('execa')
-const meta = require('./binary/meta')
-
-// Run the app once so the start bundle's code cache includes the functions that compile during startup
-const createStartBundleCodeCache = async () => {
-  const args = ['--smoke-test', '--ping=1']
-
-  if (needsSandbox()) {
-    args.push('--no-sandbox')
-  }
-
-  const usingXvfb = xvfb.isNeeded()
-
-  try {
-    if (usingXvfb) {
-      await xvfb.start()
-    }
-
-    const env = { ...process.env, CYPRESS_INTERNAL_WRITE_START_BUNDLE_CACHE: '1' }
-
-    // V8 rejects a code cache made under different flags, so NODE_OPTIONS must not leak into the app
-    delete env.NODE_OPTIONS
-    delete env.ELECTRON_RUN_AS_NODE
-
-    await execa(`${meta.buildAppExecutable()}`, args, { env, extendEnv: false })
-  } finally {
-    if (usingXvfb) {
-      await xvfb.stop()
-    }
-  }
-}
 
 // Strip test keys and local development overrides from the server code that the binary ships
 const appFileRewrites = [
@@ -130,7 +99,22 @@ module.exports = async function (params) {
         },
       )
 
-      await buildEntryPointAndCleanup(outputFolder)
+      // esbuild reports real paths, so a symlink in the build path (macOS's /var) would put every module outside the app
+      const appDir = await fs.realpath(outputFolder)
+
+      // Consolidate first so that the bundles and the files kept on disk resolve the copies that ship
+      await consolidateDeps({ projectBaseDir: appDir })
+
+      const [startBundle, serverEntryPointBundledDependencies] = await Promise.all([
+        createStartCypressBundle(appDir),
+        createServerEntryPointBundle(appDir),
+      ])
+
+      await removeBundledDependencies(appDir, {
+        bundledDependencies: [...startBundle.bundledDependencies, ...serverEntryPointBundledDependencies],
+        loadedFromDisk: startBundle.loadedFromDisk,
+      })
+
       await cleanupUnneededDependencies(outputFolder)
 
       await createStartBundleCodeCache()
