@@ -272,9 +272,9 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'mocha/no-root-hooks': 'off',
       'mocha/no-top-level-tests': 'off',
       'mocha/no-pending-tests': 'off',
-      // Phase 4 decides on these. no-async-in-sync-tests reads Cypress command
-      // chains as unawaited promises; the others catch real bugs, so their
-      // violations are fixed in their own changes.
+      // no-async-in-sync-tests reads Cypress command chains as unawaited
+      // promises. The others report real bugs, so each is re-enabled once its
+      // own violations are fixed.
       'mocha/no-async-in-sync-tests': 'off',
       'mocha/handle-done-callback': 'off',
       'mocha/no-conditional-tests': 'off',
