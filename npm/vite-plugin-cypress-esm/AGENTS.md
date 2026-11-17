@@ -6,10 +6,14 @@
 
 ```sh
 yarn build          # tsc; outputs to dist/
-yarn check-ts       # TypeScript type-check without emitting
+yarn check-ts       # TypeScript type-check without emitting, including test/ through test/tsconfig.json
 yarn lint           # ESLint
+yarn test           # unit tests, then the component tests; CI runs this
+yarn test-unit -- <path-to-spec>            # Vitest unit specs under test/
 yarn cypress:run -- --spec <path-to-spec>   # run a targeted component test
 ```
+
+The unit specs run the browser client (`client/moduleCache.js`) in Node by stubbing `window` with `globalThis`, so its module proxy can be tested without a browser.
 
 ## Architecture
 

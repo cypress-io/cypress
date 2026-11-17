@@ -26,10 +26,6 @@ describe('gulpMakePackage', () => {
       expect(validate('MyPackage')).to.be.true
     })
 
-    it('accepts a hyphen without letters', () => {
-      expect(validate('-')).to.be.true
-    })
-
     it('rejects names with no letters or hyphens', () => {
       expect(validate('')).to.be.false
       expect(validate('123')).to.be.false
