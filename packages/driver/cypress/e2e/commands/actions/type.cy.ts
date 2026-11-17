@@ -3226,6 +3226,32 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#date-without-value').should('have.value', '1999-12-31')
         })
 
+        it('consecutive {upArrow} increases day once per arrow', () => {
+          cy.get('#date-without-value').type('1999-12-30').type('{upArrow}{upArrow}')
+          cy.get('#date-without-value').should('have.value', '2000-01-01')
+        })
+
+        it('consecutive {downArrow} decreases day once per arrow', () => {
+          cy.get('#date-without-value').type('2000-01-01').type('{downArrow}{downArrow}')
+          cy.get('#date-without-value').should('have.value', '1999-12-30')
+        })
+
+        it('mixed {upArrow} and {downArrow} step the day in order', () => {
+          cy.get('#date-without-value').type('2000-01-01').type('{upArrow}{downArrow}{upArrow}')
+          cy.get('#date-without-value').should('have.value', '2000-01-02')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid date')
+            expect(err.message).to.include('{ArrowUp}{ArrowLeft}')
+
+            done()
+          })
+
+          cy.get('#date-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#date-with-value')
           .then(($input) => {
@@ -3269,6 +3295,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#month-without-value').then(($input) => $input.val('2000-01'))
           cy.get('#month-without-value').type('{downArrow}')
           cy.get('#month-without-value').should('have.value', '1999-12')
+        })
+
+        it('consecutive {upArrow} and {downArrow} step the month once per arrow', () => {
+          cy.get('#month-without-value').type('1999-11').type('{upArrow}{upArrow}')
+          cy.get('#month-without-value').should('have.value', '2000-01')
+          cy.get('#month-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#month-without-value').should('have.value', '1999-12')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid month')
+
+            done()
+          })
+
+          cy.get('#month-without-value').type('{upArrow}{leftArrow}')
         })
 
         it('{upArrow} triggers events on input', () => {
@@ -3316,6 +3359,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#week-without-value').should('have.value', '2017-W04')
         })
 
+        it('consecutive {upArrow} and {downArrow} step the week once per arrow', () => {
+          cy.get('#week-without-value').type('2017-W05').type('{upArrow}{upArrow}')
+          cy.get('#week-without-value').should('have.value', '2017-W07')
+          cy.get('#week-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#week-without-value').should('have.value', '2017-W06')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid week')
+
+            done()
+          })
+
+          cy.get('#week-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#week-with-value')
           .then(($input) => {
@@ -3361,6 +3421,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#time-without-value').should('have.value', '01:22')
         })
 
+        it('consecutive {upArrow} and {downArrow} step the minute once per arrow', () => {
+          cy.get('#time-without-value').type('01:59').type('{upArrow}{upArrow}')
+          cy.get('#time-without-value').should('have.value', '02:01')
+          cy.get('#time-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#time-without-value').should('have.value', '02:00')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid time')
+
+            done()
+          })
+
+          cy.get('#time-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#time-with-value')
           .then(($input) => {
@@ -3400,6 +3477,23 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         it('{downArrow} decreases time value', () => {
           cy.get('#datetime-local-without-value').type('{downArrow}')
+        })
+
+        it('consecutive {upArrow} and {downArrow} step the value once per arrow', () => {
+          cy.get('#datetime-local-without-value').type('2000-01-01T01:30').type('{upArrow}{upArrow}')
+          cy.get('#datetime-local-without-value').should('have.value', '2000-01-01T01:32')
+          cy.get('#datetime-local-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#datetime-local-without-value').should('have.value', '2000-01-01T01:31')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid datetime')
+
+            done()
+          })
+
+          cy.get('#datetime-local-without-value').type('{upArrow}{leftArrow}')
         })
 
         it('{upArrow} triggers events on input', () => {

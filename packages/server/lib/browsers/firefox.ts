@@ -253,13 +253,6 @@ const defaultPreferences = {
 
   'network.proxy.type': 1,
 
-  // necessary for adding extensions
-  'devtools.debugger.remote-enabled': true,
-  // devtools.debugger.remote-port is set per-launch
-
-  'devtools.debugger.prompt-connection': false,
-  // "devtools.debugger.remote-websocket": true
-  'devtools.chrome.enabled': true,
   'app.update.auto': false,
   'app.update.enabled': false,
   'browser.displayedE10SNotice': 4,
@@ -543,7 +536,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       '-new-instance',
       // if testing against older versions of Firefox to determine when a regression may have been introduced, uncomment the '-allow-downgrade' flag.
       // '-allow-downgrade',
-      '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
   })

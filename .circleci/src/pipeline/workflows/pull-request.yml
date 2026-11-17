@@ -18,8 +18,6 @@ when:
     - not:
         equal: [ 'develop', << pipeline.git.branch >> ]
     - not:
-        equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
     - not:
         equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
@@ -206,6 +204,13 @@ jobs:
         ]
       percy: true
       filters: &runLaunchpadTests pipeline.parameters.run-launchpad-tests == true
+      requires:
+        - ready-to-test
+  # Not in all-jobs-passed: it only reports telemetry, so a Cloud outage
+  # should not block the PR.
+  - open-mode-telemetry:
+      context: test-runner:cypress-record-key
+      filters: pipeline.parameters.run-app-ui-tests == true or pipeline.parameters.run-launchpad-tests == true
       requires:
         - ready-to-test
   - run-launchpad-component-tests-chrome:

@@ -1,4 +1,5 @@
 import vm from 'vm'
+import { withDefaultStackTraces } from '../utils'
 
 /**
  * Runs the provided `snapshostScript` inside a Node.js VM in order to verify
@@ -9,9 +10,11 @@ import vm from 'vm'
  */
 export class SnapshotVerifier {
   verify (snapshotScript: Buffer, filename: string) {
-    vm.runInNewContext(snapshotScript.toString(), undefined, {
-      filename,
-      displayErrors: true,
+    withDefaultStackTraces(() => {
+      vm.runInNewContext(snapshotScript.toString(), undefined, {
+        filename,
+        displayErrors: true,
+      })
     })
   }
 }

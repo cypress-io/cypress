@@ -8,8 +8,9 @@
     "json"
   ],
   "eslint.enable": true,
-  // each workspace has its own eslint.config.ts, and ESLint 9 resolves the
-  // config from the working directory, so run it from the nearest package.json
+  // each workspace has its own eslint.config.ts and eslint install; the
+  // extension loads the ESLint library from the working directory, so run it
+  // from the nearest package.json
   "eslint.workingDirectories": [
     {
       "mode": "auto"
