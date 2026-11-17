@@ -178,6 +178,9 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/(duration=')(\d+)(')/g, replaceDurationFromReporter)
   // (in|after) (1m)|(1m, 10s)|(10s)|(10.12ms) 1/1 => '(in|after) XXm, YYs, ZZ.ZZms 1/1
   .replace(/((in)|(after)) ((?:\d+m)|(?:\d+m, \d+s)|(?:\d+s)|(?:\d+\.\d+ms)) (\d+\/\d+)/g, replaceShortDuration)
+  // Chrome or Firefox sometimes take longer to connect. Runs before the seconds replacement below,
+  // which would rewrite "1 second " and stop this from matching, and before the \r strip, hence \r?.
+  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt \d+\/\d+\)\r?\n/g, '')
   // 15 seconds -> XX seconds
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
@@ -187,8 +190,6 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/^(- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
   .replace(crossOriginErrorRe, '[Cross origin error message]')
-  // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
-  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
   // Strip browser-connect retries that a later attempt recovered from; issue_7217 snapshots a run
   // where every attempt fails, so the lines stay when the run aborts.
   .replace(/(?:\nTimed out waiting for the browser to connect\. Retrying(?: again)?\.\.\.\n)+(?!\nTimed out waiting for the browser to connect|\nThe browser never connected)/g, '')
