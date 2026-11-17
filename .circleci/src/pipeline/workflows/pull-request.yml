@@ -18,8 +18,6 @@ when:
     - not:
         equal: [ 'develop', << pipeline.git.branch >> ]
     - not:
-        equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
     - not:
         equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]

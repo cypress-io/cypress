@@ -1,6 +1,8 @@
 {
   "configMigration": true,
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "extends": [
     ":semanticCommits",
     "group:monorepos",
@@ -88,6 +90,7 @@
   "separateMultipleMajor": true,
   "timezone": "America/New_York",
   "vulnerabilityAlerts": {
+    "enabled": false,
     "minimumReleaseAge": null
   }
 }

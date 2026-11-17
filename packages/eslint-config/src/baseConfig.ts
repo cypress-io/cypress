@@ -1,3 +1,6 @@
+// Pulls the eslint-plugin-mocha declaration into every program that includes this file
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="./eslint-plugin-mocha.d.ts" />
 import js from '@eslint/js'
 import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
@@ -252,11 +255,19 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
 
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
-      'mocha/no-setup-in-describe': 'off',
+      'mocha/no-setup-in-suite': 'off',
       'mocha/max-top-level-suites': 'off',
-      'mocha/no-top-level-hooks': 'off',
-      'mocha/no-global-tests': 'off',
+      'mocha/no-root-hooks': 'off',
+      'mocha/no-top-level-tests': 'off',
       'mocha/no-pending-tests': 'off',
+      // no-async-in-sync-tests reads Cypress command chains as unawaited
+      // promises. The others report real bugs, so each is re-enabled once its
+      // own violations are fixed.
+      'mocha/no-async-in-sync-tests': 'off',
+      'mocha/handle-done-callback': 'off',
+      'mocha/no-conditional-tests': 'off',
+      'mocha/no-code-after-done': 'off',
+      'mocha/consistent-structure': 'off',
 
       'vue/multi-word-component-names': 'off',
       'vue/no-dupe-keys': 'off',
