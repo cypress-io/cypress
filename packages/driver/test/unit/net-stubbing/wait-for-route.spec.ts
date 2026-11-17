@@ -117,6 +117,25 @@ describe('waitForRoute', () => {
       expect(waitForRoute('listItems', stateWith(canceled), 'response')).toBe(canceled)
     })
 
+    it('returns each canceled interception to its own wait when only cancels follow', () => {
+      const first = createInterception({ id: 'interception-1', state: 'Errored', error: browserCanceledError() })
+      const second = createInterception({ id: 'interception-2', state: 'Errored', error: browserCanceledError() })
+      const state = stateWith(first, second)
+
+      expect(waitForRoute('listItems', state, 'response')).toBe(first)
+      expect(waitForRoute('listItems', state, 'response')).toBe(second)
+    })
+
+    it('passes over repeated cancels when a later request is re-sent', () => {
+      const first = createInterception({ id: 'interception-1', state: 'Errored', error: browserCanceledError() })
+      const second = createInterception({ id: 'interception-2', state: 'Errored', error: browserCanceledError() })
+      const resent = createInterception({ id: 'interception-3', state: 'Complete' })
+      const state = stateWith(first, second, resent)
+
+      expect(waitForRoute('listItems', state, 'response')).toBe(resent)
+      expect(waitForRoute('listItems', state, 'response')).toBeNull()
+    })
+
     it('returns other network errors without waiting for a later interception', () => {
       const failed = createInterception({ id: 'interception-1', state: 'Errored', error: Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:3501'), { code: 'ECONNREFUSED' }) })
       const later = createInterception({ id: 'interception-2', state: 'Received' })
