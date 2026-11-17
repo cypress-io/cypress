@@ -98,8 +98,9 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
     // a jar read may have purged the expired cookie of a write still in flight
     replaced = findStored() ?? latest.get(key)
 
-    // tough-cookie refuses to replace an expired HttpOnly cookie that no read has purged yet
-    if (replaced && replaced.TTL() <= 0) cookieJar.removeCookie(stored)
+    // tough-cookie refuses to replace an HttpOnly cookie. one still in the jar here has
+    // expired, or the browser has answered that it no longer holds it
+    if (replaced && (replaced.TTL() <= 0 || replaced.httpOnly)) cookieJar.removeCookie(stored)
 
     try {
       cookieJar.setCookie(cookie, pageUrl.href, 'strict', { http: false })
@@ -134,7 +135,13 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
     cookieJar.removeCookie(stored)
 
-    if (restored) cookieJar.setCookie(restored, pageUrl.href, 'strict')
+    if (restored) {
+      const { creation } = restored
+
+      cookieJar.setCookie(restored, pageUrl.href, 'strict')
+      // a Max-Age cookie expires relative to its creation, which setting it again resets
+      restored.creation = creation
+    }
   }
 
   const isBlockedInJar = cookieJar.getAllCookies().some((c) => {

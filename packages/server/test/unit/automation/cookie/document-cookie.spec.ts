@@ -210,8 +210,15 @@ describe('lib/automation/cookie/document-cookie', () => {
       await expectIgnored('foo=baz')
     })
 
-    it('a cookie that would replace an HttpOnly cookie in the server-side jar', async () => {
+    it('a cookie that would replace an HttpOnly cookie on an IPv6 host', async () => {
+      existing = [{ name: 'foo', domain: '[::1]', path: '/', httpOnly: true, secure: false }]
+
+      await expectIgnored('foo=baz', 'http://[::1]:3500/')
+    })
+
+    it('a cookie that would replace an HttpOnly cookie in the server-side jar and the browser', async () => {
       cookieJar.setCookie('foo=bar; Path=/; HttpOnly', 'https://www.foobar.com/', 'strict')
+      existing = [{ name: 'foo', domain: 'www.foobar.com', path: '/', httpOnly: true, secure: false }]
 
       await write('foo=baz')
 
@@ -361,6 +368,34 @@ describe('lib/automation/cookie/document-cookie', () => {
       expect(browserCookie()).toMatchObject({ name: 'foo', value: 'baz' })
       expect(secureRequestCookies()).toEqual(['foo=baz'])
     })
+  })
+
+  it('writes over an HttpOnly cookie in the jar that the browser no longer has', async () => {
+    cookieJar.setCookie('foo=bar; Path=/; HttpOnly', 'https://www.foobar.com/', 'strict')
+
+    await write('foo=new; Path=/')
+
+    expect(browserCookie()).toMatchObject({ name: 'foo', value: 'new' })
+    expect(cookieJar.getCookies('https://www.foobar.com/').map(({ value, httpOnly }) => ({ value, httpOnly }))).toEqual([{ value: 'new', httpOnly: false }])
+  })
+
+  it('keeps the creation time of the cookie it goes back to', async () => {
+    cookieJar.setCookie('foo=old; Path=/; Max-Age=60', 'https://www.foobar.com/', 'strict')
+
+    const [{ creation }] = cookieJar.getAllCookies()
+
+    automation.setCookie.mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20))
+
+      throw new Error('refused')
+    })
+
+    await expect(write('foo=new; Path=/')).rejects.toThrow('refused')
+
+    const [restored] = cookieJar.getAllCookies()
+
+    expect(restored.value).toBe('old')
+    expect(restored.creation).toEqual(creation)
   })
 
   it('writes over an expired HttpOnly cookie the jar has not purged', async () => {
