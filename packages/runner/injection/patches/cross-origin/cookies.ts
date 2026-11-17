@@ -141,7 +141,10 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     })
 
     Cypress.on('clear:cookie', (name: string) => {
-      cookieJar.removeCookie({ name, domain })
+      // the browser also clears a cookie set for a parent domain
+      cookieJar.getAllCookies().filter((cookie) => cookie.key === name).forEach((cookie) => {
+        cookieJar.removeCookie({ name, domain: cookie.domain || domain })
+      })
     })
 
     Cypress.on('clear:cookies', reset)

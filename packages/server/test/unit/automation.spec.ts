@@ -210,4 +210,31 @@ describe('lib/automation', () => {
       })
     })
   })
+
+  describe('.normalize clear:cookie', () => {
+    const url = 'https://app.foobar.com/'
+    const jarCookies = () => cookieJar.getAllCookies().map((cookie) => `${cookie.key}=${cookie.value} ${cookie.domain}`)
+
+    beforeEach(() => {
+      cookieJar.removeAllCookies()
+      cookieJar.setCookie('foo=parent; Domain=foobar.com; Path=/', url, undefined)
+      cookieJar.setCookie('bar=other; Domain=foobar.com; Path=/', url, undefined)
+    })
+
+    afterEach(() => {
+      cookieJar.removeAllCookies()
+    })
+
+    it('removes the parent-domain cookie the browser cleared from the jar', async () => {
+      await automation.normalize('clear:cookie', { name: 'foo', domain: 'app.foobar.com' }, async () => ({ name: 'foo', value: 'parent', domain: '.foobar.com', path: '/' }))
+
+      expect(jarCookies()).toStrictEqual(['bar=other foobar.com'])
+    })
+
+    it('keeps a parent-domain cookie the browser did not clear', async () => {
+      await automation.normalize('clear:cookie', { name: 'foo', domain: 'app.foobar.com' }, async () => null)
+
+      expect(jarCookies().sort()).toStrictEqual(['bar=other foobar.com', 'foo=parent foobar.com'])
+    })
+  })
 })

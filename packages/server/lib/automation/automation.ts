@@ -227,11 +227,15 @@ export class Automation {
           ])
           .spread((automationResult) => automationResult)
         case 'clear:cookie':
-          return Bluebird.all([
-            this.cookies.clearCookie(data, automate),
-            cookieJar.removeCookie(data),
-          ])
-          .spread((automationResult) => automationResult)
+          cookieJar.removeCookie(data)
+
+          return this.cookies.clearCookie(data, automate)
+          .then((cleared) => {
+            // the browser also clears a cookie set for a parent domain
+            if (cleared?.domain) cookieJar.removeCookie({ name: data.name, domain: cleared.domain.replace(/^\./, '') })
+
+            return cleared
+          })
         case 'change:cookie':
           return this.cookies.changeCookie(data)
         case 'create:download':

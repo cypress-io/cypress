@@ -335,6 +335,23 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  it('cy.clearCookie() clears a document.cookie write for a parent domain', () => {
+    cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+    cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+    cy.origin(`https://app.foobar.com:3503`, () => {
+      cy.document().then((doc) => {
+        doc.cookie = 'parentKey=value; Domain=foobar.com; Path=/'
+      })
+
+      cy.getCookie('parentKey').its('domain').should('eq', '.foobar.com')
+      cy.clearCookie('parentKey')
+      cy.document().its('cookie').should('not.include', 'parentKey=value')
+      cy.getCookie('parentKey').should('be.null')
+      cy.reload()
+      cy.document().its('cookie').should('not.include', 'parentKey=value')
+    })
+  })
+
   describe('document.cookie with HttpOnly cookies', () => {
     beforeEach(() => {
       cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
