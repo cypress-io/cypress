@@ -688,7 +688,9 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
       return win.navigator.serviceWorker.register('/fixtures/service-worker-update-check.js')
       .then(() => win.navigator.serviceWorker.ready)
     })
-    .then((registration) => {
+    // an update check is a network round trip for the script, which Firefox
+    // can take longer than the default 1s to settle
+    .then({ timeout: 10000 }, (registration) => {
       let updateFound = false
 
       registration.addEventListener('updatefound', () => {

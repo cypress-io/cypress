@@ -991,9 +991,9 @@ export class CriClient implements ICriClient {
       return
     }
 
-    this.cdpConnection.send('Runtime.evaluate', { expression }, sessionId).then(({ exceptionDetails }) => {
-      if (exceptionDetails) {
-        debug('service worker instrumentation threw (session: %s): %o', sessionId, exceptionDetails)
+    this.cdpConnection.send('Runtime.evaluate', { expression }, sessionId).then((result) => {
+      if (result?.exceptionDetails) {
+        debug('service worker instrumentation threw (session: %s): %o', sessionId, result.exceptionDetails)
       } else {
         debug('instrumented service worker (session: %s)', sessionId)
       }
