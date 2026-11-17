@@ -2,7 +2,7 @@
   <StandardModal
     class="transition transition-all duration-200"
     variant="bare"
-    :title="t('specPage.banners.record.title')"
+    title="Record your first run"
     :model-value="isModalOpen"
     :help-link="helpLink"
     :no-help="!helpLink"
@@ -11,7 +11,7 @@
   >
     <div class="max-w-[43.75rem] py-7 px-6 text-gray-600">
       <p class="mb-[24px]">
-        {{ t('specPage.banners.record.content') }}
+        Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools.
       </p>
       <RecordPromptAdapter />
     </div>
@@ -19,7 +19,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from '@cy/i18n'
 import StandardModal from '../components/StandardModal.vue'
 import RecordPromptAdapter from './RecordPromptAdapter.vue'
 import { getUtmSource } from '../utils/getUtmSource'
@@ -32,8 +31,6 @@ const { setPromptShown } = usePromptManager()
 onMounted(() => {
   setPromptShown('loginModalRecord')
 })
-
-const { t } = useI18n()
 
 const isModalOpen = ref(true)
 

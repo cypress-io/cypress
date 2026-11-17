@@ -70,7 +70,7 @@ describe('resolveConfig', function () {
 
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
-        expect(viteConfigFn).toBeCalled
+        expect(viteConfigFn).toHaveBeenCalled()
         expect(viteConfig.server?.fs?.allow).to.include('some/other/file')
       })
     })
@@ -89,15 +89,15 @@ describe('resolveConfig', function () {
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
         expect(viteConfig.server?.watch?.ignored).to.eql('**/*')
-        expect(viteConfig.server?.hmr).to.be.false
+        expect(viteConfig.server?.hmr).toBe(false)
       })
 
       it('uses defaults in open mode', async () => {
         viteDevServerConfig.cypressConfig.isTextTerminal = false
         const viteConfig = await createViteDevServerConfig(viteDevServerConfig, discoveredVite)
 
-        expect(viteConfig.server?.watch?.ignored).to.be.undefined
-        expect(viteConfig.server?.hmr).to.be.undefined
+        expect(viteConfig.server?.watch?.ignored).toBeUndefined()
+        expect(viteConfig.server?.hmr).toBeUndefined()
       })
     })
   })
@@ -127,8 +127,8 @@ describe('resolveConfig', function () {
     })
 
     it('matches only script-like paths so imported CSS (e.g. support files) is not run through transformWithOxc', () => {
-      expect(JSX_REFRESH_SCRIPT_RE.test('/project/cypress/support/backgroundColor.css')).to.be.false
-      expect(JSX_REFRESH_SCRIPT_RE.test('/project/src/App.cy.tsx')).to.be.true
+      expect(JSX_REFRESH_SCRIPT_RE.test('/project/cypress/support/backgroundColor.css')).toBe(false)
+      expect(JSX_REFRESH_SCRIPT_RE.test('/project/src/App.cy.tsx')).toBe(true)
     })
   })
 }, 1000 * 60)

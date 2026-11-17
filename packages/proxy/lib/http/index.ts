@@ -167,7 +167,7 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
   onlyRunMiddleware: (names: string[]) => void
 }>
 
-export function _runStage (type: HttpStages, ctx: any, onError: Function) {
+export function _runStage (type: HttpStages, ctx: any, onError: (error: Error) => unknown) {
   ctx.stage = HttpStages[type]
 
   const runMiddlewareStack = (): Promise<void> => {

@@ -33,7 +33,7 @@ type EnableCommand = {
 
 type Subscription = {
   eventName: CdpEvent
-  cb: Function
+  cb: (...args: any[]) => void
 }
 
 type CmdParams<TCmd extends CdpCommand> = ProtocolMapping.Commands[TCmd]['paramsType'][0]
@@ -140,7 +140,7 @@ export interface ICriClient {
   reenableChildTargetInterception (targetId: string): Promise<void>
 }
 
-type DeferredPromise = { resolve: Function, reject: Function }
+type DeferredPromise = { resolve: (value: any) => void, reject: (reason?: any) => void }
 type CreateParams = {
   target: string
   onAsynchronousError: (err: CypressError) => void

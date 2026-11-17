@@ -1,5 +1,4 @@
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import AutoProvisionProjectIdModal from './AutoProvisionProjectIdModal.vue'
 
 describe('<AutoProvisionProjectIdModal />', () => {
@@ -21,8 +20,8 @@ describe('<AutoProvisionProjectIdModal />', () => {
   it('renders project ID and links to project ID docs', () => {
     mountModal()
 
-    cy.contains(defaultMessages.runs.connect.modal.autoProvision.title).should('be.visible')
-    cy.contains(defaultMessages.runs.connect.modal.autoProvision.body).should('be.visible')
+    cy.contains('Add your project ID to finish setup').should('be.visible')
+    cy.contains('We couldn\'t update your config file automatically. Copy the project ID below and paste it into your configuration file.').should('be.visible')
     cy.contains(`projectId: '${projectId}',`).should('be.visible')
     cy.get('[data-cy="external"]')
     .should('have.attr', 'href', 'https://on.cypress.io/what-is-a-project-id')
@@ -33,7 +32,7 @@ describe('<AutoProvisionProjectIdModal />', () => {
 
     mountModal(onClose)
 
-    cy.contains('button', defaultMessages.runs.connect.modal.autoProvision.close).click()
+    cy.contains('button', 'Close').click()
     cy.get('@closeStub').should('have.been.calledOnce')
   })
 })

@@ -1229,14 +1229,12 @@ describe('src/cy/commands/querying', () => {
       const bText = 'Boruto'
 
       cy.contains('a, button', aText).then(($el) => {
-        $el as unknown as JQuery<HTMLAnchorElement>
         expect($el?.length).to.eq(1)
         expect($el).to.match('a')
         expect($el.text()).to.eq(aText)
       })
 
       cy.contains('a, button', bText).then(($el) => {
-        $el as unknown as JQuery<HTMLButtonElement>
         expect($el?.length).to.eq(1)
         expect($el).to.match('button')
         expect($el.text()).to.eq(bText)

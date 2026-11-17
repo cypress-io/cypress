@@ -86,7 +86,7 @@ describe('doctor', () => {
 
     expect(reassign.includes('get_console().log'), 'reassign-console.js: does rewrite typeof console.log').to.be.true
 
-    expect(!reassign.includes('get_console() = function') && reassign.includes('console = function'), 'reassign-console.js: does not rewrite console =').to.be.true,
+    expect(!reassign.includes('get_console() = function') && reassign.includes('console = function'), 'reassign-console.js: does not rewrite console =').to.be.true
 
     expect(exported['./using-console.js'].toString().includes('get_console'), 'using-console.js: does rewrite console').to.be.true
   })

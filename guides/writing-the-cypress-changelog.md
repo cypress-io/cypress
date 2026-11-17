@@ -27,7 +27,7 @@ This changelog describes the **binary**. Validation only considers changed files
 
 ## Writing Guidelines
 
-1. The changelog is formatted like the following. If there is not a pending changelog for the next release, add these sections.
+1. The changelog is formatted like the following. If there is not a pending changelog for the next release, add these sections. The topmost `## X.Y.Z` is not always pending: released versions carry no marker in the file, so check for a release tag with `git ls-remote --tags origin vX.Y.Z`. If the tag exists, that version has shipped, and your entry goes in a new section for the next version above it.
 
     ```md
     ## <RELEASE_VERSION>

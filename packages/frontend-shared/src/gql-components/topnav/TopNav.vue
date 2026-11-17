@@ -13,7 +13,7 @@
       >v{{ versions.current.version }} <span
         class="text-indigo-300"
         aria-hidden="true"
-      >•</span> {{ t('topNav.upgradeText') }}</span>
+      >•</span> Upgrade</span>
     </template>
 
     <TopNavListItem
@@ -29,20 +29,18 @@
           {{ versions.latest.version }}
         </ExternalLink>
         <br>
-        <span class="text-gray-500 text-[14px] leading-[20px]">{{ t('topNav.released') }} {{ versions.latest.released }}</span>
+        <span class="text-gray-500 text-[14px] leading-[20px]">Released {{ versions.latest.released }}</span>
       </div>
       <template #suffix>
         <span class="rounded-md bg-indigo-50">
-          <span class=" p-[5px] text-indigo-500">
-            {{ t('topNav.latest') }}
-          </span>
+          <span class=" p-[5px] text-indigo-500">Latest</span>
         </span>
       </template>
     </TopNavListItem>
 
     <TopNavListItem class="py-[8px] px-[16px] pb-[16px]">
       <p class="leading-normal py-[8px] pb-[16px] text-gray-500 text-[14px]">
-        {{ t('topNav.runningOldVersion') }}
+        You're currently running an old version of Cypress. Update to the latest version for the best experience.
       </p>
       <Button
         class="!w-full"
@@ -65,13 +63,11 @@
           {{ versions.current.version }}
         </ExternalLink>
         <br>
-        <span class="text-gray-600 text-[14px]">{{ t('topNav.released') }} {{ versions.current.released }}</span>
+        <span class="text-gray-600 text-[14px]">Released {{ versions.current.released }}</span>
       </div>
       <template #suffix>
         <span class="rounded-md bg-orange-100">
-          <span class="p-[5px] text-amber-800">
-            {{ t('topNav.installed') }}
-          </span>
+          <span class="p-[5px] text-amber-800">Installed</span>
         </span>
       </template>
     </TopNavListItem>
@@ -81,7 +77,7 @@
         href="https://on.cypress.io/changelog"
         class="border-rounded border-gray-100 border w-full py-[8px] text-[12px] block whitespace-nowrap hover:border-gray-200 hover:no-underline"
       >
-        {{ t('topNav.seeAllReleases') }}
+        See all releases
       </ExternalLink>
     </TopNavListItem>
   </TopNavList>
@@ -119,7 +115,7 @@
       >{{ props.gql.currentProject?.activeBrowser?.displayName }} {{ props.gql.currentProject?.activeBrowser?.majorVersion }}</span>
       <Badge
         v-if="props.gql.currentProject?.activeBrowser?.isDeprecated"
-        :label="t('topNav.deprecated')"
+        label="Deprecated"
         status="warning"
         data-cy="top-nav-active-browser-deprecated-badge"
       />
@@ -145,7 +141,7 @@
       <span
         class="font-medium"
         :class="{'text-indigo-600': open}"
-      >{{ t('topNav.docsMenu.docsHeading') }}</span>
+      >Docs</span>
     </template>
     <div
       v-if="docsMenuVariant === 'main'"
@@ -163,7 +159,7 @@
       class="w-[484px]"
     >
       <div class="border-b border-b-gray-50 py-3 px-6 text-lg relative">
-        {{ t(`topNav.docsMenu.prompts.${docsMenuVariant}.title`) }}
+        {{ docsPromptTitles[docsMenuVariant] }}
         <button
           aria-label="Close"
           class="border-transparent rounded-full border p-[5px] top-[15px] right-[20px] absolute hocus-default hover:border-indigo-300"
@@ -207,7 +203,6 @@ import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLo
 import { gql, useMutation } from '@urql/vue'
 import { TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import type { TopNavFragment } from '../../generated/graphql'
-import { useI18n } from '@cy/i18n'
 import { computed, ref, watch, watchEffect } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { onClickOutside, onKeyStroke, useTimeAgo } from '@vueuse/core'
@@ -218,8 +213,6 @@ import Button from '../../components/Button.vue'
 import Badge from '../../components/Badge.vue'
 import UpdateCypressModal from './UpdateCypressModal.vue'
 import VerticalBrowserListItems from './VerticalBrowserListItems.vue'
-
-const { t } = useI18n()
 
 gql`
 fragment TopNav on Query {
@@ -306,6 +299,11 @@ const runningOldVersion = computed(() => {
 const showUpdateModal = ref(false)
 
 const docsMenuVariant = ref<DocsMenuVariant>('main')
+
+const docsPromptTitles: Record<Exclude<DocsMenuVariant, 'main'>, string> = {
+  ci1: 'Configure CI',
+  orchestration1: 'Run tests faster in CI',
+}
 
 watchEffect(() => {
   docsMenuVariant.value = props.forceOpenDocs ? 'ci1' : 'main'

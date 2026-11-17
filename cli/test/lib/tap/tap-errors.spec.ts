@@ -160,7 +160,7 @@ describe('lib/tap error registry lookup', () => {
     const copy = tapErrorCopy('SOMETHING_THIS_CLI_HAS_NEVER_HEARD_OF')
 
     expect(copy.description).to.eq(TAP_ERROR_COPY.PROTOCOL_MISMATCH.description)
-    expect(copy.recommendGhIssue).to.be.true
+    expect(copy.recommendGhIssue).toBe(true)
   })
 
   it('falls back for an inherited name rather than a prototype member', () => {

@@ -85,7 +85,7 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
   })
 }
 
-const debounced: Record<string, Function> = {}
+const debounced: Record<string, (cfg: NexusTypegenCfg) => void> = {}
 
 const nexusTypegenDebounced = (cfg: NexusTypegenCfg) => {
   debounced[cfg.filePath] =

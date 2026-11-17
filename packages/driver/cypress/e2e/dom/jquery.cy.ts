@@ -1,5 +1,3 @@
-/// <reference path="./jquery.d.ts" />
-
 describe('src/dom/jquery', () => {
   context('.isJquery', () => {
     it('does not get confused when window contains jquery function', () => {

@@ -56,7 +56,7 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
   [_.stubTrue, 'unknown'],
 ], ([fn, type]) => {
   return [fn, _.constant(type)]
-}) as unknown as [(val: any) => boolean, (val: Function) => Function][]
+}) as unknown as [(val: any) => boolean, (val: any) => string][]
 
 export default {
   warning (msg) {

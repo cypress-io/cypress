@@ -238,6 +238,7 @@ const getWebKitBrowserVersion = async (pwWebkitModulePath?: string) => {
     // `playwright-core`, resolving from the webkit module's location finds the
     // correct `browsers.json`.
     const paths = pwWebkitModulePath ? [path.dirname(pwWebkitModulePath), process.cwd()] : [process.cwd()]
+    // eslint-disable-next-line n/no-extraneous-require -- playwright-webkit owns the playwright-core version
     const pwCorePath = path.dirname(require.resolve('playwright-core', { paths }))
     const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
     const browsersJsonContents = await fs.readFile(browsersJsonPath, 'utf8')

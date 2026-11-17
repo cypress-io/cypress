@@ -189,8 +189,8 @@ const runDownloadAttempt = async ({ url, staging, kind }: StreamDownloadVerifyEx
   const controller = new AbortController()
   const fetchTimeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
-  let bundleSig: string | null = null
-  let manifestSig: string | null = null
+  let bundleSig: string | null
+  let manifestSig: string | null
 
   try {
     debug('fetching %s bundle from %s', kind, url)

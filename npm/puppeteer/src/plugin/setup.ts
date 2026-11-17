@@ -73,7 +73,7 @@ export function setup (options: SetupOptions) {
       debuggerUrl = options.webSocketDebuggerUrl
     })
   } catch (err: any) {
-    throw pluginError(`Could not set up \`after:browser:launch\` task. Ensure you are running Cypress >= 13.6.0. The following error was encountered:\n\n${err.stack}`)
+    throw pluginError(`Could not set up \`after:browser:launch\` task. Ensure you are running Cypress >= 14.0.0. The following error was encountered:\n\n${err.stack}`)
   }
 
   options.on('task', {

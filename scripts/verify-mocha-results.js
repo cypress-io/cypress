@@ -34,13 +34,13 @@ async function checkReportFile (filename) {
   try {
     xml = await fs.readFile(path.join(REPORTS_PATH, filename))
   } catch (err) {
-    throw new Error(`Unable to read the report in ${filename}: ${err.message}`)
+    throw new Error(`Unable to read the report in ${filename}: ${err.message}`, { cause: err })
   }
 
   try {
     result = parseResult(xml)
   } catch (err) {
-    throw new Error(`Error parsing result: ${err.message}. File contents:\n\n${xml}`)
+    throw new Error(`Error parsing result: ${err.message}. File contents:\n\n${xml}`, { cause: err })
   }
 
   const { name, time, tests, failures, skipped } = result
@@ -79,7 +79,7 @@ async function verifyMochaResults ({ expectedResultCount }) {
   try {
     filenames = await fs.readdir(REPORTS_PATH)
   } catch (err) {
-    throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
+    throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`, { cause: err })
   }
 
   const resultCount = filenames.length
