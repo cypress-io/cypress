@@ -4,8 +4,9 @@
  * @returns list of associated issue numbers
  */
 const getLinkedIssues = (body = '') => {
-  // remove markdown comments
-  body.replace(/(<!--.*?-->)|(<!--[\S\s]+?-->)|(<!--[\S\s]*?$)/g, '')
+  // An unclosed comment hides the rest of the body when GitHub renders it,
+  // so strip it to the end too.
+  body = body.replace(/<!--[\s\S]*?(?:-->|$)/g, '')
 
   const references = body.match(/(close[sd]?|fix(es|ed)?|resolve[s|d]?) ((cypress-io\/cypress)?#\d+|https:\/\/github.com\/cypress-io\/cypress\/issues\/\d+)/gi)
 
