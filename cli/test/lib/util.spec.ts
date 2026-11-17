@@ -4,11 +4,82 @@ import hasha from 'hasha'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
 import type { Systeminformation } from 'systeminformation'
+import path from 'path'
 
 describe('util', () => {
   beforeEach(() => {
     vi.unstubAllEnvs()
     vi.resetModules()
+  })
+
+  describe('.getApplicationDataFolder', () => {
+    beforeEach(() => {
+      vi.stubEnv('CYPRESS_CONFIG_ENV', undefined)
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', undefined)
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', undefined)
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', undefined)
+    })
+
+    it('keeps the default development folder without a workspace selector', () => {
+      expect(path.basename(util.getApplicationDataFolder())).toBe('development')
+    })
+
+    it.each([1, 2, 3, 4, 5])('uses an isolated development folder for workspace %s', (cloudWorkspaceNum) => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', String(cloudWorkspaceNum))
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe(`development-workspace-${cloudWorkspaceNum}`)
+    })
+
+    it('isolates the default development environment and preserves appended paths', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
+
+      const folder = util.getApplicationDataFolder('browsers', 'chrome')
+
+      expect(folder.endsWith(path.join('cy', 'development-workspace-4', 'browsers', 'chrome'))).toBe(true)
+    })
+
+    it.each(['0'])('uses default development storage for workspace selector %j', (workspace) => {
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', workspace)
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe('development')
+    })
+
+    it.each(['staging', 'production', 'test'])('keeps %s storage unchanged even with an invalid selector', (environment) => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', environment)
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', 'invalid')
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe(environment)
+    })
+
+    it('prefers CYPRESS_CONFIG_ENV for storage isolation', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      vi.stubEnv('CYPRESS_CONFIG_ENV', 'production')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe('production')
+    })
+
+    it('isolates explicitly configured development storage', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
+      vi.stubEnv('CYPRESS_CONFIG_ENV', 'development')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe('development-workspace-4')
+    })
+
+    it('places the workspace suffix before the e2e testing suffix', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', '1')
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe('development-workspace-4-e2e-test')
+    })
+
+    it('rejects an invalid development workspace selector', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '7')
+
+      expect(() => util.getApplicationDataFolder()).toThrow('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM must be an integer from 0 to 5')
+    })
   })
 
   describe('.isBrokenGtkDisplay', () => {
