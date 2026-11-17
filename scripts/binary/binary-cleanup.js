@@ -323,14 +323,18 @@ const buildEntryPointAndCleanup = async (appDir) => {
   // esbuild reports real paths, so a symlink in the build path (macOS's /var) would put every module outside the app
   const buildAppDir = await fs.realpath(appDir)
 
-  // 1. Bundle the main process module graph. Files that are only reached through it can then be removed from the binary,
+  // 1. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`) first, so the module graphs below
+  // resolve the copies that ship
+  await consolidateDeps({ projectBaseDir: buildAppDir })
+
+  // 2. Bundle the main process module graph. Files that are only reached through it can then be removed from the binary,
   // except those that are still loaded from disk.
   const { bundledDependencies, loadedFromDisk } = await createStartCypressBundle(buildAppDir)
 
   const [keptDependencies, serverEntryPointBundleDependencies] = await Promise.all([
-    // 2. Retrieve all dependencies that are loaded from disk and so must be kept in the binary
+    // 3. Retrieve all dependencies that are loaded from disk and so must be kept in the binary
     getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(c?js|json)$/.test(target))),
-    // 3. Create a bundle for the server entry point. This will be used to start the server in the binary. It returns the dependencies that are pulled in by this bundle that potentially can now be removed
+    // 4. Create a bundle for the server entry point. This will be used to start the server in the binary. It returns the dependencies that are pulled in by this bundle that potentially can now be removed
     createServerEntryPointBundle(buildAppDir),
   ])
 
@@ -344,7 +348,7 @@ const buildEntryPointAndCleanup = async (appDir) => {
 
   console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
 
-  // 4. Remove the bundled dependencies that are not in the list of kept dependencies from the binary
+  // 5. Remove the bundled dependencies that are not in the list of kept dependencies from the binary
   const existsWithExactCase = createExactCaseChecker(buildAppDir)
 
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
@@ -353,9 +357,6 @@ const buildEntryPointAndCleanup = async (appDir) => {
       await fs.remove(path.join(buildAppDir, dependency))
     }
   }))
-
-  // 5. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
-  await consolidateDeps({ projectBaseDir: buildAppDir })
 }
 
 const cleanupUnneededDependencies = async (buildAppDir) => {
