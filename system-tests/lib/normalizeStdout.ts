@@ -28,12 +28,12 @@ const electronDeprecationWarningRe = /Warning: The Electron browser is deprecate
 // goes: snapshots already have a blank line before the `====` divider.
 // DELETE THIS when the forceHttp1 option is removed -- it is easy to miss here.
 const forceHttp1DeprecationWarningRe = /Warning: The forceHttp1 option is deprecated and will be removed in a future version of Cypress\.\n\nRemove it from your configuration to use the default network path\.\n\nRead the documentation for the forceHttp1 configuration option: https:\/\/docs\.cypress\.io\/app\/references\/configuration#forceHttp1\n\n/g
-const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
+const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/g
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
 const escapedRetryDuration = /TORA(\d+)/g
 
-export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
+export const STDOUT_DURATION_IN_TABLES_RE = /(\s+)(\d+ms|\d+:\d+:?\d+)/g
 
 const replaceBrowserName = function (str: string, key: string, customBrowserPath: string, browserName: string, version: string, headless: boolean, deprecated: boolean, whitespace: string) {
   // get the padding for the existing browser string
@@ -177,7 +177,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // duration='1589' -> duration='XXXX'
   .replace(/(duration=')(\d+)(')/g, replaceDurationFromReporter)
   // (in|after) (1m)|(1m, 10s)|(10s)|(10.12ms) 1/1 => '(in|after) XXm, YYs, ZZ.ZZms 1/1
-  .replace(/((in)|(after)) ((?:\d+m)|(?:\d+m, \d+s)|(?:\d+s)|(?:\d+\.\d+ms)) (\d+\/\d+)/g, replaceShortDuration)
+  .replace(/((in)|(after)) (\d+m|\d+m, \d+s|\d+s|\d+\.\d+ms) (\d+\/\d+)/g, replaceShortDuration)
   // 15 seconds -> XX seconds
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
@@ -201,8 +201,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Strip the forceHttp1 deprecation warning so run-mode snapshots don't need to capture it
   .replace(forceHttp1DeprecationWarningRe, '')
   // Replaces "new dependencies optimized" message from vite as it does not respect the logLevel='silent' option
-  .replace(/^.*Re-optimizing dependencies.*?\n$/gm, '')
-  .replace(/\).*new dependencies optimized.*?\n/gm, ')\n')
+  .replace(/^.*Re-optimizing dependencies.*\n$/gm, '')
+  .replace(/\).*new dependencies optimized.*\n/g, ')\n')
 
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"

@@ -4,8 +4,8 @@ const { $ } = Cypress
 
 const normalizeStyles = (styles: string) => {
   return styles
-  .replace(/\s+/gm, '')
-  .replace(/['"]/gm, '\'')
+  .replace(/\s+/g, '')
+  .replace(/['"]/g, '\'')
 }
 
 const addStyles = (styles: string, to: string) => {

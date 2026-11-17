@@ -154,7 +154,7 @@ describe('detect', () => {
       family: 'chromium',
       channel: 'test-channel',
       displayName: 'Test Browser',
-      versionRegex: /Test Browser (\S+)/m,
+      versionRegex: /Test Browser (\S+)/,
       binary: 'test-browser-beta',
     }
 

@@ -130,7 +130,7 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson }: Dete
       debug('Evaluating custom Cypress config file \'%s\'', customConfigFile)
 
       // .ts, .mts extensions
-      if (/\.[m]?ts$/i.test(customConfigFile)) {
+      if (/\.m?ts$/i.test(customConfigFile)) {
         debug('Custom config file is Typescript - using TS')
 
         return 'ts'

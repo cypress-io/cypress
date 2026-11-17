@@ -67,7 +67,7 @@ function createProxyModule (module) {
         // This is how you can see if something is a class
         // TODO: Revisit, there has to be a better way to do this
         // Important! RegEx instances are stateful, do not extract to a constant
-        const isClass = /^class\s.+?\{.+?\}/gms.test(describedValue.toString())
+        const isClass = /^class\s.+?\{.+?\}/ms.test(describedValue.toString())
 
         if (isClass) {
           log(`🏗️ Handling ${key} as a constructor`)

@@ -120,7 +120,7 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
     // in the case of BiDi, cookies come in as foo=bar;bar=baz and not foo=bar; bar=baz,
     // i.e. they are delimited differently, which impacts some of our tests and our cookie splicing.
     // this regex is to help make sure the cookies are fed in consistently
-    const bidiStyleCookie = /;\S/gm
+    const bidiStyleCookie = /;\S/g
 
     if (cookies.match(bidiStyleCookie)) {
       this.req.headers.cookie = cookies.replaceAll(';', '; ')

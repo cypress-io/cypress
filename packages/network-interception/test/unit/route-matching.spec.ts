@@ -185,7 +185,7 @@ describe('core/route-matching', function () {
       tryMatch(req, {
         query: {
           foo: 'b*r',
-          baz: /quu[x]/,
+          baz: /quux/,
         },
       })
 

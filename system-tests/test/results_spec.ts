@@ -8,7 +8,7 @@ const numberRegex = /"(duration|totalDuration|port)": \d+/g
 const osNameRegex = /"(osName|platform)": "[^"]+"/g
 const archRegex = /"arch": "[^"]+"/g
 const versionRegex = /"(browserVersion|cypressVersion|osVersion|resolvedNodeVersion|version)": "[^"]+"/g
-const majorVersionRegex = /"(majorVersion)": [0-9]+/g
+const majorVersionRegex = /"(majorVersion)": \d+/g
 const pathRegex = /"(absolute|projectRoot|downloadsFolder|fileServerFolder|fixturesFolder|resolvedNodePath|screenshotsFolder|videosFolder|cypressBinaryRoot|path)": "[^"]+"/g
 // matches similar to: `\n    at SOME_CODEPATH"`
 const stackLineRegex = /(\Wn {4}at.+)"/g

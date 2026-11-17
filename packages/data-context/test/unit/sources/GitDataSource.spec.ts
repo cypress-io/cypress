@@ -75,19 +75,19 @@ describe('GitDataSource', () => {
     const unmodified = gitInfo.gitInfoFor(aRecordSpec)!
     const modified = gitInfo.gitInfoFor(xhrSpec)!
 
-    expect(created.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(created.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(created.statusType).toEqual('created')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(created.author).not.toBeUndefined()
     expect(created.lastModifiedTimestamp).not.toBeUndefined()
 
-    expect(unmodified.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(unmodified.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(unmodified.statusType).toEqual('unmodified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(unmodified.author).not.toBeUndefined()
     expect(unmodified.lastModifiedTimestamp).not.toBeUndefined()
 
-    expect(modified.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(modified.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(modified.statusType).toEqual('modified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(modified.author).not.toBeUndefined()
@@ -146,7 +146,7 @@ describe('GitDataSource', () => {
     filepaths.forEach((filepath, index) => {
       const result = results[index]
 
-      expect(result?.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+      expect(result?.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
       expect(result?.statusType).toEqual('created')
     })
   })

@@ -28,8 +28,8 @@ const getTags = async () => {
 }
 
 const parseSemanticReleaseOutput = (output) => {
-  const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d+-?\S*)/) || [])[1]
-  const nextVersion = (output.match(/next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
+  const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d\S*)/) || [])[1]
+  const nextVersion = (output.match(/next release version is (\d+\.\d+\.\d\S*)/) || [])[1]
 
   return {
     currentVersion,

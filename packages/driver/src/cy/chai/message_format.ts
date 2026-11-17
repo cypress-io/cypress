@@ -4,7 +4,7 @@
 
 const allPropertyWordsBetweenSingleQuotes = /('.*?')/g
 const allBetweenFourStars = /\*\*.*\*\*/
-const allNumberStrings = /'([0-9]+)'/g
+const allNumberStrings = /'(\d+)'/g
 const allEmptyStrings = /''/g
 const allSingleQuotes = /'/g
 const allEscapedSingleQuotes = /\\'/g

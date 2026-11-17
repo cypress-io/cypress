@@ -17,7 +17,7 @@ describe('network stubbing', { retries: 15 }, function () {
         .intercept({
           query: {
             foo: 'b*r',
-            baz: /quu[x]/,
+            baz: /quux/,
           },
         }).as('third')
         .intercept({

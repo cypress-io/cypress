@@ -51,7 +51,7 @@ type MappedPositionWithCodeFrames = MappedPosition & { codeFrames: string[] }
 // Header removed in node at ^10.16 || >=11.11.0
 // v11 is not an LTS candidate, we can just test the one version with it.
 // Test node versions for: 10.16-19, 10.20+, 12-19, 20-99, 100+, or 11.11
-const noHeader = /^v(10\.1[6-9]|10\.[2-9][0-9]|10\.[0-9]{3,}|1[2-9]\d*|[2-9]\d|\d{3,}|11\.11)/
+const noHeader = /^v(10\.1[6-9]|10\.[2-9]\d|10\.\d{3,}|1[2-9]\d*|[2-9]\d|\d{3,}|11\.11)/
 const headerLength = noHeader.test(process.version) ? 0 : 62
 
 // -----------------

@@ -223,7 +223,7 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         const oldBundler = `bundler: 'webpack',`
         const oldWebPackConfig = `webpackConfig: require('./webpack.config.js'),`
 
-        config = config.replace(oldFramework, ``).replace(oldBundler, ``).replace(oldWebPackConfig, ``).replace(`devServer: {`, ``).replace(/},/i, ``)
+        config = config.replace(oldFramework, ``).replace(oldBundler, ``).replace(oldWebPackConfig, ``).replace(`devServer: {`, ``).replace(/\},/, ``)
 
         await ctx.actions.file.writeFileInProject('cypress.config.js', config)
 
