@@ -28,6 +28,9 @@ const electronDeprecationWarningRe = /Warning: The Electron browser is deprecate
 // goes: snapshots already have a blank line before the `====` divider.
 // DELETE THIS when the forceHttp1 option is removed -- it is easy to miss here.
 const forceHttp1DeprecationWarningRe = /Warning: The forceHttp1 option is deprecated and will be removed in a future version of Cypress\.\n\nRemove it from your configuration to use the default network path\.\n\nRead the documentation for the forceHttp1 configuration option: https:\/\/docs\.cypress\.io\/app\/references\/configuration#forceHttp1\n\n/g
+// Chrome or Firefox sometimes take longer to connect. Matches the CDP_RETRYING_CONNECTION
+// template in packages/errors/src/errors.ts.
+const browserConnectRetryRe = /^Still waiting to connect to .+, retrying in 1 second \(attempt \d+\/\d+\)\r?\n/gm
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
@@ -138,9 +141,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
   str = str
-  // Chrome or Firefox sometimes take longer to connect. Stripped first so no later rewrite of
-  // durations or line endings can change the text before it is matched.
-  .replace(/^Still waiting to connect to .+, retrying in 1 second \(attempt \d+\/\d+\)\r?\n/gm, '')
+  // Stripped first so no later rewrite of durations or line endings can change it before it is matched
+  .replace(browserConnectRetryRe, '')
   // /Users/jane/........../ -> //foo/bar/.projects/
   // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join('/foo/bar/.projects')

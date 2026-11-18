@@ -48,6 +48,28 @@ describe('normalizeStdout', () => {
       .and.to.include('(attempt three of many)')
     })
 
+    it('removes connect-retry lines between browser-connect timeouts the run recovered from', () => {
+      const input = [
+        '  Running:  simple_spec.cy.js',
+        'Still waiting to connect to Chrome, retrying in 1 second (attempt 18/62)',
+        '',
+        'Timed out waiting for the browser to connect. Retrying...',
+        'Still waiting to connect to Chrome, retrying in 1 second (attempt 18/62)',
+        '',
+        'Timed out waiting for the browser to connect. Retrying again...',
+        '',
+        '  1 passing',
+        '',
+      ].join('\n')
+
+      expect(normalizeStdout(input)).to.eq([
+        '  Running:  simple_spec.cy.js',
+        '',
+        '  1 passing',
+        '',
+      ].join('\n'))
+    })
+
     it('leaves the rewrites of neighbouring lines intact', () => {
       const input = [
         'Still waiting to connect to Chrome, retrying in 1 second (attempt 18/62)',
