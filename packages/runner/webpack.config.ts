@@ -1,5 +1,6 @@
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import { HOST_MODULES_GLOBAL, HOST_MODULE_SPECIFIERS } from '@packages/types/src/host-modules'
 import path from 'path'
 import type webpack from 'webpack'
 
@@ -23,12 +24,42 @@ babelLoader.options.plugins.push(prismPlugin)
 const mainConfig: webpack.Configuration = {
   ...commonConfig,
   entry: {
-    cypress_runner: [path.resolve(__dirname, 'src/index.ts')],
+    cypress_runner: [path.resolve(__dirname, 'src/assert-host-modules.ts'), path.resolve(__dirname, 'src/index.ts')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
   },
+  externalsType: 'window',
+  externals: Object.fromEntries(HOST_MODULE_SPECIFIERS.map((specifier) => [specifier, [HOST_MODULES_GLOBAL, specifier]])),
+}
+
+// The runner and reporter compile against their own react, react-dom and mobx
+// but run against the app's copies, so all three packages must resolve the
+// same versions.
+function assertHostModuleVersionsMatch () {
+  const packageName = (specifier: string) => specifier.split('/').slice(0, specifier.startsWith('@') ? 2 : 1).join('/')
+  const packageNames = [...new Set(HOST_MODULE_SPECIFIERS.map(packageName))]
+  const consumers = ['app', 'runner', 'reporter']
+
+  for (const name of packageNames) {
+    const versions = consumers.map((consumer) => {
+      const manifest = require.resolve(`${name}/package.json`, { paths: [path.resolve(__dirname, '..', consumer)] })
+      const { version } = require(manifest)
+
+      if (typeof version !== 'string') {
+        throw new Error(`${manifest} has no version`)
+      }
+
+      return { consumer, version }
+    })
+
+    if (new Set(versions.map(({ version }) => version)).size > 1) {
+      const found = versions.map(({ consumer, version }) => `${consumer}: ${version}`).join(', ')
+
+      throw new Error(`${name} must resolve to one version for app, runner and reporter, which share it at runtime. Found ${found}`)
+    }
+  }
 }
 
 mainConfig.resolve = {
@@ -75,6 +106,8 @@ const crossOriginInjectionConfig: webpack.Configuration = {
 }
 
 export default async function () {
+  assertHostModuleVersionsMatch()
+
   await waitUntilIconsBuilt()
 
   const cyIcons = await import('@packages/icons')
