@@ -1,9 +1,17 @@
 /**
  * @vitest-environment jsdom
  */
-import $ from 'jquery'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import '../../../src/config/jquery'
+import $Cypress from '../../../src/cypress'
+
+const { $ } = $Cypress
+
+const scrollTo = (container: HTMLElement, target: string) => {
+  return new Promise<void>((resolve) => {
+    $(container).scrollTo(target, { axis: 'y', onAfter: () => resolve() })
+  })
+}
 
 describe('src/config/jquery.scrollto', () => {
   let container: HTMLElement
@@ -33,10 +41,17 @@ describe('src/config/jquery.scrollto', () => {
       return this[0]?.id === 'target' ? { top: 350, left: 0 } : { top: 50, left: 0 }
     })
 
-    await new Promise<void>((resolve) => {
-      $(container).scrollTo('#target', { axis: 'y', onAfter: () => resolve() })
-    })
+    await scrollTo(container, '#target')
 
     expect(container.scrollTop).toBe(300)
+  })
+
+  it.each([
+    ['120px', 120],
+    ['50%', 400],
+  ])('scrolls a container to the position %j', async (target, expected) => {
+    await scrollTo(container, target)
+
+    expect(container.scrollTop).toBe(expected)
   })
 })

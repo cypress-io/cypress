@@ -72,20 +72,17 @@ export function scrollTo (target, duration, settings) {
     let attr = {}
     let toff
 
-    switch (typeof targ) {
-      // A number will pass the regex
-      case 'number': break
-      // @ts-expect-error - a selector falls through on purpose, so `case 'object'` can read the matched element's offset
-      case 'string':
-        if (/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(targ)) {
-          targ = both(targ)
-          // We are done
-          break
-        }
+    // A string that isn't a position is a selector, so resolve it to the
+    // elements it matches and scroll to them like any other jQuery object.
+    if (typeof targ === 'string' && !/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(targ)) {
+      targ = win ? $(targ) : $(targ, elem)
+    }
 
-        // Relative/Absolute selector
-        targ = win ? $(targ) : $(targ, elem)
-        /* falls through */
+    switch (typeof targ) {
+      case 'number': break
+      case 'string':
+        targ = both(targ)
+        break
       case 'object':
         if (targ.length === 0) return
 
