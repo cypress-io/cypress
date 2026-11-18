@@ -131,7 +131,7 @@ describe('config/src/index', () => {
       expect(configUtil.matchesConfigKey(key)).toEqual('baseUrl')
     })
 
-    it('returns nothing when config key does not has a default value', () => {
+    it('returns nothing when config key does not have a default value', () => {
       const normalizedKey = configUtil.matchesConfigKey('random')
 
       expect(normalizedKey).toBeUndefined()
