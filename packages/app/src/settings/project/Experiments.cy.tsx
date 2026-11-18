@@ -1,8 +1,12 @@
 import { ExperimentsFragmentDoc } from '../../generated/graphql-test'
 import config from '@packages/frontend-shared/cypress/fixtures/config.json'
 import Experiments from './Experiments.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
+
+const experimentNames: Record<string, string> = {
+  experimentalCspAllowList: 'CSP Allow List',
+  experimentalInteractiveRunEvents: 'Interactive run events',
+  experimentalWebKitSupport: 'WebKit Support',
+}
 
 describe('<Experiments />', { viewportWidth: 800, viewportHeight: 600 }, () => {
   const experimentEntries = config.filter((a) => a.field.startsWith('experimental'))
@@ -17,7 +21,7 @@ describe('<Experiments />', { viewportWidth: 800, viewportHeight: 600 }, () => {
     })
 
     experimentEntries.forEach((exp) => {
-      const expName = defaultMessages.settingsPage.experiments[exp.field].name
+      const expName = experimentNames[exp.field]
 
       cy.contains(`[data-cy="experiment-${exp.field}"]`, expName)
       .should('contain', exp.value ? 'Enabled' : 'Disabled')
@@ -36,12 +40,10 @@ describe('<Experiments />', { viewportWidth: 800, viewportHeight: 600 }, () => {
       },
     })
 
-    const { experimentalStrategy, experimentalOptions } = defaultMessages.settingsPage.experiments.retries
-
-    cy.contains('[data-cy="experiment-retries.experimentalStrategy"]', experimentalStrategy.name)
+    cy.contains('[data-cy="experiment-retries.experimentalStrategy"]', 'Retries Strategy')
     .should('contain', 'Enabled')
 
-    cy.contains('[data-cy="experiment-retries.experimentalOptions"]', experimentalOptions.name)
+    cy.contains('[data-cy="experiment-retries.experimentalOptions"]', 'Retries Strategy Options')
     .should('contain', 'Disabled')
   })
 

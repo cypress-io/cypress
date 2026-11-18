@@ -412,7 +412,7 @@ exports['e2e stdout / displays assertion errors'] = `
   assertion errors
     1) fails with assertion diff, no retries
     2) fails with assertion diff, with retries
-    3) fails with dom assertion without diff, with retries
+    3) fails with dom assertion without diff, no retries
     4) fails with dom assertion without diff, with retries
 
 
@@ -442,7 +442,7 @@ exports['e2e stdout / displays assertion errors'] = `
       [stack trace lines]
 
   3) assertion errors
-       fails with dom assertion without diff, with retries:
+       fails with dom assertion without diff, no retries:
      AssertionError: expected '<body>' to have class 'foo'
       [stack trace lines]
 

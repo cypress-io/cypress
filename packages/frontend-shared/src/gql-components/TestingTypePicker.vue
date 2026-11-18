@@ -24,19 +24,14 @@
         v-if="tt.key === 'component' && tt.status === 'disabled'"
         #default
       >
-        <i18n-t
-          scope="global"
-          keypath="testingType.componentDisabled.description"
-        >
-          <ExternalLink href="https://on.cypress.io/installing-cypress">
-            {{ t('testingType.componentDisabled.link') }}
-          </ExternalLink>
-        </i18n-t>
+        To test your components you must <ExternalLink href="https://on.cypress.io/installing-cypress">
+          install Cypress
+        </ExternalLink> as an NPM dependency for this project.
       </template>
       <template #footer>
         <StatusBadge
           class="mt-[16px]"
-          :title="t(`setupPage.testingCard.${tt.status}`)"
+          :title="statusLabels[tt.status]"
           :status="tt.status === 'configured' || tt.status === 'running'"
           @choose-a-browser="emits('pick', tt.key, currentTestingType)"
         />
@@ -54,11 +49,8 @@ import IconE2E from '~icons/cy/testing-type-e2e_x64.svg'
 import IconE2ESolid from '~icons/cy/testing-type-e2e-solid_x64.svg'
 import IconComponent from '~icons/cy/testing-type-component_x64.svg'
 import IconComponentSolid from '~icons/cy/testing-type-component-solid_x64.svg'
-import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
 import ExternalLink from './ExternalLink.vue'
-
-const { t } = useI18n()
 
 gql`
 fragment TestingTypePicker on Query {
@@ -80,13 +72,22 @@ const emits = defineEmits<{
   (eventName: 'pick', testingType: TestingTypeEnum, currentTestingType: TestingTypeEnum): void
 }>()
 
-const e2eStatus = computed(() => {
+type TestingTypeStatus = 'configured' | 'notConfigured' | 'running' | 'disabled'
+
+const statusLabels: Record<TestingTypeStatus, string> = {
+  configured: 'Configured',
+  notConfigured: 'Not Configured',
+  running: 'Running',
+  disabled: 'Disabled',
+}
+
+const e2eStatus = computed((): TestingTypeStatus => {
   if (!props.gql.currentProject?.isE2EConfigured) return 'notConfigured'
 
   return props.gql.currentProject.currentTestingType === 'e2e' ? 'running' : 'configured'
 })
 
-const componentStatus = computed(() => {
+const componentStatus = computed((): TestingTypeStatus => {
   if (!props.gql.invokedFromCli) return 'disabled'
 
   if (!props.gql.currentProject?.isCTConfigured) return 'notConfigured'
@@ -98,8 +99,8 @@ const testingTypes = computed(() => {
   return [
     {
       key: 'e2e',
-      name: t('testingType.e2e.name'),
-      description: t('testingType.e2e.description'),
+      name: 'E2E Testing',
+      description: 'Build and test the entire experience of your application from end-to-end to ensure each flow matches your expectations.',
       icon: IconE2E,
       iconSolid: IconE2ESolid,
       status: e2eStatus.value,
@@ -107,8 +108,8 @@ const testingTypes = computed(() => {
     },
     {
       key: 'component',
-      name: t('testingType.component.name'),
-      description: t('testingType.component.description'),
+      name: 'Component Testing',
+      description: 'Build and test your components from your design system in isolation in order to ensure each state matches your expectations.',
       icon: IconComponent,
       iconSolid: IconComponentSolid,
       status: componentStatus.value,

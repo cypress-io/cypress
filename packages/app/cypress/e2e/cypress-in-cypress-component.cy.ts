@@ -1,5 +1,4 @@
 import type { SinonStub } from 'sinon'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../src/paths'
 // import { snapshotAUTPanel } from './support/snapshot-aut-panel'
 
@@ -44,7 +43,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       // go to Settings page and back to spec runner
       cy.contains('a', 'Settings').click()
-      cy.contains(defaultMessages.settingsPage.device.title).should('be.visible')
+      cy.contains('Device settings').should('be.visible')
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
@@ -52,7 +51,7 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       // go to Runs page and back to spec runner
       cy.contains('a', 'Runs').click()
-      cy.contains(defaultMessages.runs.connect.title).should('be.visible')
+      cy.contains('Connect to view your recorded runs').should('be.visible')
       cy.contains('a', 'Specs').click()
       cy.contains('TestComponent.spec').click()
       cy.waitForSpecToFinish()
@@ -63,13 +62,12 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
     it('redirects to the specs list with error if a spec is not found', { retries: 15 }, () => {
       cy.visitApp()
       cy.specsPageIsVisible()
-      const { title, intro, explainer } = defaultMessages.specPage.noSpecError
       const badFilePath = 'src/DoesNotExist.spec.js'
 
       cy.visitApp(`/specs/runner?file=${badFilePath}`)
-      cy.contains(title).should('be.visible')
-      cy.contains(intro).should('be.visible')
-      cy.contains(explainer).should('be.visible')
+      cy.contains('Spec not found').should('be.visible')
+      cy.contains('There is no spec matching the following location:').should('be.visible')
+      cy.contains('It is possible that the file has been moved or deleted. Please choose from the list of specs below.').should('be.visible')
       cy.contains(getPathForPlatform(badFilePath)).should('be.visible')
       cy.location()
       .its('href')
@@ -77,12 +75,10 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
 
       // should clear after reload
       cy.reload()
-      cy.contains(title).should('not.exist')
+      cy.contains('Spec not found').should('not.exist')
     })
 
     it('redirects to the specs list with error if an open spec is not found when specs list updates', () => {
-      const { title, intro, explainer } = defaultMessages.specPage.noSpecError
-
       const goodFilePath = 'src/TestComponent.spec.jsx'
 
       cy.visitApp(`/specs/runner?file=${goodFilePath}`)
@@ -92,9 +88,9 @@ describe('Cypress In Cypress CT', { viewportWidth: 1500, defaultCommandTimeout: 
       cy.withCtx((ctx, o) => {
         ctx.actions.project.setSpecs(ctx.project.specs.filter((spec) => !spec.absolute.includes(o.path)))
       }, { path: goodFilePath }).then(() => {
-        cy.contains(title).should('be.visible')
-        cy.contains(intro).should('be.visible')
-        cy.contains(explainer).should('be.visible')
+        cy.contains('Spec not found').should('be.visible')
+        cy.contains('There is no spec matching the following location:').should('be.visible')
+        cy.contains('It is possible that the file has been moved or deleted. Please choose from the list of specs below.').should('be.visible')
         cy.contains(getPathForPlatform(goodFilePath)).should('be.visible')
         cy.location()
         .its('href')

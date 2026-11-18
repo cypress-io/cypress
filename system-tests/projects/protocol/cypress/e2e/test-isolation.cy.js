@@ -51,7 +51,7 @@ describe('test isolation', { baseUrl: null }, () => {
     })
   })
 
-  describe('test isolation false', { testIsolation: false }, () => {
+  describe('test isolation false after test isolation true', { testIsolation: false }, () => {
     it('test 8', () => {
       cy.get('#text-target').type('abc')
       cy.get('#text-target').should('have.value', 'defabc')

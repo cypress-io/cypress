@@ -8,10 +8,10 @@
 # Every path a job could care about must map to a run-* param below: a path
 # that matches nothing is an error rather than a silent skip.
 #
-# release/* branches, the update-v8-snapshot-cache-on-develop branch, the
-# run-all-jobs manual trigger, and any develop or vN run that isn't a webhook
-# push (scheduled pipelines, API triggers, or an unset/unknown trigger source)
-# skip path inspection entirely and run everything.
+# release/* branches, the run-all-jobs manual trigger, and any develop or vN
+# run that isn't a webhook push (scheduled pipelines, API triggers, or an
+# unset/unknown trigger source) skip path inspection entirely and run
+# everything.
 #
 # The corresponding pipeline parameters in @pipeline.yml default to true, so a
 # continuation that omits them runs everything rather than nothing.
@@ -81,10 +81,8 @@ emit_all_true() {
 }
 
 # ----- branch override --------------------------------------------------------
-# On release branches and the v8 snapshot cache branch all jobs must run.
 BRANCH="${CIRCLE_BRANCH:-}"
-if [[ "$BRANCH" =~ ^release/ ]] || \
-   [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then
+if [[ "$BRANCH" =~ ^release/ ]]; then
   echo "Branch '$BRANCH' — running all tests" >&2
   emit_all_true
   exit 0

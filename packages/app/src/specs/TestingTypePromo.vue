@@ -7,20 +7,19 @@
       class="m-auto mt-[32px]"
     >
       <template #header>
-        <PromoHeader :title="t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.title' : 'specPage.testingTypePromo.ct.header.title')">
+        <PromoHeader :title="testingType === 'e2e' ? 'End-to-end testing is not set up for this project' : 'Component testing is not set up for this project'">
           <template #description>
-            <i18n-t
-              tag="p"
-              :keypath="testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.description' : 'specPage.testingTypePromo.ct.header.description'"
-            >
+            <p>
+              Try it out now, or
               <ExternalLink
                 data-cy="testing-type-promo-guide-link"
                 :href="guideLink"
                 @click="recordEvent(testingType, 'guide')"
               >
-                {{ t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.link' : 'specPage.testingTypePromo.ct.header.link') }}
+                read our guides
               </ExternalLink>
-            </i18n-t>
+              to learn more
+            </p>
           </template>
           <template #control>
             <Button
@@ -30,7 +29,7 @@
             >
               <component :is="testingType === 'component' ? IconTestingTypeComponent : IconTestingTypeE2E" />
               <div class="border-indigo-600 border-l-[1px] -my-[8px] py-[8px] pl-[16px] ml-[8px]">
-                {{ t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.header.control' : 'specPage.testingTypePromo.ct.header.control') }}
+                Quick setup
               </div>
               <IconChevronRightSmall />
             </Button>
@@ -40,59 +39,60 @@
 
       <template #cards>
         <PromoCard
-          :title="t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.body.title' : 'specPage.testingTypePromo.ct.body.title')"
-          :body="t(testingType === 'e2e' ? 'specPage.testingTypePromo.e2e.body.description' : 'specPage.testingTypePromo.ct.body.description')"
+          :title="testingType === 'e2e' ? 'What is end-to-end testing?' : 'What is Component Testing?'"
+          :body="testingType === 'e2e'
+            ? 'End-to-end tests are perfect for testing your entire application from a user\'s perspective. Visit any URL and test full user journeys across pages and domains.'
+            : 'Cypress Component Testing is a technique for developers to write, test, and debug components in isolation without ever leaving the browser - and without having to run your entire application.'"
           class=""
         >
           <template #content>
             <div class="gap-[24px]">
               <ol class="py-[16px] px-[20px] gap-[16px] flex flex-col font-normal text-gray-700">
-                <i18n-t
+                <li
                   v-if="testingType === 'e2e'"
-                  tag="li"
                   class="list-disc"
-                  keypath="specPage.testingTypePromo.e2e.body.listItem1"
                 >
-                  <code class="text-jade-400">{{ t('specPage.testingTypePromo.e2e.body.listItem1Command') }}</code>
-                </i18n-t>
-                <i18n-t
+                  Test full user journeys across multiple pages using
+                  <code class="text-jade-400">cy.visit()</code>
+                  to load up a web page for your test.
+                </li>
+                <li
                   v-else
-                  tag="li"
                   class="list-disc"
-                  keypath="specPage.testingTypePromo.ct.body.listItem1"
                 >
-                  <code class="text-jade-400">{{ t('specPage.testingTypePromo.ct.body.listItem1Command') }}</code>
-                </i18n-t>
+                  Instead of visiting a page, use
+                  <code class="text-jade-400">cy.mount()</code>
+                  to render your components directly in the browser.
+                </li>
 
-                <i18n-t
+                <li
                   v-if="testingType === 'e2e'"
-                  tag="li"
                   class="list-disc"
-                  keypath="specPage.testingTypePromo.e2e.body.listItem2"
                 >
-                  <code class="text-jade-400">{{ t('specPage.testingTypePromo.e2e.body.listItem2Command') }}</code>
-                </i18n-t>
-                <i18n-t
+                  Work with live API calls or mock them with
+                  <code class="text-jade-400">cy.intercept()</code>
+                  to test all possible states of your app.
+                </li>
+                <li
                   v-else
-                  tag="li"
                   class="list-disc"
-                  keypath="specPage.testingTypePromo.ct.body.listItem2"
-                />
+                >
+                  Test from a user's perspective with all the same Cypress commands that are available in end-to-end testing.
+                </li>
 
-                <i18n-t
+                <li
                   v-if="testingType === 'e2e'"
-                  tag="li"
                   class="list-disc"
-                  keypath="specPage.testingTypePromo.e2e.body.listItem3"
                 >
-                  <code class="text-jade-400">{{ t('specPage.testingTypePromo.e2e.body.listItem3Command') }}</code>
-                </i18n-t>
-                <i18n-t
+                  Use
+                  <code class="text-jade-400">cy.session()</code>
+                  to maintain consistent browser sessions in your tests, and work with features like cookies and local storage, all while keeping your tests properly isolated.
+                </li>
+                <li
                   v-else
-                  tag="li"
                   class="list-disc"
-                  keypath="specPage.testingTypePromo.ct.body.listItem3"
                 >
+                  To get started, you can generate the config for
                   <span>
                     <component
                       :is="FrameworkBundlerLogos.angular"
@@ -105,7 +105,7 @@
                     >
                       Angular
                     </ExternalLink>
-                  </span>
+                  </span>,
                   <span>
                     <component
                       :is="FrameworkBundlerLogos.react"
@@ -118,7 +118,7 @@
                     >
                       React
                     </ExternalLink>
-                  </span>
+                  </span>, and
                   <span>
                     <component
                       :is="FrameworkBundlerLogos.vue3"
@@ -132,14 +132,15 @@
                       Vue
                     </ExternalLink>
                   </span>
+                  (and
                   <ExternalLink
                     data-cy="testing-type-promo-framework-link"
                     :href="getFrameworkLink('more')"
                     @click="recordEvent('component', 'framework', 'more')"
                   >
-                    {{ t('specPage.testingTypePromo.ct.body.listItem3Link') }}
-                  </ExternalLink>
-                </i18n-t>
+                    more
+                  </ExternalLink>!).
+                </li>
               </ol>
               <div
                 v-if="testingType === 'component'"
@@ -150,7 +151,7 @@
                   :href="giveFeedbackLink"
                   @click="recordEvent(testingType, 'feedback')"
                 >
-                  {{ t('specPage.testingTypePromo.ct.body.link') }}
+                  Give feedback
                 </ExternalLink>
               </div>
             </div>
@@ -167,7 +168,6 @@ import Promo from '../components/promo/Promo.vue'
 import PromoCard from '../components/promo/PromoCard.vue'
 import PromoHeader from '../components/promo/PromoHeader.vue'
 import Button from '@cypress-design/vue-button'
-import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
@@ -194,7 +194,6 @@ const emits = defineEmits<{
 const CT_MEDIUM = 'CT Preview'
 const E2E_MEDIUM = 'E2E Preview'
 
-const { t } = useI18n()
 const recordEventMutation = useMutation(TestingTypePromo_RecordEventDocument)
 
 const promoInstanceId = nanoid()

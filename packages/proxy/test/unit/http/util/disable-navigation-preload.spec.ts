@@ -19,7 +19,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
   describe('DISABLE_NAVIGATION_PRELOAD_EXPRESSION (worker realm)', () => {
     // A prototype-backed fake so patches can be told apart from an instance's
     // own properties, the same shape the real NavigationPreloadManager has.
-    function createManagerClass (methods: { enable?: Function, disable?: Function }) {
+    function createManagerClass (methods: { enable?: (...args: any[]) => unknown, disable?: (...args: any[]) => unknown }) {
       function FakeNavigationPreloadManager (this: any) {}
 
       if (methods.enable) {
@@ -109,7 +109,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
   })
 
   describe('DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION (window realm)', () => {
-    function createManagerCtor (enable?: Function) {
+    function createManagerCtor (enable?: (...args: any[]) => unknown) {
       function FakeNavigationPreloadManager (this: any) {}
 
       FakeNavigationPreloadManager.prototype.enable = enable ?? vi.fn().mockResolvedValue(undefined)
@@ -118,8 +118,8 @@ describe('lib/http/util/disable-navigation-preload', () => {
     }
 
     function createFakeSelf (options: {
-      NavigationPreloadManager?: Function
-      getRegistrations?: Function
+      NavigationPreloadManager?: (...args: any[]) => unknown
+      getRegistrations?: (...args: any[]) => unknown
     } = {}) {
       return {
         NavigationPreloadManager: options.NavigationPreloadManager,

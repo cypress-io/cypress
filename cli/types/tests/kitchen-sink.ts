@@ -52,7 +52,8 @@ expect(stub).to.have.been.calledOnce
 cy.wrap(stub).should('have.been.calledOnce')
 cy.wrap(stub).should('be.calledOnce')
 
-namespace EventInterfaceTests {
+// EventInterfaceTests
+{
   // window:confirm stubbing
   Cypress.on('window:confirm', () => { })
   Cypress.on('window:confirm', cy.spy())
@@ -157,15 +158,18 @@ cy.clearLocalStorage('todos')
 cy.clearLocalStorage('todos', { log: false })
 cy.clearLocalStorage({ log: false })
 
-namespace BlobTests {
+// BlobTests
+{
   Cypress.Blob.imgSrcToDataURL('/some/path', undefined, 'anonymous')
     .then((dateUrl) => {
       dateUrl // $ExpectType string
   })
 }
 
-namespace BufferTests {
+// BufferTests
+{
   const buffer = Cypress.Buffer.from('sometext')
+
   Cypress.Buffer.isBuffer(buffer)
   buffer.length
 }

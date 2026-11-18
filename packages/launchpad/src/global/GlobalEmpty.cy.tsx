@@ -1,8 +1,4 @@
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 import GlobalEmpty from './GlobalEmpty.vue'
-
-const emptyText = defaultMessages.globalPage.empty
 
 describe('<GlobalEmpty />', () => {
   beforeEach(() => {
@@ -13,13 +9,11 @@ describe('<GlobalEmpty />', () => {
   })
 
   it('renders the empty state', () => {
-    cy.contains(emptyText.title)
-    cy.contains(emptyText.helper)
+    cy.contains('Add project')
+    cy.contains('Get started by adding your first project below.')
 
-    const parts = emptyText.dropText.split('{0}')
-
-    cy.contains(parts[0])
-    cy.contains(emptyText.browseManually)
+    cy.contains('Drag your project directory here or ')
+    cy.contains('browse manually.')
 
     cy.get('input[type=file]').should('have.length', 1)
   })

@@ -168,7 +168,7 @@ const attachToWindow = (autWindow: Window) => {
 
   // this communicates to the injection code that Cypress is now available so
   // it can safely subscribe to Cypress events, etc
-  autWindow.__attachToCypress ? autWindow.__attachToCypress(Cypress) : undefined
+  autWindow.__attachToCypress?.(Cypress)
 
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)

@@ -23,9 +23,7 @@
         {{ results.totalFlakyTests }}
       </span>
       <div class="w-px my-[6px] h-6 border-orange-200 border" />
-      <span class="font-semibold pl-1">
-        {{ t('specPage.flaky.badgeLabel') }}
-      </span>
+      <span class="font-semibold pl-1">Flaky</span>
     </div>
   </div>
 </template>
@@ -35,9 +33,6 @@ import { computed } from 'vue'
 import type { RunResultsFragment } from '../generated/graphql'
 import { gql } from '@urql/core'
 import ResultCounts from '@packages/frontend-shared/src/components/ResultCounts.vue'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 gql`
 fragment RunResults on CloudRun {

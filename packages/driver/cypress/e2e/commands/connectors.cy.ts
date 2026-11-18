@@ -1572,7 +1572,7 @@ describe('src/cy/commands/connectors', () => {
             done()
           })
 
-          return cy.its('wat')
+          cy.its('wat')
         })
 
         it('throws when property does not exist', function (done) {

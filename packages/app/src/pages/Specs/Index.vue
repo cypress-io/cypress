@@ -36,7 +36,6 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue'
 import { gql, useQuery } from '@urql/vue'
-import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
 import NoSpecsPage from '../../specs/NoSpecsPage.vue'
 import CreateSpecModal from '../../specs/CreateSpecModal.vue'
@@ -45,8 +44,6 @@ import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument } fr
 import { useSubscription } from '../../graphql'
 import { useRelevantRun } from '../../composables/useRelevantRun'
 import { isEmpty } from 'lodash'
-
-const { t } = useI18n()
 
 gql`
 query SpecsPageContainer_BranchInfo {
@@ -128,8 +125,8 @@ const isDefaultSpecPattern = computed(() => !!query.data.value?.currentProject?.
 
 const title = computed(() => {
   return isDefaultSpecPattern.value ?
-    t('createSpec.page.defaultPatternNoSpecs.title') :
-    t('createSpec.page.customPatternNoSpecs.title')
+    'Create your first spec' :
+    'No specs found'
 })
 
 const modalIsShown = ref(false)

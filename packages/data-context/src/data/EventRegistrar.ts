@@ -4,7 +4,7 @@ import _ from 'lodash'
 const debug = debugLib(`cypress:lifecycle:EventRegistrar`)
 
 export class EventRegistrar {
-  private _registeredEvents: Record<string, Function> = {}
+  private _registeredEvents: Record<string, (...args: any[]) => any> = {}
 
   hasNodeEvent (eventName: string) {
     const isRegistered = typeof this._registeredEvents[eventName] === 'function'
@@ -26,7 +26,7 @@ export class EventRegistrar {
     return evtFn(...args)
   }
 
-  registerEvent (event: string, callback: Function) {
+  registerEvent (event: string, callback: (...args: any[]) => any) {
     debug(`register event '${event}'`)
 
     if (!_.isString(event)) {

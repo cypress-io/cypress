@@ -482,7 +482,7 @@ export class DataContext {
   }
 
   static #activeRequestCount = 0
-  static #awaitingEmptyRequestCount: Function[] = []
+  static #awaitingEmptyRequestCount: Array<() => void> = []
 
   static addActiveRequest () {
     this.#activeRequestCount++
@@ -502,7 +502,7 @@ export class DataContext {
       return
     }
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       this.#awaitingEmptyRequestCount.push(resolve)
     })
   }
