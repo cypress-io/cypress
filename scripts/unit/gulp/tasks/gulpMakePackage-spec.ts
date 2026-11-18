@@ -21,49 +21,28 @@ describe('gulpMakePackage', () => {
     })
 
     it('accepts valid package names', () => {
-      for (const name of ['server', 'data-context', 'v8-snapshot-require', 'network-interception', 'ts']) {
+      for (const name of ['release-notes', 'source-maps', 'http2-proxy', 'es6']) {
         expect(validate(name), name).to.be.true
       }
     })
 
-    it('accepts digits after the first character', () => {
-      expect(validate('http2-proxy')).to.be.true
-      expect(validate('es6')).to.be.true
-    })
+    it('rejects names that break the naming rule', () => {
+      const invalidNames = [
+        '', 'my package', 'my package!', 'my_package', 'my.package', 'scope/name', '@@@a',
+        'ABC', 'MyPackage', 'my-Package',
+        '1-', '8-ball', '-package', '-',
+        'my-', 'my--package',
+      ]
 
-    it('rejects a name with spaces or punctuation', () => {
-      for (const name of ['my package', 'my package!', 'my_package', 'my.package', 'scope/name', 'a[]^`']) {
+      for (const name of invalidNames) {
         expect(validate(name), name).to.be.a('string').that.includes('lowercase letters, digits and single hyphens')
       }
     })
 
-    it('rejects uppercase letters', () => {
-      for (const name of ['ABC', 'MyPackage', 'my-Package']) {
-        expect(validate(name), name).to.be.a('string').that.includes('lowercase')
+    it('rejects the name of an existing package', () => {
+      for (const name of ['server', 'ts', 'v8-snapshot-require']) {
+        expect(validate(name), name).to.equal(`packages/${name} already exists. Choose a different name.`)
       }
-    })
-
-    it('rejects a name that does not start with a letter', () => {
-      for (const name of ['1-', '8-ball', '-package', '-', '@@@a']) {
-        expect(validate(name), name).to.be.a('string').that.includes('start with a letter')
-      }
-    })
-
-    it('rejects a trailing or doubled hyphen', () => {
-      for (const name of ['my-', 'my--package']) {
-        expect(validate(name), name).to.be.a('string').that.includes('single hyphens')
-      }
-    })
-
-    it('rejects an empty name', () => {
-      expect(validate('')).to.be.a('string').that.includes('start with a letter')
-    })
-
-    it('rejects a name that makes @packages/<name> longer than npm\'s 214-character limit', () => {
-      const longestName = 'a'.repeat(214 - '@packages/'.length)
-
-      expect(validate(longestName)).to.be.true
-      expect(validate(`${longestName}a`)).to.be.a('string').that.includes('214-character limit')
     })
   })
 })

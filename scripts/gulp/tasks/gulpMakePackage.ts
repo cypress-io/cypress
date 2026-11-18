@@ -5,22 +5,15 @@ import dedent from 'dedent'
 
 import { monorepoPaths } from '../monorepoPaths'
 
-// npm caps a full package name at 214 characters, and this name is scoped as `@packages/<name>`
-const MAX_PACKAGE_NAME_LENGTH = 214 - '@packages/'.length
-
-// The name becomes a directory under packages/, part of `@packages/<name>` and a source file name,
-// so hold it to the subset of npm's naming rules every existing package already follows
+// The name becomes a directory under packages/, part of `@packages/<name>` and a source file name.
+// The task writes into that directory unconditionally, so an existing name would overwrite that package.
 const validatePackageName = (name: string): true | string => {
-  if (name.length > MAX_PACKAGE_NAME_LENGTH) {
-    return `Package names can be at most ${MAX_PACKAGE_NAME_LENGTH} characters, so that @packages/<name> fits npm's 214-character limit.`
-  }
-
-  if (!/^[a-z]/i.test(name)) {
-    return 'Package names must start with a letter.'
-  }
-
   if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name)) {
-    return 'Package names can only contain lowercase letters, digits and single hyphens, and can\'t end with a hyphen.'
+    return 'Package names must start with a letter and use only lowercase letters, digits and single hyphens.'
+  }
+
+  if (fs.existsSync(path.join(monorepoPaths.pkgDir, name))) {
+    return `packages/${name} already exists. Choose a different name.`
   }
 
   return true
