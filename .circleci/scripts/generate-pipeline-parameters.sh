@@ -92,7 +92,7 @@ emit_all_true() {
 
 # ----- branch override --------------------------------------------------------
 BRANCH="${CIRCLE_BRANCH:-}"
-if [[ "$BRANCH" =~ ^release/ ]] || [[ "$BRANCH" == "chrisbreiding/driver-updates-component-testing" ]]; then
+if [[ "$BRANCH" =~ ^release/ ]] || [[ "$BRANCH" == "chrisbreiding/driver-updates-ci-run" ]]; then
   echo "Branch '$BRANCH' — running all tests" >&2
   emit_all_true
   exit 0
