@@ -20035,6 +20035,11 @@ image-size@1.2.1, image-size@^1.0.0:
   dependencies:
     queue "6.0.2"
 
+image-size@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/image-size/-/image-size-2.0.3.tgz#5225a99e99851b1dfc5fdcd6fcdeeebeeaf6a6a4"
+  integrity sha512-9BJAtVCBth+76NwqnEfWr3PiRnYhbquk6K/USuQ1GQajz5NgLzO7tNsnoNjHfO7LuftgkBf+CCH6j28hjMbIYQ==
+
 image-size@^0.5.0:
   version "0.5.5"
   resolved "https://registry.yarnpkg.com/image-size/-/image-size-0.5.5.tgz#09dfd4ab9d20e29eb1c3e80b8990378df9e3cb9c"
