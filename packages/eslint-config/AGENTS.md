@@ -15,11 +15,16 @@ yarn workspace @packages/eslint-config lint
 src/
   baseConfig.ts         Core flat-config with TypeScript, import, and stylistic rules
   cliOverrides.ts       Overrides applied for CLI/Node.js contexts
+  compatConfig.ts       Opt-in browser-API compatibility checks (eslint-plugin-compat) for the browser bundles' shipped source
+  eslint-plugin-mocha.d.ts
+                        Ambient types for eslint-plugin-mocha, which `node` resolution can't find (see Dependency pins)
   frontendOverrides.ts  Rules shared by app, launchpad and frontend-shared, such as type-only imports from data-context in .vue files
   graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
   nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
+  typeAwareConfig.ts    `noFloatingPromisesConfig(files)`: opt-in `@typescript-eslint/no-floating-promises` with a project service, scoped to the files given
+  vitestConfig.ts       Opt-in linting of Vitest specs (@vitest/eslint-plugin), for workspaces whose unit tests run on Vitest
   vueTsxOverrides.ts    Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
   reactRulesOff.ts      Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
   rules/                Cypress-authored rules, registered under the `@cypress/dev` namespace
@@ -28,7 +33,7 @@ src/
 
 ## Gotchas / Notes
 
-- Uses ESLint v9 **flat config** format (`eslint.config.*`). Targets ESLint v9.31+ as a peer dependency; earlier versions are incompatible with the flat-config API used here.
+- Uses ESLint **flat config** format (`eslint.config.*`). Targets ESLint v10.14+ as a peer dependency. ESLint 10 still loads `eslint.config.ts` through jiti: its native TypeScript config loading is behind an unstable flag and fails on the repo's extensionless imports.
 - There is no `test` script — the config is validated implicitly by running `lint` across consumer packages.
 - Fill gaps in the config with off-the-shelf rules. Don't hand-write a rule for a cosmetic gap that no existing rule covers; record the gap in this file instead (see [Known gaps](#known-gaps)).
 - Prefer adding an override here over repeating it in several packages. A rule only one package needs goes in that package's `eslint.config.ts`, after the shared configs.
@@ -41,19 +46,20 @@ src/
 
 A new workspace lints itself with its own config:
 
-1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)):
+1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), or `compatConfig` if it is one that ships to the supported browsers (see [`compatConfig`](#compatconfig)), and `vitestConfig` if its unit tests run on Vitest:
 
    ```ts
-   import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+   import { baseConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
 
    export default [
      ...baseConfig,
      ...jsonConfig,
      ...nodeConfig,
+     ...vitestConfig,
    ]
    ```
 
-2. Add `@packages/eslint-config` (`0.0.0-development`), `eslint` (`^9.31.0`) and `jiti` (`^2.4.2`) to `devDependencies`, and set the `lint` script to plain `eslint`, which finds the config and file extensions itself. ESLint loads `eslint.config.ts` through jiti at runtime, so no source file imports it. Declaring it keeps Yarn from resolving an older hoisted copy, which fails with `You are using an outdated version of the 'jiti' library`. Knip treats jiti as config infrastructure, so `yarn health-check` does not flag it.
+2. Add `@packages/eslint-config` (`0.0.0-development`), `eslint` (`^10.14.0`) and `jiti` (`^2.4.2`) to `devDependencies`, and set the `lint` script to plain `eslint`, which finds the config and file extensions itself. ESLint loads `eslint.config.ts` through jiti at runtime, so no source file imports it. Declaring it keeps Yarn from resolving an older hoisted copy, which fails with `You are using an outdated version of the 'jiti' library`. Knip treats jiti as config infrastructure, so `yarn health-check` does not flag it.
 3. Add a `lint-staged` key to its `package.json`: `"**/*.{js,jsx,ts,tsx,json}": "eslint --fix"`, plus `vue` for a Vue package. Drop `json` if the workspace leaves out `jsonConfig`, or staged `.json` files only produce a "File ignored" warning. lint-staged hands each staged file to the nearest `package.json` with a `lint-staged` key. Without one, the workspace's files fall through to the root config, which reports them as `File ignored because of a matching ignore pattern` and lints nothing. `scripts/unit/lint-staged-spec.ts` fails if a workspace with an `eslint.config.*` has no `lint-staged` key.
 4. Add the workspace to the `--scope` list of the root `lint:fix` script.
 
@@ -77,7 +83,9 @@ It is built on `eslint-plugin-jsonc` and `eslint-plugin-package-json`, and every
 
 The first `eslint --fix` after a package opts in reorders its `package.json` top-level keys. That diff is expected.
 
-`eslint-plugin-jsonc` is pinned to v2, because v3 needs ESLint 9.38 or later. `eslint-plugin-package-json` is pinned to 0.x, because 1.x moves to `jsonc-eslint-parser` v3 and declares a peer dependency on `@eslint/json`. `@eslint/json` itself doesn't fit: it is a separate ESLint language, so every `baseConfig` rule without a `files` glob would need fencing off, it has no formatting rules, and its `sort-keys` can't express the `package.json` order.
+`jsonConfig` takes only the rules from `eslint-plugin-jsonc`'s `recommended-with-json`, merged across the preset's blocks. Spreading the preset would add its own `files` globs, which make ESLint lint `tsconfig*.json` and `.vscode/**` regardless of the `ignores` above. `eslint-plugin-jsonc`, `eslint-plugin-package-json` and `jsonc-eslint-parser` share one `jsonc-eslint-parser` major, so move them together. The plugin no longer re-exports the parser, so `jsonConfig` imports it directly.
+
+`eslint-plugin-package-json` lists `@eslint/json` as an optional peer, which `jsonConfig` doesn't install. `@eslint/json` doesn't fit: it is a separate ESLint language, so every `baseConfig` rule without a `files` glob would need fencing off, it has no formatting rules, and its `sort-keys` can't express the `package.json` order.
 
 ## `nodeConfig`
 
@@ -100,6 +108,79 @@ Every workspace opts in except the browser bundles, whose floor is the supported
 `n/no-process-exit` is left off: almost all of its hits are CLIs and scripts that exit on purpose. The plugin's optional `ts-declaration-location` peer is only needed by `n/no-sync`, which isn't enabled.
 
 `nodeConfig.ts` loads the plugin with `require` rather than `import`. Its types export a string-named `"module.exports"`, which TypeScript only parses from 5.6 and import-x's parser not at all. An `import` fails `check-ts` in every workspace whose `tsconfig` takes in its `eslint.config.ts`.
+
+## `compatConfig`
+
+`compatConfig` checks the browser bundles against the browser [runtime floor](../../AGENTS.md#runtime-targets), the counterpart of `nodeConfig` for code that ships to the browser. Spread it after `baseConfig` and `jsonConfig`. It is built on `eslint-plugin-compat` and turns on `compat/compat`, which reports a browser or ES API that one of the target browsers lacks.
+
+- **Targets** come from `browser-bundles.browserslistrc` at the repo root, through `settings.browserslistOpts.config`. The file's name keeps browserslist from discovering it: any `.browserslistrc`, `browserslist` file or `browserslist` key in a `package.json` above a build switches webpack's default target from `web` to `browserslist`, which breaks `@packages/extension`'s build, and changes the output of the `autoprefixer: {}` PostCSS configs in app, launchpad, frontend-shared and reporter. Read the file by path from anything else that needs the floor. A missing file fails the lint run instead of falling back to browserslist's defaults. A `BROWSERSLIST` environment variable takes precedence over the file, so unset it before trusting a clean run.
+- **Files**: shipped source only, `src/**` and `injection/**`, minus `*.cy.*`, `*.spec.*`, `*.test.*` and `.d.ts`. Specs run in whatever browser Cypress launches for them, so the floor doesn't apply. A workspace with shipped entry points outside those directories adds them when it spreads the config, as `runner` does for `unified-runner.tsx` and `driver` for `index.ts`:
+
+  ```ts
+  ...compatConfig.map((block) => ({ ...block, files: [...(block.files ?? []), 'unified-runner.tsx'] })),
+  ```
+- **`lintAllEsApis`** is on, so ES built-ins are checked as well as web APIs. The plugin would otherwise skip them in any directory with a babel config.
+
+The bundlers don't read the file yet. Their targets are set separately in `packages/web-config/webpack.config.base.ts` (`preset-env` at `chrome: 64`), app's `vite.config.mjs` (`build.target: 'ES2022'`, plugin-legacy at `last 3 major versions`), and the PostCSS configs (browserslist's defaults). Moving them onto this file would change shipped output, so it is a change of its own.
+
+Opted in: `driver`, `app`, `frontend-shared`, `reporter` and `runner`. Not opted in:
+
+- `launchpad` only renders in Electron's own window, so its floor is the pinned Electron's Chromium, not the supported browsers. The components it shares with `app` are checked through `frontend-shared`.
+- `extension` only ever loads in Chrome and Firefox, so the Safari part of the floor doesn't apply to it.
+- `example` is generated from `cypress-example-kitchensink`, where it would have to be fixed.
+- The mount adapters (`npm/react`, `npm/vue`, `npm/angular`, `npm/svelte`, `npm/mount-utils`) and the browser files of `vite-dev-server`, `vite-plugin-cypress-esm` and `webpack-dev-server` also run on the floor but haven't been opted in yet.
+
+**The check has coverage gaps, so it doesn't replace verifying a new API on caniuse or MDN.** A clean run only means the plugin knows of no problem:
+
+- Its ES built-ins come from an old `@mdn/browser-compat-data` snapshot (through `ast-metadata-inferer`), so newer ones such as `Promise.withResolvers`, `Promise.try`, `Map.groupBy`, `Iterator.from` and `Set.prototype.union` are never reported, even below the version that added them.
+- Some web APIs are missing too: `window.showOpenFilePicker()` passes, though Safari and Firefox lack it.
+- It checks API calls, not syntax, and treats an API behind a feature check (`if ('getBattery' in navigator)`) as guarded.
+
+A hit that is intentional, such as an API used only behind a feature check the plugin doesn't recognise, takes `// eslint-disable-next-line compat/compat -- <reason>`.
+
+## `noFloatingPromisesConfig`
+
+`noFloatingPromisesConfig(files)` turns on `@typescript-eslint/no-floating-promises` for `files`: a promise must be awaited, returned, or given a rejection handler (`.catch()`, or `.then()` with two arguments), so a rejection can't go unobserved. It returns a single block, not an array, so add it after `baseConfig` and the workspace's `tsconfigRootDir` block without spreading it:
+
+```ts
+noFloatingPromisesConfig(['lib/**/*.ts']),
+```
+
+The rule needs type information, so the block also gives `files` a project service. Type-aware parsing is what makes lint slower, so pass only the TypeScript source the rule is meant for, never the whole workspace. Every file in `files` must be in the workspace's `tsconfig.json`, or the parser reports it `was not found by the project service` (see [Adding a workspace](#adding-a-workspace)).
+
+The block also turns off `vue/no-ref-as-operand`, which `baseConfig` applies to every `.ts` file. Once a file has type information, that rule asks the type checker whether each operand is a Vue `Ref`, which slows lint in workspaces with no Vue code. Don't add the block to `app`, `launchpad` or `frontend-shared`, whose composables need the rule.
+
+Fix a hit by awaiting, returning or handling the promise. Use `void` only for fire-and-forget, with a comment saying why it can't reject or what happens if it does.
+
+These workspaces opt in, for their shipped source only:
+
+- `server`, `proxy`, `net-stubbing`, `https-proxy`, `socket`, `resolve-dist`: `lib/**/*.ts`
+- `network`: `lib/*.ts`, matching its `tsconfig.json`
+- `launcher`: `index.ts` and `lib/**/*.ts`
+- `driver`: `index.ts` and `src/**/*.ts`
+- `data-context`: `src/**/*.ts` and `graphql/**/*.ts`
+- `scaffold-config`, `v8-snapshot-require`: `src/**/*.ts`
+- `config`: `src/**/*.ts` and `test/**/*.ts`
+- `reporter`: `src/**/*.{ts,tsx}` and `cypress/**/*.ts`
+- `icons`: `index.ts` and `index.mts`
+
+Specs are left out (`config` and `reporter` predate this and keep theirs): they commonly start a promise and assert on it later, so the hits are mostly noise, and giving them a project service would slow lint further. The other workspaces don't opt in yet; adding one means fixing its hits and measuring its lint time first.
+
+## `vitestConfig`
+
+Every workspace with `vitest` in its `package.json` spreads `vitestConfig` after `baseConfig`. The repo root is the exception: its `vitest.config.ts` only lists the workspace projects, and its ESLint config lints no specs. It applies `@vitest/eslint-plugin`'s `recommended` rules to `**/*.{test,spec}.{ts,tsx,js}` and `test/**`, skipping `fixtures/` and `__fixtures__/` directories. A workspace whose Vitest specs are only part of those globs narrows `files` when it spreads the config. `@packages/server`, whose `test/integration` and `test/performance` specs run on mocha, is the example:
+
+```ts
+...vitestConfig.map((block) => ({ ...block, files: ['test/unit/**'] })),
+```
+
+On top of `recommended`:
+
+- `no-focused-tests`, `no-disabled-tests` and `hoisted-apis-on-top` are errors. A skipped test that has to stay needs an `eslint-disable-next-line vitest/no-disabled-tests` below its `NOTE:`, `TODO:` or `FIXME:` comment, which `@cypress/dev/skip-comment` already requires. An intentional `.only` needs `eslint-disable-next-line vitest/no-focused-tests`. In a spec that uses Vitest's globals rather than importing `it` from `vitest`, `mocha/no-exclusive-tests` reports it as well, so list both rules in the directive.
+- `valid-expect` allows a second argument to `expect`, which Vitest takes as the failure message. It reports a chai property assertion such as `.to.be.true` as a matcher that was never called, so write those with a called matcher (`.toBe(true)`, `.toBeUndefined()`, `.toEqual(expect.anything())` for `.to.exist`).
+- `no-standalone-expect` accepts assertions in `beforeAll`, `beforeEach`, `afterEach` and `afterAll`, where a failure fails the tests the hook belongs to.
+- `expect-expect`, `no-conditional-expect`, `prefer-called-exactly-once-with`, `no-identical-title` and `valid-title` are off. `vitestConfig.ts` gives the reason for each.
+- `vitest/unbound-method`, the plugin's one rule that needs type information, is not enabled.
 
 ## Vue packages
 
@@ -135,11 +216,14 @@ graphql-eslint's processor refuses `.vue` files under flat config, and its docum
 
 ### Dependency pins
 
-- **`@eslint/js`, exact.** It is pinned to the `eslint` version in the lockfile, because `eslint` depends on that exact `@eslint/js` itself. Bump the two together; otherwise the lockfile carries two copies and the shared config applies one version's `recommended` rules under another `eslint`. Don't let it reach 10.x ahead of `eslint`: `@eslint/js` 10.0.1 and later declare a peer of `eslint@^10` and enable `preserve-caught-error`, which ESLint 9.33 doesn't have.
-- **`@typescript-eslint/no-restricted-imports`, not core.** `frontendOverrides` keeps the typescript-eslint rule, which is deprecated since 8.64, because core `no-restricted-imports` only accepts `allowTypeImports` from ESLint 9.37. On 9.33 the core rule rejects the option as a config error and every Vue file fails to lint. Switch to core once `eslint` reaches 9.37 or later.
+- **`@eslint/js` on the same major as `eslint`.** ESLint 10 no longer depends on `@eslint/js`, so this package's range is the only copy, and its `recommended` rules must exist in the installed `eslint`. `@eslint/js` declares a peer of `eslint@^10`; move both majors together.
+- **`eslint-plugin-react` 7.37.5 on ESLint 10.** Its `eslint` peer stops at `^9.7`, so `yarn` prints a peer warning; that is expected. Its `recommended` rules run on ESLint 10, with two conditions. `settings.react.version` must stay explicit, because `'detect'` calls `context.getFilename()`, which ESLint 10 removed. And none of `forward-ref-uses-ref`, `jsx-filename-extension`, `jsx-curly-spacing`, `jsx-equals-spacing`, `jsx-one-expression-per-line`, `jsx-space-before-closing` or `jsx-tag-spacing` may be enabled, as they crash on ESLint 10 too. The plugin is being replaced.
+- **`@typescript-eslint/no-restricted-imports`, not core.** `frontendOverrides` keeps the typescript-eslint rule, which is deprecated since 8.64, because it predates core `no-restricted-imports` accepting `allowTypeImports` (ESLint 9.37). The installed ESLint 10 has the option, so the block can move to the core rule.
 - **`graphql@16`, nested.** graphql-eslint v4 needs a `graphql@^16` peer at load time (it reads the `OperationTypeNode` enum, which graphql 15 only has as a type), while the app and server stay on `graphql@15`. This package depends on `graphql@16` itself and its `workspaces.nohoist` entry keeps `@graphql-eslint/eslint-plugin` and its tree in this package's `node_modules`. Hoisted to the root, the plugin would resolve `graphql@15`. Don't remove the nohoist entry, and don't move these dependencies to the root.
 - **`graphql` is left out of lockfile deduplication.** `@types/graphql-resolve-batch` depends on `graphql@>=14`, so `yarn-deduplicate --strategy=highest` would move it to graphql 16 types while `data-context` passes it graphql 15 values. `yarn dedupe-lockfile`, which `yarn check-lockfile`, the local postinstall and CI all use, passes `--exclude graphql`. A root resolution cannot fix this instead, because yarn keeps the `graphql@>=14` request in the lockfile either way.
 - **`@vue/compiler-sfc@3.5`, nested.** graphql-tag-pluck v8 needs `registerTS`, added in 3.3. Against the repo's 3.2.47 it silently drops every `.vue` document. The app packages keep 3.2.47.
+- **`@vitest/eslint-plugin` 1.6.** It declares peers of TypeScript 6 and `@typescript-eslint/eslint-plugin`, both optional: they only serve its type-aware rules, which `vitestConfig` leaves out, so its other rules run on the repo's TypeScript 5.4.5. Its `@typescript-eslint/utils` and `scope-manager` `^8.71` ranges share the lockfile entries of the `typescript-eslint` version above. A fresh resolve can pick a newer patch for them instead, and `yarn dedupe-lockfile` then moves other `@typescript-eslint` ranges to that patch while `typescript-eslint` keeps its exact pins, leaving two copies. Point the plugin's ranges back at the existing entry with `npx yarn-deduplicate --strategy=fewer --packages @typescript-eslint/utils @typescript-eslint/scope-manager` before running `yarn check-lockfile`. Don't use `eslint-plugin-vitest`, its archived predecessor.
+- **`eslint-plugin-mocha` 12, typed through `src/eslint-plugin-mocha.d.ts`.** The plugin is ESM-only, needs `eslint` ≥ 10.2, and only exposes its types through `exports`. `@packages/ts`, `proxy`, `driver` and `cli` type-check this package's source on `node` (node10) resolution, which ignores `exports`, so `check-ts` there would fail with `Cannot find module 'eslint-plugin-mocha'`. `baseConfig.ts` pulls in an ambient declaration with a `/// <reference path>`, which TypeScript prefers over `node_modules` under every resolution, typing the plugin as `ESLint.Plugin`. It can't be loaded with `require` the way `nodeConfig` loads `eslint-plugin-n`, because it uses top-level `await`. v12 renamed `no-global-tests` to `no-top-level-tests`, `no-setup-in-describe` to `no-setup-in-suite`, `no-top-level-hooks` to `no-root-hooks` and `no-return-and-callback` to `no-return-and-done` and `no-hooks-for-single-case` to `no-hooks-for-single-child`, and folded `no-sibling-hooks` into `consistent-structure` (`disallowDuplicateHooks`). ESLint accepts an unknown rule name set to `off` without complaint, so a rule still turned off under its old name is silently back on under its new one, from `recommended`.
 - **`@graphql-tools/delegate`.** The root `**/@graphql-tools/delegate` resolution also reaches the plugin's tree, under `@graphql-tools/wrap` 11. Only `graphql-config`'s URL loader reaches that code, and the schema here is a file.
 
 ## Known gaps

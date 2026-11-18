@@ -18,7 +18,7 @@ If only unit/integration tests scoped to changed packages are sufficient, do **n
 
 ### Where to add the branch name
 
-**Required:** append a **new** `- equal:` entry to the `or:` block in `&full-workflow-filters` in `.circleci/src/pipeline/workflows/@main.yml` (the `when:` at the top of `linux-x64`, reused by `windows` and other platform workflows). Do **not** rename or remove existing entries (`develop`, `update-v8-snapshot-cache-on-develop`, the `release/*` / `electron/*` patterns, or `force-persist-artifacts`):
+**Required:** append a **new** `- equal:` entry to the `or:` block in `&full-workflow-filters` in `.circleci/src/pipeline/workflows/@main.yml` (the `when:` at the top of `linux-x64`, reused by `windows` and other platform workflows). Do **not** rename or remove existing entries (`develop`, the `release/*` / `electron/*` patterns, or `force-persist-artifacts`):
 
 ```yaml
     or:
@@ -27,9 +27,9 @@ If only unit/integration tests scoped to changed packages are sufficient, do **n
       - equal: [ 'your-branch-name', << pipeline.git.branch >> ]  # add this line
 ```
 
-Push your work to the branch name you add — do not repurpose an existing allowlisted branch (for example, do not change `update-v8-snapshot-cache-on-develop` to a different name).
+Push your work to the branch name you add — do not repurpose an existing allowlisted branch.
 
-This gate turns on the main/multi-platform workflow graph, including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS. The existing `update-v8-snapshot-cache-on-develop` entry is reserved for automated v8 snapshot cache PRs.
+This gate turns on the main/multi-platform workflow graph, including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS.
 
 This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-arm64` for plain `develop` or `release/*` pushes. On those two, all four run from a scheduled pipeline instead — see "Scheduled platform CI" below. Any other branch you add here turns all five on per-push.
 
@@ -42,8 +42,6 @@ This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-ar
 | `generate-pipeline-parameters.sh` branch override | Force every path-filtered job to run even when changed files would not normally select them (or trigger manually with `run-all-jobs=true`) |
 | `&mainBuildFilters` in `@main.yml` | Binary/kitchensink/staging jobs in `linux-x64` that have an extra branch filter beyond the workflow `when:` |
 
-For typical v8 snapshot cache work, changes under `tooling/*` already enable `run-v8-tests` via path filtering, so **`&full-workflow-filters` alone is usually enough**.
-
 After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
 ### Per-workflow gates
@@ -53,7 +51,7 @@ The `run-*` guards live in the shared job definitions in `@pipeline.yml` (via `h
 - **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-build-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs, system tests, and `v8-integration-tests` are guarded, so a webhook push to `develop` or a `vN` maintenance branch runs only the ones its changed paths select.
 - **`windows` / `linux-arm64` / `darwin-*`**: none of these four run on a plain `develop`, `release/*`, or `vN` push — see "Scheduled platform CI" below for when they do. Inside them, `v8-integration-tests`, `driver-integration-memory-tests`, and (Windows) selected integration/unit jobs are still guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside these workflows is actually path-filtered once one runs.
 
-`linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop`, `release/*`, and `vN` they run only from a scheduled pipeline or a manual trigger. On `electron/*`, `update-v8-snapshot-cache-on-develop`, or an allowlisted branch, `&full-workflow-filters` alone is enough.
+`linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop`, `release/*`, and `vN` they run only from a scheduled pipeline or a manual trigger. On `electron/*` or an allowlisted branch, `&full-workflow-filters` alone is enough.
 
 `npm-release` still runs only on `develop`, not on allowlisted feature branches.
 

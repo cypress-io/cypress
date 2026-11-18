@@ -1,4 +1,4 @@
-import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -6,6 +6,7 @@ export default [
   // Browser code, which has no Node globals and a browser floor
   ...nodeConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), 'client/**'] })),
   undeclaredWorkspaceImports(['test/**', 'cypress/**'], ['@tooling/system-tests']),
+  ...vitestConfig,
   {
     files: ['**/*.js', '**/*.ts'],
     languageOptions: {

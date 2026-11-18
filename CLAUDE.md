@@ -47,6 +47,10 @@
 - Don't skip a test or exclude a browser to get a green run, and don't assume an existing skip or browser filter is still needed (including ones carried over when porting specs): run it, find the cause, and fix it.
 - Keep follow-up work from the same task, such as review fixes and related instruction updates, on that task's branch. Create a separate branch only when the user asks for one.
 - After committing a merge of `develop`, run `git diff --name-only origin/develop` and check that every file listed is in the PR's scope. The pre-commit hook runs `eslint --fix` on every staged file, merged-in ones included, and `package-json/order-properties` reorders keys in `package.json` files that `develop` committed unsorted. Restore any such file with `git checkout origin/develop -- <file>` and commit with `--no-verify`.
+- When a change could reasonably be filed as `fix` or `chore` (for example, removing data the app sends to Cypress Cloud), ask the user which prefix to use before adding a `cli/CHANGELOG.md` entry. A `chore` gets no entry.
+- Give test fixtures realistic made-up data, such as a full name, an `@example.com` email and a token-shaped value, not placeholders like `'foo'`.
+- When a test feeds in output from a browser, tool or service (a stack trace, a CLI message, an API response), take its examples from real captured output, such as a fixture under `__fixtures__`, not names made up to look plausible. Keep inputs that only follow the format's rules in their own clearly labelled cases, and check that changelog examples come from the same real output.
+- Keep a `cli/CHANGELOG.md` entry to the user-facing change, one before-and-after example and the link. Cut any sentence that restates the change in other words.
 - Before committing or pushing, `yarn check-ts`, `yarn lint`, `yarn health-check` (knip), and relevant unit tests must pass locally. CI currently does not block expensive e2e jobs when these fail.
 
 @AGENTS.md

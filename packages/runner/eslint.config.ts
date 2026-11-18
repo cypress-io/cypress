@@ -1,8 +1,10 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  // Shipped entry points outside the shared src/** glob
+  ...compatConfig.map((block) => ({ ...block, files: [...(block.files ?? []), 'unified-runner.tsx'] })),
   {
     languageOptions: {
       parserOptions: {
