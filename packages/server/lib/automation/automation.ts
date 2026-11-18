@@ -8,6 +8,7 @@ import type { SerializableAutomationCookie } from './cookie/jar'
 import { automationCookieToToughCookie, cookieJar, writtenToJar } from './cookie/jar'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 import Debug from 'debug'
+import { canonicalDomain } from 'tough-cookie'
 import { AutomationNotImplemented } from './automation_not_implemented'
 
 const debug = Debug('cypress:server:automation')
@@ -228,9 +229,29 @@ export class Automation {
           .spread((automationResult) => automationResult)
         case 'clear:cookie':
           return this.cookies.clearCookie(data, automate)
-          .then((cleared) => {
+          .then(async (cleared) => {
             // the browser clears one cookie, which may be one set for a parent domain
-            cookieJar.removeCookie({ name: data.name, domain: cleared?.domain?.replace(/^\./, '') || data.domain })
+            const domain = canonicalDomain(cleared?.domain?.replace(/^\./, '') || data.domain)
+            const inJar = cookieJar.getAllCookies().filter((cookie) => cookie.key === data.name && cookie.domain === domain)
+
+            if (!cleared?.path || inJar.every((cookie) => cookie.path === cleared.path)) {
+              cookieJar.removeCookie({ name: data.name, domain })
+
+              return cleared
+            }
+
+            // Chromium clears the cookie at every path, other browsers only the one they return
+            const remaining = await this.cookies.getCookies({ domain }, automate).catch(() => undefined)
+            const isRemaining = (path: string) => {
+              // without the browser's answer, only the cookie it returned is known to be cleared
+              if (!remaining) return path !== cleared.path
+
+              return remaining.some((cookie) => cookie && cookie.name === data.name && cookie.path === path && canonicalDomain(cookie.domain.replace(/^\./, '')) === domain)
+            }
+
+            inJar.forEach(({ path }) => {
+              if (path && !isRemaining(path)) cookieJar.removeCookie({ name: data.name, domain, path })
+            })
 
             return cleared
           })

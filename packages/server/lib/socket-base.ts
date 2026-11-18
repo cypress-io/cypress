@@ -14,7 +14,7 @@ import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
 import { cookieJar } from './automation/cookie/jar'
-import { DOCUMENT_COOKIE_WRITE_TIMEOUT, setDocumentCookie } from './automation/cookie/document-cookie'
+import { setDocumentCookie } from './automation/cookie/document-cookie'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { getSpanNames, telemetry } from '@packages/telemetry'
@@ -423,16 +423,8 @@ export class SocketBase implements SocketBroadcaster {
             setCookie: (cookie) => automationRequest('set:cookie', cookie),
           })
 
-          // automation requests have no timeout, so a write the browser never answers must not hold cookie commands forever
-          const settled = new Promise<void>((resolve) => {
-            const timer = setTimeout(resolve, DOCUMENT_COOKIE_WRITE_TIMEOUT)
-            const done = () => {
-              clearTimeout(timer)
-              resolve()
-            }
-
-            write.then(done, done)
-          }).then(() => {
+          // setDocumentCookie bounds each of its browser requests, so this always settles
+          const settled: Promise<void> = write.then(() => {}, () => {}).then(() => {
             documentCookieWrites.delete(settled)
           })
 

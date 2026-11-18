@@ -2,7 +2,7 @@ import {
   CookieJar,
   automationCookieToToughCookie,
 } from '@packages/server/lib/automation/cookie/jar'
-import { isBlockedByExisting, meetsDocumentCookieRules, parseDocumentCookie } from '@packages/server/lib/automation/cookie/document-cookie-rules'
+import { isBlockedByExisting, isExpired, meetsDocumentCookieRules, parseDocumentCookie } from '@packages/server/lib/automation/cookie/document-cookie-rules'
 import { isLocalhost } from '@packages/network-tools/lib/uri'
 import type { Cookie as ToughCookie,
   SerializableAutomationCookie,
@@ -108,13 +108,20 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
 
       const stored = { name: cookie.key, domain: cookie.domain || domain, path: cookie.path || '/' }
       const isBlocked = cookieJar.getAllCookies().some((existing) => {
-        return isBlockedByExisting({ ...existing, name: existing.key, domain: existing.domain || domain }, stored, isSecure)
+        return !isExpired(existing) && isBlockedByExisting({ ...existing, name: existing.key, domain: existing.domain || domain }, stored, isSecure)
       })
 
-      if (isBlocked || !setCookie(cookie)) return getDocumentCookieValue()
+      if (isBlocked) return getDocumentCookieValue()
+
+      // tough-cookie refuses to replace an HttpOnly cookie, even one that has expired
+      if (cookieJar.getAllCookies().some((existing) => isExpired(existing) && existing.key === stored.name && existing.domain === stored.domain && existing.path === stored.path)) {
+        cookieJar.removeCookie(stored)
+      }
+
+      if (!setCookie(cookie)) return getDocumentCookieValue()
 
       // an expired cookie removes the one it replaces, here and in the browser
-      if (cookie.expiryTime() < Date.now()) {
+      if (isExpired(cookie)) {
         cookieJar.removeCookie(stored)
       }
 
@@ -140,9 +147,14 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       setCookie(automationCookieToToughCookie(cookie, domain), { http: true })
     })
 
-    Cypress.on('clear:cookie', (name: string, cleared?: { domain?: string } | null) => {
-      // the browser clears one cookie, which may be one set for a parent domain
-      cookieJar.removeCookie({ name, domain: cleared?.domain?.replace(/^\./, '') || domain })
+    Cypress.on('clear:cookie', (name: string, cleared?: { domain?: string, path?: string } | null) => {
+      cookieJar.removeCookie({
+        name,
+        // the browser clears one cookie, which may be one set for a parent domain
+        domain: cleared?.domain?.replace(/^\./, '') || domain,
+        // Chromium clears the cookie at every path, other browsers only the one they return
+        path: Cypress.isBrowser({ family: 'chromium' }) ? undefined : cleared?.path,
+      })
     })
 
     Cypress.on('clear:cookies', reset)

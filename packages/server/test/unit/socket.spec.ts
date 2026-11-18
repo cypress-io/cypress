@@ -573,6 +573,32 @@ describe('lib/socket', () => {
         expect(await visited).toEqual({ response: ['get:cookies', 'set:cookie'] })
       })
 
+      it('holds a cookie command until a slow write has reached the browser', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+        try {
+          request.mockImplementation((message) => {
+            return new Promise((resolve) => setTimeout(() => resolve(message === 'get:cookies' ? [] : undefined), message === 'get:cookie' ? 0 : 4000))
+          })
+
+          const written = setCookie('foo=bar')
+          const read = new Promise<void>((resolve) => client.emit('automation:request', 'get:cookie', { name: 'foo' }, () => resolve()))
+
+          await vi.waitFor(() => expect(request).toHaveBeenCalledWith('get:cookies', expect.anything(), expect.anything()))
+          await vi.advanceTimersByTimeAsync(4000)
+          await vi.advanceTimersByTimeAsync(2000)
+
+          expect(request.mock.calls.map(([message]) => message)).toEqual(['get:cookies', 'set:cookie'])
+
+          await vi.advanceTimersByTimeAsync(2000)
+          await vi.waitFor(() => expect(request.mock.calls.map(([message]) => message)).toEqual(['get:cookies', 'set:cookie', 'get:cookie']))
+          await vi.advanceTimersByTimeAsync(0)
+          await Promise.all([written, read])
+        } finally {
+          vi.useRealTimers()
+        }
+      })
+
       it('does not hold a cookie command behind a write that never finishes', async () => {
         const timeouts = vi.spyOn(globalThis, 'setTimeout')
         const lookupStarted = new Promise<void>((resolve) => {

@@ -352,6 +352,37 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  it('cy.clearCookie() leaves document.cookie with the cookies the browser still has at other paths', () => {
+    cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+    cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+    cy.origin(`https://app.foobar.com:3503`, () => {
+      // browsers differ on whether clearing by name clears the cookie at every path
+      const matchesBrowser = () => {
+        cy.getAllCookies().then((cookies) => {
+          const inBrowser = cookies.filter(({ name }) => name === 'pathKey').map(({ value }) => `pathKey=${value}`).sort()
+
+          cy.document().then((doc) => {
+            expect(doc.cookie.split('; ').filter((pair) => pair.startsWith('pathKey=')).sort()).to.deep.equal(inBrowser)
+          })
+        })
+      }
+
+      cy.document().then((doc) => {
+        doc.cookie = 'pathKey=root; Path=/'
+        doc.cookie = 'pathKey=deep; Path=/fixtures'
+      })
+
+      cy.getAllCookies().should((cookies) => {
+        expect(cookies.filter(({ name }) => name === 'pathKey')).to.have.length(2)
+      })
+
+      cy.clearCookie('pathKey')
+      matchesBrowser()
+      cy.reload()
+      matchesBrowser()
+    })
+  })
+
   describe('document.cookie with HttpOnly cookies', () => {
     beforeEach(() => {
       cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
@@ -393,6 +424,25 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
             expect(atRoot.map(({ value, httpOnly }) => ({ value, httpOnly }))).to.deep.equal([{ value: 'bar', httpOnly: true }])
           })
         })
+      })
+    })
+
+    it('writes over an HttpOnly cookie that has expired', () => {
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.window().then((win) => {
+          return cy.wrap(win.fetch(`/set-cookie?cookie=expiringCookie=bar; Path=/; HttpOnly; Max-Age=2`))
+        })
+
+        cy.reload()
+        // the cookie has to expire, and reading document.cookie to find out would purge it
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(2500)
+        cy.window().then((win) => {
+          win.document.cookie = 'expiringCookie=new; Path=/'
+        })
+
+        cy.document().its('cookie').should('include', 'expiringCookie=new')
+        cy.getCookie('expiringCookie').its('value').should('eq', 'new')
       })
     })
 

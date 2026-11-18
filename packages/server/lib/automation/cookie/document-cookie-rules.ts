@@ -112,6 +112,9 @@ export const meetsDocumentCookieRules = (cookie: Pick<Cookie, 'key' | 'value' | 
 }
 
 // document.cookie can't replace an HttpOnly cookie, and an insecure page can't shadow a Secure one
+// TTL() does not count the time since a Max-Age cookie was created
+export const isExpired = (cookie: Pick<Cookie, 'expiryTime'>) => cookie.expiryTime() <= Date.now()
+
 export const isBlockedByExisting = (existing: ExistingCookie, cookie: StoredCookie, isSecure: boolean) => {
   if (existing.name !== cookie.name) return false
 

@@ -362,6 +362,21 @@ describe('lib/automation/cookie/document-cookie', () => {
       expect(secureRequestCookies()).toEqual(['foo=baz'])
     })
 
+    it('drops the write when the jar is cleared before the browser answers', async () => {
+      let answer: (cookies: typeof existing) => void = () => {}
+
+      automation.getCookies.mockReturnValueOnce(new Promise((resolve) => answer = resolve))
+
+      const waiting = write('foo=new; Path=/')
+
+      cookieJar.removeAllCookies()
+      answer([])
+      await waiting
+
+      expect(automation.setCookie).not.toHaveBeenCalled()
+      expect(cookieJar.getAllCookies()).toEqual([])
+    })
+
     it('writes once the browser no longer has that cookie', async () => {
       await write('foo=baz; Path=/', 'http://www.foobar.com/')
 
@@ -415,6 +430,7 @@ describe('lib/automation/cookie/document-cookie', () => {
 
     const refused = write('foo=new; Path=/')
 
+    await vi.waitFor(() => expect(automation.setCookie).toHaveBeenCalled())
     cookieJar.removeAllCookies()
     refuse(new Error('refused'))
     await expect(refused).rejects.toThrow('refused')
@@ -498,6 +514,38 @@ describe('lib/automation/cookie/document-cookie', () => {
 
       expect(automation.setCookie.mock.calls.map(([cookie]) => cookie.value)).toEqual(['baz'])
       expect(cookieJar.getAllCookies().map(({ value }) => value)).toEqual(['baz'])
+    })
+
+    it('does not bring back a cookie that was cleared when a later write is refused', async () => {
+      automation.setCookie.mockReturnValueOnce(new Promise(() => {}))
+      automation.setCookie.mockRejectedValueOnce(new Error('refused'))
+
+      const unanswered = write('foo=bar; Path=/')
+
+      await vi.advanceTimersByTimeAsync(0)
+      cookieJar.removeAllCookies()
+
+      const refused = write('foo=baz; Path=/').catch((err: Error) => err.message)
+
+      await vi.advanceTimersByTimeAsync(5000)
+      await unanswered
+
+      expect(await refused).toBe('refused')
+
+      expect(cookieJar.getAllCookies()).toEqual([])
+    })
+
+    it('writes over an HttpOnly cookie whose Max-Age has passed without waiting for the browser', async () => {
+      cookieJar.setCookie('foo=old; Path=/; HttpOnly; Max-Age=60', 'https://www.foobar.com/', 'strict')
+      vi.setSystemTime(Date.now() + 300000)
+      automation.getCookies.mockReturnValueOnce(new Promise(() => {}))
+
+      const unanswered = write('foo=new; Path=/')
+
+      expect(cookieJar.getAllCookies().map(({ value }) => value)).toEqual(['new'])
+
+      await vi.advanceTimersByTimeAsync(5000)
+      await unanswered
     })
 
     it('keeps a cookie the browser was told to set', async () => {

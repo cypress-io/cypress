@@ -4,7 +4,7 @@ import type { Cookie } from 'tough-cookie'
 import { isLocalhost } from '@packages/network-tools'
 import { cookieJar, toughCookieToAutomationCookie, writtenToJar } from './jar'
 import type { SerializableAutomationCookie } from './jar'
-import { isBlockedByExisting, meetsDocumentCookieRules, parseDocumentCookie } from './document-cookie-rules'
+import { isBlockedByExisting, isExpired, meetsDocumentCookieRules, parseDocumentCookie } from './document-cookie-rules'
 import type { ExistingCookie } from './document-cookie-rules'
 
 const debug = Debug('cypress:server:automation:cookie:document-cookie')
@@ -41,7 +41,10 @@ const queue = new Map<string, Promise<void>>()
 // how many writes to each cookie are waiting for the browser before they write the jar
 const heldBack = new Map<string, number>()
 
-export const DOCUMENT_COOKIE_WRITE_TIMEOUT = 5000
+// the jar generation the two maps above belong to
+let trackedGeneration = 0
+
+const DOCUMENT_COOKIE_WRITE_TIMEOUT = 5000
 
 class BrowserTimeout extends Error {}
 
@@ -91,16 +94,28 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
   const key = JSON.stringify(stored)
   const findStored = () => cookieJar.getAllCookies().find((c) => c.key === stored.name && c.domain === stored.domain && c.path === stored.path)
+  const { generation } = cookieJar
+
+  if (generation !== trackedGeneration) {
+    latest.clear()
+    heldBack.clear()
+    trackedGeneration = generation
+  }
+
+  // the jar was emptied after the page made this write, and the write must not bring anything back
+  const isCleared = () => cookieJar.generation !== generation
   let replaced: Cookie | undefined
   let written: Cookie | undefined
 
   const write = () => {
+    if (isCleared()) return false
+
     // a jar read may have purged the expired cookie of a write still in flight
     replaced = findStored() ?? latest.get(key)
 
     // tough-cookie refuses to replace an HttpOnly cookie. one still in the jar here has
     // expired, or the browser has answered that it no longer holds it
-    if (replaced && (replaced.TTL() <= 0 || replaced.httpOnly)) cookieJar.removeCookie(stored)
+    if (replaced && (isExpired(replaced) || replaced.httpOnly)) cookieJar.removeCookie(stored)
 
     try {
       cookieJar.setCookie(cookie, pageUrl.href, 'strict', { http: false })
@@ -115,13 +130,13 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
   }
 
   const undo = () => {
-    if (!written) return
+    if (!written || isCleared()) return
 
     const current = findStored()
 
     // a later write to the same cookie owns the entry now, and must not restore this one.
     // a jar read purges an expired cookie, which leaves its write the owner
-    if (current !== written && (current || written.TTL() > 0 || latest.get(key) !== written)) {
+    if (current !== written && (current || !isExpired(written) || latest.get(key) !== written)) {
       undone.set(written, replaced)
 
       return
@@ -145,7 +160,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
   }
 
   const isBlockedInJar = cookieJar.getAllCookies().some((c) => {
-    return c.TTL() > 0 && isBlockedByExisting({ name: c.key, domain: c.domain || '', path: c.path, httpOnly: c.httpOnly, secure: c.secure }, stored, isSecure)
+    return !isExpired(c) && isBlockedByExisting({ name: c.key, domain: c.domain || '', path: c.path, httpOnly: c.httpOnly, secure: c.secure }, stored, isSecure)
   })
 
   // the jar may be behind the browser, so a write its cookies block waits for the browser's
@@ -171,7 +186,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
       return undo()
     }
 
-    if (isHeldBack && !write()) return
+    if (isCleared() || (isHeldBack && !write())) return
 
     const automationCookie = toughCookieToAutomationCookie(cookie, pageUrl.hostname)
 
@@ -203,7 +218,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
 
     if (written && latest.get(key) === written) latest.delete(key)
 
-    if (isHeldBack) {
+    if (isHeldBack && !isCleared()) {
       const count = (heldBack.get(key) ?? 1) - 1
 
       count ? heldBack.set(key, count) : heldBack.delete(key)

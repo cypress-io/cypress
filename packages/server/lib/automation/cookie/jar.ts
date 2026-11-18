@@ -74,6 +74,8 @@ export const automationCookieToToughCookie = (automationCookie: SerializableAuto
  */
 export class CookieJar {
   _cookieJar: ToughCookieJar
+  // how many times the jar has been emptied
+  generation = 0
 
   static parse (cookie: string) {
     const toughCookie = Cookie.parse(cookie)
@@ -134,6 +136,7 @@ export class CookieJar {
   }
 
   removeAllCookies () {
+    this.generation++
     this._cookieJar.removeAllCookiesSync()
   }
 }
