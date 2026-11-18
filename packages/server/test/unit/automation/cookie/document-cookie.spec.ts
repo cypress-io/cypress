@@ -413,6 +413,24 @@ describe('lib/automation/cookie/document-cookie', () => {
     expect(restored.creation).toEqual(creation)
   })
 
+  it('writes over an expired HttpOnly cookie the browser still returns', async () => {
+    existing = [{ name: 'foo', domain: 'www.foobar.com', path: '/', httpOnly: true, expiry: Date.now() / 1000 - 60 }]
+
+    await write('foo=new; Path=/')
+
+    expect(browserCookie()).toMatchObject({ name: 'foo', value: 'new' })
+    expect(cookieJar.getAllCookies().map(({ value }) => value)).toEqual(['new'])
+  })
+
+  it('does not write over an HttpOnly cookie the browser returns with a later expiry', async () => {
+    existing = [{ name: 'foo', domain: 'www.foobar.com', path: '/', httpOnly: true, expiry: Date.now() / 1000 + 60 }]
+
+    await write('foo=new; Path=/')
+
+    expect(automation.setCookie).not.toHaveBeenCalled()
+    expect(cookieJar.getAllCookies()).toEqual([])
+  })
+
   it('writes over an expired HttpOnly cookie the jar has not purged', async () => {
     cookieJar.setCookie('foo=; Path=/; HttpOnly; Max-Age=0', 'https://www.foobar.com/', 'strict')
 

@@ -178,7 +178,10 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
     try {
       const existing = await answered(automation.getCookies({ name: cookie.key }))
 
-      if (existing.some((c) => isBlockedByExisting(c, stored, isSecure))) return undo()
+      // a browser can still return a cookie that has expired
+      const isLive = (c: ExistingCookie) => typeof c.expiry !== 'number' || c.expiry * 1000 > Date.now()
+
+      if (existing.some((c) => isLive(c) && isBlockedByExisting(c, stored, isSecure))) return undo()
     } catch (err) {
       // a failed lookup leaves no way to tell whether the write is allowed
       debug('ignoring document.cookie write %s: %s', cookieString, err.message)

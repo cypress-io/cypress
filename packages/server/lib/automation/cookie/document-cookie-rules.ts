@@ -38,6 +38,8 @@ export interface ExistingCookie {
   path?: string | null
   httpOnly?: boolean
   secure?: boolean
+  // seconds since the epoch
+  expiry?: number | string | null
 }
 
 interface StoredCookie {
