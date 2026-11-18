@@ -33,7 +33,7 @@ const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
-const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
+const { nonceDirectives, unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -2359,6 +2359,16 @@ describe('Routes', () => {
       })
 
       describe('CSP Header', () => {
+        // With experimentalCspAllowList set, the proxy rewrites CSP headers on every response,
+        // joining directives with '; ' and dropping any trailing ';'. Fixtures are written in
+        // that form so tests can compare the whole header exactly.
+        const expectCspWithNonce = (header, buildExpected) => {
+          const match = /'nonce-([A-Za-z0-9+/]{22}==)'/.exec(header)
+
+          expect(match, `expected a nonce in CSP header "${header}"`).to.exist
+          expect(header).to.eq(buildExpected(match[1]))
+        }
+
         describe('provided', () => {
           describe('experimentalCspAllowList: false', () => {
             beforeEach(function () {
@@ -2437,7 +2447,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; script-src-elem \'fake-src\';',
+                'content-security-policy': `object-src 'none'; script-src-elem 'self' https://cdn.example.com`,
               })
 
               return this.rp({
@@ -2449,8 +2459,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src-elem 'self' https://cdn.example.com 'nonce-${nonce}'`)
               })
             })
 
@@ -2459,7 +2468,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\';',
+                'content-security-policy': `object-src 'none'; script-src 'self' https://cdn.example.com`,
               })
 
               return this.rp({
@@ -2471,8 +2480,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src 'self' https://cdn.example.com 'nonce-${nonce}'`)
               })
             })
 
@@ -2481,7 +2489,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; default-src \'fake-src\';',
+                'content-security-policy': `object-src 'none'; default-src 'self'`,
               })
 
               return this.rp({
@@ -2493,8 +2501,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; default-src 'self' 'nonce-${nonce}'`)
               })
             })
 
@@ -2503,7 +2510,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\'; default-src \'fake-src\';',
+                'content-security-policy': `object-src 'none'; script-src 'self' https://cdn.example.com; default-src 'self'`,
               })
 
               return this.rp({
@@ -2515,8 +2522,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src 'self' https://cdn.example.com 'nonce-${nonce}'; default-src 'self' 'nonce-${nonce}'`)
               })
             })
 
@@ -2525,7 +2531,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; script-src-elem \'fake-src\'; script-src \'fake-src\'; default-src \'fake-src\';',
+                'content-security-policy': `object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`,
               })
 
               return this.rp({
@@ -2537,17 +2543,16 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src-elem 'self' 'nonce-${nonce}'; script-src 'self' https://cdn.example.com 'nonce-${nonce}'; default-src 'self' 'nonce-${nonce}'`)
               })
             })
 
-            it('does not remove original CSP header for text/html content-type', function () {
+            it('does not modify original CSP header for text/html content-type when no nonce directive exists', function () {
               nock(this.server.remoteStates.current().origin)
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'',
+                'content-security-policy': `object-src 'none'; base-uri 'self'`,
               })
 
               return this.rp({
@@ -2559,8 +2564,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/foo 'bar'/)
+                expect(res.headers['content-security-policy']).to.eq(`object-src 'none'; base-uri 'self'`)
               })
             })
 
@@ -2569,7 +2573,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'application/json',
-                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\'',
+                'content-security-policy': `object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`,
               })
 
               return this.rp({
@@ -2580,7 +2584,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers['content-security-policy']).to.eq('foo \'bar\'; script-src \'fake-src\'')
+                expect(res.headers['content-security-policy']).to.eq(`object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`)
               })
             })
 
@@ -2612,6 +2616,64 @@ describe('Routes', () => {
               })
             })
           })
+
+          // `true` strips every nonce directive, so only an allow-list naming one can show
+          // whether a nonce reaches a non-HTML response.
+          nonceDirectives.forEach((directive) => {
+            describe(`experimentalCspAllowList: ["${directive}"]`, () => {
+              const cspHeader = `object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`
+              const allowedPolicy = cspHeader.split('; ').find((policy) => policy.startsWith(`${directive} `))
+
+              beforeEach(function () {
+                return this.setup('http://localhost:8080', {
+                  config: {
+                    experimentalCspAllowList: [directive],
+                  },
+                })
+              })
+
+              it(`appends a nonce to "${directive}" and strips the other nonce directives for text/html content-type`, function () {
+                nock(this.server.remoteStates.current().origin)
+                .get('/bar')
+                .reply(200, 'OK', {
+                  'Content-Type': 'text/html',
+                  'content-security-policy': cspHeader,
+                })
+
+                return this.rp({
+                  url: 'http://localhost:8080/bar',
+                  headers: {
+                    'Cookie': '__cypress.initial=false',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                  },
+                })
+                .then((res) => {
+                  expect(res.statusCode).to.eq(200)
+                  expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; ${allowedPolicy} 'nonce-${nonce}'`)
+                })
+              })
+
+              it(`does not append a nonce to "${directive}" if request is not for html`, function () {
+                nock(this.server.remoteStates.current().origin)
+                .get('/bar')
+                .reply(200, 'OK', {
+                  'Content-Type': 'application/json',
+                  'content-security-policy': cspHeader,
+                })
+
+                return this.rp({
+                  url: 'http://localhost:8080/bar',
+                  headers: {
+                    'Cookie': '__cypress.initial=false',
+                  },
+                })
+                .then((res) => {
+                  expect(res.statusCode).to.eq(200)
+                  expect(res.headers['content-security-policy']).to.eq(`object-src 'none'; ${allowedPolicy}`)
+                })
+              })
+            })
+          })
         })
 
         describe('not provided', () => {
@@ -2635,7 +2697,7 @@ describe('Routes', () => {
             })
           })
 
-          it('does not append a nonce to CSP header if request is not for html', function () {
+          it('does not add a CSP header if request is not for html', function () {
             nock(this.server.remoteStates.current().origin)
             .get('/bar')
             .reply(200, 'OK', {
