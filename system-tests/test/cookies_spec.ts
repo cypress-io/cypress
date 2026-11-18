@@ -103,7 +103,7 @@ const onServer = function (app) {
     console.log('to', a, 'from', b)
 
     if (n > 0) {
-      res.redirect(`${a}/setCascadingCookies?n=${n - 1}&a=${b}&b=${a}`)
+      return res.redirect(`${a}/setCascadingCookies?n=${n - 1}&a=${b}&b=${a}`)
     }
 
     return res.send('<html>finished setting cookies</html>')

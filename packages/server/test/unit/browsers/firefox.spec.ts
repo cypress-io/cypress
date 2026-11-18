@@ -821,6 +821,16 @@ describe('lib/browsers/firefox', () => {
         expectCalledWith(vi.mocked(fsExtra.writeFile), '/path/to/appData/firefox-stable/interactive/chrome/userChrome.css')
       })
 
+      it('removes the content area top border in headless userChrome.css', async () => {
+        browser.isHeadless = true
+
+        await firefox.open(browser as any, 'http://', options as any, automation as any)
+
+        const userCss = vi.mocked(fsExtra.writeFile).mock.calls.find(([file]) => String(file).endsWith('userChrome.css'))?.[1]
+
+        expect(userCss).toMatch(/\.browserContainer \{\s*border-top: none !important;\s*\}/)
+      })
+
       it('clears browser cache', async () => {
         mockfs({
           '/path/to/appData/firefox-stable/interactive/': {
