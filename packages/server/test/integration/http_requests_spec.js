@@ -2360,10 +2360,13 @@ describe('Routes', () => {
 
       describe('CSP Header', () => {
         // With experimentalCspAllowList set, the proxy rewrites CSP headers on every response,
-        // joining directives with '; ' and dropping any trailing ';'. Fixtures other than the
-        // trailing-';' test are written in that form so tests can compare the whole header
-        // exactly. Non-HTML tests send the same Accept header as HTML ones, so the response
-        // Content-Type is the only difference.
+        // joining directives with '; ' and dropping a trailing ';'. Fixtures are written in that
+        // form, except in the trailing-';' test, so the whole header can be compared exactly.
+        //
+        // For these non-initial requests, Cypress injects only when both the response
+        // Content-Type and the request's Accept header say HTML. Non-HTML tests send the HTML
+        // Accept header too, so a broken Content-Type check can't hide behind a missing one.
+
         const expectCspWithNonce = (header, buildExpected) => {
           const match = /'nonce-([A-Za-z0-9+/]+={0,2})'/.exec(header)
 
