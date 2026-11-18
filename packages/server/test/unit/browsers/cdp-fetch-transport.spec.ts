@@ -2225,7 +2225,47 @@ describe('CdpFetchTransport', () => {
       expectNotCalledWith(client.send, 'Fetch.continueResponse', { requestId: 'second-request-pause-id' })
     })
 
-    it('waits for a response pause however long the origin takes to send headers', async () => {
+    it('fails the flow with ESOCKETTIMEDOUT when a request handler\'s responseTimeout elapses before headers arrive', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      let upstreamError: (Error & { code?: string }) | undefined
+
+      httpIntercept.use(async (req, next) => {
+        try {
+          return await next({ ...req, responseTimeout: 45000 })
+        } catch (err) {
+          upstreamError = err as Error
+
+          throw err
+        }
+      })
+
+      vi.useFakeTimers({ shouldAdvanceTime: false })
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          resourceType: 'XHR',
+        }))
+
+        await vi.advanceTimersByTimeAsync(44999)
+
+        expect(upstreamError).toBeUndefined()
+
+        await vi.advanceTimersByTimeAsync(1)
+        await handled
+      } finally {
+        vi.useRealTimers()
+      }
+
+      expect(upstreamError?.code).toBe('ESOCKETTIMEDOUT')
+      expect(transport['inFlightRequests'].size).toBe(0)
+    })
+
+    it('waits for a response pause however long the origin takes to send headers when no responseTimeout is set', async () => {
       vi.useFakeTimers({ shouldAdvanceTime: false })
       const client = createClient()
       const { transport } = createTransport(client)
@@ -3789,6 +3829,49 @@ describe('CdpFetchTransport', () => {
         expect(stopSpy).toHaveBeenCalledOnce()
         // stop() resets internally — the second call is expected, not a leak
         expect(resetSpy).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    it('does not charge the response body transfer against the responseTimeout', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      const slowBody = Promise.withResolvers<any>()
+
+      client.sendWithArgs('Fetch.getResponseBody').returns(slowBody.promise)
+
+      httpIntercept.use(async (req, next) => next({ ...req, responseTimeout: 30000 }))
+
+      vi.useFakeTimers({ shouldAdvanceTime: false })
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+        }))
+
+        await vi.advanceTimersByTimeAsync(0)
+
+        const responded = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          responseStatusCode: 200,
+        }))
+
+        await vi.advanceTimersByTimeAsync(31000)
+
+        slowBody.resolve({ body: '', base64Encoded: false })
+
+        await responded
+        await handled
+      } finally {
+        vi.useRealTimers()
+      }
+
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 200,
       })
     })
 

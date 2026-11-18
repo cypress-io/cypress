@@ -154,6 +154,7 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
   // Request-stage route-match result, threaded from the neutral request —
   // see the `next` callback in `interceptRequest`.
   hadMatchingRoutes?: boolean
+  responseTimeout?: number
 }
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
@@ -180,7 +181,14 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
 }
 
+/**
+ * `headersReady` settles once the response pause has arrived and its headers
+ * are resolved. A request's `responseTimeout` is bounded on that rather than on
+ * the whole response so the body transfer, which can legitimately outlast the
+ * time the browser took to respond, is not charged against a pause that arrived.
+ */
 type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
+  headersReady: PromiseWithResolvers<void>
   // key into inFlightByNetworkId; absent when the pause carried no networkId
   networkKey?: string
   // Request-stage route-match result, stashed once the outbound request comes
@@ -268,8 +276,8 @@ export class CdpFetchTransport {
    * enables. Enabling alongside `cdp_automation._handlePausedRequests` on one
    * session clobbers patterns and races `continueRequest` calls, which can
    * drop the `X-Cypress-Is-AUT-Frame` header or hang document requests until
-   * the transport resets. Coordinating two owners is out of scope; do
-   * not enable both on one session.
+   * the response times out or the transport resets. Coordinating two owners
+   * is out of scope; do not enable both on one session.
    */
   private async enableFetch (sessionId?: string): Promise<void> {
     debug('enabling CDP Fetch on session %s', sessionId ?? '<own>')
@@ -585,14 +593,17 @@ export class CdpFetchTransport {
 
       const responseDeferred: ResponsePauseDeferred = {
         ...Promise.withResolvers<CdpFetchTransportResponse>(),
+        headersReady: Promise.withResolvers<void>(),
         ...(event.networkId ? { networkKey: this.getNetworkKey(event.networkId, sessionId) } : {}),
       }
 
       // reset()/stop() may reject this before the continue callback races on
       // it (e.g. a between-tests reset while request middleware is still
       // running); observe it so that never becomes an unhandled rejection.
+      // Releasing headersReady also ends a wait no pause will ever arrive for.
       responseDeferred.promise.catch((err: Error) => {
         debug('in-flight response deferred rejected for %s: %s', event.request.url, err.message)
+        responseDeferred.headersReady.resolve()
       })
 
       deferred = responseDeferred
@@ -649,15 +660,37 @@ export class CdpFetchTransport {
 
         requestContinued = true
 
-        // Unbounded, like the MITM path: the origin may take any time to send
-        // headers. Abandoned flows settle on a canceled Network.loadingFailed
-        // (not emitted for service workers or downloads) or on reset()/stop().
-        const pausedResponse = await responseDeferred.promise
+        // Like the MITM path, only a request handler's responseTimeout bounds
+        // the wait; otherwise the origin may take any time to send headers.
+        // Abandoned flows settle on a canceled Network.loadingFailed (not
+        // emitted for service workers or downloads) or on reset()/stop().
+        let timeout: NodeJS.Timeout | undefined
 
-        responseRequestId = pausedResponse.requestId
-        responseSessionId = pausedResponse.sessionId
+        try {
+          if (outbound.responseTimeout) {
+            const responseTimeout = outbound.responseTimeout
 
-        return pausedResponse
+            await Promise.race([
+              responseDeferred.headersReady.promise,
+              new Promise<never>((_resolve, reject) => {
+                timeout = setTimeout(() => {
+                  // The code the MITM path's upstream request fails with, which
+                  // the driver reports as a responseTimeout error.
+                  reject(Object.assign(new Error(`ESOCKETTIMEDOUT waiting ${responseTimeout}ms for a response to ${event.request.url}`), { code: 'ESOCKETTIMEDOUT' }))
+                }, responseTimeout)
+              }),
+            ])
+          }
+
+          const pausedResponse = await responseDeferred.promise
+
+          responseRequestId = pausedResponse.requestId
+          responseSessionId = pausedResponse.sessionId
+
+          return pausedResponse
+        } finally {
+          clearTimeout(timeout)
+        }
       })
 
       await this.syncSetCookies(response, responseDeferred.cookieStoreWhenContinued)
@@ -824,6 +857,8 @@ export class CdpFetchTransport {
     debug('response pause for %s: status %s, header names %o', event.request.url, event.responseStatusCode, event.responseHeaders?.map(({ name }) => name))
 
     const { responseHeaders, cookiesBeforeIntercept } = await this.resolveCookieHeaders(event, sessionId)
+
+    deferred.headersReady.resolve()
 
     // no predicate composed → materialize everything
     const bodySkipped = this.options.shouldStreamBody?.(event, { hasMatchingRoute: deferred.hadMatchingRoutes ?? false }) ?? false
