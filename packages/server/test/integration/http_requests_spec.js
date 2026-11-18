@@ -2361,13 +2361,16 @@ describe('Routes', () => {
       describe('CSP Header', () => {
         // With experimentalCspAllowList set, the proxy rewrites CSP headers on every response,
         // joining directives with '; ' and dropping any trailing ';'. Fixtures are written in
-        // that form so tests can compare the whole header exactly.
+        // that form so tests can compare the whole header exactly. Non-HTML tests send the
+        // same Accept header as HTML ones, so the response Content-Type is the only difference.
         const expectCspWithNonce = (header, buildExpected) => {
-          const match = /'nonce-([A-Za-z0-9+/]{22}==)'/.exec(header)
+          const match = /'nonce-([A-Za-z0-9+/]+={0,2})'/.exec(header)
 
           expect(match, `expected a nonce in CSP header "${header}"`).to.exist
           expect(header).to.eq(buildExpected(match[1]))
         }
+
+        const cspHeaderWithNonceDirectives = `object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`
 
         describe('provided', () => {
           describe('experimentalCspAllowList: false', () => {
@@ -2531,7 +2534,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': `object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`,
+                'content-security-policy': cspHeaderWithNonceDirectives,
               })
 
               return this.rp({
@@ -2573,18 +2576,19 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'application/json',
-                'content-security-policy': `object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`,
+                'content-security-policy': cspHeaderWithNonceDirectives,
               })
 
               return this.rp({
                 url: 'http://localhost:8080/bar',
                 headers: {
                   'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 },
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers['content-security-policy']).to.eq(`object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`)
+                expect(res.headers['content-security-policy']).to.eq(cspHeaderWithNonceDirectives)
               })
             })
 
@@ -2621,8 +2625,7 @@ describe('Routes', () => {
           // whether a nonce reaches a non-HTML response.
           nonceDirectives.forEach((directive) => {
             describe(`experimentalCspAllowList: ["${directive}"]`, () => {
-              const cspHeader = `object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`
-              const allowedPolicy = cspHeader.split('; ').find((policy) => policy.startsWith(`${directive} `))
+              const allowedPolicy = cspHeaderWithNonceDirectives.split('; ').find((policy) => policy.startsWith(`${directive} `))
 
               beforeEach(function () {
                 return this.setup('http://localhost:8080', {
@@ -2637,7 +2640,7 @@ describe('Routes', () => {
                 .get('/bar')
                 .reply(200, 'OK', {
                   'Content-Type': 'text/html',
-                  'content-security-policy': cspHeader,
+                  'content-security-policy': cspHeaderWithNonceDirectives,
                 })
 
                 return this.rp({
@@ -2658,13 +2661,14 @@ describe('Routes', () => {
                 .get('/bar')
                 .reply(200, 'OK', {
                   'Content-Type': 'application/json',
-                  'content-security-policy': cspHeader,
+                  'content-security-policy': cspHeaderWithNonceDirectives,
                 })
 
                 return this.rp({
                   url: 'http://localhost:8080/bar',
                   headers: {
                     'Cookie': '__cypress.initial=false',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                   },
                 })
                 .then((res) => {
@@ -2708,6 +2712,7 @@ describe('Routes', () => {
               url: 'http://localhost:8080/bar',
               headers: {
                 'Cookie': '__cypress.initial=false',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
               },
             })
             .then((res) => {
