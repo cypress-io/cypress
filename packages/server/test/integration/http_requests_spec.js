@@ -2360,9 +2360,10 @@ describe('Routes', () => {
 
       describe('CSP Header', () => {
         // With experimentalCspAllowList set, the proxy rewrites CSP headers on every response,
-        // joining directives with '; ' and dropping any trailing ';'. Fixtures are written in
-        // that form so tests can compare the whole header exactly. Non-HTML tests send the
-        // same Accept header as HTML ones, so the response Content-Type is the only difference.
+        // joining directives with '; ' and dropping any trailing ';'. Fixtures other than the
+        // trailing-';' test are written in that form so tests can compare the whole header
+        // exactly. Non-HTML tests send the same Accept header as HTML ones, so the response
+        // Content-Type is the only difference.
         const expectCspWithNonce = (header, buildExpected) => {
           const match = /'nonce-([A-Za-z0-9+/]+={0,2})'/.exec(header)
 
@@ -2413,7 +2414,7 @@ describe('Routes', () => {
               })
             })
 
-            it('does not append a "script-src" nonce to CSP header for text/html content-type when no valid directive exists', function () {
+            it('strips nonce directives and does not append a nonce to CSP header for text/html content-type', function () {
               nock(this.server.remoteStates.current().origin)
               .get('/bar')
               .reply(200, 'OK', {
@@ -2435,7 +2436,7 @@ describe('Routes', () => {
             })
           })
 
-          describe('experimentalCspAllowList: ["script-src-element", "script-src", "default-src"]', () => {
+          describe('experimentalCspAllowList: ["script-src-elem", "script-src", "default-src"]', () => {
             beforeEach(function () {
               return this.setup('http://localhost:8080', {
                 config: {
@@ -2570,6 +2571,27 @@ describe('Routes', () => {
               })
             })
 
+            it('appends a nonce to a CSP header that ends in ";" for text/html content-type', function () {
+              nock(this.server.remoteStates.current().origin)
+              .get('/bar')
+              .reply(200, 'OK', {
+                'Content-Type': 'text/html',
+                'content-security-policy': `object-src 'none'; script-src 'self' https://cdn.example.com;`,
+              })
+
+              return this.rp({
+                url: 'http://localhost:8080/bar',
+                headers: {
+                  'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                },
+              })
+              .then((res) => {
+                expect(res.statusCode).to.eq(200)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src 'self' https://cdn.example.com 'nonce-${nonce}'`)
+              })
+            })
+
             it('does not remove or append a nonce to original CSP header if request is not for html', function () {
               nock(this.server.remoteStates.current().origin)
               .get('/bar')
@@ -2618,8 +2640,6 @@ describe('Routes', () => {
             })
           })
 
-          // `true` strips every nonce directive, so only an allow-list naming one can show
-          // whether a nonce reaches a non-HTML response.
           nonceDirectives.forEach((directive) => {
             describe(`experimentalCspAllowList: ["${directive}"]`, () => {
               const allowedPolicy = cspHeaderWithNonceDirectives.split('; ').find((policy) => policy.startsWith(`${directive} `))
@@ -2650,27 +2670,6 @@ describe('Routes', () => {
                 .then((res) => {
                   expect(res.statusCode).to.eq(200)
                   expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; ${allowedPolicy} 'nonce-${nonce}'`)
-                })
-              })
-
-              it(`does not append a nonce to "${directive}" if request is not for html`, function () {
-                nock(this.server.remoteStates.current().origin)
-                .get('/bar')
-                .reply(200, 'OK', {
-                  'Content-Type': 'application/json',
-                  'content-security-policy': cspHeaderWithNonceDirectives,
-                })
-
-                return this.rp({
-                  url: 'http://localhost:8080/bar',
-                  headers: {
-                    'Cookie': '__cypress.initial=false',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                  },
-                })
-                .then((res) => {
-                  expect(res.statusCode).to.eq(200)
-                  expect(res.headers['content-security-policy']).to.eq(`object-src 'none'; ${allowedPolicy}`)
                 })
               })
             })
