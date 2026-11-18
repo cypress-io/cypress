@@ -48,16 +48,22 @@ const runSmokeTest = function (buildAppExecutable, timeoutSeconds = 30) {
 
   const options = {
     timeout: timeoutSeconds * 1000,
+    env: { ...process.env, DEBUG: 'cypress:server:start-bundle', DEBUG_COLORS: '0' },
   }
 
   return execa(`${buildAppExecutable}`, args, options)
   .catch((err) => {
     console.error('smoke test failed with error %s', err.message)
     throw err
-  }).then(({ stdout }) => {
+  }).then(({ stdout, stderr }) => {
     stdout = stdout.replace(/\s/, '')
     if (!hasRightResponse(stdout)) {
       throw new Error(`Stdout: '${stdout}' did not match the random number: '${rand}'`)
+    }
+
+    // a rejected cache still starts, just without most of the startup improvement
+    if (!stderr.includes('code cache accepted')) {
+      throw new Error(`The start bundle's code cache was not accepted. Stderr: '${stderr}'`)
     }
 
     console.log('smoke test response', stdout)

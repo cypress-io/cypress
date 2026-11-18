@@ -4,8 +4,7 @@ const glob = require('glob')
 const os = require('os')
 const path = require('path')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
-const { consolidateDeps } = require('@tooling/v8-snapshot')
-const { removeBundledDependencies, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
+const { consolidateDuplicateDependencies, removeBundledDependencies, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
 const { createStartCypressBundle, createServerEntryPointBundle, createStartBundleCodeCache } = require('./binary/start-bundle')
 const {
   getEncryptionFileSource,
@@ -102,7 +101,7 @@ module.exports = async function (params) {
     const appDir = await fs.realpath(outputFolder)
 
     // Consolidate first so that the bundles and the files kept on disk resolve the copies that ship
-    await consolidateDeps({ projectBaseDir: appDir })
+    await consolidateDuplicateDependencies(appDir)
 
     const [startBundle, serverEntryPointBundledDependencies] = await Promise.all([
       createStartCypressBundle(appDir),

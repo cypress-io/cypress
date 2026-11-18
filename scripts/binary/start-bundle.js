@@ -54,6 +54,10 @@ const externalizeUnresolvable = (bundleDir, unresolved) => {
 }
 
 const REQUIRE_RESOLVE_LITERAL = /\brequire\.resolve\(\s*(['"`])([^'"`]+)\1/g
+// `require.resolve` as a value, so aliases and `require.resolve.paths` are covered too, but not `x.require.resolve`
+const REQUIRE_RESOLVE = /(?<![\w$.])require\.resolve\b/g
+// a shebang and a directive prologue such as "use strict" must stay ahead of the header to keep their meaning
+const FILE_PROLOGUE = /^(#!.*\n)?(?:\s*(?:\/\/.*\n|\/\*[\s\S]*?\*\/)|\s*(['"])use strict\2\s*;?)*/
 
 // Every module keeps its original __filename/__dirname and require.resolve base, so code that reads
 // files next to itself or resolves packages still sees its location on disk rather than the bundle's.
@@ -63,11 +67,14 @@ const keepModuleLocation = (buildAppDir, requireResolveTargets) => {
     setup (build) {
       build.onLoad({ filter: /\.(c?js)$/ }, async (args) => {
         let contents = await fs.readFile(args.path, 'utf8')
-        const usesRequireResolve = contents.includes('require.resolve(')
+        const usesRequireResolve = contents.search(REQUIRE_RESOLVE) !== -1
 
         if (!usesRequireResolve && !/\b__(dirname|filename)\b/.test(contents)) {
           return { contents, loader: 'js' }
         }
+
+        const relativePath = path.relative(buildAppDir, args.path).split(path.sep).join(path.posix.sep)
+        let header = `var __filename = require('path').join(__cypressAppDir, ${JSON.stringify(relativePath)}), __dirname = require('path').dirname(__filename);`
 
         if (usesRequireResolve) {
           for (const [, , request] of contents.matchAll(REQUIRE_RESOLVE_LITERAL)) {
@@ -78,16 +85,13 @@ const keepModuleLocation = (buildAppDir, requireResolveTargets) => {
             }
           }
 
-          contents = contents.replace(/\brequire\.resolve\(/g, `require('module').createRequire(__filename).resolve(`)
+          header += `var __cypressRequireResolve = require('module').createRequire(__filename).resolve;`
+          contents = contents.replace(REQUIRE_RESOLVE, '__cypressRequireResolve')
         }
 
-        const relativePath = path.relative(buildAppDir, args.path).split(path.sep).join(path.posix.sep)
-        const header = `var __filename = require('path').join(__cypressAppDir, ${JSON.stringify(relativePath)}), __dirname = require('path').dirname(__filename);`
+        const prologue = contents.match(FILE_PROLOGUE)[0]
 
-        // keep a shebang on the first line
-        contents = contents.startsWith('#!') ? contents.replace(/^(#!.*\n)/, `$1${header}`) : `${header}${contents}`
-
-        return { contents, loader: 'js' }
+        return { contents: `${prologue}${header}${contents.slice(prologue.length)}`, loader: 'js' }
       })
     },
   }
@@ -95,14 +99,18 @@ const keepModuleLocation = (buildAppDir, requireResolveTargets) => {
 
 // request-promise loads a private copy of @cypress/request by clearing require.cache, which bundled modules
 // bypass, so in the bundle it would patch the copy that every other request uses and reject non-2xx responses.
-const loadFromDisk = (filter, loadedFromDisk) => {
+// The bundle requires the exact file resolved here, which is the one kept on disk.
+const loadFromDisk = (bundleDir, filter, loadedFromDisk) => {
   return {
     name: 'load-from-disk',
     setup (build) {
       build.onResolve({ filter }, (args) => {
-        loadedFromDisk.add(require.resolve(args.path, { paths: [args.resolveDir] }))
+        const resolved = require.resolve(args.path, { paths: [args.resolveDir] })
+        const fromBundle = path.relative(bundleDir, resolved).split(path.sep).join(path.posix.sep)
 
-        return { path: args.path, external: true }
+        loadedFromDisk.add(resolved)
+
+        return { path: fromBundle.startsWith('.') ? fromBundle : `./${fromBundle}`, external: true }
       })
     },
   }
@@ -112,6 +120,7 @@ const loadFromDisk = (filter, loadedFromDisk) => {
 // Returns the bundled files and the files the bundle still loads from disk, both relative to buildAppDir.
 const createStartCypressBundle = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
+  const bundleDir = path.join(buildAppDir, 'packages/server')
   const loadedFromDisk = new Set()
   const unresolved = new Set()
 
@@ -129,8 +138,8 @@ const createStartCypressBundle = async (buildAppDir) => {
     external: ['electron'],
     banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
     plugins: [
-      loadFromDisk(/^@cypress\/request-promise(\/|$)/, loadedFromDisk),
-      externalizeUnresolvable(path.join(buildAppDir, 'packages/server'), unresolved),
+      loadFromDisk(bundleDir, /^@cypress\/request-promise(\/|$)/, loadedFromDisk),
+      externalizeUnresolvable(bundleDir, unresolved),
       keepModuleLocation(unixBuildAppDir, loadedFromDisk),
     ],
   })

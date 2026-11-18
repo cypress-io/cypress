@@ -41,6 +41,39 @@ describe('start-bundle', () => {
       expect(loadedFromDisk).to.include('node_modules/@cypress/request-promise/index.js')
     })
 
+    it('loads the copy of @cypress/request-promise that the requiring package resolves', async () => {
+      const nestedPath = path.join(appDir, 'node_modules', 'consumer', 'node_modules', '@cypress', 'request-promise', 'index.js')
+
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = require('consumer')`)
+      await fs.outputFile(path.join(appDir, 'node_modules', 'consumer', 'index.js'), `module.exports = require('@cypress/request-promise')`)
+      await fs.outputFile(nestedPath, `module.exports = __filename`)
+      await fs.outputFile(path.join(appDir, 'node_modules', '@cypress', 'request-promise', 'index.js'), `module.exports = __filename`)
+
+      const { loadedFromDisk } = await createStartCypressBundle(appDir)
+
+      expect(require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))).to.equal(nestedPath)
+      expect(loadedFromDisk).to.deep.equal(['node_modules/consumer/node_modules/@cypress/request-promise/index.js'])
+    })
+
+    it('keeps "use strict" in modules that use __dirname', async () => {
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = require('./lib/strict')`)
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'lib', 'strict.js'), `#!/usr/bin/env node\n// header\n"use strict";\nmodule.exports = { dirname: __dirname, strict: (function () { return this })() === undefined }`)
+
+      await createStartCypressBundle(appDir)
+
+      expect(require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))).to.deep.equal({ dirname: path.join(appDir, 'packages', 'server', 'lib'), strict: true })
+    })
+
+    it('resolves an aliased require.resolve from the module that calls it', async () => {
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = require('data-package')`)
+      await fs.outputFile(path.join(appDir, 'node_modules', 'data-package', 'index.js'), `const resolve = require.resolve\nmodule.exports = resolve('./data.json')`)
+      await fs.outputJson(path.join(appDir, 'node_modules', 'data-package', 'data.json'), {})
+
+      await createStartCypressBundle(appDir)
+
+      expect(require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))).to.equal(path.join(appDir, 'node_modules', 'data-package', 'data.json'))
+    })
+
     it('loads a native addon from the package that requires it', async () => {
       await createStartCypressBundle(appDir)
 

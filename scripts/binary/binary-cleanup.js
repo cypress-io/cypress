@@ -1,6 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const del = require('del')
+const glob = require('glob')
 const esbuild = require('esbuild')
 const tempDir = require('temp-dir')
 const workingDir = path.join(tempDir, 'binary-cleanup-workdir')
@@ -31,6 +32,17 @@ async function removeEmptyDirectories (directory) {
 
   if (fileNames.length === 0) {
     await fs.rmdir(directory)
+  }
+}
+
+// bluebird and lodash are nested under many packages at the same major version, so every package uses the top-level copy
+const consolidateDuplicateDependencies = async (buildAppDir) => {
+  for (const dependency of ['bluebird', 'lodash']) {
+    const duplicates = glob.sync(`{packages,node_modules/@cypress,node_modules/@packages}/**/node_modules/${dependency}`, { cwd: buildAppDir })
+
+    console.log(`removing ${duplicates.length} nested copies of ${dependency}`)
+
+    await Promise.all(duplicates.map((duplicate) => fs.remove(path.join(buildAppDir, duplicate))))
   }
 }
 
@@ -161,9 +173,10 @@ const getDependencyPathsToKeep = async (buildAppDir, additionalEntryPoints = [])
 // files the start bundle still requires at runtime, all relative to buildAppDir, which must be a real path
 const removeBundledDependencies = async (buildAppDir, { bundledDependencies, loadedFromDisk }) => {
   // 1. Retrieve all dependencies that are loaded from disk and so must be kept in the binary
-  const keptDependencies = await getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(c?js|json)$/.test(target)))
-
-  keptDependencies.push(...loadedFromDisk)
+  const keptDependencies = new Set([
+    ...await getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(c?js|json)$/.test(target))),
+    ...loadedFromDisk,
+  ])
 
   // package.json and other data files stay: Node reads them to resolve the packages that are still loaded from disk
   const potentiallyRemovedDependencies = bundledDependencies.filter((dependency) => /\.c?js$/.test(dependency))
@@ -175,7 +188,7 @@ const removeBundledDependencies = async (buildAppDir, { bundledDependencies, loa
 
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
     // babel/runtime requires all of its dependencies in a very non-standard dynamic way. We will keep anything in babel/runtime
-    if (!keptDependencies.includes(dependency.slice(2)) && !dependency.includes('@babel/runtime') && await existsWithExactCase(dependency)) {
+    if (!keptDependencies.has(dependency.slice(2)) && !dependency.includes('@babel/runtime') && await existsWithExactCase(dependency)) {
       await fs.remove(path.join(buildAppDir, dependency))
     }
   }))
@@ -246,6 +259,7 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
 }
 
 module.exports = {
+  consolidateDuplicateDependencies,
   createExactCaseChecker,
   removeBundledDependencies,
   cleanupUnneededDependencies,

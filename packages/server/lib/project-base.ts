@@ -363,7 +363,7 @@ export class ProjectBase extends EE {
     }
 
     // the reporter loads mocha, which open mode only needs once a spec runs
-    const { Reporter } = require('./reporter') as typeof import('./reporter')
+    const { Reporter }: typeof import('./reporter') = require('./reporter')
 
     try {
       Reporter.loadReporter(reporter, projectRoot)

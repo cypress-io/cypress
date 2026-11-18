@@ -231,7 +231,7 @@ export const _printGroupedProcesses = (groupTotals) => {
 
 function _checkProcesses () {
   // the profiler only runs with its debug namespace enabled, so don't load systeminformation at startup
-  const systemInformation = require('systeminformation') as typeof import('systeminformation')
+  const systemInformation: typeof si = require('systeminformation')
 
   return systemInformation.processes()
   .then(groupCyProcesses)
