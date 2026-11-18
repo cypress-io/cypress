@@ -46,9 +46,13 @@ const runSmokeTest = function (buildAppExecutable, timeoutSeconds = 30) {
   args.push('--smoke-test')
   args.push(`--ping=${rand}`)
 
+  // matches the environment createStartBundleCodeCache writes the cache in, since V8 rejects it under different flags
+  const env = _.omit(process.env, 'NODE_OPTIONS', 'ELECTRON_RUN_AS_NODE')
+
   const options = {
     timeout: timeoutSeconds * 1000,
-    env: { ...process.env, DEBUG: 'cypress:server:start-bundle', DEBUG_COLORS: '0' },
+    env: { ...env, DEBUG: 'cypress:server:start-bundle', DEBUG_COLORS: '0' },
+    extendEnv: false,
   }
 
   return execa(`${buildAppExecutable}`, args, options)
