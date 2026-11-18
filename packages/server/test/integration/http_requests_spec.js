@@ -2359,9 +2359,9 @@ describe('Routes', () => {
       })
 
       describe('CSP Header', () => {
-        // With experimentalCspAllowList enabled, the proxy rewrites CSP headers on every response
-        // ('; '-joined, no trailing ';'). Fixtures use that form so tests can compare the whole
-        // header exactly.
+        // With experimentalCspAllowList enabled, the proxy rewrites CSP headers on every response,
+        // so `object-src 'none';script-src 'self';` comes back as `object-src 'none'; script-src 'self'`.
+        // Fixtures use that form so tests can compare the whole header exactly.
         //
         // With `__cypress.initial=false`, Cypress injects only when both the response
         // Content-Type and the request's Accept header say HTML. Non-HTML tests send the HTML
