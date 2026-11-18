@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-type CypressModule = (id: string, module: Record<string, unknown>) => Record<string, any>
+// The proxy mirrors the wrapped module, so it's callable and constructible when
+// the default export is a function
+type CypressModule = (id: string, module: Record<string, unknown>) => any
 
 let cypressModule: CypressModule
 
@@ -111,6 +113,94 @@ describe('__cypressModule', () => {
 
       expect(new ns.Account('Priya Raman')).toMatchObject({ owner: 'Priya Raman' })
     })
+
+    it('constructs a default-exported class with its arguments', () => {
+      class Store {
+        constructor (public name: string, public capacity: number) {}
+      }
+
+      const DefaultStore = cypressModule('default-class', { default: Store })
+      const store = new DefaultStore('Riverside Pantry', 3)
+
+      expect(store).toBeInstanceOf(Store)
+      expect(store).toBeInstanceOf(DefaultStore)
+      expect(store).toMatchObject({ name: 'Riverside Pantry', capacity: 3 })
+    })
+
+    it('constructs a subclass of an exported constructor function', () => {
+      // Mirrors `class Greeting extends React.Component`, where `Component` is a plain function
+      function Widget (this: { props: unknown }, props: unknown) {
+        this.props = props
+      }
+
+      type Props = { name: string }
+
+      const ui: { Widget: new (props: Props) => { props: Props } } = cypressModule('react-like', { Widget })
+
+      class Greeting extends ui.Widget {
+        greet () {
+          return `Hello, ${this.props.name}`
+        }
+      }
+
+      const greeting = new Greeting({ name: 'Amara Okafor' })
+
+      expect(greeting.greet()).toBe('Hello, Amara Okafor')
+      expect(greeting).toBeInstanceOf(Widget)
+    })
+
+    it('constructs a subclass of a default-exported class', () => {
+      class Store {
+        constructor (public name: string) {}
+
+        label () {
+          return `Store: ${this.name}`
+        }
+      }
+
+      const DefaultStore: typeof Store = cypressModule('default-base-class', { default: Store })
+
+      class Outlet extends DefaultStore {
+        label () {
+          return `Outlet of ${super.label()}`
+        }
+      }
+
+      expect(new Outlet('Riverside Pantry').label()).toBe('Outlet of Store: Riverside Pantry')
+    })
+
+    it('calls a default-exported function', () => {
+      function formatPrice (cents: number, currency: string) {
+        return `${(cents / 100).toFixed(2)} ${currency}`
+      }
+
+      const format = cypressModule('default-function', { default: formatPrice })
+
+      expect(format(1999, 'EUR')).toBe('19.99 EUR')
+    })
+
+    it('constructs a class assigned after the proxy is created', () => {
+      const ns = cypressModule('late-class', {})
+
+      ns.Invoice = class Invoice {
+        constructor (public id: string) {}
+      }
+
+      const invoice = new ns.Invoice('inv_4q7Zp2Lm')
+
+      expect(invoice).toBeInstanceOf(ns.Invoice)
+      expect(invoice).toMatchObject({ id: 'inv_4q7Zp2Lm' })
+    })
+
+    it('calls a function assigned after the proxy is created', () => {
+      const ns = cypressModule('late-function', {})
+
+      ns.greet = function (this: { salutation: string }, name: string) {
+        return `${this.salutation}, ${name}`
+      }
+
+      expect(ns.greet.call({ salutation: 'Hello' }, 'Amara Okafor')).toBe('Hello, Amara Okafor')
+    })
   })
 
   describe('function exports', () => {
@@ -146,6 +236,18 @@ describe('__cypressModule', () => {
       const ns = cypressModule('method-named-class', { default: helpers })
 
       expect(ns.class('primary')).toBe('btn-primary')
+    })
+
+    it('calls a function without the Function prototype with each argument', () => {
+      function add (a: number, b: number) {
+        return a + b
+      }
+
+      Object.setPrototypeOf(add, null)
+
+      const ns = cypressModule('null-prototype-function', { add })
+
+      expect(ns.add(1, 2)).toBe(3)
     })
   })
 })

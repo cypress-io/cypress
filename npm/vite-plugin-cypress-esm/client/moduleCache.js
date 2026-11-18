@@ -4,6 +4,21 @@ const NO_REDEFINE_LIST = new Set(['prototype'])
 
 let debug = false
 
+// Mirror how a wrapper was invoked, since class constructors throw when called
+// without `new` and that can't be told reliably from their source.
+// Passing `newTarget` on lets a subclass of the wrapper (`class Greeting extends
+// React.Component`) get its own prototype from `super()`, so each wrapper's
+// `prototype` must match the function it wraps.
+// `Reflect.apply` also covers functions created without the Function prototype,
+// which have no `apply` method of their own.
+function invoke (fn, thisArg, params, newTarget) {
+  if (newTarget) {
+    return Reflect.construct(fn, params, newTarget)
+  }
+
+  return Reflect.apply(fn, thisArg, params)
+}
+
 function createProxyModule (module) {
   // What we build our module proxy off of depends on whether the module has a default export
   // We need to be able to support `import DefaultValue from 'module'` => `const DefaultValue = __cypressModule(module)`
@@ -18,14 +33,10 @@ function createProxyModule (module) {
   // ```
   if (typeof base === 'function') {
     target = function (...params) {
-      if (typeof target.default === 'function') {
-        return target.default.apply(this, params)
-      }
-
-      if (typeof module === 'function') {
-        return module.apply(this, params)
-      }
+      return invoke(target.default, this, params, new.target)
     }
+
+    target.prototype = base.prototype
   } else {
     target = {}
   }
@@ -67,20 +78,7 @@ function createProxyModule (module) {
         log(`🎁 Handling ${key} with a wrapper function`)
 
         proxies[key] = function (...params) {
-          // Mirror how the wrapper was invoked, since class constructors throw when
-          // called without `new` and that can't be told reliably from their source
-          if (new.target) {
-            return Reflect.construct(target[key], params)
-          }
-
-          // Prefer invoking with `apply` so we get proper context in the invoked function
-          if (target[key].apply) {
-            return target[key].apply(this, params)
-          }
-
-          // Certain weird edge-cases manage to create functions without the Function
-          // prototype, thus no `apply` 🤷. Fall back to straight invocation
-          return target[key](params)
+          return invoke(target[key], this, params, new.target)
         }
 
         proxies[key].prototype = target[key].prototype
@@ -134,8 +132,10 @@ function createProxyModule (module) {
 
       if (typeof value === 'function' && !(prop in proxies)) {
         proxies[prop] = function (...params) {
-          return target[prop].apply(this, params)
+          return invoke(target[prop], this, params, new.target)
         }
+
+        proxies[prop].prototype = value.prototype
       }
 
       return true
