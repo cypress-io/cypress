@@ -22,7 +22,6 @@ const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
-const RESPONSE_PAUSE_TIMEOUT_MS = 30000
 
 const setCookieHeaders = (headers: Protocol.Fetch.HeaderEntry[]): string[] => {
   return headers
@@ -181,14 +180,7 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
 }
 
-/**
- * `headersReady` settles once the response pause has arrived and its headers
- * are resolved. RESPONSE_PAUSE_TIMEOUT_MS is bounded on that rather than on the
- * whole response so the body transfer, which can legitimately outlast the time
- * the browser took to respond, is not charged against a pause that arrived.
- */
 type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
-  headersReady: PromiseWithResolvers<void>
   // key into inFlightByNetworkId; absent when the pause carried no networkId
   networkKey?: string
   // Request-stage route-match result, stashed once the outbound request comes
@@ -276,7 +268,7 @@ export class CdpFetchTransport {
    * enables. Enabling alongside `cdp_automation._handlePausedRequests` on one
    * session clobbers patterns and races `continueRequest` calls, which can
    * drop the `X-Cypress-Is-AUT-Frame` header or hang document requests until
-   * the response-pause timeout. Coordinating two owners is out of scope; do
+   * the transport resets. Coordinating two owners is out of scope; do
    * not enable both on one session.
    */
   private async enableFetch (sessionId?: string): Promise<void> {
@@ -593,17 +585,14 @@ export class CdpFetchTransport {
 
       const responseDeferred: ResponsePauseDeferred = {
         ...Promise.withResolvers<CdpFetchTransportResponse>(),
-        headersReady: Promise.withResolvers<void>(),
         ...(event.networkId ? { networkKey: this.getNetworkKey(event.networkId, sessionId) } : {}),
       }
 
       // reset()/stop() may reject this before the continue callback races on
       // it (e.g. a between-tests reset while request middleware is still
       // running); observe it so that never becomes an unhandled rejection.
-      // Releasing headersReady also ends a wait no pause will ever arrive for.
       responseDeferred.promise.catch((err: Error) => {
         debug('in-flight response deferred rejected for %s: %s', event.request.url, err.message)
-        responseDeferred.headersReady.resolve()
       })
 
       deferred = responseDeferred
@@ -660,29 +649,14 @@ export class CdpFetchTransport {
 
         requestContinued = true
 
-        let timeout: NodeJS.Timeout | undefined
+        // Unbounded, like the MITM path: the origin may take any time to send
+        // headers. Browser cancels and reset()/stop() settle abandoned flows.
+        const pausedResponse = await responseDeferred.promise
 
-        try {
-          await Promise.race([
-            responseDeferred.headersReady.promise,
-            new Promise<never>((_resolve, reject) => {
-              timeout = setTimeout(() => {
-                reject(new Error(`Timed out waiting for CDP Fetch response pause for ${event.request.url}`))
-              }, RESPONSE_PAUSE_TIMEOUT_MS)
-            }),
-          ])
+        responseRequestId = pausedResponse.requestId
+        responseSessionId = pausedResponse.sessionId
 
-          const pausedResponse = await responseDeferred.promise
-
-          responseRequestId = pausedResponse.requestId
-          responseSessionId = pausedResponse.sessionId
-
-          return pausedResponse
-        } finally {
-          if (timeout) {
-            clearTimeout(timeout)
-          }
-        }
+        return pausedResponse
       })
 
       await this.syncSetCookies(response, responseDeferred.cookieStoreWhenContinued)
@@ -849,8 +823,6 @@ export class CdpFetchTransport {
     debug('response pause for %s: status %s, header names %o', event.request.url, event.responseStatusCode, event.responseHeaders?.map(({ name }) => name))
 
     const { responseHeaders, cookiesBeforeIntercept } = await this.resolveCookieHeaders(event, sessionId)
-
-    deferred.headersReady.resolve()
 
     // no predicate composed → materialize everything
     const bodySkipped = this.options.shouldStreamBody?.(event, { hasMatchingRoute: deferred.hadMatchingRoutes ?? false }) ?? false
