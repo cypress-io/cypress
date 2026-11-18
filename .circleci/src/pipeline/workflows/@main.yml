@@ -135,6 +135,10 @@ linux-x64:
         context: test-runner:cypress-record-key
         requires:
           - build
+    - driver-integration-tests-firefox-beta:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
     - driver-integration-tests-electron:
         context: test-runner:cypress-record-key
         requires:
@@ -300,6 +304,7 @@ linux-x64:
           - check-lockfile
           - percy-finalize
           - driver-integration-tests-firefox
+          - driver-integration-tests-firefox-beta
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-chrome-inject-document-domain
