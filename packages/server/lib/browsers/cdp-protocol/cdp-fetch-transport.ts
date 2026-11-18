@@ -650,7 +650,8 @@ export class CdpFetchTransport {
         requestContinued = true
 
         // Unbounded, like the MITM path: the origin may take any time to send
-        // headers. Browser cancels and reset()/stop() settle abandoned flows.
+        // headers. Abandoned flows settle on a canceled Network.loadingFailed
+        // (not emitted for service workers or downloads) or on reset()/stop().
         const pausedResponse = await responseDeferred.promise
 
         responseRequestId = pausedResponse.requestId
