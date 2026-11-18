@@ -338,10 +338,10 @@ const getSourceDetails = (generatedDetails) => {
   }
 }
 
-// Firefox names an anonymous function after the function it is nested in,
-// adding `/<` per level (`outer/<`, `outer/</<`), sometimes after a `<`
-// (`outer</<`). Scanning from the end keeps the cost linear even for a name
-// with a long run of markers.
+// Removes the markers Firefox adds to the name of an anonymous function, so
+// `outer/<`, `outer/</<` and `outer</<` all become `outer`: one `/<` per
+// level of nesting, sometimes after a `<`. Scanning from the end keeps the
+// cost linear in the name's length.
 const stripFirefoxFunctionMarkers = (functionName: string) => {
   let end = functionName.length
 
