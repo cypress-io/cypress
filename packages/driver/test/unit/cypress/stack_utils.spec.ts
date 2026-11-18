@@ -296,26 +296,34 @@ describe('stack_utils', () => {
   })
 
   describe('getSourceStack', () => {
-    const location = 'http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.js:10:5'
+    const location = 'http://localhost:8080/__cypress/cypress/spec.cy.js:14:16'
 
-    it.each([
-      ['Context.eval/<', 'Context.eval'],
-      ['Context.eval/</<', 'Context.eval'],
-      ['Context.eval/</</<', 'Context.eval'],
-      ['Context.eval</<', 'Context.eval'],
-      ['Context.eval</</<', 'Context.eval'],
-      ['Context.eval', 'Context.eval'],
-      ['bddInterface/</context.context', 'bddInterface/</context.context'],
-      ['submitOrder<', 'submitOrder<'],
-      ['/<', '<unknown>'],
-      ['/</<', '<unknown>'],
-      ['', '<unknown>'],
-    ])('names the Firefox frame %j as %j', (functionName, expected) => {
+    const expectFunctionName = (functionName: string, expected: string) => {
       const { parsed, sourceMapped } = stack_utils.getSourceStack(`${functionName}@${location}`)
 
       expect(parsed?.[0]).toHaveProperty('function', expected)
       expect(sourceMapped).toBe(`at ${expected} (${location})`)
-    })
+    }
+
+    // names from the Firefox stacks in __fixtures__
+    it.each([
+      ['onRunnableRun/<', 'onRunnableRun'],
+      ['./cypress/spec.cy.js/</<', './cypress/spec.cy.js'],
+      ['__webpack_modules__</create/onRunnableRun/<', '__webpack_modules__</create/onRunnableRun'],
+      ['__webpack_modules__</bddInterface/</context.context', '__webpack_modules__</bddInterface/</context.context'],
+      ['__webpack_modules__</module.exports/Promise.prototype._resolveFromExecutor/r<', '__webpack_modules__</module.exports/Promise.prototype._resolveFromExecutor/r<'],
+      ['__stackReplacementMarker', '__stackReplacementMarker'],
+      ['', '<unknown>'],
+    ])('names the captured Firefox frame %j as %j', expectFunctionName)
+
+    // forms that follow Firefox's naming rules but are not in the captured stacks
+    it.each([
+      ['./cypress/spec.cy.js/</</<', './cypress/spec.cy.js'],
+      ['onRunnableRun</<', 'onRunnableRun'],
+      ['onRunnableRun</</<', 'onRunnableRun'],
+      ['/<', '<unknown>'],
+      ['/</<', '<unknown>'],
+    ])('names the extrapolated Firefox frame %j as %j', expectFunctionName)
 
     it('names a Chromium frame without Firefox markers', () => {
       const { parsed } = stack_utils.getSourceStack(`    at Context.eval (${location})`)
@@ -327,14 +335,14 @@ describe('stack_utils', () => {
       const markers = '/<'.repeat(100000)
       // a run of markers that does not end the name is the input that makes
       // a backtracking match quadratic
-      const stack = [`${markers}submitOrder@${location}`, `Context.eval${markers}@${location}`].join('\n')
+      const stack = [`${markers}onRunnableRun@${location}`, `./cypress/spec.cy.js${markers}@${location}`].join('\n')
 
       const start = performance.now()
       const { parsed } = stack_utils.getSourceStack(stack)
 
       expect(performance.now() - start).toBeLessThan(1000)
-      expect(parsed?.[0]).toHaveProperty('function', `${markers}submitOrder`)
-      expect(parsed?.[1]).toHaveProperty('function', 'Context.eval')
+      expect(parsed?.[0]).toHaveProperty('function', `${markers}onRunnableRun`)
+      expect(parsed?.[1]).toHaveProperty('function', './cypress/spec.cy.js')
     })
   })
 
