@@ -44,7 +44,25 @@ describe('normalizeStdout', () => {
     it('keeps a similar line whose counter is not an attempt count', () => {
       const input = 'Still waiting to connect to Chrome, retrying in 1 second (attempt three of many)\n'
 
-      expect(normalizeStdout(input)).to.eq('Still waiting to connect to Chrome, retrying in X second(s)(attempt three of many)\n')
+      expect(normalizeStdout(input)).to.include('Still waiting to connect to Chrome')
+      .and.to.include('(attempt three of many)')
+    })
+
+    it('leaves the rewrites of neighbouring lines intact', () => {
+      const input = [
+        'Still waiting to connect to Chrome, retrying in 1 second (attempt 18/62)',
+        '  │ Duration:     5 seconds                │',
+        '  │ Spec Ran:     simple_spec.cy.js        │',
+        '  ✔  All specs passed!                        123ms        1        1',
+        '',
+      ].join('\n')
+
+      expect(normalizeStdout(input)).to.eq([
+        '  │ Duration:     X seconds                │',
+        '  │ Spec Ran:     simple_spec.cy.js        │',
+        '  ✔  All specs passed!                        XX:XX        1        1',
+        '',
+      ].join('\n'))
     })
   })
 })

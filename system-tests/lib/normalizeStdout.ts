@@ -138,6 +138,9 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
   str = str
+  // Chrome or Firefox sometimes take longer to connect. Stripped first so no later rewrite of
+  // durations or line endings can change the text before it is matched.
+  .replace(/^Still waiting to connect to .+, retrying in 1 second \(attempt \d+\/\d+\)\r?\n/gm, '')
   // /Users/jane/........../ -> //foo/bar/.projects/
   // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join('/foo/bar/.projects')
@@ -178,9 +181,6 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/(duration=')(\d+)(')/g, replaceDurationFromReporter)
   // (in|after) (1m)|(1m, 10s)|(10s)|(10.12ms) 1/1 => '(in|after) XXm, YYs, ZZ.ZZms 1/1
   .replace(/((in)|(after)) ((?:\d+m)|(?:\d+m, \d+s)|(?:\d+s)|(?:\d+\.\d+ms)) (\d+\/\d+)/g, replaceShortDuration)
-  // Chrome or Firefox sometimes take longer to connect. Runs before the seconds replacement below,
-  // which would rewrite "1 second " and stop this from matching, and before the \r strip, hence \r?.
-  .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt \d+\/\d+\)\r?\n/g, '')
   // 15 seconds -> XX seconds
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
