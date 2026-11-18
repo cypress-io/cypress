@@ -189,6 +189,36 @@ describe('lib/browsers/browser-cri-client', function () {
       await expect(getClient()).rejects.toThrow()
     })
 
+    it('stops retrying and reports the exit when the browser exits before connecting', async function () {
+      connectAsync.mockRestore()
+      const getDelayMsForRetry = vi.spyOn(protocol, '_getDelayMsForRetry').mockReturnValue(0)
+      const connect = vi.spyOn(net, 'connect').mockImplementation(() => {
+        const socket = new net.Socket()
+
+        process.nextTick(() => socket.emit('error', Object.assign(new Error('connect ECONNREFUSED'), { code: 'ECONNREFUSED' })))
+
+        return socket
+      })
+      const getBrowserExit = vi.fn()
+      .mockReturnValueOnce(undefined)
+      .mockReturnValue({ code: 21, signal: null })
+
+      await expect(BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', getBrowserExit, onAsynchronousError: onError, onServiceWorkerClientEvent }))
+      .rejects.toMatchObject({ type: 'CDP_BROWSER_EXITED_BEFORE_CONNECT' })
+
+      expect(connect).toHaveBeenCalledTimes(2)
+      expect(getDelayMsForRetry).toHaveBeenCalledTimes(1)
+    })
+
+    it('reports a connection failure when the browser is still running', async function () {
+      connectAsync.mockImplementation(() => {
+        throw new Error('connect ECONNREFUSED')
+      })
+
+      await expect(BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', getBrowserExit: () => undefined, onAsynchronousError: onError, onServiceWorkerClientEvent }))
+      .rejects.toMatchObject({ type: 'CDP_COULD_NOT_CONNECT' })
+    })
+
     it('attempts to connect to multiple hosts', async function () {
       connectAsync.mockRestore()
       const socket = new net.Socket()

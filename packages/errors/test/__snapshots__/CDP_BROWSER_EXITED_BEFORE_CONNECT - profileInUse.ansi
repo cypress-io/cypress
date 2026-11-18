@@ -1,0 +1,5 @@
+[31mCypress could not connect to Chrome because the browser exited with [33mcode 21[39m[31m before it opened the Chrome DevTools Protocol port.[39m
+[31m[39m
+[31mThis exit code means the browser found another Chrome window already running on the same profile. This usually happens when the [95mUserDataDir[39m[31m enterprise or group policy is set, because the policy overrides the profile directory Cypress launches the browser with. You can review the applied policies by visiting [94mchrome://policy[39m[31m (or [94medge://policy[39m[31m for Edge).[39m
+[31m[39m
+[31mClose every Chrome window and try again, or run your tests in a different browser.[39m
