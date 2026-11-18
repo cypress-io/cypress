@@ -26,9 +26,8 @@ describe('Socket', function () {
 
     // @ts-expect-error - `io` is not on the SocketShape type
     expect(socket.io.opts.path).toEqual('/path')
-    // socket.io-client 4.6+ normalizes string transports into transport classes; the websocket transport class is named "WS".
     // @ts-expect-error - `io` is not on the SocketShape type
-    expect(socket.io.opts.transports[0].name).toEqual('WS')
+    expect(socket.io.engine.transports).toEqual(['websocket'])
   })
 
   describe('automation socket browsers', function () {
