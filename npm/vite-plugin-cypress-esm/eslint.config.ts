@@ -1,10 +1,11 @@
-import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   // Browser code, which has no Node globals and a browser floor
   ...nodeConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), 'client/**'] })),
+  ...vitestConfig,
   {
     files: ['**/*.js', '**/*.ts', '**/*.tsx'],
     languageOptions: {

@@ -64,32 +64,23 @@ function createProxyModule (module) {
       const describedValue = descriptor.value || descriptor.get?.()
 
       if (typeof describedValue === 'function') {
-        // This is how you can see if something is a class
-        // TODO: Revisit, there has to be a better way to do this
-        // Important! RegEx instances are stateful, do not extract to a constant
-        const isClass = /^class\s.+?\{.+?\}/gms.test(describedValue.toString())
+        log(`🎁 Handling ${key} with a wrapper function`)
 
-        if (isClass) {
-          log(`🏗️ Handling ${key} as a constructor`)
-
-          proxies[key] = function (...params) {
-            // Edge case - use `apply` with `new` to create a class instance
-            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect/construct
+        proxies[key] = function (...params) {
+          // Mirror how the wrapper was invoked, since class constructors throw when
+          // called without `new` and that can't be told reliably from their source
+          if (new.target) {
             return Reflect.construct(target[key], params)
           }
-        } else {
-          log(`🎁 Handling ${key} with a standard wrapper function`)
 
-          proxies[key] = function (...params) {
-            // Prefer invoking with `apply` so we get proper context in the invoked function
-            if (target[key].apply) {
-              return target[key].apply(this, params)
-            }
-
-            // Certain weird edge-cases manage to create functions without the Function
-            // prototype, thus no `apply` 🤷. Fall back to straight invocation
-            return target[key](params)
+          // Prefer invoking with `apply` so we get proper context in the invoked function
+          if (target[key].apply) {
+            return target[key].apply(this, params)
           }
+
+          // Certain weird edge-cases manage to create functions without the Function
+          // prototype, thus no `apply` 🤷. Fall back to straight invocation
+          return target[key](params)
         }
 
         proxies[key].prototype = target[key].prototype
