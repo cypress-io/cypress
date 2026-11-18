@@ -25,7 +25,7 @@ describe('return values', () => {
   })
 
   it('can return cy and have done callback', (done) => {
-    // eslint-disable-next-line mocha/no-return-and-callback -- returning cy alongside done is the behavior under test
+    // eslint-disable-next-line mocha/no-return-and-done -- returning cy alongside done is the behavior under test
     return cy.wrap({}).then(() => {
       done()
     })
@@ -57,7 +57,7 @@ describe('return values', () => {
 
     cy.wrap(null)
 
-    // eslint-disable-next-line mocha/no-return-and-callback -- the returned function is what the error message must stringify
+    // eslint-disable-next-line mocha/no-return-and-done -- the returned function is what the error message must stringify
     return () => {
       return 'foo'
     }

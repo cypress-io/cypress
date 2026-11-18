@@ -163,7 +163,7 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] [`/.node-version`](../../.node-version) - used by some Node version managers
     - [ ] [`/.nvmrc`](../../.nvmrc) - used by `nvm`
     - [ ] `@types/node` used throughout the monorepo to determine compatible node types. The major version of this package must reflect the node version set in [`/.node-version`](../../.node-version).
-    - [ ] [github workflows](../../.github) - used for repository templates, vulnerability detection, and V8 snapshots. If the node version for Snyk needs to be updated, then the required pull request check into `develop` must also be updated. A repository administrator will need to accomplish this.
+    - [ ] [github workflows](../../.github) - used for repository templates and V8 snapshots.
     - [ ] [`/package.json`](../../package.json) - update `engines`
     - [ ] When the **minimum major** Node version in [`/cli/package.json`](../../cli/package.json) `engines.node` changes, update esbuild's `target` in [`/packages/packherd-require/src/transpile-ts.ts`](../../packages/packherd-require/src/transpile-ts.ts) and [`/tooling/packherd/src/create-bundle.ts`](../../tooling/packherd/src/create-bundle.ts) to match (for example `node20`, `node22`) so packherd bundles and on-the-fly TypeScript transpilation stay compatible with the oldest Node still supported by the published `cypress` package.
     - [ ] [`docker-compose.yml`](../../docker-compose.yml) - update Docker image to the new matching `internal` image

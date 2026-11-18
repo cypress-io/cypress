@@ -96,8 +96,8 @@ export default [
       // fixture specs exercise how the runner orders sibling hooks and how it
       // reports a test that both returns a promise and takes `done`, so those
       // patterns are the scenario under test
-      'mocha/no-sibling-hooks': 'off',
-      'mocha/no-return-and-callback': 'off',
+      'mocha/consistent-structure': 'off',
+      'mocha/no-return-and-done': 'off',
       // import-x cannot parse the `.d.mts` types of @vitejs/plugin-vue
       'import-x/default': 'off',
       'import-x/namespace': 'off',
