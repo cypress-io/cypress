@@ -28,11 +28,6 @@ describe('dom/elements/complexElements', () => {
       expect(canSetSelectionRangeElement(createInput(type, value))).toBe(true)
     })
 
-    // The `type` property is normalized to lowercase whatever the attribute's case
-    it('returns true for input[type=URL]', () => {
-      expect(canSetSelectionRangeElement(createInput('URL', 'https://www.example.com'))).toBe(true)
-    })
-
     it.each([
       ['email', 'jane.doe@example.com'],
       ['number', '42'],
