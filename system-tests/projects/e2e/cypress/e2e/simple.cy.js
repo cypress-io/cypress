@@ -1,2 +1,2 @@
-/* eslint-disable mocha/no-global-tests */
+/* eslint-disable mocha/no-top-level-tests */
 it('is true', () => {})

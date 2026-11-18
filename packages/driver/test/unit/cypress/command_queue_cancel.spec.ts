@@ -113,9 +113,9 @@ describe('@packages/driver/src/cypress/command_queue', () => {
 
         queue.endEarly({ canceled: false })
 
-        expect(state('promise').isCancelled()).to.be.true
+        expect(state('promise').isCancelled()).toBe(true)
         expect(queue.index).to.equal(queue.length)
-        expect(state('canceled')).to.be.undefined
+        expect(state('canceled')).toBeUndefined()
         expect(runnable.resetTimeout).not.toHaveBeenCalled()
         expect(Cypress.action).not.toHaveBeenCalledWith('cy:canceled')
 
@@ -137,8 +137,8 @@ describe('@packages/driver/src/cypress/command_queue', () => {
 
         queue.endEarly({ canceled: false })
 
-        expect(state('promise').isCancelled()).to.be.false
-        expect(state('isStable')).to.be.false
+        expect(state('promise').isCancelled()).toBe(false)
+        expect(state('isStable')).toBe(false)
         expect(runnable.resetTimeout).not.toHaveBeenCalled()
       })
     })
@@ -149,9 +149,9 @@ describe('@packages/driver/src/cypress/command_queue', () => {
 
         queue.endEarly({ canceled: true })
 
-        expect(state('promise').isCancelled()).to.be.true
+        expect(state('promise').isCancelled()).toBe(true)
         expect(queue.index).to.equal(queue.length)
-        expect(state('canceled')).to.be.true
+        expect(state('canceled')).toBe(true)
         expect(runnable.resetTimeout).toHaveBeenCalled()
         expect(Cypress.action).toHaveBeenCalledWith('cy:canceled')
       })

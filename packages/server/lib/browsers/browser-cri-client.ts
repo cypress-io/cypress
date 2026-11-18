@@ -7,6 +7,7 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cdp-protocol/cri-client'
+import { sendLargeMessagesInFragments } from './cdp-protocol/send-large-messages-in-fragments'
 import { cypressSessions } from '../cypress-sessions'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape, CdpClientShape, OnExtraTargetCriClientReady, ExtraTargetDetach } from '@packages/types'
@@ -608,6 +609,8 @@ export class BrowserCriClient {
 
       return await run()
     }
+
+    sendLargeMessagesInFragments(extraTargetCriClient)
 
     browserCriClient.addExtraTargetClient(targetInfo, extraTargetCriClient)
 

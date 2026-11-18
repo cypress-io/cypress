@@ -1,4 +1,4 @@
-import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
@@ -7,6 +7,7 @@ export default [
   ...nodeConfig,
   // the shared test globs leave out .mjs
   chaiFriendlyConfig(['test/**/*.{mjs,mts}']),
+  ...vitestConfig,
   {
     ignores: ['test/_test-output/**'],
   },

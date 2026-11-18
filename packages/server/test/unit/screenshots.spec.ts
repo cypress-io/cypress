@@ -505,6 +505,8 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         screenshots.clearMultipartState()
 
         vi.restoreAllMocks()
+        // The outer beforeEach replaces composite outright, which restoreAllMocks doesn't undo
+        Jimp.prototype.composite = originalComposite
 
         data1 = {
           titles: ['cy.screenshot() - take a screenshot'],
@@ -565,7 +567,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         }).then((img3) => {
           return Jimp.read(Fixtures.path('img/DPI-1x/stitched.png'))
           .then((img) => {
-            expect(screenshots.imagesMatch(img, img3.image))
+            expect(screenshots.imagesMatch(img, img3.image)).toBe(true)
           })
         })
       })
@@ -586,7 +588,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         }).then((img3) => {
           return Jimp.read(Fixtures.path('img/DPI-2x/stitched.png'))
           .then((img) => {
-            expect(screenshots.imagesMatch(img, img3.image))
+            expect(screenshots.imagesMatch(img, img3.image)).toBe(true)
           })
         })
       })

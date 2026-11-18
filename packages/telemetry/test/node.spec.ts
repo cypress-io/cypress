@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeAll, vi } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { telemetry, encodeTelemetryContext, decodeTelemetryContext } from '../src/node'
 import { OTLPTraceExporter as OTLPTraceExporterCloud } from '../src/span-exporters/cloud-span-exporter'
+import { REDACTED } from '../src/detectors/processDetectorSync'
 
 // stub out the otlp exporter so we don't send requests to localhost:4318
 vi.mock('@opentelemetry/exporter-trace-otlp-http')
@@ -78,8 +80,11 @@ describe('telemetry is disabled', () => {
 })
 
 describe('telemetry is enabled', () => {
+  const argv = process.argv
+
   beforeAll(() => {
     vi.stubEnv('CYPRESS_INTERNAL_ENABLE_TELEMETRY', 'true')
+    process.argv = [...argv, '--key', 'record-key-value']
     const exporter = new OTLPTraceExporterCloud()
 
     expect(() => {
@@ -89,6 +94,10 @@ describe('telemetry is enabled', () => {
         exporter,
       })
     }).not.toThrow()
+  })
+
+  afterAll(() => {
+    process.argv = argv
   })
 
   describe('isEnabled', () => {
@@ -126,6 +135,15 @@ describe('telemetry is enabled', () => {
       expect(() => telemetry.endActiveSpanAndChildren(spanny)).not.toThrow()
 
       expect(telemetry.getActiveContextObject().context).toBeUndefined()
+    })
+  })
+
+  describe('getResources', () => {
+    it('does not include the record key from the command line', () => {
+      const resources = telemetry.getResources()
+
+      expect(resources[SemanticResourceAttributes.PROCESS_COMMAND_ARGS]).toEqual(expect.arrayContaining(['--key', REDACTED]))
+      expect(JSON.stringify(resources)).not.toContain('record-key-value')
     })
   })
 
