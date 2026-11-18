@@ -5,6 +5,20 @@ import dedent from 'dedent'
 
 import { monorepoPaths } from '../monorepoPaths'
 
+// The name is used as a directory, the `@packages/<name>` package name and a file name,
+// so it has to be valid as all three
+const validatePackageName = (name: string): true | string => {
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name)) {
+    return 'Package names must start with a letter and use only lowercase letters, digits and single hyphens.'
+  }
+
+  if (fs.existsSync(path.join(monorepoPaths.pkgDir, name))) {
+    return `packages/${name} already exists. Choose a different name.`
+  }
+
+  return true
+}
+
 export async function makePackage () {
   const results = await inquirer.prompt<{
     packageName: string
@@ -16,7 +30,7 @@ export async function makePackage () {
       name: 'packageName',
       type: 'input',
       message: 'What is the package name?',
-      validate: (val) => /[A-z-]+/.test(val),
+      validate: validatePackageName,
     },
     {
       name: 'target',
