@@ -13,6 +13,7 @@ linux-x64:
           value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
+      - equal: [ 'chrisbreiding/driver-updates-component-testing', << pipeline.git.branch >> ]
   jobs:
     # Bots can't join the GitHub teams that restrict our contexts, and jobs after
     # an approval run as the approver. The install runs the bot's dependency changes.
@@ -387,7 +388,7 @@ linux-x64:
     - test-against-staging:
         context: test-runner:record-tests
         # Expression-based filter: branch-based allowlist OR force-persist-artifacts pipeline parameter.
-        filters: &mainBuildFilters pipeline.git.branch == "develop" or pipeline.git.branch matches /^release\/\d+\.\d+\.\d+$/ or pipeline.git.branch matches /^v\d+$/ or pipeline.git.branch matches /^electron\/\d+\.\d+\.\d+$/ or pipeline.parameters.force-persist-artifacts == true
+        filters: &mainBuildFilters pipeline.git.branch == "develop" or pipeline.git.branch matches /^release\/\d+\.\d+\.\d+$/ or pipeline.git.branch matches /^v\d+$/ or pipeline.git.branch matches /^electron\/\d+\.\d+\.\d+$/ or pipeline.parameters.force-persist-artifacts == true or pipeline.git.branch == "chrisbreiding/driver-updates-component-testing"
         requires:
           - build
     - test-kitchensink:

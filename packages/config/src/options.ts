@@ -260,7 +260,8 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'browser',
   }, {
     name: 'experimentalRemoteDriver',
-    defaultValue: false,
+    // TODO: revert to false before merge; on by default only to run full CI with the remote driver
+    defaultValue: true,
     validation: validate.isBoolean,
     isExperimental: true,
     overrideLevel: 'any',
