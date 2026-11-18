@@ -322,6 +322,18 @@ describe('stack_utils', () => {
 
       expect(parsed?.[0]).toHaveProperty('function', 'Context.eval')
     })
+
+    it('names a Firefox frame with a long run of markers in linear time', () => {
+      const markers = '/<'.repeat(50000)
+      const stack = [`${markers}submitOrder@${location}`, `Context.eval${markers}@${location}`].join('\n')
+
+      const start = performance.now()
+      const { parsed } = stack_utils.getSourceStack(stack)
+
+      expect(performance.now() - start).toBeLessThan(1000)
+      expect(parsed?.[0]).toHaveProperty('function', `${markers}submitOrder`)
+      expect(parsed?.[1]).toHaveProperty('function', 'Context.eval')
+    })
   })
 
   describe('normalizedUserInvocationStack', () => {

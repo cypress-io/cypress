@@ -340,14 +340,28 @@ const getSourceDetails = (generatedDetails) => {
 
 // Firefox appends `/<` to an anonymous function's name once per level of
 // nesting (`outer/</<`), and `<` to a function passed as an argument
-// (`outer</<`).
-const functionExtrasRegex = /<?(?:\/<)+$/
+// (`outer</<`). Walking back from the end keeps this linear in the name's
+// length, where a regex ending in `(?:\/<)+$` retries the run of markers
+// from each position in it.
+const stripFirefoxFunctionMarkers = (functionName: string) => {
+  let end = functionName.length
+
+  while (end >= 2 && functionName[end - 1] === '<' && functionName[end - 2] === '/') {
+    end -= 2
+  }
+
+  if (end < functionName.length && functionName[end - 1] === '<') {
+    end -= 1
+  }
+
+  return functionName.slice(0, end)
+}
 
 const cleanFunctionName = (functionName) => {
   if (!_.isString(functionName)) return '<unknown>'
 
   // a name made only of markers belongs to a function nested in an anonymous one
-  return _.trim(functionName.replace(functionExtrasRegex, '')) || '<unknown>'
+  return _.trim(stripFirefoxFunctionMarkers(functionName)) || '<unknown>'
 }
 
 const parseLine = (line) => {
