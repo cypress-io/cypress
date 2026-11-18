@@ -16,11 +16,11 @@ const validatePackageName = (name: string): true | string => {
   }
 
   if (!/^[a-z]/i.test(name)) {
-    return 'Package names must start with a letter, like data-context.'
+    return 'Package names must start with a letter.'
   }
 
   if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name)) {
-    return 'Package names can only contain lowercase letters, digits and single hyphens, and can\'t end with a hyphen, like v8-snapshot-require.'
+    return 'Package names can only contain lowercase letters, digits and single hyphens, and can\'t end with a hyphen.'
   }
 
   return true

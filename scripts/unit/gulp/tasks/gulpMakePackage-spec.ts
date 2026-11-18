@@ -20,7 +20,7 @@ describe('gulpMakePackage', () => {
       validate = prompt.firstCall.args[0].find(({ name }) => name === 'packageName').validate
     })
 
-    it('accepts the names of existing packages', () => {
+    it('accepts valid package names', () => {
       for (const name of ['server', 'data-context', 'v8-snapshot-require', 'network-interception', 'ts']) {
         expect(validate(name), name).to.be.true
       }
@@ -59,9 +59,11 @@ describe('gulpMakePackage', () => {
       expect(validate('')).to.be.a('string').that.includes('start with a letter')
     })
 
-    it('rejects a name too long for npm once scoped to @packages/', () => {
-      expect(validate(`a${'b'.repeat(203)}`)).to.be.true
-      expect(validate(`a${'b'.repeat(204)}`)).to.be.a('string').that.includes('204 characters')
+    it('rejects a name that makes @packages/<name> longer than npm\'s 214-character limit', () => {
+      const longestName = 'a'.repeat(214 - '@packages/'.length)
+
+      expect(validate(longestName)).to.be.true
+      expect(validate(`${longestName}a`)).to.be.a('string').that.includes('214-character limit')
     })
   })
 })
