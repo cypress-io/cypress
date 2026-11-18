@@ -107,52 +107,67 @@ export class FilterTaggedContent extends Transform {
    * @param line The line to process
    */
   private async processLine (line: string): Promise<void> {
-    let rest = line
+    let rest: string | undefined = line
 
     do {
-      const endPos = rest.indexOf(this.endTag)
+      rest = this.inTaggedContent ? await this.processTagged(rest) : await this.processUntagged(rest)
+    } while (rest !== undefined && rest.length > 0)
+  }
 
-      if (this.inTaggedContent) {
-        if (endPos < 0) {
-          await this.writeToWasteStream(rest)
+  /**
+   * Handles the head of `rest` while inside tagged content.
+   *
+   * @returns the text still to process, or undefined once `rest` is fully consumed
+   */
+  private async processTagged (rest: string): Promise<string | undefined> {
+    const endPos = rest.indexOf(this.endTag)
 
-          return
-        }
+    if (endPos < 0) {
+      await this.writeToWasteStream(rest)
 
-        if (endPos > 0) {
-          await this.writeToWasteStream(rest.slice(0, endPos))
-        }
+      return undefined
+    }
 
-        this.inTaggedContent = false
-        rest = rest.slice(endPos + this.endTag.length)
-        continue
+    if (endPos > 0) {
+      await this.writeToWasteStream(rest.slice(0, endPos))
+    }
+
+    this.inTaggedContent = false
+
+    return rest.slice(endPos + this.endTag.length)
+  }
+
+  /**
+   * Handles the head of `rest` while outside tagged content.
+   *
+   * @returns the text still to process, or undefined once `rest` is fully consumed
+   */
+  private async processUntagged (rest: string): Promise<string | undefined> {
+    const endPos = rest.indexOf(this.endTag)
+    const startPos = rest.indexOf(this.startTag)
+
+    // An end tag without a preceding start tag closes content whose start was not seen
+    if (endPos >= 0 && (startPos < 0 || endPos < startPos)) {
+      if (endPos > 0) {
+        await this.writeToWasteStream(rest.slice(0, endPos))
       }
 
-      const startPos = rest.indexOf(this.startTag)
+      return rest.slice(endPos + this.endTag.length)
+    }
 
-      // An end tag without a preceding start tag closes content whose start was not seen
-      if (endPos >= 0 && (startPos < 0 || endPos < startPos)) {
-        if (endPos > 0) {
-          await this.writeToWasteStream(rest.slice(0, endPos))
-        }
+    if (startPos < 0) {
+      await this.pass(rest)
 
-        rest = rest.slice(endPos + this.endTag.length)
-        continue
-      }
+      return undefined
+    }
 
-      if (startPos < 0) {
-        await this.pass(rest)
+    if (startPos > 0) {
+      await this.pass(rest.slice(0, startPos))
+    }
 
-        return
-      }
+    this.inTaggedContent = true
 
-      if (startPos > 0) {
-        await this.pass(rest.slice(0, startPos))
-      }
-
-      this.inTaggedContent = true
-      rest = rest.slice(startPos + this.startTag.length)
-    } while (rest.length > 0)
+    return rest.slice(startPos + this.startTag.length)
   }
 
   private async writeToWasteStream (line: string, encoding?: BufferEncoding | 'buffer') {

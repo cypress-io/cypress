@@ -19,6 +19,7 @@ import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-imp
 
 import { cypressDevPlugin } from './rules'
 import { reactRulesOff } from './reactRulesOff'
+import { sonarjsConfig } from './sonarjsConfig'
 
 const testFiles = [
   '**/test/**/*.{js,jsx,ts,tsx}',
@@ -451,4 +452,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       }],
     },
   },
+
+  ...sonarjsConfig,
 ]

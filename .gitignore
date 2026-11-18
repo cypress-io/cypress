@@ -421,3 +421,6 @@ settings.local.json
 # chunk active sidecar tracking
 .chunk/sidecar.json
 .chunk/sidecar.*.json
+lint-findings-report/
+lint-findings-baseline/
+eslint-findings.json
