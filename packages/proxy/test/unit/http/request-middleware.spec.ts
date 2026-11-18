@@ -49,6 +49,7 @@ describe('http/request-middleware', () => {
       'CorrelateBrowserPreRequest',
       'CalculateCredentialLevelIfApplicable',
       'FormatCookiesIfApplicable',
+      'StripCypressCookies',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
       'SetMatchingRoutes',
@@ -424,6 +425,69 @@ describe('http/request-middleware', () => {
       await testMiddleware([MaybeSimulateSecHeaders], ctx)
 
       expect(ctx.req.headers['sec-fetch-dest']).toEqual('document')
+    })
+  })
+
+  describe('StripCypressCookies', () => {
+    const { StripCypressCookies } = RequestMiddleware
+
+    const stripFrom = async (cookie?: string) => {
+      const ctx = {
+        req: {
+          headers: cookie === undefined ? {} : { cookie },
+          cookies: { '__cypress.unload': 'true' },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([StripCypressCookies], ctx)
+
+      return ctx.req
+    }
+
+    it('removes the header when it only holds Cypress cookies', async () => {
+      const req = await stripFrom('__cypress.unload=true; __cypress.initial=true')
+
+      expect(req.headers).not.toHaveProperty('cookie')
+    })
+
+    it('keeps the application\'s cookies', async () => {
+      const req = await stripFrom('session_id=8f2c1e9a40b7; __cypress.unload=true; theme=dark')
+
+      expect(req.headers.cookie).toEqual('session_id=8f2c1e9a40b7; theme=dark')
+    })
+
+    it('removes Cypress cookies delimited without a space', async () => {
+      const req = await stripFrom('session_id=8f2c1e9a40b7;__cypress.unload=true')
+
+      expect(req.headers.cookie).toEqual('session_id=8f2c1e9a40b7')
+    })
+
+    it('leaves a header without Cypress cookies untouched', async () => {
+      const req = await stripFrom('session_id=8f2c1e9a40b7;theme=dark')
+
+      expect(req.headers.cookie).toEqual('session_id=8f2c1e9a40b7;theme=dark')
+    })
+
+    it('does not strip a cookie whose value mentions a Cypress cookie', async () => {
+      const req = await stripFrom('return_to=__cypress.unload')
+
+      expect(req.headers.cookie).toEqual('return_to=__cypress.unload')
+    })
+
+    it('leaves the parsed cookies for later middleware', async () => {
+      const req = await stripFrom('__cypress.unload=true')
+
+      expect(req.cookies).toEqual({ '__cypress.unload': 'true' })
+    })
+
+    it('passes through a request without cookies', async () => {
+      const req = await stripFrom()
+
+      expect(req.headers).not.toHaveProperty('cookie')
     })
   })
 

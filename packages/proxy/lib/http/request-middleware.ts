@@ -132,6 +132,23 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
   return this.next()
 }
 
+// `req.cookies` was parsed before this runs, so the proxy can still read them.
+const StripCypressCookies: RequestMiddleware = function () {
+  const { cookie } = this.req.headers
+
+  if (cookie?.includes('__cypress.')) {
+    const appCookies = cookie.split(/;\s*/).filter((pair) => !pair.startsWith('__cypress.'))
+
+    if (appCookies.length) {
+      this.req.headers.cookie = appCookies.join('; ')
+    } else {
+      delete this.req.headers.cookie
+    }
+  }
+
+  this.next()
+}
+
 const MaybeAttachCrossOriginCookies: RequestMiddleware = async function () {
   return this.networkInterceptionCore.attachCrossOriginCookies(this)
 }
@@ -279,6 +296,7 @@ export default {
   CorrelateBrowserPreRequest,
   CalculateCredentialLevelIfApplicable,
   FormatCookiesIfApplicable,
+  StripCypressCookies,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
   SetMatchingRoutes,
