@@ -117,17 +117,20 @@ export const meetsDocumentCookieRules = (cookie: Pick<Cookie, 'key' | 'value' | 
 // TTL() does not count the time since a Max-Age cookie was created
 export const isExpired = (cookie: Pick<Cookie, 'expiryTime'>) => cookie.expiryTime() <= Date.now()
 
+// browsers report an IPv6 host in brackets and a domain cookie with a leading dot
+export const isSameCookie = (existing: ExistingCookie, cookie: StoredCookie) => {
+  return existing.name === cookie.name && canonicalDomain(existing.domain) === canonicalDomain(cookie.domain) && (existing.path || '/') === cookie.path
+}
+
 export const isBlockedByExisting = (existing: ExistingCookie, cookie: StoredCookie, isSecure: boolean) => {
   if (existing.name !== cookie.name) return false
 
-  // browsers report an IPv6 host in brackets and a domain cookie with a leading dot
+  if (existing.httpOnly && isSameCookie(existing, cookie)) return true
+
   const existingDomain = canonicalDomain(existing.domain)
   const cookieDomain = canonicalDomain(cookie.domain)
-  const existingPath = existing.path || '/'
-
-  if (existing.httpOnly && existingDomain === cookieDomain && existingPath === cookie.path) return true
 
   return !isSecure && !!existing.secure
     && (!!domainMatch(existingDomain, cookieDomain) || !!domainMatch(cookieDomain, existingDomain))
-    && pathMatch(cookie.path, existingPath)
+    && pathMatch(cookie.path, existing.path || '/')
 }

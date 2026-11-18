@@ -2,7 +2,7 @@ import {
   CookieJar,
   automationCookieToToughCookie,
 } from '@packages/server/lib/automation/cookie/jar'
-import { isBlockedByExisting, isExpired, meetsDocumentCookieRules, parseDocumentCookie } from '@packages/server/lib/automation/cookie/document-cookie-rules'
+import { isBlockedByExisting, isExpired, isSameCookie, meetsDocumentCookieRules, parseDocumentCookie } from '@packages/server/lib/automation/cookie/document-cookie-rules'
 import { isLocalhost } from '@packages/network-tools/lib/uri'
 import type { Cookie as ToughCookie,
   SerializableAutomationCookie,
@@ -114,7 +114,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       if (isBlocked) return getDocumentCookieValue()
 
       // tough-cookie refuses to replace an HttpOnly cookie, even one that has expired
-      if (cookieJar.getAllCookies().some((existing) => isExpired(existing) && existing.key === stored.name && existing.domain === stored.domain && existing.path === stored.path)) {
+      if (cookieJar.getAllCookies().some((existing) => isExpired(existing) && isSameCookie({ name: existing.key, domain: existing.domain || domain, path: existing.path }, stored))) {
         cookieJar.removeCookie(stored)
       }
 

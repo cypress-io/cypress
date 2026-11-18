@@ -4,7 +4,7 @@ import type { Cookie } from 'tough-cookie'
 import { isLocalhost } from '@packages/network-tools'
 import { cookieJar, toughCookieToAutomationCookie, writtenToJar } from './jar'
 import type { SerializableAutomationCookie } from './jar'
-import { isBlockedByExisting, isExpired, meetsDocumentCookieRules, parseDocumentCookie } from './document-cookie-rules'
+import { isBlockedByExisting, isExpired, isSameCookie, meetsDocumentCookieRules, parseDocumentCookie } from './document-cookie-rules'
 import type { ExistingCookie } from './document-cookie-rules'
 
 const debug = Debug('cypress:server:automation:cookie:document-cookie')
@@ -93,7 +93,7 @@ export const setDocumentCookie = async ({ cookieString, url }: DocumentCookieWri
   const stored = { name: cookie.key, domain: cookie.domain, path: cookie.path }
 
   const key = JSON.stringify(stored)
-  const findStored = () => cookieJar.getAllCookies().find((c) => c.key === stored.name && c.domain === stored.domain && c.path === stored.path)
+  const findStored = () => cookieJar.getAllCookies().find((c) => isSameCookie({ name: c.key, domain: c.domain || '', path: c.path }, stored))
   const { generation } = cookieJar
 
   if (generation !== trackedGeneration) {
