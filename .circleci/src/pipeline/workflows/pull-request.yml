@@ -170,6 +170,11 @@ jobs:
       filters: *runDriverTests
       requires:
         - ready-to-test
+  - driver-integration-tests-firefox-beta:
+      context: test-runner:cypress-record-key
+      filters: *runDriverTests
+      requires:
+        - ready-to-test
   - driver-integration-tests-electron:
       context: test-runner:cypress-record-key
       filters: *runDriverTests
@@ -459,6 +464,7 @@ jobs:
         - driver-integration-tests-chrome-beta
         - driver-integration-tests-chrome-beta-inject-document-domain
         - driver-integration-tests-firefox
+        - driver-integration-tests-firefox-beta
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests

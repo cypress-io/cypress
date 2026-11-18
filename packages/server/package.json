@@ -98,7 +98,7 @@
     "graceful-fs": "4.2.9",
     "http-proxy": "1.18.1",
     "human-interval": "1.0.0",
-    "image-size": "1.2.1",
+    "image-size": "2.0.3",
     "is-fork-pr": "2.5.0",
     "is-html": "2.0.0",
     "jimp": "1.6.1",
