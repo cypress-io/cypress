@@ -48,7 +48,7 @@ describe('config/src/index', () => {
 
       // remove these since they are different depending on your machine
       ;['platform', 'arch', 'version'].forEach((x) => {
-        expect(defaultValues[x]).to.exist
+        expect(defaultValues[x]).toEqual(expect.anything())
         delete defaultValues[x]
       })
 
@@ -72,7 +72,7 @@ describe('config/src/index', () => {
 
       // remove these since they are different depending on your machine
       ;['platform', 'arch', 'version'].forEach((x) => {
-        expect(defaultValues[x]).to.exist
+        expect(defaultValues[x]).toEqual(expect.anything())
         delete defaultValues[x]
       })
 
@@ -119,7 +119,19 @@ describe('config/src/index', () => {
       expect(normalizedKey).toEqual('baseUrl')
     })
 
-    it('returns nothing when config key does not has a default value', () => {
+    it.each([
+      ['a leading underscore', '_BASE_URL'],
+      ['a leading dash', '-BASE-URL'],
+      ['a leading underscore-dash pair', '_-BASE_URL'],
+      ['a leading dash-underscore pair', '-_BASE_URL'],
+      ['leading double underscores', '__BASE_URL'],
+      ['mixed leading dashes and underscores', '-_-__BASE-URL'],
+      ['no leading separators', 'BASE_URL'],
+    ])('normalizes a key with %s', (_description, key) => {
+      expect(configUtil.matchesConfigKey(key)).toEqual('baseUrl')
+    })
+
+    it('returns nothing when config key does not have a default value', () => {
       const normalizedKey = configUtil.matchesConfigKey('random')
 
       expect(normalizedKey).toBeUndefined()

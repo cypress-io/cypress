@@ -76,19 +76,19 @@ jobs:
         run: sudo -H pip install setuptools
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ secrets.CYPRESS_BOT_APP_CLIENT_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: read
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ env.BASE_BRANCH }}
       - name: Set up Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .node-version
           cache: 'yarn'
@@ -115,7 +115,7 @@ jobs:
         shell: bash
       - name: Upload snapshot artifact
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: v8-snapshot-cache-${{ env.PLATFORM }}
           path: snapshot-meta-${{ env.PLATFORM }}.json
@@ -130,7 +130,7 @@ jobs:
     steps:
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ secrets.CYPRESS_BOT_APP_CLIENT_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
@@ -139,7 +139,7 @@ jobs:
           # Required to request a team (e.g. @cypress-io/app) as PR reviewer
           permission-members: read
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 1
           token: ${{ steps.app-token.outputs.token }}
@@ -151,7 +151,7 @@ jobs:
         # to continue so the stage step below can exit cleanly with
         # has_changes=false.
         continue-on-error: true
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           pattern: v8-snapshot-cache-*
           path: artifacts/
@@ -204,7 +204,7 @@ jobs:
         shell: bash
       - name: Commit snapshot update via API
         if: ${{ steps.stage.outputs.has_changes == 'true' }}
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           SNAPSHOT_FILES: ${{ steps.stage.outputs.files }}
           BASE_BRANCH: ${{ env.BASE_BRANCH }}
@@ -231,7 +231,7 @@ jobs:
             })
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
