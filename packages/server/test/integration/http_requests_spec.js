@@ -2387,7 +2387,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'',
+                'content-security-policy': cspHeaderWithNonceDirectives,
               })
 
               return this.rp({
@@ -2418,7 +2418,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'',
+                'content-security-policy': cspHeaderWithNonceDirectives,
               })
 
               return this.rp({
@@ -2430,8 +2430,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'$/)
+                expect(res.headers['content-security-policy']).to.eq(`object-src 'none'`)
               })
             })
           })
@@ -2601,7 +2600,7 @@ describe('Routes', () => {
                 .get('/bar')
                 .reply(200, 'OK', {
                   'Content-Type': 'text/html',
-                  'content-security-policy': `foo 'bar'; ${headerValue};`,
+                  'content-security-policy': `object-src 'none'; ${headerValue}; base-uri 'self'`,
                 })
 
                 return this.rp({
@@ -2613,9 +2612,7 @@ describe('Routes', () => {
                 })
                 .then((res) => {
                   expect(res.statusCode).to.eq(200)
-                  expect(res.headers).to.have.property('content-security-policy')
-                  expect(res.headers['content-security-policy']).to.match(/^foo 'bar'/)
-                  expect(res.headers['content-security-policy']).not.to.match(new RegExp(headerValue))
+                  expect(res.headers['content-security-policy']).to.eq(`object-src 'none'; base-uri 'self'`)
                 })
               })
             })
