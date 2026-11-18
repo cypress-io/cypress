@@ -55,6 +55,21 @@ describe('semantic-commits/get-linked-issues', () => {
     expect(issues).to.deep.eq(['123'])
   })
 
+  it('returns empty list for a null body', () => {
+    expect(getLinkedIssues(null)).to.deep.eq([])
+  })
+
+  it('only matches linking keywords as whole words', () => {
+    const issues = getLinkedIssues(`
+        - prefixes #31043
+        - discloses #31044
+        - unresolved #31045
+        - resolve| #31046
+      `)
+
+    expect(issues).to.deep.eq([])
+  })
+
   it('returns empty list when no issues found', () => {
     const issues = getLinkedIssues(`
         <!-- comment -->
@@ -86,11 +101,49 @@ describe('semantic-commits/get-linked-issues', () => {
       expect(issues).to.deep.eq([])
     })
 
-    it('ignores a reference inside an unclosed comment at the end', () => {
-      const issues = getLinkedIssues(`
-        summary of changes
-        <!-- fixes #31028
-      `)
+    it('ignores everything after an unclosed comment that starts a line', () => {
+      const issues = getLinkedIssues([
+        '- Closes #31034',
+        '<!-- fixes #31028',
+        '- Resolves #31035',
+      ].join('\n'))
+
+      expect(issues).to.deep.eq(['31034'])
+    })
+
+    it('keeps references after an unclosed comment that does not start a line', () => {
+      const issues = getLinkedIssues([
+        '- Closes #31036 <!-- link the follow-up issue',
+        '- Fixes #31037',
+      ].join('\n'))
+
+      expect(issues).to.deep.eq(['31036', '31037'])
+    })
+
+    it('keeps references after an unclosed comment indented inside a list item', () => {
+      const issues = getLinkedIssues([
+        '- Closes #31038',
+        '   <!-- link the follow-up issue',
+        '- Fixes #31039',
+      ].join('\n'))
+
+      expect(issues).to.deep.eq(['31038', '31039'])
+    })
+
+    it('treats <!--> and <!---> as complete comments', () => {
+      const issues = getLinkedIssues([
+        '<!--> empty',
+        '- Closes #31040',
+        '<!---> empty',
+        '- Fixes #31041',
+        '<!-- closed -->',
+      ].join('\n'))
+
+      expect(issues).to.deep.eq(['31040', '31041'])
+    })
+
+    it('does not join the text on either side of a comment into a keyword', () => {
+      const issues = getLinkedIssues('fix<!-- -->es #31042')
 
       expect(issues).to.deep.eq([])
     })
