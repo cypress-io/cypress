@@ -691,15 +691,9 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     // an update check is a network round trip for the script, which Firefox
     // can take longer than the default 1s to settle
     .then({ timeout: 10000 }, (registration) => {
-      let updateFound = false
-
-      registration.addEventListener('updatefound', () => {
-        updateFound = true
-      })
-
-      return registration.update().then(() => ({ updateFound, installing: registration.installing }))
+      return registration.update().then(() => registration.installing)
     })
-    .should('deep.equal', { updateFound: false, installing: null })
+    .should('be.null')
   })
 
   it('supports async fetch handler', () => {

@@ -47,9 +47,12 @@ declare const self: GlobalLike
  *   `service-worker-injector.ts` includes it, and the page connection
  *   evaluates that on every service worker that starts paused for the
  *   debugger, ahead of any user code. The worker has no `registration` at
- *   that point, so the expression also patches from install and activate
- *   listeners that run before the worker's own. A worker that calls
- *   `enable()` from the top level of its script is not covered.
+ *   that point, and no `NavigationPreloadManager` global either, so the
+ *   expression patches from install and activate listeners that run before
+ *   the worker's own. A worker restarted after it was stopped gets neither
+ *   event, so an `enable()` call it makes is not covered. An attached
+ *   debugger keeps Chrome from stopping an idle worker, so under Cypress
+ *   that takes an explicit stop or a crash.
  * - Window realm (`registration.navigationPreload`, from the page — e.g.
  *   immediately after `serviceWorker.register()`): `enable()` is closed
  *   deterministically by `DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION`
