@@ -2,7 +2,7 @@ const _ = require('lodash')
 
 // extract the 'Difference' section from a snap-shot-it error message
 const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
-const videoRe = /-\s\sVideo\soutput:\s.*.mp4/gm
+const videoRe = /-\s\sVideo\soutput:\s.*.mp4/
 const expectedAddedVideoSnapshotLines = [
   'Warning: We failed capturing this video.',
   'This error will not affect or change the exit code.',
@@ -40,7 +40,7 @@ export const isVideoSnapshotError = (err: Error) => {
   _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
 
   // If a video line exists after removing other static matches, remove it
-  const deletedVideoLine = _.remove(deleted, (remainingDeleted) => !!videoRe.exec(remainingDeleted))
+  const deletedVideoLine = _.remove(deleted, (remainingDeleted) => videoRe.test(remainingDeleted))
 
   // If we did indeed remove a video line, also remove the (Video) text that preceded it
   if (deletedVideoLine) {
