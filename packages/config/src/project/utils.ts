@@ -509,7 +509,8 @@ export function mergeDefaults (
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   }, testingType)
 
-  if (config.experimentalRemoteDriver === true && !config.baseUrl) {
+  // component testing gets baseUrl from the dev server once it starts
+  if (config.experimentalRemoteDriver === true && !config.baseUrl && testingType !== 'component') {
     return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, '`experimentalRemoteDriver` requires `baseUrl`. Set `baseUrl` to the URL of the app under test.')
   }
 
