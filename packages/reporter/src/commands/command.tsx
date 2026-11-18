@@ -49,9 +49,10 @@ const assertionRegex = /^.*?expected | to[^*]+| not[^*]+| with[^*]+|,? but[^*]+/
 export const formattedMessage = (message: string, name?: string) => {
   if (!message) return ''
 
-  // if the command has url args, don't format those chars like __ and ~~
+  // if the command has url args, don't format those chars like __ and ~~,
+  // but still escape HTML since the message is rendered as HTML
   if (name === 'visit' || name === 'request' || name === 'origin') {
-    return message
+    return _.escape(message)
   }
 
   // the command message is formatted as '(Optional Custom Msg:) expected <actual> to {assertion} <expected>'

@@ -136,6 +136,38 @@ describe('formattedMessage', () => {
 
       expect(result).to.equal('http://www.test.com/__Path__99~~path~~')
     })
+
+    const htmlUrl = 'https://shop.example.com/search?q=<img src=x onerror=alert(1)>'
+    const escapedHtmlUrl = 'https://shop.example.com/search?q=&lt;img src=x onerror=alert(1)&gt;'
+
+    it('cy.visit escapes HTML', () => {
+      const result = formattedMessage(htmlUrl, 'visit')
+
+      expect(result).to.equal(escapedHtmlUrl)
+    })
+
+    it('cy.request escapes HTML', () => {
+      const result = formattedMessage(`GET 200 ${htmlUrl}`, 'request')
+
+      expect(result).to.equal(`GET 200 ${escapedHtmlUrl}`)
+    })
+
+    it('cy.origin escapes HTML', () => {
+      const result = formattedMessage(htmlUrl, 'origin')
+
+      expect(result).to.equal(escapedHtmlUrl)
+    })
+
+    ;['visit', 'request', 'origin'].forEach((name) => {
+      it(`cy.${name} displays URL characters unchanged`, () => {
+        const url = 'https://shop.example.com/__sale__/~~old~~/search?q=red%20shoes&size=9#reviews'
+        const el = document.createElement('span')
+
+        el.innerHTML = formattedMessage(url, name)
+
+        expect(el.textContent).to.equal(url)
+      })
+    })
   })
 
   describe('when not an assertion', () => {

@@ -242,6 +242,23 @@ describe('commands', { viewportHeight: 1000 }, () => {
     cy.percySnapshot()
   })
 
+  it('displays HTML in a visit url as text', () => {
+    const url = 'https://shop.example.com/search?q=<img src=x onerror=alert(1)>'
+
+    addCommand(runner, {
+      id: 1294,
+      name: 'visit',
+      message: url,
+      state: 'passed',
+      timeout: 4000,
+      wallClockStartedAt: inProgressStartedAt,
+    })
+
+    cy.contains('.command-message-text', url)
+    .should('have.text', url)
+    .find('img').should('not.exist')
+  })
+
   it('includes the type class', () => {
     cy.contains('#exists').closest('.command-wrapper')
     .should('have.class', 'command-type-parent')
