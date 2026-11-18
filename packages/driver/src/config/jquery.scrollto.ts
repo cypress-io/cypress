@@ -80,7 +80,8 @@ export function scrollTo (target, duration, settings) {
       } else if (typeof targ === 'string') {
         targ = win ? $(targ) : $(targ, elem)
       } else {
-        // A number with no position, such as `NaN`, scrolls nowhere.
+        // `NaN`, `Infinity` and numbers written in exponent form, such as
+        // `1e21`, fail the position check, and a number can't be a selector.
         return
       }
     }
