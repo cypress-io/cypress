@@ -1,13 +1,11 @@
 /**
  * @vitest-environment jsdom
  */
+import $ from 'jquery'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import '../../../src/config/jquery'
-import $Cypress from '../../../src/cypress'
 
-const { $ } = $Cypress
-
-const scrollTo = (container: HTMLElement, target: string) => {
+const scrollTo = (container: HTMLElement, target: number | string) => {
   return new Promise<void>((resolve) => {
     $(container).scrollTo(target, { axis: 'y', onAfter: () => resolve() })
   })
@@ -46,9 +44,11 @@ describe('src/config/jquery.scrollto', () => {
     expect(container.scrollTop).toBe(300)
   })
 
-  it.each([
+  it.each<[number | string, number]>([
+    [120, 120],
     ['120px', 120],
     ['50%', 400],
+    ['max', 800],
   ])('scrolls a container to the position %j', async (target, expected) => {
     await scrollTo(container, target)
 

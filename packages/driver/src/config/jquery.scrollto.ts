@@ -72,30 +72,27 @@ export function scrollTo (target, duration, settings) {
     let attr = {}
     let toff
 
-    // A string that isn't a position is a selector, so resolve it to the
-    // elements it matches and scroll to them like any other jQuery object.
-    if (typeof targ === 'string' && !/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(targ)) {
-      targ = win ? $(targ) : $(targ, elem)
+    // A number, or a string of pixels or a percentage, is a position for both
+    // axes. Any other string is a selector for the element to scroll to.
+    if (typeof targ === 'number' || typeof targ === 'string') {
+      if (/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(String(targ))) {
+        targ = both(targ)
+      } else if (typeof targ === 'string') {
+        targ = win ? $(targ) : $(targ, elem)
+      } else {
+        // A number with no position, such as `NaN`, scrolls nowhere.
+        return
+      }
     }
 
-    switch (typeof targ) {
-      case 'number': break
-      case 'string':
-        targ = both(targ)
-        break
-      case 'object':
-        if (targ.length === 0) return
+    if (typeof targ === 'object') {
+      if (targ.length === 0) return
 
-        // DOMElement / jQuery
-        if (targ.is || targ.style) {
-          // Get the real position of the target
-          toff = (targ = $(targ)).offset()
-        }
-
-        break
-
-      default:
-        break
+      // DOMElement / jQuery
+      if (targ.is || targ.style) {
+        // Get the real position of the target
+        toff = (targ = $(targ)).offset()
+      }
     }
 
     const offset = isFunction(settings.offset) && settings.offset(elem, targ) || settings.offset
