@@ -68,6 +68,20 @@ describe('config/src/utils', () => {
       expect(urls.reporterUrl).toEqual('http://cypress-runner.example.com:8080/__cypress/reporter')
     })
 
+    it('serves the runner from the dev server\'s origin with experimentalDriver in component testing', () => {
+      const urls = setUrls({
+        port: 65432,
+        baseUrl: 'http://localhost:5173',
+        clientRoute: '/__/',
+        reporterRoute: '/__cypress/reporter',
+        experimentalDriver: true,
+        testingType: 'component',
+      })
+
+      expect(urls.browserUrl).toEqual('http://localhost:5173/__/')
+      expect(urls.reporterUrl).toEqual('http://localhost:5173/__cypress/reporter')
+    })
+
     it('strips baseUrl to host when set', () => {
       const obj = {
         port: 65432,

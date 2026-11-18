@@ -232,6 +232,18 @@ describe('config/src/project/utils', () => {
 
       expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_VALIDATION_MSG_ERROR', null, null, '`CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER` requires `baseUrl`. Set `baseUrl` to the URL of the app under test.')
     })
+
+    it('does not require baseUrl for component testing', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER', 'true')
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+      }
+
+      const getFilesByGlob = vi.fn().mockReturnValue(['path/to/file'])
+
+      expect(() => mergeDefaults(cfg, { testingType: 'component' }, {}, getFilesByGlob)).not.toThrow()
+    })
   })
 
   describe('environment name check', () => {
