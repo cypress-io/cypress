@@ -324,7 +324,9 @@ describe('stack_utils', () => {
     })
 
     it('names a Firefox frame with a long run of markers in linear time', () => {
-      const markers = '/<'.repeat(50000)
+      const markers = '/<'.repeat(100000)
+      // a run of markers that does not end the name is the input that makes
+      // a backtracking match quadratic
       const stack = [`${markers}submitOrder@${location}`, `Context.eval${markers}@${location}`].join('\n')
 
       const start = performance.now()
