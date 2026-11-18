@@ -5,6 +5,27 @@ import dedent from 'dedent'
 
 import { monorepoPaths } from '../monorepoPaths'
 
+// npm caps a full package name at 214 characters, and this name is scoped as `@packages/<name>`
+const MAX_PACKAGE_NAME_LENGTH = 214 - '@packages/'.length
+
+// The name becomes a directory under packages/, part of `@packages/<name>` and a source file name,
+// so hold it to the subset of npm's naming rules every existing package already follows
+const validatePackageName = (name: string): true | string => {
+  if (name.length > MAX_PACKAGE_NAME_LENGTH) {
+    return `Package names can be at most ${MAX_PACKAGE_NAME_LENGTH} characters, so that @packages/<name> fits npm's 214-character limit.`
+  }
+
+  if (!/^[a-z]/i.test(name)) {
+    return 'Package names must start with a letter, like data-context.'
+  }
+
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(name)) {
+    return 'Package names can only contain lowercase letters, digits and single hyphens, and can\'t end with a hyphen, like v8-snapshot-require.'
+  }
+
+  return true
+}
+
 export async function makePackage () {
   const results = await inquirer.prompt<{
     packageName: string
@@ -16,7 +37,7 @@ export async function makePackage () {
       name: 'packageName',
       type: 'input',
       message: 'What is the package name?',
-      validate: (val) => /[A-z-]+/.test(val),
+      validate: validatePackageName,
     },
     {
       name: 'target',
