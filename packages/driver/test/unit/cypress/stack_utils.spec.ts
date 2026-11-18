@@ -251,6 +251,50 @@ describe('stack_utils', () => {
     })
   })
 
+  describe('normalizedStack', () => {
+    describe('webkit', () => {
+      beforeEach(() => {
+        vi.mocked(Cypress.isBrowser).mockImplementation((browser) => browser === 'webkit')
+      })
+
+      const normalize = (message: string, stack: string) => {
+        const err = new Error(message)
+
+        err.stack = stack
+
+        return stack_utils.normalizedStack(err)
+      }
+
+      it('fills in missing function names and locations', () => {
+        expect(normalize('boom', 'foo@http://localhost/a.js:1:2\n@http://localhost/a.js:3:4\nglobal code@\nmap@[native code]')).toEqual(
+          'Error: boom\nfoo@http://localhost/a.js:1:2\n<unknown>@http://localhost/a.js:3:4\nglobal code@<unknown>\nmap@[native code]',
+        )
+      })
+
+      it('removes the CyWebKitError line', () => {
+        expect(normalize('boom', '__CyWebKitError@http://localhost/a.js:1:2\nfoo@http://localhost/a.js:3:4')).toEqual(
+          'Error: boom\nfoo@http://localhost/a.js:3:4',
+        )
+      })
+
+      it('splits a line at its last @', () => {
+        expect(normalize('boom', 'foo@bar@')).toEqual(
+          'Error: boom\nfoo@bar@<unknown>',
+        )
+      })
+
+      it('normalizes a stack with a very long message line in linear time', () => {
+        const message = `expected <body> to contain text 'Noted.', but the text was '${'word '.repeat(30000)}'`
+        const stack = `Error: ${message}\nfoo@http://localhost/a.js:1:2`
+
+        const start = performance.now()
+
+        expect(normalize(message, stack)).toEqual(stack)
+        expect(performance.now() - start).toBeLessThan(1000)
+      })
+    })
+  })
+
   describe('normalizedUserInvocationStack', () => {
     it('should remove cross origin stack lines', () => {
       const userInvocationStack = `    at cy.<computed> [as prompt] (cypress:///../driver/src/cypress/cy.ts:657:86)

@@ -11,7 +11,7 @@ describe('Error handling', () => {
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
+    .contains('Stack trace')
 
     cy.log('Fix error and validate it reloads configuration')
     cy.withCtx(async (ctx) => {
@@ -21,7 +21,7 @@ describe('Error handling', () => {
     cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('not.contain.text', 'Cypress configuration error')
   })
 
   it('it handles a configuration file error', () => {
@@ -41,12 +41,12 @@ describe('Error handling', () => {
     cy.visitLaunchpad()
 
     cy.get('body')
-    .should('contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('contain.text', 'Cypress configuration error')
     .and('contain.text', 'Error thrown from Config')
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
+    .contains('Stack trace')
 
     cy.log('Fix error and validate it reloads configuration')
 
@@ -57,7 +57,7 @@ describe('Error handling', () => {
     cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('not.contain.text', 'Cypress configuration error')
   })
 
   describe('using bundler: "vite" with missing config', () => {

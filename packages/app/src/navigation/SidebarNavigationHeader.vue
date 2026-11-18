@@ -7,7 +7,7 @@
   >
     <div
       role="button"
-      :aria-label="`${props.gql.currentProject?.title ?? 'Cypress'} - ${t('testingType.modalTitle')}`"
+      :aria-label="`${props.gql.currentProject?.title ?? 'Cypress'} - Choose a testing type`"
       class="border-b cursor-pointer flex border-gray-900 shrink-0 h-[64px] pl-[20px] transition-all duration-300 items-center hover:bg-gray-900"
       :popper-top-offset="4"
       popper-class="h-[56px]"
@@ -68,10 +68,7 @@ import SwitchTestingTypeModal from './SwitchTestingTypeModal.vue'
 import IconE2E from '~icons/cy/testing-type-e2e-solid-simple'
 import IconComponent from '~icons/cy/testing-type-component-solid_x24'
 import { IconLoading } from '@cypress-design/vue-icon'
-import { useI18n } from '@cy/i18n'
 import { SidebarNavigationHeaderBranchChangeDocument } from '../generated/graphql-test'
-
-const { t } = useI18n()
 
 gql`
 fragment SidebarNavigationHeader on Query {
@@ -105,11 +102,11 @@ const props = defineProps<{
 
 const TESTING_TYPE_MAP = {
   e2e: {
-    name: t(`testingType.e2e.name`),
+    name: 'E2E Testing',
     icon: IconE2E,
   },
   component: {
-    name: t(`testingType.component.name`),
+    name: 'Component Testing',
     icon: IconComponent,
   },
 } as const

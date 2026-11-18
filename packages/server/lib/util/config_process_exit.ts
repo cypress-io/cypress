@@ -31,8 +31,9 @@ export const endRunOnConfigProcessExit = (err: CypressError) => {
     console.log('')
     log(err)
   } finally {
-    // the flag is already set, so the exit must be scheduled even if printing fails
-    GracefulExit.exitGracefully(1)
+    // the flag is already set, so the exit must be scheduled even if printing fails.
+    // exitGracefully catches its own teardown errors and always ends the process.
+    void GracefulExit.exitGracefully(1)
   }
 }
 

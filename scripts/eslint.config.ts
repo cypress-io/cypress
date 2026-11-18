@@ -1,9 +1,11 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  chaiFriendlyConfig(['unit/**']),
   {
     languageOptions: {
       parserOptions: {

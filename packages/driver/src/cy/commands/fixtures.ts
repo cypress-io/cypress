@@ -11,6 +11,11 @@ const clone = (obj) => {
     return Buffer.from(obj)
   }
 
+  // A `.js` fixture can evaluate to `undefined`, which JSON.parse() rejects.
+  if (obj === undefined) {
+    return obj
+  }
+
   return JSON.parse(JSON.stringify(obj))
 }
 
@@ -58,7 +63,11 @@ const makeKeyPrefixes = (fixturePath: string): string[] => {
 }
 
 export default (Commands, Cypress, cy, state, config) => {
-  // this is called at the beginning of run, so clear the cache
+  // This function runs each time a spec window loads, so the cache lasts for one
+  // run of a spec: every test in it shares the cache, and it starts empty when
+  // the spec runs again or the next spec starts. Each cy.origin() spec bridge
+  // runs it too and keeps its own cache, which invalidation in another
+  // context does not reach.
   let cache = {}
 
   const clearCache = () => {
@@ -79,6 +88,7 @@ export default (Commands, Cypress, cy, state, config) => {
     }
   }
 
+  // Only the driver's own tests emit this, to start each test with an empty cache.
   Cypress.on('clear:fixtures:cache', clearCache)
   Cypress.on('fixture:cache:invalidate', invalidateCacheEntry)
 
@@ -101,7 +111,6 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       const cacheKey = `${fixture}${NULL_SEP}${options.encoding}`
-      const cachedContent = cache[cacheKey]
 
       // Add the filename as a symbol, in case we need it later (such as when storing an alias).
       // This must be set on every invocation - including cache hits - so that aliasing a cached
@@ -109,9 +118,9 @@ export default (Commands, Cypress, cy, state, config) => {
       // file name. https://github.com/cypress-io/cypress/issues/21936
       state('current').set('fileName', basename(fixture))
 
-      if (cachedContent) {
+      if (Object.prototype.hasOwnProperty.call(cache, cacheKey)) {
         // Clone the cached content to prevent accidental mutation.
-        return Promise.resolve(clone(cachedContent))
+        return Promise.resolve(clone(cache[cacheKey]))
       }
 
       const timeout = options.timeout ?? Cypress.config('responseTimeout')

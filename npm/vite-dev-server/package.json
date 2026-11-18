@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit --project tsconfig.build.json",
+    "check-ts": "tsc --noEmit --project tsconfig.build.json && tsc --project cypress/tsconfig.json",
     "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
@@ -42,10 +42,10 @@
     "@packages/eslint-config": "0.0.0-development",
     "cross-env": "7.0.3",
     "dedent": "^0.7.0",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "vite-8": "npm:vite@^8.0.9",
-    "vitest": "3.2.4"
+    "vitest": "3.2.7"
   },
   "peerDependencies": {
     "cypress": ">=16.0.0",

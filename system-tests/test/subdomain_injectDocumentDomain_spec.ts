@@ -1,6 +1,7 @@
 import cors from 'cors'
 import parser from 'cookie-parser'
 import session from 'express-session'
+import type { RequestHandler } from 'express'
 import systemTests from '../lib/system-tests'
 
 const onServer = function (app) {
@@ -42,13 +43,13 @@ const onServer = function (app) {
 `
   }
 
-  const applySession = session({
+  const applySession: RequestHandler = session({
     name: 'secret-session',
     secret: 'secret',
     cookie: {
       sameSite: true,
     },
-  }) as Function
+  })
 
   app.get('/htmlCookies', (req, res) => {
     const {

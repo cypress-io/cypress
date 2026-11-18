@@ -67,7 +67,7 @@ describe('remote states', () => {
     it('returns undefined when the remote state is not found', function () {
       const state = remoteStates.get('http://notfound.com')
 
-      expect(state).to.be.undefined
+      expect(state).toBeUndefined()
     })
 
     it('changing returned state does not mutate remote state', function () {
@@ -155,14 +155,14 @@ describe('remote states', () => {
     it('returns true when the requested url is the primary origin', function () {
       const isPrimarySuperDomainOrigin = remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')
 
-      expect(isPrimarySuperDomainOrigin).to.be.true
+      expect(isPrimarySuperDomainOrigin).toBe(true)
     })
 
     it('returns false when the requested url is not the primary origin', function () {
       remoteStates.set('https://google.com', {}, false)
       const isPrimarySuperDomainOrigin = remoteStates.isPrimarySuperDomainOrigin('http://google.com')
 
-      expect(isPrimarySuperDomainOrigin).to.be.false
+      expect(isPrimarySuperDomainOrigin).toBe(false)
     })
   })
 
@@ -170,11 +170,11 @@ describe('remote states', () => {
     it('resets the origin stack and remote states to the primary', function () {
       remoteStates.set('https://google.com', {}, false)
 
-      expect(remoteStates.get('https://google.com')).to.not.be.undefined
+      expect(remoteStates.get('https://google.com')).toBeDefined()
 
       remoteStates.reset()
 
-      expect(remoteStates.get('https://google.com')).to.be.undefined
+      expect(remoteStates.get('https://google.com')).toBeUndefined()
     })
   })
 
@@ -204,7 +204,7 @@ describe('remote states', () => {
 
   describe('#set', () => {
     it('sets primary state and origin when isPrimarySuperDomainOrigin is true', function () {
-      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
+      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).toBe(true)
 
       const state = remoteStates.set('https://staging.google.com/foo/bar', {}, true)
 
@@ -225,11 +225,11 @@ describe('remote states', () => {
 
       expect(remoteStates.get('https://staging.google.com')).to.deep.equal(state)
 
-      expect(remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).to.be.true
+      expect(remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).toBe(true)
     })
 
     it('sets a secondary state when isPrimarySuperDomainOrigin is false', function () {
-      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
+      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).toBe(true)
 
       const state = remoteStates.set('https://staging.google.com/foo/bar', {}, false)
 
@@ -250,8 +250,8 @@ describe('remote states', () => {
 
       expect(remoteStates.get('https://staging.google.com')).to.deep.equal(state)
 
-      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
-      expect(remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).to.be.false
+      expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).toBe(true)
+      expect(remoteStates.isPrimarySuperDomainOrigin('https://staging.google.com')).toBe(false)
     })
 
     it('sets port to 443 when omitted and https:', function () {
@@ -385,18 +385,18 @@ describe('toFileServerUrl', () => {
   })
 
   it('returns undefined for http strategy', () => {
-    expect(toFileServerUrl('https://example.test/app', httpState)).to.be.undefined
+    expect(toFileServerUrl('https://example.test/app', httpState)).toBeUndefined()
   })
 
   it('returns undefined when the URL is not under the current origin', () => {
-    expect(toFileServerUrl('http://other.localhost:2020/file.csv', fileState)).to.be.undefined
+    expect(toFileServerUrl('http://other.localhost:2020/file.csv', fileState)).toBeUndefined()
   })
 
   it('returns undefined for userinfo URLs that only prefix-match the origin', () => {
     // http://localhost:2020@evil.com/... parses as host evil.com with userinfo
     // "localhost:2020" — must not rewrite or the file-server auth token leaks.
     expect(toFileServerUrl('http://localhost:2020@evil.com/cypress/fixtures/records.csv', fileState))
-    .to.be.undefined
+    .toBeUndefined()
   })
 
   it('preserves path, search, and hash when rewriting', () => {
@@ -408,6 +408,6 @@ describe('toFileServerUrl', () => {
     expect(toFileServerUrl('http://localhost:2020/file.csv', {
       ...fileState,
       fileServer: null,
-    })).to.be.undefined
+    })).toBeUndefined()
   })
 })

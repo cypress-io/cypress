@@ -1,14 +1,10 @@
 import NoSpecsPage from './NoSpecsPage.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { NoSpecsPageFragmentDoc } from '../generated/graphql-test'
 
 const pageTitleSelector = '[data-cy=create-spec-page-title]'
 const pageDescriptionSelector = '[data-cy=create-spec-page-description]'
 const noSpecsMessageSelector = '[data-cy=no-specs-message]'
 const viewSpecsSelector = '[data-cy=view-spec-pattern]'
-
-const messages = defaultMessages.createSpec
 
 describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => {
   describe('mounting in component mode with default specPattern set', () => {
@@ -24,7 +20,7 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
           }
         },
         render: (gql) => {
-          return <NoSpecsPage gql={gql} isDefaultSpecPattern={true} title={messages.page.defaultPatternNoSpecs.title} />
+          return <NoSpecsPage gql={gql} isDefaultSpecPattern={true} title="Create your first spec" />
         },
       })
     })
@@ -32,15 +28,15 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
     it('renders the "No Specs" footer', () => {
       cy.get(noSpecsMessageSelector)
       .should('be.visible')
-      .and('contain.text', messages.noSpecsMessage)
+      .and('contain.text', 'If you feel that you\'re seeing this screen in error, and there should be specs listed here, you likely need to update the spec pattern.')
       .get(viewSpecsSelector)
       .should('be.visible')
-      .and('contain.text', messages.viewSpecPatternButton)
+      .and('contain.text', 'View spec pattern')
     })
 
     it('renders the correct text for component testing', () => {
-      cy.get(pageTitleSelector).should('contain.text', messages.page.defaultPatternNoSpecs.title)
-      .get(pageDescriptionSelector).should('contain.text', messages.page.defaultPatternNoSpecs.component.description)
+      cy.get(pageTitleSelector).should('contain.text', 'Create your first spec')
+      .get(pageDescriptionSelector).should('contain.text', 'Since this project looks new, we recommend that you get started by creating a spec for one of your components.')
     })
   })
 
@@ -57,22 +53,20 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
           }
         },
         render: (gql) => {
-          return <NoSpecsPage gql={gql} isDefaultSpecPattern={true} title={messages.page.defaultPatternNoSpecs.title} />
+          return <NoSpecsPage gql={gql} isDefaultSpecPattern={true} title="Create your first spec" />
         },
       })
     })
 
     it('renders the correct text', () => {
       cy.get(pageTitleSelector)
-      .should('contain.text', messages.page.defaultPatternNoSpecs.title)
-      .get(pageDescriptionSelector).should('contain.text', messages.page.defaultPatternNoSpecs.e2e.description)
+      .should('contain.text', 'Create your first spec')
+      .get(pageDescriptionSelector).should('contain.text', 'Since this project looks new, we recommend that you use the specs and tests that we\'ve written for you to get started.')
 
-      const text = defaultMessages.createSpec.e2e
-
-      cy.contains(text.importFromScaffold.header).should('be.visible')
-      cy.contains(text.importFromScaffold.description).should('be.visible')
-      cy.contains(text.importTemplateSpec.header).should('be.visible')
-      cy.contains(text.importTemplateSpec.description).should('be.visible')
+      cy.contains('Scaffold example specs').should('be.visible')
+      cy.contains('We\'ll generate several example specs to help guide you on how to write tests in Cypress.').should('be.visible')
+      cy.contains('Create new spec').should('be.visible')
+      cy.contains('We\'ll generate a template spec file which can be used to start testing your application.').should('be.visible')
     })
   })
 
@@ -96,19 +90,19 @@ describe('<NoSpecsPage />', { viewportHeight: 655, viewportWidth: 1032 }, () => 
         },
         render: (gql) => {
           return (
-            <NoSpecsPage gql={gql} onShowCreateSpecModal={showCreateSpecModal} isDefaultSpecPattern={false} title={messages.page.customPatternNoSpecs.title} />
+            <NoSpecsPage gql={gql} onShowCreateSpecModal={showCreateSpecModal} isDefaultSpecPattern={false} title="No specs found" />
           )
         },
       })
 
-      cy.get(pageTitleSelector).should('contain.text', messages.page.customPatternNoSpecs.title)
-      .get(pageDescriptionSelector).should('contain.text', messages.page.customPatternNoSpecs.description.replace('{0}', ' specPattern '))
+      cy.get(pageTitleSelector).should('contain.text', 'No specs found')
+      .get(pageDescriptionSelector).should('contain.text', 'We couldn\'t find any files matching the following spec patterns. You may need to move your specs or update your  specPattern  to find them.')
 
       // show spec pattern
       cy.contains(customSpecPattern)
-      cy.contains(defaultMessages.createSpec.updateSpecPattern)
+      cy.contains('Update spec pattern')
 
-      cy.contains(defaultMessages.createSpec.newSpec).click()
+      cy.contains('New spec').click()
 
       cy.get('@showCreateSpecModal').should('have.been.called')
     })

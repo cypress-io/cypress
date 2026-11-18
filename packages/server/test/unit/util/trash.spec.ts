@@ -7,11 +7,13 @@ import trash from '../../../lib/util/trash'
 
 const trashState = vi.hoisted(() => ({ stub: undefined as Mock | undefined }))
 
-vi.mock('trash', async (importOriginal) => {
-  const actual = await importOriginal<{ default: (paths: string[]) => Promise<void> }>()
-
+vi.mock('electron', () => {
   return {
-    default: (paths: string[]) => (trashState.stub ?? actual.default)(paths),
+    shell: {
+      trashItem: (itemPath: string) => {
+        return trashState.stub ? trashState.stub(itemPath) : fs.promises.rm(itemPath, { recursive: true })
+      },
+    },
   }
 })
 
@@ -42,6 +44,8 @@ describe('lib/util/trash', () => {
   let tempDir: string
 
   beforeEach(async () => {
+    // some agent hosts set this, which would send every platform down the run-as-Node path
+    vi.stubEnv('ELECTRON_RUN_AS_NODE', '')
     tempDir = path.join(os.tmpdir(), `cypress-test-${Date.now()}`)
     await fs.promises.mkdir(tempDir, { recursive: true })
   })
@@ -49,6 +53,7 @@ describe('lib/util/trash', () => {
   afterEach(async () => {
     trashState.stub = undefined
     vi.restoreAllMocks()
+    vi.unstubAllEnvs()
     await fs.promises.rm(tempDir, { recursive: true, force: true })
   })
 
@@ -68,23 +73,13 @@ describe('lib/util/trash', () => {
       await trash.folder(path.join(tempDir, 'bar'))
     })
 
-    it('does not throw when trash reports a failure but the item was actually removed', async () => {
-      // Simulates the Windows behavior where the Recycle Bin is set to
-      // "Don't move files to the Recycle Bin. Remove files immediately when
-      // deleted." In that case windows-trash.exe deletes the file but exits
-      // with a non-zero code, which `trash` surfaces as a rejection. See
-      // https://github.com/cypress-io/cypress/issues/32691
+    it('removes items on Windows when trashing fails because the Recycle Bin removes files immediately', async () => {
       vi.spyOn(os, 'platform').mockReturnValue('win32')
       const basePath = path.join(tempDir, 'foo')
 
       await populateDirectories(basePath)
 
-      const trashStub = vi.fn(async (paths: string[]) => {
-        // the underlying implementation removes the items...
-        await Promise.all(paths.map((p) => fs.promises.rm(p, { recursive: true, force: true })))
-        // ...but then rejects with a non-zero exit error
-        throw new Error('Command failed: windows-trash.exe')
-      })
+      const trashStub = vi.fn().mockRejectedValue(new Error('Failed to perform delete operation'))
 
       trashState.stub = trashStub
 
@@ -94,26 +89,34 @@ describe('lib/util/trash', () => {
       await fs.promises.rmdir(basePath)
     })
 
-    it('rethrows when trash fails and the item still exists', async () => {
-      vi.spyOn(os, 'platform').mockReturnValue('win32')
+    it('rethrows when trashing fails on macOS', async () => {
+      vi.spyOn(os, 'platform').mockReturnValue('darwin')
       const basePath = path.join(tempDir, 'foo')
 
       await populateDirectories(basePath)
 
-      const trashStub = vi.fn().mockRejectedValue(new Error('Command failed: windows-trash.exe'))
+      trashState.stub = vi.fn().mockRejectedValue(new Error('Failed to move item to trash'))
+
+      await expect(trash.folder(basePath)).rejects.toThrow('Failed to move item to trash')
+      expect(fs.existsSync(path.resolve(basePath, 'a.txt'))).toBe(true)
+      await fs.promises.rm(basePath, { recursive: true, force: true })
+    })
+
+    it('empties the directory without Electron\'s shell when running as Node', async () => {
+      vi.spyOn(os, 'platform').mockReturnValue('darwin')
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+      const basePath = path.join(tempDir, 'foo')
+
+      await populateDirectories(basePath)
+
+      const trashStub = vi.fn()
 
       trashState.stub = trashStub
 
-      let thrown: Error | undefined
-
-      try {
-        await trash.folder(basePath)
-      } catch (err) {
-        thrown = err as Error
-      }
-
-      expect(thrown).toBeInstanceOf(Error)
-      await fs.promises.rm(basePath, { recursive: true, force: true })
+      await trash.folder(basePath)
+      expect(trashStub).not.toHaveBeenCalled()
+      expectDirectoriesExist(basePath)
+      await fs.promises.rmdir(basePath)
     })
 
     it('completely removes directory on Linux', async () => {

@@ -40,7 +40,8 @@ const isFalse = (value: any): boolean => {
   return value === false
 }
 
-type ValidationResult = ErrResult | boolean | string
+export type ValidationResult = ErrResult | boolean | string
+
 type ValidationFn = (key: string, value: any) => ValidationResult
 
 export const validateAny = (...validations: ValidationFn[]): ValidationFn => {

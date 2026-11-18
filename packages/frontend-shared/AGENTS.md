@@ -1,6 +1,6 @@
 # @packages/frontend-shared
 
-Shared Vue 3 component library, TailwindCSS configuration, composables, GraphQL fragments, and i18n strings consumed by both `@packages/app` (browser-side UI) and `@packages/launchpad` (Electron-rendered UI). Any component or utility intended to appear identically in both apps belongs here.
+Shared Vue 3 component library, TailwindCSS configuration, composables, and GraphQL fragments consumed by both `@packages/app` (browser-side UI) and `@packages/launchpad` (Electron-rendered UI). Any component or utility intended to appear identically in both apps belongs here.
 
 ## Key Commands
 
@@ -32,7 +32,6 @@ src/
   generated/     Auto-generated files: GraphQL schema snapshot used in tests
   gql-components/ Components that are tightly coupled to specific GraphQL queries/fragments
   graphql/       urql exchanges, GraphQL client setup, and fragment definitions
-  locales/       i18n JSON translation files
   public/        Static public assets served during development
   shiki/         Syntax highlighting theme and language definitions
   store/         Shared Pinia stores

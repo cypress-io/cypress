@@ -220,9 +220,7 @@ describe('<Alert />', () => {
       cy.get(alertBodySelector).should('not.exist')
     })
   })
-})
 
-describe('<Alert />', () => {
   it('renders various alerts with customizations', () => {
     const { modelValue, methods } = makeDismissibleProps()
 

@@ -231,8 +231,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
   private testConfigOverride: TestConfigOverride
-  private commandFns: Record<string, Function> = {}
-  private queryFns: Record<string, Function> = {}
+  private commandFns: Record<string, (...args: any[]) => any> = {}
+  private queryFns: Record<string, (...args: any[]) => any> = {}
 
   constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
     super()
@@ -245,9 +245,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.config = config
     this.Cypress = Cypress
     this.Cookies = Cookies
-    // TODO: this should be awaited
-    /* tslint:disable:no-floating-promises */
-    initVideoRecorder(Cypress)
+    // The constructor can't wait on recording, and initVideoRecorder swallows its own errors
+    void initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()
 
@@ -536,6 +535,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         try {
           // Test to see if we can communicate with the AUT.
+          // eslint-disable-next-line chai-friendly/no-unused-expressions -- reading href throws when the AUT is cross-origin
           autWindow.location.href
           isRunnerAbleToCommunicateWithAUT = true
         } catch (err: any) {

@@ -204,7 +204,7 @@ export class BidiAutomation {
     // identify the AUT by its window.name (seeded with AUT_FRAME_NAME_IDENTIFIER
     // for exactly this purpose) rather than assuming it is the first child
     // created.
-    let contextName = ''
+    let contextName: string
 
     const identification = { contextId, destroyed: false }
 
@@ -525,7 +525,9 @@ export class BidiAutomation {
       headers: parsedHeaders,
     }
 
-    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+    this.automation.onRequestEvent?.('response:received', browserResponseReceived)?.catch((error) => {
+      debugVerbose('error handling response:received %o', { requestId: params.request.request, error })
+    })
   }
 
   private onFetchError = (params: NetworkFetchErrorParameters) => {

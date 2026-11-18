@@ -729,7 +729,7 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 #### Dependency Updates Checklist
 
 - [ ] Code using the dependency has been updated to accommodate any breaking changes
-- [ ] The dependency still supports the version of Node that the package requires.
+- [ ] The dependency still supports the version of Node that the package requires. Check the dependency's `engines.node` against the Node the code actually runs on, not the development Node in `.node-version`. The `cypress` CLI and the config/plugins child process run on the user's Node, so their floor is `engines.node` in [`cli/package.json`](./cli/package.json). See [Runtime targets](./AGENTS.md#runtime-targets) for the other runtimes.
 - [ ] Appropriate labels have been added to the PR (for example: label `type: breaking change` if it is a breaking change)
 
 ## Releases
