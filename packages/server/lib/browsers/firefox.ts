@@ -368,6 +368,9 @@ toolbox {
   overflow: hidden !important;
   border: none !important;
 }
+.browserContainer {
+  border-top: none !important;
+}
 `
 
 let browserBidiClient: BidiAutomation | undefined

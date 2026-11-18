@@ -338,12 +338,29 @@ const getSourceDetails = (generatedDetails) => {
   }
 }
 
-const functionExtrasRegex = /(\/<|<\/<)$/
+// Removes the markers Firefox adds to the name of an anonymous function, so
+// `outer/<`, `outer/</<` and `outer</<` all become `outer`: one `/<` per
+// level of nesting, sometimes after a `<`. Scanning from the end keeps the
+// cost linear in the name's length.
+const stripFirefoxFunctionMarkers = (functionName: string) => {
+  let end = functionName.length
+
+  while (end >= 2 && functionName[end - 1] === '<' && functionName[end - 2] === '/') {
+    end -= 2
+  }
+
+  if (end < functionName.length && functionName[end - 1] === '<') {
+    end -= 1
+  }
+
+  return functionName.slice(0, end)
+}
 
 const cleanFunctionName = (functionName) => {
   if (!_.isString(functionName)) return '<unknown>'
 
-  return _.trim(functionName.replace(functionExtrasRegex, ''))
+  // a name made only of markers belongs to a function nested in an anonymous one
+  return _.trim(stripFirefoxFunctionMarkers(functionName)) || '<unknown>'
 }
 
 const parseLine = (line) => {
@@ -550,7 +567,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
     // stacks in development builds look like:
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
     // stacks in prod builds look like:
-    //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
+    //     at cypressErr (http://localhost:8888/__cypress/runner/cypress_runner.js:173123:17)
     return line.includes('cy[name]')
     || line.includes('Chainer.prototype[key]')
     || line.includes('cy.<computed>')
