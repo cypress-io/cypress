@@ -1,3 +1,6 @@
+// Pulls the eslint-plugin-mocha declaration into every program that includes this file
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="./eslint-plugin-mocha.d.ts" />
 import js from '@eslint/js'
 import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
@@ -10,12 +13,10 @@ import globals from 'globals'
 import vue from 'eslint-plugin-vue'
 import vueParser from 'vue-eslint-parser'
 import stylistic from '@stylistic/eslint-plugin'
-import react from 'eslint-plugin-react'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
 import { cypressDevPlugin } from './rules'
-import { reactRulesOff } from './reactRulesOff'
 
 const testFiles = [
   '**/test/**/*.{js,jsx,ts,tsx}',
@@ -52,16 +53,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   cy.configs.recommended,
   mocha.configs?.recommended ?? {},
   ...vue.configs['flat/recommended'],
-  {
-    ...react.configs.flat.recommended,
-    settings: {
-      react: {
-        // Keep this explicit: on ESLint 10, eslint-plugin-react 7's 'detect'
-        // calls the removed `context.getFilename()` and crashes every lint run
-        version: '18',
-      },
-    },
-  },
   // importing { config } from @stylistic/eslint-plugin causes errors
   stylistic.configs.customize({
     'braceStyle': '1tbs',
@@ -264,20 +255,24 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
 
       'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
-      'mocha/no-setup-in-describe': 'off',
+      'mocha/no-setup-in-suite': 'off',
       'mocha/max-top-level-suites': 'off',
-      'mocha/no-top-level-hooks': 'off',
-      'mocha/no-global-tests': 'off',
+      'mocha/no-root-hooks': 'off',
+      'mocha/no-top-level-tests': 'off',
       'mocha/no-pending-tests': 'off',
+      // no-async-in-sync-tests reads Cypress command chains as unawaited
+      // promises. The others report real bugs, so each is re-enabled once its
+      // own violations are fixed.
+      'mocha/no-async-in-sync-tests': 'off',
+      'mocha/handle-done-callback': 'off',
+      'mocha/no-conditional-tests': 'off',
+      'mocha/no-code-after-done': 'off',
+      'mocha/consistent-structure': 'off',
 
       'vue/multi-word-component-names': 'off',
       'vue/no-dupe-keys': 'off',
 
       'cypress/unsafe-to-chain-command': 'off',
-
-      // we use react 18+, so these rules do not apply
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
 
       // noisy, and not that helpful at this point. Maybe down the line we can
       // enable it.
@@ -360,12 +355,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'mocha/no-exports': 'off',
     },
-  },
-
-  // React rules do not apply to Vue SFCs. Vue JSX/TSX files need `vueTsxOverrides`.
-  {
-    files: ['**/*.vue'],
-    rules: reactRulesOff,
   },
 
   // common file patterns to ignore

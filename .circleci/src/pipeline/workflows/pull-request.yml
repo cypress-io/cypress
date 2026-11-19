@@ -18,24 +18,34 @@ when:
     - not:
         equal: [ 'develop', << pipeline.git.branch >> ]
     - not:
-        equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-    - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
     - not:
         equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
 
 jobs:
-  # Internal PRs — install and build run immediately
+  # Internal PRs — install and build run immediately, unless a bot pushed.
+  # Bots can't join the GitHub teams that restrict our contexts, and jobs after
+  # an approval run as the approver. The install runs the bot's dependency changes.
+  # The install has one variant per case because CircleCI drops a job whose
+  # requires are all filtered out.
   - node_modules_install:
       build-better-sqlite3: true
-      filters:
-        branches:
-          ignore: /^pull\/[0-9]+/
+      filters: pipeline.parameters.bot-approval-required == false and not (pipeline.git.branch matches /^pull\/[0-9]+/)
+  - approve-bot-pr:
+      type: approval
+      filters: pipeline.parameters.bot-approval-required == true
+  - node_modules_install:
+      name: bot-node-modules-install
+      build-better-sqlite3: true
+      requires:
+        - approve-bot-pr
+      filters: pipeline.parameters.bot-approval-required == true
   - build:
       name: internal-pr-build
       context: test-runner:env-canary
       requires:
         - node_modules_install
+        - bot-node-modules-install
       filters:
         branches:
           ignore: /^pull\/[0-9]+/
@@ -168,6 +178,11 @@ jobs:
       requires:
         - ready-to-test
   - driver-integration-tests-firefox:
+      context: test-runner:cypress-record-key
+      filters: *runDriverTests
+      requires:
+        - ready-to-test
+  - driver-integration-tests-firefox-beta:
       context: test-runner:cypress-record-key
       filters: *runDriverTests
       requires:
@@ -461,6 +476,7 @@ jobs:
         - driver-integration-tests-chrome-beta
         - driver-integration-tests-chrome-beta-inject-document-domain
         - driver-integration-tests-firefox
+        - driver-integration-tests-firefox-beta
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests

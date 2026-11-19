@@ -16,15 +16,16 @@ src/
   baseConfig.ts         Core flat-config with TypeScript, import, and stylistic rules
   cliOverrides.ts       Overrides applied for CLI/Node.js contexts
   compatConfig.ts       Opt-in browser-API compatibility checks (eslint-plugin-compat) for the browser bundles' shipped source
+  eslint-plugin-mocha.d.ts
+                        Ambient types for eslint-plugin-mocha, which `node` resolution can't find (see Dependency pins)
   frontendOverrides.ts  Rules shared by app, launchpad and frontend-shared, such as type-only imports from data-context in .vue files
   graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
   nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
+  reactConfig.ts        `reactConfig(files)`: opt-in React rules (@eslint-react/eslint-plugin), scoped to the React files given. Requires the plugin on call
   typeAwareConfig.ts    `noFloatingPromisesConfig(files)`: opt-in `@typescript-eslint/no-floating-promises` with a project service, scoped to the files given
   vitestConfig.ts       Opt-in linting of Vitest specs (@vitest/eslint-plugin), for workspaces whose unit tests run on Vitest
-  vueTsxOverrides.ts    Turns React rules off for .jsx/.tsx in Vue packages, which write components in Vue JSX
-  reactRulesOff.ts      Every React rule set to `off`, shared by the .vue block and vueTsxOverrides
   rules/                Cypress-authored rules, registered under the `@cypress/dev` namespace
   index.ts              Main entry: composes and exports the full flat-config array
 ```
@@ -164,6 +165,37 @@ These workspaces opt in, for their shipped source only:
 
 Specs are left out (`config` and `reporter` predate this and keep theirs): they commonly start a promise and assert on it later, so the hits are mostly noise, and giving them a project service would slow lint further. The other workspaces don't opt in yet; adding one means fixing its hits and measuring its lint time first.
 
+## `reactConfig`
+
+`reactConfig(files)` applies `@eslint-react/eslint-plugin`'s `recommended-typescript` rules to `files`. It returns a single block, so add it after `baseConfig` without spreading it:
+
+```ts
+reactConfig(['**/*.{js,jsx,ts,tsx}']),
+```
+
+The rules are opt-in because the Vue packages write components in Vue JSX, which React rules misread: `class`, for example, is reported as an unknown property. Nothing in `app`, `launchpad` or `frontend-shared` needs to turn them off. `reactConfig` requires the plugin when it is called rather than importing it, so the workspaces that don't opt in start ESLint without loading it. The plugin is ESM-only and its `exports` map has only an `import` condition, so Node's own `require` refuses it with `ERR_PACKAGE_PATH_NOT_EXPORTED`: the call works because ESLint loads `eslint.config.ts` through jiti, whose `require` resolves ESM. A loader other than jiti needs the plugin imported instead.
+
+These opt in:
+
+- `npm/react` and `reporter`: every file.
+- `runner`: `unified-runner.tsx`.
+- `vite-plugin-cypress-esm`: its component tests, `cypress/**/*.tsx`.
+- `webpack-batteries-included-preprocessor`: the JSX fixtures under `test/fixtures`.
+- `system-tests`: the `.jsx` and `.tsx` files under `projects/**` and `project-fixtures/**`, all of which belong to React or Next.js projects, plus the `.js` files of the Next.js projects (`project-fixtures/next` and `projects/nextjs-*`), whose pages are JSX. A new Next.js fixture that writes JSX in `.js` files needs adding to that list. `dom-no-render` is off there: some fixtures mount with the legacy `ReactDOM.render`, which React 18 still runs, the way apps written before `createRoot` do. Any layout rule the React plugin brings is off for them too, like `baseConfig`'s for every fixture, because system-test snapshots assert on line and column numbers. It brings none today; the switch-off covers a later version that adds one.
+
+A workspace with new React files opts them in the same way. `data-context`'s React scaffold fixtures under `test/unit` are the exception: its config ignores them, because its specs assert on how those inputs are written.
+
+On top of `recommended-typescript`:
+
+- `settings['react-x'].version` is `'18'`. `@cypress/react` supports React 18, so the rules that steer toward React 19 APIs (`no-forward-ref`, `no-context-provider`, `no-use-context`) stay quiet. Raise it only once React 18 support is dropped.
+- Every rule it enables is an error, including the many `recommended` makes warnings: lint scripts don't pass `--max-warnings 0`, so a warning never fails `yarn lint` and would go unfixed.
+- `dom-no-unknown-property`, `dom-no-unsafe-target-blank` and `no-missing-component-display-name` are on, though not in `recommended`. Give a component the last one reports, such as one wrapped in `forwardRef` or `observer`, a `displayName`.
+- `no-array-index-key`, `set-state-in-effect`, `use-state`, `no-children-only` and `no-clone-element` are off. `reactConfig.ts` gives the reason for each.
+
+The plugin brings its own hooks rules (`rules-of-hooks`, `exhaustive-deps`) and purity rules, so don't add `eslint-plugin-react-hooks`. An effect that runs once on mount on purpose takes `// eslint-disable-next-line @eslint-react/exhaustive-deps -- <reason>` above the line the rule reports. As with `vue/no-v-html`, a `dangerouslySetInnerHTML` that renders HTML built to be rendered takes a `@eslint-react/dom-no-dangerously-set-innerhtml` disable naming where the HTML comes from. In JSX children, write the directive as `{/* eslint-disable-next-line ... */}`.
+
+The plugin has no counterpart for `eslint-plugin-react`'s `no-string-refs`, `no-unescaped-entities`, `no-is-mounted`, `require-render-return` or `jsx-no-duplicate-props`. The parser still rejects an unescaped `>` or `}` in JSX text, and `tsc` reports duplicate props in `.tsx` files, but a duplicate prop in a `.js` or `.jsx` file now goes unreported (see [Known gaps](#known-gaps)). `jsx-uses-vars`, `react-in-jsx-scope` and `jsx-uses-react` have no counterpart either, and need none: ESLint 10 marks variables used in JSX itself, and React 18's JSX transform doesn't need `React` in scope.
+
 ## `vitestConfig`
 
 Every workspace with `vitest` in its `package.json` spreads `vitestConfig` after `baseConfig`. The repo root is the exception: its `vitest.config.ts` only lists the workspace projects, and its ESLint config lints no specs. It applies `@vitest/eslint-plugin`'s `recommended` rules to `**/*.{test,spec}.{ts,tsx,js}` and `test/**`, skipping `fixtures/` and `__fixtures__/` directories. A workspace whose Vitest specs are only part of those globs narrows `files` when it spreads the config. `@packages/server`, whose `test/integration` and `test/performance` specs run on mocha, is the example:
@@ -182,7 +214,7 @@ On top of `recommended`:
 
 ## Vue packages
 
-`app`, `launchpad` and `frontend-shared` spread `vueTsxOverrides` and then `frontendOverrides` after `baseConfig` (and `jsonConfig`), and add `vue` to their `lint-staged` glob. Without `vue` in the glob, a staged `.vue` file matches no task and is committed unlinted. `vue-eslint-parser` 10 defines the `<script setup>` compiler macros (`defineProps`, `defineEmits`, `defineExpose`, `withDefaults`), so they need no globals.
+`app`, `launchpad` and `frontend-shared` spread `frontendOverrides` after `baseConfig` (and `jsonConfig`), and add `vue` to their `lint-staged` glob. Without `vue` in the glob, a staged `.vue` file matches no task and is committed unlinted. `vue-eslint-parser` 10 defines the `<script setup>` compiler macros (`defineProps`, `defineEmits`, `defineExpose`, `withDefaults`), so they need no globals.
 
 `vue/no-v-html` is an error. Render text with `{{ }}` interpolation. Where a component renders HTML built to be rendered (markdown-it via `useMarkdown`, Shiki, `ansi-to-html` with `escapeXML: true`, bundled SVG icons), wrap it in `<!-- eslint-disable vue/no-v-html -->` / `<!-- eslint-enable vue/no-v-html -->` with a note on where the HTML comes from. A `disable-next-line` comment does not reach a `v-html` attribute on a later line of the tag.
 
@@ -215,14 +247,16 @@ graphql-eslint's processor refuses `.vue` files under flat config, and its docum
 ### Dependency pins
 
 - **`@eslint/js` on the same major as `eslint`.** ESLint 10 no longer depends on `@eslint/js`, so this package's range is the only copy, and its `recommended` rules must exist in the installed `eslint`. `@eslint/js` declares a peer of `eslint@^10`; move both majors together.
-- **`eslint-plugin-react` 7.37.5 on ESLint 10.** Its `eslint` peer stops at `^9.7`, so `yarn` prints a peer warning; that is expected. Its `recommended` rules run on ESLint 10, with two conditions. `settings.react.version` must stay explicit, because `'detect'` calls `context.getFilename()`, which ESLint 10 removed. And none of `forward-ref-uses-ref`, `jsx-filename-extension`, `jsx-curly-spacing`, `jsx-equals-spacing`, `jsx-one-expression-per-line`, `jsx-space-before-closing` or `jsx-tag-spacing` may be enabled, as they crash on ESLint 10 too. The plugin is being replaced.
+- **`@eslint-react/eslint-plugin` 5.** It is ESM-only, flat-config only, and needs ESLint 10, TypeScript 5 and Node 20.19. Its `@typescript-eslint/*` ranges start at the patch it was built against, so keep `typescript-eslint`, `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` at or above that patch. Below it, the plugin resolves a second copy of `@typescript-eslint/types`, `utils` and the rest, since `typescript-eslint` pins its own subpackages exactly. Don't add `eslint-plugin-react`: its last release, 7.37.5, declares no ESLint 10 support.
 - **`@typescript-eslint/no-restricted-imports`, not core.** `frontendOverrides` keeps the typescript-eslint rule, which is deprecated since 8.64, because it predates core `no-restricted-imports` accepting `allowTypeImports` (ESLint 9.37). The installed ESLint 10 has the option, so the block can move to the core rule.
 - **`graphql@16`, nested.** graphql-eslint v4 needs a `graphql@^16` peer at load time (it reads the `OperationTypeNode` enum, which graphql 15 only has as a type), while the app and server stay on `graphql@15`. This package depends on `graphql@16` itself and its `workspaces.nohoist` entry keeps `@graphql-eslint/eslint-plugin` and its tree in this package's `node_modules`. Hoisted to the root, the plugin would resolve `graphql@15`. Don't remove the nohoist entry, and don't move these dependencies to the root.
 - **`graphql` is left out of lockfile deduplication.** `@types/graphql-resolve-batch` depends on `graphql@>=14`, so `yarn-deduplicate --strategy=highest` would move it to graphql 16 types while `data-context` passes it graphql 15 values. `yarn dedupe-lockfile`, which `yarn check-lockfile`, the local postinstall and CI all use, passes `--exclude graphql`. A root resolution cannot fix this instead, because yarn keeps the `graphql@>=14` request in the lockfile either way.
 - **`@vue/compiler-sfc@3.5`, nested.** graphql-tag-pluck v8 needs `registerTS`, added in 3.3. Against the repo's 3.2.47 it silently drops every `.vue` document. The app packages keep 3.2.47.
 - **`@vitest/eslint-plugin` 1.6.** It declares peers of TypeScript 6 and `@typescript-eslint/eslint-plugin`, both optional: they only serve its type-aware rules, which `vitestConfig` leaves out, so its other rules run on the repo's TypeScript 5.4.5. Its `@typescript-eslint/utils` and `scope-manager` `^8.71` ranges share the lockfile entries of the `typescript-eslint` version above. A fresh resolve can pick a newer patch for them instead, and `yarn dedupe-lockfile` then moves other `@typescript-eslint` ranges to that patch while `typescript-eslint` keeps its exact pins, leaving two copies. Point the plugin's ranges back at the existing entry with `npx yarn-deduplicate --strategy=fewer --packages @typescript-eslint/utils @typescript-eslint/scope-manager` before running `yarn check-lockfile`. Don't use `eslint-plugin-vitest`, its archived predecessor.
+- **`eslint-plugin-mocha` 12, typed through `src/eslint-plugin-mocha.d.ts`.** The plugin is ESM-only, needs `eslint` ≥ 10.2, and only exposes its types through `exports`. `@packages/ts`, `proxy`, `driver` and `cli` type-check this package's source on `node` (node10) resolution, which ignores `exports`, so `check-ts` there would fail with `Cannot find module 'eslint-plugin-mocha'`. `baseConfig.ts` pulls in an ambient declaration with a `/// <reference path>`, which TypeScript prefers over `node_modules` under every resolution, typing the plugin as `ESLint.Plugin`. It can't be loaded with `require` the way `nodeConfig` loads `eslint-plugin-n`, because it uses top-level `await`. v12 renamed `no-global-tests` to `no-top-level-tests`, `no-setup-in-describe` to `no-setup-in-suite`, `no-top-level-hooks` to `no-root-hooks` and `no-return-and-callback` to `no-return-and-done` and `no-hooks-for-single-case` to `no-hooks-for-single-child`, and folded `no-sibling-hooks` into `consistent-structure` (`disallowDuplicateHooks`). ESLint accepts an unknown rule name set to `off` without complaint, so a rule still turned off under its old name is silently back on under its new one, from `recommended`.
 - **`@graphql-tools/delegate`.** The root `**/@graphql-tools/delegate` resolution also reaches the plugin's tree, under `@graphql-tools/wrap` 11. Only `graphql-config`'s URL loader reaches that code, and the schema here is a file.
 
 ## Known gaps
 
+- No rule reports a duplicate JSX prop, such as two `className`s, in `.js` or `.jsx` files. `eslint-plugin-react`'s `jsx-no-duplicate-props` did; `@eslint-react/eslint-plugin` has no counterpart, and TypeScript only checks `.tsx`.
 - `jsonConfig` does not collapse `{ }` to `{}`. `jsonc/object-curly-spacing` skips empty objects, and no off-the-shelf rule covers them.

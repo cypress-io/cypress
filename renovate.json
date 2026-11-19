@@ -1,6 +1,8 @@
 {
   "configMigration": true,
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "extends": [
     ":semanticCommits",
     "group:monorepos",
@@ -81,6 +83,9 @@
       "matchCurrentValue": "/^\\d+\\.\\d+\\.\\d+$/",
       "enabled": false
     }
+  ],
+  "postUpdateOptions": [
+    "yarnDedupeHighest"
   ],
   "prConcurrentLimit": 4,
   "prHourlyLimit": 1,
