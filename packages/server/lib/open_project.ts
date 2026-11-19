@@ -22,6 +22,8 @@ import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 import { resolveTrustedCertificateFingerprints } from './util/spki'
 import { createMtlsBridge } from './mtls'
 import type { MtlsBridgeLaunchOpts } from './mtls'
+import { getCypressReservedPathPrefixes } from './adapters/internal-routes'
+import { getServiceWorkerInstrumentationExpression } from '@packages/proxy/lib/http/util/service-worker-injector'
 import * as appData from './util/app_data'
 
 const debug = Debug('cypress:server:open_project')
@@ -158,6 +160,7 @@ export class OpenProject extends EventEmitter {
         ...translateEgressPolicyToLaunchOpts(cfg.hosts, this._mtlsBridge?.origins),
         hosts: cfg.hosts,
         shouldClearPersistedServiceWorkers: cfg.testIsolation !== false,
+        serviceWorkerInstrumentation: getServiceWorkerInstrumentationExpression({ reservedPathPrefixes: getCypressReservedPathPrefixes(cfg) }),
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
         },
