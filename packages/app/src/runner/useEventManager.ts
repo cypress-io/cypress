@@ -6,6 +6,34 @@ import { useStudioStore } from '../store/studio-store'
 import { empty, getReporterElement, getRunnerElement } from './utils'
 import { unmountReporter } from './reporter'
 
+// An agent reads this without the runner's code frame, so it keeps the stack, which names the file and
+// line the spec threw at. A rejection that is not an Error, such as a plain object, still gets its message.
+function formatSpecLoadError (err: unknown): string {
+  if (err instanceof Error) {
+    return err.stack || `${err.name}: ${err.message}`
+  }
+
+  if (err && typeof err === 'object') {
+    const { name, message, stack } = err as { name?: unknown, message?: unknown, stack?: unknown }
+
+    if (typeof stack === 'string' && stack) {
+      return stack
+    }
+
+    if (typeof message === 'string') {
+      return typeof name === 'string' ? `${name}: ${message}` : message
+    }
+
+    try {
+      return JSON.stringify(err)
+    } catch {
+      return String(err)
+    }
+  }
+
+  return String(err)
+}
+
 export function useEventManager () {
   const eventManager = getEventManager()
 
@@ -40,7 +68,7 @@ export function useEventManager () {
     })
 
     eventManager.on('spec:load:error', (err) => {
-      autStore.setSpecLoadError(String(err))
+      autStore.setSpecLoadError(formatSpecLoadError(err))
     })
 
     eventManager.on('visit:failed', (payload) => {

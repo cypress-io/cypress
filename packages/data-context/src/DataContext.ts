@@ -319,9 +319,11 @@ export class DataContext {
     return this.isOpenMode && Boolean(this.modeOptions.headless)
   }
 
-  // What kind of load error the record describes, so each step of loading withdraws only the
-  // kind it resolves: a configuration that loads does not finish a setup or find a browser
-  private _loadErrorKind: LoadErrorKind | null = null
+  // The load errors still unresolved, by kind, so an error of one kind replacing another does not
+  // lose it: each step of loading withdraws only the kind it resolves, and a configuration that
+  // loads does not finish a setup or find a browser. The last one reported is what `cypress tap`
+  // is shown.
+  private _loadErrors = new Map<LoadErrorKind, string>()
 
   /**
    * Records that the project could not load, for `cypress tap status` to report, whether it
@@ -332,38 +334,54 @@ export class DataContext {
    * Without a project there is nothing for a session to describe.
    */
   reportLoadError (error: CypressError | string, kind: LoadErrorKind = 'config') {
-    const projectRoot = this.currentProject
-
-    if (!this.isOpenMode || !projectRoot) {
+    if (!this.isOpenMode || !this.currentProject) {
       return
     }
 
-    this._loadErrorKind = kind
+    this._loadErrors.delete(kind)
+    this._loadErrors.set(kind, stripVTControlCharacters(typeof error === 'string' ? error : formatForOutput(error)))
+    this.recordLoadErrorForTap()
+  }
+
+  private recordLoadErrorForTap () {
+    const projectRoot = this.currentProject
+    const loadError = [...this._loadErrors.values()].pop()
+
+    if (!projectRoot || loadError === undefined) {
+      this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
+
+      return
+    }
 
     this._apis.projectApi.setSessionLoadError({
       projectRoot,
       testingType: this.coreData.currentTestingType,
-      loadError: stripVTControlCharacters(typeof error === 'string' ? error : formatForOutput(error)),
+      loadError,
     }).catch((err) => this.debug('could not record the load error for cypress tap: %o', err))
   }
 
   /**
    * Withdraws the record of a load error once whatever caused it is resolved, so `cypress tap
-   * status` does not keep reporting it. Given `kinds`, only an error of one of those kinds is
-   * withdrawn; without them, any is, as when another project replaces it.
+   * status` does not keep reporting it. Given `kinds`, only errors of those kinds are
+   * withdrawn, and an older error of another kind is reported again; without them, all are,
+   * as when another project replaces them.
    */
   clearLoadError (kinds?: LoadErrorKind[]) {
     if (!this.isOpenMode) {
       return
     }
 
-    if (kinds && (this._loadErrorKind === null || !kinds.includes(this._loadErrorKind))) {
-      return
+    if (kinds) {
+      const withdrawn = kinds.filter((kind) => this._loadErrors.delete(kind))
+
+      if (!withdrawn.length) {
+        return
+      }
+    } else {
+      this._loadErrors.clear()
     }
 
-    this._loadErrorKind = null
-
-    this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
+    this.recordLoadErrorForTap()
   }
 
   onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {

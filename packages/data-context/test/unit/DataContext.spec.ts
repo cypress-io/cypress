@@ -250,6 +250,21 @@ describe('DataContext open mode error output', () => {
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
       })
 
+      it('reports the older error again when the newer one of another kind is withdrawn', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.reportLoadError('no browser was given', 'browser')
+        projectCtx.reportLoadError('Your configFile is invalid', 'config')
+        projectCtx.clearLoadError(['config', 'setup'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+        expect(recorded(projectCtx)).toHaveBeenLastCalledWith(expect.objectContaining({ loadError: 'no browser was given' }))
+
+        projectCtx.clearLoadError(['browser'])
+
+        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+      })
+
       it('does not happen for a given kind when no error is recorded', () => {
         const projectCtx = openProject('/projects/foo')
 

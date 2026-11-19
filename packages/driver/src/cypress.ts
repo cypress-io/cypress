@@ -433,6 +433,18 @@ class $Cypress {
         specRelativePath: this.spec.relative,
         specAbsolutePath: this.spec.absolute,
       })
+      .catch((error) => {
+        // Only the spec's own scripts failing is a spec load error; a failure setting up the
+        // CSP below is not. The runner reports this as a failed test, which does not tell
+        // `cypress tap` that the spec itself threw while loading.
+        try {
+          this.emit('spec:load:error', error)
+        } catch (listenerError) {
+          // a throwing listener must not keep the failing test from being created
+        }
+
+        throw error
+      })
       .then(() => {
         this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
         this.sourceMapProjectRoot = $sourceMapUtils.getSourceMapProjectRoot()
@@ -441,9 +453,6 @@ class $Cypress {
         }
       })
       .catch((error) => {
-        // The runner reports this as a failed test, which does not tell `cypress tap` that the
-        // spec itself threw while loading
-        this.emit('spec:load:error', error)
         this.runner.onSpecError('error')({ error })
       })
       .then(() => {
