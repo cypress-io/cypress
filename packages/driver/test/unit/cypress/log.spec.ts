@@ -67,6 +67,25 @@ describe('LogUtils.reduceMemory', () => {
   })
 })
 
+describe('LogUtils.getProtocolProps', () => {
+  it('keeps the Test Replay element IDs of a remote-element log', () => {
+    const props = LogUtils.getProtocolProps({
+      id: 'log-https://example.com-4',
+      name: 'get',
+      numElements: 2,
+      protocolElementIds: ['a3f9c2e1-node-17', 'a3f9c2e1-node-18'],
+      consoleProps: { Yielded: '<button>' },
+    })
+
+    expect(props).toEqual({
+      id: 'log-https://example.com-4',
+      name: 'get',
+      numElements: 2,
+      protocolElementIds: ['a3f9c2e1-node-17', 'a3f9c2e1-node-18'],
+    })
+  })
+})
+
 describe('LogUtils.toSerializedJSON', () => {
   // A walk that re-reads objects hangs synchronously, where vitest's timeout
   // can't interrupt it. Counting reads, and throwing once they pass a budget,
