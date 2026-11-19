@@ -1,8 +1,8 @@
 import React from '#host/react'
 
-// Studio and cy.prompt request react as a ^18.3.1 singleton from the `default`
-// share scope. Serving the app's own copy gives them the same React that the
-// reporter renders with, since the runner bundle reads it from the host modules.
+// The Cloud-delivered Studio and cy.prompt bundles are served to every Cypress
+// version in the field, so keep this share contract fixed. Serving the app's own
+// React keeps them on the copy the reporter renders with.
 export const federationShared = {
   react: {
     scope: 'default',
