@@ -208,14 +208,6 @@ yarn test
 
 ## Common Issues and Solutions
 
-### Integrity Check Failures
-```bash
-# Update fs.readFileSync string representation in:
-# /scripts/binary/binary-integrity-check-source.js
-# Create throwaway script: console.log(fs.readFileSync.toString())
-# Run with: electron throwaway-script.js
-```
-
 ### ResizeObserver Errors
 ```bash
 # Update error message matching in support files

@@ -8,9 +8,7 @@
         "scripts/after-sign-hook.js",
         "scripts/gulp/tasks/gulpGraphql.ts",
         "scripts/add-install-comment.js",
-        "scripts/semantic-commits/get-binary-release-data.js",
-        "scripts/binary/binary-entry-point-source.js",
-        "scripts/binary/binary-byte-node-entry-point-source.js"
+        "scripts/semantic-commits/get-binary-release-data.js"
       ],
       "ignoreDependencies": [
         "@electron/fuses",
@@ -29,7 +27,6 @@
         "@octokit/auth-app",
         "@octokit/core",
         "@percy/cli",
-        "bytenode",
         "chai-as-promised",
         "mobx",
         "mocha-banner",
