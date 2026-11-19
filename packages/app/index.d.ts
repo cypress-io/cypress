@@ -35,10 +35,8 @@ declare global {
       config: Record<string, any>
 
       /**
-       * To ensure we are only a single copy of React
-       * We get a reference to the copy of React (and React DOM)
-       * that is used in the Reporter and Driver, which are bundled with
-       * webpack.
+       * The app's own React and React DOM, which the runner bundle reads from
+       * the host modules and re-exports here for Studio and cy.prompt.
        *
        * Unfortunately, attempting to have React in a project
        * using Vue causes mad conflicts because React'S JSX type

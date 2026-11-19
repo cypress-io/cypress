@@ -11,6 +11,7 @@ import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as protocol from '../../../lib/browsers/protocol'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
@@ -288,6 +289,18 @@ describe('lib/browsers/chrome', () => {
       await chrome.open({ isHeadless: true } as any, 'http://', mitmOpts as any, automation)
 
       expect(browserCriClient.reenableChildTargetInterception).toBeUndefined()
+    })
+
+    it('hands the service worker instrumentation to the page client on the browser (CDP) network path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...openOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBe('(function __cypressInstrument () {})()')
+    })
+
+    it('does not hand the page client service worker instrumentation on the MITM path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBeUndefined()
     })
 
     it('executeBeforeBrowserLaunch is noop if before:browser:launch is not registered', async () => {
@@ -744,7 +757,7 @@ describe('lib/browsers/chrome', () => {
             },
             {
               name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
+              value: getMetadataHeaderValue(),
             },
           ],
         })

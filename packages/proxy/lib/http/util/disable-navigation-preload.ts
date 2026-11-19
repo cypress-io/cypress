@@ -23,6 +23,7 @@ interface ServiceWorkerContainerLike {
 }
 
 interface GlobalLike {
+  addEventListener? (type: string, listener: () => void): void
   registration?: ServiceWorkerRegistrationLike
   NavigationPreloadManager?: NavigationPreloadManagerCtor
   navigator?: { serviceWorker?: ServiceWorkerContainerLike }
@@ -42,10 +43,16 @@ declare const self: GlobalLike
  * needs its own seam:
  * - Worker realm (`self.registration.navigationPreload`, inside the service
  *   worker's own script): closed by `DISABLE_NAVIGATION_PRELOAD_EXPRESSION`
- *   below. `service-worker-injector.ts` prepends it to every service worker
- *   script fetched through the pipeline, ahead of any user code, so it wins
- *   the race against that worker's own install/activate for any script the
- *   pipeline refetches.
+ *   below. `getServiceWorkerInstrumentationExpression` in
+ *   `service-worker-injector.ts` includes it, and the page connection
+ *   evaluates that on every service worker that starts paused for the
+ *   debugger, ahead of any user code. The worker has no `registration` at
+ *   that point, and no `NavigationPreloadManager` global either, so the
+ *   expression patches from install and activate listeners that run before
+ *   the worker's own. A worker restarted after it was stopped gets neither
+ *   event, so an `enable()` call it makes is not covered. An attached
+ *   debugger keeps Chrome from stopping an idle worker, so under Cypress
+ *   that takes an explicit stop or a crash.
  * - Window realm (`registration.navigationPreload`, from the page — e.g.
  *   immediately after `serviceWorker.register()`): `enable()` is closed
  *   deterministically by `DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION`
@@ -54,8 +61,8 @@ declare const self: GlobalLike
  *   is active.
  *   That same expression also sweeps `serviceWorkerContainer.
  *   getRegistrations()` to `disable()` a persisted registration from an
- *   earlier run (whose script the pipeline never refetches, so the worker
- *   realm expression never reaches it) — but the sweep runs at the start of
+ *   earlier run (whose worker may already be running before Cypress attaches,
+ *   so the worker realm expression never reaches it) — but the sweep runs at the start of
  *   the navigation that document-start script is evaluated for, and a
  *   persisted worker may already have served that same navigation's preload
  *   response by then. It only reliably prevents preload on that worker's
@@ -80,28 +87,49 @@ declare const self: GlobalLike
  * and spoofing `preloadResponse` at either seam is infeasible.
  */
 function __cypressDisableNavigationPreload () {
+  const disable = function () {
+    try {
+      const preload = self.registration && self.registration.navigationPreload
+
+      if (!preload) {
+        return
+      }
+
+      // Patched where `enable` resolves through the prototype chain, so every
+      // reference to the manager sees the resolving stub, not just this
+      // instance. Falls back to the instance itself when the chain has no
+      // `enable` to patch there.
+      const proto = Object.getPrototypeOf(preload)
+      const target = proto && typeof proto.enable === 'function' ? proto : preload
+
+      target.enable = function () {
+        return Promise.resolve()
+      }
+
+      preload.disable().catch(function () {})
+    } catch {
+      // Missing self.registration/navigationPreload, or any other unexpected
+      // shape, must not break the service worker's startup.
+    }
+  }
+
+  // Does nothing in a worker still paused for the debugger, which has no
+  // `registration` yet. It takes effect when the instrumentation arrives after
+  // the worker's script has started, as can happen when a worker restarts,
+  // since install and activate don't fire again then.
+  disable()
+
+  // A worker paused for the debugger has no `registration` yet: Chrome only
+  // sets it once the worker's script is about to run. Listeners added now run
+  // ahead of any the script adds, so `enable()` is patched before the
+  // worker's own install or activate handler can call it.
   try {
-    const preload = self.registration && self.registration.navigationPreload
-
-    if (!preload) {
-      return
+    if (typeof self.addEventListener === 'function') {
+      self.addEventListener('install', disable)
+      self.addEventListener('activate', disable)
     }
-
-    // Patched where `enable` resolves through the prototype chain, so every
-    // reference to the manager sees the resolving stub, not just this
-    // instance. Falls back to the instance itself when the chain has no
-    // `enable` to patch there.
-    const proto = Object.getPrototypeOf(preload)
-    const target = proto && typeof proto.enable === 'function' ? proto : preload
-
-    target.enable = function () {
-      return Promise.resolve()
-    }
-
-    preload.disable().catch(function () {})
   } catch {
-    // Missing self.registration/navigationPreload, or any other unexpected
-    // shape, must not break the service worker's startup.
+    // An unexpected global must not break the service worker's startup.
   }
 }
 

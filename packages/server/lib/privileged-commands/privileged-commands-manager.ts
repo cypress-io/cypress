@@ -35,7 +35,7 @@ const hashOptions = (options: unknown) => {
   return sha256(JSON.stringify([packet, binaryHashes]))
 }
 
-const getOrigin = (url: string) => {
+export const getOrigin = (url: string) => {
   try {
     return new URL(url).origin
   } catch {
