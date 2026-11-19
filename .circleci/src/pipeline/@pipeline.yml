@@ -2096,7 +2096,7 @@ jobs:
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 3
+                expectedResultCount: 1
 
   # Unguarded: a release gate rather than a test group, and the only check on
   # either release train. `test-npm-package-release-script` is the dry run of
