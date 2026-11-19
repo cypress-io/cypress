@@ -35,6 +35,7 @@
 - Fixed an issue where, in `cypress run` with the Electron browser and video disabled, the first screenshot in a spec, including the screenshot taken when a test fails, made the application under test render far more slowly for the rest of that spec. Fixes [#35291](https://github.com/cypress-io/cypress/issues/35291).
 - Fixed a regression in [8.4.0](#8-4-0) where `.scrollTo()` on a scrollable element wrapped with [`Cypress.$`](https://on.cypress.io/$), other than the window or `body`, threw `TypeError: Cannot read properties of undefined (reading 'slice')` when given a selector string, a number, or `'max'`, such as `Cypress.$('#list').scrollTo('#item')` or `Cypress.$('#list').scrollTo(120)`. It now scrolls to the matching element or position. Fixed in [#35460](https://github.com/cypress-io/cypress/pull/35460).
 - In Firefox, error stack traces in the Command Log and in `cypress run` output no longer end the names of nested anonymous functions with a stray `/` or `/</`. For example, a test's callback now shows as `at ./cypress/spec.cy.js` instead of `at ./cypress/spec.cy.js/`. A frame with no name to show now reads `at <unknown>` instead of being blank. Fixed in [#35462](https://github.com/cypress-io/cypress/pull/35462).
+- Fixed an issue where run mode durations of 24 hours or more dropped the whole days, so a run that took exactly 24 hours was reported as `0ms` and a run of 26 hours as `2:00:00`. Fixes [#34976](https://github.com/cypress-io/cypress/issues/34976).
 
 **Misc:**
 
