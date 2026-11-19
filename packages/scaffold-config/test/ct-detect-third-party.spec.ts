@@ -190,13 +190,39 @@ describe('detectThirdPartyCTFrameworks', () => {
     })
   })
 
-  describe('project path with glob special characters', () => {
+  describe('installed package layouts', () => {
+    const solidDependency: Cypress.CypressComponentDependency = {
+      type: 'solid-js',
+      name: 'Solid.js',
+      package: 'solid-js',
+      installer: 'solid-js',
+      description: 'Solid is a declarative JavaScript library for creating user interfaces',
+      minVersion: '^1.0.0',
+    }
+
+    const qwikDependency: Cypress.CypressComponentDependency = {
+      type: 'qwik',
+      name: 'Qwik',
+      package: '@builder.io/qwik',
+      installer: '@builder.io/qwik',
+      description: 'An Open-Source sub-framework designed with a focus on server-side-rendering, lazy-loading, and styling/animation.',
+      minVersion: '^0.17.5',
+    }
+
     let tempDir: string
-    let projectRoot: string
 
-    async function writeThirdPartyFramework (packageName: string, dependency: Cypress.CypressComponentDependency) {
-      const packageRoot = path.join(projectRoot, 'node_modules', packageName)
+    async function createProject (directoryName: string) {
+      const projectRoot = path.join(tempDir, directoryName)
 
+      // Marks the project as the repository root, so the search stops here
+      // instead of also picking up packages installed above the temp directory
+      await fs.mkdirp(path.join(projectRoot, '.git'))
+      await fs.writeJson(path.join(projectRoot, 'package.json'), { name: 'jordan-rivera-storefront' })
+
+      return projectRoot
+    }
+
+    async function writeThirdPartyFramework (packageRoot: string, packageName: string, dependency: Cypress.CypressComponentDependency) {
       await fs.outputJson(path.join(packageRoot, 'package.json'), {
         name: packageName,
         version: '1.4.2',
@@ -218,47 +244,87 @@ describe('detectThirdPartyCTFrameworks', () => {
       return path.join(packageRoot, 'definition.cjs')
     }
 
-    beforeEach(async () => {
-      tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ct-detect-third-party-'))
-      projectRoot = path.join(tempDir, `Jordan Rivera's app (v2) [beta]`)
-
-      // Marks the project as the repository root, so the search stops here
-      // instead of also picking up packages installed above the temp directory
-      await fs.mkdirp(path.join(projectRoot, '.git'))
-      await fs.writeJson(path.join(projectRoot, 'package.json'), { name: 'jordan-rivera-storefront' })
-    })
-
-    afterEach(async () => {
-      await fs.rm(tempDir, { recursive: true, force: true })
-    })
-
-    it('detects global and namespaced third party frameworks', async () => {
-      const solidPath = await writeThirdPartyFramework('cypress-ct-solid-js', {
-        type: 'solid-js',
-        name: 'Solid.js',
-        package: 'solid-js',
-        installer: 'solid-js',
-        description: 'Solid is a declarative JavaScript library for creating user interfaces',
-        minVersion: '^1.0.0',
-      })
-      const qwikPath = await writeThirdPartyFramework('@acme/cypress-ct-qwik', {
-        type: 'qwik',
-        name: 'Qwik',
-        package: '@builder.io/qwik',
-        installer: '@builder.io/qwik',
-        description: 'An Open-Source sub-framework designed with a focus on server-side-rendering, lazy-loading, and styling/animation.',
-        minVersion: '^0.17.5',
-      })
-
+    async function detect (projectRoot: string) {
       const { frameworks, erroredFrameworks } = await detectThirdPartyCTFrameworks(projectRoot)
 
       const detected = frameworks
       .map((framework) => ({ type: framework.type, path: 'path' in framework ? framework.path : undefined }))
       .sort((a, b) => a.type.localeCompare(b.type))
 
+      return { detected, erroredFrameworks }
+    }
+
+    beforeEach(async () => {
+      tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ct-detect-third-party-'))
+    })
+
+    afterEach(async () => {
+      await fs.rm(tempDir, { recursive: true, force: true })
+    })
+
+    it('detects global and namespaced third party frameworks when the project path has brackets and parentheses', async () => {
+      const projectRoot = await createProject(`Jordan Rivera's app (v2) [beta]`)
+      const nodeModules = path.join(projectRoot, 'node_modules')
+      const solidPath = await writeThirdPartyFramework(path.join(nodeModules, 'cypress-ct-solid-js'), 'cypress-ct-solid-js', solidDependency)
+      const qwikPath = await writeThirdPartyFramework(path.join(nodeModules, '@acme', 'cypress-ct-qwik'), '@acme/cypress-ct-qwik', qwikDependency)
+
+      const { detected, erroredFrameworks } = await detect(projectRoot)
+
       expect(erroredFrameworks).toEqual([])
       expect(detected).toEqual([
         { type: '@acme/cypress-ct-qwik', path: qwikPath },
+        { type: 'cypress-ct-solid-js', path: solidPath },
+      ])
+    })
+
+    it('detects third party frameworks that pnpm symlinks into node_modules', async () => {
+      const projectRoot = await createProject('jordan-rivera-storefront')
+      const nodeModules = path.join(projectRoot, 'node_modules')
+      const solidPath = await writeThirdPartyFramework(
+        path.join(nodeModules, '.pnpm', 'cypress-ct-solid-js@1.4.2', 'node_modules', 'cypress-ct-solid-js'),
+        'cypress-ct-solid-js',
+        solidDependency,
+      )
+      const qwikPath = await writeThirdPartyFramework(
+        path.join(nodeModules, '.pnpm', '@acme+cypress-ct-qwik@1.4.2', 'node_modules', '@acme', 'cypress-ct-qwik'),
+        '@acme/cypress-ct-qwik',
+        qwikDependency,
+      )
+
+      // pnpm links each package into node_modules from its store under
+      // `.pnpm`. `junction` makes the links work on Windows without admin
+      // rights, and is ignored elsewhere.
+      await fs.symlink(path.dirname(solidPath), path.join(nodeModules, 'cypress-ct-solid-js'), 'junction')
+      await fs.mkdirp(path.join(nodeModules, '@acme'))
+      await fs.symlink(path.dirname(qwikPath), path.join(nodeModules, '@acme', 'cypress-ct-qwik'), 'junction')
+
+      const { detected, erroredFrameworks } = await detect(projectRoot)
+
+      // Node resolves the links, so the definitions load from the store
+      expect(erroredFrameworks).toEqual([])
+      expect(detected).toEqual([
+        { type: '@acme/cypress-ct-qwik', path: await fs.realpath(qwikPath) },
+        { type: 'cypress-ct-solid-js', path: await fs.realpath(solidPath) },
+      ])
+    })
+
+    it('ignores packages that only resemble third party frameworks', async () => {
+      const projectRoot = await createProject('jordan-rivera-storefront')
+      const nodeModules = path.join(projectRoot, 'node_modules')
+      const solidRoot = path.join(nodeModules, 'cypress-ct-solid-js')
+      const solidPath = await writeThirdPartyFramework(solidRoot, 'cypress-ct-solid-js', solidDependency)
+
+      // Any of these that matched would show up in `detected` or `erroredFrameworks`
+      await writeThirdPartyFramework(path.join(nodeModules, 'not-cypress-ct-qwik'), 'not-cypress-ct-qwik', qwikDependency)
+      await writeThirdPartyFramework(path.join(nodeModules, '@acme', 'not-cypress-ct-qwik'), '@acme/not-cypress-ct-qwik', qwikDependency)
+      await writeThirdPartyFramework(path.join(nodeModules, '@acme', 'cypress-ct-'), '@acme/cypress-ct-', qwikDependency)
+      await writeThirdPartyFramework(path.join(nodeModules, '@acme', 'tools', 'cypress-ct-qwik'), '@acme/tools/cypress-ct-qwik', qwikDependency)
+      await writeThirdPartyFramework(path.join(solidRoot, 'node_modules', 'cypress-ct-qwik'), 'cypress-ct-qwik', qwikDependency)
+
+      const { detected, erroredFrameworks } = await detect(projectRoot)
+
+      expect(erroredFrameworks).toEqual([])
+      expect(detected).toEqual([
         { type: 'cypress-ct-solid-js', path: solidPath },
       ])
     })
