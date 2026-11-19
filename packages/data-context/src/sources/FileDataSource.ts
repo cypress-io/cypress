@@ -10,7 +10,17 @@ import { toPosix } from '../util/file'
 
 const debug = Debug('cypress:data-context:sources:FileDataSource')
 
-export const matchGlobs = async (globs: string | string[], globbyOptions?: GlobbyOptions) => {
+export interface GlobOptions {
+  absolute?: boolean
+  expandDirectories?: boolean
+  ignore?: string[]
+  // Set by getFilesByGlob's retry, which tolerates filesystem errors to return partial results
+  suppressErrors?: boolean
+}
+
+export const matchGlobs = async (globs: string | string[], options?: GlobOptions & { cwd?: string, onlyFiles?: boolean }) => {
+  const globbyOptions: GlobbyOptions | undefined = options
+
   return await globby(globs, globbyOptions)
 }
 
@@ -35,7 +45,7 @@ export class FileDataSource {
     return this.ctx.fs.readFile(path.join(this.ctx.currentProject, relative), 'utf-8')
   }
 
-  async getFilesByGlob (cwd: string, glob: string | string[], globOptions: GlobbyOptions = {}): Promise<string[]> {
+  async getFilesByGlob (cwd: string, glob: string | string[], globOptions: GlobOptions = {}): Promise<string[]> {
     const globs = ([] as string[]).concat(glob).map((globPattern) => {
       const workingDirectoryPrefix = path.join(cwd, path.sep)
 
