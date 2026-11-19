@@ -1774,21 +1774,12 @@ describe('lib/server-base', () => {
   describe('#_errorHandler', () => {
     const err = new Error('boom')
 
-    err.stack = 'Error: boom\n    at handler (/packages/server/lib/server-base.ts:1:1)'
-
-    let log: Mock
-
-    beforeEach(() => {
-      log = vi.spyOn(console, 'log').mockImplementation(() => {}) as unknown as Mock
-    })
-
-    it('logs the stack and answers 500 without a body', () => {
+    it('answers 500 without a body', () => {
       const res = { headersSent: false, sendStatus: vi.fn() }
       const req = { socket: { destroy: vi.fn() } }
 
       _errorHandler(err, req as any, res as any, vi.fn())
 
-      expect(log).toHaveBeenCalledWith(err.stack)
       expect(res.sendStatus).toHaveBeenCalledWith(500)
       expect(req.socket.destroy).not.toHaveBeenCalled()
     })
