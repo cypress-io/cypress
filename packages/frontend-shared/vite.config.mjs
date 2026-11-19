@@ -109,11 +109,9 @@ export const makeConfig = (config = {}, plugins = {}) => {
     base,
     publicDir: path.resolve(__dirname, './src/public'),
 
-    // Production-only build options. A package's own build options are merged
-    // in, but minification is set here last so app and launchpad always ship
-    // the same way. CSS minification follows this setting, and `yarn dev`
-    // passes --minify false on the command line, which overrides it and keeps
-    // the watch builds readable.
+    // Set after the package's options so app and launchpad can't ship with
+    // different minification. Leave cssMinify unset: it follows minify, so the
+    // --minify false that `yarn dev` passes keeps both JS and CSS readable.
     build: {
       ...build,
       minify: 'oxc',
