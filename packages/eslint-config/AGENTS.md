@@ -158,7 +158,7 @@ These workspaces opt in, for their shipped source only:
 - `launcher`: `index.ts` and `lib/**/*.ts`
 - `driver`: `index.ts` and `src/**/*.ts`
 - `data-context`: `src/**/*.ts` and `graphql/**/*.ts`
-- `scaffold-config`, `v8-snapshot-require`: `src/**/*.ts`
+- `scaffold-config`: `src/**/*.ts`
 - `config`: `src/**/*.ts` and `test/**/*.ts`
 - `reporter`: `src/**/*.{ts,tsx}` and `cypress/**/*.ts`
 - `icons`: `index.ts` and `index.mts`
