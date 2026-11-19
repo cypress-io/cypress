@@ -1,10 +1,11 @@
-import { baseConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, mochaConfig, nodeConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   ...nodeConfig,
+  ...mochaConfig.map((block) => ({ ...block, files: ['test/**'] })),
   {
     ignores: [
       // a snapshot script the specs expect mksnapshot to reject

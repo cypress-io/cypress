@@ -1,4 +1,3 @@
-/* eslint-disable mocha/no-exclusive-tests -- dtslint-style samples for Mocha/Cypress API typings */
 // CypressLodashTests
 {
   Cypress._ // $ExpectType LoDashStatic
