@@ -87,19 +87,20 @@ describe('isolated runner', { defaultCommandTimeout: 2000 }, () => {
         cy.get('#page').should('have.text', '1')
       })
 
+      // The callbacks run in the AUT, not the spec, so they record what they
+      // saw on the page rather than in a variable closed over from the test.
       it('cy.visit onBeforeLoad / onLoad get the window', () => {
-        const seen: string[] = []
-
         cy.visit(`${origin}${PAGE}?page=3`, {
           onBeforeLoad (win) {
-            seen.push(`before:${typeof (win as any).document}`)
+            Object.assign(win, { seenByCallbacks: [`before:${typeof win.document}`] })
           },
-          onLoad (win) {
-            seen.push(`load:${typeof (win as any).appState}`)
+          onLoad (win: any) {
+            win.seenByCallbacks.push(`load:${typeof win.appState}`)
+            win.document.getElementById('probe-result').textContent = win.seenByCallbacks.join()
           },
         })
 
-        cy.wrap(seen).should('deep.equal', ['before:object', 'load:object'])
+        cy.get('#probe-result').should('have.text', 'before:object,load:object')
       })
     })
   })
