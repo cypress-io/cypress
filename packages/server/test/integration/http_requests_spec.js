@@ -34,6 +34,7 @@ const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
 const { nonceDirectives, unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
+const { getMetadataHeaderValue } = require('@packages/proxy')
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -1189,7 +1190,7 @@ describe('Routes', () => {
           gzip: true,
           headers: {
             'Cookie': '__cypress.initial=true',
-            'x-cypress-is-aut-frame': 'true',
+            'x-cypress-is-aut-frame': getMetadataHeaderValue(),
           },
         })
         .then((res) => {
@@ -1347,7 +1348,7 @@ describe('Routes', () => {
           encoding: null,
           headers: {
             'Accept-Encoding': 'br',
-            'x-cypress-is-aut-frame': 'true',
+            'x-cypress-is-aut-frame': getMetadataHeaderValue(),
           },
         })
         .then((res) => {
@@ -3491,7 +3492,7 @@ describe('Routes', () => {
             headers: {
               'Cookie': '__cypress.initial=false',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-              'X-Cypress-Is-AUT-Frame': 'true',
+              'X-Cypress-Is-AUT-Frame': getMetadataHeaderValue(),
               'Accept-Encoding': 'identity',
             },
           })
