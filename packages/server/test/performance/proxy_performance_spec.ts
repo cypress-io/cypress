@@ -703,7 +703,7 @@ describe('Proxy Performance', function () {
     // DataContext is still unset here unless we call `setCtx` again.
     return Promise.resolve(clearCtx()).then(() => {
       setCtx(makeDataContext({}))
-      const getFilesByGlob = getCtx().file.getFilesByGlob
+      const getFilesByGlob = (cwd: string, glob: string | string[]) => getCtx().file.getFilesByGlob(cwd, glob)
 
       return CA.create()
       .then((ca) => {

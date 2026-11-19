@@ -49,7 +49,7 @@ describe('Server', () => {
         // get all the config defaults
         // and allow us to override them
         // for each test
-        return setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
+        return setupFullConfigWithDefaults(obj, (cwd, glob) => getCtx().file.getFilesByGlob(cwd, glob))
         .then((cfg) => {
           // use a jar for each test
           // but reset it automatically
