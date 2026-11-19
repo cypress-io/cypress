@@ -5,7 +5,7 @@ const proxyquire = require('proxyquire').noCallThru()
 
 describe('gulpMakePackage', () => {
   context('packageName validation', () => {
-    let validate: (val: string) => boolean
+    let validate: (val: string) => true | string
 
     before(async () => {
       const prompt = sinon.stub().rejects(new Error('stop after prompting'))
@@ -20,20 +20,29 @@ describe('gulpMakePackage', () => {
       validate = prompt.firstCall.args[0].find(({ name }) => name === 'packageName').validate
     })
 
-    it('accepts lowercase, uppercase, mixed case and hyphenated names', () => {
-      expect(validate('my-package')).to.be.true
-      expect(validate('ABC')).to.be.true
-      expect(validate('MyPackage')).to.be.true
+    it('accepts valid package names', () => {
+      for (const name of ['release-notes', 'source-maps', 'http2-proxy', 'es6']) {
+        expect(validate(name), name).to.be.true
+      }
     })
 
-    it('rejects names with no letters or hyphens', () => {
-      expect(validate('')).to.be.false
-      expect(validate('123')).to.be.false
+    it('rejects names that break the naming rule', () => {
+      const invalidNames = [
+        '', 'my package', 'my package!', 'my_package', 'my.package', 'scope/name', '@@@a',
+        'ABC', 'MyPackage', 'my-Package',
+        '1-', '8-ball', '-package', '-',
+        'my-', 'my--package',
+      ]
+
+      for (const name of invalidNames) {
+        expect(validate(name), name).to.be.a('string').that.includes('lowercase letters, digits and single hyphens')
+      }
     })
 
-    it('rejects the punctuation that sits between Z and a in ASCII', () => {
-      expect(validate('_')).to.be.false
-      expect(validate('[]^`')).to.be.false
+    it('rejects the name of an existing package', () => {
+      for (const name of ['server', 'ts', 'v8-snapshot-require']) {
+        expect(validate(name), name).to.equal(`packages/${name} already exists. Choose a different name.`)
+      }
     })
   })
 })

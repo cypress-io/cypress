@@ -1,4 +1,4 @@
-import { baseConfig, jsonConfig, nodeConfig, regexpConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, reactConfig, regexpConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
@@ -7,6 +7,8 @@ export default [
   // Browser code, which has no Node globals and a browser floor
   ...nodeConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), 'client/**'] })),
   ...vitestConfig,
+  // the component tests mount React
+  reactConfig(['cypress/**/*.tsx']),
   {
     files: ['**/*.js', '**/*.ts', '**/*.tsx'],
     languageOptions: {

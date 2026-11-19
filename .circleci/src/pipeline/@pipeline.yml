@@ -9,7 +9,10 @@ chrome-stable-version: &chrome-stable-version "156.0.8078.47"
 chrome-beta-version: &chrome-beta-version "158.0.8127.2"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "156.0.8078.47"
-firefox-stable-version: &firefox-stable-version "154.0"
+# Pin from https://product-details.mozilla.org/1.0/firefox_versions.json (LATEST_FIREFOX_VERSION, LATEST_FIREFOX_RELEASED_DEVEL_VERSION).
+# Mozilla's product-details field name uses "DEVEL"; their public-facing channel is called Beta.
+firefox-stable-version: &firefox-stable-version "160.0"
+firefox-beta-version: &firefox-beta-version "161.0b4"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:24.22.1-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.22.1-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
@@ -40,6 +43,11 @@ parameters:
   # `linux-arm64`, `darwin-x64`, and `darwin-arm64` workflows on develop or release/*.
   # (can also be set manually to run those workflows)
   run-platform-workflows:
+    type: boolean
+    default: false
+  # Set by generate-pipeline-parameters.sh when a bot pushed the commit;
+  # gates every workflow behind approve-bot-pr.
+  bot-approval-required:
     type: boolean
     default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PR
@@ -854,6 +862,13 @@ commands:
             - install-browsers:
                 install-firefox: true
                 firefox-version: << parameters.firefox-version >>
+      - when:
+          condition:
+            equal: [ firefox:dev, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-firefox: true
+                firefox-version: *firefox-beta-version
       - when:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -2715,6 +2730,17 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: firefox
+          guard: << pipeline.parameters.run-driver-tests >>
+
+  # Cypress detects Mozilla Beta as firefox:dev: Beta and Developer Edition
+  # report the same `--version` format
+  driver-integration-tests-firefox-beta:
+    <<: *defaults
+    resource_class: medium+.gen2
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: firefox:dev
           guard: << pipeline.parameters.run-driver-tests >>
 
   # electron is deprecated as a test browser, so it stays on the HTTP/1 MITM

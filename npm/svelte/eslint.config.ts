@@ -12,7 +12,7 @@ export default [
     },
     rules: {
       'no-console': 'off',
-      'mocha/no-global-tests': 'off',
+      'mocha/no-top-level-tests': 'off',
     },
   },
 ]

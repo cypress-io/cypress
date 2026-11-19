@@ -6,6 +6,8 @@ const normalizeStyles = (styles: string) => {
   return styles
   .replace(/\s+/g, '')
   .replace(/['"]/g, '\'')
+  // Firefox 161+ serializes font-family names without quotes
+  .replace(/font-family:'([^']*)'/g, 'font-family:$1')
 }
 
 const addStyles = (styles: string, to: string) => {

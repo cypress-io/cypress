@@ -12,13 +12,13 @@ export * from './jsonConfig'
 
 export * from './nodeConfig'
 
+export * from './reactConfig'
+
 export * from './regexpConfig'
 
 export * from './typeAwareConfig'
 
 export * from './vitestConfig'
-
-export * from './vueTsxOverrides'
 
 import * as globalImport from 'globals'
 

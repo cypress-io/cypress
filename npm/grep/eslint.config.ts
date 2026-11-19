@@ -11,7 +11,7 @@ export default [
     files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
     rules: {
       'no-restricted-syntax': 'off',
-      'mocha/no-global-tests': 'off',
+      'mocha/no-top-level-tests': 'off',
     },
     languageOptions: {
       parserOptions: {
