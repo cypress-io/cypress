@@ -204,6 +204,129 @@ describe('GitDataSource', () => {
     }
   })
 
+  describe('reading the last commit of a committed spec', () => {
+    const HOUR = 60 * 60 * 1000
+    const DAY = 24 * HOUR
+
+    const commitSpec = async (filename: string, { author, ageMs, subject }: { author: string, ageMs: number, subject: string }) => {
+      const spec = toPosix(path.join(e2eFolder, filename))
+      const date = new Date(Date.now() - ageMs).toISOString()
+
+      await fs.createFile(spec)
+      await git.add([spec])
+      await git.commit(subject, [spec], { '--author': `${author} <${author.toLowerCase().replace(' ', '.')}@example.com>`, '--date': date })
+
+      const [timestamp, shortHash] = (await git.raw(['log', '-1', '--pretty=format:%ci|%h', '--', spec])).split('|')
+
+      return { spec, timestamp, shortHash }
+    }
+
+    const loadGitInfo = async (specs: string[]) => {
+      const dfd = Promise.withResolvers()
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: jest.fn(),
+        onGitInfoChange: dfd.resolve,
+        onError: jest.fn(),
+      })
+
+      gitInfo.setSpecs(specs)
+
+      await dfd.promise
+    }
+
+    it('reads the timestamp, age, author, short hash and subject', async () => {
+      const { spec, timestamp, shortHash } = await commitSpec('typical.cy.js', { author: 'Lachlan Miller', ageMs: 2 * DAY + HOUR, subject: 'add typical spec' })
+
+      await loadGitInfo([spec])
+
+      expect(timestamp).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+]\d{4}$/)
+      expect(gitInfo.gitInfoFor(spec)).toEqual({
+        lastModifiedTimestamp: timestamp,
+        lastModifiedHumanReadable: '2 days ago',
+        author: 'Lachlan Miller',
+        statusType: 'unmodified',
+        subject: 'add typical spec',
+        shortHash,
+      })
+    })
+
+    it('words each age the way git does', async () => {
+      const ages = [
+        { filename: 'seconds.cy.js', ageMs: 5 * 1000, age: /^\d+ seconds ago$/ },
+        { filename: 'minute.cy.js', ageMs: 75 * 1000, age: /^\d+ seconds ago$/ },
+        { filename: 'minutes.cy.js', ageMs: 10 * 60 * 1000, age: /^10 minutes ago$/ },
+        { filename: 'hours.cy.js', ageMs: 4 * HOUR, age: /^4 hours ago$/ },
+        { filename: 'day.cy.js', ageMs: DAY + 12 * HOUR, age: /^2 days ago$/ },
+        { filename: 'weeks.cy.js', ageMs: 21 * DAY + HOUR, age: /^3 weeks ago$/ },
+        { filename: 'months.cy.js', ageMs: 120 * DAY, age: /^4 months ago$/ },
+        { filename: 'year.cy.js', ageMs: 365 * DAY + HOUR, age: /^1 year ago$/ },
+        { filename: 'year-and-months.cy.js', ageMs: 426 * DAY, age: /^1 year, 2 months ago$/ },
+        { filename: 'years.cy.js', ageMs: 6 * 365 * DAY, age: /^6 years ago$/ },
+      ]
+
+      const commits = []
+
+      for (const { filename, ageMs } of ages) {
+        commits.push(await commitSpec(filename, { author: 'Test User', ageMs, subject: `add ${filename}` }))
+      }
+
+      await loadGitInfo(commits.map(({ spec }) => spec))
+
+      ages.forEach(({ filename, age }, i) => {
+        const info = gitInfo.gitInfoFor(commits[i].spec)
+
+        expect(info?.lastModifiedHumanReadable).toMatch(age)
+        expect(info?.author).toEqual('Test User')
+        expect(info?.subject).toEqual(`add ${filename}`)
+      })
+    })
+
+    it('reads a commit dated after the local clock, which git words as "in the future"', async () => {
+      const { spec, timestamp, shortHash } = await commitSpec('future.cy.js', { author: 'Priya Natarajan', ageMs: -3 * HOUR - 60 * 1000, subject: 'add spec from a skewed clock' })
+
+      expect(await git.raw(['log', '-1', '--pretty=format:%ar', '--', spec])).toEqual('in the future')
+
+      await loadGitInfo([spec])
+
+      expect(gitInfo.gitInfoFor(spec)).toEqual({
+        lastModifiedTimestamp: timestamp,
+        lastModifiedHumanReadable: 'in 3 hours',
+        author: 'Priya Natarajan',
+        statusType: 'unmodified',
+        subject: 'add spec from a skewed clock',
+        shortHash,
+      })
+    })
+
+    it('keeps an author whose first name ends in "ago" out of the age', async () => {
+      const { spec } = await commitSpec('iago.cy.js', { author: 'Iago Smith', ageMs: 2 * DAY + HOUR, subject: 'add iago spec' })
+
+      await loadGitInfo([spec])
+
+      expect(gitInfo.gitInfoFor(spec)).toMatchObject({
+        lastModifiedHumanReadable: '2 days ago',
+        author: 'Iago Smith',
+        subject: 'add iago spec',
+      })
+    })
+
+    it('reads the subject up to the first "|"', async () => {
+      const { spec, shortHash } = await commitSpec('pipe.cy.js', { author: 'Test User', ageMs: 2 * DAY + HOUR, subject: 'fix a|b ago c|d' })
+
+      await loadGitInfo([spec])
+
+      expect(gitInfo.gitInfoFor(spec)).toMatchObject({
+        lastModifiedHumanReadable: '2 days ago',
+        author: 'Test User',
+        shortHash,
+        subject: 'fix a',
+      })
+    })
+  })
+
   it(`watches switching branches on ${os.platform()}`, async () => {
     const stub = jest.fn()
     const dfd = Promise.withResolvers()
