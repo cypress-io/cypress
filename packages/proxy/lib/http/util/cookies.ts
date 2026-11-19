@@ -116,6 +116,18 @@ export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[
   return applicableCookieJarCookies.concat(requestCookiesThatNeedToBeAdded).map((cookie) => cookie.cookieString()).join('; ')
 }
 
+// `session_id=8f2c; __cypress.unload=true` becomes `session_id=8f2c`, and a
+// header holding only Cypress's cookies becomes `undefined`.
+export const stripCypressCookies = (cookieHeader: string | undefined): string | undefined => {
+  if (!cookieHeader?.includes('__cypress.')) {
+    return cookieHeader
+  }
+
+  const appCookies = cookieHeader.split(/;\s*/).filter((pair) => pair && !pair.startsWith('__cypress.'))
+
+  return appCookies.length ? appCookies.join('; ') : undefined
+}
+
 // sameSiteContext is a concept for tough-cookie's cookie jar that helps it
 // simulate what a browser would do when determining whether or not it should
 // be set from a response or a attached to a response. it shouldn't be confused

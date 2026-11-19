@@ -1,29 +1,34 @@
-// These tests run in order: the first leaves `__cypress.unload` on its origin
-// for the second to find.
-describe('Cypress cookies left on a former top origin', { browser: '!webkit', testIsolation: true }, () => {
+describe('Cypress cookies on the application\'s origin', { browser: '!webkit' }, () => {
   const originUrl = 'https://www.foobar.com:3502'
 
-  it('keeps the unload cookie when top leaves the origin', () => {
-    cy.visit(`${originUrl}/fixtures/generic.html`)
-
-    // Stops the runner clearing the cookie it set on `beforeunload`
-    cy.then(() => {
-      for (const event of ['unload', 'pagehide']) {
-        window.top!.addEventListener(event, (e) => e.stopImmediatePropagation(), true)
-      }
-    })
-  })
-
-  it('does not send the unload cookie with the app\'s requests', () => {
-    cy.intercept(`${originUrl}/test-request`).as('req')
+  const fetchWithCookies = (cookies: string[]) => {
+    cy.intercept(`${originUrl}/dump-headers`).as('req')
 
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cookie-https"]').click()
 
-    cy.origin(originUrl, { args: originUrl }, (originUrl) => {
+    return cy.origin(originUrl, { args: { originUrl, cookies } }, ({ originUrl, cookies }) => {
       cy.window().then((win) => {
-        return cy.wrap(win.fetch(`${originUrl}/test-request`))
+        cookies.forEach((cookie) => win.document.cookie = cookie)
+
+        expect(win.document.cookie).to.include('__cypress.unload=true')
+
+        return cy.wrap(win.fetch(`${originUrl}/dump-headers`).then((res) => res.text()))
       })
+    })
+  }
+
+  it('sends only the application\'s cookies with its requests', () => {
+    fetchWithCookies(['__cypress.unload=true', 'session_id=8f2c1e9a40b7']).then((headersReceived) => {
+      expect(headersReceived).to.include('"cookie":"session_id=8f2c1e9a40b7"')
+    })
+
+    cy.wait('@req').its('request.headers.cookie').should('eq', 'session_id=8f2c1e9a40b7')
+  })
+
+  it('sends no cookies when the application has none', () => {
+    fetchWithCookies(['__cypress.unload=true']).then((headersReceived) => {
+      expect(headersReceived).not.to.include('"cookie"')
     })
 
     cy.wait('@req').its('request.headers.cookie').should('be.undefined')
