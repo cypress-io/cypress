@@ -7,6 +7,7 @@
 
 **Performance:**
 
+- Cypress now uses less memory in `cypress open` and `cypress run`. Each Cypress process now stores the code it preloads at startup more compactly. Fixed in [#35420](https://github.com/cypress-io/cypress/pull/35420).
 - `cypress run --record` on Linux and macOS now starts recording sooner when the processes that launched Cypress have very large environments, as is common in CI. Fixed in [#35372](https://github.com/cypress-io/cypress/pull/35372).
 - When your config file or a plugin throws an error whose stack trace contains a very long line, Cypress now shows the error and its code frame right away. Previously, finding the error's location in such a line could stop Cypress from responding for seconds or minutes. Fixed in [#35368](https://github.com/cypress-io/cypress/pull/35368).
 - An assertion on a long string no longer makes the browser stop responding while Cypress formats the assertion for the Command Log. This happened when the string held many `![` sequences or long runs of whitespace, such as a large block of Markdown or preformatted text. Fixed in [#35388](https://github.com/cypress-io/cypress/pull/35388).
