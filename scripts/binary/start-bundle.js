@@ -135,7 +135,6 @@ const createStartCypressBundle = async (buildAppDir) => {
     minify: true,
     // error stacks and code that reads `constructor.name` need the original names
     keepNames: true,
-    // one character above U+00FF makes V8 store the whole source as two-byte; regex literals with them are patched
     legalComments: 'external',
     external: ['electron'],
     banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
@@ -170,7 +169,6 @@ const createServerEntryPointBundle = async (buildAppDir) => {
       platform: 'node',
       metafile: true,
       absWorkingDir: unixBuildAppDir,
-      // drops comments, which can hold characters above U+00FF
       minify: true,
       keepNames: true,
       legalComments: 'external',
@@ -205,7 +203,8 @@ const createStartBundleCodeCache = async () => {
   const getAppEnv = () => {
     const env = { ...process.env, CYPRESS_INTERNAL_WRITE_START_BUNDLE_CACHE: '1' }
 
-    // V8 rejects a code cache made under different flags, so NODE_OPTIONS must not leak into the app
+    // only for this build-time run: the shipped cache is made without the build machine's NODE_OPTIONS,
+    // and the user's own NODE_OPTIONS still apply when they run Cypress
     delete env.NODE_OPTIONS
     delete env.ELECTRON_RUN_AS_NODE
 
