@@ -238,7 +238,7 @@ describe('GitDataSource', () => {
     }
 
     it('reads the timestamp, age, author, short hash and subject', async () => {
-      const { spec, timestamp, shortHash } = await commitSpec('typical.cy.js', { author: 'Lachlan Miller', ageMs: 2 * DAY + HOUR, subject: 'add typical spec' })
+      const { spec, timestamp, shortHash } = await commitSpec('typical.cy.js', { author: 'Marisol Okafor', ageMs: 2 * DAY + HOUR, subject: 'add typical spec' })
 
       await loadGitInfo([spec])
 
@@ -246,7 +246,7 @@ describe('GitDataSource', () => {
       expect(gitInfo.gitInfoFor(spec)).toEqual({
         lastModifiedTimestamp: timestamp,
         lastModifiedHumanReadable: '2 days ago',
-        author: 'Lachlan Miller',
+        author: 'Marisol Okafor',
         statusType: 'unmodified',
         subject: 'add typical spec',
         shortHash,

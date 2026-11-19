@@ -18,7 +18,7 @@ dayjs.extend(relativeTime)
 // arguments, never through a shell. SimpleGit caps how many `git log` calls run at once.
 
 // matches <committer date> <author date as unix seconds> <author>|<short hash>|<subject>
-// eg '2021-09-14 13:43:19 +1000 1631504599 Lachlan Miller|1a2b3c4|add spec'
+// eg '2021-09-14 13:43:19 +1000 1631504599 Marisol Okafor|1a2b3c4|add spec'
 // The age is computed from the unix time rather than read from `%ar`, which git
 // translates in non-English locales and replaces with `in the future` for dates past the clock.
 const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+]\d{4})\s(\d+)\s([^|]*)\|([^|]*)\|([^|]*)/
