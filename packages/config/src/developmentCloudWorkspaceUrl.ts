@@ -49,5 +49,5 @@ export function resolveDevelopmentCloudWorkspaceUrl (url: string, environment: s
   }
 
   // Keep the input's exact URL spelling; URL serialization can add a trailing slash.
-  return url.replace(/^(https?:\/\/localhost)(?::\d+)?(?=\/|$|\?|#)/i, `$1:${port}`)
+  return url.replace(/^(https?:\/\/localhost)(?::\d+)?(?=\/|$|[?#])/i, `$1:${port}`)
 }

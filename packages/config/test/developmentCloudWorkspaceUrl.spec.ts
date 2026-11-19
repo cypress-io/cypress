@@ -58,6 +58,7 @@ describe('resolveDevelopmentCloudWorkspaceUrl', () => {
 
     expect(resolveDevelopmentCloudWorkspaceUrl('http://localhost:3000/path/?next=%2Ffoo#section', 'development', env)).toBe('http://localhost:43000/path/?next=%2Ffoo#section')
     expect(resolveDevelopmentCloudWorkspaceUrl('http://localhost:3000?next=%2Ffoo', 'development', env)).toBe('http://localhost:43000?next=%2Ffoo')
+    expect(resolveDevelopmentCloudWorkspaceUrl('http://localhost:3000#section', 'development', env)).toBe('http://localhost:43000#section')
   })
 
   it('rejects offsets that exceed the TCP port range', () => {
