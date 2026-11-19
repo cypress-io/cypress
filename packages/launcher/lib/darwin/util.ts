@@ -29,16 +29,18 @@ function parsePlist (p: string, property: string): Promise<string> {
   .catch(failed) // to make TS compiler happy
 }
 
-/** uses mdfind to find app using Ma app id like 'com.google.Chrome.canary' */
-function mdfind (id: string): Promise<string> {
-  const cmd = `mdfind 'kMDItemCFBundleIdentifier=="${id}"' | head -1`
+/** uses mdfind to find apps using a Mac app id like 'com.google.Chrome.canary' */
+function mdfind (id: string): Promise<string[]> {
+  // pass the query as an argument: execa does not use a shell, so a piped
+  // command string would be treated as a program name and never run
+  const args = [`kMDItemCFBundleIdentifier=="${id}"`]
 
-  debugVerbose('looking for bundle id %s using command: %s', id, cmd)
+  debugVerbose('looking for bundle id %s using command: mdfind %o', id, args)
 
-  const logFound = (str: string) => {
-    debugVerbose('found %s at %s', id, str)
+  const logFound = (paths: string[]) => {
+    debugVerbose('found %s at %o', id, paths)
 
-    return str
+    return paths
   }
 
   const failedToFind = () => {
@@ -46,14 +48,18 @@ function mdfind (id: string): Promise<string> {
     throw notInstalledErr(id)
   }
 
-  return utils.execa(cmd)
+  return utils.execa('mdfind', args)
   .then((val) => {
-    return val.stdout
-  })
-  .then((val) => {
-    logFound(val)
+    const paths = val.stdout
+    .split('\n')
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0)
 
-    return val
+    if (paths.length === 0) {
+      return failedToFind()
+    }
+
+    return logFound(paths)
   })
   .catch(failedToFind)
 }
@@ -94,7 +100,31 @@ export function findApp ({ appName, executable, bundleId, versionProperty }: Fin
   }
 
   const tryMdFind = () => {
-    return mdfind(bundleId).then(findVersion)
+    return mdfind(bundleId)
+    .then((paths) => {
+      // prefer applications installed directly in /Applications, then keep the
+      // remaining results in the order mdfind returned them
+      const sortedPaths = [
+        ...paths.filter((p) => path.dirname(p) === '/Applications'),
+        ...paths.filter((p) => path.dirname(p) !== '/Applications'),
+      ]
+
+      const tryNextPath = (index: number): Promise<AppInfo> => {
+        if (index >= sortedPaths.length) {
+          debugVerbose('could not find %s in any of %o', bundleId, sortedPaths)
+
+          return Promise.reject(notInstalledErr(bundleId))
+        }
+
+        return findVersion(sortedPaths[index]).catch((err) => {
+          debugVerbose('could not get plist for %s at %s, trying next result %o', bundleId, sortedPaths[index], err)
+
+          return tryNextPath(index + 1)
+        })
+      }
+
+      return tryNextPath(0)
+    })
   }
 
   const tryFullApplicationFind = () => {
