@@ -190,6 +190,74 @@ describe('detectThirdPartyCTFrameworks', () => {
     })
   })
 
+  describe('project path with glob special characters', () => {
+    let tempDir: string
+    let projectRoot: string
+
+    async function writeThirdPartyFramework (packageName: string, frameworkName: string) {
+      const packageRoot = path.join(projectRoot, 'node_modules', packageName)
+      const dependency = {
+        type: frameworkName.toLowerCase(),
+        name: frameworkName,
+        package: frameworkName.toLowerCase(),
+        installer: frameworkName.toLowerCase(),
+        description: `${frameworkName} components for Jordan Rivera's storefront`,
+        minVersion: '^1.0.0',
+      }
+
+      await fs.outputJson(path.join(packageRoot, 'package.json'), {
+        name: packageName,
+        version: '1.4.2',
+        main: 'definition.cjs',
+      })
+
+      await fs.outputFile(path.join(packageRoot, 'definition.cjs'), `
+        const dependency = ${JSON.stringify(dependency)}
+
+        module.exports = {
+          type: '${packageName}',
+          name: '${frameworkName}',
+          supportedBundlers: ['vite'],
+          detectors: [dependency],
+          dependencies: () => [dependency],
+        }
+      `)
+
+      return path.join(packageRoot, 'definition.cjs')
+    }
+
+    beforeEach(async () => {
+      tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ct-detect-third-party-'))
+      projectRoot = path.join(tempDir, `Jordan Rivera's app (v2) [beta]`)
+
+      await fs.mkdirp(path.join(projectRoot, '.git'))
+      await fs.writeJson(path.join(projectRoot, 'package.json'), { name: 'jordan-rivera-storefront' })
+    })
+
+    afterEach(async () => {
+      await fs.rm(tempDir, { recursive: true, force: true })
+    })
+
+    it('detects global and namespaced third party frameworks', async () => {
+      const solidPath = await writeThirdPartyFramework('cypress-ct-solid-js', 'Solid')
+      const qwikPath = await writeThirdPartyFramework('@acme/cypress-ct-qwik', 'Qwik')
+
+      const { frameworks, erroredFrameworks } = await detectThirdPartyCTFrameworks(projectRoot)
+
+      const detected = frameworks
+      .map((framework) => ({ type: framework.type, path: (framework as { path?: string }).path }))
+      .sort((a, b) => a.type.localeCompare(b.type))
+
+      expect(erroredFrameworks).toEqual([])
+      expect(detected).toEqual([
+        { type: '@acme/cypress-ct-qwik', path: qwikPath },
+        { type: 'cypress-ct-solid-js', path: solidPath },
+      ])
+
+      expect(detected.every(({ path: modulePath }) => modulePath && path.isAbsolute(modulePath))).toBe(true)
+    })
+  })
+
   it('validates third party module', () => {
     expect(() => validateThirdPartyModule(solidJs)).not.toThrow()
 
