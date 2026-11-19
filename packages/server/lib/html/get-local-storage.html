@@ -1,27 +1,32 @@
 <html>
   <body>
     <script>
-      // gathers and sends localStorage and sessionStorage via postMessage to the Cypress frame
-      // detect existence of local/session storage with JSON.stringify(...).length since localStorage.length may not be accurate
-      const _localStorageStr = JSON.stringify(window.localStorage)
-      const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
-      const _sessionStorageStr = JSON.stringify(window.sessionStorage)
-      const _sessionStorage = _sessionStorageStr.length > 2 && JSON.parse(JSON.stringify(window.sessionStorage))
+      // the origin of the embedding document, when it is the runner's; the data goes to nothing else
+      const parentOrigin = {{parentOrigin | safe}}
 
-      const value = {}
+      if (parentOrigin) {
+        // gathers and sends localStorage and sessionStorage via postMessage to the Cypress frame
+        // detect existence of local/session storage with JSON.stringify(...).length since localStorage.length may not be accurate
+        const _localStorageStr = JSON.stringify(window.localStorage)
+        const _localStorage = _localStorageStr.length > 2 && JSON.parse(_localStorageStr)
+        const _sessionStorageStr = JSON.stringify(window.sessionStorage)
+        const _sessionStorage = _sessionStorageStr.length > 2 && JSON.parse(JSON.stringify(window.sessionStorage))
 
-      if (_localStorage) {
-        value.localStorage = _localStorage
+        const value = {}
+
+        if (_localStorage) {
+          value.localStorage = _localStorage
+        }
+
+        if (_sessionStorage) {
+          value.sessionStorage = _sessionStorage
+        }
+
+        window.parent.postMessage({
+          value,
+          type: 'localStorage',
+        }, parentOrigin)
       }
-
-      if (_sessionStorage) {
-        value.sessionStorage = _sessionStorage
-      }
-
-      window.parent.postMessage({
-        value,
-        type: 'localStorage',
-      }, '*')
     </script>
   </body>
 </html>

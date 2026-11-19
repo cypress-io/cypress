@@ -7,6 +7,7 @@
 
 **Performance:**
 
+- Cypress now uses less memory in `cypress open` and `cypress run`. Each Cypress process now stores the code it preloads at startup more compactly. Fixed in [#35420](https://github.com/cypress-io/cypress/pull/35420).
 - `cypress run --record` on Linux and macOS now starts recording sooner when the processes that launched Cypress have very large environments, as is common in CI. Fixed in [#35372](https://github.com/cypress-io/cypress/pull/35372).
 - When your config file or a plugin throws an error whose stack trace contains a very long line, Cypress now shows the error and its code frame right away. Previously, finding the error's location in such a line could stop Cypress from responding for seconds or minutes. Fixed in [#35368](https://github.com/cypress-io/cypress/pull/35368).
 - An assertion on a long string no longer makes the browser stop responding while Cypress formats the assertion for the Command Log. This happened when the string held many `![` sequences or long runs of whitespace, such as a large block of Markdown or preformatted text. Fixed in [#35388](https://github.com/cypress-io/cypress/pull/35388).
@@ -64,6 +65,8 @@
 - Upgraded `ws` from `8.22.1` to `8.23.0`. Addressed in [#35040](https://github.com/cypress-io/cypress/pull/35040).
 - Upgraded `socket.io-parser` from `4.2.6` to `4.2.7` to address a [Zero-attachment Memory Exhaustion](https://github.com/advisories/GHSA-2m8v-j782-fhvr) (CVE-2026-69185) vulnerability reported in security scans. Addresses [#35263](https://github.com/cypress-io/cypress/issues/35263).
 - Removed the unused `@ffprobe-installer/ffprobe` dependency, which bundled an `ffprobe` executable, making the Cypress binary smaller to download and install. Addressed in [#35423](https://github.com/cypress-io/cypress/pull/35423).
+- Upgraded the transitive `@puppeteer/browsers` dependency of `@wdio/utils` from `2.4.0` to `3.2.7`, which removes `extract-zip`, `basic-ftp` and `ip-address` from the binary, to address [Path Traversal](https://github.com/advisories/GHSA-7pqw-9j4j-h8q3) (CVE-2026-19693) and [Path Traversal](https://github.com/advisories/GHSA-jmr9-qjv8-65gv) (CVE-2026-56876) vulnerabilities in `extract-zip`, a [ReDoS](https://github.com/advisories/GHSA-c475-qrg2-pj4r) (CVE-2026-102990) vulnerability in `basic-ftp`, and [Uncontrolled Resource Consumption](https://github.com/advisories/GHSA-h3mg-xc3c-68pw) (CVE-2026-101911), [Incorrect Comparison](https://github.com/advisories/GHSA-j6r3-76f7-8jcv) (CVE-2026-101912), [Server-Side Request Forgery](https://github.com/advisories/GHSA-mwp4-54f8-5fhr) (CVE-2026-69192), [Server-Side Request Forgery](https://github.com/advisories/GHSA-rpw4-54j3-4h4q) (CVE-2026-101913), [ReDoS](https://github.com/advisories/GHSA-rxp7-6hxx-x8q5) (CVE-2026-111997) and [Cross-site Scripting](https://github.com/advisories/GHSA-v2v4-37r5-5v8g) (CVE-2026-42338) vulnerabilities in `ip-address` reported in security scans. Addresses [#35273](https://github.com/cypress-io/cypress/issues/35273).
+- Upgraded the transitive `deepmerge-ts` dependency of `webdriver`, `@wdio/config` and `@wdio/utils` from `7.1.0` to `8.0.2` to address an [Uncontrolled Recursion](https://github.com/advisories/GHSA-ggr8-5vv4-36mx) (CVE-2026-40345) vulnerability reported in security scans. Addresses [#35273](https://github.com/cypress-io/cypress/issues/35273).
 
 ## 16.3.0
 
