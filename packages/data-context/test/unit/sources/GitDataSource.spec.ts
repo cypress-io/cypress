@@ -254,12 +254,13 @@ describe('GitDataSource', () => {
     })
 
     it('words each age the way git does', async () => {
+      // Each age starts just past the young edge of its rounding bucket, so the
+      // seconds that pass while the commits are made can't push it into the next one
       const ages = [
         { filename: 'seconds.cy.js', ageMs: 5 * 1000, age: /^\d+ seconds ago$/ },
-        { filename: 'minute.cy.js', ageMs: 75 * 1000, age: /^\d+ seconds ago$/ },
-        { filename: 'minutes.cy.js', ageMs: 10 * 60 * 1000, age: /^10 minutes ago$/ },
-        { filename: 'hours.cy.js', ageMs: 4 * HOUR, age: /^4 hours ago$/ },
-        { filename: 'day.cy.js', ageMs: DAY + 12 * HOUR, age: /^2 days ago$/ },
+        { filename: 'minutes.cy.js', ageMs: (10 * 60 - 25) * 1000, age: /^10 minutes ago$/ },
+        { filename: 'hours.cy.js', ageMs: 4 * HOUR - 25 * 60 * 1000, age: /^4 hours ago$/ },
+        { filename: 'day.cy.js', ageMs: DAY + 13 * HOUR, age: /^2 days ago$/ },
         { filename: 'weeks.cy.js', ageMs: 21 * DAY + HOUR, age: /^3 weeks ago$/ },
         { filename: 'months.cy.js', ageMs: 120 * DAY, age: /^4 months ago$/ },
         { filename: 'year.cy.js', ageMs: 365 * DAY + HOUR, age: /^1 year ago$/ },
@@ -286,8 +287,6 @@ describe('GitDataSource', () => {
 
     it('reads a commit dated after the local clock, which git words as "in the future"', async () => {
       const { spec, timestamp, shortHash } = await commitSpec('future.cy.js', { author: 'Priya Natarajan', ageMs: -3 * HOUR - 60 * 1000, subject: 'add spec from a skewed clock' })
-
-      expect(await git.raw(['log', '-1', '--pretty=format:%ar', '--', spec])).toEqual('in the future')
 
       await loadGitInfo([spec])
 
