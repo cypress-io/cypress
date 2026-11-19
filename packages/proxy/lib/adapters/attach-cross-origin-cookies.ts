@@ -11,14 +11,16 @@ import type { RequestInterceptionMiddlewareCtx } from './types'
 export function attachCrossOriginCookies (mw: RequestInterceptionMiddlewareCtx): void {
   const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: mw.reqMiddlewareSpan, isVerbose })
 
-  const doesTopNeedSimulation = doesTopNeedToBeSimulated(mw) && !doesBrowserSendAllCookies(mw)
+  const doesTopNeedSimulation = doesTopNeedToBeSimulated(mw)
+  const doesBrowserSendAll = doesTopNeedSimulation && doesBrowserSendAllCookies(mw)
 
   span?.setAttributes({
     doesTopNeedToBeSimulated: doesTopNeedSimulation,
+    doesBrowserSendAllCookies: doesBrowserSendAll,
     resourceType: mw.req.resourceType,
   })
 
-  if (!doesTopNeedSimulation) {
+  if (!doesTopNeedSimulation || doesBrowserSendAll) {
     span?.end()
 
     return mw.next()

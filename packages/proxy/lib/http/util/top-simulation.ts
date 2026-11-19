@@ -13,25 +13,22 @@ export const doesTopNeedToBeSimulated = <T>(ctx: HttpMiddlewareThis<T>): boolean
   return !ctx.remoteStates.isPrimarySuperDomainOrigin(currentAUTUrl) || ctx.req.isAUTFrame
 }
 
-const sameSiteFetchSites = ['same-origin', 'same-site', 'none']
+const sameSiteFetchSites = ['same-origin', 'same-site']
 
-// A navigation started from another origin, or redirected through one, can be cross-site
-// to the browser even when it ends on the primary origin, and so can a reload of that page.
-// Firefox withholds SameSite cookies from those, which Sec-Fetch-Site reports. Chromium
-// does not, and its header is absent from natively intercepted requests.
-const isSameSiteNavigation = <T>(ctx: HttpMiddlewareThis<T>): boolean => {
-  const secFetchSite = ctx.req.headers['sec-fetch-site']
-
-  if (typeof secFetchSite === 'string') {
-    return sameSiteFetchSites.includes(secFetchSite)
+// Firefox withholds SameSite cookies from a navigation another origin started or that was
+// redirected through one, and says so in Sec-Fetch-Site. Chromium sends them regardless.
+const doesBrowserWithholdSameSiteCookies = <T>(ctx: HttpMiddlewareThis<T>): boolean => {
+  if (ctx.getCurrentBrowser()?.family === 'chromium') {
+    return false
   }
 
-  return ctx.getCurrentBrowser()?.family === 'chromium'
+  const secFetchSite = ctx.req.headers['sec-fetch-site']
+
+  return typeof secFetchSite !== 'string' || !sameSiteFetchSites.includes(secFetchSite)
 }
 
-// When the AUT frame makes a same-site navigation within the primary origin, the browser
-// sends every cookie it holds. The jar never sees a native `document.cookie` write, so
-// its copy can be stale.
+// The jar never sees a native `document.cookie` write, so its copy can be stale. The
+// browser's own Cookie header is complete for an AUT frame navigation within the primary origin.
 export const doesBrowserSendAllCookies = <T>(ctx: HttpMiddlewareThis<T>): boolean => {
   const currentAUTUrl = ctx.getAUTUrl()
 
@@ -39,5 +36,5 @@ export const doesBrowserSendAllCookies = <T>(ctx: HttpMiddlewareThis<T>): boolea
     && ctx.req.isAUTFrame
     && ctx.remoteStates.isPrimarySuperDomainOrigin(currentAUTUrl)
     && ctx.remoteStates.isPrimarySuperDomainOrigin(ctx.req.proxiedUrl)
-    && isSameSiteNavigation(ctx)
+    && !doesBrowserWithholdSameSiteCookies(ctx)
 }

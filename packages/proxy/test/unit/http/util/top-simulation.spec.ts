@@ -66,7 +66,7 @@ describe('.doesBrowserSendAllCookies', () => {
   const getCtx = ({ autUrl, requestUrl, isAUTFrame = true, secFetchSite = 'same-origin', browserFamily = 'firefox' }: { autUrl?: string, requestUrl: string, isAUTFrame?: boolean, secFetchSite?: string, browserFamily?: string }): HttpMiddlewareThis<any> => {
     return {
       getAUTUrl: vi.fn().mockReturnValue(autUrl),
-      getCurrentBrowser: vi.fn().mockReturnValue({ family: browserFamily }),
+      getCurrentBrowser: vi.fn().mockReturnValue(browserFamily ? { family: browserFamily } : undefined),
       req: {
         isAUTFrame,
         proxiedUrl: requestUrl,
@@ -78,20 +78,24 @@ describe('.doesBrowserSendAllCookies', () => {
     }
   }
 
-  it.each(['same-origin', 'same-site', 'none'])('returns true when the AUT frame navigates within the primary origin and sec-fetch-site is %s', (secFetchSite) => {
+  it.each(['same-origin', 'same-site'])('returns true when the AUT frame navigates within the primary origin and sec-fetch-site is %s', (secFetchSite) => {
     expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/settings', secFetchSite }))).toBe(true)
   })
 
-  it('returns false when the browser reports the navigation as cross-site', () => {
-    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/callback', secFetchSite: 'cross-site' }))).toBe(false)
-  })
-
-  it('returns true when a Chromium browser does not send sec-fetch-site', () => {
-    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/settings', secFetchSite: '', browserFamily: 'chromium' }))).toBe(true)
+  it.each(['cross-site', 'none', 'same-origin, cross-site'])('returns false when sec-fetch-site is %s', (secFetchSite) => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/callback', secFetchSite }))).toBe(false)
   })
 
   it('returns false when a browser other than Chromium does not send sec-fetch-site', () => {
     expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/settings', secFetchSite: '' }))).toBe(false)
+  })
+
+  it('returns false when there is no current browser and no sec-fetch-site', () => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/settings', secFetchSite: '', browserFamily: '' }))).toBe(false)
+  })
+
+  it.each(['', 'cross-site'])('returns true in a Chromium browser when sec-fetch-site is "%s"', (secFetchSite) => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/callback', secFetchSite, browserFamily: 'chromium' }))).toBe(true)
   })
 
   it('returns false when the AUT frame navigates to another origin', () => {

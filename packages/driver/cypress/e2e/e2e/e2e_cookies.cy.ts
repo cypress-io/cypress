@@ -58,6 +58,18 @@ describe('e2e cookies spec', () => {
         })
       })
 
+      // Firefox withholds SameSite cookies from this navigation, so the server-side jar,
+      // which never saw the deletion, still supplies them
+      it('does not send a cookie the page deleted before the redirect', { browser: { family: 'chromium' } }, () => {
+        cy.window().then((win) => {
+          win.document.cookie = 'session_token=; Max-Age=0; Path=/'
+          redirectThroughAnotherOrigin(win)
+        })
+
+        cy.location('search').should('eq', '?redirected=true')
+        cy.contains('request headers').should('not.contain', 'session_token')
+      })
+
       it('does not send a cookie the page deleted on a later navigation', () => {
         cy.window().then(redirectThroughAnotherOrigin)
         cy.location('search').should('eq', '?redirected=true')
