@@ -11,6 +11,11 @@ describe('lib/util/human_time', () => {
       expect(humanTime.long(humanInterval('1 minute'))).toBe('1 minute, 0 seconds')
     })
 
+    it('includes full days in minutes', () => {
+      expect(humanTime.long(humanInterval('24 hours'))).toBe('1440 minutes, 0 seconds')
+      expect(humanTime.long(humanInterval('26 hours and 5 seconds'))).toBe('1560 minutes, 5 seconds')
+    })
+
     it('outputs seconds', () => {
       expect(humanTime.long(humanInterval('59 seconds'))).toBe('59 seconds')
 
@@ -24,6 +29,11 @@ describe('lib/util/human_time', () => {
       expect(humanTime.short(humanInterval('65 minutes'))).toBe('65m')
 
       expect(humanTime.short(humanInterval('1 minute'))).toBe('1m')
+    })
+
+    it('includes full days in mins', () => {
+      expect(humanTime.short(humanInterval('24 hours'))).toBe('1440m')
+      expect(humanTime.short(humanInterval('25 hours and 1 minute and 1 second'))).toBe('1501m, 1s')
     })
 
     it('outputs seconds', () => {
