@@ -943,6 +943,15 @@ describe('visual error templates', () => {
         electron: ['electron', 2345, makeErr()],
       }
     },
+    CDP_BROWSER_EXITED_BEFORE_CONNECT: () => {
+      const err = makeErr()
+
+      return {
+        default: ['Chrome', 1, null, err],
+        profileInUse: ['Chrome', 21, null, err],
+        signal: ['Chrome', null, 'SIGKILL', err],
+      }
+    },
     FIREFOX_COULD_NOT_CONNECT: () => {
       const err = makeErr()
 
