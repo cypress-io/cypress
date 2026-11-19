@@ -103,13 +103,20 @@ export const makeConfig = (config = {}, plugins = {}) => {
   // Don't overwrite plugins
   delete config.plugins
 
+  const { build, ...packageConfig } = config
+
   return {
     base,
     publicDir: path.resolve(__dirname, './src/public'),
 
-    // Production-only build options
+    // Production-only build options. A package's own build options are merged
+    // in, but minification is set here last so app and launchpad always ship
+    // the same way. CSS minification follows this setting, and `yarn dev`
+    // passes --minify false on the command line, which overrides it and keeps
+    // the watch builds readable.
     build: {
-      minify: false,
+      ...build,
+      minify: 'oxc',
     },
 
     css: {
@@ -156,7 +163,7 @@ export const makeConfig = (config = {}, plugins = {}) => {
       'process.version': '99',
       'setImmediate': {},
     },
-    ...config,
+    ...packageConfig,
   }
 }
 
