@@ -157,13 +157,20 @@ const ensureLiveBrowser = async (hosts: string[], port: number, browserName: str
   })
 }
 
-const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
+const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number, getBrowserExit?: () => BrowserExit | undefined): Promise<T> => {
   let retryIndex = 0
 
   const retry = async () => {
     try {
       return await retryable()
     } catch (err) {
+      const exit = getBrowserExit?.()
+
+      if (exit) {
+        debug('browser exited, not retrying %o', { exit, err })
+        errors.throwErr('CDP_BROWSER_EXITED_BEFORE_CONNECT', browserName, exit.code, exit.signal)
+      }
+
       retryIndex++
       const delay = _getDelayMsForRetry(retryIndex, browserName)
 
@@ -355,7 +362,7 @@ export class BrowserCriClient {
       }
 
       return browserCriClient
-    }, browserName, port)
+    }, browserName, port, getBrowserExit)
   }
 
   static async _manageTabs (options: ManageTabsOptions) {

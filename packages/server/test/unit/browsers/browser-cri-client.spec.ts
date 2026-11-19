@@ -257,6 +257,16 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(criImport.Version).toHaveBeenCalledTimes(3)
     })
 
+    it('stops retrying the handshake and reports the exit when the browser exits after opening its port', async function () {
+      const getDelayMsForRetry = vi.spyOn(protocol, '_getDelayMsForRetry').mockReturnValue(100)
+
+      await expect(BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', getBrowserExit: () => ({ code: null, signal: 'SIGSEGV' }), onAsynchronousError: onError, onServiceWorkerClientEvent }))
+      .rejects.toMatchObject({ type: 'CDP_BROWSER_EXITED_BEFORE_CONNECT' })
+
+      expect(criImport.Version).toHaveBeenCalledTimes(1)
+      expect(getDelayMsForRetry).not.toHaveBeenCalled()
+    })
+
     it('throws when Version fails more than allowed', async function () {
       vi.spyOn(protocol, '_getDelayMsForRetry')
       .mockReturnValue(undefined)
