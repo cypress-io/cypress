@@ -684,12 +684,13 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
   // worker that calls skipWaiting() and clients.claim() swaps in mid-test.
   it('does not install a new version when an unchanged script is checked for updates', () => {
     cy.visit('fixtures/empty.html')
-    cy.window().then((win) => {
+    // installing the worker and checking it for updates each fetch the script
+    // over the network, which Firefox can take longer than the default 1s to
+    // settle
+    cy.window().then({ timeout: 10000 }, (win) => {
       return win.navigator.serviceWorker.register('/fixtures/service-worker-update-check.js')
       .then(() => win.navigator.serviceWorker.ready)
     })
-    // an update check is a network round trip for the script, which Firefox
-    // can take longer than the default 1s to settle
     .then({ timeout: 10000 }, (registration) => {
       return registration.update().then(() => registration.installing)
     })
