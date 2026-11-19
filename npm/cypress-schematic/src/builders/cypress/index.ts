@@ -85,7 +85,7 @@ function initCypress (userOptions: CypressBuilderOptions): Observable<BuilderOut
   const options: CypressOptions = {
     ...defaultOptions,
     ...userOptions,
-    //@ts-ignore
+    // @ts-expect-error - `dev` is an internal option not declared in `CypressOptions`
     dev: process.env.CYPRESS_ENV === 'test',
   }
 
@@ -117,7 +117,6 @@ export function startDevServer ({
       // for instance @nguniversal/builders:ssr-dev-server.
       // see https://github.com/nrwl/nx/blob/f930117ed6ab13dccc40725c7e9551be081cc83d/packages/cypress/src/executors/cypress/cypress.impl.ts
       if (builderName !== '@nguniversal/builders:ssr-dev-server') {
-        // eslint-disable-next-line no-console
         console.info(`Passing watch mode to DevServer - watch mode is ${watch}`)
         overrides = {
           watch,

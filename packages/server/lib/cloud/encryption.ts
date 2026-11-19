@@ -6,7 +6,6 @@ import { generalDecrypt } from 'jose'
 import base64Url from 'base64url'
 import type { CypressRequestOptions } from './api'
 import { deflateRaw as deflateRawCb, inflateRaw as inflateRawCb } from 'zlib'
-import fs from 'fs'
 
 const deflateRaw = promisify(deflateRawCb)
 const inflateRaw = promisify(inflateRawCb)

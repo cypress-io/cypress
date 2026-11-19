@@ -2,7 +2,7 @@
   <div class="h-full">
     <TransitionQuickFade mode="out-in">
       <NoInternetConnection v-if="!online">
-        {{ t('launchpadErrors.noInternet.connectProject') }}
+        Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch your latest runs for this project.
       </NoInternetConnection>
       <DebugLoading v-else-if="!userProjectStatusStore.hasInitiallyLoaded || userProjectStatusStore.project.isProjectConnected && isLoading" />
 
@@ -103,16 +103,12 @@ import DebugNoRuns from './empty/DebugNoRuns.vue'
 import DebugError from './empty/DebugError.vue'
 import DebugBranchError from './empty/DebugBranchError.vue'
 import DebugSpecLimitBanner from './DebugSpecLimitBanner.vue'
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- rendered in the template, which the rule cannot see; a type-only import would drop the binding at runtime
 import DebugRunNavigation from './DebugRunNavigation.vue'
 import { specsList } from './utils/DebugMapping'
 import type { CloudRunHidingReason } from './DebugOverLimit.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
 
 import dayjs from 'dayjs'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 gql`
 fragment DebugLocalSpecs on Spec {

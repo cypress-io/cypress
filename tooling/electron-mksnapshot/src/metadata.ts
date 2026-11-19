@@ -1,4 +1,5 @@
-import { config, VersionMeta } from './config'
+import type { VersionMeta } from './config'
+import { config } from './config'
 import { promises as fs } from 'fs'
 
 const { versionMetaPath } = config
@@ -21,7 +22,7 @@ export class Metadata {
 
     const currentVersion: VersionMeta = config.versionMeta(this.version)
 
-    for (let [key, val] of Object.entries(downloadedVersion)) {
+    for (const [key, val] of Object.entries(downloadedVersion)) {
       if (currentVersion[key] !== val) return false
     }
 

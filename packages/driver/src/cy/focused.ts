@@ -14,8 +14,7 @@ const simulateBlurEvent = (el, win) => {
   })
 
   const blurEvt = new FocusEvent('blur', {
-    // @ts-ignore // Bubble isn't available on FocusEvent?
-    bubble: false,
+    bubbles: false,
     cancelable: false,
     view: win,
     relatedTarget: null,
@@ -291,4 +290,4 @@ export const create = (state: StateFunc) => ({
   },
 })
 
-export interface IFocused extends ReturnType<typeof create> {}
+export type IFocused = ReturnType<typeof create>

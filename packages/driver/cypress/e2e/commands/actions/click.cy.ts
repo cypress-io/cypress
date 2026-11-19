@@ -726,8 +726,7 @@ describe('src/cy/commands/actions/click', () => {
           expect(timeout.callCount).to.eq(0)
 
           done()
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('#sequential-clicks a').click({ multiple: true })
@@ -1585,7 +1584,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('passes config.animationDistanceThreshold to $actionability.ensureElIsNotAnimating', () => {
-        let old = Cypress.config('animationDistanceThreshold')
+        const old = Cypress.config('animationDistanceThreshold')
 
         Cypress.config('animationDistanceThreshold', 1000)
 
@@ -1697,16 +1696,13 @@ describe('src/cy/commands/actions/click', () => {
             this.lastLog = log
           }
         })
-
-        null
       })
 
       it('eventually passes the assertion', () => {
         cy.$$('button:first').click(function () {
           _.delay(() => {
             $(this).addClass('clicked')
-          }
-          , 50)
+          }, 50)
 
           return false
         })
@@ -1725,8 +1721,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.$$('button').click(function () {
           _.delay(() => {
             $(this).addClass('clicked')
-          }
-          , 50)
+          }, 50)
 
           return false
         })
@@ -3272,15 +3267,18 @@ describe('mouse state', () => {
           y: 9,
         }
 
+        // div.item spans the viewport, so its center moves with the scrollbar width (0 for overlay scrollbars)
+        const firefoxCenterX = cy.state('document').documentElement.clientWidth / 2
+
         // TODO: add back assertion on Y values
         const coordsFirefox = {
-          clientX: 494,
+          clientX: firefoxCenterX,
           clientY: 10,
-          pageX: 494,
+          pageX: firefoxCenterX,
           pageY: 226,
-          screenX: 494,
+          screenX: firefoxCenterX,
           screenY: 10,
-          x: 494,
+          x: firefoxCenterX,
           y: 10,
         }
 

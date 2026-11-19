@@ -675,7 +675,7 @@ export const AllCypressErrors = {
       return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string, responseBody: string })
     }
 
-    let systemErr = error.errors.find((err) => {
+    const systemErr = error.errors.find((err) => {
       return err.kind === 'SystemError'
     })
     const recommendation = systemErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(systemErr.url)}` : null
@@ -732,6 +732,14 @@ export const AllCypressErrors = {
   },
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
+  },
+  PORT_BLOCKED_BY_BROWSER: () => {
+    return errTemplate`\
+        Cypress could not find a port that browsers allow
+
+        Chrome, Electron, Firefox and WebKit refuse to load any URL on the ports Cypress was randomly assigned, so the runner could never connect to Cypress
+
+        Set the ${fmt.highlightSecondary('port')} option in your Cypress configuration to a port browsers allow`
   },
   FILE_SERVER_COULD_NOT_LISTEN: (attempts: number, err: Error) => {
     return errTemplate`\
@@ -902,6 +910,17 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(err)}
     `
   },
+  CONFIG_PROCESS_EXITED_UNEXPECTEDLY: (code: number | null, signal: string | null, testingType?: string) => {
+    const exitedWith = signal ? `signal ${signal}` : code !== null ? `code ${code}` : 'no exit code or signal'
+    const oomHint = signal === 'SIGKILL'
+      ? fmt.off(`\n\nA SIGKILL usually means the operating system ran out of memory and killed the process.${testingType === 'component' ? ' In component testing this process also runs your dev server, which can use a lot of memory.' : ''}`)
+      : fmt.off('')
+
+    return errTemplate`\
+      The process that loads your ${fmt.highlight(`configFile`)} and runs your Node events exited unexpectedly (${fmt.highlightSecondary(exitedWith)}).${oomHint}
+
+      Cypress cannot run your Node events without this process.`
+  },
   TRUSTED_CERTIFICATES_LOAD_ERROR: (filePathOrLabel: string, err: Error) => {
     return errTemplate`\
       Cypress could not load a certificate you listed in ${fmt.highlight(`trustedCertificates`)}.
@@ -921,6 +940,18 @@ export const AllCypressErrors = {
       ${fmt.listItems(urls)}
 
       A browser opens one connection per origin and presents a single client certificate on it, before any path is known. Configure one certificate per origin.
+
+      Setting ${fmt.highlightSecondary(`forceHttp1: true`)} routes this run through Cypress's HTTP/1 proxy, which makes the request itself and so can honor per-path entries, at the cost of HTTP/2.`
+  },
+  CLIENT_CERTIFICATES_PATH_SCOPED: (origin: string, urls: string[]) => {
+    return errTemplate`\
+      Cypress could not apply your ${fmt.highlight(`clientCertificates`)} configuration.
+
+      The certificate for ${fmt.highlightSecondary(origin)} is limited to part of that origin:
+
+      ${fmt.listItems(urls)}
+
+      A browser presents a client certificate when it connects to an origin, before any path is known, so Cypress cannot keep it to the configured path. Configure the certificate for the whole origin by removing the path from the URL.
 
       Setting ${fmt.highlightSecondary(`forceHttp1: true`)} routes this run through Cypress's HTTP/1 proxy, which makes the request itself and so can honor per-path entries, at the cost of HTTP/2.`
   },
@@ -1019,7 +1050,7 @@ export const AllCypressErrors = {
 
         ${fmt.stringify(browsers)}
 
-        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine — it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
+        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine; it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
 
         To run your tests in a specific browser, remove that value and pass the browser by name instead:
 
@@ -1655,6 +1686,20 @@ export const AllCypressErrors = {
     `
   },
 
+  DEV_SERVER_START_FAILED: (configFile: string, bundler: string | undefined, err: ErrorLike) => {
+    const devServer = bundler ? errPartial`the ${fmt.highlight(bundler)} dev server` : errPartial`your dev server`
+
+    return errTemplate`
+      Cypress could not start ${devServer} for component testing. Fix the error below, then run Cypress again.
+
+      Read about configuring the dev server: https://on.cypress.io/dev-server
+
+      The ${fmt.highlight('component.devServer')} set in ${fmt.path(configFile)} threw this error:
+
+      ${fmt.stackTrace(err)}
+    `
+  },
+
   UNEXPECTED_MUTATION_ERROR: (mutationField: string, args: any, err: Error) => {
     return errTemplate`
       An unexpected internal error occurred while executing the ${fmt.highlight(mutationField)} operation with payload:
@@ -1704,7 +1749,7 @@ export const AllCypressErrors = {
     return errTemplate`
       The testing type selected (${fmt.highlight(testingType)}) is not configured in your config file.
 
-      Please run ‘cypress open’ and choose your testing type to automatically update your configuration file.
+      Please run ${fmt.highlight(`cypress open`)} and choose your testing type to automatically update your configuration file.
 
       https://on.cypress.io/configuration
     `
@@ -1791,7 +1836,7 @@ export const getError = function <Type extends keyof AllCypressErrorObj> (type: 
     return err
   }
 
-  // @ts-expect-error
+  // @ts-expect-error - `args` is not typed as the parameter tuple of the template selected by `type`
   const result = AllCypressErrors[type](...args) as ErrTemplateResult
 
   const { message, details, originalError, messageMarkdown } = result
@@ -1857,8 +1902,8 @@ export const cloneErr = function (err: CypressError | GenericError, options: { h
     // revert back the distorted characters
     // in case there is an error in a child_process
     // that contains quotes
-    .replace(/\&\#x27;/g, '\'')
-    .replace(/\&quot\;/g, '"')
+    .replace(/&#x27;/g, '\'')
+    .replace(/&quot;/g, '"')
   }
 
   // and any own (custom) properties

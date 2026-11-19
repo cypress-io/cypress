@@ -1,6 +1,6 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
-# Internal PR for any branch that is not develop, release/x.x.x, or electron/x.x.x related
+# Internal PR for any branch that is not develop, release/x.x.x, vN, or electron/x.x.x related
 when:
   and:
     - not:
@@ -9,29 +9,43 @@ when:
             value: << pipeline.git.branch >>
     - not:
         matches:
+            pattern: /^v\d+$/
+            value: << pipeline.git.branch >>
+    - not:
+        matches:
             pattern: /^electron\/\d+\.\d+\.\d+$/
             value: << pipeline.git.branch >>
     - not:
         equal: [ 'develop', << pipeline.git.branch >> ]
-    - not:
-        equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
     - not:
         equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
 
 jobs:
-  # Internal PRs — install and build run immediately
+  # Internal PRs — install and build run immediately, unless a bot pushed.
+  # Bots can't join the GitHub teams that restrict our contexts, and jobs after
+  # an approval run as the approver. The install runs the bot's dependency changes.
+  # The install has one variant per case because CircleCI drops a job whose
+  # requires are all filtered out.
   - node_modules_install:
       build-better-sqlite3: true
-      filters:
-        branches:
-          ignore: /^pull\/[0-9]+/
+      filters: pipeline.parameters.bot-approval-required == false and not (pipeline.git.branch matches /^pull\/[0-9]+/)
+  - approve-bot-pr:
+      type: approval
+      filters: pipeline.parameters.bot-approval-required == true
+  - node_modules_install:
+      name: bot-node-modules-install
+      build-better-sqlite3: true
+      requires:
+        - approve-bot-pr
+      filters: pipeline.parameters.bot-approval-required == true
   - build:
       name: internal-pr-build
       context: test-runner:env-canary
       requires:
         - node_modules_install
+        - bot-node-modules-install
       filters:
         branches:
           ignore: /^pull\/[0-9]+/
@@ -168,6 +182,11 @@ jobs:
       filters: *runDriverTests
       requires:
         - ready-to-test
+  - driver-integration-tests-firefox-beta:
+      context: test-runner:cypress-record-key
+      filters: *runDriverTests
+      requires:
+        - ready-to-test
   - driver-integration-tests-electron:
       context: test-runner:cypress-record-key
       filters: *runDriverTests
@@ -202,6 +221,13 @@ jobs:
         ]
       percy: true
       filters: &runLaunchpadTests pipeline.parameters.run-launchpad-tests == true
+      requires:
+        - ready-to-test
+  # Not in all-jobs-passed: it only reports telemetry, so a Cloud outage
+  # should not block the PR.
+  - open-mode-telemetry:
+      context: test-runner:cypress-record-key
+      filters: pipeline.parameters.run-app-ui-tests == true or pipeline.parameters.run-launchpad-tests == true
       requires:
         - ready-to-test
   - run-launchpad-component-tests-chrome:
@@ -306,10 +332,6 @@ jobs:
       filters: &runNpmGrepTests pipeline.parameters.run-npm-grep-tests == true
       requires:
         - ready-to-test
-  - npm-eslint-plugin-dev:
-      filters: &runNpmEslintPluginTests pipeline.parameters.run-npm-eslint-plugin-tests == true
-      requires:
-        - ready-to-test
   - npm-cypress-schematic:
       filters: &runNpmSchematicTests pipeline.parameters.run-npm-schematic-tests == true
       requires:
@@ -339,7 +361,7 @@ jobs:
       # mirrors run_driver_suite() in scripts/validate-proxy-middleware-transport.sh,
       # plus the MITM injection/interception-heavy specs (net_stubbing, security,
       # redirects, service-worker)
-      spec: cypress/e2e/e2e/encoding.cy.*,cypress/e2e/e2e/csp_headers.cy.*,cypress/e2e/cypress/proxy-logging.cy.*,cypress/e2e/cy/snapshot.cy.*,cypress/e2e/cypress/downloads.cy.*,cypress/e2e/commands/net_stubbing.cy.*,cypress/e2e/e2e/security.cy.*,cypress/e2e/e2e/redirects.cy.*,cypress/e2e/e2e/service-worker.cy.*
+      spec: cypress/e2e/e2e/encoding.cy.*,cypress/e2e/e2e/csp_headers.cy.*,cypress/e2e/cypress/proxy-logging.cy.*,cypress/e2e/cy/snapshot.cy.*,cypress/e2e/cypress/downloads.cy.*,cypress/e2e/commands/net_stubbing/*.cy.*,cypress/e2e/e2e/security.cy.*,cypress/e2e/e2e/redirects.cy.*,cypress/e2e/e2e/service-worker.cy.*
       filters: *runDriverTests
       requires:
         - ready-to-test
@@ -454,6 +476,7 @@ jobs:
         - driver-integration-tests-chrome-beta
         - driver-integration-tests-chrome-beta-inject-document-domain
         - driver-integration-tests-firefox
+        - driver-integration-tests-firefox-beta
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests
@@ -478,6 +501,5 @@ jobs:
         - npm-angular
         - npm-mount-utils
         - npm-grep
-        - npm-eslint-plugin-dev
         - npm-cypress-schematic
         - v8-integration-tests

@@ -120,7 +120,9 @@ export default (Commands, Cypress, cy, state, config) => {
       options.method = options.method.toUpperCase()
 
       if (options.retryOnStatusCodeFailure && !options.failOnStatusCode) {
-        $errUtils.throwErrByPath('request.status_code_flags_invalid')
+        $errUtils.throwErrByPath('request.status_code_flags_invalid', {
+          args: _.pick(options, 'failOnStatusCode', 'retryOnStatusCodeFailure'),
+        })
       }
 
       // normalize followRedirects -> followRedirect
@@ -199,7 +201,7 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      if (options.encoding) {
+      if (options.encoding !== null) {
         if (!_.isString(options.encoding) || !Buffer.isEncoding(options.encoding)) {
           $errUtils.throwErrByPath('request.encoding_invalid', {
             args: {

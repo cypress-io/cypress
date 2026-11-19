@@ -457,6 +457,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       })
 
       cy.origin('http://www.idp.com:3501', () => {
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
         cy.wait(1000) // give cookie time to expire
         cy.reload()
         cy.document().its('cookie').should('not.include', 'user=')
@@ -481,6 +482,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         cy.get('[data-cy="login"]').click()
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1500) // give cookie time to expire
       cy.reload()
       verifyLocalhostNotLoggedIn()
@@ -497,6 +499,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         cy.get('[data-cy="login"]').click()
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1500) // give cookie time to expire
       cy.reload()
       cy.getCookie('user').should('be.null')
@@ -514,6 +517,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       })
 
       cy.origin('http://www.idp.com:3501', () => {
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
         cy.wait(1500) // give cookie time to expire
         cy.reload()
         cy.document().its('cookie').should('not.include', 'user=')
@@ -534,6 +538,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
           cy.get('[data-cy="login"]').click()
         })
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
         cy.wait(1500) // give cookie time to expire
         cy.reload()
         verifyLocalhostNotLoggedIn()
@@ -548,6 +553,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
           cy.get('[data-cy="login"]').click()
         })
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- checks that a long-lived cookie survives past a 1 second lifetime
         cy.wait(1500) // ensure cookie doesn't expire in this time
         cy.reload()
         verifyLoggedIn(username)
@@ -776,6 +782,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         // since they'd pretty much have to write this exact test. making it
         // wait a second is probably overkill, but purposefully keeping the
         // wait long to avoid this test becoming flaky
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie sync delay described above
         cy.wait(1000)
         cy.getCookie('key').its('value').should('equal', 'value')
       })
@@ -894,6 +901,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         })
 
         cy.document().its('cookie').should('equal', 'key=value')
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- checks that the cookie persists, so give it time to be lost first
         cy.wait(500)
         cy.reload()
         cy.document().its('cookie').should('equal', 'key=value')

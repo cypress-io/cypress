@@ -1,4 +1,3 @@
-/* eslint-env mocha */
 const sinon = require('sinon')
 const Promise = require('bluebird')
 

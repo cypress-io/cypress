@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import Debug from 'debug'
 import { verifySignature } from '../encryption'
 import { walkFiles } from './walk_files'
-import { isInsideDir } from './is_inside_dir'
+import { isInsideDir } from '@packages/data-context/src/util/isInsideDir'
 
 const debug = Debug('cypress:server:cloud:bundles:verify-bundle-on-disk')
 

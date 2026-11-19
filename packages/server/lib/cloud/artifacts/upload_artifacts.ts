@@ -33,7 +33,8 @@ const toUploadReportPayload = (acc: {
   const reportWithoutOriginalError = _.omit(report, 'originalError')
 
   if (key === ArtifactKinds.PROTOCOL) {
-    let { error, errorStack, allErrors } = reportWithoutOriginalError
+    const { allErrors } = reportWithoutOriginalError
+    let { error, errorStack } = reportWithoutOriginalError
 
     if (allErrors) {
       const messages = allErrors.map((error) => {

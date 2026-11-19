@@ -57,7 +57,7 @@ export default class Test extends Runnable {
 
   attempts: Attempt[] = []
   _isOpen: boolean | null = null
-  isOpenWhenActive: Boolean | null = null
+  isOpenWhenActive: boolean | null = null
   _isFinished = false
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {

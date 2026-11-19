@@ -1,11 +1,7 @@
 import { HeaderBar_HeaderBarContentFragmentDoc } from '../generated/graphql-test'
 import HeaderBarContent from './HeaderBarContent.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import { CloudUserStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { useUserProjectStatusStore } from '../store/user-project-status-store'
-
-const text = defaultMessages.topNav
 
 describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   const mountFragmentWithData = (data = {}) => {
@@ -122,16 +118,27 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     mountFragmentWithData()
 
     cy.findByTestId('top-nav-active-browser').should('not.exist')
-    cy.contains('button', text.docsMenu.docsHeading).click()
+    cy.contains('button', 'Docs').click()
 
-    cy.wrap(Object.values(text.docsMenu)).each((menuItem) => {
-      if (typeof menuItem === 'string') {
-        cy.contains(menuItem).should('be.visible')
-      }
+    cy.wrap([
+      'Docs',
+      'Getting started',
+      'Write your first test',
+      'Testing your app',
+      'Organizing tests',
+      'References',
+      'Best practices',
+      'Configuration',
+      'API',
+      'Run in CI/CD',
+      'Set up CI',
+      'Run tests faster',
+    ]).each((menuItem: string) => {
+      cy.contains(menuItem).should('be.visible')
     })
 
     cy.get('body').click()
-    cy.contains('a', text.docsMenu.firstTest).should('not.be.visible')
+    cy.contains('a', 'Write your first test').should('not.be.visible')
   })
 
   it('docs menu has expected links with no current project', () => {
@@ -143,17 +150,17 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     // because outside of global mode, those are buttons that trigger popups
     // so this way we can assert all links at once.
     const expectedDocsLinks = {
-      [text.docsMenu.firstTest]: 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+Launchpad',
-      [text.docsMenu.testingApp]: 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+Launchpad',
-      [text.docsMenu.organizingTests]: 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+Launchpad',
-      [text.docsMenu.bestPractices]: 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+Launchpad',
-      [text.docsMenu.configuration]: 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+Launchpad',
-      [text.docsMenu.api]: 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+Launchpad',
-      [text.docsMenu.ciSetup]: 'https://on.cypress.io/ci?utm_medium=Docs+Menu&utm_content=Set+Up+CI&utm_source=Binary%3A+Launchpad',
-      [text.docsMenu.fasterTests]: 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization&utm_source=Binary%3A+Launchpad',
+      'Write your first test': 'https://on.cypress.io/writing-first-test?utm_medium=Docs+Menu&utm_content=First+Test&utm_source=Binary%3A+Launchpad',
+      'Testing your app': 'https://on.cypress.io/testing-your-app?utm_medium=Docs+Menu&utm_content=Testing+Your+App&utm_source=Binary%3A+Launchpad',
+      'Organizing tests': 'https://on.cypress.io/writing-and-organizing-tests?utm_medium=Docs+Menu&utm_content=Organizing+Tests&utm_source=Binary%3A+Launchpad',
+      'Best practices': 'https://on.cypress.io/best-practices?utm_medium=Docs+Menu&utm_content=Best+Practices&utm_source=Binary%3A+Launchpad',
+      'Configuration': 'https://on.cypress.io/configuration?utm_medium=Docs+Menu&utm_content=Configuration&utm_source=Binary%3A+Launchpad',
+      'API': 'https://on.cypress.io/api?utm_medium=Docs+Menu&utm_content=API&utm_source=Binary%3A+Launchpad',
+      'Set up CI': 'https://on.cypress.io/ci?utm_medium=Docs+Menu&utm_content=Set+Up+CI&utm_source=Binary%3A+Launchpad',
+      'Run tests faster': 'https://on.cypress.io/parallelization?utm_medium=Docs+Menu&utm_content=Parallelization&utm_source=Binary%3A+Launchpad',
     }
 
-    cy.contains('button', text.docsMenu.docsHeading).click()
+    cy.contains('button', 'Docs').click()
 
     cy.wrap(Object.keys(expectedDocsLinks)).each((linkName: string) => {
       cy.contains('a', linkName).should('have.attr', 'href', expectedDocsLinks[linkName])
@@ -182,7 +189,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       cy.viewport(767, 800)
 
       // show docs menu
-      cy.contains('button', text.docsMenu.docsHeading).click()
+      cy.contains('button', 'Docs').click()
 
       // docs menu flex direction is column when viewport width is small
       cy.findByTestId('docs-menu-container').should('have.css', 'flex-direction', 'column')
@@ -195,7 +202,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       cy.viewport(768, 800)
 
       // show docs menu
-      cy.contains('button', text.docsMenu.docsHeading).click()
+      cy.contains('button', 'Docs').click()
 
       // docs menu flex direction is row when viewport width is big enough.
       cy.findByTestId('docs-menu-container').should('have.css', 'flex-direction', 'row')
@@ -270,13 +277,13 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
     cy.percySnapshot('after upgrade click')
     cy.contains('button', 'Update to').click()
 
-    cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('be.visible')
+    cy.contains('Upgrade to Cypress 8.7.0').should('be.visible')
     cy.contains('test-project').should('be.visible')
     cy.findByDisplayValue('yarn add -D cypress@8.7.0').should('be.visible')
     cy.get('p').contains('You are currently running Version 8.6.0 of Cypress. To upgrade to the latest version for your project, first close this app, then paste the command below into your terminal:')
 
     cy.get('body').type('{esc}') // dismiss modal with keyboard
-    cy.contains(`${defaultMessages.topNav.updateCypress.title} 8.7.0`).should('not.exist')
+    cy.contains('Upgrade to Cypress 8.7.0').should('not.exist')
     cy.percySnapshot()
   })
 
@@ -309,10 +316,10 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
       render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} /></div>,
     })
 
-    cy.getByRole('button', { name: text.login.profileMenuLabel }).click()
+    cy.getByRole('button', { name: 'Profile and logout' }).click()
     cy.contains(cloudViewer.fullName).should('be.visible')
     cy.contains(cloudViewer.email).should('be.visible')
-    cy.getByRole('button', { name: text.login.actionLogout }).should('be.visible')
+    cy.getByRole('button', { name: 'Log out' }).should('be.visible')
     cy.percySnapshot()
   })
 
@@ -338,12 +345,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         it('opens on menu item click', () => {
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
+          cy.contains('Optimize your tests in CI by following these guides.').should('be.visible')
         })
 
         it('is dismissible from X icon', () => {
           cy.findAllByLabelText('Close').click()
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+          cy.contains('Optimize your tests in CI by following these guides.').should('not.exist')
         })
       })
 
@@ -357,7 +364,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         function mountWithSavedState (options?: { state?: object, projectId?: string }) {
-          const mountResult = cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
+          cy.mountFragment(HeaderBar_HeaderBarContentFragmentDoc, {
             onResult: (result) => {
               if (!result.currentProject) {
                 return
@@ -382,14 +389,12 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
           // Auto-opening prompts wait 2000ms after mount before opening
           // Advance to that point so that prompts will have had a chance to open
           cy.tick(2000)
-
-          return mountResult
         }
 
         it('opens when after 4 days from first open, no projectId, and not already shown', () => {
           mountWithSavedState()
 
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('be.visible')
+          cy.contains('Optimize your tests in CI by following these guides.').should('be.visible')
         })
 
         it('links have correct utm_content param', () => {
@@ -397,31 +402,31 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
 
           cy.contains(
             'a[href="https://on.cypress.io/setup-ci?utm_medium=CI+Prompt+1&utm_campaign=Other&utm_content=Automatic&utm_source=Binary%3A+Launchpad"]',
-            defaultMessages.topNav.docsMenu.prompts.ci1.seeOtherGuides,
+            'See other guides',
           ).should('be.visible')
 
           cy.contains(
             'a[href="https://on.cypress.io/ci?utm_medium=CI+Prompt+1&utm_campaign=Learn+More&utm_source=Binary%3A+Launchpad"]',
-            defaultMessages.topNav.docsMenu.prompts.ci1.intro,
+            'Introduction to CI',
           ).should('be.visible')
         })
 
         it('does not open when projectId exists', () => {
           mountWithSavedState({ projectId: 'testid' })
 
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+          cy.contains('Optimize your tests in CI by following these guides.').should('not.exist')
         })
 
         it('does not open when previously shown', () => {
           mountWithSavedState({ state: { promptsShown: { 'ci1': 1609459200000, 'orchestration1': 1609459200000 } } })
 
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+          cy.contains('Optimize your tests in CI by following these guides.').should('not.exist')
         })
 
         it('does not open when another prompt has been shown recently', () => {
           mountWithSavedState({ state: { promptsShown: { dashboard1: 1609891100000 } } })
 
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+          cy.contains('Optimize your tests in CI by following these guides.').should('not.exist')
         })
 
         it('does not open if "allowAutomaticPromptOpen" prop is not true', () => {
@@ -441,7 +446,7 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
             render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><HeaderBarContent gql={gqlVal} show-browsers={true} /></div>,
           })
 
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.ci1.description).should('not.exist')
+          cy.contains('Optimize your tests in CI by following these guides.').should('not.exist')
         })
       })
     })
@@ -462,19 +467,19 @@ describe('<HeaderBarContent />', { viewportWidth: 1000, viewportHeight: 750 }, (
         })
 
         it('opens on menu item click', () => {
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration1.title).should('be.visible')
+          cy.contains('Run tests faster in CI').should('be.visible')
           cy.contains('Getting Started').should('not.exist')
         })
 
         it('is dismissible from X icon', () => {
           cy.findAllByLabelText('Close').click()
-          cy.contains(defaultMessages.topNav.docsMenu.prompts.orchestration1.title).should('not.exist')
+          cy.contains('Run tests faster in CI').should('not.exist')
         })
 
         it('links to more information with expected utm params', () => {
           cy.contains(
             'a[href="https://on.cypress.io/smart-orchestration?utm_medium=CI+Prompt+1&utm_campaign=Learn+More&utm_source=Binary%3A+Launchpad"]',
-            defaultMessages.topNav.docsMenu.prompts.orchestration1.learnMore,
+            'Learn more',
           )
           .should('be.visible')
         })

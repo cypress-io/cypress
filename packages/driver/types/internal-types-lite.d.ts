@@ -23,8 +23,8 @@ declare namespace Cypress {
     (action: 'backend:request', fn: (...any) => void)
     (action: 'automation:request', fn: (...any) => void)
     (action: 'viewport:changed', fn?: (viewport: { viewportWidth: string, viewportHeight: string }, callback: () => void) => void)
-    (action: 'before:screenshot', fn: (config: {}, fn: () => void) => void)
-    (action: 'after:screenshot', config: {})
+    (action: 'before:screenshot', fn: (config: object, fn: () => void) => void)
+    (action: 'after:screenshot', config: object)
     (action: 'command:failed', fn: (command: CommandQueue, error: Error) => void): Cypress
     (action: 'page:loading', fn: (loading: boolean) => void)
     (action: 'test:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void)
@@ -44,6 +44,24 @@ declare namespace Cypress {
     (task: 'protocol:page:loading', input: any): Promise<void>
     (task: 'wait:for:prompt:ready'): Promise<{ success: boolean, error?: Error }>
     (task: 'preserve:run:state', runState: any): Promise<void>
+    (task: 'get:session', id: string): Promise<Cypress.ServerSessionData>
+    (task: 'request:sent:with:credentials', args: { url?: string, resourceType: 'xhr' | 'fetch', credentialStatus: string | boolean }): Promise<void>
+  }
+
+  interface ActionTrigger {
+    (action: 'runner:test:before:run:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'runner:test:before:after:run:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'runner:test:after:run:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'runner:runnable:after:run:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:visit:blank', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:command:start:async', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:collect:run:state', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:before:stability:release', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'app:timers:reset', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'app:timers:pause', ...args: any[]): Bluebird.Promise<any[]>
+    (action: 'cy:fail', ...args: any[]): any[]
+    (action: 'app:uncaught:exception', ...args: any[]): any[]
+    (action: 'app:window:confirm', ...args: any[]): any[]
   }
 
   interface Devices {
@@ -58,9 +76,9 @@ declare namespace Cypress {
      * If `as` is chained to the current command, return the alias name used.
      */
     getAlias: IAliases['getAlias']
+    getFocused: IFocused['getFocused']
     getNextAlias: IAliases['getNextAlias']
     noop: <T>(v?: T) => Cypress.Chainable<T>
-    now: <T>(string, v: T) => Cypress.Chainable<T>
     queue: CommandQueue
     retry: IRetries['retry']
     state: State
@@ -70,8 +88,10 @@ declare namespace Cypress {
     // We should decide whether calling with id is correct or not.
     clearTimeout: ITimeouts['clearTimeout']
     isStable: IStability['isStable']
+    whenStable: IStability['whenStable']
     fail: (err: Error, options: { async?: boolean }) => Error
     getRemoteLocation: ILocation['getRemoteLocation']
+    subject: (chainerId?: string) => any
     subjectChain: (chainerId?: string) => SubjectChain
 
     createSnapshot: ISnapshots['createSnapshot']

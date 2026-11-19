@@ -43,7 +43,7 @@ describe('lib/cloud/exceptions', () => {
 
       beforeEach(() => {
         try {
-          // @ts-expect-error
+          // @ts-expect-error - foo is intentionally undefined to throw a ReferenceError
           return foo.bar()
         } catch (e) {
           err = e

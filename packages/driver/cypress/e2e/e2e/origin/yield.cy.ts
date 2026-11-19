@@ -94,7 +94,7 @@ describe('cy.origin yields', { browser: '!webkit' }, () => {
         symbol: Symbol(''),
       }
     }).then((obj) => {
-      // @ts-ignore
+      // @ts-expect-error - the yielded subject is typed as unknown
       return obj.symbol // This will fail accessing the symbol
     })
   })
@@ -134,7 +134,7 @@ describe('cy.origin yields', { browser: '!webkit' }, () => {
       done()
     })
 
-    cy.origin<{ key: Function }>('http://www.foobar.com:3500', () => {
+    cy.origin<{ key: () => string }>('http://www.foobar.com:3500', () => {
       cy.wrap({
         key: () => {
           return 'whoops'
@@ -177,7 +177,7 @@ describe('cy.origin yields', { browser: '!webkit' }, () => {
       })
     })
     .then((obj) => {
-      // @ts-ignore
+      // @ts-expect-error - the yielded subject is typed as unknown
       obj()
     })
   })

@@ -32,7 +32,7 @@ yarn workspace @packages/net-stubbing check-ts
 **Gotchas / Notes**
 
 - Do not build `.js` files manually during development; `@packages/ts` provides require-time transpilation.
-- End-to-end behavioral tests live in `@packages/driver` (`net_stubbing_spec`), not in this package's `test/` directory.
+- End-to-end behavioral tests live in `@packages/driver` (`cypress/e2e/commands/net_stubbing/`), not in this package's `test/` directory.
 - The `lib/server/` entry point is what gets imported by `@packages/server`; the browser side is in `@packages/driver`.
 
 **Integration Points**

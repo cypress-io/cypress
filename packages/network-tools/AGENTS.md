@@ -26,6 +26,7 @@ lib/
   cors.ts                      CORS utilities: origin comparison, header manipulation
   document-domain-injection.ts Helpers for injecting document.domain overrides via the spec bridge
   index.ts                     Public entry point re-exporting all modules
+  serialize-for-inline-script.ts  JSON serialization that can't close the inline <script> it's written into
   types.ts                     Shared TypeScript types
   uri.ts                       URI parsing, normalization, and same-origin comparison helpers
 ```

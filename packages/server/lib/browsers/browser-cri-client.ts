@@ -7,11 +7,12 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cdp-protocol/cri-client'
+import { sendLargeMessagesInFragments } from './cdp-protocol/send-large-messages-in-fragments'
 import { cypressSessions } from '../cypress-sessions'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape, CdpClientShape, OnExtraTargetCriClientReady, ExtraTargetDetach } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { EXTRA_TARGET_HEADER } from './constants'
+import { EXTRA_TARGET_HEADER, getMetadataHeaderValue } from './constants'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -46,7 +47,7 @@ interface ManageTabsOptions {
   browserCriClient: BrowserCriClient
   browserName
   host: string
-  onAsynchronousError: Function
+  onAsynchronousError: (err: CypressError) => void
   port: number
   protocolManager?: ProtocolManagerShape
   // Overrides CHILD_TARGET_INTERCEPTION_TIMEOUT_MS. Exposed for tests only.
@@ -70,7 +71,7 @@ interface TargetDestroyedOptions {
   browserClient: CriClient
   browserCriClient: BrowserCriClient
   event: Protocol.Target.TargetDestroyedEvent
-  onAsynchronousError: Function
+  onAsynchronousError: (err: CypressError) => void
 }
 
 // How long to wait for the page connection to confirm session-scoped Fetch
@@ -210,10 +211,10 @@ export class BrowserCriClient {
   closing = false
   closed = false
   resettingBrowserTargets = false
-  gracefulShutdown?: Boolean
+  gracefulShutdown?: boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   serviceWorkerBindings: Map<SessionId, ServiceWorkerBindingListener> = new Map()
-  onClose: Function | null = null
+  onClose: ((gracefulShutdown?: boolean) => void) | null = null
   /**
    * Cross-connection hold closing #34674's interception gap:
    *
@@ -462,7 +463,8 @@ export class BrowserCriClient {
     const { browserClient, browserCriClient, CriConstructor, event, host, port, protocolManager, childTargetInterceptionTimeoutMs = CHILD_TARGET_INTERCEPTION_TIMEOUT_MS } = options
     const CreateCRI = CriConstructor || CRI
     const { sessionId, targetInfo, waitingForDebugger } = event
-    let { targetId, url } = targetInfo
+    const { targetId } = targetInfo
+    let { url } = targetInfo
 
     debug('Target.attachedToTarget %o', targetInfo)
 
@@ -608,6 +610,8 @@ export class BrowserCriClient {
       return await run()
     }
 
+    sendLargeMessagesInFragments(extraTargetCriClient)
+
     browserCriClient.addExtraTargetClient(targetInfo, extraTargetCriClient)
 
     // Fetch.enable + continue must stay paired — enabling without a continue
@@ -632,7 +636,7 @@ export class BrowserCriClient {
           requestId: params.requestId,
           headers: [
             ...headers,
-            { name: EXTRA_TARGET_HEADER, value: 'true' },
+            { name: EXTRA_TARGET_HEADER, value: getMetadataHeaderValue() },
           ],
         }
 

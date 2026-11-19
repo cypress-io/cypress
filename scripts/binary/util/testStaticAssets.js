@@ -1,10 +1,8 @@
-/* eslint-disable arrow-body-style */
-
 const la = require('lazy-ass')
 const fs = require('fs-extra')
 const _ = require('lodash')
 const glob = require('glob')
-const chalk = require('chalk').default
+const chalk = require('chalk')
 const Promise = require('bluebird')
 const { stripIndent } = require('common-tags')
 
@@ -19,20 +17,42 @@ const testStaticAssets = async (buildResourcePath) => {
         'webpack-livereload-plugin',
         // indicates eval source maps were included, which cause cross-origin errors
         '//# sourceURL=cypress://',
-        // make sure webpack is not run with NODE_ENV=development
-        'react.development.js',
-      ],
-      goodStrings: [
-        // make sure webpack is run with NODE_ENV=production
+        // React and MobX are read from the app's copies, so the runner must not
+        // bundle its own: these are React's license headers and a MobX core global
         'react.production.min.js',
+        'react-dom.production.min.js',
+        '__mobxInstanceCount',
+      ],
+      // each host module must be read through its webpack external, not bundled
+      goodStrings: [
+        'window["__CYPRESS_HOST_MODULES__"]["react"]',
+        'window["__CYPRESS_HOST_MODULES__"]["react-dom"]',
+        'window["__CYPRESS_HOST_MODULES__"]["react-dom/client"]',
+        'window["__CYPRESS_HOST_MODULES__"]["mobx"]',
       ],
       testAssetStrings: [
         [
           (str) => !str.split('\n').slice(-1)[0].includes('//# sourceMappingURL'),
           'sourcemaps were detected, ensure `web-config/webpack.config.base.ts` does not have sourcemaps enabled in production',
         ],
+        [
+          // only the production config's DefinePlugin replaces these comparisons
+          (str) => !/process\.env\.NODE_ENV\s*[!=]==?/.test(str),
+          'process.env.NODE_ENV comparisons were found, ensure webpack is run with NODE_ENV=production',
+        ],
       ],
       minLineCount: 5000,
+    }),
+    testPackageStaticAssets({
+      // the React that the app publishes to the runner must be the production build
+      assetGlob: `${buildResourcePath}/packages/app/dist/assets/hostModules-*.js`,
+      goodStrings: [
+        'Minified React error #',
+      ],
+      badStrings: [
+        // only React's development builds carry the full message text
+        'Invalid hook call',
+      ],
     }),
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/injection.js`,
@@ -171,9 +191,8 @@ function includesCount (string, subString) {
 
   let n = 0
   let pos = 0
-  let step = subString.length
+  const step = subString.length
 
-  // eslint-disable-next-line
   while (true) {
     pos = string.indexOf(subString, pos)
     if (pos >= 0) {

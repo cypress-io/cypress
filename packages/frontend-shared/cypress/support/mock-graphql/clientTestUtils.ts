@@ -36,7 +36,7 @@ export function resetTestNodeIdx () {
   nodeIdx = {}
 }
 
-export function testNodeId <T extends TypesWithId> (type: T, title?: string) {
+export function testNodeId<T extends TypesWithId> (type: T, title?: string) {
   nodeIdx[type] = (nodeIdx[type] ?? 0) + 1
 
   const id = title ? `${type}:${nodeIdx[type]}:${title}` : `${type}:${nodeIdx[type]}`

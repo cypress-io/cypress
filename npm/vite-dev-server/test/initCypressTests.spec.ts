@@ -59,7 +59,6 @@ describe('initCypressTests', () => {
     mockCypressInstance = createMockCypress()
 
     global.import = vi.fn()
-    // @ts-expect-error
     global.document = {
       location: {
         search: '',
@@ -69,20 +68,20 @@ describe('initCypressTests', () => {
       },
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - a bare object stands in for the parent window
     global.parent = {}
-    // @ts-expect-error
+    // @ts-expect-error - Cypress is not declared on Window
     global.parent.Cypress = mockCypressInstance
-    // @ts-expect-error
+    // @ts-expect-error - a minimal stub stands in for window
     global.window = { parent: global.parent }
   })
 
   afterEach(() => {
-    // @ts-expect-error
+    // @ts-expect-error - the operand of delete must be optional
     delete global.document
-    // @ts-expect-error
+    // @ts-expect-error - the operand of delete must be optional
     delete global.window
-    // @ts-expect-error
+    // @ts-expect-error - the operand of delete must be optional
     delete global.parent
   })
 
@@ -224,15 +223,14 @@ describe('initCypressTests', () => {
         { relative: 'src/Test3.cy.jsx', absolute: '/users/mock_dir/mock_project/src/Test3.cy.jsx' },
       ]
 
-      // @ts-expect-error
+      // @ts-expect-error - __RUN_ALL_SPECS__ is not declared on Window
       global.parent.__RUN_ALL_SPECS__ = mockRunAllSpecs
-      // @ts-expect-error
+      // @ts-expect-error - __RUN_MODE_SPECS__ is not declared on Window
       global.parent.__RUN_MODE_SPECS__ = mockRunModeSpecs
     })
 
     describe('when specPath is "__all"', () => {
       beforeEach(() => {
-        // @ts-expect-error
         global.document.location.search = '?specPath=__all'
       })
 
@@ -341,9 +339,9 @@ describe('initCypressTests', () => {
           ]
 
           mockCypressInstance.spec.relative = '__all'
-          // @ts-expect-error
+          // @ts-expect-error - __RUN_ALL_SPECS__ is not declared on Window
           global.parent.__RUN_ALL_SPECS__ = mockRunAllSpecs
-          // @ts-expect-error
+          // @ts-expect-error - __RUN_MODE_SPECS__ is not declared on Window
           global.parent.__RUN_MODE_SPECS__ = mockRunModeSpecs
         })
 

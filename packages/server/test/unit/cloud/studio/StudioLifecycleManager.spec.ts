@@ -303,7 +303,6 @@ describe('StudioLifecycleManager', () => {
       expect(mockCtx.update).toHaveBeenCalledOnce()
       expect(ensureStudioBundleStub).toHaveBeenCalledWith({
         studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
-        projectId: 'abc123',
       })
 
       expect(studioManagerSetupStub).toHaveBeenCalledWith({

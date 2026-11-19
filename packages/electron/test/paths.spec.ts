@@ -37,7 +37,6 @@ vi.mock('path', async () => {
 })
 
 describe('paths', () => {
-  const dir = '/package/src'
   const root = '/package'
 
   let originalPath: typeof path

@@ -22,7 +22,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
     },
@@ -34,7 +34,7 @@ vi.mock('../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       logErrorExit1: vi.fn(),
       pkgBuildInfo: vi.fn(),
@@ -48,7 +48,7 @@ vi.mock('../../lib/exec/run', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -60,7 +60,7 @@ vi.mock('../../lib/exec/open', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -72,7 +72,7 @@ vi.mock('../../lib/exec/info', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -84,7 +84,7 @@ vi.mock('../../lib/exec/tap', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -96,7 +96,7 @@ vi.mock('../../lib/tasks/install', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -114,7 +114,7 @@ vi.mock('../../lib/tasks/cache', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       list: vi.fn(),
     },
@@ -126,7 +126,7 @@ vi.mock('../../lib/tasks/state', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       getBinaryDir: vi.fn(),
       getBinaryPkgAsync: vi.fn(),
@@ -284,11 +284,11 @@ describe('cli', () => {
 
     const sanitizePlatform = (text: any): any => {
       return text
-      // @ts-expect-error
+      // @ts-expect-error - os.eol does not exist (the constant is os.EOL), so this passes undefined
       .split(os.eol)
       .map(replacePlatform)
       .map(replaceCypressVersion)
-      // @ts-expect-error
+      // @ts-expect-error - os.eol does not exist (the constant is os.EOL), so this passes undefined
       .join(os.eol)
     }
 

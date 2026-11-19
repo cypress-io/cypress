@@ -10,7 +10,7 @@ const PLACEHOLDER_COMMANDS = ['mount', 'hover']
 
 const builtInCommands = [
   // `default` is necessary if a file uses `export default` syntax.
-  // @ts-ignore
+  // @ts-expect-error - not every command module has a default export
   ..._.toArray(allCommands).map((c) => c.default || c),
   addNetstubbingCommand,
 ]
@@ -53,7 +53,7 @@ export default {
     const Commands = {
       addAllSync (obj) {
         // perf loop
-        for (let name in obj) {
+        for (const name in obj) {
           const fn = obj[name]
 
           Commands.addSync(name, fn)
@@ -74,7 +74,7 @@ export default {
         }
 
         // perf loop
-        for (let name in obj) {
+        for (const name in obj) {
           const fn = obj[name]
 
           Commands.add(name, options, fn)
@@ -194,7 +194,7 @@ export default {
     }
 
     addingBuiltIns = true
-    for (let cmd of builtInCommands) {
+    for (const cmd of builtInCommands) {
       cmd(Commands, Cypress, cy, state, config)
     }
     addingBuiltIns = false

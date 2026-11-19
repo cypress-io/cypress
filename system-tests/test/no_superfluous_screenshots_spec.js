@@ -12,8 +12,8 @@ describe('no superfluous screenshots when afterEach() failed', () => {
   systemTests.it('2 screenshots', {
     spec: 'no_superfluous_screenshots.cy.js',
     onRun (exec) {
-      return exec().
-      then(() => {
+      return exec()
+      .then(() => {
         const screenshotsPath = path.join(e2ePath, 'cypress', 'screenshots', 'no_superfluous_screenshots.cy.js')
 
         return fs.readdir(screenshotsPath).then((files) => {

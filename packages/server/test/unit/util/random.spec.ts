@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import randomstring from 'randomstring'
+import crypto from 'crypto'
 import { id as randomId } from '../../../lib/util/random'
 
 describe('.id', () => {
@@ -7,29 +7,33 @@ describe('.id', () => {
     vi.restoreAllMocks()
   })
 
-  it('returns random.generate string with length 5 by default', () => {
-    vi.spyOn(randomstring, 'generate')
+  it('returns a 5 character lowercase alphanumeric string by default', () => {
+    const randomInt = vi.spyOn(crypto, 'randomInt')
 
-    const id = randomId()
-
-    expect(id.length).toBe(5)
-
-    expect(randomstring.generate).toHaveBeenCalledWith({
-      length: 5,
-      capitalization: 'lowercase',
-    })
+    expect(randomId()).toMatch(/^[0-9a-z]{5}$/)
+    expect(randomInt).toHaveBeenCalledTimes(5)
   })
 
-  it('passes the length parameter if supplied', () => {
-    vi.spyOn(randomstring, 'generate')
+  it('returns a string of the supplied length', () => {
+    const randomInt = vi.spyOn(crypto, 'randomInt')
 
-    const id = randomId(32)
+    expect(randomId(64)).toMatch(/^[0-9a-z]{64}$/)
+    expect(randomInt).toHaveBeenCalledTimes(64)
+  })
 
-    expect(id.length).toBe(32)
+  it('draws each character from crypto.randomInt over the full 0-9a-z alphabet', () => {
+    const values = [0, 9, 10, 35]
+    const randomInt = vi.spyOn(crypto, 'randomInt').mockImplementation(() => values.shift())
 
-    expect(randomstring.generate).toHaveBeenCalledWith({
-      length: 32,
-      capitalization: 'lowercase',
+    expect(randomId(4)).toBe('09az')
+    expect(randomInt.mock.calls).toEqual([[36], [36], [36], [36]])
+  })
+
+  it('throws when crypto throws instead of falling back to a weaker source', () => {
+    vi.spyOn(crypto, 'randomInt').mockImplementation(() => {
+      throw new Error('crypto unavailable')
     })
+
+    expect(() => randomId()).toThrow('crypto unavailable')
   })
 })

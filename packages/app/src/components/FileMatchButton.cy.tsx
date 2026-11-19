@@ -30,7 +30,7 @@ describe('<FileMatchButton />', () => {
 
     cy.mount(() => (<div class="p-12">
       <FileMatchButton
-        // @ts-ignore - vue @click isn't represented in JSX
+        // @ts-expect-error - the component's JSX types do not declare the onClick listener Vue binds as @click
         onClick={() => {
           expanded.value = !expanded.value
         }}

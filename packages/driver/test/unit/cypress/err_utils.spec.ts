@@ -20,7 +20,7 @@ vi.mock('../../../src/cypress/source_map_utils', () => {
 
 describe('err_utils', () => {
   beforeEach(() => {
-    // @ts-expect-error
+    // @ts-expect-error - partial Cypress mock
     global.Cypress = {
       config: vi.fn(),
     }
@@ -241,7 +241,7 @@ describe('err_utils', () => {
 
   describe('modifyErrMsg', () => {
     beforeEach(() => {
-      // @ts-expect-error
+      // @ts-expect-error - partial Cypress mock
       global.Cypress = {
         config: vi.fn(),
         isBrowser: vi.fn().mockReturnValue(false),

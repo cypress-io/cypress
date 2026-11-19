@@ -22,6 +22,7 @@ import logger from './logger'
 import Debug from 'debug'
 import fs from 'fs-extra'
 import { relativeToRepoRoot } from './relative-to-repo-root'
+import { resolveDevelopmentCloudWorkspaceNumber } from './development-cloud-workspace'
 
 const debug = Debug('cypress:cli')
 
@@ -44,7 +45,9 @@ const getFileSize = async (filename: string): Promise<any> => {
   return size
 }
 
-const isBrokenGtkDisplayRe = /Gtk: cannot open display/
+// When DISPLAY is set but nothing is listening on it, Electron prints either the Gtk
+// message or the X server one, depending on its version.
+const isBrokenGtkDisplayRe = /Gtk: cannot open display|Missing X server or \$DISPLAY/
 
 const stringify = (val: any): string => {
   return _.isObject(val) ? JSON.stringify(val) : val
@@ -251,6 +254,13 @@ const getApplicationDataFolder = (...paths: string[]): string => {
 
   // allow overriding the app_data folder
   let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  const cloudWorkspaceNum = resolveDevelopmentCloudWorkspaceNumber(folder, env)
+  const hasCloudWorkspace = cloudWorkspaceNum !== undefined
+
+  if (hasCloudWorkspace) {
+    folder = `${folder}-workspace-${cloudWorkspaceNum}`
+  }
+
   // eslint-disable-next-line no-restricted-syntax
   const pkg = JSON.parse(fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8'))
   const PRODUCT_NAME = pkg.productName || pkg.name
@@ -293,6 +303,7 @@ const util = {
       return value ? '1' : '0'
     })
     .extend(this.getOriginalNodeOptions())
+    .extend(this.getTerminalSize())
     .value()
   },
 
@@ -312,6 +323,13 @@ const util = {
       FORCE_STDOUT_TTY: this.isTty(process.stdout.fd),
       FORCE_STDERR_TTY: this.isTty(process.stderr.fd),
     }
+  },
+
+  // On Windows the binary's stdio is always piped, so it cannot measure the terminal itself
+  getTerminalSize (): { FORCE_TTY_COLUMNS?: string, FORCE_TTY_ROWS?: string } {
+    const stream = [process.stdout, process.stderr].find((s) => s.isTTY && s.columns && s.rows)
+
+    return stream ? { FORCE_TTY_COLUMNS: String(stream.columns), FORCE_TTY_ROWS: String(stream.rows) } : {}
   },
 
   getEnvColors (): any {
@@ -388,6 +406,11 @@ const util = {
 
     return chalk.blue(...args)
   },
+
+  // Download and unzip progress use this to limit how often they update.
+  // In an interactive terminal each update redraws the install task list,
+  // so updating for every chunk or entry slows the install down.
+  progressThrottleMs: 100,
 
   calculateEta (percent: number, elapsed: number): number {
     // returns the number of seconds remaining
@@ -521,19 +544,19 @@ const util = {
 
     let result: string | undefined
 
-    if (process.env.hasOwnProperty(varName)) {
+    if (Object.prototype.hasOwnProperty.call(process.env, varName)) {
       debug(`Using ${varName} from environment variable`)
 
       result = process.env[varName]
-    } else if (process.env.hasOwnProperty(configVarName)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, configVarName)) {
       debug(`Using ${varName} from npm config`)
 
       result = process.env[configVarName]
-    } else if (process.env.hasOwnProperty(configVarNameLower)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, configVarNameLower)) {
       debug(`Using ${varName.toLowerCase()} from npm config`)
 
       result = process.env[configVarNameLower]
-    } else if (process.env.hasOwnProperty(packageConfigVarName)) {
+    } else if (Object.prototype.hasOwnProperty.call(process.env, packageConfigVarName)) {
       debug(`Using ${varName} from package.json config`)
 
       result = process.env[packageConfigVarName]

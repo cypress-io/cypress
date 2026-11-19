@@ -10,7 +10,7 @@ export const requireScript = <T>(script: string): T => {
 
   mod.filename = ''
   // _compile is a private method
-  // @ts-expect-error
+  // @ts-expect-error - _compile is not on Module's public type
   mod._compile(script, mod.filename)
 
   if (module.children) {

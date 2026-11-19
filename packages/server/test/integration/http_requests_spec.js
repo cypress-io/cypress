@@ -33,7 +33,8 @@ const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
-const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
+const { nonceDirectives, unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
+const { getMetadataHeaderValue } = require('@packages/proxy')
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -43,7 +44,7 @@ const repoPackageJson = path.resolve(__dirname, '../../../../package.json')
 const traversalTo = (absolutePath) => `${'..%2F'.repeat(20)}${encodeURIComponent(absolutePath)}`
 
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
-let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
+const sourceMapRegex = /\n\/\/# sourceMappingURL=.*/
 
 const replaceAbsolutePaths = (content) => {
   return content.replace(absolutePathRegex, '"/<path-to-project>')
@@ -319,13 +320,22 @@ describe('Routes', () => {
     })
 
     it('routes config.clientRoute to serve cypress client app html', function () {
-      return this.rp('http://localhost:2020/__')
+      return this.rp(`${this.proxy}/__`)
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
         expect(res.body).to.match(/window.__Cypress__ = true/)
 
         expect(res.headers['origin-agent-cluster']).to.eq('?0')
+      })
+    })
+
+    it('serves the \'not launched through Cypress\' page for an origin that is neither this server nor the primary', function () {
+      return this.rp('http://localhost:2020/__')
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/This browser was not launched through Cypress\./)
       })
     })
 
@@ -339,7 +349,7 @@ describe('Routes', () => {
     })
 
     it('sets title to projectName', function () {
-      return this.rp('http://localhost:2020/__')
+      return this.rp(`${this.proxy}/__`)
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
@@ -429,8 +439,8 @@ describe('Routes', () => {
       })
     })
 
-    it('routes when baseUrl is set', function () {
-      return this.setup({ baseUrl: 'http://localhost:9999/app' })
+    it('routes at the primary origin', function () {
+      return this.setup('http://localhost:9999/app')
       .then(() => {
         return this.rp('http://localhost:9999/__')
         .then((res) => {
@@ -476,6 +486,54 @@ describe('Routes', () => {
         expect(res.body).not.to.match(/This browser was not launched through Cypress\./)
         expect(res.body).to.match(/window.__Cypress__ = true/)
       })
+    })
+  })
+
+  context('GET /__cypress/iframes/*', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('does not let the spec path close the inline script', function () {
+      const specPath = 'x</script><script>window.injected=1</script>.cy.js'
+
+      return this.rp(`http://localhost:8443/__cypress/iframes/${encodeURIComponent(specPath)}`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).not.to.include('<script>window.injected')
+
+        const scripts = JSON.parse(res.body.match(/window\.Cypress\.onSpecWindow\(window, (.+)\);/)[1])
+
+        expect(_.map(scripts, 'relative')).to.include(specPath)
+      })
+    })
+  })
+
+  context('privileged channel', () => {
+    beforeEach(function () {
+      return this.setup('http://www.foobar.com:8080')
+    })
+
+    it('includes the privileged channel in the spec frame on the primary origin', async function () {
+      const res = await this.rp('http://www.foobar.com:8080/__cypress/iframes/cypress/e2e/spec.cy.js')
+
+      expect(res.statusCode).to.eq(200)
+      expect(res.body).to.include('add-verified-command')
+    })
+
+    it('omits the privileged channel from the spec frame on another origin', async function () {
+      const res = await this.rp('http://www.other.com:8080/__cypress/iframes/cypress/e2e/spec.cy.js')
+
+      expect(res.statusCode).to.eq(200)
+      expect(res.body).not.to.include('add-verified-command')
+    })
+
+    it('omits the privileged channel from a spec bridge for an origin the spec has not passed to cy.origin()', async function () {
+      const res = await this.rp('http://www.other.com:8080/__cypress/spec-bridge-iframes')
+
+      expect(res.statusCode).to.eq(200)
+      expect(res.body).to.include('cypress_cross_origin_runner.js')
+      expect(res.body).not.to.include('add-verified-command')
     })
   })
 
@@ -588,6 +646,13 @@ describe('Routes', () => {
     })
   }
 
+  // The route only preprocesses a project's specs and support file, and these
+  // tests request fixture files outside their project's default specPattern.
+  async function loadProjectWithSpecs (projectRoot, relativeSpecs) {
+    await pollUntilEventsIpcLoaded()
+    ctx.project.setSpecs(relativeSpecs.map((relative) => ({ absolute: path.join(projectRoot, relative), relative })))
+  }
+
   context('GET /__cypress/tests', () => {
     describe('ids with typescript', () => {
       beforeEach(function () {
@@ -599,7 +664,7 @@ describe('Routes', () => {
       })
 
       it('processes foo.js spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/foo.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
@@ -608,7 +673,7 @@ describe('Routes', () => {
       })
 
       it('processes dom.jsx spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/baz.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
 
         expect(res.statusCode).to.eq(200)
@@ -617,7 +682,7 @@ describe('Routes', () => {
       })
 
       it('processes spec into modern javascript', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/es6.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/es6.js')
 
         expect(res.statusCode).to.eq(200)
@@ -629,12 +694,31 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when the file is missing', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['does/not/exist.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Module not found')
         expect(res.body).to.include('Cypress.action("spec:script:error", {')
+      })
+
+      it('refuses a project file that is not a spec or the support file', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress.config.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('Cypress.action("spec:script:error", {')
+        expect(res.body).to.include('cypress.config.js is not a spec file or the support file of this project.')
+        expect(res.body).not.to.include('module.exports')
+      })
+
+      it('refuses a path that escapes the project', async function () {
+        await pollUntilEventsIpcLoaded()
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=../e2e/cypress.config.js')
+
+        expect(res.statusCode).to.eq(200)
+        expect(res.body).to.include('../e2e/cypress.config.js is not a spec file or the support file of this project.')
+        expect(res.body).not.to.include('module.exports')
       })
     })
 
@@ -652,7 +736,7 @@ describe('Routes', () => {
       })
 
       it('processes foo.js spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/foo.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
@@ -661,7 +745,7 @@ describe('Routes', () => {
       })
 
       it('processes dom.jsx spec', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['cypress/e2e/baz.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/baz.js')
 
         expect(res.statusCode).to.eq(200)
@@ -670,7 +754,7 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when the file is missing', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('ids'), ['does/not/exist.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
@@ -692,7 +776,7 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when there\'s a syntax error', async function () {
-        await pollUntilEventsIpcLoaded()
+        await loadProjectWithSpecs(Fixtures.projectPath('failures'), ['cypress/e2e/syntax_error.js'])
         const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/syntax_error.js')
 
         expect(res.statusCode).to.eq(200)
@@ -1106,7 +1190,7 @@ describe('Routes', () => {
           gzip: true,
           headers: {
             'Cookie': '__cypress.initial=true',
-            'x-cypress-is-aut-frame': 'true',
+            'x-cypress-is-aut-frame': getMetadataHeaderValue(),
           },
         })
         .then((res) => {
@@ -1264,7 +1348,7 @@ describe('Routes', () => {
           encoding: null,
           headers: {
             'Accept-Encoding': 'br',
-            'x-cypress-is-aut-frame': 'true',
+            'x-cypress-is-aut-frame': getMetadataHeaderValue(),
           },
         })
         .then((res) => {
@@ -2285,6 +2369,23 @@ describe('Routes', () => {
       })
 
       describe('CSP Header', () => {
+        // With experimentalCspAllowList enabled, the proxy rewrites CSP headers on every response,
+        // so `object-src 'none';script-src 'self';` comes back as `object-src 'none'; script-src 'self'`.
+        // Fixtures use that form so tests can compare the whole header exactly.
+        //
+        // With `__cypress.initial=false`, Cypress injects only when both the response
+        // Content-Type and the request's Accept header say HTML. Non-HTML tests send the HTML
+        // Accept header too, so Content-Type alone decides whether a nonce is added.
+
+        const expectCspWithNonce = (header, buildExpected) => {
+          const match = /'nonce-([A-Za-z0-9+/]+={0,2})'/.exec(header)
+
+          expect(match, `expected a nonce in CSP header "${header}"`).to.exist
+          expect(header).to.eq(buildExpected(match[1]))
+        }
+
+        const cspHeaderWithNonceDirectives = `object-src 'none'; script-src-elem 'self'; script-src 'self' https://cdn.example.com; default-src 'self'`
+
         describe('provided', () => {
           describe('experimentalCspAllowList: false', () => {
             beforeEach(function () {
@@ -2300,7 +2401,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'',
+                'content-security-policy': cspHeaderWithNonceDirectives,
               })
 
               return this.rp({
@@ -2326,12 +2427,12 @@ describe('Routes', () => {
               })
             })
 
-            it('does not append a "script-src" nonce to CSP header for text/html content-type when no valid directive exists', function () {
+            it('strips nonce directives and does not append a nonce to CSP header for text/html content-type', function () {
               nock(this.server.remoteStates.current().origin)
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'',
+                'content-security-policy': cspHeaderWithNonceDirectives,
               })
 
               return this.rp({
@@ -2343,13 +2444,12 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'$/)
+                expect(res.headers['content-security-policy']).to.eq(`object-src 'none'`)
               })
             })
           })
 
-          describe('experimentalCspAllowList: ["script-src-element", "script-src", "default-src"]', () => {
+          describe('experimentalCspAllowList: ["script-src-elem", "script-src", "default-src"]', () => {
             beforeEach(function () {
               return this.setup('http://localhost:8080', {
                 config: {
@@ -2363,7 +2463,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; script-src-elem \'fake-src\';',
+                'content-security-policy': `object-src 'none'; script-src-elem 'self' https://cdn.example.com`,
               })
 
               return this.rp({
@@ -2375,8 +2475,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src-elem 'self' https://cdn.example.com 'nonce-${nonce}'`)
               })
             })
 
@@ -2385,7 +2484,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\';',
+                'content-security-policy': `object-src 'none'; script-src 'self' https://cdn.example.com`,
               })
 
               return this.rp({
@@ -2397,8 +2496,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src 'self' https://cdn.example.com 'nonce-${nonce}'`)
               })
             })
 
@@ -2407,7 +2505,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; default-src \'fake-src\';',
+                'content-security-policy': `object-src 'none'; default-src 'self'`,
               })
 
               return this.rp({
@@ -2419,8 +2517,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; default-src 'self' 'nonce-${nonce}'`)
               })
             })
 
@@ -2429,7 +2526,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; script-src \'fake-src\'; default-src \'fake-src\';',
+                'content-security-policy': `object-src 'none'; script-src 'self' https://cdn.example.com; default-src 'self'`,
               })
 
               return this.rp({
@@ -2441,8 +2538,7 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src 'self' https://cdn.example.com 'nonce-${nonce}'; default-src 'self' 'nonce-${nonce}'`)
               })
             })
 
@@ -2451,7 +2547,7 @@ describe('Routes', () => {
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'; script-src-elem \'fake-src\'; script-src \'fake-src\'; default-src \'fake-src\';',
+                'content-security-policy': cspHeaderWithNonceDirectives,
               })
 
               return this.rp({
@@ -2463,17 +2559,16 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'; script-src-elem 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; script-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'; default-src 'fake-src' 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}';$/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src-elem 'self' 'nonce-${nonce}'; script-src 'self' https://cdn.example.com 'nonce-${nonce}'; default-src 'self' 'nonce-${nonce}'`)
               })
             })
 
-            it('does not remove original CSP header for text/html content-type', function () {
+            it('does not modify original CSP header for text/html content-type when no nonce directive exists', function () {
               nock(this.server.remoteStates.current().origin)
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'text/html',
-                'content-security-policy': 'foo \'bar\'',
+                'content-security-policy': `object-src 'none'; base-uri 'self'`,
               })
 
               return this.rp({
@@ -2485,50 +2580,49 @@ describe('Routes', () => {
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/foo 'bar'/)
+                expect(res.headers['content-security-policy']).to.eq(`object-src 'none'; base-uri 'self'`)
               })
             })
 
-            it('does not append a nonce to CSP header if request is not for html', function () {
+            it('appends a nonce to a CSP header that ends in ";" for text/html content-type', function () {
               nock(this.server.remoteStates.current().origin)
               .get('/bar')
               .reply(200, 'OK', {
-                'Content-Type': 'application/json',
-                'content-security-policy': 'foo \'bar\'',
+                'Content-Type': 'text/html',
+                'content-security-policy': `object-src 'none'; script-src 'self' https://cdn.example.com;`,
               })
 
               return this.rp({
                 url: 'http://localhost:8080/bar',
                 headers: {
                   'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 },
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).not.to.match(/script-src 'nonce-[^-A-Za-z0-9+/=]|=[^=]|={3,}'/)
+                expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; script-src 'self' https://cdn.example.com 'nonce-${nonce}'`)
               })
             })
 
-            it('does not remove original CSP header if request is not for html', function () {
+            it('does not remove or append a nonce to original CSP header if request is not for html', function () {
               nock(this.server.remoteStates.current().origin)
               .get('/bar')
               .reply(200, 'OK', {
                 'Content-Type': 'application/json',
-                'content-security-policy': 'foo \'bar\'',
+                'content-security-policy': cspHeaderWithNonceDirectives,
               })
 
               return this.rp({
                 url: 'http://localhost:8080/bar',
                 headers: {
                   'Cookie': '__cypress.initial=false',
+                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 },
               })
               .then((res) => {
                 expect(res.statusCode).to.eq(200)
-                expect(res.headers).to.have.property('content-security-policy')
-                expect(res.headers['content-security-policy']).to.match(/^foo 'bar'$/)
+                expect(res.headers['content-security-policy']).to.eq(cspHeaderWithNonceDirectives)
               })
             })
 
@@ -2541,7 +2635,7 @@ describe('Routes', () => {
                 .get('/bar')
                 .reply(200, 'OK', {
                   'Content-Type': 'text/html',
-                  'content-security-policy': `foo \'bar\'; ${headerValue};`,
+                  'content-security-policy': `object-src 'none'; ${headerValue}; base-uri 'self'`,
                 })
 
                 return this.rp({
@@ -2553,9 +2647,42 @@ describe('Routes', () => {
                 })
                 .then((res) => {
                   expect(res.statusCode).to.eq(200)
-                  expect(res.headers).to.have.property('content-security-policy')
-                  expect(res.headers['content-security-policy']).to.match(/^foo 'bar'/)
-                  expect(res.headers['content-security-policy']).not.to.match(new RegExp(headerValue))
+                  expect(res.headers['content-security-policy']).to.eq(`object-src 'none'; base-uri 'self'`)
+                })
+              })
+            })
+          })
+
+          nonceDirectives.forEach((directive) => {
+            describe(`experimentalCspAllowList: ["${directive}"]`, () => {
+              const allowedPolicy = cspHeaderWithNonceDirectives.split('; ').find((policy) => policy.startsWith(`${directive} `))
+
+              beforeEach(function () {
+                return this.setup('http://localhost:8080', {
+                  config: {
+                    experimentalCspAllowList: [directive],
+                  },
+                })
+              })
+
+              it(`appends a nonce to "${directive}" and strips the other nonce directives for text/html content-type`, function () {
+                nock(this.server.remoteStates.current().origin)
+                .get('/bar')
+                .reply(200, 'OK', {
+                  'Content-Type': 'text/html',
+                  'content-security-policy': cspHeaderWithNonceDirectives,
+                })
+
+                return this.rp({
+                  url: 'http://localhost:8080/bar',
+                  headers: {
+                    'Cookie': '__cypress.initial=false',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                  },
+                })
+                .then((res) => {
+                  expect(res.statusCode).to.eq(200)
+                  expectCspWithNonce(res.headers['content-security-policy'], (nonce) => `object-src 'none'; ${allowedPolicy} 'nonce-${nonce}'`)
                 })
               })
             })
@@ -2583,7 +2710,7 @@ describe('Routes', () => {
             })
           })
 
-          it('does not append a nonce to CSP header if request is not for html', function () {
+          it('does not add a CSP header if request is not for html', function () {
             nock(this.server.remoteStates.current().origin)
             .get('/bar')
             .reply(200, 'OK', {
@@ -2594,6 +2721,7 @@ describe('Routes', () => {
               url: 'http://localhost:8080/bar',
               headers: {
                 'Cookie': '__cypress.initial=false',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
               },
             })
             .then((res) => {
@@ -3258,7 +3386,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include(`document.domain = \'${superdomain}\'`)
+            expect(res.body).to.include(`document.domain = "${superdomain}"`)
           })
         })
 
@@ -3299,7 +3427,7 @@ describe('Routes', () => {
 
               const body = cleanResponseBody(res.body)
 
-              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foobar.com\'; </script></head><body>https server</body></html>')
+              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "foobar.com"; </script></head><body>https server</body></html>')
             })
           })
         })
@@ -3324,7 +3452,7 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'cypress.io\'; </script></head></html>')
+            expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "cypress.io"; </script></head></html>')
           })
         })
 
@@ -3364,7 +3492,7 @@ describe('Routes', () => {
             headers: {
               'Cookie': '__cypress.initial=false',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-              'X-Cypress-Is-AUT-Frame': 'true',
+              'X-Cypress-Is-AUT-Frame': getMetadataHeaderValue(),
               'Accept-Encoding': 'identity',
             },
           })
@@ -3373,7 +3501,7 @@ describe('Routes', () => {
 
             const body = cleanResponseBody(res.body)
 
-            expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = 'foobar.com';`)
+            expect(body).to.include(`<html><head> <script type='text/javascript'> document.domain = "foobar.com";`)
           })
         })
 
@@ -3493,7 +3621,7 @@ describe('Routes', () => {
 
               const body = cleanResponseBody(res.body)
 
-              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = \'foo.com\'; </script></head></html>')
+              expect(body).to.eq('<html><head> <script type=\'text/javascript\'> document.domain = "foo.com"; </script></head></html>')
             })
           })
         })
@@ -3705,7 +3833,7 @@ describe('Routes', () => {
             'Content-Encoding': 'gzip',
           })
 
-          return this.r({
+          this.r({
             url: 'http://www.google.com/app.js',
             gzip: true,
           })
@@ -4065,7 +4193,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('document.domain = \'localhost\';')
+            expect(res.body).to.include('document.domain = "localhost";')
           })
         })
 
@@ -4081,7 +4209,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(200)
 
-            expect(res.body).to.include('document.domain = \'localhost\';')
+            expect(res.body).to.include('document.domain = "localhost";')
           })
         })
 
@@ -4096,7 +4224,7 @@ describe('Routes', () => {
           .then((res) => {
             expect(res.statusCode).to.eq(301)
 
-            expect(res.body).not.to.include('document.domain = \'localhost\';')
+            expect(res.body).not.to.include('document.domain = "localhost";')
           })
         })
 
@@ -4231,7 +4359,7 @@ describe('Routes', () => {
         // due to the reduced keep alive timeout
         this.timeout(1500)
 
-        return dns.lookup('localhost', { all: true }, (err, addresses) => {
+        dns.lookup('localhost', { all: true }, (err, addresses) => {
           if (err) {
             return done(err)
           }

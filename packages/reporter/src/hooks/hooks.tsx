@@ -25,7 +25,7 @@ const HookHeader = ({ model, number }: HookHeaderProps) => (
 interface HookComponentProps {
   model: HookModel
   showNumber: boolean
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const Hook: React.FC<HookComponentProps> = observer(({ model, showNumber, scrollIntoView }: HookComponentProps) => (
@@ -62,7 +62,7 @@ interface HooksModel {
 interface HooksProps {
   state?: AppState
   model: HooksModel
-  scrollIntoView: Function
+  scrollIntoView: () => void
 }
 
 const Hooks: React.FC<HooksProps> = observer(({ state = appState, model, scrollIntoView }: HooksProps) => (

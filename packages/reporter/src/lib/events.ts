@@ -199,16 +199,8 @@ const events: Events = {
       runner.emit('runner:unpin:snapshot', testId, logId)
     })
 
-    localBus.on('get:user:editor', (cb) => {
-      runner.emit('get:user:editor', cb)
-    })
-
     localBus.on('clear:all:sessions', (cb) => {
       runner.emit('clear:all:sessions', cb)
-    })
-
-    localBus.on('set:user:editor', (editor) => {
-      runner.emit('set:user:editor', editor)
     })
 
     localBus.on('save:state', () => {

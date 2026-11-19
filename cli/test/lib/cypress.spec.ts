@@ -11,10 +11,10 @@ vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual returns unknown, which cannot be spread
     ...actual,
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       readJson: vi.fn(),
     },
@@ -25,10 +25,10 @@ vi.mock('tmp', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual returns unknown, which cannot be spread
     ...actual,
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       fileSync: vi.fn(),
     },
@@ -39,10 +39,10 @@ vi.mock('../../lib/exec/open', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual returns unknown, which cannot be spread
     ...actual,
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },
@@ -53,10 +53,10 @@ vi.mock('../../lib/exec/run', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual returns unknown, which cannot be spread
     ...actual,
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       start: vi.fn(),
     },

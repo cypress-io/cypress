@@ -1,6 +1,6 @@
 <template>
   <WizardLayout
-    :next="allDependenciesInstalled ? t('setupPage.step.continue') : t('setupWizard.installDependencies.waitForInstall')"
+    :next="allDependenciesInstalled ? 'Continue' : 'Waiting for you to install the dependencies...'"
     :can-navigate-forward="allDependenciesInstalled"
     :back-fn="props.backFn"
     :next-fn="confirmInstalled"
@@ -16,7 +16,7 @@
         v-model="showSuccessAlert"
         class="w-full"
         :icon="CircleCheck"
-        :title="t('setupWizard.installDependencies.installationAlertSuccess')"
+        title="You've successfully installed all required dependencies."
         status="success"
         dismissible
       />
@@ -38,7 +38,6 @@ import {
   InstallDependencies_ScaffoldFilesDocument,
   Wizard_InstalledPackagesDocument,
 } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
 import { useMutation, useQuery } from '@urql/vue'
 import { useIntervalFn } from '@vueuse/core'
 
@@ -100,7 +99,6 @@ if (!allDependenciesInstalled.value) {
   }, 1000)
 }
 
-const { t } = useI18n()
 const mutation = useMutation(InstallDependencies_ScaffoldFilesDocument)
 
 const confirmInstalled = () => {

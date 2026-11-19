@@ -1,6 +1,8 @@
 import _ from 'lodash'
+import os from 'os'
 import path from 'path'
-import Jimp from 'jimp'
+import { createRequire } from 'module'
+import type { Jimp as JimpClass } from 'jimp'
 import { Buffer } from 'buffer'
 import dataUriToBuffer from 'data-uri-to-buffer'
 import sizeOf from 'image-size'
@@ -12,6 +14,9 @@ import { fs } from '../../lib/util/fs'
 import * as plugins from '../../lib/plugins'
 import { Screenshot } from '../../lib/automation/screenshot'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../lib/makeDataContext'
+
+// screenshots.ts requires jimp's CommonJS build, so stub that copy.
+const { Jimp } = createRequire(path.join(__dirname, '../../lib/screenshots.ts'))('jimp') as { Jimp: typeof JimpClass }
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
 // `graphql` rejects. Resolving the project config never queries either schema.
@@ -83,8 +88,13 @@ function argsStub (): ArgsStub {
 }
 
 const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC'
-const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
+const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.?\d*Z?$/
 let ctx
+
+// RGBA colours as returned by `getPixelColor()`
+const GREY = 0x7f7f7fff
+const WHITE = 0xffffffff
+const BLACK = 0x000000ff
 
 // each test times out after only 1 sec so that durations are handled correctly
 describe('lib/screenshots', { timeout: 1000 }, () => {
@@ -145,9 +155,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         return jimpImage
       }),
       getBuffer: vi.fn(() => Promise.resolve(buffer)),
-      getMIME () {
-        return 'image/png'
-      },
+      mime: 'image/png',
       hash: vi.fn(() => 'image hash'),
       clone: () => {
         return jimpImage
@@ -184,12 +192,12 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
 
     beforeEach(() => {
       getPixelColor = argsStub()
-      getPixelColor.withArgs(0, 0).returns('grey')
-      getPixelColor.withArgs(1, 0).returns('white')
-      getPixelColor.withArgs(0, 1).returns('white')
-      getPixelColor.withArgs(40, 0).returns('white')
-      getPixelColor.withArgs(0, 40).returns('white')
-      getPixelColor.withArgs(40, 40).returns('black')
+      getPixelColor.withArgs(0, 0).returns(GREY)
+      getPixelColor.withArgs(1, 0).returns(WHITE)
+      getPixelColor.withArgs(0, 1).returns(WHITE)
+      getPixelColor.withArgs(40, 0).returns(WHITE)
+      getPixelColor.withArgs(0, 40).returns(WHITE)
+      getPixelColor.withArgs(40, 40).returns(BLACK)
       jimpImage.getPixelColor = getPixelColor
 
       jimpReadOnCall = new Map()
@@ -201,18 +209,10 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         return Promise.resolve(jimpReadOnCall.has(n) ? jimpReadOnCall.get(n) : jimpImage)
       }) as any)
 
-      const colors = {
-        black: { r: 0, g: 0, b: 0 },
-        grey: { r: 127, g: 127, b: 127 },
-        white: { r: 255, g: 255, b: 255 },
-      }
-
-      vi.spyOn(Jimp, 'intToRGBA').mockImplementation(((color: string) => colors[color]) as any)
-
       automate = vi.fn(() => Promise.resolve(image))
 
       passPixelTest = () => {
-        getPixelColor.withArgs(0, 0).returns('white')
+        getPixelColor.withArgs(0, 0).returns(WHITE)
       }
     })
 
@@ -227,7 +227,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
     })
 
     it('retries until helper pixels are no longer present for viewport capture', () => {
-      getPixelColor.withArgs(0, 0).onCall(1).returns('white')
+      getPixelColor.withArgs(0, 0).onCall(1).returns(WHITE)
 
       return screenshots.capture(appData, automate).then(() => {
         expect(automate).toHaveBeenCalledTimes(2)
@@ -236,7 +236,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
 
     it('retries until helper pixels are present for runner capture', () => {
       passPixelTest()
-      getPixelColor.withArgs(0, 0).onCall(1).returns('black')
+      getPixelColor.withArgs(0, 0).onCall(1).returns(BLACK)
 
       return screenshots.capture({ viewport: jimpImage.bitmap }, automate)
       .then(() => {
@@ -248,12 +248,12 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
       appData.viewport = { width: 20, height: 20 }
       appData.clip = { x: 5, y: 5, width: 10, height: 10 }
       passPixelTest()
-      getPixelColor.withArgs(2, 0).returns('white')
-      getPixelColor.withArgs(0, 2).returns('white')
+      getPixelColor.withArgs(2, 0).returns(WHITE)
+      getPixelColor.withArgs(0, 2).returns(WHITE)
 
       return screenshots.capture(appData, automate)
       .then(() => {
-        expect(jimpImage.crop).toHaveBeenCalledWith(10, 10, 20, 20)
+        expect(jimpImage.crop).toHaveBeenCalledWith({ x: 10, y: 10, w: 20, h: 20 })
       })
     })
 
@@ -279,7 +279,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
 
         return screenshots.capture(appData, automate)
         .then(() => {
-          expect(jimpImage.crop).toHaveBeenCalledWith(0, 0, 10, 10)
+          expect(jimpImage.crop).toHaveBeenCalledWith({ x: 0, y: 0, w: 10, h: 10 })
         })
       })
 
@@ -288,7 +288,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         appData.capture = 'runner'
         appData.appOnly = false
 
-        getPixelColor.withArgs(0, 0).onCall(1).returns('white')
+        getPixelColor.withArgs(0, 0).onCall(1).returns(WHITE)
 
         return screenshots.capture(appData, automate).then(() => {
           expect(automate).toHaveBeenCalledTimes(2)
@@ -323,7 +323,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         passPixelTest()
 
         return screenshots.capture(appData, automate).then(() => {
-          expect(jimpImage.crop).toHaveBeenCalledWith(2, 2, 5, 5)
+          expect(jimpImage.crop).toHaveBeenCalledWith({ x: 2, y: 2, w: 5, h: 5 })
         })
       })
 
@@ -342,11 +342,11 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         appData.viewport = { width: 20, height: 20 }
         appData.userClip = { x: 5, y: 5, width: 10, height: 10 }
         passPixelTest()
-        getPixelColor.withArgs(2, 0).returns('white')
-        getPixelColor.withArgs(0, 2).returns('white')
+        getPixelColor.withArgs(2, 0).returns(WHITE)
+        getPixelColor.withArgs(0, 2).returns(WHITE)
 
         return screenshots.capture(appData, automate).then(() => {
-          expect(jimpImage.crop).toHaveBeenCalledWith(10, 10, 20, 20)
+          expect(jimpImage.crop).toHaveBeenCalledWith({ x: 10, y: 10, w: 20, h: 20 })
         })
       })
     })
@@ -362,7 +362,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         appData.current = 1
         appData.total = 3
 
-        getPixelColor.withArgs(0, 0).onSecondCall().returns('white')
+        getPixelColor.withArgs(0, 0).onSecondCall().returns(WHITE)
 
         const clone = (img, props) => {
           return _.defaultsDeep(props, img)
@@ -459,7 +459,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
       })
 
       it('clears previous full page state once complete', () => {
-        getPixelColor.withArgs(0, 0).returns('white')
+        getPixelColor.withArgs(0, 0).returns(WHITE)
 
         readResolvesOnCall(1, jimpImage2)
         readResolvesOnCall(2, jimpImage3)
@@ -505,6 +505,8 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         screenshots.clearMultipartState()
 
         vi.restoreAllMocks()
+        // The outer beforeEach replaces composite outright, which restoreAllMocks doesn't undo
+        Jimp.prototype.composite = originalComposite
 
         data1 = {
           titles: ['cy.screenshot() - take a screenshot'],
@@ -565,7 +567,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         }).then((img3) => {
           return Jimp.read(Fixtures.path('img/DPI-1x/stitched.png'))
           .then((img) => {
-            expect(screenshots.imagesMatch(img, img3.image))
+            expect(screenshots.imagesMatch(img, img3.image)).toBe(true)
           })
         })
       })
@@ -586,7 +588,7 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
         }).then((img3) => {
           return Jimp.read(Fixtures.path('img/DPI-2x/stitched.png'))
           .then((img) => {
-            expect(screenshots.imagesMatch(img, img3.image))
+            expect(screenshots.imagesMatch(img, img3.image)).toBe(true)
           })
         })
       })
@@ -605,37 +607,37 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
     it('crops to dimension size if less than the image size', () => {
       screenshots.crop(jimpImage, dimensions())
 
-      expect(jimpImage.crop).toHaveBeenCalledWith(0, 0, 10, 10)
+      expect(jimpImage.crop).toHaveBeenCalledWith({ x: 0, y: 0, w: 10, h: 10 })
     })
 
     it('crops to dimension size if less than the image size', () => {
       screenshots.crop(jimpImage, dimensions())
 
-      expect(jimpImage.crop).toHaveBeenCalledWith(0, 0, 10, 10)
+      expect(jimpImage.crop).toHaveBeenCalledWith({ x: 0, y: 0, w: 10, h: 10 })
     })
 
     it('crops to one less than width if dimensions x is more than the image width', () => {
       screenshots.crop(jimpImage, dimensions({ x: 50 }))
 
-      expect(jimpImage.crop).toHaveBeenCalledWith(39, 0, 1, 10)
+      expect(jimpImage.crop).toHaveBeenCalledWith({ x: 39, y: 0, w: 1, h: 10 })
     })
 
     it('crops to one less than height if dimensions y is more than the image height', () => {
       screenshots.crop(jimpImage, dimensions({ y: 50 }))
 
-      expect(jimpImage.crop).toHaveBeenCalledWith(0, 39, 10, 1)
+      expect(jimpImage.crop).toHaveBeenCalledWith({ x: 0, y: 39, w: 10, h: 1 })
     })
 
     it('crops only width if dimensions height is more than the image height', () => {
       screenshots.crop(jimpImage, dimensions({ height: 50 }))
 
-      expect(jimpImage.crop).toHaveBeenCalledWith(0, 0, 10, 40)
+      expect(jimpImage.crop).toHaveBeenCalledWith({ x: 0, y: 0, w: 10, h: 40 })
     })
 
     it('crops only height if dimensions width is more than the image width', () => {
       screenshots.crop(jimpImage, dimensions({ width: 50 }))
 
-      expect(jimpImage.crop).toHaveBeenCalledWith(0, 0, 40, 10)
+      expect(jimpImage.crop).toHaveBeenCalledWith({ x: 0, y: 0, w: 40, h: 10 })
     })
   })
 
@@ -772,6 +774,106 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
       })
     })
 
+    const eexist = (): NodeJS.ErrnoException => Object.assign(new Error('eexist'), { code: 'EEXIST' })
+
+    const data = {
+      specName: 'foo.js',
+      name: 'name',
+    }
+
+    it('claims the name with an exclusive create when overwrite is off', async () => {
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).toBe('path/to/screenshots/foo.js/name.png')
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(1)
+      expect(fs.outputFileAsync).toHaveBeenCalledWith(p, '', { flag: 'wx' })
+    })
+
+    it('moves to the next suffix when the name already exists', async () => {
+      vi.mocked(fs.outputFileAsync).mockRejectedValueOnce(eexist())
+
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).toBe('path/to/screenshots/foo.js/name (1).png')
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(2)
+      expect(fs.outputFileAsync).toHaveBeenNthCalledWith(2, p, '', { flag: 'wx' })
+    })
+
+    it('keeps moving to the next suffix while names already exist', async () => {
+      vi.mocked(fs.outputFileAsync)
+      .mockRejectedValueOnce(eexist())
+      .mockRejectedValueOnce(eexist())
+
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', false)
+
+      expect(p).toBe('path/to/screenshots/foo.js/name (2).png')
+    })
+
+    it('reuses the base name without an exclusive create when overwrite is on', async () => {
+      const p = await screenshots.getPath(data, 'png', 'path/to/screenshots', true)
+
+      expect(p).toBe('path/to/screenshots/foo.js/name.png')
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(1)
+      expect(fs.outputFileAsync).toHaveBeenCalledWith(p, '', {})
+    })
+
+    it('does not retry on an existing file when overwrite is on', async () => {
+      const err = eexist()
+
+      vi.mocked(fs.outputFileAsync).mockRejectedValueOnce(err)
+
+      await expect(screenshots.getPath(data, 'png', 'path/to/screenshots', true)).rejects.toBe(err)
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(1)
+    })
+
+    it('rethrows errors other than EEXIST and ENAMETOOLONG when overwrite is off', async () => {
+      const err: NodeJS.ErrnoException = Object.assign(new Error('eacces'), { code: 'EACCES' })
+
+      vi.mocked(fs.outputFileAsync).mockRejectedValueOnce(err)
+
+      await expect(screenshots.getPath(data, 'png', 'path/to/screenshots', false)).rejects.toBe(err)
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(1)
+    })
+
+    it('reuses and truncates an existing file on disk when overwrite is on', async () => {
+      vi.mocked(fs.outputFileAsync).mockRestore()
+
+      const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-screenshots-'))
+      const existing = path.join(folder, 'foo.js', 'name.png')
+
+      try {
+        await fs.outputFile(existing, 'previous screenshot')
+
+        const p = await screenshots.getPath(data, 'png', folder, true)
+
+        expect(p).toBe(existing)
+        expect(await fs.readFile(p, 'utf8')).toBe('')
+      } finally {
+        await fs.remove(folder)
+      }
+    })
+
+    it('gives concurrent callers distinct names on disk', async () => {
+      vi.mocked(fs.outputFileAsync).mockRestore()
+
+      const folder = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-screenshots-'))
+
+      try {
+        const paths = await Promise.all(_.times(10, () => {
+          return screenshots.getPath(data, 'png', folder, false)
+        }))
+
+        expect(_.uniq(paths)).toHaveLength(10)
+        expect(paths).toContain(path.join(folder, 'foo.js', 'name.png'))
+
+        for (const p of paths) {
+          expect(await fs.pathExists(p), p).toBe(true)
+        }
+      } finally {
+        await fs.remove(folder)
+      }
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/2403
     it('truncates long paths with unicode in them', async () => {
       const fullPath = await screenshots.getPath({
@@ -803,6 +905,28 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
       }, 'png', '/tmp')
 
       expect(path.basename(fullPath)).toHaveLength(204)
+    })
+
+    // ENAMETOOLONG permanently lowers the module-level filename byte limit, so this runs after
+    // the test above that asserts the exact truncated length
+    it('handles EEXIST and ENAMETOOLONG in sequence', async () => {
+      const enametoolong: NodeJS.ErrnoException = Object.assign(new Error('enametoolong'), { code: 'ENAMETOOLONG' })
+
+      vi.mocked(fs.outputFileAsync)
+      .mockRejectedValueOnce(eexist())
+      .mockRejectedValueOnce(enametoolong)
+      .mockRejectedValueOnce(eexist())
+
+      const p = await screenshots.getPath({ specName: 'foo.js', name: 'a'.repeat(300) }, 'png', '/tmp', false)
+      const [first, second, third, fourth] = vi.mocked(fs.outputFileAsync).mock.calls.map((call) => path.basename(call[0] as string))
+
+      expect(first).toMatch(/^a+\.png$/)
+      expect(second).toMatch(/^a+ \(1\)\.png$/)
+      expect(third).toMatch(/^a+ \(1\)\.png$/)
+      expect(third.length).toBe(second.length - 1)
+      expect(fourth).toMatch(/^a+ \(2\)\.png$/)
+      expect(path.basename(p)).toBe(fourth)
+      expect(fs.outputFileAsync).toHaveBeenCalledTimes(4)
     })
 
     it('rejects with ENAMETOOLONG errors if name goes below MIN_PREFIX_LENGTH', async () => {
@@ -963,8 +1087,8 @@ describe('lib/automation/screenshot', () => {
   let savedDetails
   let updatedDetails
   let screenshot
-  // left undefined; capture is stubbed and only forwards it
-  let automate
+  // capture is stubbed and only forwards it
+  const automate = undefined
 
   beforeEach(() => {
     details = {}

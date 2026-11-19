@@ -3,8 +3,11 @@ import debug from 'debug'
 import fs from 'fs'
 import { dirname, join, basename } from 'path'
 import { minify } from 'terser'
-import { createSnapshotScript, SnapshotScript } from './create-snapshot-script'
+import type { SnapshotScript } from './create-snapshot-script'
+import { createSnapshotScript } from './create-snapshot-script'
 import { SnapshotVerifier } from './snapshot-verifier'
+import { assertLatin1, escapeNonLatin1 } from './escape-non-latin1'
+import { shiftGeneratedColumns } from '../sourcemap/shift-generated-columns'
 import { determineDeferred } from '../doctor/determine-deferred'
 import {
   backupName,
@@ -15,7 +18,8 @@ import {
   getBundlerPath,
   resolveElectronVersion,
 } from '../utils'
-import { createExportScript, ExportScript } from './create-snapshot-bundle'
+import type { ExportScript } from './create-snapshot-bundle'
+import { createExportScript } from './create-snapshot-bundle'
 import { Flag, GeneratorFlags } from './snapshot-generator-flags'
 import { syncAndRun } from '@tooling/electron-mksnapshot'
 import tempDir from 'temp-dir'
@@ -267,7 +271,8 @@ export class SnapshotGenerator {
         contents = this.updateSnapshotScriptContents(contents)
       }
 
-      this.snapshotScript = Buffer.from(contents)
+      // Only a script cached before escaping existed changes here, and its source map is left unshifted
+      this.snapshotScript = Buffer.from(escapeNonLatin1(contents).code)
       await fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
 
       return
@@ -299,6 +304,7 @@ export class SnapshotGenerator {
     }
 
     let result: SnapshotScript
+    const processedSourcemapPath = this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map')
 
     try {
       // 2. Create the initial snapshot script using whatever info we
@@ -315,7 +321,7 @@ export class SnapshotGenerator {
         nodeModulesOnly: this.nodeModulesOnly,
         sourcemap: true,
         baseSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'base.snapshot.js.map'),
-        processedSourcemapExternalPath: this.snapshotScriptPath.replace('snapshot.js', 'processed.snapshot.js.map'),
+        processedSourcemapExternalPath: processedSourcemapPath,
         nodeEnv: this.nodeEnv,
         cypressInternalEnv: this.cypressInternalEnv,
         supportTypeScript: this.nodeModulesOnly,
@@ -333,7 +339,16 @@ export class SnapshotGenerator {
       }),
     )
 
-    this.snapshotScript = result.snapshotScript
+    const unescapedScript = result.snapshotScript.toString()
+    const { code, edits } = escapeNonLatin1(unescapedScript)
+
+    this.snapshotScript = Buffer.from(code)
+
+    if (edits.length > 0 && fileExistsSync(processedSourcemapPath)) {
+      const sourceMap = await fs.promises.readFile(processedSourcemapPath, 'utf8')
+
+      await fs.promises.writeFile(processedSourcemapPath, shiftGeneratedColumns(sourceMap, unescapedScript, edits))
+    }
 
     // 3. Since we don't want the `mksnapshot` command to bomb with cryptic
     //    errors we verify that the generated script is snapshot-able.
@@ -360,12 +375,16 @@ export class SnapshotGenerator {
 
       const minified = await minify(this.snapshotScript!.toString(), {
         sourceMap: false,
+        // Otherwise terser turns `\uXXXX` escapes back into the characters
+        format: { ascii_only: true },
       })
 
       if (!minified.code) {
         await fs.promises.writeFile(this.snapshotScriptPath, this.snapshotScript)
         throw new Error(`Failed to minify snapshot script. Writing unminified code to ${this.snapshotScriptPath}`)
       }
+
+      assertLatin1(minified.code, this.snapshotScriptPath)
 
       return fs.promises.writeFile(this.snapshotScriptPath, minified.code)
     }
@@ -477,6 +496,8 @@ export class SnapshotGenerator {
       'Cannot makeSnapshot when MakeSnapshot flag is not set',
     )
 
+    assertLatin1(await fs.promises.readFile(this.snapshotScriptPath, 'utf8'), this.snapshotScriptPath)
+
     // 2. Run the `mksnapshot` binary providing it the path to our snapshot
     //    script
     // --no-use-ic flag is a workaround
@@ -519,7 +540,7 @@ export class SnapshotGenerator {
       const stderr = err.stderr?.toString().trim()
       const detail = stderr || err.toString()
 
-      throw new Error(`Failed \`mksnapshot\` command\n${detail}`)
+      throw new Error(`Failed \`mksnapshot\` command\n${detail}`, { cause: err })
     }
   }
 

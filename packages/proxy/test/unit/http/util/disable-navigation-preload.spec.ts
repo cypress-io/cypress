@@ -5,7 +5,6 @@ import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION, DISABLE_NAVIGATION_PRELOAD_WINDO
 // script body / addScriptToEvaluateOnNewDocument does: as a standalone
 // script with a single free variable naming its realm.
 function evaluate (expression: string, freeVariableName: string, value: unknown) {
-  // eslint-disable-next-line no-new-func
   return new Function(freeVariableName, expression)(value)
 }
 
@@ -20,7 +19,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
   describe('DISABLE_NAVIGATION_PRELOAD_EXPRESSION (worker realm)', () => {
     // A prototype-backed fake so patches can be told apart from an instance's
     // own properties, the same shape the real NavigationPreloadManager has.
-    function createManagerClass (methods: { enable?: Function, disable?: Function }) {
+    function createManagerClass (methods: { enable?: (...args: any[]) => unknown, disable?: (...args: any[]) => unknown }) {
       function FakeNavigationPreloadManager (this: any) {}
 
       if (methods.enable) {
@@ -110,7 +109,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
   })
 
   describe('DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION (window realm)', () => {
-    function createManagerCtor (enable?: Function) {
+    function createManagerCtor (enable?: (...args: any[]) => unknown) {
       function FakeNavigationPreloadManager (this: any) {}
 
       FakeNavigationPreloadManager.prototype.enable = enable ?? vi.fn().mockResolvedValue(undefined)
@@ -119,8 +118,8 @@ describe('lib/http/util/disable-navigation-preload', () => {
     }
 
     function createFakeSelf (options: {
-      NavigationPreloadManager?: Function
-      getRegistrations?: Function
+      NavigationPreloadManager?: (...args: any[]) => unknown
+      getRegistrations?: (...args: any[]) => unknown
     } = {}) {
       return {
         NavigationPreloadManager: options.NavigationPreloadManager,

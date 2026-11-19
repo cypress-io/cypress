@@ -43,7 +43,8 @@ if (version && context) {
 const span = telemetry.startSpan({ name: 'child:process', active: true })
 
 debug('child:process span initialized')
-suppressWarnings()
+// The user controls TLS verification in this process, so keep Node's warning if they turn it off
+suppressWarnings({ showTlsWarning: true })
 
 gracefulify(fs)
 const ipc = util.wrapIpc(process as unknown as util.WrappedIpcProcess)

@@ -94,7 +94,7 @@ export function doesRouteMatch (routeMatcher: RouteMatcherOptions, req: RouteMat
 }
 
 export function getMatchableForRequest (req: RouteMatchableRequest) {
-  let matchable: any = _.pick(req, ['headers', 'method', 'resourceType'])
+  const matchable: any = _.pick(req, ['headers', 'method', 'resourceType'])
 
   const authorization = req.headers['authorization']
   const authHeader = Array.isArray(authorization) ? authorization[0] : authorization

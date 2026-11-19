@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import Debug from 'debug'
-// @ts-ignore
 import deepDiff from 'return-deep-diff'
 
 import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
@@ -24,13 +23,11 @@ const debug = Debug('cypress:config:project')
 // TODO: any -> SetupFullConfigOptions in data-context/src/data/ProjectConfigManager.ts
 export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any): Promise<FullConfig> {
   debug('setting config object %o', obj)
-  let { projectRoot, projectName, config, envFile, options, cliConfig, repoRoot } = obj
+  const { projectRoot, projectName, envFile, options, cliConfig, repoRoot } = obj
 
   // just force config to be an object so we dont have to do as much
   // work in our tests
-  if (config == null) {
-    config = {}
-  }
+  const config = obj.config ?? {}
 
   debug('config is %o', config)
 
@@ -40,7 +37,7 @@ export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any)
   config.projectName = projectName
   config.repoRoot = repoRoot
 
-  // @ts-ignore
+  // @ts-expect-error - mergeDefaults is typed to return Promise<Config>, but it sets resolved and the other FullConfig fields
   return mergeDefaults(config, options, cliConfig, getFilesByGlob)
 }
 
@@ -56,7 +53,7 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
   // make sure every option returned from the plugins file
   // passes our validation functions
   validate(modifiedConfig, (validationResult: ConfigValidationFailureInfo | string) => {
-    let configFile = cfg.configFile!
+    const configFile = cfg.configFile!
 
     if (_.isString(validationResult)) {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)

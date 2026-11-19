@@ -4,19 +4,15 @@
     data-cy="settings-projectId"
   >
     <template #title>
-      {{ t('settingsPage.projectId.title') }}
+      Project ID
     </template>
     <template #description>
-      <i18n-t
-        scope="global"
-        keypath="settingsPage.projectId.description"
+      The Project ID configured for this project inside of Cypress Cloud.
+      <ExternalLink
+        :href="learnMoreUrl"
       >
-        <ExternalLink
-          href="https://on.cypress.io/what-is-a-project-id"
-        >
-          {{ t('links.learnMore') }}
-        </ExternalLink>
-      </i18n-t>
+        Learn more.
+      </ExternalLink>
     </template>
     <div
       v-if="props.gql.currentProject?.projectId"
@@ -36,15 +32,13 @@
 
 <script lang="ts" setup>
 import { gql } from '@urql/core'
-import { useI18n } from '@cy/i18n'
 import CopyButton from '@cy/gql-components/CopyButton.vue'
 import IconOctothorpe from '~icons/cy/octothorpe_x16.svg'
 import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import CodeBox from './CodeBox.vue'
 import type { ProjectIdFragment } from '../../generated/graphql'
-
-const { t } = useI18n()
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 gql`
 fragment ProjectId on Query {
@@ -57,5 +51,7 @@ fragment ProjectId on Query {
 const props = defineProps<{
   gql: ProjectIdFragment
 }>()
+
+const learnMoreUrl = getUrlWithParams({ url: 'https://on.cypress.io/what-is-a-project-id', params: { utm_medium: 'Settings', utm_campaign: 'Project ID' } })
 
 </script>

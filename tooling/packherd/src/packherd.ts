@@ -1,7 +1,8 @@
 import path from 'path'
 import { strict as assert } from 'assert'
 import { createBundle as defaultCreateBundle } from './create-bundle'
-import { EntryGenerator, PathsMapper } from './generate-entry'
+import type { PathsMapper } from './generate-entry'
+import { EntryGenerator } from './generate-entry'
 import { tmpFilePaths } from './utils'
 import type { CreateBundle } from './types'
 

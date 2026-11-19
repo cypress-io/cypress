@@ -29,8 +29,6 @@ export {
 
 const debug = Debug('cypress:config:browser')
 
-const dashesOrUnderscoresRe = /^(_-)+/
-
 // takes an array and creates an index object of [keyKey]: [valueKey]
 function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T, defaultValueFallback?: any) {
   return _.reduce(arr, (memo: Record<string, any>, item) => {
@@ -62,7 +60,7 @@ export type InvalidTestOverrideResult = {
 
 type ErrorHandler = (
   key: BreakingOptionErrorKey,
-  options: BreakingErrResult
+  options: BreakingErrResult,
 ) => void
 
 export function resetIssuedWarnings () {
@@ -156,8 +154,7 @@ export const matchesConfigKey = (key: string) => {
     return key
   }
 
-  key = key.toLowerCase().replace(dashesOrUnderscoresRe, '')
-  key = _.camelCase(key)
+  key = _.camelCase(key.toLowerCase())
 
   if (_.has(defaultValues, key)) {
     return key

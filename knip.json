@@ -36,6 +36,7 @@
         "mocha-junit-reporter",
         "mocha-multi-reporters",
         "mock-fs",
+        "node-gyp",
         "playwright-webkit",
         "proxyquire",
         "react-dom",
@@ -162,7 +163,9 @@
         "*.{ts,tsx,js,jsx,mjs}"
       ],
       "ignoreDependencies": [
-        "@graphql-typed-document-node/core"
+        "@graphql-typed-document-node/core",
+        "react",
+        "react-dom"
       ]
     },
     "packages/example": {
@@ -383,6 +386,7 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
+        "@electron/get",
         "@electron/packager"
       ]
     },
@@ -460,14 +464,6 @@
         "*.{ts,tsx,js,jsx}"
       ]
     },
-    "npm/eslint-plugin-dev": {
-      "entry": [
-        "lib/custom-rules/**/*.js"
-      ],
-      "project": [
-        "lib/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
     "npm/webpack-dev-server": {
       "entry": [
         "src/browser.ts",
@@ -536,7 +532,8 @@
     },
     "npm/vite-dev-server": {
       "entry": [
-        "cypress/e2e/**/*.{ts,tsx,js,jsx}"
+        "cypress/e2e/**/*.{ts,tsx,js,jsx}",
+        "cypress/support/e2e.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
@@ -562,9 +559,6 @@
     "npm/svelte": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "jiti"
       ]
     },
     "npm/react": {
@@ -774,8 +768,10 @@
     "pgrep",
     "rm",
     "tar",
+    "tput",
     "tslint",
-    "wc"
+    "wc",
+    "Xvfb"
   ],
   "rules": {
     "binaries": "error",
@@ -974,7 +970,7 @@
     "packages/driver/src/cy/commands/querying/within.ts": [
       "exports"
     ],
-    "npm/react/cypress/component/basic/use-render/my-component.jsx": [
+    "npm/react/cypress/component/basic/use-render/my-component.tsx": [
       "exports"
     ],
     "packages/driver/src/cypress/command.ts": [

@@ -3,7 +3,6 @@
 import { parseGrep, shouldTestRun } from './utils'
 import { version } from '../package.json'
 import debug from 'debug'
-// @ts-ignore
 const debugInstance = debug('@cypress/grep')
 
 debugInstance.log = console.info.bind(console)
@@ -74,6 +73,7 @@ export function register (): void {
   }
 
   // @ts-expect-error - it is missing only, skip, and retries which are overridden below
+  // eslint-disable-next-line no-global-assign -- @cypress/grep filters tests by replacing the global it
   it = function itGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Test | void[] {
     if (typeof options === 'function') {
       callback = options
@@ -139,6 +139,7 @@ export function register (): void {
   const suiteStack: SuiteStackItem[] = []
 
     // @ts-expect-error - it is missing only and skip which are overridden below
+  // eslint-disable-next-line no-global-assign -- @cypress/grep filters tests by replacing the global describe
   describe = function describeGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Suite {
     if (typeof options === 'function') {
       callback = options
@@ -175,7 +176,9 @@ export function register (): void {
     suiteStack.pop()
   }
 
+  // eslint-disable-next-line no-global-assign -- @cypress/grep filters tests by replacing the global context alias
   context = describe
+  // eslint-disable-next-line no-global-assign -- @cypress/grep filters tests by replacing the global specify alias
   specify = it
 
   it.skip = _it.skip

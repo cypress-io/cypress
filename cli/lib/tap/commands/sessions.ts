@@ -1,4 +1,4 @@
-import { TAP_TARGET, isTapSupportedBrowser, listLiveSessions } from '../../cypress-sessions'
+import { TAP_TARGET, isTapSupportedBrowser, listLiveSessions, findStartingSession } from '../../cypress-sessions'
 import type { LiveSessionState, ReadySessionState } from '../../cypress-sessions'
 import { renderOutcome, renderResult } from '../output'
 import { withTapConnection } from '../tap-connection'
@@ -7,6 +7,9 @@ import { defineNativeCommand } from './definition'
 import type { TapCliOptions } from '../types'
 
 const NO_SESSIONS_GUIDANCE = `No running ${TAP_TARGET} found. Start Cypress in open mode (e.g. \`cypress open\`) and select a testing type to get started.`
+
+// Cypress is running, so telling the reader to start it would start a second one
+const PROJECT_NOT_LOADED_GUIDANCE = `Cypress is running, but its project could not load, so there is no ${TAP_TARGET} to list. Run \`cypress tap status\` to see why.`
 
 /** One row of `cypress tap sessions`: a reachable open-mode Cypress session. */
 export interface TapSessionSummary {
@@ -50,7 +53,9 @@ const listSessions = async (options: TapCliOptions): Promise<number> => {
   const sessions = await listLiveSessions({ session: options.session })
 
   if (sessions.length === 0) {
-    renderResult(NO_SESSIONS_GUIDANCE)
+    const starting = await findStartingSession({ session: options.session, cwd: process.cwd() })
+
+    renderResult(starting ? PROJECT_NOT_LOADED_GUIDANCE : NO_SESSIONS_GUIDANCE)
 
     return 0
   }

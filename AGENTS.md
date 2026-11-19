@@ -10,7 +10,7 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 - **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more
 - **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling
 - **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot`
-- **`system-tests/`** — Full end-to-end system test suite run against a built Cypress binary
+- **`system-tests/`** — Full end-to-end system test suite: `test/` runs against the dev app, `test-binary/` against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
 
 ## Task runbooks
@@ -72,8 +72,9 @@ yarn workspace @packages/server test-unit -- --grep "<pattern>"
 # @packages/data-context is the one package on jest, not vitest or mocha
 yarn workspace @packages/data-context test-unit -- <path-to-spec>
 
-# Run system tests (full binary-level E2E)
-yarn test-system
+# Run system test specs whose file name contains a fragment (not a path);
+# see system-tests/AGENTS.md
+yarn test-system go_spec --browser electron
 
 # Run Cypress headlessly against a specific spec (dev mode)
 yarn cypress:run -- --spec "path/to/spec.cy.ts"
@@ -103,8 +104,6 @@ yarn lint:fix
 ```
 
 > **Note**: This project does **not** use Prettier. All formatting is enforced via ESLint.
-
-The repo is mid-migration between two ESLint configs, so ignore rules live in two places: `ignorePatterns` in the root `.eslintrc.js` for the packages still on eslintrc, and the `ignores` block in `packages/eslint-config/src/baseConfig.ts` for the packages on flat config. Build output (`cjs/`, `esm/`, `dist/`) is already ignored in both; do not add a per-package `.eslintignore` for it, since patterns in those files that contain a `/` silently match nothing. [The ESLint migration guide](./guides/eslint-migration.md#6-ignore-build-output-centrally) explains the mechanism.
 
 ### Build
 
@@ -210,7 +209,6 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **`@cypress/grep`** — Plugin to filter test runs by substring/tag.
 - **`@cypress/puppeteer`** — Plugin to enhance Cypress tests with Puppeteer.
 - **`@cypress/schematic`** — Official Angular CLI schematic for adding Cypress.
-- **`@cypress/eslint-plugin-dev`** — ESLint rules shared across Cypress development packages.
 
 ## Code Conventions
 
@@ -227,9 +225,9 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **TypeScript**: `strict: true` base, but `noImplicitAny: false` (implicit `any` allowed for pragmatic reasons).
 - **Type-only imports**: `importsNotUsedAsValues: "error"` — use `import type` for type-only imports.
 - **Type guards over `as`** — Narrow with a type guard, an `asserts` function or an `in` check rather than an `as` assertion, and explain any assertion that remains with a "Safe because" comment. See [Type Assertions](./guides/typescript.md#type-assertions).
-- **Unused vars**: Prefix with `_` to suppress (`argsIgnorePattern: '^_'`).
-- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
-- **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
+- **Unused vars**: Unused variables and imports are errors. Unused function parameters and caught errors are allowed, since callbacks often have to accept arguments they ignore. In packages on the flat config, prefix a variable that exists only to be type-checked with `_`.
+- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment). In a workspace that spreads `vitestConfig`, disable `vitest/no-focused-tests` instead, plus `mocha/no-exclusive-tests` in a spec that uses Vitest's globals rather than importing `it` from `vitest`.
+- **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why. In a workspace that spreads `vitestConfig`, a skip that has to stay also needs `eslint-disable-next-line vitest/no-disabled-tests` below that comment.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
 
@@ -239,6 +237,9 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **Explain the why** — When a comment is necessary, use it to explain the *why* and anything relevant that is not directly expressed by the code itself.
 - **Don't repeat yourself** — Do not restate the same comment multiple times in a file as the code flows through each step.
 - **Present state only** — Keep comments relevant to the current state of the code. Do not describe what changed or how the code used to be different.
+- **Name the reason, not the predecessor** — "Matches what the old plugin did" is not a *why*, and it rots once that plugin is deleted. State the reason the old code had, and put parity with replaced tooling in the commit message or guide.
+- **Show the effect first** — For code that rewrites a value (a parser, a sanitizer, a name or path normalizer), open with what it does to its input, with a concrete example such as `` `outer/</<` becomes `outer` ``. Background on why the input looks that way comes after, if at all.
+- **No measurements** — Don't cite benchmark numbers in a comment. They depend on the machine they came from and go stale with the code around them. State the reason instead, and keep the numbers in the commit message or pull request.
 
 Bad examples:
 
@@ -265,7 +266,7 @@ Code in this monorepo runs in several runtimes, each with its own JavaScript / r
 - **Dev tooling, gulp, build/dev scripts** — the Node version in [`.node-version`](./.node-version).
 - **The bundled app (main/Electron process)** — the Node embedded in the `electron` version pinned in the root [`package.json`](./package.json) (look up that Electron release's Node/V8).
 - **The config/plugins child process** (`@packages/server` `lib/plugins/child/require_async_child.ts`, forked by `@packages/data-context` `ProjectConfigIpc`) and the **`cypress` CLI** (`cli/`) — the *user's* Node, whose supported range is `engines.node` in [`cli/package.json`](./cli/package.json). This floor is lower than the dev/bundled Node, so it is the binding constraint for that code.
-- **Browser-shipped bundles** (`@packages/app`, `@packages/frontend-shared`, `@packages/driver`) — the last 3 major versions of the supported browsers. Since Safari releases majors roughly annually, the last 3 major versions reach back years, making this the most conservative floor. `@packages/driver` runs in the user's AUT browser. For WebKit, Cypress runs the WebKit bundled with the installed `playwright-webkit` version — not the user's system Safari — so the WebKit floor tracks that dependency.
+- **Browser-shipped bundles** (`@packages/app`, `@packages/frontend-shared`, `@packages/driver`, `@packages/reporter`, `@packages/runner`; not `@packages/launchpad`, which only renders in Electron) — the last 3 major versions of the supported browsers. Since Safari releases majors roughly annually, the last 3 major versions reach back years, making this the most conservative floor. `@packages/driver` runs in the user's AUT browser. For WebKit, Cypress runs the WebKit bundled with the installed `playwright-webkit` version — not the user's system Safari — so the WebKit floor tracks that dependency. The floor is written down as a browserslist query in [`browser-bundles.browserslistrc`](./browser-bundles.browserslistrc), where `last 3 Safari major versions` stands in for that WebKit build. Read the file by path, never by moving it to a name browserslist finds on its own (the file's header says why). ESLint's [`compatConfig`](./packages/eslint-config/AGENTS.md#compatconfig) checks the bundles against it.
 
 Verify an API against the relevant floor (node.green for Node, caniuse/MDN for browsers) before relying on it.
 
@@ -279,10 +280,14 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 - Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
+### Dependency Updates
+
+Whether you're bumping a dependency or reviewing a Renovate PR, follow [Code Review of Dependency Updates](./CONTRIBUTING.md#code-review-of-dependency-updates). Read the changelog for every version in the range, not just the target release, and don't trust semver to flag breaking changes. Check the dependency's `engines.node` against the floor of the runtime that loads it (see [Runtime targets](#runtime-targets)), not the dev Node version.
+
 ## CI/CD
 
 - **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`. See [`.circleci/AGENTS.md`](.circleci/AGENTS.md) for when to add a branch to the full-CI allowlist (binary tests, Windows jobs, v8 snapshot validation).
-- **Supplementary**: GitHub Actions for security scanning (Snyk), SBOM generation, browser version auto-updates, and PR validation.
+- **Supplementary**: GitHub Actions for SBOM generation, browser version auto-updates, and PR validation.
 - **Base branch**: `develop` — all PRs target `develop`; release branches follow `release/X.Y.Z`.
 - **Multi-platform matrix**: Linux x64, Linux ARM64, macOS x64, macOS ARM64, Windows — all run in parallel. Coverage is per-job, not uniform: `unit-tests` runs only on linux-x64 and windows, so a unit test coupled to the host architecture passes CI and still fails locally on arm64. See [`cli/AGENTS.md`](./cli/AGENTS.md) for keeping specs host-independent.
 - **Release gate**: All tests must pass through the `ready-to-release` aggregation job before `npm-release` runs.
@@ -295,7 +300,7 @@ Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, an
 
 ### Environment
 
-- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
+- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which runs the postinstall. What it covers depends on `CI` ([`scripts/run-postInstall.js`](./scripts/run-postInstall.js)): with `CI` set, as on Claude Code on the web, it skips `yarn-deduplicate`, `yarn build` and the V8 snapshot, so nothing is built. Check `echo $CI`, and run `yarn build` before anything that loads built packages, such as system tests. After adding or changing a dependency, run `yarn check-lockfile`. If it lists duplicates, run `yarn dedupe-lockfile` and commit the result, or CI's "Check yarn.lock is deduplicated" job fails. Then run `yarn check-lockfile-drift`. It runs a full `yarn install`, which drops request keys that nothing asks for any more, such as those left by a reverted `resolutions` entry. `--frozen-lockfile` keeps those keys, so a stale lockfile still passes a frozen install and only fails CI's "Check yarn.lock matches resolved dependencies" job. Don't call `yarn-deduplicate` directly: `dedupe-lockfile` leaves out `graphql`, which the repo holds at two majors on purpose (see [`@packages/eslint-config`'s dependency pins](./packages/eslint-config/AGENTS.md#dependency-pins)).
 - The root `package.json` sets `engines.node` to the version in [`.node-version`](./.node-version), so yarn refuses to run any script on an older Node: `The engine "node" is incompatible with this module`. Containers that pre-install a lower version need the required one installed before anything else works — see [Matching the required Node version](#matching-the-required-node-version).
 - Browsers and a display differ by host. Cursor Cloud runs Xvfb on `DISPLAY=:1` and ships Chrome at `/usr/bin/google-chrome-stable`. Claude Code on the web has Xvfb installed but leaves `DISPLAY` unset, and has no Chrome — only the Chromium that Playwright bundles under `$PLAYWRIGHT_BROWSERS_PATH`. There, `cypress run` starts its own Xvfb when `DISPLAY` is unset, so the Cypress-based suites do run; pass `--browser "$PLAYWRIGHT_BROWSERS_PATH/chromium"` instead of `--browser chrome`, and wrap anything else that needs a display (such as `yarn dev`) in `xvfb-run -a`. On any host, prefix Electron commands with `env -u ELECTRON_RUN_AS_NODE`: some agent hosts set it, and it makes Electron start as plain Node.
 
@@ -309,6 +314,17 @@ Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, an
 - Prefer scoped tests: `yarn workspace @packages/<name> test`. Do not use `yarn test --scope <name>` — lerna unions scopes with the ones the root `test` script already sets, so it broadens the run instead of narrowing it. `yarn lint --scope` and `yarn check-ts --scope` do narrow correctly.
 - Some test suites (e.g., `@packages/network`) require privileged ports (443) and will fail with EACCES in unprivileged containers — this is expected.
 - `@packages/config` has 2 tests that assert `cypressBinaryRoot` contains `'cypress'`; these fail when the workspace directory name differs (e.g., `/workspace`). This is a known path-dependent issue, not a code bug.
+
+### Running system tests
+
+Specs in `system-tests/test` run in cloud containers. Specs in `system-tests/test-binary` need Docker and a built binary, so they do not.
+
+1. **Build once:** `env -u ELECTRON_RUN_AS_NODE yarn build`. System tests need all three things it produces: the compiled workspace packages, the dev Electron app in `packages/electron/dist/Cypress`, and the `cli/dist` bundle that fixture projects resolve `cypress` from. Without them the run fails with `Cannot find module '…/lib-dist/index.js'`, `spawn …/dist/Cypress/Cypress ENOENT`, or `Cannot find module '…/cypress/dist/index.js'`.
+2. **Run by file name fragment:** `env -u ELECTRON_RUN_AS_NODE yarn test-system go_spec --browser electron`. The script wraps its argument in `{test,test-binary}/**/*<arg>*`, so a path such as `test/go_spec.js`, or `--spec <path>`, matches nothing. The runner starts its own Xvfb, so `DISPLAY` can stay unset.
+3. **Pick a browser that exists:** Claude Code on the web has no Chrome or Firefox install, so pass `--browser electron`. It runs the Electron variant and reports the other browsers as pending.
+4. **Restore snapshots afterwards:** a local run prunes snapshot keys for tests it skipped. See [`system-tests/AGENTS.md`](./system-tests/AGENTS.md).
+
+If `yarn build` fails in `@cypress/vue` with `Cannot find module '@cypress/mount-utils'` while `npm/mount-utils/dist` exists, the rollup-plugin-typescript2 cache is stale: delete `npm/vue/node_modules/.cache/rollup-plugin-typescript2` and rerun.
 
 ### Linting
 

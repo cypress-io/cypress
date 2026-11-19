@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import type { FoundBrowser, Browser } from '@packages/types'
-import type { PathData } from '../types'
+import type { PathData, VersionStringCache } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import os from 'os'
@@ -36,10 +36,30 @@ async function isFirefoxSnap (binary: string): Promise<boolean> {
   }
 }
 
+// Forking is slow from a large parent process such as the Electron main process,
+// so only spawn `--version` for binaries that exist.
+async function getInstalledVersionString (binary: string, versionStringCache: VersionStringCache): Promise<string> {
+  const resolvedPath = await utils.which(binary)
+
+  if (!resolvedPath) {
+    throw notInstalledErr(binary)
+  }
+
+  let versionString = versionStringCache.get(resolvedPath)
+
+  if (!versionString) {
+    versionString = Promise.resolve(getVersionString(binary))
+    versionStringCache.set(resolvedPath, versionString)
+  }
+
+  return versionString
+}
+
 function getLinuxBrowser (
   name: string,
   binary: string,
   versionRegex: RegExp,
+  versionStringCache: VersionStringCache,
 ): Promise<FoundBrowser> {
   const foundBrowser: any = {
     name,
@@ -95,7 +115,7 @@ function getLinuxBrowser (
     }
   }
 
-  return getVersionString(binary)
+  return Bluebird.resolve(getInstalledVersionString(binary, versionStringCache))
   .tap(maybeSetSnapProfilePath)
   .then(getVersion)
   .then((version?: string): FoundBrowser => {
@@ -106,18 +126,23 @@ function getLinuxBrowser (
   .catch(logAndThrowError)
 }
 
-export function getVersionString (path: string) {
+// A binary that cannot start says why on stderr, which is the only text a person has to
+// go on when a path they gave is not recognized as a browser.
+export function getVersionOutput (path: string) {
   debugVerbose('finding version string using command "%s --version"', path)
 
   return utils.getOutput(path, ['--version'])
   .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
-  .then((val) => val.stdout)
-  .then((val) => val.trim())
-  .then((val) => {
-    debugVerbose('stdout for "%s --version": %s', path, val)
+  .then(({ stdout, stderr }) => {
+    debugVerbose('stdout for "%s --version": %s', path, stdout.trim())
+    debugVerbose('stderr for "%s --version": %s', path, stderr?.trim())
 
-    return val
+    return { stdout: stdout.trim(), stderr: (stderr ?? '').trim() }
   })
+}
+
+export function getVersionString (path: string) {
+  return getVersionOutput(path).then(({ stdout }) => stdout)
 }
 
 export function getVersionNumber (version: string, browser: Browser) {
@@ -130,10 +155,11 @@ export function getPathData (pathStr: string): PathData {
   return { path: pathStr }
 }
 
-export function detect (browser: Browser) {
+export function detect (browser: Browser, versionStringCache: VersionStringCache = new Map()) {
   return getLinuxBrowser(
     browser.name,
     browser.binary as string,
     browser.versionRegex,
+    versionStringCache,
   )
 }

@@ -50,7 +50,6 @@ describe('<CreateSpecCard />', { viewportWidth: 400, viewportHeight: 400 }, () =
 
     cy.mount(() => (<div class="m-12">
       <CreateSpecCard icon={DocumentCode} header={header} description={shortDescription}
-        // @ts-ignore - vue @click isn't represented in JSX
         onClick={onClickSpy} />
     </div>))
     .get(specCardSelector)

@@ -45,8 +45,8 @@ export async function createWebpackDevServer (
   const finalWebpackConfig = await makeWebpackConfig(config)
   const webpackCompiler = webpack(finalWebpackConfig)
 
-  if (webpackDevServerMajorVersion === 5) {
-    debug('using webpack-dev-server v5')
+  if (webpackDevServerMajorVersion === 5 || webpackDevServerMajorVersion === 6) {
+    debug(`using webpack-dev-server v${webpackDevServerMajorVersion}`)
 
     return webpackDevServer5(config, webpackCompiler, finalWebpackConfig)
   }
@@ -65,8 +65,7 @@ function webpackDevServer5 (
   const webpackDevServerConfig: WebpackDevServer5Configuration = {
     host: '127.0.0.1',
     port: 'auto',
-    // @ts-ignore
-    ...finalWebpackConfig?.devServer,
+    ...finalWebpackConfig.devServer,
     devMiddleware: {
       publicPath: devServerPublicPathRoute,
       stats: finalWebpackConfig.stats ?? 'minimal',

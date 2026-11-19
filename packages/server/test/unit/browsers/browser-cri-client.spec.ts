@@ -8,8 +8,10 @@ import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
+import { FRAGMENT_MESSAGES_OVER_BYTES } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
 import * as protocol from '../../../lib/browsers/protocol'
 import { cypressSessions } from '../../../lib/cypress-sessions'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -333,7 +335,7 @@ describe('lib/browsers/browser-cri-client', function () {
     })
 
     it('ignores a detach for a session with no binding', async function () {
-      const client = await getClient({ fullyManageTabs: true })
+      await getClient({ fullyManageTabs: true })
 
       await callsWith(on, 'Target.detachedFromTarget')[0][1]({ sessionId: 'never-attached' })
 
@@ -507,6 +509,24 @@ describe('lib/browsers/browser-cri-client', function () {
       expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
+    it('sends messages over the fragmenting threshold to the extra target as fragments', async () => {
+      const originalSend = vi.fn()
+      const criClient = {
+        send: stub(),
+        on: vi.fn(),
+        _ws: { send: originalSend },
+      }
+
+      options.CriConstructor.mockReturnValue(criClient)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      criClient._ws.send('a'.repeat(FRAGMENT_MESSAGES_OVER_BYTES + 1))
+
+      expect(originalSend.mock.calls.length).toBeGreaterThan(1)
+    })
+
     it('does not throw if Fetch.enable on extra target throws', async () => {
       const fetchEnableFailed = Object.assign(new Error(''), { name: 'Fetch.enable failed' })
       const extraTargetCriClient = {
@@ -578,7 +598,7 @@ describe('lib/browsers/browser-cri-client', function () {
         requestId: 'request-id',
         headers: [
           { name: 'X-Another-Custom-Header', value: 'value' },
-          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+          { name: 'X-Cypress-Is-From-Extra-Target', value: getMetadataHeaderValue() },
         ],
       })
     })
@@ -658,7 +678,7 @@ describe('lib/browsers/browser-cri-client', function () {
       expectCalledWith(criClient.send, 'Fetch.continueRequest', {
         requestId: 'request-id',
         headers: [
-          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+          { name: 'X-Cypress-Is-From-Extra-Target', value: getMetadataHeaderValue() },
         ],
       })
     })

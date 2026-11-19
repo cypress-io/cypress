@@ -1,6 +1,11 @@
 const disabledFeatures = [
-  // Uncomment to force the deprecation of unload events
-  // 'DeprecateUnloadByUserAndOrigin',
+  // Keep `unload` events firing (Chrome 158+ stops dispatching them). The
+  // driver listens for the AUT's `unload` to drop its listeners and record
+  // that the page went away; without it, navigations within `cy.origin()`
+  // leave that state stale when `injectDocumentDomain` is enabled.
+  // https://developer.chrome.com/docs/web-platform/deprecating-unload
+  'DeprecateUnload',
+  'DeprecateUnloadByBucket',
 
   // Hide toolbar button that opens dialog for controlling media sessions.
   'GlobalMediaControls',
@@ -29,6 +34,9 @@ const disabledFeatures = [
   // servers (e.g. login/redirect/OAuth flows) are blocked, breaking tests that
   // worked in Chrome 140. Cypress fully controls the browser under test, so it's
   // safe to opt out of these checks entirely.
+  // The browser network path also depends on it: internal Cypress routes the
+  // page requests from the AUT origin are redirected to the Cypress server on
+  // localhost, which LNA would block for a public AUT origin.
   // https://github.com/cypress-io/cypress/issues/32708
   // https://developer.chrome.com/blog/local-network-access
   'LocalNetworkAccessChecks',

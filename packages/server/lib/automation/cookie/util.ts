@@ -14,7 +14,8 @@ export const sameSiteExtensionToProtocolMap = {
   'strict': 'Strict',
 } as const
 
-// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- @ts-expect-error would be unused in server, where the chrome types are loaded
+// @ts-ignore - driver, proxy and net-stubbing type-check this file without the chrome namespace
 export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
   // use `undefined` instead of `unspecified`
   sameSite?: Exclude<ExtensionSameSiteStatus, 'unspecified'>
@@ -24,7 +25,8 @@ export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expiratio
 
 // Cypress uses the webextension-style filtering
 // https://developer.chrome.com/extensions/cookies#method-getAll
-// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- @ts-expect-error would be unused in server, where the chrome types are loaded
+// @ts-ignore - driver, proxy and net-stubbing type-check this file without the chrome namespace
 export type CyCookieFilter = chrome.cookies.GetAllDetails
 
 // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains

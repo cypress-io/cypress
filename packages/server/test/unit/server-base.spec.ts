@@ -1,4 +1,5 @@
 import { createRequire } from 'module'
+import { EventEmitter } from 'events'
 import express from 'express'
 import _ from 'lodash'
 import nock from 'nock'
@@ -11,11 +12,15 @@ import { clearCtx, setCtx } from '@packages/data-context'
 import { connect } from '@packages/network'
 import type { NetworkProxy } from '@packages/proxy'
 
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
 import { cache } from '../../lib/cache'
 import { cypressSessions } from '../../lib/cypress-sessions'
 import * as serverErrors from '../../lib/errors'
 import * as fileServer from '../../lib/file_server'
-import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
+import { ServerBase, _errorHandler, _forceProxyMiddleware } from '../../lib/server-base'
+import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
+import { runnerMutationRule } from '@packages/data-context/graphql/rootFieldRules'
+import { subscriptionOnlyRule } from '@packages/data-context/graphql/subscriptionOnlyRule'
 import { SocketE2E } from '../../lib/socket-e2e'
 import * as ensureUrl from '../../lib/util/ensure-url'
 import { GracefulExit } from '../../lib/util/graceful-exit'
@@ -26,7 +31,7 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
-    graphQLHTTP: vi.fn(),
+    tapGraphQLHTTP: vi.fn(),
   }
 })
 
@@ -148,7 +153,7 @@ afterAll(() => {
 describe('lib/server-base', () => {
   let config: any
   let server: TestServer
-  let fileServerMock: { close: () => void, port: () => number }
+  let fileServerMock: { close: Mock, port: () => number }
   let oldFileServer: any
   let createFileServer: Mock
 
@@ -168,7 +173,7 @@ describe('lib/server-base', () => {
     await cache.remove()
 
     fileServerMock = {
-      close () {},
+      close: vi.fn(),
       port () {
         return 1111
       },
@@ -294,10 +299,6 @@ describe('lib/server-base', () => {
 
       it('logs a tap graphql request whose session id header does not match', () => {
         expect(skip('/__cypress/tap/graphql/TapSpecs', { 'x-cypress-session-id': 'nope' })).toBe(false)
-      })
-
-      it('logs a graphql request from the app, which sends no session id header', () => {
-        expect(skip('/__cypress/graphql/Specs')).toBe(false)
       })
 
       it('logs a proxied request that mimics the probe path', () => {
@@ -455,6 +456,16 @@ describe('lib/server-base', () => {
       samples.forEach(({ cdp, proxy }, index) => {
         expect(cdp, `sample ${index} reads CDP only while the CDP proxy is installed`).toBe(proxy === cdpNetworkProxy)
       })
+    })
+  })
+
+  describe('#createServer', () => {
+    it('restricts the graphql-ws endpoint to subscriptions and the mutations the runner sends', async () => {
+      const app = server.createExpressApp({ morgan: false })
+
+      await server.createServer(app, { socketIoRoute: '/__socket' })
+
+      expect(graphqlWS).toHaveBeenCalledWith(expect.anything(), '/__socket-graphql', { enforceOrigin: false, validationRules: [runnerMutationRule, subscriptionOnlyRule] })
     })
   })
 
@@ -1103,7 +1114,101 @@ describe('lib/server-base', () => {
           type: 'PORT_IN_USE_SHORT',
           message: expect.stringContaining(String(port)),
         })
+
+        // the file server created for the failed attempt is still listening,
+        // so it has to be closed rather than left holding its port
+        expect(fileServerMock.close).toHaveBeenCalled()
       })
+    })
+  })
+
+  describe('#_listen', () => {
+    // Stands in for an http.Server whose listen() always succeeds and whose
+    // address reports the next port. Keeps the port sequence deterministic so
+    // the browser-blocked-port retry can be exercised without a real bind.
+    function fakeListeningServer (ports: number[]) {
+      const srv: any = new EventEmitter()
+      let nextPort = 0
+
+      srv.listen = vi.fn((_port: number, _host: string, cb: () => void) => {
+        process.nextTick(cb)
+
+        return srv
+      })
+
+      // the server keeps reporting its last port after the sequence runs out,
+      // since teardown reads address() again
+      srv.address = vi.fn(() => ({ address: '127.0.0.1', family: 'IPv4', port: ports[Math.min(nextPort++, ports.length - 1)] }))
+      srv.close = vi.fn((cb: (err?: Error) => void) => {
+        process.nextTick(() => cb())
+      })
+
+      srv.destroyAsync = vi.fn()
+
+      return srv
+    }
+
+    it('listens on the configured port when browsers allow it', async () => {
+      server._server = fakeListeningServer([54321])
+
+      await expect(server._listen(54321)).resolves.toBe(54321)
+
+      expect(server._server.listen).toHaveBeenCalledWith(54321, '127.0.0.1', expect.any(Function))
+    })
+
+    it('redraws an ephemeral port that browsers block instead of failing to load it', async () => {
+      server._server = fakeListeningServer([10080, 54321])
+
+      await expect(server._listen(null)).resolves.toBe(54321)
+
+      expect(server._server.listen).toHaveBeenCalledTimes(2)
+      expect(server._server.listen).toHaveBeenLastCalledWith(0, '127.0.0.1', expect.any(Function))
+      expect(server._server.close).toHaveBeenCalledTimes(1)
+    })
+
+    it('rejects a bind failure other than EADDRINUSE instead of leaving the run hanging', async () => {
+      const srv: any = new EventEmitter()
+
+      srv.listen = vi.fn(() => {
+        const err = Object.assign(new Error('listen EACCES: permission denied'), { code: 'EACCES' })
+
+        process.nextTick(() => srv.emit('error', err))
+
+        return srv
+      })
+
+      srv.destroyAsync = vi.fn()
+
+      server._server = srv
+
+      await expect(server._listen(null)).rejects.toMatchObject({ code: 'EACCES' })
+    })
+
+    it('rejects with the close error instead of retrying when the blocked port cannot be released', async () => {
+      const srv = fakeListeningServer([10080, 54321])
+      const closeErr = Object.assign(new Error('close failed'), { code: 'EBADF' })
+
+      srv.close = vi.fn((cb: (err?: Error) => void) => {
+        process.nextTick(() => cb(closeErr))
+      })
+
+      server._server = srv
+
+      await expect(server._listen(null)).rejects.toBe(closeErr)
+
+      // a server that is still bound cannot listen again
+      expect(srv.listen).toHaveBeenCalledTimes(1)
+    })
+
+    it('gives up after repeated blocked ephemeral ports instead of listening forever', async () => {
+      server._server = fakeListeningServer(Array(10).fill(10080))
+
+      await expect(server._listen(null)).rejects.toMatchObject({
+        type: 'PORT_BLOCKED_BY_BROWSER',
+        message: expect.stringContaining('could not find a port that browsers allow'),
+      })
+
+      expect(server._server.listen).toHaveBeenCalledTimes(10)
     })
   })
 
@@ -1310,9 +1415,12 @@ describe('lib/server-base', () => {
     })
 
     it('is noop if req.url startsWith socketIoRoute', () => {
+      server.remoteStates.set('http://localhost:3000')
+
       const remotePort = 12345
       const req = {
         url: '/foobarbaz',
+        headers: { origin: 'http://localhost:3000' },
         socket: { remotePort, remoteAddress: '127.0.0.1' },
       }
 
@@ -1330,21 +1438,23 @@ describe('lib/server-base', () => {
     // stretch on the browser (CDP) network path (which never CONNECTs) leaves it
     // empty. A MITM browser repopulates it via onConnect before it upgrades, so
     // nothing needs to clear it on a switch.
-    it('switches gates between loopback and the CONNECT allow-list', async () => {
+    it('switches gates between Origin alone and the CONNECT allow-list', async () => {
       server._openConfig = config
+      server.remoteStates.set('http://localhost:3000')
 
       const remotePort = 12345
       const req = {
         url: '/foo/bar',
+        headers: { origin: 'http://localhost:3000' },
         socket: { remotePort, remoteAddress: '127.0.0.1' },
       }
       const write = vi.fn()
 
       await enterBrowserNetworkMode(server)
 
-      server.proxyWebsockets(proxy, '/foo', req, { ...socket, write }, head)
+      server.proxyWebsockets(proxy, '/foo', { ...req, url: '/foo-graphql' }, { ...socket, write }, head)
 
-      expect(write, 'loopback is the only gate on the browser (CDP) network path').not.toHaveBeenCalled()
+      expect(write, 'the Origin is the only gate on the browser (CDP) network path').not.toHaveBeenCalled()
       expect(server.socketAllowed.allowedLocalPorts).toHaveLength(0)
 
       vi.spyOn(server, 'ensureHttpsProxy').mockResolvedValue(undefined)
@@ -1360,6 +1470,106 @@ describe('lib/server-base', () => {
       server.proxyWebsockets(proxy, '/foo', req, { ...socket, write }, head)
 
       expect(write, 'the CONNECT that precedes the upgrade re-registers the port').not.toHaveBeenCalled()
+    })
+
+    describe('on the browser (CDP) network path', () => {
+      const upgrade = (url: string, origin = 'http://localhost:3000') => {
+        const write = vi.fn()
+        const end = vi.fn()
+
+        server.proxyWebsockets(proxy, '/__socket', { url, headers: { origin }, socket: { remotePort: 12345, remoteAddress: '127.0.0.1' } }, { end, write }, head)
+
+        return { write, end }
+      }
+
+      beforeEach(async () => {
+        server._openConfig = config
+        server.remoteStates.set('http://localhost:3000')
+        await enterBrowserNetworkMode(server)
+      })
+
+      it('refuses socket.io upgrades from the primary origin', () => {
+        const { write, end } = upgrade('/__socket/?EIO=4&transport=websocket')
+
+        expect(write).toHaveBeenCalledWith(expect.stringContaining('400 Bad Request'))
+        expect(end).toHaveBeenCalled()
+      })
+
+      it('lets graphql-ws upgrades from the primary origin through', () => {
+        const { write, end } = upgrade('/__socket-graphql')
+
+        expect(write).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
+
+      it('refuses graphql-ws upgrades from another origin', () => {
+        const { write } = upgrade('/__socket-graphql', 'https://other.example.com')
+
+        expect(write).toHaveBeenCalledWith(expect.stringContaining('400 Bad Request'))
+      })
+    })
+
+    it('refuses a socket upgrade from any origin but the primary, or the Firefox extension on the proxy path', async () => {
+      server._openConfig = config
+      server.remoteStates.set('http://localhost:3000')
+
+      const remotePort = 12345
+      const write = vi.fn()
+      const upgrade = (origin?: string) => {
+        write.mockClear()
+        server.proxyWebsockets(proxy, '/foo', {
+          url: '/foo-graphql',
+          headers: origin ? { origin } : {},
+          socket: { remotePort, remoteAddress: '127.0.0.1' },
+        }, { ...socket, write }, head)
+
+        return write.mock.calls.length > 0 ? 'refused' : 'allowed'
+      }
+
+      server.socketAllowed.add({ localPort: remotePort, once: _.noop })
+
+      for (const mode of ['proxy', 'browser'] as const) {
+        if (mode === 'browser') await enterBrowserNetworkMode(server)
+
+        expect(upgrade('http://localhost:3000'), `${mode}: primary`).toBe('allowed')
+        expect(upgrade('https://www.localhost:3000'), `${mode}: other protocol`).toBe('refused')
+        expect(upgrade('https://other.example.com'), `${mode}: other origin`).toBe('refused')
+        expect(upgrade('http://localhost:4000'), `${mode}: other port`).toBe('refused')
+        expect(upgrade(undefined), `${mode}: no origin`).toBe('refused')
+        // Firefox only runs on the proxy path, so a moz-extension origin on the browser path is some other Firefox
+        expect(upgrade('moz-extension://3f1c2b2e-0000-4000-8000-000000000000'), `${mode}: firefox extension`).toBe(mode === 'proxy' ? 'allowed' : 'refused')
+      }
+    })
+
+    it('accepts a socket upgrade from the server\'s own origin when the primary is a component testing dev server', async () => {
+      server._openConfig = config
+      server.remoteStates.set('http://localhost:4456')
+
+      const serverPort = 4455
+
+      server._server = { address: () => ({ port: serverPort }) }
+      const remotePort = 12345
+      const write = vi.fn()
+      const upgrade = (origin: string) => {
+        write.mockClear()
+        server.proxyWebsockets(proxy, '/foo', {
+          url: '/foo-graphql',
+          headers: { origin },
+          socket: { remotePort, remoteAddress: '127.0.0.1' },
+        }, { ...socket, write }, head)
+
+        return write.mock.calls.length > 0 ? 'refused' : 'allowed'
+      }
+
+      server.socketAllowed.add({ localPort: remotePort, once: _.noop })
+
+      for (const mode of ['proxy', 'browser'] as const) {
+        if (mode === 'browser') await enterBrowserNetworkMode(server)
+
+        expect(upgrade(`http://localhost:${serverPort}`), `${mode}: runner at the server's own origin`).toBe('allowed')
+        expect(upgrade('http://localhost:4456'), `${mode}: dev server primary`).toBe('allowed')
+        expect(upgrade('http://localhost:4000'), `${mode}: other localhost port`).toBe('refused')
+      }
     })
 
     it('calls proxy.ws with hostname + port', () => {
@@ -1505,6 +1715,92 @@ describe('lib/server-base', () => {
 
       expect(next).toHaveBeenCalledTimes(1)
       expect(res.redirect).not.toHaveBeenCalled()
+    })
+
+    describe('on the browser (CDP) network path', () => {
+      const listenPort = 2020
+
+      const runNative = (req) => {
+        const res = { redirect: vi.fn() }
+        const next = vi.fn()
+
+        _forceProxyMiddleware(clientRoute, undefined, () => true)(req, res, next)
+
+        return { res, next }
+      }
+
+      const direct = (proxiedUrl: string, host: string | undefined, headers = {}) => {
+        return { proxiedUrl, headers: { ...(host ? { host } : {}), ...headers }, socket: { localPort: listenPort } }
+      }
+
+      it('lets a loopback-token request through under any host', () => {
+        const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', 'other.example.com', {
+          [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
+        }))
+
+        expect(next).toHaveBeenCalledTimes(1)
+        expect(res.redirect).not.toHaveBeenCalled()
+      })
+
+      it('lets a request addressed to this server by a loopback name on its port through', () => {
+        for (const host of ['localhost:2020', '127.0.0.1:2020', '[::1]:2020', 'app.localhost:2020']) {
+          const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', host))
+
+          expect(next, host).toHaveBeenCalledTimes(1)
+          expect(res.redirect, host).not.toHaveBeenCalled()
+        }
+      })
+
+      it('redirects a request under another host, or another port, to clientRoute', () => {
+        for (const host of ['other.example.com:2020', 'localhost:4000', 'localhost', undefined]) {
+          const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', host))
+
+          expect(res.redirect, String(host)).toHaveBeenCalledWith(clientRoute)
+          expect(next, String(host)).not.toHaveBeenCalled()
+        }
+      })
+
+      it('still lets clientRoute and the runner bundles through under another host, so the runner page answers', () => {
+        for (const url of ['/__/', '/__cypress/runner/cypress_runner.js']) {
+          const { res, next } = runNative(direct(url, 'other.example.com:2020'))
+
+          expect(next, url).toHaveBeenCalledTimes(1)
+          expect(res.redirect, url).not.toHaveBeenCalled()
+        }
+      })
+    })
+  })
+
+  describe('#_errorHandler', () => {
+    const err = new Error('boom')
+
+    err.stack = 'Error: boom\n    at handler (/packages/server/lib/server-base.ts:1:1)'
+
+    let logError: Mock
+
+    beforeEach(() => {
+      logError = vi.spyOn(console, 'error').mockImplementation(() => {}) as unknown as Mock
+    })
+
+    it('logs the stack to stderr and answers 500 without a body', () => {
+      const res = { headersSent: false, sendStatus: vi.fn() }
+      const req = { socket: { destroy: vi.fn() } }
+
+      _errorHandler(err, req as any, res as any, vi.fn())
+
+      expect(logError).toHaveBeenCalledWith(err.stack)
+      expect(res.sendStatus).toHaveBeenCalledWith(500)
+      expect(req.socket.destroy).not.toHaveBeenCalled()
+    })
+
+    it('destroys the socket when the response has already started', () => {
+      const res = { headersSent: true, sendStatus: vi.fn() }
+      const req = { socket: { destroy: vi.fn() } }
+
+      _errorHandler(err, req as any, res as any, vi.fn())
+
+      expect(req.socket.destroy).toHaveBeenCalledTimes(1)
+      expect(res.sendStatus).not.toHaveBeenCalled()
     })
   })
 

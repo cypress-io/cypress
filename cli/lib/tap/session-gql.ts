@@ -1,6 +1,5 @@
 import Debug from 'debug'
 
-import { errors } from '../errors'
 import { throwTapError } from './tap-connection'
 import type { LiveSessionState } from '../cypress-sessions'
 import { verifySessionRecord } from '../cypress-sessions'

@@ -29,7 +29,7 @@ describe('StreamTimeoutController', () => {
       },
     })
 
-    // @ts-ignore
+    // @ts-expect-error - the global ReadableStream type differs from the stream/web one fromWeb expects
     fakeNodeReadableStream = Readable.fromWeb(fakeWebReadableStream)
 
     streamSink = new Writable()

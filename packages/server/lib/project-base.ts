@@ -726,7 +726,7 @@ export class ProjectBase extends EE {
 
   async initializeConfig (): Promise<Cfg> {
     this.ctx.lifecycleManager.setAndLoadCurrentTestingType(this.testingType)
-    let theCfg: Cfg = {
+    const theCfg: Cfg = {
       ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
       testingType: this.testingType,
     } as Cfg // ?? types are definitely wrong here I think
@@ -807,7 +807,7 @@ export class ProjectBase extends EE {
       throw new Error('Missing project root')
     }
 
-    let state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
+    const state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
 
     await state.set(stateChanges)
     this.cfg.state = await state.get()

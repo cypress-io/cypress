@@ -21,7 +21,7 @@ export const calculateCypressInternalEnv = () => {
   // use env from package first
   // or development as default
   if (!process.env['CYPRESS_INTERNAL_ENV']) {
-    // @ts-expect-error
+    // @ts-expect-error - the root package.json has no env field, so its inferred type lacks it
     return pkg.env !== null && pkg.env !== undefined ? pkg.env : 'development'
   }
 

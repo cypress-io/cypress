@@ -25,6 +25,7 @@ describe('return values', () => {
   })
 
   it('can return cy and have done callback', (done) => {
+    // eslint-disable-next-line mocha/no-return-and-done -- returning cy alongside done is the behavior under test
     return cy.wrap({}).then(() => {
       done()
     })
@@ -56,13 +57,14 @@ describe('return values', () => {
 
     cy.wrap(null)
 
+    // eslint-disable-next-line mocha/no-return-and-done -- the returned function is what the error message must stringify
     return () => {
       return 'foo'
     }
   })
 
   it('can return undefined when invoking cy commands in custom command', (done) => {
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       cy.wrap(null).then(function () {
         assertLogLength(this.logs, 1)
@@ -72,8 +74,8 @@ describe('return values', () => {
       return undefined
     })
 
-    // @ts-expect-error
-    return cy.foo()
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
+    cy.foo()
   })
 
   it('throws when returning a non promise and invoking cy commands from a custom command', function (done) {
@@ -91,15 +93,15 @@ describe('return values', () => {
       done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       cy.wrap(null)
 
       return 'bar'
     })
 
-    // @ts-expect-error
-    return cy.foo()
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
+    cy.foo()
   })
 
   it('stringifies function return values', function (done) {
@@ -117,7 +119,7 @@ describe('return values', () => {
       done()
     })
 
-    // @ts-expect-error
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
     Cypress.Commands.add('foo', () => {
       cy.wrap(null)
 
@@ -126,8 +128,8 @@ describe('return values', () => {
       }
     })
 
-    // @ts-expect-error
-    return cy.foo()
+    // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
+    cy.foo()
   })
 
   describe('without invoking cy', () => {

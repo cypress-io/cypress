@@ -7,7 +7,7 @@ describe('lib/automation', () => {
   let automation
 
   beforeEach(() => {
-    // @ts-expect-error
+    // @ts-expect-error - partial AutomationOptions
     automation = new Automation({})
   })
 

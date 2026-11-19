@@ -8,6 +8,7 @@ import { dockerSpawner } from './docker'
 import Express from 'express'
 import Fixtures from './fixtures'
 import * as DepInstaller from './dep-installer'
+import { isVideoSnapshotError } from './videoSnapshotError'
 import {
   DEFAULT_BROWSERS,
   replaceStackTraceLines,
@@ -62,7 +63,7 @@ export type ItOptions = ExecOptions & {
   onRun?: (
     this: Mocha.Context,
     execFn: ExecFn,
-    browser: BrowserName
+    browser: BrowserName,
   ) => Promise<any> | any
   /**
    * Same as using `systemTests.it.only`.
@@ -211,9 +212,9 @@ type ExecOptions = {
    */
   env?: string
   /**
-   * Set OS-level env vars.
+   * Set OS-level env vars. `undefined` unsets one inherited from the test process.
    */
-  processEnv?: { [key: string]: string | number }
+  processEnv?: { [key: string]: string | number | undefined }
   /**
    * Set an output path.
    */
@@ -589,59 +590,8 @@ process.on('exit', () => {
     return
   }
 
-  // eslint-disable-next-line no-console
   console.log(`[teardown-budget] exceeded in ${teardownBudget.runsOverBudget} of ${teardownBudget.runs} Cypress runs (${teardownBudget.notices} process notices)`)
 })
-
-// extract the 'Difference' section from a snap-shot-it error message
-const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
-const videoRe = /\-\s\sVideo\soutput:\s.*.mp4/gm
-const expectedAddedVideoSnapshotLines = [
-  'Warning: We failed capturing this video.',
-  'This error will not affect or change the exit code.',
-  'TimeoutError: operation timed out',
-  '[stack trace lines]',
-]
-const expectedDeletedVideoSnapshotLines = [
-  '(Video)',
-  '-  Started compressing: Compressing to 32 CRF',
-]
-const sometimesAddedSpacingLine = ''
-const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
-const sometimesDeletedVideoSnapshotLine = '│ Video:        true                                                                             │'
-
-const isVideoSnapshotError = (err: Error) => {
-  const [added, deleted] = [[], []]
-  const matches = diffRe.exec(err.message)
-
-  if (!matches || !matches.length) {
-    return false
-  }
-
-  const lines = matches[1].split('\n')
-
-  for (const line of lines) {
-    // past this point, the content is variable - mp4 path length
-    if (line.includes('Finished compressing:')) break
-
-    if (line.charAt(0) === '+') added.push(line.slice(1).trim())
-
-    if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
-  }
-
-  _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
-  _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
-
-  // If a video line exists after removing other static matches, remove it
-  const deletedVideoLine = _.remove(deleted, (remainingDeleted) => !!videoRe.exec(remainingDeleted))
-
-  // If we did indeed remove a video line, also remove the (Video) text that preceded it
-  if (deletedVideoLine) {
-    _.pull(deleted, '(Video)')
-  }
-
-  return _.isEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || _.isEqual(deleted, expectedDeletedVideoSnapshotLines))
-}
 
 /**
  * Takes normalized runner STDOUT, finds the "Run Finished" line
@@ -761,16 +711,12 @@ function getBrowsers (browserPattern) {
     return DEFAULT_BROWSERS
   }
 
-  let selected = []
-
   const addBrowsers = _.clone(browserPattern)
   const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
 
-  if (removeBrowsers.length) {
-    selected = _.without(DEFAULT_BROWSERS, ...removeBrowsers)
-  } else {
-    selected = _.intersection(DEFAULT_BROWSERS, addBrowsers)
-  }
+  const selected = removeBrowsers.length
+    ? _.without(DEFAULT_BROWSERS, ...removeBrowsers)
+    : _.intersection(DEFAULT_BROWSERS, addBrowsers)
 
   if (!selected.length) {
     throw new Error(`options.browser: "${browserPattern}" matched no browsers`)
@@ -835,14 +781,12 @@ const localItFn = function (title: string, opts: ItOptions) {
 
       const originalTitle = this.test.parent.titlePath().concat(title).join(' / ')
 
-      const ctx = this
-
       const execFn = (overrides = {}) => {
-        return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+        return systemTests.exec(this, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
       // pass Mocha's this context to onRun
-      return options.onRun.call(this, execFn, browser, ctx)
+      return options.onRun.call(this, execFn, browser, this)
     })
   }
 
@@ -885,10 +829,9 @@ const systemTests = {
     args = _.compact(args)
 
     // avoid snapshot cwd issue - see /patches/snap-shot* for more information
-    // @ts-ignore
     global.CACHED_CWD_FOR_SNAP_SHOT_IT = path.join(__dirname, '..')
 
-    return snapshot.apply(null, args)
+    return snapshot(...args)
   },
 
   setup (options: SetupOptions = {}) {
@@ -1131,7 +1074,6 @@ const systemTests = {
         const matches = browserNameVersionRe.exec(stdout)
 
         if (matches) {
-          // eslint-disable-next-line no-unused-vars
           const [, , customBrowserPath, browserName, version, headless] = matches
 
           const { browser } = options

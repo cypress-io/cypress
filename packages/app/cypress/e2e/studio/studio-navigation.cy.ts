@@ -223,8 +223,6 @@ describe('studio functionality', () => {
 })`)
     })
 
-    cy.wait(200)
-
     cy.findByTestId('studio-save-button').click()
 
     cy.location().its('hash').should('contain', 'testId=r3').and('contain', 'studio=')

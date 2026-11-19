@@ -470,7 +470,7 @@ describe('src/cy/commands/storage', () => {
           done()
         })
 
-        // @ts-expect-error
+        // @ts-expect-error - deliberately passes a number as the key
         cy.clearLocalStorage(1)
       })
     })

@@ -1,8 +1,10 @@
 import zlib from 'zlib'
 import _ from 'lodash'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
-import { isCypressServerOrigin, isInternalCypressRoute, cypressInternalLoopbackToken } from '../../../lib/adapters/internal-routes'
+import { HttpIntercept } from '@packages/network-interception'
+import { proxyHttpCodec } from '@packages/proxy/lib/adapters/http-codec'
+import { isAnsweredByCypress, isCypressServerOrigin, isInternalCypressRoute, isLoopbackHost, cypressInternalLoopbackToken } from '../../../lib/adapters/internal-routes'
 import { createServeInternalRoutesMiddleware } from '../../../lib/adapters/serve-internal-routes'
 
 // sinon's `calledWithMatch` compares objects partially at every depth and
@@ -77,13 +79,32 @@ describe('lib/adapters/internal-routes', () => {
     expect(isCypressServerOrigin('http://localhost:1234/__/', withoutProxyUrl)).toBe(true)
     expect(isCypressServerOrigin('/__/', withoutProxyUrl)).toBe(true)
   })
+
+  describe('isLoopbackHost', () => {
+    it('matches loopback names on the listen port', () => {
+      for (const host of ['localhost:1234', '127.0.0.1:1234', '127.1.2.3:1234', '[::1]:1234', 'app.localhost:1234']) {
+        expect(isLoopbackHost(host, 1234), host).toBe(true)
+      }
+    })
+
+    it('matches a loopback name without a port on port 80', () => {
+      expect(isLoopbackHost('localhost', 80)).toBe(true)
+    })
+
+    it('rejects other hosts, other ports, and missing values', () => {
+      for (const host of ['other.example.com:1234', 'localhost:4000', 'localhost', 'localhost.example.com:1234', '', undefined]) {
+        expect(isLoopbackHost(host, 1234), String(host)).toBe(false)
+      }
+
+      expect(isLoopbackHost('localhost:1234', undefined)).toBe(false)
+      expect(isLoopbackHost('[::1', 1234)).toBe(false)
+    })
+  })
 })
 
 describe('lib/adapters/serve-internal-routes', () => {
   afterEach(() => {
-    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
-    delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
-    delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
+    vi.unstubAllEnvs()
   })
 
   function createMiddleware (response: any = {
@@ -379,35 +400,9 @@ describe('lib/adapters/serve-internal-routes', () => {
     expect(response.statusCode).toBe(200)
   })
 
-  it('asks the loopback for an identity-encoded response in cypress-in-cypress', async () => {
-    // The cy-in-cy parent forwards cloud-bundle loopbacks through its proxy
-    // pipeline, which rewrites a missing accept-encoding to 'gzip,identity' —
-    // and Fetch.fulfillRequest bodies are identity-only, so the loopback must
-    // ask for identity explicitly.
-    process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT = '1'
-
-    const { middleware, serverRequest } = createMiddleware()
-    const next = vi.fn()
-
-    await middleware({
-      id: 'req-1',
-      url: 'http://localhost:1234/__cypress/xhrs/foo',
-      method: 'GET',
-      headers: {
-        'accept-encoding': 'gzip, deflate, br',
-      },
-    }, next)
-
-    expectCalledWithMatch(serverRequest.create, {
-      headers: {
-        'accept-encoding': 'identity',
-      },
-    }, true)
-  })
-
-  it('sends no accept-encoding on the loopback outside cypress-in-cypress', async () => {
-    // Single-hop loopbacks terminate at our own Express routes, which already
-    // serve identity when the header is absent.
+  it('sends no accept-encoding on the loopback', async () => {
+    // The browser's accept-encoding is not forwarded; toIdentityResponse
+    // handles any hop that compresses anyway.
     const { middleware, serverRequest } = createMiddleware()
     const next = vi.fn()
 
@@ -423,6 +418,27 @@ describe('lib/adapters/serve-internal-routes', () => {
     const headers = serverRequest.create.mock.calls[0][0].headers
 
     expect(headers).not.toHaveProperty(['accept-encoding'])
+  })
+
+  it('keeps referer and origin on the loopback', async () => {
+    // the storage pages and the runner-only posts resolve trust from them
+    const { middleware, serverRequest } = createMiddleware()
+    const next = vi.fn()
+
+    await middleware({
+      id: 'req-1',
+      url: 'https://cross-origin.test/__cypress/automation/getLocalStorage',
+      method: 'GET',
+      headers: {
+        referer: 'http://localhost:1234/__cypress/iframes/spec.cy.js',
+        origin: 'http://localhost:1234',
+      },
+    }, next)
+
+    expect(serverRequest.create.mock.calls[0][0].headers).toMatchObject({
+      referer: 'http://localhost:1234/__cypress/iframes/spec.cy.js',
+      origin: 'http://localhost:1234',
+    })
   })
 
   it('decodes a gzip response body and drops the content-encoding header', async () => {
@@ -477,7 +493,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     // here hides the pause from the parent's interception (injection,
     // window:before:load), so the inner must release them to the wire.
     it('releases the own-origin runner document to the next middleware', async () => {
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware()
       const next = vi.fn().mockResolvedValue({ id: 'req-1', statusCode: 200 })
@@ -493,18 +509,18 @@ describe('lib/adapters/serve-internal-routes', () => {
       expect(serverRequest.create).not.toHaveBeenCalled()
     })
 
-    it('releases own-origin namespace subresources with concrete types', async () => {
-      // the app's graphql calls — the parent's cy.intercept must see these
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+    it('releases own-origin subresources with concrete types', async () => {
+      // the Studio bundle — the parent's cy.intercept must see it
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware()
       const next = vi.fn().mockResolvedValue({ id: 'req-1', statusCode: 200 })
 
       await middleware({
         id: 'req-1',
-        url: 'http://localhost:1234/__cypress/graphql/mutation-foo',
-        method: 'POST',
-        resourceType: 'xhr',
+        url: 'http://localhost:1234/__cypress-studio/app-studio.js',
+        method: 'GET',
+        resourceType: 'script',
       }, next)
 
       expect(next).toHaveBeenCalledOnce()
@@ -514,7 +530,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     it('still loops own-origin non-clientRoute documents back to Express', async () => {
       // e.g. the CT fixture iframe under /__cypress/iframes — the parent must
       // not get a chance to inject into frames the inner owns outright
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware({
         statusCode: 200,
@@ -537,7 +553,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     it('releases own-origin clientRoute subresources to the next middleware', async () => {
       // matches the e2e-mode topology, where the inner has no interception
       // and the parent's pipeline carries /__/ assets already
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware()
       const next = vi.fn().mockResolvedValue({ id: 'req-1', statusCode: 200 })
@@ -556,7 +572,7 @@ describe('lib/adapters/serve-internal-routes', () => {
     it('still loops foreign-origin internal requests back to Express', async () => {
       // e.g. internal routes requested on the CT dev-server origin — those
       // never reach our Express over the wire, so the loopback must stay.
-      process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
 
       const { middleware, serverRequest } = createMiddleware({
         statusCode: 200,
@@ -682,5 +698,148 @@ describe('lib/adapters/serve-internal-routes', () => {
 
       expect(serverRequest.create).toHaveBeenCalledTimes(2)
     })
+  })
+})
+
+describe('lib/adapters/internal-routes isAnsweredByCypress', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  const answered = (request: { url: string, headers?: Record<string, string>, resourceType?: any }, isBrowserNetworkMode = true) => {
+    return isAnsweredByCypress({ id: 'req-1', method: 'GET', ...request }, config, isBrowserNetworkMode)
+  }
+
+  it('is false for non-internal paths', () => {
+    expect(answered({ url: 'https://example.test/app' })).toBe(false)
+  })
+
+  it('is false for component-testing bundler assets', () => {
+    expect(answered({ url: 'https://example.test/__cypress/src/spec-0.js' })).toBe(false)
+  })
+
+  it('is true for internal routes on any origin', () => {
+    expect(answered({ url: 'https://example.test/__cypress/tests?p=spec.cy.js' })).toBe(true)
+    expect(answered({ url: 'http://localhost:1234/__/' })).toBe(true)
+  })
+
+  it('is false for a trusted loopback re-entry, including cloud-bundle namespaces', () => {
+    const headers = { 'x-cypress-internal-loopback-token': cypressInternalLoopbackToken }
+
+    expect(answered({ url: 'http://localhost:1234/__cypress/xhrs/foo', headers })).toBe(false)
+    expect(answered({ url: 'http://localhost:1234/__cypress-studio/app-studio.js', headers })).toBe(false)
+  })
+
+  it('is true for a loopback header without the process token', () => {
+    expect(answered({
+      url: 'https://example.test/__cypress/tests',
+      headers: { 'x-cypress-internal-loopback': 'https://example.test/__cypress/tests' },
+    })).toBe(true)
+  })
+
+  it('is false for cloud-bundle namespaces on the MITM path', () => {
+    expect(answered({ url: 'https://example.test/__cypress-studio/app-studio.js' }, false)).toBe(false)
+  })
+
+  it('is true for studio and cy-prompt routes on the CDP path', () => {
+    expect(answered({ url: 'https://example.test/__cypress-studio-ai/generate' })).toBe(true)
+    expect(answered({ url: 'https://example.test/__cypress-cy-prompt/app.js' })).toBe(true)
+  })
+
+  describe('cypress-in-cypress inner (CYPRESS_INTERNAL_E2E_TESTING_SELF)', () => {
+    beforeEach(() => {
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
+    })
+
+    it('is false for the own-origin runner document', () => {
+      expect(answered({ url: 'http://localhost:1234/__/', resourceType: 'other' })).toBe(false)
+    })
+
+    it('is false for own-origin subresources with concrete types', () => {
+      expect(answered({ url: 'http://localhost:1234/__cypress-studio/app-studio.js', resourceType: 'script' })).toBe(false)
+    })
+
+    it('is true for own-origin non-clientRoute documents', () => {
+      expect(answered({ url: 'http://localhost:1234/__cypress/iframes/spec', resourceType: 'other' })).toBe(true)
+    })
+
+    it('is false for own-origin clientRoute subresources', () => {
+      expect(answered({ url: 'http://localhost:1234/__/assets/app.js', resourceType: 'script' })).toBe(false)
+    })
+
+    it('is true for foreign-origin internal routes', () => {
+      expect(answered({ url: 'http://localhost:5173/__cypress/xhrs/foo', resourceType: 'other' })).toBe(true)
+    })
+  })
+
+  it('is true for own-origin internals outside cypress-in-cypress', () => {
+    expect(answered({ url: 'http://localhost:1234/__/' })).toBe(true)
+  })
+})
+
+describe('serve-internal-routes over the Express pipeline (#34810)', () => {
+  it('writes the loop-guard 404 to the client response instead of dropping it', async () => {
+    // Composes the layers the way network-runtime.ts installs them: the
+    // intercept onion with the Express proxy codec, serveInternalRoutes first.
+    // A trusted loopback re-entry with no owning Express route produces a 404
+    // without calling next(); the codec must write it to ctx.res or the
+    // request hangs with no response.
+    const written: { statusCode?: number, body?: unknown } = {}
+    const writtenHeaders: Record<string, unknown> = {}
+    const res = {
+      headersSent: false,
+      writableFinished: false,
+      status (statusCode: number) {
+        written.statusCode = statusCode
+
+        return this
+      },
+      set (name: string, value: unknown) {
+        writtenHeaders[name] = value
+
+        return this
+      },
+      end (body?: unknown) {
+        written.body = body
+        this.writableFinished = true
+
+        return this
+      },
+    }
+
+    const ctx = {
+      req: {
+        proxiedUrl: 'http://127.0.0.1:1234/__/unknown',
+        method: 'GET',
+        headers: {
+          'x-cypress-internal-loopback': 'http://127.0.0.1:1234/__/unknown',
+          'x-cypress-internal-loopback-token': cypressInternalLoopbackToken,
+        },
+      },
+      res,
+    }
+
+    const intercept = new HttpIntercept(proxyHttpCodec)
+    const origin = vi.fn()
+    const legacyPipeline = vi.fn()
+
+    intercept.use(createServeInternalRoutesMiddleware({
+      config,
+      request: { create: vi.fn() } as any,
+      isBrowserNetworkMode: false,
+    }))
+
+    // Stand-in for the legacy pipeline stage, which owns writing ctx.res on
+    // the normal path; the short-circuit must not reach it.
+    intercept.use(legacyPipeline)
+
+    await intercept.handle(ctx as any, origin)
+
+    expect(origin).not.toHaveBeenCalled()
+    expect(legacyPipeline).not.toHaveBeenCalled()
+    expect(written.statusCode).toBe(404)
+    expect(writtenHeaders).toStrictEqual({ 'content-type': 'text/plain' })
+    expect(written.body).toBe('Not Found')
+    expect(res.writableFinished).toBe(true)
   })
 })

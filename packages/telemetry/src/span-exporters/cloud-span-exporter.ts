@@ -17,7 +17,7 @@ interface OTLPExporterNodeConfigBasePlusEncryption extends OTLPExporterNodeConfi
       url: string
       method: string
       body: string
-    }) => (Promise<{jwe: string}>)
+    }) => (Promise<{ jwe: string }>)
   }
 }
 
@@ -30,10 +30,11 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
     onSuccess: () => void
     onError: (error: OTLPExporterError) => void
   }[]
+
   enc: OTLPExporterNodeConfigBasePlusEncryption['encryption'] | undefined
   projectId?: string
   recordKey?: string
-  requirementsToExport: 'met'| 'unmet' | 'unknown'
+  requirementsToExport: 'met' | 'unmet' | 'unknown'
   sendWithHttp: typeof sendWithHttp
   constructor (config: OTLPExporterNodeConfigBasePlusEncryption = {}) {
     super(config)

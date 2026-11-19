@@ -81,7 +81,7 @@ describe('Err model', () => {
     })
 
     it('does nothing if props is null', () => {
-      // @ts-ignore
+      // @ts-expect-error - update() does not accept null, which is the case under test
       err.update(null)
       expect(err.name).to.equal('BadError')
     })

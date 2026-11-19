@@ -1409,12 +1409,9 @@ describe('lib/browsers/cri-client', () => {
       })
 
       client.send('Page.enable')
-      // @ts-ignore
       client.send('Page.foo')
-      // @ts-ignore
       client.send('Page.bar')
       client.send('Network.enable')
-      // @ts-ignore
       client.send('Network.baz')
 
       // clear out previous calls before reconnect

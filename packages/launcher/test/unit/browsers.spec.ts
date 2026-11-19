@@ -78,7 +78,7 @@ describe('browsers', () => {
 
         FIREFOX_KNOWN_BROWSER_CHANNELS.forEach((browser) => {
           it(`${browser.channel}: fails validation when Firefox major version is below 140`, () => {
-            // @ts-expect-error
+            // @ts-expect-error - validator is optional and called without its second argument
             const result = browser.validator({
               majorVersion: '139',
               displayName: 'Firefox',

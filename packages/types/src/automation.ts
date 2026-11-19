@@ -1,4 +1,4 @@
-/// <reference path="../../../cli/types/cypress-automation.d.ts" />
+/// <reference types="cypress" />
 
 export type AutomationElementId = `${string}-string`
 

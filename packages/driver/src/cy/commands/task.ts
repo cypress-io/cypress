@@ -22,9 +22,7 @@ export default (Commands, Cypress, cy) => {
         timeout: Cypress.config('taskTimeout') as number,
       })
 
-      let consoleOutput
-
-      consoleOutput = {
+      const consoleOutput = {
         task,
         arg,
       }

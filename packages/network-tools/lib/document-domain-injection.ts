@@ -18,7 +18,7 @@ import type { ParsedHostWithProtocolAndHost } from './types'
 const debug = Debug('cypress:network:document-domain-injection')
 
 export abstract class DocumentDomainInjection {
-  public static InjectionBehavior (config: { injectDocumentDomain?: boolean, testingType?: 'e2e' | 'component'}): DocumentDomainInjection {
+  public static InjectionBehavior (config: { injectDocumentDomain?: boolean, testingType?: 'e2e' | 'component' }): DocumentDomainInjection {
     debug('Determining injection behavior for config values: %o', {
       injectDocumentDomain: config.injectDocumentDomain,
       testingType: config.testingType,
@@ -45,9 +45,11 @@ export class DocumentDomainBehavior implements DocumentDomainInjection {
   public getOrigin (url: string) {
     return getSuperDomainOrigin(url)
   }
+
   public getHostname (url: string): string {
     return getSuperDomain(url)
   }
+
   public urlsMatch (frameUrl: string | ParsedHostWithProtocolAndHost, topUrl: string | ParsedHostWithProtocolAndHost): boolean {
     const frameProps = isString(frameUrl) ? parseUrlIntoHostProtocolDomainTldPort(frameUrl) : frameUrl
     const topProps = isString(topUrl) ? parseUrlIntoHostProtocolDomainTldPort(topUrl) : topUrl
@@ -57,6 +59,7 @@ export class DocumentDomainBehavior implements DocumentDomainInjection {
 
     return isEqual(parsedFrameUrl, parsedTopUrl)
   }
+
   public shouldInjectDocumentDomain (url: string | undefined) {
     debug('document-domain behavior: should inject document domain -> true')
 
@@ -68,15 +71,18 @@ export class OriginBehavior implements DocumentDomainInjection {
   public getOrigin (url: string) {
     return new URL(url).origin
   }
+
   public getHostname (url: string): string {
     return new URL(url).hostname
   }
+
   public urlsMatch (frameUrl: string | ParsedHostWithProtocolAndHost, topUrl: string | ParsedHostWithProtocolAndHost): boolean {
     const frameProps = isString(frameUrl) ? parseUrlIntoHostProtocolDomainTldPort(frameUrl) : frameUrl
     const topProps = isString(topUrl) ? parseUrlIntoHostProtocolDomainTldPort(topUrl) : topUrl
 
     return isEqual(frameProps, topProps)
   }
+
   public shouldInjectDocumentDomain (url: string | undefined) {
     debug('origin-behavior: should inject document domain -> false')
 

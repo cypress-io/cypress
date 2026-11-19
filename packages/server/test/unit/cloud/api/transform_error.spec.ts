@@ -28,7 +28,7 @@ describe('transformError', () => {
       },
     }
 
-    // @ts-expect-error
+    // @ts-expect-error - partial mock of the axios instance
     installErrorTransform(mockAxiosInstance)
 
     const [, secondArg] = (mockAxiosInstance.interceptors?.response.use as ReturnType<typeof vi.fn>).mock.calls[0]
@@ -82,7 +82,7 @@ describe('transformError', () => {
     let err: Error & { error?: any, statusCode: number }
 
     beforeEach(() => {
-      // @ts-expect-error
+      // @ts-expect-error - statusCode is assigned on the next line
       err = new Error(originalMessage)
       err.statusCode = status
     })

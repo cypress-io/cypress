@@ -6,6 +6,7 @@ import { stripVTControlCharacters as stripAnsi } from 'util'
 import * as errors from './errors'
 import { fs } from './util/fs'
 import { globAsync as glob } from './util/glob'
+import { isInsideDir } from '@packages/data-context/src/util/isInsideDir'
 import type { ObjectEncodingOptions } from 'fs-extra'
 
 const debug = debugModule('cypress:server:fixture')
@@ -34,8 +35,13 @@ const friendlyJsonParse = function (s) {
 }
 
 export async function get (fixturesFolder: string, filePath: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null | undefined } = {}) {
+  const root = path.resolve(fixturesFolder)
   const p = path.join(fixturesFolder, filePath)
   const fixture = path.basename(p)
+
+  if (!isInsideDir(root, path.resolve(p))) {
+    throw new Error(`Fixture path '${filePath}' must resolve to a file inside the fixtures folder: ${fixturesFolder}`)
+  }
 
   // if the file exists, go ahead and parse it
   // otherwise, glob for potential extensions
@@ -52,11 +58,10 @@ export async function get (fixturesFolder: string, filePath: string, options: { 
 
     const pattern = `${p}{${extensions.join(',')}}`
 
-    // @ts-ignore as v8-snapshot package is typechecking this incorrectly
-    const matches = await glob(pattern, {
+    const matches = (await glob(pattern, {
       nosort: true,
       nodir: true,
-    })
+    })).filter((match) => isInsideDir(root, path.resolve(match)))
 
     if (matches.length === 0) {
       const relativePath = path.relative('.', p)
@@ -145,7 +150,7 @@ async function parseJson (p: string, fixture: string) {
 
     return friendlyJsonParse(content)
   } catch (err) {
-    throw new Error(`'${fixture}' is not valid JSON.\n${err.message}`)
+    throw new Error(`'${fixture}' is not valid JSON.\n${err.message}`, { cause: err })
   }
 }
 
@@ -169,7 +174,7 @@ async function parseJs (p: string, fixture: string) {
 
     return obj
   } catch (err) {
-    throw new Error(`'${fixture}' is not a valid JavaScript object.\n${err.toString()}`)
+    throw new Error(`'${fixture}' is not a valid JavaScript object.\n${err.toString()}`, { cause: err })
   }
 }
 
@@ -179,7 +184,7 @@ async function parseHtml (p: string, fixture: string) {
 
     return content
   } catch (err) {
-    throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`)
+    throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`, { cause: err })
   }
 }
 
@@ -189,6 +194,6 @@ async function parse (p: string, fixture: string, encoding: (ObjectEncodingOptio
 
     return content
   } catch (err) {
-    throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`)
+    throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`, { cause: err })
   }
 }

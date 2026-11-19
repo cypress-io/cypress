@@ -5,11 +5,11 @@ interface Props {
   value: boolean
   size?: 'sm' | 'md' | 'lg' | 'xl'
   'data-cy'?: string
-  onUpdate: (e: MouseEvent) => void
+  onUpdate: (e: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 const Switch: React.FC<Props> = observer(({ value, 'data-cy': dataCy, size = 'lg', onUpdate }) => {
-  const _onClick = useCallback((e: MouseEvent) => {
+  const _onClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     onUpdate(e)
   }, [onUpdate])
 
@@ -19,7 +19,6 @@ const Switch: React.FC<Props> = observer(({ value, 'data-cy': dataCy, size = 'lg
       className={`switch switch-${size}`}
       role="switch"
       aria-checked={value}
-      // @ts-expect-error
       onClick={_onClick}
     >
       <span className="indicator" />

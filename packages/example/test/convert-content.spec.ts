@@ -1,5 +1,3 @@
-/* eslint-disable quotes */
-
 import { describe, expect, it } from 'vitest'
 import { convertExampleContent } from '../bin/convert-content'
 

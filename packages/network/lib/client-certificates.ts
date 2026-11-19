@@ -15,7 +15,7 @@ export class ParsedUrl {
       this.path = undefined
       this.port = undefined
     } else {
-      let parsed = new URL(url)
+      const parsed = new URL(url)
 
       this.host = parsed.hostname
       this.port = !parsed.port ? undefined : parseInt(parsed.port)
@@ -76,6 +76,7 @@ export class UrlClientCertificates {
     this.pathnameLength = new URL(url).pathname.length
     this.clientCertificates = new ClientCertificates()
   }
+
   clientCertificates: ClientCertificates
   url: string
   pathnameLength: number
@@ -228,10 +229,10 @@ export function loadClientCertificateConfig (config: Config) {
 
               try {
                 // construct to validate; throws on malformed PEM
-                // eslint-disable-next-line no-new
+
                 new X509Certificate(caRaw)
               } catch (error: any) {
-                throw new Error(`Cannot parse CA cert: ${error.message}`)
+                throw new Error(`Cannot parse CA cert: ${error.message}`, { cause: error })
               }
 
               urlClientCertificates.clientCertificates.ca.push(caRaw)
@@ -261,10 +262,9 @@ export function loadClientCertificateConfig (config: Config) {
             const pemRaw = loadBinaryFromFile(cert.cert)
 
             try {
-              // eslint-disable-next-line no-new
               new X509Certificate(pemRaw)
             } catch (error: any) {
-              throw new Error(`Cannot parse PEM cert: ${error.message}`)
+              throw new Error(`Cannot parse PEM cert: ${error.message}`, { cause: error })
             }
 
             urlClientCertificates.clientCertificates.cert.push(pemRaw)
@@ -295,10 +295,11 @@ export function loadClientCertificateConfig (config: Config) {
               if (passphrase && isBadDecrypt) {
                 throw new Error(
                   `Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn't have unexpected whitespace at the end)`,
+                  { cause: error },
                 )
               }
 
-              throw new Error(`Cannot parse PEM key: ${error.message}`)
+              throw new Error(`Cannot parse PEM key: ${error.message}`, { cause: error })
             }
 
             urlClientCertificates.clientCertificates.key.push(
@@ -352,6 +353,7 @@ export function loadClientCertificateConfig (config: Config) {
 
     throw new Error(
       `Failed to load client certificates for clientCertificates[${index}]: ${e.message}.  For more debug details run Cypress with DEBUG=cypress:server:client-certificates*`,
+      { cause: e },
     )
   }
 }
@@ -386,6 +388,6 @@ function loadPfx (pfx: Buffer, passphrase: string | undefined): void {
     tls.createSecureContext({ pfx, passphrase })
   } catch (e: any) {
     debug(`loadPfx fail: ${e.message} ${e.stack}`)
-    throw new Error(`Unable to load PFX file: ${e.message}`)
+    throw new Error(`Unable to load PFX file: ${e.message}`, { cause: e })
   }
 }

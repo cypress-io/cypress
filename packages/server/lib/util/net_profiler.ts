@@ -123,7 +123,6 @@ export class NetProfiler {
 
   install (): void {
     const netImpl = this.net
-    const self = this
 
     this.originalSocketConnect = netImpl.Socket.prototype.connect
     this.originalServerListen = netImpl.Server.prototype.listen
@@ -143,10 +142,10 @@ export class NetProfiler {
       const connection = new Connection(String(options.host), Number(options.port))
 
       client.on('close', () => {
-        self.removeActiveConnection(connection)
+        this.removeActiveConnection(connection)
       })
 
-      self.addActiveConnection(connection)
+      this.addActiveConnection(connection)
 
       return client
     }
@@ -165,9 +164,9 @@ export class NetProfiler {
 
         const connection = new Connection(address, port, 'server')
 
-        self.addActiveConnection(connection)
+        this.addActiveConnection(connection)
         server.on('close', () => {
-          self.removeActiveConnection(connection)
+          this.removeActiveConnection(connection)
         })
 
         server.on('connection', (client) => {
@@ -179,9 +178,9 @@ export class NetProfiler {
             port,
           )
 
-          self.addActiveConnection(clientConn)
+          this.addActiveConnection(clientConn)
           client.on('close', () => {
-            self.removeActiveConnection(clientConn)
+            this.removeActiveConnection(clientConn)
           })
         })
       })

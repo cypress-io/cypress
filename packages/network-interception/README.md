@@ -147,4 +147,4 @@ yarn workspace @packages/proxy test
 yarn workspace @packages/server test-unit -- network-runtime_spec
 ```
 
-Behavioral coverage for `cy.intercept` itself lives in `packages/driver/cypress/e2e/commands/net_stubbing.cy.ts`, not in this package.
+Behavioral coverage for `cy.intercept` itself lives in the specs under `packages/driver/cypress/e2e/commands/net_stubbing/`, not in this package.

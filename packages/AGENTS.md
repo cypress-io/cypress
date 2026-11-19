@@ -10,7 +10,7 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 
 - **@packages/app** — The main Vue 3 front-end application for the Cypress browser-side UI (specs list, Test Replay, runner toolbar, Studio).
 - **@packages/launchpad** — Vue 3 Electron-rendered application shown when running `cypress open`; handles login, project selection, and configuration setup.
-- **@packages/frontend-shared** — Shared Vue 3 components, TailwindCSS config, composables, and i18n strings consumed by both `app` and `launchpad`.
+- **@packages/frontend-shared** — Shared Vue 3 components, TailwindCSS config, and composables consumed by both `app` and `launchpad`.
 - **@packages/reporter** — The test result reporter UI (command log, test tree) rendered inside the runner iframe.
 - **@packages/runner** — Legacy webpack bundler for `driver` and `reporter`; being phased out in favour of `app`.
 
@@ -85,7 +85,9 @@ yarn build
 ## Notes
 
 - Most packages publish both CJS (`cjs/`) and ESM (`esm/`) builds; the `main` field points to CJS and `module` to ESM.
-- `@packages/ts` provides require-time TypeScript transpilation during development, so do not build `.js` files by hand. Node-side packages need no pre-build to run their tests locally; the browser bundles (`driver`, `runner`, `app`, `launchpad`, `frontend-shared`, `reporter`) still do, and are built by `yarn watch` from the repo root.
+- Do not build `.js` files by hand. Whether a package needs a pre-build is decided by where its `main` points. A handful still point at tracked source and resolve TypeScript at require time — `proxy` and `data-context` through an `@packages/ts/register` shim, `server` through `tsx`, `net-stubbing` straight at `lib/server` — and those need no build. That is the legacy pattern and is being retired: most Node-side packages now point `main` at build output under `cjs/`, `esm/`, or `dist/`, and a package cannot run its tests until every first-party dependency resolved that way has been built. Check the dependency's own `main` rather than assuming either way.
+- A missing dependency build surfaces as `Failed to resolve entry for package "@packages/x"` from `vite:import-analysis`, which reads like a malformed `package.json` rather than a missing build. Each run only names the next one, so a fresh worktree can need several builds in turn — see [`network/AGENTS.md`](./network/AGENTS.md) for a worked example. A full root `yarn` runs a lerna build and covers this; `yarn clean` or an interrupted install is what leaves you short.
+- The browser bundles (`driver`, `runner`, `app`, `launchpad`, `frontend-shared`, `reporter`) always need building, by `yarn watch` from the repo root.
 - Many packages use `vitest` for unit tests; the front-end packages (`app`, `launchpad`, `frontend-shared`) use Cypress component tests and E2E tests (cypress-in-cypress pattern).
 - The `nohoist` workspace option prevents specific dependencies from being hoisted to the monorepo root. It is set in `driver` (which nohoists everything, `["*"]`), `frontend-shared`, `proxy`, `server`, `socket`, and `types` — check the package's own `package.json` `workspaces.nohoist` rather than assuming.
 - Packages that depend on generated GraphQL types (from `data-context`) must run `yarn build:graphql` before type-checking will pass.

@@ -203,7 +203,6 @@ describe('CyPromptLifecycleManager', () => {
       expect(mockCtx.update).toHaveBeenCalledOnce()
       expect(ensureCyPromptBundleStub).toHaveBeenCalledWith({
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
-        projectId: 'test-project-id',
       })
 
       expect(cyPromptManagerSetupStub).toHaveBeenCalledWith({
@@ -272,7 +271,6 @@ describe('CyPromptLifecycleManager', () => {
       expect(mockCtx.update).toHaveBeenCalledOnce()
       expect(ensureCyPromptBundleStub).toHaveBeenCalledWith({
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
-        projectId: 'test-project-id',
       })
 
       expect(cyPromptManagerSetupStub).toHaveBeenCalledWith({
@@ -330,7 +328,6 @@ describe('CyPromptLifecycleManager', () => {
       expect(mockCtx.update).toHaveBeenCalledOnce()
       expect(ensureCyPromptBundleStub).toHaveBeenCalledWith({
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
-        projectId: 'test-project-id',
       })
 
       expect(cyPromptManagerSetupStub).toHaveBeenCalledWith({
@@ -437,7 +434,6 @@ describe('CyPromptLifecycleManager', () => {
       expect(ensureCyPromptBundleStub).toHaveBeenCalledOnce()
       expect(ensureCyPromptBundleStub).toHaveBeenCalledWith({
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
-        projectId: 'test-project-id',
       })
 
       expect(cyPromptManagerSetupStub).toHaveBeenCalledOnce()

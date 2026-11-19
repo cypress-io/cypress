@@ -73,7 +73,7 @@ export const postRunResponseWithProtocolDisabled = (response = postRunResponse) 
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
-};
+}
 const sendUploadUrls = function (req, res) {
   const { body } = req
 
@@ -137,6 +137,7 @@ type RouteHandler = {
   resSchema?: {
     [K in keyof RecordSchemaVersions]: [K, keyof RecordSchemaVersions[K]]
   }[keyof RecordSchemaVersions]
+  onReqBody?: (body: Record<string, unknown>) => void
   res?: RequestHandler | object
 }
 
@@ -298,7 +299,7 @@ const getResponse = function (responseSchema) {
 
   const [name, version] = responseSchema
 
-  // @ts-expect-error
+  // @ts-expect-error - the schema name and version come from an untyped tuple, which cannot satisfy the generated schema keys
   return getExample(name, version, 'res')
 }
 
@@ -337,7 +338,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
 
     try {
       if (expectedRequestSchema) {
-        // @ts-expect-error
+        // @ts-expect-error - the schema name and version come from an untyped tuple, which cannot satisfy the generated schema keys
         assertSchema(reqName, reqVersion, 'req')(body)
       }
 
@@ -352,7 +353,6 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
         body,
       })
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.log('Schema Error:', err.message)
       debug(err)
 
@@ -388,7 +388,6 @@ const assertResponseBodySchema = function (req, res, next) {
       try {
         assertSchema(resName, resVersion, 'res')(body)
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.log('Schema Error:', err.message)
 
         return res.status(412).json(err)

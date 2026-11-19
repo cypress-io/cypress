@@ -12,7 +12,7 @@ gql`
   }
 `
 
-gql `
+gql`
 fragment RunsGitTreeProject on Query {
   ...RunsErrorRenderer
   currentProject {

@@ -2,6 +2,8 @@ import type { Mock, MockInstance } from 'vitest'
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import zlib from 'zlib'
+import http from 'http'
+import { Socket } from 'net'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import EventEmitter from 'events'
@@ -12,6 +14,7 @@ import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
 import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../lib/http/util/disable-navigation-preload'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 
 async function flushPromises () {
   return new Promise((resolve) => setTimeout(resolve, 0))
@@ -394,7 +397,7 @@ describe('http/response-middleware', function () {
       expect(ctx.incomingResHadEmptyBody).toBe(false)
     })
 
-    let badHeaders = {
+    const badHeaders = {
       'bad-header ': 'value', //(contains trailling space)
       'Content Type': 'value', //(contains a space)
       'User-Agent:': 'value', //(contains a colon)
@@ -573,6 +576,32 @@ describe('http/response-middleware', function () {
         },
       }
     }
+  })
+
+  describe('PatchExpressSetHeader', function () {
+    const { PatchExpressSetHeader } = ResponseMiddleware
+    let ctx
+
+    beforeEach(async function () {
+      ctx = {
+        incomingRes: {
+          headers: {},
+        },
+        res: new http.ServerResponse(new http.IncomingMessage(new Socket())),
+      }
+
+      await testMiddleware([PatchExpressSetHeader], ctx)
+    })
+
+    it('returns the response when the header is valid', function () {
+      expect(ctx.res.setHeader('x-valid', 'value')).toBe(ctx.res)
+      expect(ctx.res.getHeader('x-valid')).toBe('value')
+    })
+
+    it('sets the header and returns the response when the value has an invalid character', function () {
+      expect(ctx.res.setHeader('x-invalid', 'a\u0000b')).toBe(ctx.res)
+      expect(ctx.res.getHeader('x-invalid')).toBe('a\u0000b')
+    })
   })
 
   describe('MaybeSetOriginAgentClusterHeader', function () {
@@ -775,6 +804,9 @@ describe('http/response-middleware', function () {
 
     it('sets Origin-Agent-Cluster header to false when injection is expected', async function () {
       prepareContext({
+        req: {
+          isFileServerRequest: true,
+        },
         incomingRes: {
           headers: {
             // simplest way to make injection expected
@@ -785,6 +817,43 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([SetInjectionLevel], ctx)
       expect(ctx.res.setHeader).toHaveBeenCalledWith('Origin-Agent-Cluster', '?0')
+    })
+
+    it('injects partially for a file server error', async function () {
+      prepareContext({
+        req: {
+          isFileServerRequest: true,
+          cookies: {},
+        },
+        incomingRes: {
+          headers: {
+            'x-cypress-file-server-error': 'true',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+
+      expect(ctx.res.wantsInjection).toEqual('partial')
+      expect(ctx.incomingRes.headers['x-cypress-file-server-error']).toEqual('true')
+    })
+
+    it('ignores and removes the file server error header on other responses', async function () {
+      prepareContext({
+        req: {
+          cookies: {},
+        },
+        incomingRes: {
+          headers: {
+            'x-cypress-file-server-error': 'true',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+
+      expect(ctx.res.wantsInjection).toBe(false)
+      expect(ctx.incomingRes.headers['x-cypress-file-server-error']).toBeUndefined()
     })
 
     describe('CSP header nonce injection', () => {
@@ -802,7 +871,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} \'fake-src\'`,
+                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -825,7 +894,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; ${validNonceDirectiveName} \'fake-src-0\',${validNonceDirectiveName} \'fake-src-1\'`,
+                      [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; ${validNonceDirectiveName} 'fake-src-0',${validNonceDirectiveName} 'fake-src-1'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -852,7 +921,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} \'fake-src\'`,
+                      [`${headerName}`]: `fake-csp-directive fake-csp-value; ${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: false,
@@ -871,7 +940,7 @@ describe('http/response-middleware', function () {
                 res: {
                   getHeaders () {
                     return {
-                      [`${nonCspHeader}`]: `${validNonceDirectiveName} \'fake-src\'`,
+                      [`${nonCspHeader}`]: `${validNonceDirectiveName} 'fake-src'`,
                     }
                   },
                   wantsInjection: 'full',
@@ -889,7 +958,7 @@ describe('http/response-middleware', function () {
                   res: {
                     getHeaders () {
                       return {
-                        [`${headerName}`]: `${validNonceDirectiveName} \'self\'; fake-csp-directive fake-csp-value; ${otherNonceDirective} \'fake-src\'`,
+                        [`${headerName}`]: `${validNonceDirectiveName} 'self'; fake-csp-directive fake-csp-value; ${otherNonceDirective} 'fake-src'`,
                       }
                     },
                     wantsInjection: 'full',
@@ -912,7 +981,7 @@ describe('http/response-middleware', function () {
                   res: {
                     getHeaders () {
                       return {
-                        [`${headerName}`]: `${validNonceDirectiveName} \'self\',fake-csp-directive fake-csp-value; ${otherNonceDirective} \'fake-src\'`,
+                        [`${headerName}`]: `${validNonceDirectiveName} 'self',fake-csp-directive fake-csp-value; ${otherNonceDirective} 'fake-src'`,
                       }
                     },
                     wantsInjection: 'full',
@@ -1243,6 +1312,27 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
       expect(appendStub).not.toHaveBeenCalled()
+    })
+
+    it('blanks HttpOnly cookie values in the simulated cookies', async function () {
+      const cookieJar = new CookieJar()
+
+      cookieJar.setCookie('visible=1', 'http://www.foobar.com/', 'strict')
+      cookieJar.setCookie('hidden=1; HttpOnly', 'http://www.foobar.com/', 'strict')
+
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          wantsInjection: 'fullCrossOrigin',
+        },
+      })
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.simulatedCookies.map(({ name, value, httpOnly }) => ({ name, value, httpOnly }))).toEqual([
+        { name: 'visible', value: '1', httpOnly: false },
+        { name: 'hidden', value: '', httpOnly: true },
+      ])
     })
 
     it('records cookie in jar but skips browser automation sync when top does not need simulating', async function () {
@@ -3080,6 +3170,34 @@ describe('http/response-middleware', function () {
   describe('AttachPlainTextStreamFn', function () {
     const { AttachPlainTextStreamFn } = ResponseMiddleware
 
+    // https://github.com/cypress-io/cypress/issues/34387
+    it.each(['x-gzip', ' X-GZIP '])('decompresses the gzip alias in %s', async function (encoding) {
+      const ctx = {
+        debug: () => {},
+        res: { on: () => {}, off: () => {} },
+        incomingRes: { headers: { 'content-encoding': encoding } },
+        incomingResStream: Readable.from([zlib.gzipSync(Buffer.from('aliased'))]),
+        isGunzipped: false,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: [],
+        makeResStreamPlainText: () => {},
+        onError: (err) => {
+          throw err
+        },
+      }
+
+      await testMiddleware([AttachPlainTextStreamFn], ctx)
+      ctx.makeResStreamPlainText()
+      expect(ctx.contentEncodingOrder).toEqual(['gzip'])
+      expect(ctx.isGunzipped).toBe(true)
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+      expect(Buffer.concat(chunks).toString()).toBe('aliased')
+    })
+
     it('decompresses Brotli and sets isBrotliDecompressed when content-encoding is br', async function () {
       const compressed = zlib.brotliCompressSync(Buffer.from('hello'))
       const stream = Readable.from([compressed])
@@ -3112,7 +3230,7 @@ describe('http/response-middleware', function () {
       expect(Buffer.concat(chunks).toString()).toBe('hello')
     })
 
-    it('decompresses layered content-encoding in reverse order (br then gzip for "gzip, br")', async function () {
+    it.each(['gzip, br', 'x-gzip, br'])('decompresses layered content-encoding in reverse order for %s', async function (encoding) {
       // content-encoding: gzip, br means gzip applied first, then br. Wire format: br(gzip(data)).
       const inner = zlib.gzipSync(Buffer.from('layered'))
       const outer = zlib.brotliCompressSync(inner)
@@ -3120,7 +3238,7 @@ describe('http/response-middleware', function () {
       const ctx = {
         debug: () => {},
         res: { on: () => {}, off: () => {} },
-        incomingRes: { headers: { 'content-encoding': 'gzip, br' } },
+        incomingRes: { headers: { 'content-encoding': encoding } },
         incomingResStream: stream,
         isGunzipped: false,
         isBrotliDecompressed: false,

@@ -10,7 +10,7 @@ export type LauncherApi = {
   detect: (goalBrowsers?: Browser[]) => Bluebird<FoundBrowser[]>
   detectByPath: (
     path: string,
-    goalBrowsers?: Browser[]
+    goalBrowsers?: Browser[],
   ) => Promise<FoundBrowser>
   launch: (browser: FoundBrowser, url: string, args: string[]) => ChildProcess
 }
@@ -19,3 +19,6 @@ export type PathData = {
   path: string
   browserKey?: string
 }
+
+/** `--version` output keyed by the resolved path of the binary that produced it */
+export type VersionStringCache = Map<string, Promise<string>>

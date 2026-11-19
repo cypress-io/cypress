@@ -2,10 +2,12 @@ import execa from 'execa'
 import cp from 'child_process'
 import os from 'os'
 import Bluebird from 'bluebird'
+import which from 'which'
 
 // export an object for easy method stubbing
 export const utils = {
   execa,
+  which: (cmd: string): Promise<string | null> => which(cmd, { nothrow: true }),
   spawnWithArch: <T extends cp.SpawnOptionsWithStdioTuple<cp.StdioNull, cp.StdioPipe, cp.StdioPipe>>(cmd: string, args: string[], opts: T) => {
     if (os.platform() === 'darwin' && os.arch() === 'arm64') {
       // On macOS, browsers are distributed as "universal apps" which have both arm64 and x86_64 binaries

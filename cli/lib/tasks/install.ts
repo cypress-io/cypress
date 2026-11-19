@@ -316,7 +316,6 @@ function downloadArchive (version: string, downloadDestination: string): ListrTa
         version,
         downloadDestination,
         progress: {
-          throttle: 100,
           onProgress: (percentComplete: number, remaining: number) => {
             task.title = progressTitle(inProgressTitle, percentComplete, remaining)
           },

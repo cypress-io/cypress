@@ -22,9 +22,14 @@ const format = (data) => {
 }
 
 function removeLeadingSlash (str: string) {
-  let li = Math.max(str.indexOf('/'), str.indexOf('\\'))
+  const li = Math.max(str.indexOf('/'), str.indexOf('\\'))
 
   return str.substring(li + 1)
+}
+
+// Only an empty string fails a non-empty string check, so quote strings to keep it visible
+const formatNonEmptyStringArg = (value) => {
+  return _.isString(value) ? `'${value}'` : $utils.stringifyActual(value)
 }
 
 const formatConfigFile = (projectRoot: Cypress.Config['projectRoot'], configFile: Cypress.Config['configFile']) => {
@@ -79,6 +84,24 @@ const getScreenshotDocsPath = (cmd) => {
   }
 
   return 'screenshot'
+}
+
+const statusCodeFlagsInvalid = (command, { failOnStatusCode, retryOnStatusCodeFailure }) => {
+  return {
+    message: stripIndent`\
+      ${cmd(command)} was called with options that cannot be used together:
+
+        { failOnStatusCode: ${$utils.stringifyActual(failOnStatusCode)}, retryOnStatusCodeFailure: ${$utils.stringifyActual(retryOnStatusCodeFailure)} }
+
+      \`retryOnStatusCodeFailure\` retries when the response has a status code other than \`2xx\` or \`3xx\`, and fails if the last retry gets one too. It requires \`failOnStatusCode: true\`.
+
+      Pass one of these combinations instead:
+
+        1. To retry on these status codes, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: true }\`.
+        2. To fail on these status codes without retrying, which is the default, pass \`{ failOnStatusCode: true, retryOnStatusCodeFailure: false }\`.
+        3. To not fail on these status codes, pass \`{ failOnStatusCode: false, retryOnStatusCodeFailure: false }\`.`,
+    docsUrl: `https://on.cypress.io/${command}`,
+  }
 }
 
 const getRedirects = (obj, phrase, listIndentSize) => {
@@ -540,7 +563,7 @@ export default {
     },
     invalid_argument (obj) {
       return {
-        message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`{{file}}\`.`,
+        message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`${formatNonEmptyStringArg(obj.file)}\`.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
@@ -1152,7 +1175,7 @@ export default {
 
           You passed: ${format(eventName)}`, 10)
       },
-      req_continue_fn_only: '\`req.continue\` requires the parameter to be a function',
+      req_continue_fn_only: '`req.continue` requires the parameter to be a function',
       event_needs_handler: `\`req.on()\` requires the second parameter to be a function.`,
       defineproperty_is_not_allowed: `\`defineProperty()\` is not allowed.`,
       setprototypeof_is_not_allowed: `\`setPrototypeOf()\` is not allowed.`,
@@ -1420,19 +1443,15 @@ export default {
         docsUrl: 'https://on.cypress.io/request',
       }
     },
-    status_code_flags_invalid: {
-      message: stripIndent`\
-        ${cmd('request')} was invoked with \`{ failOnStatusCode: false, retryOnStatusCodeFailure: true }\`.
-
-        \`failOnStatusCode\` must be \`true\` if \`retryOnStatusCodeFailure\` is \`true\`.`,
-      docsUrl: 'https://on.cypress.io/request',
+    status_code_flags_invalid (obj) {
+      return statusCodeFlagsInvalid('request', obj)
     },
     auth_invalid: {
       message: `${cmd('request')} must be passed an object literal for the \`auth\` option.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     encoding_invalid: {
-      message: `${cmd('request')} was called with invalid encoding: \`{{encoding}}\`. Encoding can be: \`utf8\`, \`utf16le\`, \`latin1\`, \`base64\`, \`hex\`, \`ascii\`, \`binary\`, \`latin1\`, \`ucs2\`, \`utf16le\`, or any other encoding supported by Node\'s Buffer encoding.`,
+      message: `${cmd('request')} was called with invalid encoding: \`{{encoding}}\`. Encoding can be: \`utf8\`, \`utf16le\`, \`latin1\`, \`base64\`, \`hex\`, \`ascii\`, \`binary\`, \`latin1\`, \`ucs2\`, \`utf16le\`, or any other encoding supported by Node's Buffer encoding.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     gzip_invalid: {
@@ -1454,7 +1473,6 @@ export default {
         If you're trying to send a \`x-www-form-urlencoded\` request then pass either a string or object literal to the \`body\` property.`,
       docsUrl: 'https://on.cypress.io/request',
     },
-    /* eslint-disable indent */
     loading_failed (obj) {
       return {
         message: cyStripIndent(`\
@@ -1543,7 +1561,6 @@ export default {
         docsUrl: 'https://on.cypress.io/request',
       }
     },
-    /* eslint-enable indent */
     url_missing: {
       message: `${cmd('request')} requires a \`url\`. You did not provide a \`url\`.`,
       docsUrl: 'https://on.cypress.io/request',
@@ -1871,12 +1888,14 @@ export default {
         `,
         docsUrl: 'https://on.cypress.io/session',
       },
-      wrongArgOptionUnexpected: {
-        message: stripIndent`
-        ${cmd('session')} was passed an invalid option: **{{key}}**
-        Available options are: \`validate\`
-        `,
-        docsUrl: 'https://on.cypress.io/session',
+      wrongArgOptionUnexpected: ({ validOpts }: { validOpts: string[] }) => {
+        return {
+          message: stripIndent`
+          ${cmd('session')} was passed an invalid option: **{{key}}**
+          Available options are: ${[...validOpts].sort().map((opt) => `\`${opt}\``).join(', ')}
+          `,
+          docsUrl: 'https://on.cypress.io/session',
+        }
       },
       wrongArgOptionInvalid: {
         message: stripIndent`
@@ -2099,9 +2118,11 @@ export default {
   },
 
   trigger: {
-    invalid_argument: {
-      message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`{{cmd}}\`.`,
-      docsUrl: 'https://on.cypress.io/trigger',
+    invalid_argument ({ eventName }) {
+      return {
+        message: `${cmd('trigger')} must be passed a non-empty string as its 1st argument. You passed: \`${formatNonEmptyStringArg(eventName)}\`.`,
+        docsUrl: 'https://on.cypress.io/trigger',
+      }
     },
     multiple_elements: {
       message: `${cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements.`,
@@ -2142,7 +2163,7 @@ export default {
       docsUrl: 'https://on.cypress.io/type',
     },
     invalid_week: {
-      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (00-53). You passed: \`{{chars}}\``,
+      message: `Typing into a \`week\` input with ${cmd('type')} requires a valid week with the format \`YYYY-Www\`, where \`W\` is the literal character \`W\` and \`ww\` is the week number (01-53). You passed: \`{{chars}}\``,
       docsUrl: 'https://on.cypress.io/type',
     },
     multiple_elements: {
@@ -2281,12 +2302,9 @@ export default {
         docsUrl: 'https://on.cypress.io/visit',
       }
     },
-    status_code_flags_invalid: stripIndent`\
-      These options are incompatible with each other.
-
-       - To retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-       - To not retry on non-2xx status codes, pass { failOnStatusCode: true, retryOnStatusCodeFailure: true }.
-       - To fail on non-2xx status codes without retrying (the default behavior), pass { failOnStatusCode: true, retryOnStatusCodeFailure: false }`,
+    status_code_flags_invalid (obj) {
+      return statusCodeFlagsInvalid('visit', obj)
+    },
     invalid_1st_arg: {
       message: `${cmd('visit')} must be called with a \`url\` or an \`options\` object containing a \`url\` as its 1st argument`,
       docsUrl: 'https://on.cypress.io/visit',

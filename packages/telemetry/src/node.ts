@@ -1,16 +1,19 @@
 import type { Span } from '@opentelemetry/api'
 import type { startSpanOptions, findActiveSpanOptions, contextObject } from './telemetry/index'
 import {
-  envDetectorSync, hostDetectorSync, osDetectorSync, processDetectorSync,
+  envDetectorSync, hostDetectorSync, osDetectorSync,
 } from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { circleCiDetectorSync } from './detectors/circleCiDetectorSync'
+import { processDetectorSync } from './detectors/processDetectorSync'
 import { enabledValues, Telemetry as TelemetryClass, TelemetryNoop } from './telemetry/index'
 import { OTLPTraceExporter as OTLPTraceExporterCloud } from './span-exporters/cloud-span-exporter'
 import { OTLPTraceExporter as OTLPTraceExporterIpc } from './span-exporters/ipc-span-exporter'
 
 export { OTLPTraceExporterIpc, OTLPTraceExporterCloud, Span }
+
+export { getSpanNames } from './span-names'
 
 let telemetryInstance: TelemetryNoop | TelemetryClass = new TelemetryNoop
 
@@ -90,7 +93,7 @@ export const telemetry = {
   exporter: (): void | OTLPTraceExporterIpc | OTLPTraceExporterCloud => telemetryInstance.getExporter() as void | OTLPTraceExporterIpc | OTLPTraceExporterCloud,
 }
 
-export const decodeTelemetryContext = (telemetryCtx: string): {context?: contextObject, version?: string} => {
+export const decodeTelemetryContext = (telemetryCtx: string): { context?: contextObject, version?: string } => {
   if (telemetryCtx) {
     return JSON.parse(
       Buffer.from(telemetryCtx, 'base64').toString('utf-8'),

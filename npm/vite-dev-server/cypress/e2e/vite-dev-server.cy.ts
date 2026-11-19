@@ -1,5 +1,3 @@
-/// <reference path="../support/e2e.ts" />
-
 import dedent from 'dedent'
 
 describe('Config options', () => {
@@ -153,7 +151,7 @@ describe('sourcemaps', () => {
       cy.waitForSpecToFinish({ failCount: 2 })
       cy.reporter().find('.runnable-err-file-path').eq(1).should('contain', `${specName}:${line}:${column}`)
       cy.window().then((win) => {
-        // @ts-expect-error
+        // @ts-expect-error - getEventManager is set on the app window and is not in its types
         cy.stub(win.getEventManager(), 'emit').as('emit')
       })
 

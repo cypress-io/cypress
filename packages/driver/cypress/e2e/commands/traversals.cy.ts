@@ -38,9 +38,7 @@ describe('src/cy/commands/traversals', () => {
         const el = traverse(cy.$$('#list'))
 
         cy.get('#list')[name](arg).then(($el) => {
-          // chai-jquery types `match` as taking a selector, but it delegates to
-          // `$el.is()`, which also accepts another jQuery object
-          expect($el).to.match(el as any)
+          expect($el).to.match(el)
         })
       })
 
@@ -109,8 +107,6 @@ describe('src/cy/commands/traversals', () => {
 
         it('returns no elements', (done) => {
           const errIncludes = (el, node) => {
-            node = dom.stringify(cy.$$(node), 'short')
-
             cy.on('fail', (err) => {
               expect(err.message).to.include(`Expected to find element: \`${el}\`, but never found it. Queried from:`)
 

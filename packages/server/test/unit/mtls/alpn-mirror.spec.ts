@@ -57,6 +57,7 @@ async function bridgeTo (originPort: number) {
   const bridge = new MtlsBridge({
     listeners: [{
       hostname: 'localhost',
+      hostMatcher: { match: (h) => h === 'localhost' },
       port: originPort,
       sourceUrls: [`https://localhost:${originPort}`],
       material: { ca: [read('origin-ca.crt')], cert: [read('client.crt')], key: [{ pem: read('client.key') }] },

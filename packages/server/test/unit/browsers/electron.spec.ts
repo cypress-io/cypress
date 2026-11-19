@@ -7,13 +7,14 @@ import { Automation } from '../../../lib/automation'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as electronApp from '../../../lib/util/electron-app'
 import utils from '../../../lib/browsers/utils'
-import { screencastOpts } from '../../../lib/browsers/cdp-protocol/cdp_automation'
+import { CdpAutomation, screencastOpts } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import menu from '../../../lib/gui/menu'
 import * as plugins from '../../../lib/plugins'
 import * as Windows from '../../../lib/gui/windows'
 import electron from '../../../lib/browsers/electron'
 import * as savedState from '../../../lib/saved_state'
 import type { BrowserLaunchOpts } from '@packages/types'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 vi.mock('electron', async () => {
   const { default: electronStub } = await import('../../support/helpers/electron_stub')
@@ -139,6 +140,7 @@ describe('lib/browsers/electron', () => {
           setUserAgent: vi.fn(),
           getUserAgent: vi.fn(),
           clearCache: vi.fn(),
+          clearStorageData: vi.fn(),
         },
         on: vi.fn(),
         getOSProcessId: vi.fn().mockReturnValue(ELECTRON_PID),
@@ -188,7 +190,7 @@ describe('lib/browsers/electron', () => {
   describe('.connectToNewSpec', () => {
     it('throws an error', async () => {
       expect(() => {
-        // @ts-expect-error
+        // @ts-expect-error - partial browser stub
         electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, automation)
       }).toThrow('Attempting to connect to a new spec is not supported for electron, use open instead')
     })
@@ -197,27 +199,27 @@ describe('lib/browsers/electron', () => {
   describe('.open', () => {
     beforeEach(async () => {
       // shortcut to set the browserCriClient singleton variable
-      // @ts-expect-error
+      // @ts-expect-error - partial launch options
       await electron._getAutomation({}, { onError: () => {} }, {})
 
       await stubForOpen()
     })
 
     it('calls render with url, state, and options', () => {
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       return electron.open('electron', url, options, automation)
       .then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - automation argument omitted
         let expectedOptions = electron._defaultOptions(options.projectRoot, state, options)
 
         expectedOptions = Windows.defaults(expectedOptions)
 
-        // @ts-expect-error
+        // @ts-expect-error - _render is mocked
         const preferencesKeys = _.keys(electron._render.mock.calls[0][2])
 
         expect(_.keys(expectedOptions)).toStrictEqual(preferencesKeys)
 
-        // @ts-expect-error
+        // @ts-expect-error - _render is mocked
         const electronOptionsArg = electron._render.mock.calls[0][3]
 
         expect(electronOptionsArg.projectRoot).toBe(options.projectRoot)
@@ -231,10 +233,10 @@ describe('lib/browsers/electron', () => {
     })
 
     it('returns custom object emitter interface', () => {
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       return electron.open('electron', url, options, automation)
       .then((obj) => {
-        // @ts-expect-error
+        // @ts-expect-error - browserWindow is not on the BrowserInstance type
         expect(obj.browserWindow).toBe(win)
         expect(obj.kill).toBeTypeOf('function')
         expect(obj.removeAllListeners).toBeTypeOf('function')
@@ -250,10 +252,10 @@ describe('lib/browsers/electron', () => {
       vi.mocked(plugins.has).mockReturnValue(true)
       vi.mocked(plugins.execute).mockResolvedValue(null)
 
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       return electron.open('electron', url, options, automation)
       .then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - _render is mocked
         const renderOptions = electron._render.mock.calls[0][2]
 
         expect(Object.keys(renderOptions)).toEqual(expect.arrayContaining(['onFocus', 'onNewWindow', 'onCrashed']))
@@ -267,10 +269,10 @@ describe('lib/browsers/electron', () => {
         return event === 'before:browser:launch' ? Promise.resolve({ preferences: { foo: 'bar' } }) : undefined as any
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       return electron.open('electron', url, options, automation)
       .then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - _render is mocked
         const renderOptions = electron._render.mock.calls[0][2]
 
         expect(Object.keys(renderOptions)).toEqual(expect.arrayContaining(['foo', 'onFocus', 'onNewWindow', 'onCrashed']))
@@ -287,7 +289,7 @@ describe('lib/browsers/electron', () => {
         }
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       return electron.open('electron', url, options, automation)
       .then(() => {
         expect(Windows.removeAllExtensions).toHaveBeenCalledOnce()
@@ -314,7 +316,7 @@ describe('lib/browsers/electron', () => {
       vi.mocked(plugins.has).mockReturnValue(true)
       vi.mocked(plugins.execute).mockResolvedValue(null)
 
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       return electron.open('electron', url, options, automation)
       .then(() => {
         expectCalledWith(plugins.execute, 'after:browser:launch', 'electron', {
@@ -324,7 +326,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('executeAfterBrowserLaunch is noop if after:browser:launch is not registered', () => {
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       return electron.open('electron', url, options, automation)
       .then(() => {
         expectNotCalledWith(plugins.execute, 'after:browser:launch')
@@ -465,7 +467,7 @@ describe('lib/browsers/electron', () => {
         currentlyAttachedProtocolTarget: mockCurrentlyAttachedProtocolTarget,
       }
 
-      // @ts-expect-error
+      // @ts-expect-error - partial BrowserCriClient stub
       vi.spyOn(electron, '_getBrowserCriClient').mockReturnValue(browserCriClient)
 
       await electron.closeProtocolConnection()
@@ -477,7 +479,7 @@ describe('lib/browsers/electron', () => {
 
   describe('.kill', () => {
     beforeEach(async () => {
-      // @ts-expect-error
+      // @ts-expect-error - partial launch options
       await electron._getAutomation({}, { onError: () => {} }, {})
 
       await stubForOpen()
@@ -486,7 +488,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('does not terminate the browserCriClient if the instance is an orphaned process', async () => {
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       const instance = await electron.open('electron', url, options, automation)
 
       instance.isOrphanedBrowserProcess = true
@@ -496,7 +498,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('terminates the browserCriClient otherwise', async () => {
-      // @ts-expect-error
+      // @ts-expect-error - browser passed by name instead of a Browser object
       const instance = await electron.open('electron', url, options, automation)
 
       instance.kill()
@@ -515,14 +517,14 @@ describe('lib/browsers/electron', () => {
     })
 
     it('sets menu.set whether or not its in headless mode', () => {
-      // @ts-expect-error
+      // @ts-expect-error - partial electron options
       return electron._launch(win, url, automation, { show: true, onError: () => {} }, undefined, undefined, { attachCDPClient: vi.fn() })
       .then(() => {
         expectCalledWith(menu.set, { withInternalDevTools: true })
       }).then(() => {
         vi.mocked(menu.set).mockClear()
 
-        // @ts-expect-error
+        // @ts-expect-error - partial electron options
         return electron._launch(win, url, automation, { show: false, onError: () => {} })
       }).then(() => {
         expect(menu.set).not.toHaveBeenCalled()
@@ -534,7 +536,7 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(electron._setUserAgent).not.toHaveBeenCalled()
       }).then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - partial electron options
         return electron._launch(win, url, automation, { userAgent: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: vi.fn() })
       }).then(() => {
         expectCalledWith(electron._setUserAgent, win.webContents, 'foo')
@@ -546,7 +548,7 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(electron._setProxy).not.toHaveBeenCalled()
       }).then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - partial electron options
         return electron._launch(win, url, automation, {
           proxyServer: 'foo',
           proxyBypassList: '<-loopback>,example.com',
@@ -690,8 +692,13 @@ describe('lib/browsers/electron', () => {
     it('expects the browser to be reset', () => {
       return electron._launch(win, url, automation, options, undefined, undefined, { attachCDPClient: vi.fn() })
       .then(() => {
-        expectCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
+        expect(win.webContents.session.clearStorageData).toHaveBeenCalledWith({
+          storages: ['cookies', 'indexdb', 'localstorage', 'shadercache', 'serviceworkers', 'cachestorage'],
+        })
+
+        expectCalledWith(pageCriClient.send, 'Network.clearBrowserCookies')
         expectCalledWith(pageCriClient.send, 'Network.clearBrowserCache')
+        expectNotCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin', { origin: '*' })
       })
     })
 
@@ -876,7 +883,7 @@ describe('lib/browsers/electron', () => {
             },
             {
               name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
+              value: getMetadataHeaderValue(),
             },
           ],
         })
@@ -1053,6 +1060,49 @@ describe('lib/browsers/electron', () => {
     })
   })
 
+  describe('._getAutomation take:screenshot', () => {
+    let captureScreenshot: Mock
+
+    const takeScreenshot = async (launchOptions: Record<string, unknown>) => {
+      // @ts-expect-error - partial launch options
+      const automationInstance = await electron._getAutomation(win, { onError: () => {}, ...launchOptions }, automation)
+
+      return automationInstance.onRequest('take:screenshot', {} as any)
+    }
+
+    beforeEach(() => {
+      captureScreenshot = vi.fn().mockResolvedValue('data:image/png;base64,iVBORw0KGgo=')
+      // @ts-expect-error - partial CdpAutomation
+      vi.spyOn(CdpAutomation, 'create').mockResolvedValue({ onRequest: captureScreenshot })
+    })
+
+    it('wraps the screenshot in a screencast in open mode without video', async () => {
+      const result = await takeScreenshot({ isTextTerminal: false })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expect(pageCriClient.send.mock.calls.map(([command]) => command)).toStrictEqual(['Page.startScreencast', 'Page.stopScreencast'])
+      expect(pageCriClient.send).toHaveBeenCalledWith('Page.startScreencast', screencastOpts())
+      expect(pageCriClient.send.mock.invocationCallOrder[0]).toBeLessThan(captureScreenshot.mock.invocationCallOrder[0])
+      expect(captureScreenshot.mock.invocationCallOrder[0]).toBeLessThan(pageCriClient.send.mock.invocationCallOrder[1])
+    })
+
+    it('leaves the run-mode screencast running when video is disabled', async () => {
+      const result = await takeScreenshot({ isTextTerminal: true })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expectNotCalledWith(pageCriClient.send, 'Page.startScreencast', anyArg)
+      expectNotCalledWith(pageCriClient.send, 'Page.stopScreencast')
+    })
+
+    it('leaves the video screencast running when video is enabled', async () => {
+      const result = await takeScreenshot({ isTextTerminal: true, videoApi: {} })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expectNotCalledWith(pageCriClient.send, 'Page.startScreencast', anyArg)
+      expectNotCalledWith(pageCriClient.send, 'Page.stopScreencast')
+    })
+  })
+
   describe('._render', () => {
     let newWin: any
     let preferences: any
@@ -1119,49 +1169,49 @@ describe('lib/browsers/electron', () => {
     })
 
     it('uses default width if there isn\'t one saved', () => {
-      // @ts-expect-error
+      // @ts-expect-error - automation argument omitted
       const opts = electron._defaultOptions('/foo', state, options)
 
       expect(opts.width).toBe(1280)
     })
 
     it('uses saved width if there is one', () => {
-      // @ts-expect-error
+      // @ts-expect-error - automation argument omitted
       const opts = electron._defaultOptions('/foo', { browserWidth: 1024 }, options)
 
       expect(opts.width).toBe(1024)
     })
 
     it('uses default height if there isn\'t one saved', () => {
-      // @ts-expect-error
+      // @ts-expect-error - automation argument omitted
       const opts = electron._defaultOptions('/foo', state, options)
 
       expect(opts.height).toBe(720)
     })
 
     it('uses saved height if there is one', () => {
-      // @ts-expect-error
+      // @ts-expect-error - automation argument omitted
       const opts = electron._defaultOptions('/foo', { browserHeight: 768 }, options)
 
       expect(opts.height).toBe(768)
     })
 
     it('uses saved x if there is one', () => {
-      // @ts-expect-error
+      // @ts-expect-error - automation argument omitted
       const opts = electron._defaultOptions('/foo', { browserX: 200 }, options)
 
       expect(opts.x).toBe(200)
     })
 
     it('uses saved y if there is one', () => {
-      // @ts-expect-error
+      // @ts-expect-error - automation argument omitted
       const opts = electron._defaultOptions('/foo', { browserY: 300 }, options)
 
       expect(opts.y).toBe(300)
     })
 
     it('tracks browser state', () => {
-      // @ts-expect-error
+      // @ts-expect-error - automation argument omitted
       const opts = electron._defaultOptions('/foo', { browserY: 300 }, options)
 
       const args = _.pick(opts.trackState, 'width', 'height', 'x', 'y', 'devTools')
@@ -1209,10 +1259,10 @@ describe('lib/browsers/electron', () => {
 
       it('adds pid of new BrowserWindow to allPids list', async () => {
         // shortcut to set the browserCriClient singleton variable
-        // @ts-expect-error
+        // @ts-expect-error - partial launch options
         await electron._getAutomation({}, { onError: () => {} }, {})
 
-        // @ts-expect-error
+        // @ts-expect-error - automation argument omitted
         const opts = electron._defaultOptions(options.projectRoot, state, options)
 
         const NEW_WINDOW_PID = ELECTRON_PID * 2
@@ -1225,7 +1275,7 @@ describe('lib/browsers/electron', () => {
 
         return stubForOpen()
         .then(() => {
-          // @ts-expect-error
+          // @ts-expect-error - browser passed by name instead of a Browser object
           return electron.open('electron', url, opts, automation)
         }).then((instance) => {
           return opts.onNewWindow.call(win, {}, url)
@@ -1238,6 +1288,7 @@ describe('lib/browsers/electron', () => {
   })
 
   // TODO: these all need to be updated
+  // eslint-disable-next-line vitest/no-disabled-tests
   describe.skip('._launchChild', () => {
     let childWin: any
     let event: any
@@ -1267,7 +1318,7 @@ describe('lib/browsers/electron', () => {
       }
 
       openNewWindow = (options) => {
-        // @ts-expect-error
+        // @ts-expect-error - launcher is not defined in this spec
         return launcher.launch('electron', url, options).then(() => {
           return win.webContents.emit('new-window', event, 'some://other.url')
         })
@@ -1282,7 +1333,7 @@ describe('lib/browsers/electron', () => {
 
     it('creates child window', () => {
       return openNewWindow().then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - Windows.create is mocked
         const args = Windows.create.mock.lastCall[0]
 
         expect(Windows.create).toHaveBeenCalledTimes(2)
@@ -1295,7 +1346,7 @@ describe('lib/browsers/electron', () => {
 
     it('offsets it from parent by 100px', () => {
       return openNewWindow().then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - Windows.create is mocked
         const args = Windows.create.mock.lastCall[0]
 
         expect(args.x).toBe(104)
@@ -1306,7 +1357,7 @@ describe('lib/browsers/electron', () => {
 
     it('passes along web security', () => {
       return openNewWindow({ chromeWebSecurity: false }).then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - Windows.create is mocked
         const args = Windows.create.mock.lastCall[0]
 
         expect(args.chromeWebSecurity).toBe(false)
@@ -1315,12 +1366,12 @@ describe('lib/browsers/electron', () => {
 
     it('sets unique PROJECT type on each new window', () => {
       return openNewWindow().then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - Windows.create is mocked
         const firstArgs = Windows.create.mock.lastCall[0]
 
         expect(firstArgs.type).toMatch(/^PROJECT-CHILD-\d/)
         win.webContents.emit('new-window', event, 'yet://another.url')
-        // @ts-expect-error
+        // @ts-expect-error - Windows.create is mocked
         const secondArgs = Windows.create.mock.lastCall[0]
 
         expect(secondArgs.type).toMatch(/^PROJECT-CHILD-\d/)
@@ -1349,7 +1400,7 @@ describe('lib/browsers/electron', () => {
 
     it('sets menu with dev tools on focus', () => {
       return openNewWindow().then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - Windows.create is mocked
         Windows.create.mock.lastCall[0].onFocus()
         // once for main window, once for child, once for focus
         expect(menu.set).toHaveBeenCalledTimes(3)
@@ -1395,7 +1446,7 @@ describe('lib/browsers/electron', () => {
 
       return openNewWindow().then(() => {
         childWin.webContents.emit('new-window', event, 'yet://another.url')
-        // @ts-expect-error
+        // @ts-expect-error - Windows.create is mocked
         const args = Windows.create.mock.lastCall[0]
 
         expect(Windows.create).toHaveBeenCalledTimes(3)

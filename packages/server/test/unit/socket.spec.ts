@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { EventEmitter } from 'events'
 import path from 'path'
 import httpsAgent from 'https-proxy-agent'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -6,12 +7,14 @@ import type { MockInstance } from 'vitest'
 // NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
 // we are unable to import ESM into a CommonJS test context, even if we await import() the module.
 import * as socketIo from '@packages/socket/lib/client'
+import { encode } from '@packages/socket/lib/utils'
 import Fixtures from '@tooling/system-tests'
 import * as errors from '../../lib/errors'
 import { SocketE2E } from '../../lib/socket-e2e'
 import { ServerBase } from '../../lib/server-base'
 import { Automation } from '../../lib/automation'
 import preprocessor from '../../lib/plugins/preprocessor'
+import * as specFrameScripts from '../../lib/util/spec_frame_scripts'
 import { fs } from '../../lib/util/fs'
 import * as session from '../../lib/session'
 import devServer from '../../lib/plugins/dev-server'
@@ -20,14 +23,24 @@ import { clearCtx, getCtx, makeDataContext, setCtx } from '../../lib/makeDataCon
 import { SocketCt } from '../../lib/socket-ct'
 import runEvents from '../../lib/plugins/run_events'
 import { GracefulExit } from '../../lib/util/graceful-exit'
+import { cookieJar } from '../../lib/automation/cookie/jar'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
 // `graphql` rejects. No test here issues a GraphQL request.
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     graphqlWS: vi.fn(),
-    graphQLHTTP: vi.fn(),
+    tapGraphQLHTTP: vi.fn(),
+    handleRunnerGraphQLSocketRequest: vi.fn(),
   }
+})
+
+const openExternal = vi.hoisted(() => {
+  return vi.fn()
+})
+
+vi.mock('../../lib/gui/links', () => {
+  return { openExternal }
 })
 
 vi.mock('@packages/data-context/graphql/schema', () => {
@@ -227,6 +240,7 @@ describe('lib/socket', () => {
             agent,
             path: socketIoRoute,
             transports: ['websocket'],
+            extraHeaders: { origin: new URL(proxyUrl).origin },
           })
         })
         .catch(reject)
@@ -301,6 +315,63 @@ describe('lib/socket', () => {
             return done()
           })
         })
+      })
+    })
+
+    describe('on(external:open)', () => {
+      let onUnhandledRejection: MockInstance
+
+      beforeEach(() => {
+        onUnhandledRejection = vi.fn()
+        process.on('unhandledRejection', onUnhandledRejection as any)
+      })
+
+      afterEach(() => {
+        process.off('unhandledRejection', onUnhandledRejection as any)
+      })
+
+      it('handles a url the OS fails to open', () => {
+        return new Promise<void>((done) => {
+          openExternal.mockImplementationOnce(() => {
+            setImmediate(() => {
+              expect(onUnhandledRejection).not.toHaveBeenCalled()
+
+              done()
+            })
+
+            return Promise.reject(new Error('no handler for https'))
+          })
+
+          client.emit('external:open', 'https://on.cypress.io')
+        })
+      })
+    })
+
+    describe('on(open:file)', () => {
+      const fileDetails = { file: '/project/cypress/e2e/spec.cy.js', line: 3, column: 5 }
+
+      beforeEach(() => {
+        ctx.coreData.localSettings.availableEditors = [{ id: 'code', name: 'Visual Studio Code', binary: 'code' }]
+        vi.spyOn(ctx.actions.file, 'openFile').mockResolvedValue(undefined)
+        vi.spyOn(ctx.actions.electron, 'showItemInFolder').mockReturnValue(undefined)
+      })
+
+      it('opens the file in a detected preferred editor', async () => {
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+
+        client.emit('open:file', fileDetails)
+
+        await vi.waitFor(() => expect(ctx.actions.file.openFile).toHaveBeenCalledWith(fileDetails.file, 3, 5))
+        expect(ctx.actions.electron.showItemInFolder).not.toHaveBeenCalled()
+      })
+
+      it('shows the file in the file manager without a launchable preferred editor', async () => {
+        ctx.coreData.localSettings.preferences.preferredEditorBinary = '/bin/sh'
+
+        client.emit('open:file', fileDetails)
+
+        await vi.waitFor(() => expect(ctx.actions.electron.showItemInFolder).toHaveBeenCalledWith(fileDetails.file))
+        expect(ctx.actions.file.openFile).not.toHaveBeenCalled()
       })
     })
 
@@ -413,6 +484,46 @@ describe('lib/socket', () => {
             return done()
           })
         })
+      })
+    })
+
+    describe('on(backend:request, cross:origin:set:cookie)', () => {
+      const url = 'https://www.foobar.com/'
+
+      const makeCookie = (props = {}) => {
+        return { name: 'foo', value: 'bar', domain: 'www.foobar.com', path: '/', hostOnly: true, httpOnly: false, secure: false, expiry: null, maxAge: null, sameSite: 'lax', ...props }
+      }
+
+      const setCookie = (cookie) => {
+        return new Promise<void>((resolve) => {
+          client.emit('backend:request', 'cross:origin:set:cookie', { cookie, url, sameSiteContext: 'strict' }, () => resolve())
+        })
+      }
+
+      const jarCookies = () => cookieJar.getCookies(url).map(({ key, value, httpOnly }) => ({ key, value, httpOnly }))
+
+      beforeEach(() => {
+        cookieJar.removeAllCookies()
+      })
+
+      it('stores the cookie in the server-side cookie jar', async () => {
+        await setCookie(makeCookie())
+
+        expect(jarCookies()).toEqual([{ key: 'foo', value: 'bar', httpOnly: false }])
+      })
+
+      it('does not store HttpOnly cookies', async () => {
+        await setCookie(makeCookie({ httpOnly: true }))
+
+        expect(jarCookies()).toEqual([])
+      })
+
+      it('does not replace HttpOnly cookies', async () => {
+        cookieJar.setCookie('foo=bar; Path=/; HttpOnly', url, 'strict')
+
+        await setCookie(makeCookie({ value: 'changed' }))
+
+        expect(jarCookies()).toEqual([{ key: 'foo', value: 'bar', httpOnly: true }])
       })
     })
 
@@ -840,7 +951,7 @@ describe('lib/socket', () => {
     describe('on(backend:request, clear:sessions)', () => {
       it('clears spec sessions', () => {
         return new Promise<void>((done) => {
-          let state: any = session.getState()
+          const state: any = session.getState()
 
           state.globalSessions = {
             global: { id: 'global' },
@@ -865,7 +976,7 @@ describe('lib/socket', () => {
 
       it('clears all sessions', () => {
         return new Promise<void>((done) => {
-          let state: any = session.getState()
+          const state: any = session.getState()
 
           state.globalSessions = {
             global: { id: 'global' },
@@ -1077,6 +1188,7 @@ describe('lib/socket', () => {
           agent,
           path: socketIoRoute,
           transports: ['websocket'],
+          extraHeaders: { origin: new URL(proxyUrl).origin },
         })
       })
     })
@@ -1197,6 +1309,68 @@ describe('lib/socket', () => {
         })
       })
 
+      describe('#createCDPIo', () => {
+        const MAIN_FRAME_ID = 'main-frame'
+
+        // attaches a fake CDP client and returns the origins/frames whose binding calls reach the socket
+        const acceptedCallers = async (cdpIo, callers: { origin: string, frameId: string }[]) => {
+          const client = Object.assign(new EventEmitter(), {
+            send: vi.fn(async (command: string) => {
+              return command === 'Page.getFrameTree' ? { frameTree: { frame: { id: MAIN_FRAME_ID }, childFrames: [{ frame: { id: 'aut-frame' } }] } } : {}
+            }),
+          })
+          let cdpSocket
+
+          cdpIo.on('connection', (s) => cdpSocket = s)
+          await cdpIo.attachCDPClient(client)
+
+          const accepted: string[] = []
+
+          cdpSocket.on('caller:test', (caller) => accepted.push(caller))
+
+          for (const [index, { origin, frameId }] of callers.entries()) {
+            const id = index + 1
+            const caller = `${frameId} ${origin}`
+
+            client.emit('Runtime.executionContextCreated', { context: { id, origin, name: '', uniqueId: String(id), auxData: { frameId, isDefault: true } } })
+            client.emit('Runtime.bindingCalled', {
+              name: 'cypressSendToServer-/__socket/default',
+              payload: JSON.stringify(await encode(['caller:test', 'callback-id', [caller]], '/__socket/default')),
+              executionContextId: id,
+            })
+          }
+
+          await new Promise((resolve) => setImmediate(resolve))
+
+          return accepted
+        }
+
+        afterEach(() => {
+          vi.unstubAllEnvs()
+        })
+
+        it('accepts binding calls only from the main frame at the server\'s trusted origins', async () => {
+          const serverOrigin = `http://localhost:${server._port()}`
+
+          expect(await acceptedCallers(socket.cdpIo, [
+            { origin: serverOrigin, frameId: MAIN_FRAME_ID },
+            { origin: serverOrigin, frameId: 'aut-frame' },
+            { origin: 'http://other.test', frameId: MAIN_FRAME_ID },
+          ])).toStrictEqual([`${MAIN_FRAME_ID} ${serverOrigin}`])
+        })
+
+        it('also accepts children of the main frame for Cypress-in-Cypress', async () => {
+          vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', 'true')
+
+          const cdpIo = new SocketE2E(cfg).createCDPIo('/__socket', (origin) => origin === 'http://localhost:4455')
+
+          expect(await acceptedCallers(cdpIo, [
+            { origin: 'http://localhost:4455', frameId: 'aut-frame' },
+            { origin: 'http://other.test', frameId: 'aut-frame' },
+          ])).toStrictEqual(['aut-frame http://localhost:4455'])
+        })
+      })
+
       describe('#sendFocusBrowserMessage', () => {
         it('sends an automation request of focus:browser:window', () => {
           const request = vi.spyOn(automation, 'request').mockReturnValue(undefined)
@@ -1221,11 +1395,29 @@ describe('lib/socket', () => {
 
       describe('#watchTestFileByPath', () => {
         let getFile: MockInstance
+        let isSpecFrameScript: MockInstance
 
         beforeEach(() => {
           socket.testsDir = Fixtures.project('todos/tests')
 
+          isSpecFrameScript = vi.spyOn(specFrameScripts, 'isSpecFrameScript').mockReturnValue(true)
           getFile = vi.spyOn(preprocessor, 'getFile').mockResolvedValue(undefined as any)
+        })
+
+        it('refuses to watch a path that is not a spec or the support file', () => {
+          isSpecFrameScript.mockReturnValue(false)
+          const removeFile = vi.spyOn(preprocessor, 'removeFile')
+
+          socket.testFilePath = 'test1.js'
+
+          const result = socket.watchTestFileByPath(cfg, {
+            relative: '../secret.json',
+          })
+
+          expect(result).toBeUndefined()
+          expect(getFile).not.toHaveBeenCalled()
+          expect(removeFile).not.toHaveBeenCalled()
+          expect(socket.testFilePath).toBe('test1.js')
         })
 
         it('returns undefined if trying to watch special path __all', () => {
@@ -1315,7 +1507,7 @@ describe('lib/socket', () => {
       describe('#startListening', () => {
         describe('watch:test:file', () => {
           it('listens for watch:test:file event', () => {
-            socket.startListening(server.getHttpServer(), automation, cfg, {})
+            socket.startListening(server.getHttpServer(), automation, cfg, { isTrustedOrigin: () => true })
 
             expectCalledWith(mockClient.on, 'watch:test:file')
           })
@@ -1329,7 +1521,7 @@ describe('lib/socket', () => {
               }
             })
 
-            socket.startListening(server.getHttpServer(), automation, cfg, {})
+            socket.startListening(server.getHttpServer(), automation, cfg, { isTrustedOrigin: () => true })
 
             expectCalledWith(watchTestFileByPath, cfg, { relative: 'foo/bar/baz' })
           })

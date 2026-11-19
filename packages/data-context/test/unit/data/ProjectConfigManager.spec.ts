@@ -41,6 +41,7 @@ describe('ProjectConfigManager', () => {
       const configManagerInternals = configManager as any
 
       configManagerInternals._eventsIpc = {
+        expectExit: () => {},
         send: () => false,
         on: () => {
           throw new Error('should not wait on a child that is already gone')
@@ -62,6 +63,7 @@ describe('ProjectConfigManager', () => {
 
       // never acks, so the promise can only settle via its own timeout
       configManagerInternals._eventsIpc = {
+        expectExit: () => {},
         send: () => true,
         on: () => {},
       }
@@ -108,7 +110,7 @@ describe('ProjectConfigManager', () => {
 
   describe('#eventProcessPid', () => {
     it('returns process id from events ipc', () => {
-      // @ts-expect-error
+      // @ts-expect-error - a partial `ProjectConfigIpc` stub on the private `_eventsIpc`
       configManager._eventsIpc = {
         childProcessPid: 45699,
       }
@@ -117,7 +119,7 @@ describe('ProjectConfigManager', () => {
     })
 
     it('does not throw if config manager is not initialized', () => {
-      // @ts-expect-error
+      // @ts-expect-error - `_eventsIpc` is private
       configManager._eventsIpc = undefined
       expect(configManager.eventProcessPid).toEqual(undefined)
     })

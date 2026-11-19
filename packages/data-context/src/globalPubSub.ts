@@ -1,4 +1,3 @@
-/* eslint-disable no-dupe-class-members */
 import EventEmitter from 'events'
 import type { DataContext } from './DataContext'
 
@@ -11,24 +10,24 @@ type MenuItem = 'log:out'
  * to reset the global state for testing / resetting when there is an error
  */
 export class GlobalPubSub extends EventEmitter {
-  on(msg: 'reset:data-context', listener: (ctx: DataContext) => void): this
-  on(msg: 'menu:item:clicked', listener: (item: MenuItem) => void): this
-  on(msg: 'test:cleanup', listener: (...args: any[]) => void): this
+  on (msg: 'reset:data-context', listener: (ctx: DataContext) => void): this
+  on (msg: 'menu:item:clicked', listener: (item: MenuItem) => void): this
+  on (msg: 'test:cleanup', listener: (...args: any[]) => void): this
   on (msg: string, listener: (...args: any[]) => void) {
     return super.on(msg, listener)
   }
 
-  emit(msg: 'menu:item:clicked', arg: MenuItem): boolean
-  emit(msg: 'reset:data-context', arg: DataContext): boolean
+  emit (msg: 'menu:item:clicked', arg: MenuItem): boolean
+  emit (msg: 'reset:data-context', arg: DataContext): boolean
   emit (msg: string, ...args: any[]) {
     return super.emit(msg, ...args)
   }
 
-  emitThen(msg: 'test:cleanup'): Promise<void>
+  emitThen (msg: 'test:cleanup'): Promise<void>
   async emitThen (msg: string, ...args: any[]): Promise<void> {
-    // @ts-expect-error
+    // @ts-expect-error - `_events` is EventEmitter's untyped internal listener map
     const events = this._events
-    const handlers = events[msg] as Function | Function[]
+    const handlers = events[msg] as (() => any) | Array<() => any>
 
     if (!handlers) {
       return Promise.resolve()

@@ -13,7 +13,7 @@ runnerStore.setSpec({
 describe('agents', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
-  let start: Function
+  let start: () => void
 
   beforeEach(() => {
     cy.fixture('runnables_agents').then((_runnables) => {
@@ -40,7 +40,7 @@ describe('agents', () => {
   })
 
   it('does not render agents if there are no agents', () => {
-    // @ts-ignore
+    // @ts-expect-error - RootRunnable types tests as optional
     runnables.tests[0].agents = []
     start()
 

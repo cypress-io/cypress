@@ -191,7 +191,7 @@ export const createPublicConfig = (config: Cfg): CypressCommandLine.PublicConfig
   return {
     ..._.omit(config, omitConfigKeys) as Omit<CypressCommandLine.PublicConfig, 'browsers' | 'cypressInternalEnv'>,
     browsers: _.map(config.browsers, createPublicBrowser),
-    // @ts-expect-error
+    // @ts-expect-error - cypressEnv is not declared on Cfg
     cypressInternalEnv: config.cypressEnv,
   }
 }

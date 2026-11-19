@@ -12,7 +12,6 @@ describe('zone.js', () => {
 
         xhr.onload = () => {
           try {
-            // @ts-expect-error - `Cypress.Log` is the internal LogUtils namespace at runtime, but the public types only declare it as a log instance
             Cypress.Log.toSerializedJSON(xhr)
 
             resolve()

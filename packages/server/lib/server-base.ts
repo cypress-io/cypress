@@ -4,7 +4,7 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import evilDns from 'evil-dns'
 import * as ensureUrl from './util/ensure-url'
-import type { Express } from 'express'
+import type { ErrorRequestHandler, Express } from 'express'
 import express from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
@@ -30,11 +30,12 @@ import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import { allowDestroy } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
+import { isUnsafePort } from '@packages/config'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import type { InitializeRoutes } from './routes'
 import { createCommonRoutes } from './routes'
-import { SESSIONS_ROUTE_PREFIX, SESSION_ID_HEADER, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
+import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { cypressSessions } from './cypress-sessions'
 import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
@@ -46,6 +47,8 @@ import type { FileServer } from './file_server'
 import * as appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
+import { runnerMutationRule } from '@packages/data-context/graphql/rootFieldRules'
+import { subscriptionOnlyRule } from '@packages/data-context/graphql/subscriptionOnlyRule'
 import * as statusCode from './util/status_code'
 import { getContentType } from './util/headers'
 import stream from 'stream'
@@ -59,12 +62,15 @@ import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
-import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, getTrustedLoopbackUrl, isTrustedInternalLoopback } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, fullyQualifiedRe, getCypressReservedPathPrefixes, getTrustedLoopbackUrl, isLoopbackHost, isTrustedInternalLoopback } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:server-base')
 
-const fullyQualifiedRe = /^https?:\/\//
 const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
+// listen(0) draws a fresh ephemeral port each attempt, so only a handful of
+// retries are needed to move off a port browsers block. The cap keeps a
+// misbehaving port range from looping forever.
+const MAX_PORT_ATTEMPTS = 10
 const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
 
 const isResponseHtml = function (contentType, responseBuffer) {
@@ -90,18 +96,11 @@ const _isNonProxiedRequest = (req) => {
   return req.proxiedUrl.startsWith('/')
 }
 
-const _hasValidSessionIdHeader = (req): boolean => {
-  const provided = req.headers[SESSION_ID_HEADER]
-  const current = cypressSessions.getCurrent()?.sessionId
-
-  return Boolean(current) && typeof provided === 'string' && provided === current
-}
-
 const _isTapRequest = (req): boolean => {
   const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
   return trimmedUrl.startsWith(SESSIONS_ROUTE_PREFIX) ||
-    (trimmedUrl.startsWith(TAP_GRAPHQL_ROUTE_PREFIX) && _hasValidSessionIdHeader(req))
+    (trimmedUrl.startsWith(TAP_GRAPHQL_ROUTE_PREFIX) && cypressSessions.hasCurrentSessionIdHeader(req.headers))
 }
 
 // `isNativeBrowserNetwork`: on that path the browser intercepts its own
@@ -134,13 +133,6 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
       return next()
     }
 
-    // CDP Fetch owns browser traffic on the browser (CDP) network path, so
-    // path-only requests to the Cypress server are expected — not a sign the
-    // browser was launched outside Cypress.
-    if (isNativeBrowserNetwork()) {
-      return next()
-    }
-
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
     // Trusted loopback from serve-internal-routes: path-only HTTP to Express
@@ -150,6 +142,18 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
       return next()
     }
 
+    // On the browser (CDP) network path nothing transits the proxy: browser
+    // traffic for Cypress routes is looped back with the token above, so a
+    // request without it must address this server by a loopback name on its
+    // own port.
+    if (isNativeBrowserNetwork()) {
+      if (isLoopbackHost(req.headers.host, req.socket.localPort) || isAllowedProxyBypass(trimmedUrl, req) || (trimmedUrl === trimmedClientRoute)) {
+        return next()
+      }
+
+      return res.redirect(clientRoute)
+    }
+
     if (_isNonProxiedRequest(req) && !isAllowedProxyBypass(trimmedUrl, req) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
@@ -157,6 +161,19 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
 
     return next()
   }
+}
+
+// Express's own final handler writes the stack into the response body.
+export const _errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
+  console.error(err?.stack || err) // eslint-disable-line no-console
+
+  if (res.headersSent) {
+    req.socket.destroy()
+
+    return
+  }
+
+  res.sendStatus(500)
 }
 
 const setProxiedUrl = function (req) {
@@ -253,9 +270,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // restore between specs. Kept here rather than in the network runtime, which is
   // rebuilt mid-run and would snapshot an active override.
   private _projectBlockHosts?: Cfg['blockHosts']
-  // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
-  // After some package refactoring, we should be able to remove this.
-  protected _httpsProxy?: httpsProxy
+  protected _httpsProxy?: HttpsProxyServer
   private _httpsProxyReady?: Promise<void>
   protected _graphqlWS?: GraphqlWsHandle
   private _closing?: Bluebird<any>
@@ -270,7 +285,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   constructor (config: Cfg) {
     this.isListening = false
     this.request = new Request()
-    this.socketAllowed = new SocketAllowed()
     this._eventBus = new EventEmitter()
     this._middleware = null
     this._baseUrl = null
@@ -286,6 +300,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this._remoteStates = new RemoteStates(remoteStatePorts, this._documentDomainInjection)
+    this.socketAllowed = new SocketAllowed(this._remoteStates, () => {
+      // address() is null once the server closes
+      const address = this._server?.address()
+
+      return address && typeof address === 'object' ? address.port : undefined
+    })
   }
 
   ensureProp = ensureProp
@@ -359,17 +379,32 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
-    // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
-    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, { enforceOrigin: false })
+    // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed in proxyWebsockets, which requires a trusted Origin instead.
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, {
+      enforceOrigin: false,
+      validationRules: [runnerMutationRule, subscriptionOnlyRule],
+    })
 
     // Start the file server first so its port is known before we begin
     // listening for proxied requests on the main server. The primary
     // remote state's `<root>` strategy reads `_fileServer.port()`
     // synchronously, so the fileServer must exist before the primary
     // is computed.
-    this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
+    const fileServerInstance = await fileServer.create(fileServerFolder as string) as FileServer
 
-    const listenedPort = await this._listen(port)
+    this._fileServer = fileServerInstance
+
+    let listenedPort: number
+
+    try {
+      listenedPort = await this._listen(port)
+    } catch (err) {
+      // the file server is already listening when the runner server fails to
+      // start, and nothing else tears it down, so free its port here
+      await fileServerInstance.close()
+
+      throw err
+    }
 
     this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
@@ -454,10 +489,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const routeOptions: InitializeRoutes = {
       config,
       remoteStates: this._remoteStates,
+      socketAllowed: this.socketAllowed,
       nodeProxy: this.nodeProxy,
       // Lazy: the CDP Fetch runtime swaps NetworkProxy at each launch, so the
       // routes must read whichever instance is current rather than capture one.
-      getNetworkProxy: () => this.networkProxy,
+      getNetworkProxy: () => this._networkProxy,
       isBrowserNetworkMode: this.isBrowserNetworkMode,
       onError,
       getSpec,
@@ -604,8 +640,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       app.use(this.useMorgan())
     }
 
-    // errorhandler
-    app.use(require('errorhandler')())
+    app.use(_errorHandler)
 
     // remove the express powered-by header
     app.disable('x-powered-by')
@@ -846,7 +881,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
     }
 
-    const ios = this.socket.startListening(this.server, automation, config, options)
+    const ios = this.socket.startListening(this.server, automation, config, Object.assign(options, { isTrustedOrigin: this.socketAllowed.isTrustedOrigin }))
 
     this._normalizeReqUrl(this.server)
 
@@ -906,10 +941,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // retry covers a gap longer than this.
     svr.keepAliveTimeout = KEEP_ALIVE_TIMEOUT
 
-    allowDestroy(svr)
-
-    // @ts-ignore
-    return svr
+    return allowDestroy(svr)
   }
 
   _port = () => {
@@ -918,35 +950,72 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   _listen (port: number | null | undefined): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          reject(this.portInUseErr(port))
+      let attempts = 0
+
+      const tryListen = () => {
+        attempts++
+
+        const onError = (err) => {
+          // if the server bombs before starting
+          // and the err no is EADDRINUSE
+          // then we know to display the custom err message
+          if (err.code === 'EADDRINUSE') {
+            return reject(this.portInUseErr(port))
+          }
+
+          // any other bind failure cannot be fixed by retrying, and leaving
+          // the promise pending would hang the run
+          reject(err)
         }
+
+        this.server.once('error', onError)
+
+        const listener = () => {
+          const address = this.server.address() as AddressInfo
+
+          this.server.removeListener('error', onError)
+
+          // Configuration validation rejects configured ports that browsers block.
+          // A randomly assigned port can still be blocked and must be redrawn.
+          if (isUnsafePort(address.port)) {
+            debug('discarding browser-blocked port %d', address.port)
+
+            this.server.close((closeErr?: Error) => {
+              if (closeErr) {
+                // the server is still bound, so a retry would fail with
+                // ERR_SERVER_ALREADY_LISTEN
+                debug('error closing server after discarding port %d: %o', address.port, closeErr)
+
+                return reject(closeErr)
+              }
+
+              if (attempts < MAX_PORT_ATTEMPTS) {
+                return tryListen()
+              }
+
+              // the port is already free, so surface the error instead of
+              // leaving the run waiting for a browser that can never connect
+              reject(errors.get('PORT_BLOCKED_BY_BROWSER'))
+            })
+
+            return
+          }
+
+          this.isListening = true
+
+          debug('Server listening on ', address)
+
+          resolve(address.port)
+        }
+
+        this.server.listen(port || 0, '127.0.0.1', listener)
       }
 
-      this.server.once('error', onError)
-
-      const listener = () => {
-        const address = this.server.address() as AddressInfo
-
-        this.isListening = true
-
-        debug('Server listening on ', address)
-
-        this.server.removeListener('error', onError)
-
-        resolve(address.port)
-      }
-
-      this.server.listen(port || 0, '127.0.0.1', listener)
+      tryListen()
     })
   }
 
   _onRequest (userAgent, automationRequest, options) {
-    // @ts-ignore
     return this.request.sendPromise(userAgent, automationRequest, options)
   }
 
@@ -981,11 +1050,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     if (req.url.startsWith(socketIoRoute)) {
       // Without the proxy, upgrades arrive on direct connections the CONNECT
-      // port allow-list never saw — a loopback remoteAddress is the only
-      // available gate (see #34513).
+      // port allow-list never saw, so the Origin is the only gate. The runner
+      // reaches socket.io over the automation binding on that path, so only
+      // graphql-ws upgrades remain. Firefox always takes the proxy path, so
+      // only there can its extension connect.
       const isAllowed = this.isBrowserNetworkMode()
-        ? this.socketAllowed.isRequestFromLocalhost(req)
-        : this.socketAllowed.isRequestAllowed(req)
+        ? req.url.startsWith(`${socketIoRoute}-graphql`) && this.socketAllowed.isRequestFromTrustedOrigin(req)
+        : this.socketAllowed.isRequestAllowed(req) && this.socketAllowed.isRequestFromTrustedOrigin(req, { allowExtension: true })
 
       if (!isAllowed) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
@@ -1279,7 +1350,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       // Read the field, not the getter: teardown drops _netStubbingState, so a
       // resolve:url racing close matches zero routes instead of throwing.
-      // @ts-ignore
       const iterator = getRoutesForRequest(this._netStubbingState?.routes ?? [], proxiedReq)
       // If the iterator is exhausted (done) on the first try, then 0 matches were found
       const zeroMatches = iterator.next().done
@@ -1511,8 +1581,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       debug('sending request with options %o', options)
 
       return runPhase(() => {
-        // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
-        // After some package refactoring, we should be able to remove this.
         return request.sendStream(userAgent, automationRequest, options)
         .then((createReqStream) => {
           const stream = createReqStream()

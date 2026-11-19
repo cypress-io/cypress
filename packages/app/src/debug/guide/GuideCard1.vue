@@ -1,7 +1,7 @@
 <template>
   <PromoCard
-    :title="t('debugPage.emptyStates.slideshow.step1.title')"
-    :body="t('debugPage.emptyStates.slideshow.step1.description')"
+    title="Review how many tests failed during a CI test run"
+    body="The Debug page shows the latest completed test run for your current checked out commit."
   >
     <template #image>
       <Illustration />
@@ -9,8 +9,8 @@
     <template #action>
       <PromoAction
         :action="action"
-        :left-label="t('debugPage.emptyStates.slideshow.controls.step', [1, 3])"
-        :right-label="t('debugPage.emptyStates.slideshow.controls.next')"
+        left-label="1 of 3"
+        right-label="Next"
         :right-icon="IconChevronRightSmall"
       />
     </template>
@@ -18,15 +18,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import PromoCard from '../../components/promo/PromoCard.vue'
 import PromoAction from '../../components/promo/PromoAction.vue'
 
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
 
 import Illustration from '../../assets/debug-guide-skeleton-1.svg'
-
-const { t } = useI18n()
 
 defineProps<{
   action: () => void

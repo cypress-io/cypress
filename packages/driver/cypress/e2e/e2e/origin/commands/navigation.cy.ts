@@ -37,7 +37,6 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
       const consoleProps = goLog.invoke('consoleProps')
 
       expect(consoleProps.props.Yielded).to.eq(win)
-      // @ts-expect-error - `Cypress.Log` is the internal LogUtils namespace at runtime, but the public types only declare it as a log instance
       expect(() => Cypress.Log.toSerializedConsoleProps(consoleProps)).not.to.throw()
     })
 
@@ -65,7 +64,7 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
       cy.window().then((localWindow) => {
         // Define a custom property on window that we can assert the presence of.
         // After reloading, this property should not exist.
-        // @ts-ignore
+        // @ts-expect-error - `cy_testCustomValue` is a test-only property on the AUT window
         localWindow.cy_testCustomValue = true
       })
 
@@ -263,7 +262,7 @@ context('cy.origin navigation', { browser: '!webkit' }, () => {
 
     it('succeeds when the AUT window in the secondary is undefined', () => {
       // manually remove the spec bridge iframe to ensure Cypress.state('window') is not already set
-      window.top?.document.getElementById('Spec\ Bridge:\ foobar.com')?.remove()
+      window.top?.document.getElementById('Spec Bridge: foobar.com')?.remove()
 
       cy.visit('/fixtures/primary-origin.html')
 

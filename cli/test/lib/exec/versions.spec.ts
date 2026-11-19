@@ -8,7 +8,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       pkgBuildInfo: vi.fn(),
       pkgVersion: vi.fn(),
@@ -21,7 +21,7 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       getBinaryDir: vi.fn(),
       getBinaryPkgAsync: vi.fn(),

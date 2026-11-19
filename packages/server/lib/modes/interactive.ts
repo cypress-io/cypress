@@ -9,7 +9,7 @@ import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
 import { GracefulExit } from '../util/graceful-exit'
 import { makeGraphQLServer } from '@packages/data-context/graphql/makeGraphQLServer'
-import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
+import { globalPubSub, getCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
 
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
@@ -127,7 +127,6 @@ export = {
         show: true,
         frame: true,
         transparent: false,
-        // @ts-ignore
         icon: image.createFromPath(cyIcons.getPathToIcon('icon_64x64.png')),
       },
     }

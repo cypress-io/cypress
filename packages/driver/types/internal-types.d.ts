@@ -39,14 +39,17 @@ type InternalKeyboard = typeof import('../src/cy/keyboard').default
 type InternalScreenshot = typeof import('../src/cypress/screenshot').default
 
 declare namespace Cypress {
+  // Checks that `$ensure` exposes for internal callers only
+  interface Ensure {
+    commandCanCommunicateWithAUT: typeof import('../src/cypress/ensure').default.commandCanCommunicateWithAUT
+    isStrictlyVisible: typeof import('../src/cypress/ensure').default.isStrictlyVisible
+  }
+
   interface Cypress {
     browserMajorVersion: () => number
     backend: (eventName: string, ...args: any[]) => Promise<any>
     // TODO: how to pull this from proxy-logging.ts? can't import in a d.ts file...
     ProxyLogging: any
-    // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
-    resolveWindowReference: any
-    resolveLocationReference: any
     routes: {
       [routeId: string]: any
     }
@@ -64,6 +67,7 @@ declare namespace Cypress {
     Location: {
       create: (url: string) => ({ domain: string, superDomain: string })
     }
+    Log: typeof import('../src/cypress/log').LogUtils
     $Cypress: {
       $: JQueryStatic
     }
@@ -80,9 +84,13 @@ declare namespace Cypress {
   }
 
   interface CypressUtils {
+    addTwentyYears: () => number
     encodeBase64Unicode: (str: string) => string
     getDistanceBetween: (point1: { x: number, y: number }, point2: { x: number, y: number }) => number
     isInstanceOf: (instance: any, constructor: any) => boolean
+    locExisting: () => ReturnType<Cypress['Location']['create']>
+    locHref: (url: string, win: Window) => void
+    locReload: (forceReload: boolean, win: Window) => void
     log: (...msgs: any[]) => void
     throwErrByPath: (path: string, obj?: { args: object }) => void
     warnByPath: (path: string, obj?: { args: object }) => void

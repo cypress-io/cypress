@@ -39,7 +39,7 @@
                 :ariaDisabled="!currentProject"
                 @click.prevent="clearCurrentProject"
               >
-                {{ t('topNav.global.projects') }}
+                Projects
               </a>
             </li>
             <template v-if="currentProject?.title">
@@ -80,7 +80,7 @@
                   <i-cy-chevron-right_x16 class="icon-dark-gray-200" />
                 </li>
                 <li class="inline-block">
-                  {{ t(`testingType.${currentProject.currentTestingType}.name`) }}
+                  {{ testingTypeNames[currentProject.currentTestingType] }}
                 </li>
               </template>
             </template>
@@ -106,7 +106,7 @@
               class="h-[24px] w-[24px]"
               data-cy="user-avatar-title"
             />
-            <span class="sr-only">{{ t('topNav.login.profileMenuLabel') }}</span>
+            <span class="sr-only">Profile and logout</span>
           </template>
           <template
             v-if="userProjectStatusStore.userData"
@@ -153,7 +153,7 @@
             <i-cy-profile_x16
               class="h-[16px] mr-[8px] w-[16px] block icon-dark-gray-500 icon-light-gray-100 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
             />
-            <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">{{ t('topNav.login.actionLogin') }}</span>
+            <span class="font-medium whitespace-nowrap group-hocus:text-indigo-500">Log in</span>
           </button>
         </div>
       </nav>
@@ -164,7 +164,7 @@
 <script setup lang="ts">
 import { gql, useMutation, useSubscription } from '@urql/vue'
 import { ref, computed, onMounted } from 'vue'
-import type { HeaderBar_HeaderBarContentFragment } from '../generated/graphql'
+import type { HeaderBar_HeaderBarContentFragment, TestingTypeEnum } from '../generated/graphql'
 import {
   GlobalPageHeader_ClearCurrentProjectDocument,
   HeaderBarContent_AuthChangeDocument,
@@ -172,7 +172,6 @@ import {
 import TopNav from './topnav/TopNav.vue'
 import UserAvatar from './topnav/UserAvatar.vue'
 import Auth from './Auth.vue'
-import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
 import interval from 'human-interval'
 import { sortBy } from 'lodash'
@@ -267,7 +266,11 @@ const props = defineProps<{
   allowAutomaticPromptOpen?: boolean
 }>()
 
-const { t } = useI18n()
+const testingTypeNames: Record<TestingTypeEnum, string> = {
+  e2e: 'E2E Testing',
+  component: 'Component Testing',
+}
+
 const prompts = sortBy([
   {
     slug: 'ci1',

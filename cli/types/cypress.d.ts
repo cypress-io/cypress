@@ -79,6 +79,14 @@ declare namespace Cypress {
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
+  /**
+   * Trigger action
+   * @private
+   */
+  interface ActionTrigger {
+    <T = (any[] | void)>(action: string, ...args: any[]): T
+  }
+
   type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
@@ -218,6 +226,7 @@ declare namespace Cypress {
     [key: string]: Storable
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- public type; kept an interface because a type alias would stop declaration merging in user code
   interface StorableArray extends Array<Storable> { }
 
   type StorableRecord = Record<string, Storable>
@@ -318,6 +327,7 @@ declare namespace Cypress {
   /**
    * The interface for user-defined properties in Window object under test.
    */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- users declare their AUT window properties by merging into it
   interface ApplicationWindow { } // tslint:disable-line
 
   /**
@@ -616,6 +626,16 @@ declare namespace Cypress {
        * Returns a jQuery object obtained by wrapping an object in jQuery.
        */
       wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
+      /**
+       * Returns the elements matching a jQuery selector, as a jQuery object.
+       * Without a `context`, it searches the document that Cypress's own scripts
+       * run in, not your application. To search your application, pass its
+       * document or an element in it as `context`.
+       * @example
+       *    cy.document().then((doc) => {
+       *      const $buttons = Cypress.dom.query('button', doc)
+       *    })
+       */
       query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
       /**
        * Returns an array of raw elements pulled out from a jQuery object.
@@ -625,7 +645,6 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a DOM object.
        */
       isDom(obj: any): boolean
-      isType(element: JQuery | HTMLElement, type: string): boolean
       /**
        * Returns a boolean indicating whether an element is visible.
        */
@@ -636,15 +655,29 @@ declare namespace Cypress {
       isHidden(element: JQuery | HTMLElement, methodName?: string, options?: object): boolean
       /**
        * Returns a boolean indicating whether an element can receive focus.
+       * Accepts a DOM element or a jQuery object. For a jQuery object with
+       * more than one element, returns `true` if any of them can receive focus.
        */
       isFocusable(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element accepts typed text: a
+       * `<textarea>`, a contenteditable element, or an `<input>` whose `type` is
+       * `text`, `password`, `email`, `number`, `date`, `week`, `month`, `time`,
+       * `datetime`, `datetime-local`, `search`, `url`, or `tel`.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, checks its
+       * first element.
+       */
       isTextLike(element: JQuery | HTMLElement): boolean
       /**
-       * Returns a boolean indicating whether an element is scrollable.
+       * Returns a boolean indicating whether an element or the window is scrollable.
+       * Accepts the window, a DOM element, or a jQuery object. For a jQuery object,
+       * checks its first element.
        */
       isScrollable(element: Window | JQuery | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element currently has focus.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, checks
+       * its first element.
        */
       isFocused(element: JQuery | HTMLElement): boolean
       /**
@@ -655,9 +688,16 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an element is attached to the DOM.
        */
       isAttached(element: JQuery | HTMLElement | Window | Document): boolean
+      /**
+       * Returns a boolean indicating whether an element matches a jQuery selector.
+       * For a jQuery object with more than one element, returns `true` if any of
+       * them match. Accepts a DOM element or a jQuery object.
+       */
       isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
       /**
-       * Returns a boolean indicating whether an element is a descendent of another element.
+       * Returns a boolean indicating whether `element2` is `element1` or is
+       * inside it. Each argument can be a DOM element or a jQuery object.
+       * For a jQuery object, checks its first element.
        */
       isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
       /**
@@ -680,22 +720,146 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a jQuery object.
        */
       isJquery(obj: any): obj is JQuery
+      /**
+       * Returns a boolean indicating whether an `<input>` or `<button>` has the
+       * given `type`, or any of the given types when `type` is an array. It reads
+       * the element's `type` property rather than its attribute, so an `<input>`
+       * with an unrecognized `type` counts as `'text'`, and a `<button>` with no
+       * `type` counts as `'submit'`. Returns `false` for any other element.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, checks its
+       * first element.
+       */
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
-      stringify(element: JQuery | HTMLElement, form: string): string
-      getElements(element: JQuery): JQuery | HTMLElement[]
+      /**
+       * Returns a string representation of an element, the window, or the document.
+       * `'long'` (the default) returns the element's HTML with its content
+       * abbreviated, and `'short'` returns its tag name with its id or classes.
+       */
+      stringify(element: JQuery | HTMLElement | Window | Document, form?: 'long' | 'short'): string
+      /**
+       * Returns the raw elements in a jQuery object: the element itself when it
+       * holds one, an array of elements when it holds more than one, and
+       * `undefined` when it is empty.
+       */
+      getElements(element: JQuery): HTMLElement | HTMLElement[] | undefined
+      /**
+       * Returns the selector that `cy.contains()` uses to find elements whose
+       * text includes `text`, plus submit buttons whose `value` has `text` as one
+       * of its space-separated words. `filter` limits the search to elements
+       * matching a selector, and can list several selectors separated by commas.
+       * Matching ignores case unless `options.matchCase` is `true`.
+       *
+       * The selector relies on pseudo-classes that only Cypress's copy of jQuery
+       * understands, so run it with `Cypress.$` or `Cypress.dom.query()`, not
+       * `document.querySelectorAll()`.
+       * @example
+       *    Cypress.dom.getContainsSelector('Log in', 'button', { matchCase: true })
+       */
       getContainsSelector(text: string, filter?: string, options?: CaseMatchable): JQuery.Selector
-      getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
-      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      /**
+       * Picks one element from a list of matches, the way `cy.contains()` does.
+       * Starting at `index` (default `0`) and skipping `<script>` and `<style>`,
+       * it moves on to the next element in the list for as long as that element
+       * is nested inside the current one, and stops at the deepest. If that
+       * element is inside an `<a>`, `<button>`, `<label>`, or submit `<input>`
+       * that is also in the list, it picks that ancestor instead.
+       *
+       * Returns a jQuery object holding the chosen element.
+       */
+      getFirstDeepestElement(elements: JQuery, index?: number): JQuery
+      /**
+       * Returns the window that contains an element or a document, or the window
+       * itself when passed a window. Accepts any of these, or a jQuery object
+       * holding one. For a jQuery object, uses its first element.
+       */
+      getWindowByElement(element: JQuery<HTMLElement | Document | Window> | HTMLElement | Document | Window): Window
+      /**
+       * Returns a sentence explaining why an element is not visible.
+       * Accepts a DOM element or a jQuery object.
+       */
       getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
-      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
+      /**
+       * Returns the closest ancestor of an element that can scroll, as a jQuery
+       * object, or `null` if there is none. The element itself is not checked.
+       * It walks out of shadow roots to their hosts and can return `<html>`.
+       * Returns `null` right away for `<html>`, `<body>`, or the document.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
+       */
+      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | null
+      /**
+       * Returns the element, or its closest ancestor, whose CSS `position` is
+       * `fixed` or `sticky`, as a jQuery object, or `null` if there is none.
+       * It walks out of shadow roots to their hosts. Returns `null` right away for
+       * `<html>`, `<body>`, or the document.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
+       */
+      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | null
+      /**
+       * Returns the element, or its closest ancestor, whose CSS `position` is
+       * `sticky`, as a jQuery object, or `null` if there is none. It walks out of
+       * shadow roots to their hosts. Returns `null` right away for `<html>`,
+       * `<body>`, or the document.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, starts
+       * from its first element.
+       */
+      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | null
+      /**
+       * Rounds a point to whole pixels so it stays inside the element it targets.
+       * `xPosition` (`'left'`, `'center'`, or `'right'`) and `yPosition` (`'top'`,
+       * `'center'`, or `'bottom'`) say which edge the point sits on, and both
+       * default to `'center'`. A left or top edge rounds up, a center rounds down,
+       * and a right or bottom edge rounds down and then subtracts 1.
+       * Returns an object with `x` and `y`.
+       */
+      getCoordsByPosition(left: number, top: number, xPosition?: 'left' | 'center' | 'right', yPosition?: 'top' | 'center' | 'bottom'): { x: number, y: number }
+      /**
+       * Returns an element's `width`, `height`, `scrollTop`, and `scrollLeft`, and
+       * the position of its box measured three ways: `fromElViewport` is relative
+       * to the viewport of the window the element is in, `fromElWindow` is
+       * relative to that window's document (so it includes the window's scroll),
+       * and `fromAutWindow` is relative to your application's top-level window,
+       * adding the offsets of any iframes in between.
+       * Accepts a DOM element or a jQuery object. For a jQuery object, measures its
+       * first element.
+       */
       getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
+      /**
+       * Returns the topmost element at a point in `doc`'s viewport, looking inside
+       * open shadow roots, or `null` when the point is outside the viewport.
+       */
       getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
+      /**
+       * Returns the same measurements as `getElementPositioning()`, with `x` and
+       * `y` added to `fromElViewport`, `fromElWindow`, and `fromAutWindow` for a
+       * point at `position` inside the element. `position` defaults to `'center'`
+       * and can be `'topLeft'`, `'top'`, `'topRight'`, `'left'`, `'center'`,
+       * `'right'`, `'bottomLeft'`, `'bottom'`, or `'bottomRight'`. Any other value
+       * throws a `TypeError`.
+       * Accepts a DOM element or a jQuery object.
+       */
       getElementCoordinatesByPosition(element: JQuery | HTMLElement, position?: string): ElementCoordinates
+      /**
+       * Like `getElementCoordinatesByPosition()`, but the point is `x` and `y`
+       * pixels from the element's top-left corner, as in `.click(x, y)`. The
+       * returned `top` and `left` values are shifted by `x` and `y` as well.
+       * Accepts a DOM element or a jQuery object.
+       */
       getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
+      /**
+       * Returns the element that hosts editing for `element`: the closest element,
+       * starting with `element` itself, that has a `contenteditable` attribute
+       * other than `"false"`. If there is none, returns the document's `<html>`
+       * element, which is the editing host when the document is in `designMode`.
+       * Pass a DOM element.
+       */
       getHostContenteditable(element: HTMLElement): HTMLElement
+      /**
+       * Returns the start and end offsets of the current text selection in an
+       * `<input>`, a `<textarea>`, or a contenteditable element. Returns
+       * `{ start: 0, end: 0 }` for any other element. Pass a DOM element.
+       */
       getSelectionBounds(element: HTMLElement): { start: number, end: number }
     }
 
@@ -776,7 +940,7 @@ declare namespace Cypress {
      * Trigger action
      * @private
      */
-    action: <T = (any[] | void)>(action: string, ...args: any[]) => T
+    action: ActionTrigger
 
     /**
      * Load files
@@ -1337,9 +1501,12 @@ declare namespace Cypress {
     /**
       * Save/Restore browser Cookies, LocalStorage, and SessionStorage data resulting from the supplied `setup` function.
       *
+      * Yields the status of the session: `'created'` when `setup` ran for a new session, `'restored'` when a saved
+      * session was restored, or `'recreated'` when a restored session failed validation and `setup` ran again.
+      *
       * @see https://on.cypress.io/session
       */
-    session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<null>
+    session(id: string | object, setup: () => void, options?: SessionOptions): Chainable<'created' | 'restored' | 'recreated'>
 
     /**
      * Get the window.document of the page that is currently active.
@@ -4025,7 +4192,7 @@ declare namespace Cypress {
     ensureScrollable: boolean
   }
 
-  interface ScrollIntoViewOptions extends ScrollToOptions {
+  interface ScrollIntoViewOptions extends Omit<ScrollToOptions, 'ensureScrollable'> {
     /**
      * Amount to scroll after the element has been scrolled into view
      *
@@ -4084,14 +4251,14 @@ declare namespace Cypress {
      */
     cacheAcrossSpecs?: boolean
     /**
-     * Function to run immediately after the session is created and `setup` function runs or
-     * after a session is restored and the page is cleared. If this returns `false`, throws an
-     * exception, returns a Promise which resolves to `false` or rejects or contains any failing
-     * Cypress command, the session is considered invalid.
+     * Function to run immediately after `setup` creates a session, or after a saved session is
+     * restored. The session is invalid if this function throws an exception, contains a failing
+     * Cypress command, returns a Promise that rejects or resolves to `false`, or returns nothing
+     * and its last Cypress command yields `false`. Returning `false` directly, without a Promise,
+     * does not invalidate the session.
      *
      * If validation fails immediately after `setup`, the test will fail.
      * If validation fails after restoring a session, `setup` will re-run.
-     * @default {false}
      */
     validate?: () => Promise<false | void> | void
   }
@@ -4313,6 +4480,13 @@ declare namespace Cypress {
     flag: string
     encoding: Encodings
   }
+
+  /**
+   * What the chai-jquery `match` assertion accepts for a DOM subject: anything jQuery's `.is()` accepts.
+   *
+   * @see http://chaijs.com/plugins/chai-jquery/#matchselector
+   */
+  type JQueryMatchable = string | Element | ArrayLike<Element> | JQuery<any> | ((this: Element, index: number, element: Element) => boolean)
 
   // Kind of onerous, but has a nice auto-complete.
   /**
@@ -4904,8 +5078,10 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
+    /* eslint-disable @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users */
     // tslint:disable-next-line ban-types
     (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /* eslint-enable @typescript-eslint/no-unsafe-function-type */
     /**
      * Asserts that the target is a member of the given array list.
      * @example
@@ -5508,8 +5684,10 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
+    /* eslint-disable @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users */
     // tslint:disable-next-line ban-types
     (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /* eslint-enable @typescript-eslint/no-unsafe-function-type */
     /**
      * Asserts that the target is a member of the given array list.
      * @example
@@ -5968,10 +6146,11 @@ declare namespace Cypress {
      * @example
      *    cy.get('#result').should('have.attr', 'role')
      *    cy.get('#result').should('have.attr', 'role', 'menu')
+     *    cy.get('#result').should('have.attr', 'tabindex', 0)
      * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.attr', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.attr', value: string, match?: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection has the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -5995,7 +6174,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.data', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.data', value: string, match?: string | number | boolean | null): Chainable<Subject>
     /**
      * Assert that the selection contains at least one element which has a descendant matching the given selector, using `.has()`.
      * @example
@@ -6029,13 +6208,13 @@ declare namespace Cypress {
      */
     (chainer: 'include.html', value: string): Chainable<Subject>
     /**
-     * Assert that the first element of the selection has the given id, using `.attr('id')`.
+     * Assert that the first element of the selection has the given id, using `.prop('id')`.
      * @example
      *    cy.get('#result').should('have.id', 'result')
      * @see http://chaijs.com/plugins/chai-jquery/#idid
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.id', value: string, match?: string): Chainable<Subject>
+    (chainer: 'have.id', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection has the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -6052,7 +6231,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.text', value: string): Chainable<Subject>
+    (chainer: 'have.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the text of the first element of the selection partially contains the given text, using `.text()`.
      * @example
@@ -6060,7 +6239,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'contain.text', value: string): Chainable<Subject>
+    (chainer: 'contain.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the text of the first element of the selection partially contains the given text, using `.text()`.
      * @example
@@ -6068,7 +6247,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'include.text', value: string): Chainable<Subject>
+    (chainer: 'include.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection has the given value, using `.val()`.
      * @example
@@ -6076,7 +6255,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.value', value: string): Chainable<Subject>
+    (chainer: 'have.value', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection partially contains the given value, using `.val()`.
      * @example
@@ -6084,7 +6263,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'contain.value', value: string): Chainable<Subject>
+    (chainer: 'contain.value', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection partially contains the given value, using `.val()`.
      * @example
@@ -6092,15 +6271,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'include.value', value: string): Chainable<Subject>
+    (chainer: 'include.value', value: string | number): Chainable<Subject>
     /**
-     * Assert that the selection matches a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * Assert that the selection matches a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted, and a regular expression never matches a DOM element or jQuery object.
      * @example
      *    cy.get('#result').should('match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'match', value: string): Chainable<Subject>
+    (chainer: 'match', value: JQueryMatchable): Chainable<Subject>
 
     // jquery-chai.not
     /**
@@ -6196,10 +6375,11 @@ declare namespace Cypress {
      * @example
      *    cy.get('#result').should('not.have.attr', 'role')
      *    cy.get('#result').should('not.have.attr', 'role', 'menu')
+     *    cy.get('#result').should('not.have.attr', 'tabindex', 0)
      * @see http://chaijs.com/plugins/chai-jquery/#attrname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.attr', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.attr', value: string, match?: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not have the given attribute, using `.attr()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -6223,7 +6403,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#dataname-value
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.data', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.data', value: string, match?: string | number | boolean | null): Chainable<Subject>
     /**
      * Assert that the selection does not contain at least one element which has a descendant matching the given selector, using `.has()`.
      * @example
@@ -6257,13 +6437,13 @@ declare namespace Cypress {
      */
     (chainer: 'not.include.html', value: string): Chainable<Subject>
     /**
-     * Assert that the first element of the selection does not have the given id, using `.attr('id')`.
+     * Assert that the first element of the selection does not have the given id, using `.prop('id')`.
      * @example
      *    cy.get('#result').should('not.have.id', 'result')
      * @see http://chaijs.com/plugins/chai-jquery/#idid
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.id', value: string, match?: string): Chainable<Subject>
+    (chainer: 'not.have.id', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not have the given property, using `.prop()`. Optionally, assert a particular value as well. The return value is available for chaining.
      * @example
@@ -6280,7 +6460,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.text', value: string): Chainable<Subject>
+    (chainer: 'not.have.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the text of the first element of the selection does not contain the given text, using `.text()`.
      * @example
@@ -6288,7 +6468,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.contain.text', value: string): Chainable<Subject>
+    (chainer: 'not.contain.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the text of the first element of the selection does not contain the given text, using `.text()`.
      * @example
@@ -6296,7 +6476,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#texttext
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.include.text', value: string): Chainable<Subject>
+    (chainer: 'not.include.text', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not have the given value, using `.val()`.
      * @example
@@ -6304,7 +6484,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.value', value: string): Chainable<Subject>
+    (chainer: 'not.have.value', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not contain the given value, using `.val()`.
      * @example
@@ -6312,7 +6492,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.contain.value', value: string): Chainable<Subject>
+    (chainer: 'not.contain.value', value: string | number): Chainable<Subject>
     /**
      * Assert that the first element of the selection does not contain the given value, using `.val()`.
      * @example
@@ -6320,15 +6500,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.include.value', value: string): Chainable<Subject>
+    (chainer: 'not.include.value', value: string | number): Chainable<Subject>
     /**
-     * Assert that the selection does not match a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
+     * Assert that the selection does not match a given selector, element, elements, jQuery object, or predicate, using `.is()`. Note that this overrides the built-in chai assertion. If the subject is not a DOM element or jQuery object, only a regular expression is accepted, and a regular expression never matches a DOM element or jQuery object.
      * @example
      *    cy.get('#result').should('not.match', ':empty')
      * @see http://chaijs.com/plugins/chai-jquery/#matchselector
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.match', value: string): Chainable<Subject>
+    (chainer: 'not.match', value: JQueryMatchable): Chainable<Subject>
 
     // fallback
     /**
@@ -6432,7 +6612,7 @@ declare namespace Cypress {
 
   interface BeforeRunDetails {
     browser?: Browser
-    config: ConfigOptions
+    config: PluginConfigOptions
     cypressVersion: string
     group?: string
     parallel?: boolean
@@ -6892,6 +7072,7 @@ declare namespace Cypress {
   }
   ```
    */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- users add custom properties by merging into it, as documented above
   interface cy extends Chainable<undefined> { }
 }
 

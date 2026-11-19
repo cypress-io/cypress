@@ -112,7 +112,7 @@ describe('Poller', () => {
     const callback = jest.fn()
     const interval = 5
 
-    const poller = new Poller<'relevantRunChange', { name: string }, { name: string}>(ctx, 'relevantRunChange', interval, callback)
+    const poller = new Poller<'relevantRunChange', { name: string }, { name: string }>(ctx, 'relevantRunChange', interval, callback)
 
     expect(poller.subscriptions).toHaveLength(0)
 

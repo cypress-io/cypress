@@ -72,7 +72,7 @@ describe('src/cy/commands/actions/trigger', () => {
     })
 
     it('sends through event options, overriding defaults', (done) => {
-      let options = {
+      const options = {
         clientX: 42,
         clientY: 24,
         pageX: 420,
@@ -219,7 +219,7 @@ describe('src/cy/commands/actions/trigger', () => {
     it('view should be AUT window', (done) => {
       cy.window().then((win) => {
         cy.get('input:first').then((jQueryElement) => {
-          let elem = jQueryElement.get(0)
+          const elem = jQueryElement.get(0)
 
           elem.addEventListener('mousedown', (event) => {
             expect(event.view).to.eql(win)
@@ -586,7 +586,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('passes config.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
-        let old = Cypress.config('animationDistanceThreshold')
+        const old = Cypress.config('animationDistanceThreshold')
 
         Cypress.config('animationDistanceThreshold', 1000)
 
@@ -856,7 +856,7 @@ describe('src/cy/commands/actions/trigger', () => {
       it('should trigger KeyboardEvent with .trigger inside Cypress event listener', (done) => {
         cy.window().then((win) => {
           cy.get('input:first').then((jQueryElement) => {
-            let elemHtml = jQueryElement.get(0)
+            const elemHtml = jQueryElement.get(0)
 
             elemHtml.addEventListener('keydown', (event) => {
               expect(event instanceof win['KeyboardEvent']).to.be.true
@@ -891,7 +891,7 @@ describe('src/cy/commands/actions/trigger', () => {
       it('should trigger MouseEvent with .trigger inside Cypress event listener', (done) => {
         cy.window().then((win) => {
           cy.get('input:first').then((jQueryElement) => {
-            let elem = jQueryElement.get(0)
+            const elem = jQueryElement.get(0)
 
             elem.addEventListener('mousedown', (event) => {
               expect(event instanceof win['MouseEvent']).to.be.true
@@ -936,16 +936,60 @@ describe('src/cy/commands/actions/trigger', () => {
         return null
       })
 
-      // TODO: trigger() doesn't throw an error now.
-      it.skip('throws when eventName is not a string', (done) => {
+      ;[
+        { eventName: 1, passed: '1' },
+        { eventName: ['click'], passed: '[click]' },
+        { eventName: { type: 'click' }, passed: '{type: click}' },
+      ].forEach(({ eventName, passed }) => {
+        it(`throws when eventName is ${passed}`, function (done) {
+          cy.on('fail', (err) => {
+            const { lastLog } = this
+
+            assertLogLength(this.logs, 2)
+            expect(lastLog.get('error')).to.eq(err)
+            expect(lastLog.get('state')).to.eq('failed')
+            expect(err.message).to.eq(`\`cy.trigger()\` must be passed a non-empty string as its 1st argument. You passed: \`${passed}\`.`)
+            expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
+
+            done()
+          })
+
+          // @ts-expect-error - testing invalid argument
+          cy.get('button:first').trigger(eventName)
+        })
+      })
+
+      it('throws when eventName is not passed', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('`cy.trigger()` can only be called on a single element. Your subject contained 15 elements.')
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 2)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
 
           done()
         })
 
-        cy.get('button:first').trigger('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: \'undefined\'.')
+        // @ts-expect-error - testing missing argument
+        cy.get('button:first').trigger()
+      })
+
+      it('throws when eventName is an empty string', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          assertLogLength(this.logs, 2)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: `\'\'`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
+
+          done()
+        })
+
+        cy.get('button:first').trigger('')
       })
 
       it('throws when not a dom subject', (done) => {
