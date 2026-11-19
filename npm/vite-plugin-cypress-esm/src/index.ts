@@ -95,7 +95,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     //   - Text/Data/Markup/Markdown files
     //   - Styles
     // Other asset types like audio/video are unlikely to be imported into a JS file thus are not considered here
-    return /\.(?:svg|png|jpe?g|gif|tiff|webp|json|md|txt|xml|x?html?|css|less|s[c|a]ss?)(?:\?|$)/i.test(importTarget)
+    return /\.(?:svg|png|jpe?g|gif|tiff|webp|json|md|txt|xml|x?html?|css|less|s[ac]ss?)(?:\?|$)/i.test(importTarget)
   }
 
   /**

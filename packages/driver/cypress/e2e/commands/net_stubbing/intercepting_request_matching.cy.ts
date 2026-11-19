@@ -17,7 +17,8 @@ describe('network stubbing', { retries: 15 }, function () {
         .intercept({
           query: {
             foo: 'b*r',
-            baz: /quux/,
+            // eslint-disable-next-line regexp/no-useless-character-class -- the class makes this a RegExp matcher rather than a literal
+            baz: /quu[x]/,
           },
         }).as('third')
         .intercept({
