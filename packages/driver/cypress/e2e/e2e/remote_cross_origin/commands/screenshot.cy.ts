@@ -1,3 +1,4 @@
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}
 
 const serverResult = {
@@ -13,7 +14,7 @@ const serverResult = {
   duration: 100,
 }
 
-// the remote driver reaches the AUT through Cypress.automation too, so only the capture is stubbed
+// the experimental driver reaches the AUT through Cypress.automation too, so only the capture is stubbed
 const stubTakeScreenshot = () => cy.stub(Cypress, 'automation').callThrough().withArgs('take:screenshot')
 
 // The AUT is cross-origin, so code reaches it as an inline handler rather than through cy.window()
@@ -40,7 +41,7 @@ const stubSlowCapture = () => {
 // the page records when its timer ran, since the spec can't watch the AUT's timers
 const setPageTimer = (code: string) => runInAut(`setTimeout(() => { ${code} }, 300)`)
 
-describe('remote driver: screenshot in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: screenshot in a cross-origin AUT', () => {
   const { devicePixelRatio } = window
 
   context('set viewport', () => {
@@ -95,7 +96,7 @@ describe('remote driver: screenshot in a cross-origin AUT', { experimentalRemote
 
       cy.screenshot()
       .then(() => {
-        expect(automationStub.args[0][1].titles).to.deep.equal(['remote driver: screenshot in a cross-origin AUT', 'without setting viewport', 'supports multiple titles'])
+        expect(automationStub.args[0][1].titles).to.deep.equal(['experimental driver: screenshot in a cross-origin AUT', 'without setting viewport', 'supports multiple titles'])
       })
     })
 
@@ -178,6 +179,7 @@ describe('remote driver: screenshot in a cross-origin AUT', { experimentalRemote
         stubSlowCapture()
         setPageTimer('throw new Error(\'setTimeout error after screenshot\')')
         cy.screenshot()
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps the test running long enough for the page's timer to throw after the screenshot
         cy.wait(500)
       })
 

@@ -26,7 +26,7 @@ export const isRunnerFrameName = (name?: string) => {
   return !!name && RUNNER_FRAME_NAME_IDENTIFIERS.some((identifier) => name.startsWith(identifier))
 }
 
-// the remote driver's main-world AUT script exposes its controls here, for the driver to call over the automation protocol
+// the experimental driver's main-world AUT script exposes its controls here, for the driver to call over the automation protocol
 export const REMOTE_AUT_API = '__cypressRemoteAut'
 
 export interface RemoteAutScriptConfig {

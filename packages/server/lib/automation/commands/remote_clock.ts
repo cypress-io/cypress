@@ -9,7 +9,7 @@ const debug = Debug('cypress:server:automation:remote_clock')
 const CLOCK = 'window[Symbol.for(\'cypress:remote:clock\')]'
 const CLOCK_MISSING = '__cypress_remote_clock_missing__'
 
-// cy.clock under the remote driver: Cypress's clock runs in the AUT's main world, where it can replace
+// cy.clock under the experimental driver: Cypress's clock runs in the AUT's main world, where it can replace
 // the AUT's own timers. A preload script installs it in every document the AUT loads while it's on,
 // starting from the same time, as the legacy driver rebinds its clock to each new window.
 export class RemoteClock {

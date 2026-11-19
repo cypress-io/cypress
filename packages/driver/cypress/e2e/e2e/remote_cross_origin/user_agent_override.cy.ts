@@ -1,7 +1,6 @@
 // We modify the user agent to strip cypress and electron out of the user agent string to appear more chrome-like
 // this only happens in electron and when the experimentalModifyObstructiveThirdPartyCode flag is set to true
-describe('remote driver: user agent override in a cross-origin AUT', {
-  experimentalRemoteDriver: true,
+describe('experimental driver: user agent override in a cross-origin AUT', {
   browser: 'electron',
 }, () => {
   const expectAutUserAgent = (userAgent: string) => {

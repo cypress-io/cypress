@@ -1,7 +1,7 @@
-const CLOCK_PAGE = 'http://www.foobar.com:3500/fixtures/remote-driver-isolation.html'
+const CLOCK_PAGE = 'http://www.foobar.com:3500/fixtures/experimental-driver-isolation.html'
 const NEW_YEAR = Date.UTC(2020, 0, 1)
 
-describe('remote driver: cy.clock', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: cy.clock', () => {
   it('freezes the AUT\'s time from before it loads', () => {
     cy.clock(NEW_YEAR)
     cy.visit(CLOCK_PAGE)

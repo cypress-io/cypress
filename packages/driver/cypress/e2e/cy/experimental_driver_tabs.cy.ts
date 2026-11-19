@@ -1,6 +1,6 @@
-const TABS_PAGE = 'http://localhost:3500/fixtures/remote-driver-tabs.html'
+const TABS_PAGE = 'http://localhost:3500/fixtures/experimental-driver-tabs.html'
 
-describe('remote driver: tabs the AUT opens', { browser: '!electron', experimentalRemoteDriver: true }, () => {
+describe('experimental driver: tabs the AUT opens', { browser: '!electron' }, () => {
   beforeEach(() => {
     cy.visit(TABS_PAGE)
   })
@@ -45,7 +45,7 @@ describe('remote driver: tabs the AUT opens', { browser: '!electron', experiment
   })
 })
 
-describe('remote driver: tabs in Electron', { browser: 'electron', experimentalRemoteDriver: true }, () => {
+describe('experimental driver: tabs in Electron', { browser: 'electron' }, () => {
   it('fails clearly', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.include('`cy.tab()` is not supported in Electron yet.')
@@ -55,17 +55,5 @@ describe('remote driver: tabs in Electron', { browser: 'electron', experimentalR
 
     cy.visit(TABS_PAGE)
     cy.tab().find('#username').click()
-  })
-})
-
-describe('legacy driver: tabs', { experimentalRemoteDriver: false }, () => {
-  it('.tab() requires experimentalRemoteDriver', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('`cy.tab()` requires `experimentalRemoteDriver` to be enabled.')
-
-      done()
-    })
-
-    cy.tab()
   })
 })

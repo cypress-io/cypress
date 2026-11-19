@@ -1,5 +1,5 @@
 /**
- * The script the remote driver adds to every frame of the runner's tab over the browser's automation
+ * The script the experimental driver adds to every frame of the runner's tab over the browser's automation
  * protocol, in the page's main world. The server wraps it to provide `cypressRemoteAutConfig`.
  *
  * In the AUT, it does what the legacy bootstrap does from inside the page: it makes a cross-origin

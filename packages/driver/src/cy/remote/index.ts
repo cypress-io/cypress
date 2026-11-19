@@ -9,11 +9,11 @@ import { RemoteElement, RemoteLocator, isRemoteSubject } from './remote_element'
 
 export { isRemoteElement, isRemoteSubject } from './remote_element'
 
-export const isRemoteDriverEnabled = (Cypress: Pick<ICypress, 'config'>) => Cypress.config('experimentalRemoteDriver' as keyof Cypress.Config) === true
+export const isExperimentalDriverEnabled = (Cypress: Pick<ICypress, 'config'>) => Cypress.config('experimentalDriver' as keyof Cypress.Config) === true
 
 // AUT errors reach the driver asynchronously, so this waits for any thrown before it was called
 export const flushRemoteErrors = (Cypress: AgentCypress) => {
-  if (!isRemoteDriverEnabled(Cypress)) {
+  if (!isExperimentalDriverEnabled(Cypress)) {
     return Promise.resolve()
   }
 
@@ -121,7 +121,7 @@ export const resolveRemoteSubject = (Cypress: ICypress, locator: RemoteLocator, 
 }
 
 export const throwUnsupportedOption = (cmd: string, option: string) => {
-  $errUtils.throwErrByPath('remote_driver.unsupported_option', { args: { cmd, option } })
+  $errUtils.throwErrByPath('experimental_driver.unsupported_option', { args: { cmd, option } })
 }
 
 // A remote query chains only off nothing or another remote query's subject.
@@ -134,11 +134,11 @@ export const extendRemoteSubject = (cmd: string, subject: unknown, step: QuerySt
     return subject.extend(step, selector)
   }
 
-  return $errUtils.throwErrByPath('remote_driver.unsupported_subject', { args: { cmd } })
+  return $errUtils.throwErrByPath('experimental_driver.unsupported_subject', { args: { cmd } })
 }
 
 // A cy.visit callback runs in the AUT's own window, so it's sent as source and can't close over test values
-export const serializeCallback = (fn: Function) => {
+export const serializeCallback = (fn: (...args: never[]) => unknown) => {
   const source = fn.toString()
 
   // a method shorthand such as `onLoad (win) {}` is only valid source as an object member
@@ -171,7 +171,7 @@ export const createRemoteEvaluator = (Cypress: AgentCypress, kind: EvaluateArgs[
 
   return (subject: RemoteLocator): EvaluateResult => {
     if (args.some((arg) => typeof arg === 'function')) {
-      $errUtils.throwErrByPath('remote_driver.unsupported_argument', { args: { cmd }, errProps: { retry: false } })
+      $errUtils.throwErrByPath('experimental_driver.unsupported_argument', { args: { cmd }, errProps: { retry: false } })
     }
 
     if (!pending && !unseen) {
@@ -199,7 +199,7 @@ export const createRemoteEvaluator = (Cypress: AgentCypress, kind: EvaluateArgs[
     }
 
     if (!result) {
-      throw $errUtils.cypressErrByPath('remote_driver.awaiting_aut', { args: { cmd } })
+      throw $errUtils.cypressErrByPath('experimental_driver.awaiting_aut', { args: { cmd } })
     }
 
     return result

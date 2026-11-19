@@ -1,3 +1,4 @@
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}
 
 const expectAutWindowSize = (width: number, height: number) => {
@@ -5,7 +6,7 @@ const expectAutWindowSize = (width: number, height: number) => {
   cy.document().its('defaultView.innerHeight').should('eq', height)
 }
 
-describe('remote driver: viewport in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: viewport in a cross-origin AUT', () => {
   it('keeps a viewport set before navigating to the cross-origin AUT', () => {
     cy.viewport(320, 480)
 

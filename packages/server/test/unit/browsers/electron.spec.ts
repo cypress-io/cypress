@@ -338,9 +338,9 @@ describe('lib/browsers/electron', () => {
   })
 
   describe('._getAutomation', () => {
-    it('adds the remote AUT script to every frame with experimentalRemoteDriver', async () => {
+    it('adds the remote AUT script to every frame with experimentalDriver', async () => {
       // @ts-expect-error - partial launch options
-      await electron._getAutomation({}, { onError: () => {}, experimentalRemoteDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } }, {})
+      await electron._getAutomation({}, { onError: () => {}, experimentalDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } }, {})
 
       expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: 'remote AUT script' })
     })

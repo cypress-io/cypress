@@ -198,7 +198,7 @@ it('verifies number of cy commands', () => {
     'prevAll', 'prevUntil', 'prompt', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
     'mount', 'as', 'root', 'getAllLocalStorage', 'clearAllLocalStorage', 'getAllSessionStorage', 'clearAllSessionStorage',
     'getAllCookies', 'clearAllCookies',
-    // require experimentalRemoteDriver, which makes cy.origin unavailable
+    // require the experimental driver, which makes cy.origin unavailable
     'tab', 'frame',
   ]
   const addedCommands = Cypress._.difference(actualCommands, expectedCommands)

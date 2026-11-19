@@ -1,6 +1,6 @@
 import { isWebKit } from '../../../../support/utils'
 
-describe('remote driver: cookies on several origins in one test', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: cookies on several origins in one test', () => {
   const setCookies = () => {
     cy.log('set cookies')
     cy.setCookie('key1', 'value1', { domain: 'www.foobar.com', log: false })

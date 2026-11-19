@@ -12,7 +12,7 @@ import Highlight from './selector-playground/Highlight.ce.vue'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 
 // Everything except allow-top-navigation*
-const REMOTE_DRIVER_AUT_SANDBOX = [
+const EXPERIMENTAL_DRIVER_AUT_SANDBOX = [
   'allow-downloads',
   'allow-forms',
   'allow-modals',
@@ -63,8 +63,8 @@ export class AutIframe {
     // Chromium lets a same-site, cross-origin frame navigate top without user activation
     const config = getRunnerConfigFromWindow()
 
-    if ('experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true) {
-      $iframe.attr('sandbox', REMOTE_DRIVER_AUT_SANDBOX)
+    if ('experimentalDriver' in config && config.experimentalDriver === true) {
+      $iframe.attr('sandbox', EXPERIMENTAL_DRIVER_AUT_SANDBOX)
     }
 
     this.$iframe = $iframe

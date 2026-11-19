@@ -203,7 +203,7 @@ export const createCommonRoutes = ({
     client.handle(req, res)
   })
 
-  if ('experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true) {
+  if ('experimentalDriver' in config && config.experimentalDriver === true) {
     addRemoteAutRoutes(router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError, reportBeforeLoad })
   }
 

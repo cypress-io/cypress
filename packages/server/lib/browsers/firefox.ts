@@ -741,8 +741,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
           browserName: 'firefox',
           acceptInsecureCerts: true,
           webSocketUrl: true,
-          // the remote driver answers the AUT's dialogs over BiDi, so Firefox must not dismiss them first
-          ...(options.experimentalRemoteDriver ? { unhandledPromptBehavior: 'ignore' } : {}),
+          // the experimental driver answers the AUT's dialogs over BiDi, so Firefox must not dismiss them first
+          ...(options.experimentalDriver ? { unhandledPromptBehavior: 'ignore' } : {}),
           // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
           'moz:firefoxOptions': {
             profile: base64EncodedProfile,

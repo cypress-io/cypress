@@ -6,7 +6,7 @@ const runInAut = (code: string) => {
 
 // These tests run in order: the second checks that a cookie the first left in
 // the server's cookie jar, but not in the browser, is cleared between tests.
-describe('remote driver: server cookie jar between isolated tests in a cross-origin AUT', { experimentalRemoteDriver: true, testIsolation: true, retries: 0 }, () => {
+describe('experimental driver: server cookie jar between isolated tests in a cross-origin AUT', { testIsolation: true, retries: 0 }, () => {
   const originUrl = 'https://www.foobar.com:3502'
 
   it('leaves a cookie in the jar after the app deletes it from the browser', () => {
@@ -34,4 +34,5 @@ describe('remote driver: server cookie jar between isolated tests in a cross-ori
   })
 })
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}

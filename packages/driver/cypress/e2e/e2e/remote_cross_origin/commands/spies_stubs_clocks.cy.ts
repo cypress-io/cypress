@@ -1,4 +1,4 @@
-describe('remote driver: spies, stubs, and clock in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: spies, stubs, and clock in a cross-origin AUT', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
@@ -65,7 +65,7 @@ describe('remote driver: spies, stubs, and clock in a cross-origin AUT', { exper
   it('clock() and tick()', () => {
     const now = Date.UTC(2022, 0, 12)
 
-    cy.visit('http://www.foobar.com:3500/fixtures/remote-driver-isolation.html')
+    cy.visit('http://www.foobar.com:3500/fixtures/experimental-driver-isolation.html')
     cy.clock(now)
     cy.get('#show-time').click()
     cy.get('#timer-result').should('have.text', `now:${now}`)

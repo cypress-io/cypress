@@ -10,7 +10,7 @@ const setDocumentCookie = (cookie: string) => {
   runInAut(`document.cookie = ${JSON.stringify(cookie)}`)
 }
 
-// .its() runs in the remote driver's isolated world, which doesn't see the page's own document.cookie,
+// .its() runs in the experimental driver's isolated world, which doesn't see the page's own document.cookie,
 // so the page copies it to an attribute until it unloads
 const documentCookie = () => {
   runInAut(`
@@ -22,7 +22,7 @@ const documentCookie = () => {
   return cy.get('body').invoke('attr', 'data-document-cookie')
 }
 
-describe('remote driver: cookie login in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: cookie login in a cross-origin AUT', () => {
   const { _ } = Cypress
   // ensures unique username so there's no risk of false positives from
   // test pollution
@@ -377,6 +377,7 @@ describe('remote driver: cookie login in a cross-origin AUT', { experimentalRemo
       login(username, { cookieProps: `Expires=${(new Date()).toUTCString()}` })
 
       cy.location('host').should('equal', 'www.idp.com:3501')
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1000) // give cookie time to expire
       cy.reload()
       documentCookie().should('not.include', 'user=')
@@ -396,6 +397,7 @@ describe('remote driver: cookie login in a cross-origin AUT', { experimentalRemo
       cy.get('[data-cy="cookie-login"]').click()
       login(username, { localhostCookieProps: 'Max-Age=1' })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1500) // give cookie time to expire
       cy.reload()
       verifyLocalhostNotLoggedIn()
@@ -405,6 +407,7 @@ describe('remote driver: cookie login in a cross-origin AUT', { experimentalRemo
       cy.get('[data-cy="cookie-login"]').click()
       login(username, { localhostCookieProps: 'Max-Age=1' })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1500) // give cookie time to expire
       cy.reload()
       cy.getCookie('user').should('be.null')
@@ -415,6 +418,7 @@ describe('remote driver: cookie login in a cross-origin AUT', { experimentalRemo
       login(username, { cookieProps: 'Max-Age=1' })
 
       cy.location('host').should('equal', 'www.idp.com:3501')
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1500) // give cookie time to expire
       cy.reload()
       documentCookie().should('not.include', 'user=')
@@ -430,6 +434,7 @@ describe('remote driver: cookie login in a cross-origin AUT', { experimentalRemo
 
         login(username, { localhostCookieProps: `Max-Age=1; Expires=${expires}` })
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
         cy.wait(1500) // give cookie time to expire
         cy.reload()
         verifyLocalhostNotLoggedIn()
@@ -438,6 +443,7 @@ describe('remote driver: cookie login in a cross-origin AUT', { experimentalRemo
       it('before Max-Age, past Expires -> logged in', () => {
         login(username, { localhostCookieProps: `Max-Age=10000000; Expires=${(new Date()).toUTCString()}` })
 
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- checks that the cookie persists, so give it time to be lost first
         cy.wait(1500) // ensure cookie doesn't expire in this time
         cy.reload()
         verifyLoggedIn(username)
@@ -675,6 +681,7 @@ describe('remote driver: cookie login in a cross-origin AUT', { experimentalRemo
       setDocumentCookie('key=value')
 
       documentCookie().should('equal', 'key=value')
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- checks that the cookie persists, so give it time to be lost first
       cy.wait(500)
       cy.reload()
       documentCookie().should('equal', 'key=value')

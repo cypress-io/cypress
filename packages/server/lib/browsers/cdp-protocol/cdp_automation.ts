@@ -406,7 +406,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     return !!context?.auxData?.isDefault && this._isAUTFrame(context.auxData.frameId)
   }
 
-  // the remote driver can't listen for errors in a cross-origin AUT, so it learns of them here
+  // the experimental driver can't listen for errors in a cross-origin AUT, so it learns of them here
   private onExceptionThrown = (event: Protocol.Runtime.ExceptionThrownEvent) => this.remoteErrors.report(this.reportException(event))
 
   private reportException = async ({ exceptionDetails }: Protocol.Runtime.ExceptionThrownEvent) => {

@@ -24,7 +24,7 @@ interface RemoteAutRouteOptions {
   reportBeforeLoad: (url: string) => Promise<unknown>
 }
 
-// The routes the remote driver's main-world AUT script calls to make a cross-origin page behave as if
+// The routes the experimental driver's main-world AUT script calls to make a cross-origin page behave as if
 // it were top-level, in place of the postMessage the legacy cross-origin injection sends to the runner.
 export const addRemoteAutRoutes = (router: Router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError, reportBeforeLoad }: RemoteAutRouteOptions) => {
   // a page only reaches the cookies of its own origin, as it could as top

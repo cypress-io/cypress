@@ -473,7 +473,7 @@ const toServerFrame = (frame: playwright.Frame): PlaywrightServerFrame => {
   const serverFrame = toPlaywrightServerObject(frame)
 
   if (!isServerFrame(serverFrame)) {
-    throw new Error('The remote agent could not reach Playwright\'s isolated world. In WebKit, `experimentalRemoteDriver` must be enabled in the config file, and playwright-webkit must be 1.59.0 or later.')
+    throw new Error('The remote agent could not reach Playwright\'s isolated world. In WebKit, `CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER` must be set when Cypress starts, and playwright-webkit must be 1.59.0 or later.')
   }
 
   return serverFrame
@@ -546,7 +546,7 @@ export class WebKitRemoteAgent {
     try {
       return await frame._evaluateExpression(expression, UTILITY)
     } catch (err) {
-      throw new Error(`The remote agent threw while ${action}: ${err instanceof Error ? err.message : String(err)}`)
+      throw new Error(`The remote agent threw while ${action}: ${err instanceof Error ? err.message : String(err)}`, { cause: err })
     }
   }
 }

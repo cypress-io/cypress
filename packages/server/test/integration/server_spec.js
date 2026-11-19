@@ -1268,7 +1268,7 @@ describe('Server', () => {
       })
     })
 
-    describe('http with experimentalRemoteDriver enabled', () => {
+    describe('http with experimentalDriver enabled', () => {
       const baseUrl = 'http://www.cypress.io'
       const otherOrigin = 'http://www.google.com'
 
@@ -1282,7 +1282,7 @@ describe('Server', () => {
             port: 2000,
             supportFile: false,
             baseUrl,
-            experimentalRemoteDriver: true,
+            experimentalDriver: true,
           },
         })
       })

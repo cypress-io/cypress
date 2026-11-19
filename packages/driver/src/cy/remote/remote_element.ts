@@ -39,7 +39,7 @@ const PROPS = {
 }
 
 const unsupported = (what: string) => {
-  const err = new Error(`\`${what}\` is not supported on a subject from \`experimentalRemoteDriver\`, since the element is in the AUT. Use \`.invoke()\` or \`.its()\` to run it there.`)
+  const err = new Error(`\`${what}\` is not supported on a subject from the experimental driver, since the element is in the AUT. Use \`.invoke()\` or \`.its()\` to run it there.`)
 
   // @ts-expect-error - retry is a Cypress error prop
   err.retry = false

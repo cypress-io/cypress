@@ -13,7 +13,7 @@ import {
 } from '../../../dom/accessibility'
 import { explainMiss, findMatches, logQuery, pickOptions, searchScope, validateOptions, yieldMatches } from './get_by'
 import { isNativeOnly, matchesRole } from './role_match'
-import { extendRemoteSubject, getRemoteWithinSubject, isRemoteDriverEnabled } from '../../remote'
+import { extendRemoteSubject, getRemoteWithinSubject, isExperimentalDriverEnabled } from '../../remote'
 import type { GetByRoleOptions } from './role_match'
 import type { GetByQuery, GetByRoot, Search } from './get_by'
 
@@ -134,11 +134,11 @@ export default (Commands, Cypress, cy) => {
     const log = logQuery(this, Cypress, role, options, userOptions)
 
     // the matching runs in the AUT, so the name has to cross as JSON; a failure there has no search to describe
-    if (isRemoteDriverEnabled(Cypress)) {
+    if (isExperimentalDriverEnabled(Cypress)) {
       const { name: matcher } = options
 
       if (typeof matcher === 'function') {
-        return $errUtils.throwErrByPath('remote_driver.unsupported_argument', { args: { cmd: 'getByRole' } })
+        return $errUtils.throwErrByPath('experimental_driver.unsupported_argument', { args: { cmd: 'getByRole' } })
       }
 
       const name = _.isRegExp(matcher) ? { source: matcher.source, flags: matcher.flags } : matcher

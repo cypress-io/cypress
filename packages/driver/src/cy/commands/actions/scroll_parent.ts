@@ -1,6 +1,6 @@
 import $dom from '../../../dom'
 
-// the element cy.scrollIntoView scrolls, or the window; shared with the remote driver's agent
+// the element cy.scrollIntoView scrolls, or the window; shared with the experimental driver's agent
 export const findScrollableParent = ($el, win) => {
   const $parent = $dom.getParent($el)
 

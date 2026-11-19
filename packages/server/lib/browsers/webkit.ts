@@ -89,7 +89,7 @@ async function launchServer (pw: typeof playwright, preferences: playwright.Laun
   return { pwBrowser: await pw.webkit.connect(websocketUrl), websocketUrl, pid: pwServer.process().pid }
 }
 
-// The remote driver's agent needs Playwright's isolated world, which only an in-process client
+// The experimental driver's agent needs Playwright's isolated world, which only an in-process client
 // can reach; `bind` still serves the websocket that `after:browser:launch` hands to users
 async function launchInProcess (pw: typeof playwright, preferences: playwright.LaunchOptions): Promise<LaunchedWebKit> {
   const pwBrowser = await pw.webkit.launch(preferences)
@@ -99,7 +99,7 @@ async function launchInProcess (pw: typeof playwright, preferences: playwright.L
   if (typeof pwBrowser.bind !== 'function') {
     await pwBrowser.close()
 
-    throw new Error('`experimentalRemoteDriver` requires playwright-webkit 1.59.0 or later.')
+    throw new Error('The experimental driver requires playwright-webkit 1.59.0 or later.')
   }
 
   const { endpoint } = await pwBrowser.bind('cypress', { host: '127.0.0.1', port: 0 })
@@ -146,7 +146,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   let launched: LaunchedWebKit
 
   try {
-    launched = options.experimentalRemoteDriver
+    launched = options.experimentalDriver
       ? await launchInProcess(pw, launchOptions.preferences)
       : await launchServer(pw, launchOptions.preferences)
   } catch (err) {
@@ -165,7 +165,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     userAgent: options.userAgent,
     isHeadless: !!browser.isHeadless,
     cdpSocketServer,
-    remoteDriver: !!options.experimentalRemoteDriver,
+    experimentalDriver: !!options.experimentalDriver,
     remoteAutScript: options.remoteAutScript,
   })
 

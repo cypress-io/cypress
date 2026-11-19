@@ -325,8 +325,8 @@ describe('lib/browsers/firefox', () => {
       }))
     })
 
-    it('leaves the AUT\'s dialogs for the remote driver to answer', async () => {
-      await firefox.open(browser as any, 'http://', { ...options, experimentalRemoteDriver: true } as any, automation as any)
+    it('leaves the AUT\'s dialogs for the experimental driver to answer', async () => {
+      await firefox.open(browser as any, 'http://', { ...options, experimentalDriver: true } as any, automation as any)
 
       expectCalledWith(vi.mocked(webdriver.newSession), matchSubset({
         capabilities: {
@@ -449,10 +449,10 @@ describe('lib/browsers/firefox', () => {
         expect(bidiAutomationClient.addRemoteAutScript).not.toHaveBeenCalled()
       })
 
-      it('adds the remote AUT script to every frame with experimentalRemoteDriver', async () => {
+      it('adds the remote AUT script to every frame with experimentalDriver', async () => {
         browser.family = 'firefox'
         browser.majorVersion = '135'
-        await firefox.open(browser as any, 'http://', { ...options, experimentalRemoteDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } } as any, automation as any)
+        await firefox.open(browser as any, 'http://', { ...options, experimentalDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } } as any, automation as any)
 
         expect(bidiAutomationClient.addRemoteAutScript).toHaveBeenCalledExactlyOnceWith({ primaryOrigin: 'http://localhost:3500', namespace: '__cypress' })
       })

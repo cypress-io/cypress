@@ -1,6 +1,6 @@
 import { authCreds } from '../../../../fixtures/auth_creds'
 
-describe('remote driver: navigation in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: navigation in a cross-origin AUT', () => {
   it('.go()', () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

@@ -5,7 +5,7 @@ const ORIGINS = {
   'www.foobar.com AUT': 'http://www.foobar.com:3500',
 }
 
-const PAGE = '/fixtures/remote-driver-isolation.html'
+const PAGE = '/fixtures/experimental-driver-isolation.html'
 
 describe('isolated runner', { defaultCommandTimeout: 2000 }, () => {
   Object.entries(ORIGINS).forEach(([label, origin]) => {

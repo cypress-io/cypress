@@ -1,3 +1,4 @@
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}
 
 const setStorage = () => {
@@ -5,7 +6,7 @@ const setStorage = () => {
   cy.visit('http://www.foobar.com:3500/fixtures/set-storage.html?nums=3,4')
 }
 
-describe('remote driver: storage in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: storage in a cross-origin AUT', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

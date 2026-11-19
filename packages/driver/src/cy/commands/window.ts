@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 import { getTitleFromAutomation } from './helpers/window'
-import { extendRemoteSubject, isRemoteDriverEnabled } from '../remote'
+import { extendRemoteSubject, isExperimentalDriverEnabled } from '../remote'
 import { createRemoteWindow } from '../remote/remote_window'
 
 const viewports = {
@@ -109,8 +109,8 @@ export default (Commands, Cypress, cy, state) => {
       timeout: options.timeout,
     })
 
-    // the AUT's window is cross-origin to the spec, so the remote driver yields a stand-in for cy.stub and cy.spy
-    const remoteWindow = isRemoteDriverEnabled(Cypress) ? createRemoteWindow() : undefined
+    // the AUT's window is cross-origin to the spec, so the experimental driver yields a stand-in for cy.stub and cy.spy
+    const remoteWindow = isExperimentalDriverEnabled(Cypress) ? createRemoteWindow() : undefined
 
     return () => {
       if (remoteWindow) {
@@ -128,8 +128,8 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('document', function documentFn (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-    // the AUT's document is cross-origin to the spec, so the remote driver yields it as a remote subject
-    if (isRemoteDriverEnabled(Cypress)) {
+    // the AUT's document is cross-origin to the spec, so the experimental driver yields it as a remote subject
+    if (isExperimentalDriverEnabled(Cypress)) {
       this.set('timeout', options.timeout)
       Cypress.log({ hidden: options.log === false, timeout: options.timeout })
 

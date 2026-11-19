@@ -8,7 +8,7 @@ import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import type { Log } from '../../../cypress/log'
 import { findScrollableParent } from './scroll_parent'
-import { isRemoteDriverEnabled, isRemoteSubject } from '../../remote'
+import { isExperimentalDriverEnabled, isRemoteSubject } from '../../remote'
 import { remoteScrollIntoView, remoteScrollTo } from '../../remote/actions'
 
 const isNaNOrInfinity = (item) => {
@@ -314,7 +314,7 @@ export default (Commands, Cypress, cy, state) => {
         },
       })
 
-      if (isRemoteDriverEnabled(Cypress) && (subject == null || isRemoteSubject(subject))) {
+      if (isExperimentalDriverEnabled(Cypress) && (subject == null || isRemoteSubject(subject))) {
         return remoteScrollTo(Cypress, cy, subject ?? undefined, options.x, options.y, { axis: options.axis, duration: options.duration, easing: options.easing, ensureScrollable: options.ensureScrollable }, options)
       }
 

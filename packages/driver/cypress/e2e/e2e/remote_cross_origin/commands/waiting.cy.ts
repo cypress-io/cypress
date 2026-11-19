@@ -1,3 +1,5 @@
+/* eslint-disable cypress/no-unnecessary-waiting -- these specs test cy.wait itself, including waiting a fixed time */
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}
 
 // the agent's world shares the AUT's origin, so these requests come from the cross-origin AUT
@@ -7,7 +9,7 @@ const fetchInAut = (...urls: string[]) => {
   })
 }
 
-describe('remote driver: waiting in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: waiting in a cross-origin AUT', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="dom-link"]').click()

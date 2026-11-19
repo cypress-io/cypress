@@ -1,13 +1,13 @@
-// The remote driver against an AUT on baseUrl and on another site; the runner is cross-origin to
-// both. Where the remote driver deviates from the legacy driver, the test asserts the deviation.
+// The experimental driver against an AUT on baseUrl and on another site; the runner is cross-origin to
+// both. Where the experimental driver deviates from the legacy driver, the test asserts the deviation.
 type Go = () => void
 
 const goBaseUrl: Go = () => {
-  cy.visit('/fixtures/remote-driver-isolation.html')
+  cy.visit('/fixtures/experimental-driver-isolation.html')
 }
 
 const goOtherSite: Go = () => {
-  cy.visit('/fixtures/remote-driver.html')
+  cy.visit('/fixtures/experimental-driver.html')
   cy.get('#isolation-link').click()
   cy.get('#page').should('have.text', '1')
 }
@@ -122,8 +122,8 @@ const probes = (go: Go) => {
     it('cy.title / url / location / hash', () => {
       go()
       cy.title().should('eq', 'Isolation spike')
-      cy.url().should('include', 'remote-driver-isolation.html')
-      cy.location('pathname').should('eq', '/fixtures/remote-driver-isolation.html')
+      cy.url().should('include', 'experimental-driver-isolation.html')
+      cy.location('pathname').should('eq', '/fixtures/experimental-driver-isolation.html')
       cy.hash().should('eq', '')
     })
 
@@ -214,7 +214,7 @@ const probes = (go: Go) => {
 
     it('cy.intercept + cy.wait', () => {
       go()
-      cy.intercept('/fixtures/remote-driver-isolation.html?fetched=1').as('fetched')
+      cy.intercept('/fixtures/experimental-driver-isolation.html?fetched=1').as('fetched')
       cy.get('#fetch').click()
       cy.wait('@fetched')
       cy.get('#fetch-result').should('have.text', 'status:200')
@@ -291,10 +291,11 @@ const probes = (go: Go) => {
   })
 }
 
-describe('remote driver isolation', () => {
+describe('experimental driver isolation', () => {
   describe('AUT on baseUrl', () => probes(goBaseUrl))
 
   describe('AUT on another site', () => probes(goOtherSite))
 })
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}

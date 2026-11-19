@@ -259,12 +259,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
   }, {
-    name: 'experimentalRemoteDriver',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    overrideLevel: 'any',
-  }, {
     name: 'experimentalSingleTabRunMode',
     defaultValue: false,
     validation: validate.isBoolean,
@@ -578,6 +572,12 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     // https://github.com/cypress-io/cypress/issues/20789
     defaultValue: (options: Record<string, any> = {}) => !options.isTextTerminal,
     validation: validate.isBoolean,
+  }, {
+    // set from CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER, never from the config file
+    name: 'experimentalDriver',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
   }, {
     name: 'isTextTerminal',
     defaultValue: false,

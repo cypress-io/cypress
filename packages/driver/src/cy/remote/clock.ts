@@ -6,7 +6,7 @@ const isClockDetails = (value: unknown): value is RemoteClockDetails => {
   return typeof value === 'object' && value !== null && typeof Reflect.get(value, 'now') === 'number' && Array.isArray(Reflect.get(value, 'methods'))
 }
 
-// cy.clock under the remote driver. The clock runs in the AUT (the server installs it there and in
+// cy.clock under the experimental driver. The clock runs in the AUT (the server installs it there and in
 // every page the AUT loads while it's on), so each call is a round trip and details() is the last known state.
 export const createRemoteClock = (Cypress: Pick<ICypress, 'automation'>, now: number | undefined, methods: string[] | undefined) => {
   let details: RemoteClockDetails = { now: now ?? 0, methods: [] }

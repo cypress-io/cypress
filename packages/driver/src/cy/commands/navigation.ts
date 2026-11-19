@@ -13,7 +13,7 @@ import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
 import type { StateFunc } from '../../cypress/state'
 import type { $Cy } from '../../cypress/cy'
-import { isRemoteDriverEnabled, serializeCallback } from '../remote'
+import { isExperimentalDriverEnabled, serializeCallback } from '../remote'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
@@ -446,8 +446,8 @@ interface InternalVisitOptions extends Partial<Cypress.VisitOptions> {
   hasAlreadyVisitedUrl: boolean
 }
 
-// the remote driver keeps the AUT cross-origin, so even WebKit has to reload and navigate it through automation
-const usesLegacyWebKitNavigation = (Cypress: Cypress.Cypress) => Cypress.isBrowser('webkit') && !isRemoteDriverEnabled(Cypress)
+// the experimental driver keeps the AUT cross-origin, so even WebKit has to reload and navigate it through automation
+const usesLegacyWebKitNavigation = (Cypress: Cypress.Cypress) => Cypress.isBrowser('webkit') && !isExperimentalDriverEnabled(Cypress)
 
 export const reload = (Cypress: Cypress.Cypress, cy: $Cy, state: StateFunc, config: Cypress.Cypress['config'], args: any[]) => {
   let forceReload
@@ -806,8 +806,8 @@ export default (Commands, Cypress, cy, state, config) => {
 
       options.hasAlreadyVisitedUrl = !!previouslyVisitedLocation
 
-      // the remote driver runs the callbacks inside the AUT, which is cross-origin to the runner
-      const remoteCallbacks = isRemoteDriverEnabled(Cypress) && (onBeforeLoadIsUserDefined || onLoadIsUserDefined) ? {
+      // the experimental driver runs the callbacks inside the AUT, which is cross-origin to the runner
+      const remoteCallbacks = isExperimentalDriverEnabled(Cypress) && (onBeforeLoadIsUserDefined || onLoadIsUserDefined) ? {
         token: `${Date.now()}-${_.uniqueId()}`,
         args: userOptions.args,
         onBeforeLoad: userOptions.onBeforeLoad && serializeCallback(userOptions.onBeforeLoad),
@@ -913,7 +913,7 @@ export default (Commands, Cypress, cy, state, config) => {
           // @see https://github.com/cypress-io/cypress/issues/652
           // also, the page doesn't fully reload on hashchange, so we
           // can't and don't wait for before:window:load
-          if (event === 'hashchange' && isRemoteDriverEnabled(Cypress)) {
+          if (event === 'hashchange' && isExperimentalDriverEnabled(Cypress)) {
             // a cross-origin window takes no listener, so wait for automation to report the new URL
             const waitForUrl = () => {
               return Promise.resolve(Cypress.automation('get:aut:url', {}))
@@ -928,15 +928,15 @@ export default (Commands, Cypress, cy, state, config) => {
             // otherwise, resolve once this event fires
             cy.once(event, onEvent)
 
-            // the remote driver runs onBeforeLoad in the AUT, whose window is cross-origin to this listener
-            if (!isRemoteDriverEnabled(Cypress)) {
+            // the experimental driver runs onBeforeLoad in the AUT, whose window is cross-origin to this listener
+            if (!isExperimentalDriverEnabled(Cypress)) {
               cy.once('window:before:load', onBeforeLoad)
             }
           }
 
           cleanup = () => {
             if (event === 'hashchange') {
-              if (!isRemoteDriverEnabled(Cypress)) {
+              if (!isExperimentalDriverEnabled(Cypress)) {
                 win.removeEventListener('hashchange', resolve)
               }
             } else {
@@ -973,7 +973,7 @@ export default (Commands, Cypress, cy, state, config) => {
           }
 
           if (remoteCallbacks?.onBeforeLoad && !beforeLoadRan) {
-            $errUtils.throwErrByPath('remote_driver.visit_before_load_did_not_run', { onFail: options._log, errProps: { isCallbackError: true } })
+            $errUtils.throwErrByPath('experimental_driver.visit_before_load_did_not_run', { onFail: options._log, errProps: { isCallbackError: true } })
           }
         })
       }
@@ -1029,7 +1029,7 @@ export default (Commands, Cypress, cy, state, config) => {
         return Promise.resolve(win)
       }
 
-      // the remote driver reads a cross-origin AUT's URL from automation; legacy reads the window
+      // the experimental driver reads a cross-origin AUT's URL from automation; legacy reads the window
       const visit = (autHref?: string) => {
         // hold onto our existing url
         const existing = $utils.locExisting()
@@ -1147,8 +1147,8 @@ export default (Commands, Cypress, cy, state, config) => {
           const remoteOrigin = Cypress.config('injectDocumentDomain') ? remote.superDomainOrigin : remote.origin
           const existingOrigin = Cypress.config('injectDocumentDomain') ? existing.superDomainOrigin : existing.origin
 
-          // the remote driver drives a cross-origin AUT, so the runner never follows it to another origin
-          if (isRemoteDriverEnabled(Cypress) || remoteOrigin === existingOrigin || previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) {
+          // the experimental driver drives a cross-origin AUT, so the runner never follows it to another origin
+          if (isExperimentalDriverEnabled(Cypress) || remoteOrigin === existingOrigin || previouslyVisitedLocation || Cypress.isCrossOriginSpecBridge) {
             if (!previouslyVisitedLocation) {
               previouslyVisitedLocation = remote
             }
@@ -1239,7 +1239,7 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
-      return Promise.resolve(isRemoteDriverEnabled(Cypress) ? Cypress.automation('get:aut:url', {}).catch(() => undefined) : undefined)
+      return Promise.resolve(isExperimentalDriverEnabled(Cypress) ? Cypress.automation('get:aut:url', {}).catch(() => undefined) : undefined)
       .then((autHref) => visit(typeof autHref === 'string' ? autHref : undefined))
       .timeout(options.timeout ?? config('pageLoadTimeout'), 'visit')
       .catch(Promise.TimeoutError, () => {

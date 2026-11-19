@@ -11,7 +11,7 @@ export async function evaluateInFrameContext (expression: string,
   contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
   frame: Protocol.Page.Frame): Promise<ProtocolMapping.Commands['Runtime.evaluate']['returnType']> {
   for (const [contextId, context] of contexts.entries()) {
-    // skip isolated worlds such as the remote driver's agent; they don't see the page's globals
+    // skip isolated worlds such as the experimental driver's agent; they don't see the page's globals
     if (context.auxData?.frameId === frame.id && context.auxData?.isDefault !== false) {
       try {
         return await send('Runtime.evaluate', {

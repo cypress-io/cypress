@@ -1,4 +1,4 @@
-describe('remote driver: basic login in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: basic login in a cross-origin AUT', () => {
   // Scenario, Token based auth. Visit site, redirect to IDP hosted on secondary origin, login and redirect back to site.
   describe('visit primary first', () => {
     it('logs in with idp redirect', () => {

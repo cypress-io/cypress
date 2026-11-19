@@ -203,20 +203,34 @@ describe('config/src/project/utils', () => {
     })
   })
 
-  describe('experimentalRemoteDriver', () => {
-    it('requires baseUrl', () => {
+  describe('CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER', () => {
+    const getFilesByGlob = vi.fn().mockReturnValue(['path/to/file'])
+
+    beforeEach(() => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
-      const cfg = {
-        projectRoot: '/foo/bar/',
-        supportFile: false,
-        experimentalRemoteDriver: true,
-      }
+    })
 
-      const getFilesByGlob = vi.fn().mockReturnValue(['path/to/file'])
+    it('enables the experimental driver when set', async () => {
+      vi.stubEnv('CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER', '1')
 
-      expect(() => mergeDefaults(cfg, {}, {}, getFilesByGlob)).toThrow()
+      const cfg = await mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false, baseUrl: 'http://shop.example.com' }, {}, {}, getFilesByGlob)
 
-      expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_VALIDATION_MSG_ERROR', null, null, '`experimentalRemoteDriver` requires `baseUrl`. Set `baseUrl` to the URL of the app under test.')
+      expect(cfg.experimentalDriver).toBe(true)
+      expect(cfg.env).not.toHaveProperty('INTERNAL_EXPERIMENTAL_DRIVER')
+    })
+
+    it('ignores experimentalDriver in the config file', async () => {
+      const cfg = await mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false, experimentalDriver: true }, {}, {}, getFilesByGlob)
+
+      expect(cfg.experimentalDriver).toBe(false)
+    })
+
+    it('requires baseUrl', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER', 'true')
+
+      expect(() => mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, {}, {}, getFilesByGlob)).toThrow()
+
+      expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_VALIDATION_MSG_ERROR', null, null, '`CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER` requires `baseUrl`. Set `baseUrl` to the URL of the app under test.')
     })
   })
 
@@ -1315,7 +1329,6 @@ describe('config/src/project/utils', () => {
           visibilityStrategy: { value: 'modern', from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
-          experimentalRemoteDriver: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
@@ -1440,7 +1453,6 @@ describe('config/src/project/utils', () => {
           visibilityStrategy: { value: 'modern', from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
-          experimentalRemoteDriver: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },

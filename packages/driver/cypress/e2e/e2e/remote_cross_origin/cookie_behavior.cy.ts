@@ -25,7 +25,7 @@ const makeRequest = (url: string, client: 'fetch' | 'xmlHttpRequest' = 'xmlHttpR
   cy.get('body').should('have.attr', 'data-request', `${id}:ok`)
 }
 
-describe('remote driver: cookie behavior in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: cookie behavior in a cross-origin AUT', () => {
   const serverConfig = {
     http: {
       sameOriginPort: 3500,
@@ -583,6 +583,7 @@ describe('remote driver: cookie behavior in a cross-origin AUT', { experimentalR
               // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
               makeRequest(`/set-cookie?cookie=foo=bar; Domain=www.foobar.com`, 'fetch')
 
+              // eslint-disable-next-line cypress/no-unnecessary-waiting -- lets the first Set-Cookie response reach the cookie jar before the second request
               cy.wait(200)
 
               makeRequest(`/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch')
@@ -1060,6 +1061,7 @@ describe('remote driver: cookie behavior in a cross-origin AUT', { experimentalR
 
               makeRequest(`/set-cookie?cookie=foo=bar; Domain=.foobar.com`, 'fetch')
 
+              // eslint-disable-next-line cypress/no-unnecessary-waiting -- lets the first Set-Cookie response reach the cookie jar before the second request
               cy.wait(200)
 
               makeRequest(`/set-cookie?cookie=bar=baz; Domain=.foobar.com`, 'fetch')
@@ -1075,4 +1077,5 @@ describe('remote driver: cookie behavior in a cross-origin AUT', { experimentalR
   })
 })
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}

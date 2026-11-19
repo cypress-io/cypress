@@ -1,4 +1,4 @@
-// Runs in the AUT's main world under the remote driver, injected by the server, so cy.clock
+// Runs in the AUT's main world under the experimental driver, injected by the server, so cy.clock
 // can replace the AUT's own timers. The server drives it through REMOTE_CLOCK_GLOBAL.
 import { create } from '../../cypress/clock'
 import type { Clock } from '../../cypress/clock'

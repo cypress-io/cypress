@@ -98,7 +98,7 @@ describe('lib/browsers/webkit-automation', () => {
     } as unknown as RunModeVideoApi
   })
 
-  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any, remoteDriver: boolean, remoteAutScript: any }> = { videoApi }) => {
+  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any, experimentalDriver: boolean, remoteAutScript: any }> = { videoApi }) => {
     return WebKitAutomation.create({
       automation,
       browser: mock.browser as any,
@@ -108,7 +108,7 @@ describe('lib/browsers/webkit-automation', () => {
       userAgent: opts.userAgent,
       isHeadless: opts.isHeadless ?? true,
       cdpSocketServer: opts.cdpSocketServer,
-      remoteDriver: opts.remoteDriver,
+      experimentalDriver: opts.experimentalDriver,
       remoteAutScript: opts.remoteAutScript,
     })
   }
@@ -257,7 +257,7 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
-  describe('remote driver dialogs and stubs', () => {
+  describe('experimental driver dialogs and stubs', () => {
     const listenersFor = (event: string) => mock.getLastPage().on.mock.calls.filter(([name]) => name === event).map(([, listener]) => listener)
     const bindingFor = (name: string) => mock.getLastContext().exposeBinding.mock.calls.find(([bindingName]) => bindingName === name)?.[1]
 
@@ -265,7 +265,7 @@ describe('lib/browsers/webkit-automation', () => {
       automation.push = vi.fn(async () => {})
     })
 
-    it('leaves dialogs to Playwright and exposes no binding without the remote driver', async () => {
+    it('leaves dialogs to Playwright and exposes no binding without the experimental driver', async () => {
       await createAutomation()
 
       expect(listenersFor('dialog')).toHaveLength(0)
@@ -273,7 +273,7 @@ describe('lib/browsers/webkit-automation', () => {
     })
 
     it('answers a dialog, then reports it', async () => {
-      await createAutomation({ remoteDriver: true })
+      await createAutomation({ experimentalDriver: true })
 
       const dialog = { type: () => 'confirm', message: () => 'sure?', accept: vi.fn(async () => {}), dismiss: vi.fn(async () => {}) }
 
@@ -284,7 +284,7 @@ describe('lib/browsers/webkit-automation', () => {
     })
 
     it('pushes a stub call from the AUT frame only', async () => {
-      await createAutomation({ remoteDriver: true })
+      await createAutomation({ experimentalDriver: true })
 
       const binding = bindingFor('__cypressRemoteStubCall')
       const autFrame = mock.getLastPage().mainFrame().childFrames()[0]
@@ -296,15 +296,15 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
-  it('adds the remote AUT script to every frame with the remote driver only', async () => {
+  it('adds the remote AUT script to every frame with the experimental driver only', async () => {
     await createAutomation()
     expect(mock.getLastPage().addInitScript).not.toHaveBeenCalledWith({ content: 'remote AUT script' })
 
-    await createAutomation({ remoteDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } })
+    await createAutomation({ experimentalDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } })
     expect(mock.getLastPage().addInitScript).toHaveBeenCalledWith({ content: 'remote AUT script' })
   })
 
-  describe('remote driver navigation', () => {
+  describe('experimental driver navigation', () => {
     const listenersFor = (event: string) => mock.getLastPage().on.mock.calls.filter(([name]) => name === event).map(([, listener]) => listener)
     // the navigation listeners are added after the network ones
     const emit = (event: string, arg: unknown) => listenersFor(event).at(-1)(arg)
@@ -315,7 +315,7 @@ describe('lib/browsers/webkit-automation', () => {
 
     beforeEach(async () => {
       automation.push = vi.fn(async () => {})
-      await createAutomation({ remoteDriver: true })
+      await createAutomation({ experimentalDriver: true })
       autFrame = mock.getLastPage().mainFrame().childFrames()[0]
       autFrame.waitForLoadState = vi.fn(async () => {})
     })

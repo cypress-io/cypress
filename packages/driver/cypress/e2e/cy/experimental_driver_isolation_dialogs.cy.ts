@@ -2,11 +2,11 @@
 type Go = () => void
 
 const goBaseUrl: Go = () => {
-  cy.visit('/fixtures/remote-driver-isolation.html')
+  cy.visit('/fixtures/experimental-driver-isolation.html')
 }
 
 const goOtherSite: Go = () => {
-  cy.visit('/fixtures/remote-driver.html')
+  cy.visit('/fixtures/experimental-driver.html')
   cy.get('#isolation-link').click()
   cy.get('#page').should('have.text', '1')
 }
@@ -51,10 +51,11 @@ const probes = (go: Go) => {
   })
 }
 
-describe('remote driver isolation: dialogs', () => {
+describe('experimental driver isolation: dialogs', () => {
   describe('AUT on baseUrl', () => probes(goBaseUrl))
 
   describe('AUT on another site', () => probes(goOtherSite))
 })
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}

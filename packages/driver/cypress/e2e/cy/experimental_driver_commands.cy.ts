@@ -1,6 +1,6 @@
-// Every command that touches the AUT, one per test, run against a cross-origin AUT with the remote driver.
-// A command the remote driver doesn't support yet is listed in UNSUPPORTED with the reason, and skipped.
-const AUDIT_PAGE = 'http://www.foobar.com:3500/fixtures/remote-driver-audit.html'
+// Every command that touches the AUT, one per test, run against a cross-origin AUT with the experimental driver.
+// A command the experimental driver doesn't support yet is listed in UNSUPPORTED with the reason, and skipped.
+const AUDIT_PAGE = 'http://www.foobar.com:3500/fixtures/experimental-driver-audit.html'
 const AUDIT_ORIGIN = 'http://www.foobar.com:3500'
 
 const expectStatus = (text: string) => cy.get('#status').should('have.text', text)
@@ -34,7 +34,7 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
     'document find': () => cy.document().find('#two').should('have.text', 'Two'),
     title: () => cy.title().should('eq', 'Audit Page'),
     url: () => cy.url().should('eq', AUDIT_PAGE),
-    location: () => cy.location('pathname').should('eq', '/fixtures/remote-driver-audit.html'),
+    location: () => cy.location('pathname').should('eq', '/fixtures/experimental-driver-audit.html'),
     hash: () => {
       cy.visit(`${AUDIT_PAGE}#section`)
       cy.hash().should('eq', '#section')
@@ -94,7 +94,7 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
     },
     'a snapshot fails loudly on what it can\'t answer': () => {
       cy.get('#two').then(($el) => {
-        expect(() => $el[0]).to.throw('is not supported on a subject from `experimentalRemoteDriver`')
+        expect(() => $el[0]).to.throw('is not supported on a subject from the experimental driver')
         expect(() => $el.css('color')).to.throw('`.css(\'color\')` is not supported')
         expect(() => $el.find('span')).to.throw('`.find()` is not supported')
       })
@@ -249,7 +249,7 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
     'match a simple selector': () => cy.get('#two').should('match', 'li.item.two').and('match', 'p, #two').and('not.match', 'ul'),
     'match an unsupported selector': () => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('is not supported on a subject from `experimentalRemoteDriver`')
+        expect(err.message).to.include('is not supported on a subject from the experimental driver')
       })
 
       cy.get('#two').should('match', 'ul > li').then(() => {
@@ -274,7 +274,7 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
     '.css() in a should callback': () => cy.get('#two').should(($el) => expect($el.css('display')).to.eq('list-item')),
     '.css() in a then callback': () => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('`.css(\'display\')` is not supported on a subject from `experimentalRemoteDriver`')
+        expect(err.message).to.include('`.css(\'display\')` is not supported on a subject from the experimental driver')
       })
 
       cy.get('#two').then(($el) => $el.css('display')).then(() => {
@@ -289,14 +289,14 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
     'have.descendants': () => cy.get('#list').should('have.descendants', '#two').and('not.have.descendants', '#far'),
   },
   other: {
-    'screenshot of the page': () => cy.screenshot('remote-driver-audit-page'),
-    'screenshot of an element': () => cy.get('#two').screenshot('remote-driver-audit-element'),
+    'screenshot of the page': () => cy.screenshot('experimental-driver-audit-page'),
+    'screenshot of an element': () => cy.get('#two').screenshot('experimental-driver-audit-element'),
     viewport: () => {
       cy.viewport(400, 600)
       expectStatus('width:400')
     },
     session: () => {
-      cy.session('remote-driver-audit', () => {
+      cy.session('experimental-driver-audit', () => {
         cy.visit(AUDIT_PAGE)
         cy.setCookie('session-cookie', 'kept')
       })
@@ -309,19 +309,19 @@ const AUDIT_CASES: Record<string, Record<string, () => void>> = {
 
 const UNSUPPORTED: Record<string, string> = {}
 
-// unsupported in a browser for reasons the remote driver doesn't change, or a bug in one browser
+// unsupported in a browser for reasons the experimental driver doesn't change, or a bug in one browser
 const UNSUPPORTED_IN: Record<string, { browser: string, reason: string }> = {
   press: { browser: 'webkit', reason: 'cy.press() isn\'t supported in WebKit' },
 }
 
-describe('remote driver: commands against a cross-origin AUT', { experimentalRemoteDriver: true, retries: 0, defaultCommandTimeout: 3000 }, () => {
+describe('experimental driver: commands against a cross-origin AUT', { retries: 0, defaultCommandTimeout: 3000 }, () => {
   beforeEach(() => {
     cy.visit(AUDIT_PAGE)
   })
 
   it('fails cy.origin, which a cross-origin AUT doesn\'t need', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('`cy.origin()` is not available when `experimentalRemoteDriver` is enabled')
+      expect(err.message).to.include('`cy.origin()` is not available when the experimental driver is enabled')
       done()
     })
 
@@ -336,7 +336,7 @@ describe('remote driver: commands against a cross-origin AUT', { experimentalRem
         const reason = UNSUPPORTED[name] ?? (Cypress.isBrowser(UNSUPPORTED_IN[name]?.browser ?? '') ? UNSUPPORTED_IN[name].reason : undefined)
 
         if (reason) {
-          // TODO: remove each entry from UNSUPPORTED once the remote driver supports the command
+          // TODO: remove each entry from UNSUPPORTED once the experimental driver supports the command
           it.skip(`${name} (unsupported: ${reason})`, run)
 
           return

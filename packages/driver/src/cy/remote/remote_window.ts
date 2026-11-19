@@ -28,7 +28,7 @@ const create = (path: string[]): object => {
   return proxy
 }
 
-// What cy.window() yields under the remote driver. The AUT's window is cross-origin to the
+// What cy.window() yields under the experimental driver. The AUT's window is cross-origin to the
 // spec, so this only records the property path it's read along, for cy.stub and cy.spy to target.
 export const createRemoteWindow = () => create([])
 

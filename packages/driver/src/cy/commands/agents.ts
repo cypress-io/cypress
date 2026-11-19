@@ -158,7 +158,7 @@ export default function (Commands, Cypress, cy, state) {
     return state('sandbox', sandbox)
   }
 
-  // stubs and spies on the AUT's window under the remote driver, by the id the AUT reports calls with
+  // stubs and spies on the AUT's window under the experimental driver, by the id the AUT reports calls with
   const remoteAgents = new Map<string, RemoteAgent>()
 
   const resetRemoteAgents = () => {
@@ -298,7 +298,7 @@ export default function (Commands, Cypress, cy, state) {
     return agent
   }
 
-  // The AUT's window is cross-origin to the spec under the remote driver, so the agent is split in two:
+  // The AUT's window is cross-origin to the spec under the experimental driver, so the agent is split in two:
   // a recorder in the AUT replaces the property and returns what the stub's behaviors say, and the
   // agent here records each call it reports, for assertions, aliases and the command log.
   const remoteAgent = function (ctx, type: 'spy' | 'stub', path: string[]) {
@@ -313,7 +313,7 @@ export default function (Commands, Cypress, cy, state) {
     remoteAgents.set(id, { agent, setReturned: (value) => returned = value })
 
     const send = (message: 'remote:stub:add' | 'remote:stub:update', data) => {
-      Cypress.automation(message, data).catch((err) => $errUtils.warnByPath('remote_driver.stub_not_applied', { args: { method: path.join('.'), message: err.message } }))
+      Cypress.automation(message, data).catch((err) => $errUtils.warnByPath('experimental_driver.stub_not_applied', { args: { method: path.join('.'), message: err.message } }))
     }
 
     const addBehaviors = (target, args?: unknown[]) => {

@@ -52,5 +52,6 @@
 - When a test feeds in output from a browser, tool or service (a stack trace, a CLI message, an API response), take its examples from real captured output, such as a fixture under `__fixtures__`, not names made up to look plausible. Keep inputs that only follow the format's rules in their own clearly labelled cases, and check that changelog examples come from the same real output.
 - Keep a `cli/CHANGELOG.md` entry to the user-facing change, one before-and-after example and the link. Cut any sentence that restates the change in other words.
 - Before committing or pushing, `yarn check-ts`, `yarn lint`, `yarn health-check` (knip), and relevant unit tests must pass locally. CI currently does not block expensive e2e jobs when these fail.
+- The pre-commit hook runs ESLint on every staged file in full, so an error already in a file you touch, including one you only rename, blocks the commit. Lint the whole of each touched file and fix what it reports in the same change, rather than calling it pre-existing.
 
 @AGENTS.md

@@ -39,8 +39,8 @@ const files = {
 
     let privilegedChannel: string | undefined
 
-    // the runner loads the spec frame on the primary origin, or on its own origin under the remote driver, which never moves it
-    const isRemoteRunnerOrigin = 'experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true && !!config.baseUrl && config.port != null &&
+    // the runner loads the spec frame on the primary origin, or on its own origin under the experimental driver, which never moves it
+    const isRemoteRunnerOrigin = 'experimentalDriver' in config && config.experimentalDriver === true && !!config.baseUrl && config.port != null &&
       new URL(req.proxiedUrl).origin === getRemoteRunnerOrigin(config.baseUrl, config.port)
 
     if (remoteStates.isPrimarySuperDomainOrigin(req.proxiedUrl) || isRemoteRunnerOrigin) {

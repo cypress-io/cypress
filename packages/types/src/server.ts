@@ -141,8 +141,8 @@ export type BrowserLaunchOpts = {
    */
   shouldClearPersistedServiceWorkers?: boolean
   // From the project config, since a per-test override can't change how the browser was launched
-  experimentalRemoteDriver?: boolean
-  // set with experimentalRemoteDriver: configures the script added to the main world of every frame
+  experimentalDriver?: boolean
+  // set with experimentalDriver: configures the script added to the main world of every frame
   remoteAutScript?: RemoteAutScriptConfig
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
@@ -258,7 +258,7 @@ export type RemoteNavigation =
   | { event: 'stopped' }
   | { event: 'withinDocument', source: 'hashchange' | 'history' }
 
-// a call into the remote driver's AUT script: a cookie command for its document.cookie jar, or pausing its timers
+// a call into the experimental driver's AUT script: a cookie command for its document.cookie jar, or pausing its timers
 export type RemoteAutCall =
   | { method: 'cookies', args: ['set:cookie', unknown] | ['clear:cookie', string] | ['clear:cookies'] }
   | { method: 'timers', args: ['pause', boolean] | ['reset'] }

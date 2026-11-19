@@ -1,4 +1,4 @@
-import { extendRemoteSubject, getRemoteWithinSubject, isRemoteDriverEnabled } from '../../remote'
+import { extendRemoteSubject, getRemoteWithinSubject, isExperimentalDriverEnabled } from '../../remote'
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('root', function root (options: Cypress.LogTimeoutOptions) {
@@ -12,7 +12,7 @@ export default (Commands, Cypress, cy, state) => {
 
     const withinSubject = cy.state('withinSubjectChain')
 
-    if (isRemoteDriverEnabled(Cypress)) {
+    if (isExperimentalDriverEnabled(Cypress)) {
       return () => {
         if (withinSubject) {
           return getRemoteWithinSubject(() => cy.getSubjectFromChain(withinSubject), 'root')

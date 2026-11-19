@@ -820,8 +820,8 @@ commands:
         description: run subset of tests with injectDocumentDomain config enabled
         type: boolean
         default: false
-      remote-driver:
-        description: run the subset of tests that need experimentalRemoteDriver enabled for the project
+      experimental-driver:
+        description: run the subset of tests that need the experimental driver (CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER)
         type: boolean
         default: false
       force-http1:
@@ -893,9 +893,9 @@ commands:
             if << parameters.inject-document-domain >> ; then
               YARN_CMD="cypress:run:inject-document-domain"
               GROUP="5x-driver-inject-document-domain-<<parameters.browser>>"
-            elif << parameters.remote-driver >> ; then
-              YARN_CMD="cypress:run:remote-driver"
-              GROUP="5x-driver-remote-driver-<<parameters.browser>>"
+            elif << parameters.experimental-driver >> ; then
+              YARN_CMD="cypress:run:experimental-driver"
+              GROUP="5x-driver-experimental-driver-<<parameters.browser>>"
             else
               YARN_CMD="cypress:run"
               GROUP="5x-driver-<<parameters.browser>>"
@@ -2709,7 +2709,7 @@ jobs:
           force-http1: << parameters.force-http1 >>
           guard: << pipeline.parameters.run-driver-tests >>
 
-  driver-integration-tests-chrome-remote-driver:
+  driver-integration-tests-chrome-experimental-driver:
     <<: *defaults
     parallelism: 2
     resource_class: medium+.gen2
@@ -2717,27 +2717,27 @@ jobs:
       - run-driver-integration-tests:
           browser: chrome
           install-chrome-channel: stable
-          remote-driver: true
+          experimental-driver: true
           guard: << pipeline.parameters.run-driver-tests >>
 
-  driver-integration-tests-firefox-remote-driver:
+  driver-integration-tests-firefox-experimental-driver:
     <<: *defaults
     parallelism: 2
     resource_class: medium+.gen2
     steps:
       - run-driver-integration-tests:
           browser: firefox
-          remote-driver: true
+          experimental-driver: true
           guard: << pipeline.parameters.run-driver-tests >>
 
-  driver-integration-tests-webkit-remote-driver:
+  driver-integration-tests-webkit-experimental-driver:
     <<: *defaults
     parallelism: 2
     resource_class: large.gen2
     steps:
       - run-driver-integration-tests:
           browser: webkit
-          remote-driver: true
+          experimental-driver: true
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-chrome-beta:

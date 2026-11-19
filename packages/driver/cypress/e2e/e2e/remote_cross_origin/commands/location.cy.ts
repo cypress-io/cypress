@@ -1,4 +1,4 @@
-describe('remote driver: location in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: location in a cross-origin AUT', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()

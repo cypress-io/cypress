@@ -1,6 +1,6 @@
-const PAGE = 'http://localhost:3500/fixtures/remote-driver-frames.html'
+const PAGE = 'http://localhost:3500/fixtures/experimental-driver-frames.html'
 
-describe('remote driver: iframes in the AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: iframes in the AUT', () => {
   beforeEach(() => {
     cy.visit(PAGE)
   })
@@ -48,32 +48,5 @@ describe('remote driver: iframes in the AUT', { experimentalRemoteDriver: true }
   })
 })
 
-describe('legacy driver: iframes in the AUT', { experimentalRemoteDriver: false }, () => {
-  beforeEach(() => {
-    cy.visit(PAGE)
-  })
-
-  it('reaches a same-origin iframe only through its contentDocument', () => {
-    cy.get('#same').its('0.contentDocument.body').find('#label').should('have.text', 'same-origin')
-  })
-
-  it('cannot reach a cross-origin iframe', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('contentDocument')
-      done()
-    })
-
-    cy.get('#cross').its('0.contentDocument.body', { timeout: 500 })
-  })
-
-  it('.frame() requires experimentalRemoteDriver', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('`cy.frame()` requires `experimentalRemoteDriver` to be enabled.')
-      done()
-    })
-
-    cy.get('#cross').frame()
-  })
-})
-
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}

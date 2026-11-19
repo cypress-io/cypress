@@ -9,7 +9,7 @@ import {
   matches,
 } from '../../../dom/accessibility'
 
-// How cy.getByRole decides an element matches, shared with the remote driver's agent
+// How cy.getByRole decides an element matches, shared with the experimental driver's agent
 
 // The public option types, so the runtime validation can't drift from them.
 export type GetByRoleOptions = Partial<Pick<Cypress.GetByRoleOptions, 'name' | 'hidden' | 'native'>>

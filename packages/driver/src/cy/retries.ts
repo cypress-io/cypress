@@ -8,7 +8,7 @@ import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import type { Log } from '../cypress/log'
-import { isRemoteDriverEnabled } from './remote'
+import { isExperimentalDriverEnabled } from './remote'
 
 const { errByPath, modifyErrMsg, throwErr, mergeErrProps } = $errUtils
 
@@ -166,8 +166,8 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
     const retryValue = () => {
       return Promise
       .try(() => {
-        // the remote driver works with cookies through automation, whatever the AUT's origin
-        if (isRemoteDriverEnabled(Cypress)) {
+        // the experimental driver works with cookies through automation, whatever the AUT's origin
+        if (isExperimentalDriverEnabled(Cypress)) {
           return
         }
 

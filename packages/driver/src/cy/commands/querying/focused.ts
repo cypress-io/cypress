@@ -1,5 +1,5 @@
 import $dom from '../../../dom'
-import { extendRemoteSubject, isRemoteDriverEnabled } from '../../remote'
+import { extendRemoteSubject, isExperimentalDriverEnabled } from '../../remote'
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('focused', function focused (options: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
@@ -7,7 +7,7 @@ export default (Commands, Cypress, cy, state) => {
 
     this.set('timeout', options.timeout)
 
-    if (isRemoteDriverEnabled(Cypress)) {
+    if (isExperimentalDriverEnabled(Cypress)) {
       return () => extendRemoteSubject('focused', undefined, { type: 'focused' }, 'focused')
     }
 

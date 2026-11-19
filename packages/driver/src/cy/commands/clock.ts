@@ -4,13 +4,13 @@ import Promise from 'bluebird'
 import type { Clock } from '../../cypress/clock'
 import { create as createClock } from '../../cypress/clock'
 import $errUtils from '../../cypress/error_utils'
-import { isRemoteDriverEnabled } from '../remote'
+import { isExperimentalDriverEnabled } from '../remote'
 import { createRemoteClock } from '../remote/clock'
 import type { RemoteClock } from '../remote/clock'
 
-// what the legacy clock and the remote driver's clock share
+// what the legacy clock and the experimental driver's clock share
 type CyClock = Pick<Clock | RemoteClock, 'setSystemTime' | 'details'> & {
-  // the remote driver's clock runs in the AUT, so its tick resolves once the AUT has ticked
+  // the experimental driver's clock runs in the AUT, so its tick resolves once the AUT has ticked
   tick(ms, options?: any): number | PromiseLike<number>
   restore(options?: any): void
   bind(win): unknown
@@ -109,7 +109,7 @@ export default function (Commands, Cypress, cy, state) {
         })
       }
 
-      const remoteClock = isRemoteDriverEnabled(Cypress) ? createRemoteClock(Cypress, now, methods) : undefined
+      const remoteClock = isExperimentalDriverEnabled(Cypress) ? createRemoteClock(Cypress, now, methods) : undefined
 
       clock = remoteClock ?? createClock(state('window'), now, methods)
 
@@ -182,7 +182,7 @@ export default function (Commands, Cypress, cy, state) {
 
       ctx.clock = clock
 
-      // the remote driver logs once the AUT reports which methods the clock replaced
+      // the experimental driver logs once the AUT reports which methods the clock replaced
       if (remoteClock) {
         return remoteClock.installed.then(() => {
           log('clock', options.log)

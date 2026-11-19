@@ -2,7 +2,7 @@ import { getRunnerRemoteAutInjectionContents } from '@packages/resolve-dist'
 import { REMOTE_AUT_API } from '@packages/types'
 import type { RemoteAutCall, RemoteAutScriptConfig, RemoteAutScriptSettings } from '@packages/types'
 
-// The remote driver's script for the main world of every frame of the runner's tab, built from
+// The experimental driver's script for the main world of every frame of the runner's tab, built from
 // packages/runner/injection/remote-aut.ts. It marks synchronous XHRs, since the AUT shares the
 // runner's thread and one would block the driver from answering a cy.intercept route handler,
 // gives a cross-origin AUT the cookies it would have as top, and with reportErrors reports the

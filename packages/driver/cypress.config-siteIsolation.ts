@@ -3,12 +3,12 @@ import { defineConfig } from 'cypress'
 import { baseConfig } from './cypress.config'
 
 // Isolation spike: launches Chrome with site isolation on, so a cross-origin
-// AUT runs in its own renderer process (an out-of-process iframe).
+// AUT runs in its own renderer process (an out-of-process iframe). Run with CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER=1.
 export default defineConfig({
   ...baseConfig,
   e2e: {
     ...baseConfig.e2e,
-    specPattern: 'cypress/e2e/cy/remote_driver*.cy.ts',
+    specPattern: 'cypress/e2e/cy/experimental_driver*.cy.ts',
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser, launchOptions) => {
         if (browser.family === 'chromium' && browser.name !== 'electron') {

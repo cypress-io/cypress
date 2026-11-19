@@ -3,7 +3,7 @@ import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
-import { isRemoteDriverEnabled } from '../remote'
+import { isExperimentalDriverEnabled } from '../remote'
 import type { RemoteAutCall } from '@packages/types'
 
 const COOKIE_PROPS = 'name value path secure hostOnly httpOnly expiry domain sameSite'.split(' ')
@@ -103,9 +103,9 @@ interface GetAndClearOptions {
 }
 
 export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, config) {
-  // the remote driver's script in a cross-origin AUT keeps its own document.cookie jar
+  // the experimental driver's script in a cross-origin AUT keeps its own document.cookie jar
   const updateRemoteAutCookies = (args: Extract<RemoteAutCall, { method: 'cookies' }>['args']) => {
-    if (isRemoteDriverEnabled(Cypress)) {
+    if (isExperimentalDriverEnabled(Cypress)) {
       Promise.resolve(Cypress.automation('remote:aut:call', { method: 'cookies', args })).catch(() => {})
     }
   }
@@ -115,8 +115,8 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
   Cypress.on('clear:cookies', () => updateRemoteAutCookies(['clear:cookies']))
 
   function getDefaultDomain () {
-    // the remote driver can't read a cross-origin AUT's location, so it uses the one from automation
-    const hostname = isRemoteDriverEnabled(Cypress) ? state('autLocation')?.hostname : (state('window') as Window | undefined)?.location.hostname
+    // the experimental driver can't read a cross-origin AUT's location, so it uses the one from automation
+    const hostname = isExperimentalDriverEnabled(Cypress) ? state('autLocation')?.hostname : (state('window') as Window | undefined)?.location.hostname
 
     // if hostname is undefined, the AUT is on about:blank, so use the
     // spec frame's hostname instead
@@ -261,7 +261,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         // mismatch here is retryable - keep retrying until the AUT is reachable
         // or the command times out (matching the previous
         // retryIfCommandAUTOriginMismatch behavior).
-        if (checkAUTCommunication && !isRemoteDriverEnabled(Cypress)) {
+        if (checkAUTCommunication && !isExperimentalDriverEnabled(Cypress)) {
           Cypress.ensure.commandCanCommunicateWithAUT(cy)
         }
 

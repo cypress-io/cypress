@@ -11,7 +11,7 @@ import $utils from '../../cypress/utils'
 import type { Log } from '../../cypress/log'
 import type { StateFunc } from '../../cypress/state'
 import type { ScreenshotElementPosition } from '../../remote/protocol'
-import { callAgent, isRemoteDriverEnabled, isRemoteSubject } from '../remote'
+import { callAgent, isExperimentalDriverEnabled, isRemoteSubject } from '../remote'
 import type { RemoteLocator } from '../remote/remote_element'
 
 interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> {
@@ -114,7 +114,7 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
 }
 
 // What cy.screenshot does to the AUT's document around a capture. The legacy driver reaches into
-// the AUT's window; the remote driver's AUT is cross-origin to the runner, so its agent does.
+// the AUT's window; the experimental driver's AUT is cross-origin to the runner, so its agent does.
 interface ScreenshotPage {
   prepare: (blackout: string[], disableAnimations: boolean) => Promise<unknown>
   cleanup: (disableAnimations: boolean) => Promise<unknown>
@@ -470,7 +470,7 @@ const takeScreenshot = (
     ? subject
     : $dom.wrap(state('document')?.documentElement)
 
-  const page = isRemoteDriverEnabled(Cypress)
+  const page = isExperimentalDriverEnabled(Cypress)
     ? createRemotePage(Cypress, isRemoteElement ? subject : undefined)
     : createLegacyPage(state, $el)
 

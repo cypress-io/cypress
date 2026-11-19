@@ -1,4 +1,4 @@
-describe('remote driver: network handling in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: network handling in a cross-origin AUT', () => {
   it('loads transfer-encoding: chunked redirects that end on another origin', () => {
     cy.intercept('*')
     const originOne = 'http://foobar.com:3500'

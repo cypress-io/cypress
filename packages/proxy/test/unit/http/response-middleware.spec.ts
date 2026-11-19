@@ -718,9 +718,9 @@ describe('http/response-middleware', function () {
       expect(ctx.res.wantsInjection).toEqual('fullCrossOrigin')
     })
 
-    it('doesn\'t inject anything into the AUT with experimentalRemoteDriver', async function () {
+    it('doesn\'t inject anything into the AUT with experimentalDriver', async function () {
       prepareContext({
-        config: { experimentalRemoteDriver: true },
+        config: { experimentalDriver: true },
         req: {
           isAUTFrame: true,
           cookies: {
@@ -739,9 +739,9 @@ describe('http/response-middleware', function () {
       expect(ctx.res.wantsInjection).toBe(false)
     })
 
-    it('doesn\'t inject anything into frames inside the AUT with experimentalRemoteDriver', async function () {
+    it('doesn\'t inject anything into frames inside the AUT with experimentalDriver', async function () {
       prepareContext({
-        config: { experimentalRemoteDriver: true },
+        config: { experimentalDriver: true },
         renderedHTMLOrigins: {},
         getRenderedHTMLOrigins () {
           return this.renderedHTMLOrigins

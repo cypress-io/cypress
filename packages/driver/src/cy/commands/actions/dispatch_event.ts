@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import $errUtils from '../../../cypress/error_utils'
 
-// How cy.trigger builds and dispatches an event in the AUT's document, shared with the remote driver's agent
+// How cy.trigger builds and dispatches an event in the AUT's document, shared with the experimental driver's agent
 export const dispatch = (target, appWindow, eventName, options) => {
   const eventConstructor = options.eventConstructor ?? 'Event'
   const ctor = appWindow[eventConstructor]

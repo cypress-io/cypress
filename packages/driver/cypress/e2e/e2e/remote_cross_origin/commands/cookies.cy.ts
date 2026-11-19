@@ -1,4 +1,4 @@
-describe('remote driver: cookies in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: cookies in a cross-origin AUT', () => {
   context('client side', () => {
     beforeEach(() => {
       cy.visit('/fixtures/primary-origin.html')
@@ -46,6 +46,7 @@ describe('remote driver: cookies in a cross-origin AUT', { experimentalRemoteDri
       cy.wait('@headers')
 
       cy.contains('"cookie":"foo=bar"')
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- cy.getCookie() does not retry, so give the server time to set the cookie first
       cy.wait(0) // Give the server a chance to catch up
       cy.getCookie('foo').its('value').should('equal', 'bar')
     })

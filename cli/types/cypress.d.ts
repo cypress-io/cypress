@@ -2298,7 +2298,7 @@ declare namespace Cypress {
 
     /**
      * Traverse into the `<body>` of an iframe's document, whatever its origin.
-     * Requires `experimentalRemoteDriver`.
+     * Requires the experimental driver.
      *
      * @example
      *    cy.get('iframe#checkout')
@@ -2311,7 +2311,7 @@ declare namespace Cypress {
     /**
      * Get the `<body>` of a tab the app opened, such as a login popup. A string matches any
      * part of the tab's URL, and with no URL the newest tab is used.
-     * Requires `experimentalRemoteDriver`.
+     * Requires the experimental driver.
      *
      * @example
      *    cy.get('#sign-in-with-idp').click()
@@ -2404,7 +2404,7 @@ declare namespace Cypress {
     /**
      * Spy on a method.
      *
-     * With `experimentalRemoteDriver`, a method on the window from `cy.window()` is spied on inside the page,
+     * With the experimental driver, a method on the window from `cy.window()` is spied on inside the page,
      * and the calls the page reports are recorded here, with copies of their arguments.
      * @see https://on.cypress.io/spy
      * @example
@@ -2448,7 +2448,7 @@ declare namespace Cypress {
     /**
      * Stubs single method of an object.
      *
-     * With `experimentalRemoteDriver`, a method on the window from `cy.window()` is stubbed inside the page:
+     * With the experimental driver, a method on the window from `cy.window()` is stubbed inside the page:
      * `returns()` and `resolves()` take serializable values, `callsFake()` runs in the page without access to the
      * test's variables, and calls are recorded here with copies of their arguments. A stub made before `cy.visit()`
      * applies to every page the test loads, before the page's own scripts run.
@@ -2804,7 +2804,7 @@ declare namespace Cypress {
     /**
      * Get the window object of the page that is currently active.
      *
-     * With `experimentalRemoteDriver`, it yields a stand-in for the page's window that only `cy.stub()` and
+     * With the experimental driver, it yields a stand-in for the page's window that only `cy.stub()` and
      * `cy.spy()` can use, such as `cy.stub(win, 'open')` or `cy.spy(win.console, 'log')`.
      *
      * @see https://on.cypress.io/window
@@ -3743,11 +3743,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalOriginDependencies?: boolean
-    /**
-     * Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser's automation protocol, so they work against a cross-origin AUT without `cy.origin()`. Requires `baseUrl`: the runner is served from that site and stays there.
-     * @default false
-     */
-    experimentalRemoteDriver?: boolean
   }
 
   /**
@@ -3830,7 +3825,7 @@ declare namespace Cypress {
 
   interface SuiteConfigOverrides extends Partial<
     Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
-  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>>, Partial<Pick<EndToEndConfigOptions, 'experimentalRemoteDriver'>> {
+  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
     expose?: Record<string, any>
@@ -3838,7 +3833,7 @@ declare namespace Cypress {
 
   interface TestConfigOverrides extends Partial<
     Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
-  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>>, Partial<Pick<EndToEndConfigOptions, 'experimentalRemoteDriver'>> {
+  >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
     expose?: Record<string, any>
@@ -4441,7 +4436,7 @@ declare namespace Cypress {
     /**
      * Called before your page has loaded all of its resources.
      *
-     * With `experimentalRemoteDriver`, it runs inside the page itself, so it can't use values from the test
+     * With the experimental driver, it runs inside the page itself, so it can't use values from the test
      * other than `args`, or commands such as `cy.stub()`.
      *
      * @param {AUTWindow} win the remote page's window object
@@ -4452,7 +4447,7 @@ declare namespace Cypress {
     /**
      * Called once your page has fired its load event.
      *
-     * With `experimentalRemoteDriver`, it runs inside the page itself, so it can't use values from the test
+     * With the experimental driver, it runs inside the page itself, so it can't use values from the test
      * other than `args`, or commands such as `cy.stub()`.
      *
      * @param {AUTWindow} win the remote page's window object
@@ -4461,7 +4456,7 @@ declare namespace Cypress {
     onLoad(win: AUTWindow, args?: any): void
 
     /**
-     * With `experimentalRemoteDriver`, values passed as the second argument to `onBeforeLoad` and `onLoad`.
+     * With the experimental driver, values passed as the second argument to `onBeforeLoad` and `onLoad`.
      * They must be serializable as JSON.
      */
     args: any
@@ -6938,7 +6933,7 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
-     * @returns The clock's new `now`, in ms since the unix epoch. With `experimentalRemoteDriver` the clock runs in the
+     * @returns The clock's new `now`, in ms since the unix epoch. With the experimental driver the clock runs in the
      * page, so this returns a promise of it instead; use `cy.tick()`, which waits for it.
      * @see https://on.cypress.io/tick
      */

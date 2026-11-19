@@ -1,6 +1,6 @@
-const AUT_PAGE = 'http://www.foobar.com:3500/fixtures/remote-driver-isolation.html'
+const AUT_PAGE = 'http://www.foobar.com:3500/fixtures/experimental-driver-isolation.html'
 
-describe('remote driver: the AUT window', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: the AUT window', () => {
   describe('uncaught:exception', () => {
     beforeEach(() => {
       cy.visit(AUT_PAGE)

@@ -10,7 +10,7 @@
   <button id="start-timer">Start timer</button>
   <button id="show-time">Show time</button>
   <p id="timer-result"></p>
-  <a id="nav" href="remote-driver-isolation.html?page=2">Next page</a>
+  <a id="nav" href="experimental-driver-isolation.html?page=2">Next page</a>
   <a id="hash" href="#section">Section</a>
   <button id="push-state">Push state</button>
 
@@ -51,7 +51,7 @@
   <button id="bust">Navigate top</button>
   <button id="js-cookie">document.cookie</button>
   <button id="storage">localStorage</button>
-  <a id="cookie-login" href="/cookie-login?cookie=user%3Dbob%3B%20SameSite%3DLax%3B%20Path%3D%2F&username=bob&redirect=/fixtures/remote-driver-isolation.html">Cookie login</a>
+  <a id="cookie-login" href="/cookie-login?cookie=user%3Dbob%3B%20SameSite%3DLax%3B%20Path%3D%2F&username=bob&redirect=/fixtures/experimental-driver-isolation.html">Cookie login</a>
   <button id="fetch-cookie">Fetch with cookie</button>
   <p id="probe-result"></p>
 
@@ -75,7 +75,7 @@
     document.getElementById('confirm').addEventListener('click', () => { result('dialog-result', `confirmed:${confirm('app confirm')}`) })
     document.getElementById('prompt').addEventListener('click', () => { result('dialog-result', `prompted:${prompt('app prompt')}`) })
     document.getElementById('open').addEventListener('click', () => {
-      result('probe-result', `opened:${window.open('http://www.foobar.com:3500/fixtures/remote-driver-isolation.html?page=popup', '_blank') === null ? 'null' : 'window'}`)
+      result('probe-result', `opened:${window.open('http://www.foobar.com:3500/fixtures/experimental-driver-isolation.html?page=popup', '_blank') === null ? 'null' : 'window'}`)
     })
     document.getElementById('log').addEventListener('click', () => {
       console.log('app log', { clicks: window.appState.clicks })
@@ -90,7 +90,7 @@
     document.getElementById('compute').addEventListener('click', () => { result('probe-result', `computed:${window.appMath.double(2)},${window.appMath.double(3)}`) })
     document.getElementById('delayed').addEventListener('click', () => { setTimeout(() => result('delayed-result', 'done'), 10000) })
     document.getElementById('fetch').addEventListener('click', () => {
-      fetch('/fixtures/remote-driver-isolation.html?fetched=1').then((res) => result('fetch-result', `status:${res.status}`))
+      fetch('/fixtures/experimental-driver-isolation.html?fetched=1').then((res) => result('fetch-result', `status:${res.status}`))
     })
     document.getElementById('dbl').addEventListener('dblclick', () => result('event-result', 'dblclick'))
     document.getElementById('right').addEventListener('contextmenu', () => result('event-result', 'contextmenu'))

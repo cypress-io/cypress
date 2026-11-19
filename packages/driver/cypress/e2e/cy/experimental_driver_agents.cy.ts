@@ -1,6 +1,6 @@
-const AGENTS_PAGE = 'http://www.foobar.com:3500/fixtures/remote-driver-isolation.html'
+const AGENTS_PAGE = 'http://www.foobar.com:3500/fixtures/experimental-driver-isolation.html'
 
-describe('remote driver: dialogs, stubs and spies', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: dialogs, stubs and spies', () => {
   describe('dialogs', () => {
     beforeEach(() => {
       cy.visit(AGENTS_PAGE)
@@ -55,7 +55,7 @@ describe('remote driver: dialogs, stubs and spies', { experimentalRemoteDriver: 
       cy.visit(AGENTS_PAGE)
       cy.get('#open').click()
       cy.get('#probe-result').should('have.text', 'opened:null')
-      cy.get('@open').should('have.been.calledOnceWith', 'http://www.foobar.com:3500/fixtures/remote-driver-isolation.html?page=popup', '_blank')
+      cy.get('@open').should('have.been.calledOnceWith', 'http://www.foobar.com:3500/fixtures/experimental-driver-isolation.html?page=popup', '_blank')
     })
 
     it('spies on a method and still calls it', () => {

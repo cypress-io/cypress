@@ -5,7 +5,7 @@ import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
 import type { StorageType } from './sessions/storage'
 import { clearStorage, getStorage } from './sessions/storage'
-import { callAgent, isRemoteDriverEnabled } from '../remote'
+import { callAgent, isExperimentalDriverEnabled } from '../remote'
 
 type Options = Partial<Cypress.Loggable & Cypress.Timeoutable>
 
@@ -147,7 +147,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
       }
 
       // the AUT is cross-origin to the runner, so the agent clears its storage, and there's no Storage to yield
-      if (isRemoteDriverEnabled(Cypress)) {
+      if (isExperimentalDriverEnabled(Cypress)) {
         Cypress.log({ hidden: options.log === false, end: true })
 
         return callAgent(Cypress, 'clearLocalStorage', { steps: [], keys: _.isRegExp(keys) ? { source: keys.source, flags: keys.flags } : keys ?? null })

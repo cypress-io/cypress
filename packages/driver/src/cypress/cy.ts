@@ -24,7 +24,7 @@ import { create as createLocation } from '../cy/location'
 import type { IAssertions } from '../cy/assertions'
 import { create as createAssertions } from '../cy/assertions'
 import { bindToListeners } from '../cy/listeners'
-import { isRemoteDriverEnabled } from '../cy/remote'
+import { isExperimentalDriverEnabled } from '../cy/remote'
 import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
 import type { RemoteDialog, RemoteNavigation, RemoteUncaughtException } from '@packages/types'
 import { $Chainer } from './chainer'
@@ -305,8 +305,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.$$ = (selector, context?) => {
       // without a context jQuery searches the runner's document, since the AUT's is cross-origin
-      if (context == null && typeof selector === 'string' && !selector.trim().startsWith('<') && isRemoteDriverEnabled(this.Cypress) && !isRunnerAbleToCommunicateWithAut()) {
-        $errUtils.throwErrByPath('remote_driver.unsupported_jquery', { args: { selector } })
+      if (context == null && typeof selector === 'string' && !selector.trim().startsWith('<') && isExperimentalDriverEnabled(this.Cypress) && !isRunnerAbleToCommunicateWithAut()) {
+        $errUtils.throwErrByPath('experimental_driver.unsupported_jquery', { args: { selector } })
       }
 
       return jquery.$$(selector, context)
@@ -981,10 +981,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     return
   }
 
-  // The server has already answered a dialog from the remote driver's AUT; the dialog blocks the
+  // The server has already answered a dialog from the experimental driver's AUT; the dialog blocks the
   // runner too while it's open. A window:confirm handler can't change that answer, so it's flagged.
   onRemoteDialog ({ type, message, accepted }: RemoteDialog) {
-    if (!isRemoteDriverEnabled(this.Cypress)) {
+    if (!isExperimentalDriverEnabled(this.Cypress)) {
       return
     }
 
@@ -994,7 +994,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     if (type === 'confirm') {
       if (_.some(this.Cypress.action('app:window:confirm', message), returnedFalse)) {
-        $errUtils.warnByPath('remote_driver.confirm_answered', { args: { message } })
+        $errUtils.warnByPath('experimental_driver.confirm_answered', { args: { message } })
       }
 
       this.Cypress.action('app:window:confirmed', message, accepted)
@@ -1004,7 +1004,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   // stands in for the beforeunload and history listeners the runner can't add to a cross-origin AUT;
   // page loads still arrive through the AUT iframe's load event
   onRemoteNavigation (navigation: RemoteNavigation) {
-    if (!isRemoteDriverEnabled(this.Cypress) || isRunnerAbleToCommunicateWithAut()) {
+    if (!isExperimentalDriverEnabled(this.Cypress) || isRunnerAbleToCommunicateWithAut()) {
       return
     }
 
@@ -1032,7 +1032,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   // the server reports errors from an AUT the runner can't listen to itself
   onRemoteUncaughtException ({ handlerType, error }: RemoteUncaughtException) {
-    if (!isRemoteDriverEnabled(this.Cypress) || isRunnerAbleToCommunicateWithAut()) {
+    if (!isExperimentalDriverEnabled(this.Cypress) || isRunnerAbleToCommunicateWithAut()) {
       return
     }
 

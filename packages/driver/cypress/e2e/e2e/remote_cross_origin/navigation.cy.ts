@@ -1,6 +1,6 @@
 const SECONDARY_ORIGIN_PAGE = 'http://www.foobar.com:3500/fixtures/secondary-origin.html'
 
-describe('remote driver: navigation in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: navigation in a cross-origin AUT', () => {
   describe('navigation events', () => {
     const logNames: string[] = []
     const urls: string[] = []

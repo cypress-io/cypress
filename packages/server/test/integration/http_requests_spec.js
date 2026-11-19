@@ -528,16 +528,16 @@ describe('Routes', () => {
     })
   })
 
-  context('privileged channel with the remote driver', () => {
+  context('privileged channel with the experimental driver', () => {
     beforeEach(function () {
-      // the remote driver requires baseUrl, which the server checks it can connect to
+      // the experimental driver requires baseUrl, which the server checks it can connect to
       sinon.stub(ensureUrl, 'isListening').resolves()
 
       return this.setup('http://www.foobar.com:8080', {
         config: {
           port: 2000,
           baseUrl: 'http://www.foobar.com:8080',
-          experimentalRemoteDriver: true,
+          experimentalDriver: true,
         },
       })
     })

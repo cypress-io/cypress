@@ -201,7 +201,7 @@ export function getSuperDomainOrigin (url: string) {
 }
 
 /**
- * The origin the remote driver serves the runner from: cross-origin to the AUT so the AUT can't
+ * The origin the experimental driver serves the runner from: cross-origin to the AUT so the AUT can't
  * reach the top frame, and same-site so the AUT's cookies stay first-party.
  * ex: http://shop.example.com:8081 -> http://cypress-runner.example.com:8081
  */

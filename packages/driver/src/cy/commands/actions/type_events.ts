@@ -38,7 +38,7 @@ const getDefaultButtons = (form) => {
 
 // The keyboard callbacks that give cy.type a browser's side effects: change events,
 // implicit form submission and the clicks that {enter} and space send to buttons.
-// Both the legacy driver and the remote driver's agent type through them.
+// Both the legacy driver and the experimental driver's agent type through them.
 export const createTypeEventHandlers = ({ $el, state, isBrowser, submit, updateTable }: TypeEventsOptions) => {
   const simulateSubmitHandler = function () {
     const form = $el.parents('form')

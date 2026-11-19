@@ -40,8 +40,8 @@ type WebKitAutomationOpts = {
   userAgent?: string | null
   isHeadless: boolean
   cdpSocketServer?: CDPSocketServer
-  // launched for experimentalRemoteDriver, which drives the AUT from outside the page
-  remoteDriver?: boolean
+  // launched for the experimental driver, which drives the AUT from outside the page
+  experimentalDriver?: boolean
   remoteAutScript?: RemoteAutScriptConfig
 }
 
@@ -52,7 +52,7 @@ export class WebKitAutomation {
   private page!: playwright.Page
   private userAgent: string | null
   private isHeadless: boolean
-  private remoteDriver: boolean
+  private experimentalDriver: boolean
   private remoteAutScript?: RemoteAutScriptConfig
   private remoteAgent = new WebKitRemoteAgent()
   private remoteTabs = new RemoteTabs(() => {
@@ -96,7 +96,7 @@ export class WebKitAutomation {
     this.browser = opts.browser
     this.userAgent = opts.userAgent ?? null
     this.isHeadless = opts.isHeadless
-    this.remoteDriver = !!opts.remoteDriver
+    this.experimentalDriver = !!opts.experimentalDriver
     this.remoteAutScript = opts.remoteAutScript
     this.cdpSocketServer = opts.cdpSocketServer
   }
@@ -145,7 +145,7 @@ export class WebKitAutomation {
     await this.cdpSocketServer?.attachCDPClient(new WebKitCDPBridge(this.page))
 
     this.handleRequestEvents()
-    if (this.remoteDriver) {
+    if (this.experimentalDriver) {
       if (this.remoteAutScript) {
         await this.page.addInitScript({ content: await getRemoteAutScript(this.remoteAutScript, { reportErrors: true }) })
       }
@@ -496,7 +496,9 @@ export class WebKitAutomation {
       if (pendingRequest) {
         const request = pendingRequest
 
-        frame.waitForLoadState('load').finally(() => end(request))
+        frame.waitForLoadState('load')
+        .catch((err) => debug('AUT frame did not reach load after navigating: %o', err))
+        .finally(() => end(request))
 
         return
       }

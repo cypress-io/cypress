@@ -142,9 +142,9 @@ export class OpenProject extends EventEmitter {
       downloadsFolder: cfg.downloadsFolder,
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
-      experimentalRemoteDriver: 'experimentalRemoteDriver' in cfg && cfg.experimentalRemoteDriver === true,
-      // the remote driver requires baseUrl, which the proxy keeps as the primary origin
-      remoteAutScript: 'experimentalRemoteDriver' in cfg && cfg.experimentalRemoteDriver === true && cfg.baseUrl
+      experimentalDriver: 'experimentalDriver' in cfg && cfg.experimentalDriver === true,
+      // the experimental driver requires baseUrl, which the proxy keeps as the primary origin
+      remoteAutScript: 'experimentalDriver' in cfg && cfg.experimentalDriver === true && cfg.baseUrl
         ? { primaryOrigin: new URL(cfg.baseUrl).origin, namespace: cfg.namespace }
         : undefined,
       ...prevOptions || {},

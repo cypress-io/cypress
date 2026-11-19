@@ -13,7 +13,7 @@ const fetchInAut = (url: string) => {
   cy.get('body').should('have.attr', 'data-request', `${id}:ok`)
 }
 
-describe('remote driver: misc cookie tests in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: misc cookie tests in a cross-origin AUT', () => {
   // NOTE: For this test to work correctly, we need to have a FQDN, not localhost (www.foobar.com).
   it('does not duplicate cookies with a prepended dot for cookies that are stored inside the server side cookie jar (host only)', () => {
     cy.visit('https://www.foobar.com:3502/fixtures/trigger-cross-origin-redirect-to-self.html')
@@ -238,4 +238,5 @@ describe('remote driver: misc cookie tests in a cross-origin AUT', { experimenta
   })
 })
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}

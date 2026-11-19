@@ -228,8 +228,8 @@ describe('lib/browsers/chrome', () => {
       expectCalledOnceWith(utils.initializeCDP as any, pageCriClient, automation, false)
     })
 
-    it('adds the remote AUT script to every frame with experimentalRemoteDriver', async () => {
-      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, experimentalRemoteDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } } as any, automation)
+    it('adds the remote AUT script to every frame with experimentalDriver', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, experimentalDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } } as any, automation)
 
       expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: 'remote AUT script' })
     })

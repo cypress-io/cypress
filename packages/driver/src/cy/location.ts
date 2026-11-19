@@ -3,7 +3,7 @@ import type { LocationObject } from '../cypress/location'
 import { $Location } from '../cypress/location'
 import type { StateFunc } from '../cypress/state'
 import $utils from '../cypress/utils'
-import { isRemoteDriverEnabled } from './remote'
+import { isExperimentalDriverEnabled } from './remote'
 
 const debug = Debug('cypress:driver:location')
 
@@ -68,7 +68,7 @@ export const create = (state: StateFunc) => ({
       autLocation = $Location.create(remoteUrl)
     } catch (e) {
       // without the proxy's cross-origin injection nothing in the AUT answers the postMessage
-      autLocation = isRemoteDriverEnabled(Cypress)
+      autLocation = isExperimentalDriverEnabled(Cypress)
         ? $Location.create(await Cypress.automation('get:aut:url', {}))
         : await getRemoteLocationFromCrossOriginWindow(autWindow)
     }

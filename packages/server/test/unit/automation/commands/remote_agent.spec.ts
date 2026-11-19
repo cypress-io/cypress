@@ -353,7 +353,7 @@ describe('remote:agent automation command', () => {
     })
 
     it('fails clearly when the frame comes from a client that is not in-process', async () => {
-      await expect(webkitAgent.call({} as any, request)).rejects.toThrow('In WebKit, `experimentalRemoteDriver` must be enabled in the config file')
+      await expect(webkitAgent.call({} as any, request)).rejects.toThrow('In WebKit, `CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER` must be set when Cypress starts')
     })
 
     describe('with frames to enter', () => {

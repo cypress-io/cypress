@@ -60,9 +60,9 @@ export async function setInjectionLevel (mw: ResponseInterceptionMiddlewareCtx):
     urlDoesNotMatchPolicyBasedOnDomain,
   })
 
-  // the remote driver drives the AUT and its frames over the automation protocol, so nothing is injected into them
-  if (mw.config && 'experimentalRemoteDriver' in mw.config && mw.config.experimentalRemoteDriver === true) {
-    mw.debug('- no injection (experimentalRemoteDriver)')
+  // the experimental driver drives the AUT and its frames over the automation protocol, so nothing is injected into them
+  if (mw.config && 'experimentalDriver' in mw.config && mw.config.experimentalDriver === true) {
+    mw.debug('- no injection (experimentalDriver)')
     mw.res.wantsInjection = false
   }
 

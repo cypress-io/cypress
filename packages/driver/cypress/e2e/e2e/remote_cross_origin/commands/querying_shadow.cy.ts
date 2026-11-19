@@ -1,4 +1,4 @@
-describe('remote driver: shadow dom in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: shadow dom in a cross-origin AUT', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="shadow-dom-link"]').click()

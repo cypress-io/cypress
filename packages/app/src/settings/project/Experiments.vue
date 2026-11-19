@@ -73,10 +73,6 @@ const experimentText = {
     name: 'Origin Dependencies',
     description: 'Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.',
   },
-  experimentalRemoteDriver: {
-    name: 'Remote Driver',
-    description: 'Runs queries, actions and DOM assertions through an agent injected into the AUT over the browser\'s automation protocol, so they work against a cross-origin AUT without `cy.origin()`.',
-  },
 }
 
 const isKnownExperiment = (field: string): field is keyof typeof experimentText => field in experimentText

@@ -94,7 +94,7 @@ describe('lib/browsers/bidi_automation', () => {
       expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextDestroyed')
     })
 
-    describe('remote driver dialogs and stubs', () => {
+    describe('experimental driver dialogs and stubs', () => {
       let bidiAutomationInstance: BidiAutomation
 
       beforeEach(() => {
@@ -128,7 +128,7 @@ describe('lib/browsers/bidi_automation', () => {
       })
     })
 
-    describe('remote driver navigation', () => {
+    describe('experimental driver navigation', () => {
       const info = (overrides: object) => ({ context: 'aut', navigation: 'nav-1', timestamp: 0, url: 'http://www.foobar.com/', ...overrides })
 
       beforeEach(() => {

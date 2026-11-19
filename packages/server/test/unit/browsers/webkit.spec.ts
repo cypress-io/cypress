@@ -105,12 +105,12 @@ describe('lib/browsers/webkit', () => {
       expect(mocks.WebKitAutomation.create).toHaveBeenCalledWith(expect.objectContaining({ cdpSocketServer }))
     })
 
-    describe('with experimentalRemoteDriver', () => {
+    describe('with experimentalDriver', () => {
       let inProcessBrowser
 
       beforeEach(() => {
         hasSpy.mockReturnValue(true)
-        options.experimentalRemoteDriver = true
+        options.experimentalDriver = true
 
         inProcessBrowser = {
           on: vi.fn(),
@@ -136,7 +136,7 @@ describe('lib/browsers/webkit', () => {
       it('fails clearly when playwright-webkit has no bind', async () => {
         delete inProcessBrowser.bind
 
-        await expect(webkit.open(browser as any, 'http://the.url', options as any, automation as any)).rejects.toThrow('`experimentalRemoteDriver` requires playwright-webkit 1.59.0 or later.')
+        await expect(webkit.open(browser as any, 'http://the.url', options as any, automation as any)).rejects.toThrow('The experimental driver requires playwright-webkit 1.59.0 or later.')
         expect(inProcessBrowser.close).toHaveBeenCalled()
       })
     })

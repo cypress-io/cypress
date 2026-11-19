@@ -4,7 +4,7 @@ import mime from 'mime'
 import $dom from '../../../dom'
 import { addEventCoords, dispatch } from './dispatch_event'
 
-// What cy.selectFile does in the AUT's document, shared with the remote driver's agent
+// What cy.selectFile does in the AUT's document, shared with the experimental driver's agent
 
 /* dropzone.js relies on an experimental, nonstandard API, webkitGetAsEntry().
  * https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry

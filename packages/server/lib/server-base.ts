@@ -265,7 +265,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _urlResolver: Bluebird<Record<string, any>> | null = null
   private testingType?: TestingType
   private _documentDomainInjection: DocumentDomainInjection
-  private _remoteDriver: boolean
+  private _experimentalDriver: boolean
 
   constructor (config: Cfg) {
     this.isListening = false
@@ -276,7 +276,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._fileServer = null
 
     this._documentDomainInjection = DocumentDomainInjection.InjectionBehavior(config)
-    this._remoteDriver = 'experimentalRemoteDriver' in config && config.experimentalRemoteDriver === true
+    this._experimentalDriver = 'experimentalDriver' in config && config.experimentalDriver === true
 
     const remoteStatePorts = () => {
       return {
@@ -486,7 +486,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       reportAutError: async (uncaught) => this._automation?.push('remote:uncaught:exception', uncaught),
       reportBeforeLoad: async (url) => this._automation?.push('remote:window:before:load', { url }),
       setBrowserCookie: async (cookie) => {
-        // the browsers the remote driver supports set cookies in automation middleware, so nothing goes to an automation client
+        // the browsers the experimental driver supports set cookies in automation middleware, so nothing goes to an automation client
         return this._automation?.request('set:cookie', cookie, () => {
           throw new Error('set:cookie is not handled by automation middleware')
         })
@@ -1478,8 +1478,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                   })
 
                   if (!handlingLocalFile) {
-                    // the remote driver's runner never leaves baseUrl's site, so only that origin is top to the AUT
-                    const isPrimary = this._remoteDriver && this._baseUrl
+                    // the experimental driver's runner never leaves baseUrl's site, so only that origin is top to the AUT
+                    const isPrimary = this._experimentalDriver && this._baseUrl
                       ? this._documentDomainInjection.urlsMatch(this._baseUrl, newUrl || '')
                       : !urlDoesNotMatchPolicyBasedOnDomain
 

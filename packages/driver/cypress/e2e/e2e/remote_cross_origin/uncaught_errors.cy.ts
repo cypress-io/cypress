@@ -1,4 +1,4 @@
-describe('remote driver: uncaught errors in a cross-origin AUT', { experimentalRemoteDriver: true }, () => {
+describe('experimental driver: uncaught errors in a cross-origin AUT', () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="errors-link"]').click()
@@ -106,6 +106,7 @@ describe('remote driver: uncaught errors in a cross-origin AUT', { experimentalR
       })
 
       cy.get('.trigger-async-error').click()
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps the test running long enough for the async error to fire
       cy.wait(1000)
     })
   })
