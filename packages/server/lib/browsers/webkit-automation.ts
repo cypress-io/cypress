@@ -13,7 +13,7 @@ import type { CyCookie, CyCookieFilter } from '../automation/cookie/util'
 import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
-import { AUT_FRAME_HEADER } from './constants'
+import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 import { RemoteTabs, WebKitRemoteAgent } from '../automation/commands/remote_agent'
 import { RemoteVisit } from '../automation/commands/remote_visit'
 import type { AutScripts } from '../automation/commands/remote_visit'
@@ -252,7 +252,7 @@ export class WebKitAutomation {
       return route.continue({
         headers: {
           ...request.headers(),
-          [AUT_FRAME_HEADER]: 'true',
+          [AUT_FRAME_HEADER]: getMetadataHeaderValue(),
         },
       })
     })

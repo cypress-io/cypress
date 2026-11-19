@@ -60,7 +60,7 @@
     "disparity": "^3.2.0",
     "eslint": "^10.14.0",
     "fs-extra": "8.1.0",
-    "globby": "^11.0.1",
+    "globby": "^11.1.0",
     "graphql": "^15.5.1",
     "human-interval": "1.0.0",
     "jiti": "^2.4.2",

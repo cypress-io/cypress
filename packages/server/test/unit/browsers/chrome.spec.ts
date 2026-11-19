@@ -11,6 +11,7 @@ import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as protocol from '../../../lib/browsers/protocol'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 
 vi.mock('../../../lib/automation/commands/remote_aut_script', async (importOriginal) => {
@@ -754,7 +755,7 @@ describe('lib/browsers/chrome', () => {
             },
             {
               name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
+              value: getMetadataHeaderValue(),
             },
           ],
         })

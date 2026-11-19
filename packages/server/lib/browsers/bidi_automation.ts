@@ -37,7 +37,7 @@ import { answerRemoteDialog } from '../automation/commands/remote_dialogs'
 import { RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
 import { getRemoteAutScript, callRemoteAut } from '../automation/commands/remote_aut_script'
 import { RemoteErrorReports } from '../automation/commands/remote_errors'
-import { AUT_FRAME_HEADER } from './constants'
+import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
 const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
@@ -663,7 +663,7 @@ export class BidiAutomation {
           name: AUT_FRAME_HEADER,
           value: {
             type: 'string',
-            value: 'true',
+            value: getMetadataHeaderValue(),
           },
         })
       }

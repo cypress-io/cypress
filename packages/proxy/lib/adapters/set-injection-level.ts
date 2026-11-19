@@ -22,6 +22,10 @@ export async function setInjectionLevel (mw: ResponseInterceptionMiddlewareCtx):
 
   mw.res.isInitial = mw.req.cookies['__cypress.initial'] === 'true'
 
+  if (!mw.req.isFileServerRequest) {
+    delete mw.incomingRes.headers['x-cypress-file-server-error']
+  }
+
   const isHTML = resContentTypeIs(mw.incomingRes, 'text/html')
   const isRenderedHTML = reqWillRenderHtml(mw.req, mw.incomingRes)
 
