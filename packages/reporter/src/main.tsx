@@ -28,7 +28,7 @@ function usePrevious (value) {
 
   useEffect(() => {
     ref.current = value
-  }, [])
+  }, [value])
 
   return ref.current
 }
@@ -103,6 +103,7 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
     setIsMounted(true)
 
     return () => shortcuts.stop()
+  // eslint-disable-next-line @eslint-react/exhaustive-deps -- applies the initial props once, on mount
   }, [])
 
   useEffect(() => {

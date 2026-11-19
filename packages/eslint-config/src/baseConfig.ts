@@ -13,12 +13,10 @@ import globals from 'globals'
 import vue from 'eslint-plugin-vue'
 import vueParser from 'vue-eslint-parser'
 import stylistic from '@stylistic/eslint-plugin'
-import react from 'eslint-plugin-react'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
 import { cypressDevPlugin } from './rules'
-import { reactRulesOff } from './reactRulesOff'
 
 const testFiles = [
   '**/test/**/*.{js,jsx,ts,tsx}',
@@ -55,16 +53,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   cy.configs.recommended,
   mocha.configs?.recommended ?? {},
   ...vue.configs['flat/recommended'],
-  {
-    ...react.configs.flat.recommended,
-    settings: {
-      react: {
-        // Keep this explicit: on ESLint 10, eslint-plugin-react 7's 'detect'
-        // calls the removed `context.getFilename()` and crashes every lint run
-        version: '18',
-      },
-    },
-  },
   // importing { config } from @stylistic/eslint-plugin causes errors
   stylistic.configs.customize({
     'braceStyle': '1tbs',
@@ -286,10 +274,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
 
       'cypress/unsafe-to-chain-command': 'off',
 
-      // we use react 18+, so these rules do not apply
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
-
       // noisy, and not that helpful at this point. Maybe down the line we can
       // enable it.
       'import-x/default': 'warn',
@@ -371,12 +355,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     rules: {
       'mocha/no-exports': 'off',
     },
-  },
-
-  // React rules do not apply to Vue SFCs. Vue JSX/TSX files need `vueTsxOverrides`.
-  {
-    files: ['**/*.vue'],
-    rules: reactRulesOff,
   },
 
   // common file patterns to ignore
