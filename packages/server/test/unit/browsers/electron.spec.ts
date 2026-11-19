@@ -7,7 +7,7 @@ import { Automation } from '../../../lib/automation'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as electronApp from '../../../lib/util/electron-app'
 import utils from '../../../lib/browsers/utils'
-import { screencastOpts } from '../../../lib/browsers/cdp-protocol/cdp_automation'
+import { CdpAutomation, screencastOpts } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import menu from '../../../lib/gui/menu'
 import * as plugins from '../../../lib/plugins'
 import * as Windows from '../../../lib/gui/windows'
@@ -1056,6 +1056,49 @@ describe('lib/browsers/electron', () => {
           })
         })
       })
+    })
+  })
+
+  describe('._getAutomation take:screenshot', () => {
+    let captureScreenshot: Mock
+
+    const takeScreenshot = async (launchOptions: Record<string, unknown>) => {
+      // @ts-expect-error - partial launch options
+      const automationInstance = await electron._getAutomation(win, { onError: () => {}, ...launchOptions }, automation)
+
+      return automationInstance.onRequest('take:screenshot', {} as any)
+    }
+
+    beforeEach(() => {
+      captureScreenshot = vi.fn().mockResolvedValue('data:image/png;base64,iVBORw0KGgo=')
+      // @ts-expect-error - partial CdpAutomation
+      vi.spyOn(CdpAutomation, 'create').mockResolvedValue({ onRequest: captureScreenshot })
+    })
+
+    it('wraps the screenshot in a screencast in open mode without video', async () => {
+      const result = await takeScreenshot({ isTextTerminal: false })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expect(pageCriClient.send.mock.calls.map(([command]) => command)).toStrictEqual(['Page.startScreencast', 'Page.stopScreencast'])
+      expect(pageCriClient.send).toHaveBeenCalledWith('Page.startScreencast', screencastOpts())
+      expect(pageCriClient.send.mock.invocationCallOrder[0]).toBeLessThan(captureScreenshot.mock.invocationCallOrder[0])
+      expect(captureScreenshot.mock.invocationCallOrder[0]).toBeLessThan(pageCriClient.send.mock.invocationCallOrder[1])
+    })
+
+    it('leaves the run-mode screencast running when video is disabled', async () => {
+      const result = await takeScreenshot({ isTextTerminal: true })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expectNotCalledWith(pageCriClient.send, 'Page.startScreencast', anyArg)
+      expectNotCalledWith(pageCriClient.send, 'Page.stopScreencast')
+    })
+
+    it('leaves the video screencast running when video is enabled', async () => {
+      const result = await takeScreenshot({ isTextTerminal: true, videoApi: {} })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expectNotCalledWith(pageCriClient.send, 'Page.startScreencast', anyArg)
+      expectNotCalledWith(pageCriClient.send, 'Page.stopScreencast')
     })
   })
 

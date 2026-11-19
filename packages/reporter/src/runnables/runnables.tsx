@@ -188,6 +188,7 @@ const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, erro
     // so we pass maybeHandleScroll. If we don't, Cypress blows up with an error like
     // `A container must be set on the scroller with scroller.setContainer(container)`
     scroller.setContainer(containerRef.current as Element, maybeHandleScroll)
+  // eslint-disable-next-line @eslint-react/exhaustive-deps -- the scroller container is set once, on mount
   }, [])
 
   return (
