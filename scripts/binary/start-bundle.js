@@ -135,6 +135,8 @@ const createStartCypressBundle = async (buildAppDir) => {
     minify: true,
     // error stacks and code that reads `constructor.name` need the original names
     keepNames: true,
+    // one character above U+00FF makes V8 store the whole source as two-byte; regex literals with them are patched
+    legalComments: 'external',
     external: ['electron'],
     banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
     plugins: [
@@ -168,6 +170,10 @@ const createServerEntryPointBundle = async (buildAppDir) => {
       platform: 'node',
       metafile: true,
       absWorkingDir: unixBuildAppDir,
+      // drops comments, which can hold characters above U+00FF
+      minify: true,
+      keepNames: true,
+      legalComments: 'external',
       external: [
         './transpile-ts',
         './start-cypress',
@@ -176,6 +182,10 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     })
 
     await fs.copy(path.join(outdir, 'index.js'), entryPoint)
+
+    for (const legalFile of (await fs.readdir(outdir)).filter((file) => file.endsWith('.LEGAL.txt'))) {
+      await fs.copy(path.join(outdir, legalFile), path.join(path.dirname(entryPoint), legalFile))
+    }
 
     return Object.keys(esbuildResult.metafile.inputs).filter((input) => input !== 'packages/server/index.js').map((input) => `./${input}`)
   } finally {

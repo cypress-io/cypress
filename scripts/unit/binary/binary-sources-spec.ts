@@ -45,6 +45,22 @@ describe('binary-sources', () => {
       expect(error.message).to.include('index.js contains the test encryption key')
     })
 
+    it('fails when a bundle contains a character above U+00FF', async () => {
+      await fs.outputFile(path.join(serverDir, 'start-cypress.bundle.js'), 'const invalidPathRegex = /[‘“!%&^<=>`]/')
+
+      const error = await validateShippedServerCode(serverDir, TEST_KEY).catch((err: Error) => err)
+
+      expect(error).to.be.an('error')
+      expect(error.message).to.include('start-cypress.bundle.js contains U+2018, so V8 stores it as two-byte')
+    })
+
+    it('allows Latin-1 characters in a bundle and any character in other files', async () => {
+      await fs.outputFile(path.join(serverDir, 'index.js'), 'const SEXAGESIMAL_REGEX = /^([0-9]{1,3})°/')
+      await fs.outputFile(path.join(serverDir, 'lib', 'util', 'quotes.js'), 'module.exports = /[‘“]/')
+
+      await validateShippedServerCode(serverDir, TEST_KEY)
+    })
+
     it('ignores dependencies under node_modules', async () => {
       await fs.outputFile(path.join(serverDir, 'node_modules', 'some-package', 'index.js'), `process.env.CYPRESS_LOCAL_PROTOCOL_PATH`)
 
