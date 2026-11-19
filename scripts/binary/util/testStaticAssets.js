@@ -55,7 +55,7 @@ const testStaticAssets = async (buildResourcePath) => {
       ],
     }),
     testPackageStaticAssets({
-      // launchpad ships minified, like the app
+      // launchpad ships minified
       assetGlob: `${buildResourcePath}/packages/launchpad/dist/assets/*.js`,
       maxLineCount: 10000,
     }),
