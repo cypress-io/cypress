@@ -19,6 +19,8 @@ import {
 } from './utils'
 import type { GetFilesByGlob } from './types'
 
+export type { GetFilesByGlob }
+
 const debug = Debug('cypress:config:project')
 
 // TODO: any -> SetupFullConfigOptions in data-context/src/data/ProjectConfigManager.ts

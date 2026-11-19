@@ -4,7 +4,7 @@ import * as path from 'path'
 import os from 'os'
 
 import globby from 'globby'
-import type { GlobbyOptions } from 'globby'
+import type { GetFilesByGlob } from '@packages/config'
 import Debug from 'debug'
 import { toPosix } from '../util/file'
 
@@ -19,12 +19,15 @@ export interface GlobOptions {
 }
 
 export const matchGlobs = async (globs: string | string[], options?: GlobOptions & { cwd?: string, onlyFiles?: boolean }) => {
-  const globbyOptions: GlobbyOptions | undefined = options
-
-  return await globby(globs, globbyOptions)
+  return await globby(globs, options)
 }
 
-export class FileDataSource {
+// @packages/config receives getFilesByGlob as a callback for resolving the support file
+interface ConfigGlobSource {
+  getFilesByGlob: GetFilesByGlob
+}
+
+export class FileDataSource implements ConfigGlobSource {
   constructor (private ctx: DataContext) {}
 
   async checkIfFileExists (relativePath: string) {
