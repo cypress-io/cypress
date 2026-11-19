@@ -259,12 +259,27 @@ describe('lib/browsers/browser-cri-client', function () {
 
     it('stops retrying the handshake and reports the exit when the browser exits after opening its port', async function () {
       const getDelayMsForRetry = vi.spyOn(protocol, '_getDelayMsForRetry').mockReturnValue(100)
+      const connectionRefused = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:50505'), { code: 'ECONNREFUSED' })
+
+      criImport.Version.withArgs({ host: HOST, port: THROWS_PORT, useHostName: true }).rejects(connectionRefused)
 
       await expect(BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', getBrowserExit: () => ({ code: null, signal: 'SIGSEGV' }), onAsynchronousError: onError, onServiceWorkerClientEvent }))
-      .rejects.toMatchObject({ type: 'CDP_BROWSER_EXITED_BEFORE_CONNECT' })
+      .rejects.toMatchObject({ type: 'CDP_BROWSER_EXITED_BEFORE_CONNECT', details: expect.stringContaining('ECONNREFUSED') })
 
       expect(criImport.Version).toHaveBeenCalledTimes(1)
       expect(getDelayMsForRetry).not.toHaveBeenCalled()
+    })
+
+    it('keeps retrying a handshake error that is not a connection error after the browser exits', async function () {
+      vi.spyOn(protocol, '_getDelayMsForRetry')
+      .mockReturnValue(undefined)
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(100)
+
+      const client = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', getBrowserExit: () => ({ code: 1, signal: null }), onAsynchronousError: onError, onServiceWorkerClientEvent })
+
+      expect(client.attachToTargetUrl).toBeInstanceOf(Function)
+      expect(criImport.Version).toHaveBeenCalledTimes(3)
     })
 
     it('throws when Version fails more than allowed', async function () {

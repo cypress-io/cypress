@@ -944,10 +944,12 @@ describe('visual error templates', () => {
       }
     },
     CDP_BROWSER_EXITED_BEFORE_CONNECT: () => {
+      const err = makeErr()
+
       return {
-        default: ['Chrome', 1, null],
-        profileInUse: ['Chrome', 21, null],
-        signal: ['Chrome', null, 'SIGKILL'],
+        default: ['Chrome', 1, null, err],
+        profileInUse: ['Chrome', 21, null, err],
+        signal: ['Chrome', null, 'SIGKILL', err],
       }
     },
     FIREFOX_COULD_NOT_CONNECT: () => {

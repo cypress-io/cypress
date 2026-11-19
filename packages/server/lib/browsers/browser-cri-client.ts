@@ -125,7 +125,7 @@ const ensureLiveBrowser = async (hosts: string[], port: number, browserName: str
       if (!connected) {
         const exit = getBrowserExit?.()
         const e = exit
-          ? errors.get('CDP_BROWSER_EXITED_BEFORE_CONNECT', browserName, exit.code, exit.signal)
+          ? errors.get('CDP_BROWSER_EXITED_BEFORE_CONNECT', browserName, exit.code, exit.signal, err)
           : errors.get('CDP_COULD_NOT_CONNECT', browserName, port, err)
 
         e.cause = {
@@ -157,6 +157,12 @@ const ensureLiveBrowser = async (hosts: string[], port: number, browserName: str
   })
 }
 
+const CONNECTION_ERROR_CODES = ['ECONNREFUSED', 'ECONNRESET', 'EPIPE']
+
+const isConnectionError = (err: unknown) => {
+  return err instanceof Error && 'code' in err && typeof err.code === 'string' && CONNECTION_ERROR_CODES.includes(err.code)
+}
+
 const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number, getBrowserExit?: () => BrowserExit | undefined): Promise<T> => {
   let retryIndex = 0
 
@@ -164,11 +170,11 @@ const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserN
     try {
       return await retryable()
     } catch (err) {
-      const exit = getBrowserExit?.()
+      const exit = isConnectionError(err) ? getBrowserExit?.() : undefined
 
       if (exit) {
         debug('browser exited, not retrying %o', { exit, err })
-        errors.throwErr('CDP_BROWSER_EXITED_BEFORE_CONNECT', browserName, exit.code, exit.signal)
+        errors.throwErr('CDP_BROWSER_EXITED_BEFORE_CONNECT', browserName, exit.code, exit.signal, err)
       }
 
       retryIndex++
