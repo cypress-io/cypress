@@ -117,8 +117,8 @@ export async function detectThirdPartyCTFrameworks (
     for (const directory of directoryAndAncestors(projectRoot)) {
       debug('searching for third-party dependencies in %s', directory)
 
-      // The directory goes in `cwd` rather than the pattern, because glob
-      // libraries read `[`, `]`, `(` and `)` in a project path as pattern syntax
+      // Keep the directory in `cwd`, not the pattern: glob syntax would read the
+      // brackets in a path like `my-app (v2) [beta]` and match nothing
       const newPackagePaths = (await glob([CT_FRAMEWORK_GLOBAL_GLOB, CT_FRAMEWORK_NAMESPACED_GLOB], {
         cwd: directory,
         absolute: true,
