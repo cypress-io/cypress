@@ -253,19 +253,18 @@ describe('GitDataSource', () => {
       })
     })
 
-    it('words each age the way git does', async () => {
+    it('words each age the way the specs list words other relative times', async () => {
       // Each age starts just past the young edge of its rounding bucket, so the
       // seconds that pass while the commits are made can't push it into the next one
       const ages = [
-        { filename: 'seconds.cy.js', ageMs: 5 * 1000, age: /^\d+ seconds ago$/ },
-        { filename: 'minutes.cy.js', ageMs: (10 * 60 - 25) * 1000, age: /^10 minutes ago$/ },
-        { filename: 'hours.cy.js', ageMs: 4 * HOUR - 25 * 60 * 1000, age: /^4 hours ago$/ },
-        { filename: 'day.cy.js', ageMs: DAY + 13 * HOUR, age: /^2 days ago$/ },
-        { filename: 'weeks.cy.js', ageMs: 21 * DAY + HOUR, age: /^3 weeks ago$/ },
-        { filename: 'months.cy.js', ageMs: 120 * DAY, age: /^4 months ago$/ },
-        { filename: 'year.cy.js', ageMs: 365 * DAY + HOUR, age: /^1 year ago$/ },
-        { filename: 'year-and-months.cy.js', ageMs: 426 * DAY, age: /^1 year, 2 months ago$/ },
-        { filename: 'years.cy.js', ageMs: 6 * 365 * DAY, age: /^6 years ago$/ },
+        { filename: 'seconds.cy.js', ageMs: 5 * 1000, age: 'a few seconds ago' },
+        { filename: 'minutes.cy.js', ageMs: (10 * 60 - 25) * 1000, age: '10 minutes ago' },
+        { filename: 'hours.cy.js', ageMs: 4 * HOUR - 25 * 60 * 1000, age: '4 hours ago' },
+        { filename: 'days.cy.js', ageMs: DAY + 13 * HOUR, age: '2 days ago' },
+        { filename: 'weeks.cy.js', ageMs: 21 * DAY + HOUR, age: '21 days ago' },
+        { filename: 'months.cy.js', ageMs: 120 * DAY, age: '4 months ago' },
+        { filename: 'year.cy.js', ageMs: 365 * DAY + HOUR, age: 'a year ago' },
+        { filename: 'years.cy.js', ageMs: 6 * 365 * DAY, age: '6 years ago' },
       ]
 
       const commits = []
@@ -279,7 +278,7 @@ describe('GitDataSource', () => {
       ages.forEach(({ filename, age }, i) => {
         const info = gitInfo.gitInfoFor(commits[i].spec)
 
-        expect(info?.lastModifiedHumanReadable).toMatch(age)
+        expect(info?.lastModifiedHumanReadable).toEqual(age)
         expect(info?.author).toEqual('Test User')
         expect(info?.subject).toEqual(`add ${filename}`)
       })

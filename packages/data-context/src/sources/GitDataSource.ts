@@ -19,64 +19,13 @@ dayjs.extend(relativeTime)
 
 // matches <committer date> <author date as unix seconds> <author>|<short hash>|<subject>
 // eg '2021-09-14 13:43:19 +1000 1631504599 Marisol Okafor|1a2b3c4|add spec'
-// The age is computed from the unix time rather than read from `%ar`, which git
-// translates in non-English locales and replaces with `in the future` for dates past the clock.
+// The age is formatted from the unix time with dayjs, like the created and modified
+// specs, rather than read from `%ar`: git translates that in non-English locales and
+// replaces it with `in the future` for dates past the clock.
 const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+]\d{4})\s(\d+)\s([^|]*)\|([^|]*)\|([^|]*)/
 const GIT_LOG_ARGS = ['--literal-pathspecs', 'log', '--max-count=1', '--pretty=format:%ci %at %an|%h|%s']
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000
-
-const pluralize = (count: number, unit: string) => `${count} ${unit}${count === 1 ? '' : 's'}`
-
-/**
- * Formats a unix time the way git's English `%ar` does, so `1631504599` becomes
- * `2 days ago` or `1 year, 2 months ago`, using the same rounding as `show_date_relative`
- * in git's date.c. A time past the local clock reads `in 3 hours` rather than git's `in the future`.
- */
-const formatRelativeAge = (unixSeconds: number, nowMs = Date.now()) => {
-  let diff = Math.floor(nowMs / 1000) - unixSeconds
-
-  if (diff < 0) {
-    return dayjs.unix(unixSeconds).from(nowMs)
-  }
-
-  if (diff < 90) {
-    return `${pluralize(diff, 'second')} ago`
-  }
-
-  diff = Math.floor((diff + 30) / 60)
-  if (diff < 90) {
-    return `${pluralize(diff, 'minute')} ago`
-  }
-
-  diff = Math.floor((diff + 30) / 60)
-  if (diff < 36) {
-    return `${pluralize(diff, 'hour')} ago`
-  }
-
-  diff = Math.floor((diff + 12) / 24)
-  if (diff < 14) {
-    return `${pluralize(diff, 'day')} ago`
-  }
-
-  if (diff < 70) {
-    return `${pluralize(Math.floor((diff + 3) / 7), 'week')} ago`
-  }
-
-  if (diff < 365) {
-    return `${pluralize(Math.floor((diff + 15) / 30), 'month')} ago`
-  }
-
-  if (diff < 1825) {
-    const totalMonths = Math.floor((diff * 12 * 2 + 365) / (365 * 2))
-    const years = pluralize(Math.floor(totalMonths / 12), 'year')
-    const months = totalMonths % 12
-
-    return months ? `${years}, ${pluralize(months, 'month')} ago` : `${years} ago`
-  }
-
-  return `${pluralize(Math.floor((diff + 183) / 365), 'year')} ago`
-}
 
 interface GitInfo {
   author: string | null
@@ -386,7 +335,7 @@ export class GitDataSource {
           if (file && info && info[1] && info[2] && info[3] && info[4] && info[5]) {
             toSet = {
               lastModifiedTimestamp: info[1],
-              lastModifiedHumanReadable: formatRelativeAge(Number(info[2])),
+              lastModifiedHumanReadable: dayjs.unix(Number(info[2])).fromNow(),
               author: info[3],
               statusType: 'unmodified',
               subject: info[5],
