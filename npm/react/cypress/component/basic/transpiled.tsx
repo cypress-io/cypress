@@ -6,9 +6,9 @@ export class Transpiled extends React.Component<object, { count: number }> {
   }
 
   click () {
-    this.setState({
-      count: this.state.count + 1,
-    })
+    this.setState((state) => ({
+      count: state.count + 1,
+    }))
   }
 
   render () {

@@ -3,6 +3,7 @@ import Debug from 'debug'
 import type net from 'net'
 import type { Request } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
+import { fullyQualifiedRe } from '../adapters/internal-routes'
 
 const debug = Debug('cypress:server:util:socket_allowed')
 
@@ -73,7 +74,7 @@ export class SocketAllowed {
    * Is this origin the primary remote state's origin or the server's own origin?
    */
   isTrustedOrigin = (origin: string) => {
-    if (!/^https?:\/\//.test(origin)) {
+    if (!fullyQualifiedRe.test(origin)) {
       return false
     }
 
