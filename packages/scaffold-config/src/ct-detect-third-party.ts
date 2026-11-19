@@ -118,7 +118,7 @@ export async function detectThirdPartyCTFrameworks (
       debug('searching for third-party dependencies in %s', directory)
 
       // Keep the directory in `cwd`, not the pattern: glob syntax would read the
-      // brackets in a path like `my-app (v2) [beta]` and match nothing
+      // brackets and parentheses in a path like `my-app (v2) [beta]` and match nothing
       const newPackagePaths = (await glob([CT_FRAMEWORK_GLOBAL_GLOB, CT_FRAMEWORK_NAMESPACED_GLOB], {
         cwd: directory,
         absolute: true,

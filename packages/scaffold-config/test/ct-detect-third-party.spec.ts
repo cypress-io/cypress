@@ -291,9 +291,8 @@ describe('detectThirdPartyCTFrameworks', () => {
         qwikDependency,
       )
 
-      // pnpm links each package into node_modules from its store under
-      // `.pnpm`. `junction` makes the links work on Windows without admin
-      // rights, and is ignored elsewhere.
+      // `junction` lets Windows create these links without admin rights, and
+      // other platforms ignore it
       await fs.symlink(path.dirname(solidPath), path.join(nodeModules, 'cypress-ct-solid-js'), 'junction')
       await fs.mkdirp(path.join(nodeModules, '@acme'))
       await fs.symlink(path.dirname(qwikPath), path.join(nodeModules, '@acme', 'cypress-ct-qwik'), 'junction')
