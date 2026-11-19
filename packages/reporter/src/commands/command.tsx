@@ -51,7 +51,7 @@ export const formattedMessage = (message: string, name?: string) => {
 
   // if the command has url args, don't format those chars like __ and ~~
   if (name === 'visit' || name === 'request' || name === 'origin') {
-    return message
+    return _.escape(message)
   }
 
   // the command message is formatted as '(Optional Custom Msg:) expected <actual> to {assertion} <expected>'
@@ -283,6 +283,7 @@ const Message: React.FC<MessageProps> = observer(({ model }: MessageProps) => (
     )}
     {!!model.displayMessage && <span
       className='command-message-text'
+      // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- markdown-it renders the command message, except for visit, request and origin, whose URL passes through unescaped
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage, model.name) }}
     />}
     {model.isSelfHealed && (
@@ -412,6 +413,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
     * @see https://github.com/cypress-io/cypress/issues/31530 for more details
     */
     scrollIntoView()
+  // eslint-disable-next-line @eslint-react/exhaustive-deps -- scrolls once, when the command is added
   }, [])
 
   if (model.group && groupId !== model.group) {
@@ -473,7 +475,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
         return 'https://on.cypress.io/report-cy-prompt-issue'
       }
     },
-    [Cypress],
+    [],
   )
 
   // snapshot rules

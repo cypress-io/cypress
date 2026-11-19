@@ -34,6 +34,7 @@ const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
 const { nonceDirectives, unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
+const { getMetadataHeaderValue } = require('@packages/proxy')
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -319,13 +320,22 @@ describe('Routes', () => {
     })
 
     it('routes config.clientRoute to serve cypress client app html', function () {
-      return this.rp('http://localhost:2020/__')
+      return this.rp(`${this.proxy}/__`)
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
         expect(res.body).to.match(/window.__Cypress__ = true/)
 
         expect(res.headers['origin-agent-cluster']).to.eq('?0')
+      })
+    })
+
+    it('serves the \'not launched through Cypress\' page for an origin that is neither this server nor the primary', function () {
+      return this.rp('http://localhost:2020/__')
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/This browser was not launched through Cypress\./)
       })
     })
 
@@ -339,7 +349,7 @@ describe('Routes', () => {
     })
 
     it('sets title to projectName', function () {
-      return this.rp('http://localhost:2020/__')
+      return this.rp(`${this.proxy}/__`)
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
@@ -429,8 +439,8 @@ describe('Routes', () => {
       })
     })
 
-    it('routes when baseUrl is set', function () {
-      return this.setup({ baseUrl: 'http://localhost:9999/app' })
+    it('routes at the primary origin', function () {
+      return this.setup('http://localhost:9999/app')
       .then(() => {
         return this.rp('http://localhost:9999/__')
         .then((res) => {
@@ -1180,7 +1190,7 @@ describe('Routes', () => {
           gzip: true,
           headers: {
             'Cookie': '__cypress.initial=true',
-            'x-cypress-is-aut-frame': 'true',
+            'x-cypress-is-aut-frame': getMetadataHeaderValue(),
           },
         })
         .then((res) => {
@@ -1338,7 +1348,7 @@ describe('Routes', () => {
           encoding: null,
           headers: {
             'Accept-Encoding': 'br',
-            'x-cypress-is-aut-frame': 'true',
+            'x-cypress-is-aut-frame': getMetadataHeaderValue(),
           },
         })
         .then((res) => {
@@ -3482,7 +3492,7 @@ describe('Routes', () => {
             headers: {
               'Cookie': '__cypress.initial=false',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-              'X-Cypress-Is-AUT-Frame': 'true',
+              'X-Cypress-Is-AUT-Frame': getMetadataHeaderValue(),
               'Accept-Encoding': 'identity',
             },
           })

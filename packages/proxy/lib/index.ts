@@ -12,4 +12,6 @@ export type { CreateProxyNetworkInterceptionOptions } from './adapters/create-pr
 
 export { defaultMiddleware } from './http'
 
+export { getMetadataHeaderValue } from './http/util/metadata-header-value'
+
 export { stripCypressCookies } from './http/util/cookies'
