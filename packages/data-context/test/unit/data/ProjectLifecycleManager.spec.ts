@@ -78,6 +78,7 @@ describe('ProjectLifecycleManager', () => {
   describe('#initializeProjectSetup', () => {
     const originalEnv = process.env
     let consoleError: ReturnType<typeof jest.spyOn>
+    let consoleLog: ReturnType<typeof jest.spyOn>
 
     const scaffolded = (...statuses: Array<'valid' | 'changes' | 'skipped' | 'error'>) => {
       return statuses.map((status, index) => ({ status, description: '', file: { absolute: `/projects/foo/file-${index}.js`, contents: '' } }))
@@ -100,11 +101,13 @@ describe('ProjectLifecycleManager', () => {
     beforeEach(() => {
       process.env = { PATH: originalEnv.PATH }
       consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+      consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {})
     })
 
     afterEach(() => {
       process.env = originalEnv
       consoleError.mockRestore()
+      consoleLog.mockRestore()
     })
 
     it('completes the setup after the e2e scaffold when an agent opens a project', async () => {
@@ -128,11 +131,12 @@ describe('ProjectLifecycleManager', () => {
 
       await setupCtx(scaffolded('valid', 'skipped', 'valid')).lifecycleManager.initializeProjectSetup('e2e')
 
-      const printed = consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
+      const printed = consoleLog.mock.calls.map((args) => args.join(' ')).join('\n')
 
       expect(printed).toContain(path.relative('foo', '/projects/foo/file-0.js'))
       expect(printed).toContain(path.relative('foo', '/projects/foo/file-2.js'))
       expect(printed).not.toContain('file-1.js')
+      expect(consoleError).not.toHaveBeenCalled()
     })
 
     it('completes the setup when CYPRESS_AGENT_MODE forces agent mode on', async () => {

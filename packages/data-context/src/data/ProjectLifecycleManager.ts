@@ -979,7 +979,9 @@ export class ProjectLifecycleManager {
     const created = relativePaths(['valid'])
 
     if (created.length) {
-      logError(`Cypress set up e2e testing for this project by creating or updating: ${created.join(', ')}. Review these files and commit them.`)
+      // A success notice, so not stderr, where an unattended caller reads it as a failure
+      // eslint-disable-next-line no-console
+      console.log(`Cypress set up e2e testing for this project by creating or updating: ${created.join(', ')}. Review these files and commit them.`)
     }
 
     // A config that fails to load after the scaffold is reported like any other load error. Nothing
