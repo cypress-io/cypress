@@ -191,20 +191,25 @@ const createStartBundleCodeCache = async () => {
     args.push('--no-sandbox')
   }
 
-  const usingXvfb = xvfb.isNeeded()
-
-  try {
-    if (usingXvfb) {
-      await xvfb.start()
-    }
-
+  // read after xvfb.start(), which sets DISPLAY
+  const getAppEnv = () => {
     const env = { ...process.env, CYPRESS_INTERNAL_WRITE_START_BUNDLE_CACHE: '1' }
 
     // V8 rejects a code cache made under different flags, so NODE_OPTIONS must not leak into the app
     delete env.NODE_OPTIONS
     delete env.ELECTRON_RUN_AS_NODE
 
-    await execa(`${meta.buildAppExecutable()}`, args, { env, extendEnv: false })
+    return env
+  }
+
+  const usingXvfb = xvfb.isNeeded(getAppEnv())
+
+  try {
+    if (usingXvfb) {
+      await xvfb.start()
+    }
+
+    await execa(`${meta.buildAppExecutable()}`, args, { env: getAppEnv(), extendEnv: false })
   } finally {
     if (usingXvfb) {
       await xvfb.stop()
