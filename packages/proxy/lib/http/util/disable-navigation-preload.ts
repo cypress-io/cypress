@@ -113,6 +113,10 @@ function __cypressDisableNavigationPreload () {
     }
   }
 
+  // Does nothing in a worker still paused for the debugger, which has no
+  // `registration` yet. It takes effect when the instrumentation arrives after
+  // the worker's script has started, as can happen when a worker restarts,
+  // since install and activate don't fire again then.
   disable()
 
   // A worker paused for the debugger has no `registration` yet: Chrome only
