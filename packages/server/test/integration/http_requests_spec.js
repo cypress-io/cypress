@@ -112,7 +112,7 @@ describe('Routes', () => {
       // get all the config defaults
       // and allow us to override them
       // for each test
-      return setupFullConfigWithDefaults(obj, (cwd, glob) => getCtx().file.getFilesByGlob(cwd, glob))
+      return setupFullConfigWithDefaults(obj, (...args) => getCtx().file.getFilesByGlob(...args))
       .then((cfg) => {
         // use a jar for each test
         // but reset it automatically

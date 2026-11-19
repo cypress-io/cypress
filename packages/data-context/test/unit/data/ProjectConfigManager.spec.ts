@@ -155,7 +155,7 @@ describe('ProjectConfigManager', () => {
       const ctx = createTestDataContext('open')
       const supportFile = path.join(projectRoot, 'cypress', 'support', 'e2e.js')
 
-      configManager = new ProjectConfigManager({
+      const projectConfigManager = new ProjectConfigManager({
         ctx,
         configFile: 'cypress.config.js',
         projectRoot,
@@ -168,10 +168,10 @@ describe('ProjectConfigManager', () => {
         refreshLifecycle: () => Promise.resolve(),
       })
 
-      configManager.configFilePath = path.join(projectRoot, 'cypress.config.js')
-      configManager.setTestingType('e2e')
-      jest.spyOn(configManager, 'getConfigFileContents').mockResolvedValue({ e2e: { supportFile: 'cypress/support/**/e2e.js' } })
-      jest.spyOn(configManager, 'reloadCypressEnvFile').mockResolvedValue({})
+      projectConfigManager.configFilePath = path.join(projectRoot, 'cypress.config.js')
+      projectConfigManager.setTestingType('e2e')
+      jest.spyOn(projectConfigManager, 'getConfigFileContents').mockResolvedValue({ e2e: { supportFile: 'cypress/support/**/e2e.js' } })
+      jest.spyOn(projectConfigManager, 'reloadCypressEnvFile').mockResolvedValue({})
 
       // globby rejects like this when a `**` support file pattern walks into a directory it cannot read
       const unreadableDir = path.join(projectRoot, 'cypress', 'support', 'private')
@@ -186,7 +186,7 @@ describe('ProjectConfigManager', () => {
       .mockRejectedValueOnce(eaccesError)
       .mockResolvedValueOnce([supportFile])
 
-      const config = await configManager.getFullInitialConfig({}, false)
+      const config = await projectConfigManager.getFullInitialConfig({}, false)
 
       expect(config.supportFile).toEqual(supportFile)
       expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledTimes(2)

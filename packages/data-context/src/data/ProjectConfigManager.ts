@@ -551,7 +551,7 @@ export class ProjectConfigManager {
         configFile: path.basename(this.configFilePath),
       },
       configFile: this.options.ctx.lifecycleManager.configFile,
-    }, (cwd: string, glob: string | string[]) => this.options.ctx.file.getFilesByGlob(cwd, glob))
+    }, (...args: Parameters<DataContext['file']['getFilesByGlob']>) => this.options.ctx.file.getFilesByGlob(...args))
 
     if (withBrowsers) {
       const browsers = await this.options.ctx.browser.machineBrowsers()
