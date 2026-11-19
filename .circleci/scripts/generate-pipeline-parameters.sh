@@ -48,9 +48,19 @@ npm_schematic_tests=false
 # collides with that inherited value and CircleCI rejects the continuation with
 # "Conflicting pipeline parameters."
 
+# Restricted contexts check the pusher's GitHub team membership, which bots
+# (Renovate, cypress-bot, Cursor Agent) can't have. CircleCI leaves
+# CIRCLE_USERNAME empty for a pusher with no CircleCI account. Fork PRs
+# (pull/N) are excluded because approve-contributor-pr already gates them.
+bot_approval_required=false
+if [[ "${TRIGGER_SOURCE:-}" == "webhook" ]] && [[ ! "${CIRCLE_BRANCH:-}" =~ ^pull/[0-9]+ ]] && [[ -z "${CIRCLE_USERNAME:-}" ]]; then
+  bot_approval_required=true
+fi
+echo "Pushed by '${CIRCLE_USERNAME:-<unset>}' (trigger source '${TRIGGER_SOURCE:-<unset>}') — bot-approval-required=$bot_approval_required" >&2
+
 emit_json() {
   cat <<EOF
-{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-schematic-tests": $npm_schematic_tests}
+{"bot-approval-required": $bot_approval_required, "run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-schematic-tests": $npm_schematic_tests}
 EOF
 }
 

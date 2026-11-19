@@ -1,10 +1,19 @@
 import { builtinRules } from 'eslint/use-at-your-own-risk'
-import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig, reactConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
+// Every JSX file under the fixtures belongs to a React or Next.js project. The
+// Next.js projects also write pages as JSX in `.js` files
+const fixtureReactFiles = [
+  ...fixtureDirs.map((dir) => `${dir}/*.{jsx,tsx}`),
+  'project-fixtures/next/**/*.js',
+  'projects/nextjs-*/**/*.js',
+]
 
-const plugins = Object.assign({}, ...baseConfig.map((config) => config.plugins ?? {}))
+const fixtureReactConfig = reactConfig(fixtureReactFiles)
+
+const plugins = Object.assign({}, ...[...baseConfig, fixtureReactConfig].map((config) => config.plugins ?? {}))
 
 const ruleMeta = (ruleId: string) => {
   const slash = ruleId.lastIndexOf('/')
@@ -23,12 +32,14 @@ const isLayoutRule = (ruleId: string) => {
   return meta?.type === 'layout' || meta?.fixable === 'whitespace'
 }
 
-const layoutRulesOff = Object.fromEntries(
-  baseConfig
-  .flatMap((config) => Object.keys(config.rules ?? {}))
-  .filter(isLayoutRule)
-  .map((ruleId) => [ruleId, 'off']),
-)
+const layoutRulesOff = (configs: typeof baseConfig) => {
+  return Object.fromEntries(
+    configs
+    .flatMap((config) => Object.keys(config.rules ?? {}))
+    .filter(isLayoutRule)
+    .map((ruleId) => [ruleId, 'off']),
+  )
+}
 
 export default [
   ...baseConfig,
@@ -76,7 +87,7 @@ export default [
       reportUnusedDisableDirectives: 'off',
     },
     rules: {
-      ...layoutRulesOff,
+      ...layoutRulesOff(baseConfig),
       // Angular resolves a constructor parameter's type to a DI token at
       // runtime, so a type-only import erases the token and the app fails to
       // compile (NG2003)
@@ -86,8 +97,6 @@ export default [
       'no-restricted-properties': 'off',
       'no-restricted-syntax': 'off',
       'prefer-const': 'off',
-      'react/no-deprecated': 'off',
-      'react/prop-types': 'off',
       'vue/require-default-prop': 'off',
       // fixture specs produce the timings, videos, command logs and mid-wait
       // errors that system tests assert on, so their fixed waits are the
@@ -118,6 +127,18 @@ export default [
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       'no-debugger': 'off',
+    },
+  },
+  fixtureReactConfig,
+  {
+    files: fixtureReactFiles,
+    rules: {
+      // the fixture block above turns off baseConfig's layout rules, but the
+      // React plugin is only loaded for these files
+      ...layoutRulesOff([fixtureReactConfig]),
+      // some fixtures mount with the legacy `ReactDOM.render`, which React 18
+      // still runs, the way apps written before `createRoot` do
+      '@eslint-react/dom-no-render': 'off',
     },
   },
   // The harness asserts with chai, and fixture projects keep specs wherever

@@ -89,7 +89,6 @@ const getCallbackFn = async (fn: string, file?: string) => {
     body: JSON.stringify({
       file,
       fn: `${callbackName} = ${fn};`,
-      projectRoot: Cypress.config('projectRoot'),
     }),
     headers: {
       'Content-Type': 'application/json',

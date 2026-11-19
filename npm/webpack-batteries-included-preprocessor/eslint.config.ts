@@ -1,4 +1,4 @@
-import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig, reactConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
@@ -8,6 +8,8 @@ export default [
   // the shared test globs leave out .mjs
   chaiFriendlyConfig(['test/**/*.{mjs,mts}']),
   ...vitestConfig,
+  // fixtures that check the preprocessor compiles React JSX
+  reactConfig(['test/fixtures/**/*.{jsx,tsx}']),
   {
     ignores: ['test/_test-output/**'],
   },
