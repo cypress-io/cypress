@@ -165,7 +165,7 @@ export const _forceProxyMiddleware = function (clientRoute, namespace = '__cypre
 
 // Express's own final handler writes the stack into the response body.
 export const _errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
-  debug('unhandled route error: %o', err)
+  console.error(err?.stack || err) // eslint-disable-line no-console
 
   if (res.headersSent) {
     req.socket.destroy()
