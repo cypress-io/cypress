@@ -16,12 +16,15 @@ function setSimulatedCookies (mw: ResponseInterceptionMiddlewareCtx) {
   const url = new URL(mw.req.proxiedUrl)
   const defaultDomain = url.hostname
 
-  mw.simulatedCookies = mw.getCookieJar()
   // browsers treat localhost as a secure context, so its pages read Secure cookies over http
-  .getCookies(mw.req.proxiedUrl, undefined, { secure: url.protocol === 'https:' || isLocalhost(url) })
+  const isSecure = url.protocol === 'https:' || isLocalhost(url)
+
+  mw.simulatedCookies = mw.getCookieJar()
+  .getCookies(mw.req.proxiedUrl, undefined, { secure: true })
   .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
-  // document.cookie never reads HttpOnly values; it only needs to know they exist so it can't replace them
-  .map((cookie) => (cookie.httpOnly ? { ...cookie, value: '' } : cookie))
+  // document.cookie never reads an HttpOnly cookie, or a Secure one on an insecure page;
+  // it only needs to know they exist so it can't replace or shadow them
+  .map((cookie) => (cookie.httpOnly || (cookie.secure && !isSecure) ? { ...cookie, value: '' } : cookie))
 }
 
 /**

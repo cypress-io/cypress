@@ -486,6 +486,30 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         })
       })
     })
+
+    it('does not keep a write that shadows a Secure cookie set before the page loaded', () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cookie-https"]').click()
+
+      cy.origin('https://www.foobar.com:3502', () => {
+        cy.window().then((win) => {
+          return cy.wrap(win.fetch('/set-cookie?cookie=foo=bar; Secure; Domain=foobar.com')).then(() => {
+            win.location.href = 'http://www.foobar.com:3500/fixtures/secondary-origin.html'
+          })
+        })
+      })
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.window().then((win) => {
+          win.document.cookie = 'foo=baz'
+          win.document.cookie = 'sync=1'
+        })
+
+        cy.getCookie('sync').should('exist')
+        cy.document().its('cookie').should('equal', 'sync=1')
+        cy.getCookie('foo').its('value').should('equal', 'bar')
+      })
+    })
   })
 
   describe('Same-Site Cross-Origin cookie behavior', () => {
