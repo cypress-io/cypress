@@ -50,6 +50,7 @@
 
 - Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#35284](https://github.com/cypress-io/cypress/pull/35284).
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
+- The TypeScript types now allow custom queries to set and read a numeric `timeout` on their command instance. Addresses [#30198](https://github.com/cypress-io/cypress/issues/30198). Addressed in [#35135](https://github.com/cypress-io/cypress/pull/35135).
 
 **Dependency Updates:**
 
