@@ -521,6 +521,7 @@ describe('errors', { browser: '!webkit' }, () => {
 })
 
 // https://github.com/cypress-io/cypress/issues/35475
+// Each test sets up state for the next, so run them together.
 describe('spec bridge page load started outside of cy.origin', { browser: '!webkit', pageLoadTimeout: 5000, retries: 0 }, () => {
   it('creates the spec bridge', () => {
     cy.origin('http://www.foobar.com:3500', () => {})
