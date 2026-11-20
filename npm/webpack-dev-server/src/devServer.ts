@@ -57,14 +57,18 @@ export async function devServer (devServerConfig: WebpackDevServerConfig): Promi
 
   await result.server.start()
 
-  if (!result.server.options.port) {
-    throw new Error(`Expected port ${result.server.options.port} to be a number`)
+  // with port 0 (`cypress run --port 0`), the OS picks the port and options.port stays 0
+  const address = result.server.server?.address()
+  const port = address && typeof address === 'object' ? address.port : result.server.options.port
+
+  if (!port) {
+    throw new Error(`Expected port ${port} to be a number`)
   }
 
-  debug(`Component testing webpack server ${result.version} started on port %s`, result.server.options.port)
+  debug(`Component testing webpack server ${result.version} started on port %s`, port)
 
   return {
-    port: result.server.options.port as number,
+    port: port as number,
     // Close is for unit testing only. We kill this child process which will handle the closing of the server
     close: async (done) => {
       debug('closing dev server')

@@ -82,6 +82,43 @@ describe('cypress run --workers', () => {
   })
 })
 
+describe('cypress run --component --workers', () => {
+  systemTests.setup()
+
+  for (const [project, ext] of [['run-all-specs-ct-vite', 'tsx'], ['run-all-specs-ct-webpack', 'jsx']]) {
+    systemTests.it(`runs every ${project} spec once across workers`, {
+      project,
+      testingType: 'component',
+      browser: ['electron', 'chrome'],
+      workers: 3,
+      snapshot: false,
+      expectedExitCode: 0,
+      async onRun (exec) {
+        const ctOutputPath = path.join(Fixtures.projectPath(project), 'output.json')
+
+        const { stdout } = await exec({ outputPath: ctOutputPath })
+
+        // a worker whose dev server can't start leaves its specs to the others, so the results alone don't show it
+        expect(stdout).not.to.include('exited early')
+
+        const results = await fs.readJsonAsync(ctOutputPath)
+
+        expect(results.runs.map((run) => run.spec.relative).sort()).to.deep.eq([
+          'component/component-a.cy',
+          'component/folder-a/component-a.cy',
+          'component/folder-a/component-b.cy',
+          'component/folder-b/component-a.cy',
+          'component/folder-b/folder-c/component-a.cy',
+          'component/folder-b/folder-c/component-b.cy',
+        ].map((spec) => `${spec}.${ext}`).sort())
+
+        expect(results.totalFailed).to.eq(0)
+        expect(results.totalPassed).to.be.greaterThan(0)
+      },
+    })
+  }
+})
+
 describe('cypress run --workers --record', () => {
   const e2ePath = Fixtures.projectPath('e2e')
   const recordedOutputPath = path.join(e2ePath, 'output.json')

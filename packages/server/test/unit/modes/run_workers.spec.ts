@@ -20,6 +20,7 @@ import {
   SpecQueue,
   workerArgv,
   workerEnv,
+  workerExitNotice,
   workerSpawnArgs,
 } from '../../../lib/modes/run-workers'
 import type { RunResult } from '../../../lib/modes/results'
@@ -72,6 +73,20 @@ describe('lib/modes/run-workers', () => {
 
       expect(queue.abandon(1, new Error('exit'))).toBeUndefined()
       expect(queue.runsInSpecOrder()).toHaveLength(1)
+    })
+  })
+
+  describe('workerExitNotice', () => {
+    it('names the spec a worker was running when it exited', () => {
+      expect(workerExitNotice(2, { code: null, signal: 'SIGKILL', abandoned: 'a.cy.ts' })).toContain('Worker 2 exited while running a.cy.ts; the spec is marked as failed.')
+    })
+
+    it('reports a worker that exited early between specs, such as one whose dev server could not start', () => {
+      expect(workerExitNotice(1, { code: 1, signal: null })).toContain('Worker 1 exited early (code 1); the other workers ran its share of the specs.')
+    })
+
+    it('says nothing when a worker finishes normally', () => {
+      expect(workerExitNotice(1, { code: 0, signal: null })).toBeUndefined()
     })
   })
 

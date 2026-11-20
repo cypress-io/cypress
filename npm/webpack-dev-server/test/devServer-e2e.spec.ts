@@ -99,6 +99,23 @@ describe('#devServer', { timeout: 5000 }, () => {
     await closeServer(close)
   })
 
+  it('reports the port the OS picked when the Cypress port is 0', async () => {
+    const { port, close } = await devServer({
+      cypressConfig: { ...cypressConfig, port: 0 },
+      webpackConfig,
+      specs: createSpecs('foo.spec.js'),
+      devServerEvents: new EventEmitter(),
+    })
+
+    expect(port).toBeGreaterThan(0)
+
+    const response = await requestSpecFile('/test/fixtures/foo.spec.js', port as number)
+
+    expect(response).toEqual('const foo = () => {}\n')
+
+    await closeServer(close)
+  })
+
   it('serves specs in directory with [] chars via a webpack dev server', async () => {
     const { port, close } = await devServer({
       cypressConfig,

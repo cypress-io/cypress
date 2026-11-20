@@ -384,6 +384,19 @@ export interface Coordinator {
   }
 }
 
+/** What to print when a spawned worker exits; a worker that fails to start would otherwise go unnoticed, its specs run by the others. */
+export const workerExitNotice = (index: number, { code, signal, abandoned }: { code: number | null, signal: NodeJS.Signals | null, abandoned?: string }) => {
+  if (abandoned) {
+    return `${os.EOL}Worker ${index} exited while running ${abandoned}; the spec is marked as failed.${os.EOL}`
+  }
+
+  if (code !== 0) {
+    return `${os.EOL}Worker ${index} exited early (${signal ?? `code ${code}`}); the other workers ran its share of the specs.${os.EOL}`
+  }
+
+  return undefined
+}
+
 export function startCoordinator ({ specs, workers, downloadsFolder, durations, record, bundle, runAsNode = false, write = process.stdout.write.bind(process.stdout) }: {
   specs: SpecWithRelativeRoot[]
   workers: number
@@ -480,10 +493,9 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
         debug('worker %d exited %o', index, { code, signal })
 
         const abandoned = queue.abandon(index, new Error(`The Cypress worker process running this spec exited unexpectedly (${signal ?? `code ${code}`}).`))
+        const notice = workerExitNotice(index, { code, signal, abandoned })
 
-        if (abandoned) {
-          printBlock(`${os.EOL}Worker ${index} exited while running ${abandoned}; the spec is marked as failed.${os.EOL}`)
-        }
+        if (notice) printBlock(notice)
 
         resolve()
       })
