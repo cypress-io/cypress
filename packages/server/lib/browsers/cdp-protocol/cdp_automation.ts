@@ -19,7 +19,7 @@ import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { CDPDisconnectedError } from './cri-errors'
 import { normalizeResourceType } from './normalize-resource-type'
 import { cdpKeyPress } from '../../automation/commands/key_press'
-import { AUT_FRAME_HEADER } from '../constants'
+import { AUT_FRAME_HEADER, getMetadataHeaderValue } from '../constants'
 
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 
@@ -298,7 +298,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       headers: params.response.headers,
     }
 
-    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+    this.automation.onRequestEvent?.('response:received', browserResponseReceived)?.catch((error) => {
+      debugVerbose('error handling response:received %o', { requestId: params.requestId, error })
+    })
   }
 
   private onServiceWorkerRegistrationUpdated = (params: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) => {
@@ -515,7 +517,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     } catch (err) {
       debugVerbose('failed to get aut frame:', err.stack)
 
-      throw new Error('Could not find AUT frame')
+      throw new Error('Could not find AUT frame', { cause: err })
     }
   }
 
@@ -536,7 +538,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
         return this._continueRequest(client, params, {
           name: AUT_FRAME_HEADER,
-          value: 'true',
+          value: getMetadataHeaderValue(),
         })
       }
 
@@ -659,7 +661,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         try {
           screenshot = await this.sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
         } catch (err) {
-          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
+          throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`, { cause: err })
         }
 
         return `data:image/png;base64,${screenshot.data}`

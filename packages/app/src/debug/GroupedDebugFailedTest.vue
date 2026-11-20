@@ -44,18 +44,15 @@ import type { StatsMetadata_GroupsFragment } from '../generated/graphql'
 import { getDebugArtifacts } from './utils/debugArtifacts'
 import type { DebugArtifact } from './utils/debugArtifacts'
 import type { TestResults } from './DebugSpec.vue'
-import { useI18n } from '@cy/i18n'
 
 const props = defineProps<{
   failedTests: TestResults[]
   groups: StatsMetadata_GroupsFragment[]
 }>()
 
-const { t } = useI18n()
-
 const debugArtifacts = computed(() => {
   return props.failedTests.reduce<{ [groupID: string]: DebugArtifact[] }>((acc, curr) => {
-    acc[curr.instance?.groupId ?? ''] = getDebugArtifacts(curr.instance, t)
+    acc[curr.instance?.groupId ?? ''] = getDebugArtifacts(curr.instance)
 
     return acc
   }, {})

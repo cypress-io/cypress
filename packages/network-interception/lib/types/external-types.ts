@@ -74,7 +74,7 @@ type Method =
 
 export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
 
-export namespace CyHttpMessages {
+export declare namespace CyHttpMessages {
   export interface BaseMessage<T = any> {
     /**
      * The body of the HTTP message.

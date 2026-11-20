@@ -1,7 +1,7 @@
 <template>
   <PromoCard
-    :title="t('debugPage.emptyStates.slideshow.step3.title')"
-    :body="t('debugPage.emptyStates.slideshow.step3.description')"
+    title="Locally debug failed test runs with visual artifacts"
+    body="Easily review screenshots, videos and logs from your tests."
   >
     <template #image>
       <Illustration />
@@ -10,22 +10,19 @@
       <PromoAction
         :action="action"
         :left-icon="IconActionRestart"
-        :right-label="t('debugPage.emptyStates.slideshow.controls.reset')"
+        right-label="Reset"
       />
     </template>
   </PromoCard>
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import PromoCard from '../../components/promo/PromoCard.vue'
 import PromoAction from '../../components/promo/PromoAction.vue'
 
 import { IconActionRestart } from '@cypress-design/vue-icon'
 
 import Illustration from '../../assets/debug-guide-skeleton-3.svg'
-
-const { t } = useI18n()
 
 defineProps<{
   action: () => void

@@ -251,6 +251,101 @@ describe('stack_utils', () => {
     })
   })
 
+  describe('normalizedStack', () => {
+    describe('webkit', () => {
+      beforeEach(() => {
+        vi.mocked(Cypress.isBrowser).mockImplementation((browser) => browser === 'webkit')
+      })
+
+      const normalize = (message: string, stack: string) => {
+        const err = new Error(message)
+
+        err.stack = stack
+
+        return stack_utils.normalizedStack(err)
+      }
+
+      it('fills in missing function names and locations', () => {
+        expect(normalize('boom', 'foo@http://localhost/a.js:1:2\n@http://localhost/a.js:3:4\nglobal code@\nmap@[native code]')).toEqual(
+          'Error: boom\nfoo@http://localhost/a.js:1:2\n<unknown>@http://localhost/a.js:3:4\nglobal code@<unknown>\nmap@[native code]',
+        )
+      })
+
+      it('removes the CyWebKitError line', () => {
+        expect(normalize('boom', '__CyWebKitError@http://localhost/a.js:1:2\nfoo@http://localhost/a.js:3:4')).toEqual(
+          'Error: boom\nfoo@http://localhost/a.js:3:4',
+        )
+      })
+
+      it('splits a line at its last @', () => {
+        expect(normalize('boom', 'foo@bar@')).toEqual(
+          'Error: boom\nfoo@bar@<unknown>',
+        )
+      })
+
+      it('normalizes a stack with a very long message line in linear time', () => {
+        const message = `expected <body> to contain text 'Noted.', but the text was '${'word '.repeat(30000)}'`
+        const stack = `Error: ${message}\nfoo@http://localhost/a.js:1:2`
+
+        const start = performance.now()
+
+        expect(normalize(message, stack)).toEqual(stack)
+        expect(performance.now() - start).toBeLessThan(1000)
+      })
+    })
+  })
+
+  describe('getSourceStack', () => {
+    const location = 'http://localhost:8080/__cypress/cypress/spec.cy.js:14:16'
+
+    const expectFunctionName = (functionName: string, expected: string) => {
+      const { parsed, sourceMapped } = stack_utils.getSourceStack(`${functionName}@${location}`)
+
+      expect(parsed?.[0]).toHaveProperty('function', expected)
+      expect(sourceMapped).toBe(`at ${expected} (${location})`)
+    }
+
+    // names from the Firefox stacks in __fixtures__
+    it.each([
+      ['onRunnableRun/<', 'onRunnableRun'],
+      ['./cypress/spec.cy.js/</<', './cypress/spec.cy.js'],
+      ['__webpack_modules__</create/onRunnableRun/<', '__webpack_modules__</create/onRunnableRun'],
+      ['__webpack_modules__</bddInterface/</context.context', '__webpack_modules__</bddInterface/</context.context'],
+      ['__webpack_modules__</module.exports/Promise.prototype._resolveFromExecutor/r<', '__webpack_modules__</module.exports/Promise.prototype._resolveFromExecutor/r<'],
+      ['__stackReplacementMarker', '__stackReplacementMarker'],
+      ['', '<unknown>'],
+    ])('names the captured Firefox frame %j as %j', expectFunctionName)
+
+    // forms that follow Firefox's naming rules but are not in the captured stacks
+    it.each([
+      ['./cypress/spec.cy.js/</</<', './cypress/spec.cy.js'],
+      ['onRunnableRun</<', 'onRunnableRun'],
+      ['onRunnableRun</</<', 'onRunnableRun'],
+      ['/<', '<unknown>'],
+      ['/</<', '<unknown>'],
+    ])('names the extrapolated Firefox frame %j as %j', expectFunctionName)
+
+    it('names a Chromium frame without Firefox markers', () => {
+      const { parsed } = stack_utils.getSourceStack(`    at Context.eval (${location})`)
+
+      expect(parsed?.[0]).toHaveProperty('function', 'Context.eval')
+    })
+
+    it('names a Firefox frame with a long run of markers in linear time', () => {
+      const markers = '/<'.repeat(100000)
+      // a run of markers that does not end the name is the input that makes
+      // a backtracking match quadratic
+      const stack = [`${markers}onRunnableRun@${location}`, `./cypress/spec.cy.js${markers}@${location}`].join('\n')
+
+      const start = performance.now()
+      const { parsed } = stack_utils.getSourceStack(stack)
+
+      expect(performance.now() - start).toBeLessThan(1000)
+      expect(parsed?.[0]).toHaveProperty('function', `${markers}onRunnableRun`)
+      expect(parsed?.[1]).toHaveProperty('function', './cypress/spec.cy.js')
+    })
+  })
+
   describe('normalizedUserInvocationStack', () => {
     it('should remove cross origin stack lines', () => {
       const userInvocationStack = `    at cy.<computed> [as prompt] (cypress:///../driver/src/cypress/cy.ts:657:86)

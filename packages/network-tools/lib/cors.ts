@@ -13,7 +13,7 @@ export function getSuperDomain (url: string) {
 }
 
 export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
-  let hostname = ''
+  let hostname: string
   let port = ''
   let protocol = ''
 

@@ -1,10 +1,19 @@
 import { builtinRules } from 'eslint/use-at-your-own-risk'
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, mochaConfig, nodeConfig, reactConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
+// Every JSX file under the fixtures belongs to a React or Next.js project. The
+// Next.js projects also write pages as JSX in `.js` files
+const fixtureReactFiles = [
+  ...fixtureDirs.map((dir) => `${dir}/*.{jsx,tsx}`),
+  'project-fixtures/next/**/*.js',
+  'projects/nextjs-*/**/*.js',
+]
 
-const plugins = Object.assign({}, ...baseConfig.map((config) => config.plugins ?? {}))
+const fixtureReactConfig = reactConfig(fixtureReactFiles)
+
+const plugins = Object.assign({}, ...[...baseConfig, fixtureReactConfig].map((config) => config.plugins ?? {}))
 
 const ruleMeta = (ruleId: string) => {
   const slash = ruleId.lastIndexOf('/')
@@ -15,18 +24,34 @@ const ruleMeta = (ruleId: string) => {
   return rule?.meta
 }
 
-const layoutRulesOff = Object.fromEntries(
-  baseConfig
-  .flatMap((config) => Object.keys(config.rules ?? {}))
-  .filter((ruleId) => ruleMeta(ruleId)?.type === 'layout')
-  .map((ruleId) => [ruleId, 'off']),
-)
+// Plugins don't always type a whitespace-only rule `layout`, so a whitespace
+// autofix counts too
+const isLayoutRule = (ruleId: string) => {
+  const meta = ruleMeta(ruleId)
+
+  return meta?.type === 'layout' || meta?.fixable === 'whitespace'
+}
+
+const layoutRulesOff = (configs: typeof baseConfig) => {
+  return Object.fromEntries(
+    configs
+    .flatMap((config) => Object.keys(config.rules ?? {}))
+    .filter(isLayoutRule)
+    .map((ruleId) => [ruleId, 'off']),
+  )
+}
 
 export default [
   ...baseConfig,
   // Fixture package.json files keep the layout and key order of the user
   // projects they stand in for
   ...jsonConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),
+  // Fixtures are user projects with their own dependencies and Node, and
+  // n/no-extraneous-import crashes resolving their tsconfig files
+  ...nodeConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),
+  // The harness specs run on mocha, and fixture projects keep Cypress specs
+  // wherever their custom spec patterns point
+  ...mochaConfig.map((block) => ({ ...block, files: ['test/**', 'test-binary/**', 'lib/**', ...fixtureDirs] })),
   {
     languageOptions: {
       parserOptions: {
@@ -65,7 +90,7 @@ export default [
       reportUnusedDisableDirectives: 'off',
     },
     rules: {
-      ...layoutRulesOff,
+      ...layoutRulesOff(baseConfig),
       // Angular resolves a constructor parameter's type to a DI token at
       // runtime, so a type-only import erases the token and the app fails to
       // compile (NG2003)
@@ -75,13 +100,16 @@ export default [
       'no-restricted-properties': 'off',
       'no-restricted-syntax': 'off',
       'prefer-const': 'off',
-      'react/no-deprecated': 'off',
-      'react/prop-types': 'off',
       'vue/require-default-prop': 'off',
       // fixture specs produce the timings, videos, command logs and mid-wait
       // errors that system tests assert on, so their fixed waits are the
       // scenario under test
       'cypress/no-unnecessary-waiting': 'off',
+      // fixture specs exercise how the runner orders sibling hooks and how it
+      // reports a test that both returns a promise and takes `done`, so those
+      // patterns are the scenario under test
+      'mocha/consistent-structure': 'off',
+      'mocha/no-return-and-done': 'off',
       // import-x cannot parse the `.d.mts` types of @vitejs/plugin-vue
       'import-x/default': 'off',
       'import-x/namespace': 'off',
@@ -95,13 +123,27 @@ export default [
       '@typescript-eslint/no-unused-vars': 'off',
     },
   },
+  fixtureReactConfig,
   {
-    // These exercise how the V8 snapshot bundler loads modules, so unused
-    // bindings and the `debugger` statement are deliberate
-    files: ['projects/v8-snapshot/**'],
+    files: fixtureReactFiles,
     rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-debugger': 'off',
+      // the fixture block above turns off baseConfig's layout rules, but the
+      // React plugin is only loaded for these files
+      ...layoutRulesOff([fixtureReactConfig]),
+      // some fixtures mount with the legacy `ReactDOM.render`, which React 18
+      // still runs, the way apps written before `createRoot` do
+      '@eslint-react/dom-no-render': 'off',
+    },
+  },
+  // The harness asserts with chai, and fixture projects keep specs wherever
+  // their custom spec patterns point, outside the shared test globs
+  chaiFriendlyConfig(['lib/**', ...fixtureDirs]),
+  {
+    // These configs reference `require` or `import.meta.resolve` as a bare
+    // statement, which throws unless they load in the module system under test
+    files: ['projects/config-cjs-and-esm/**/cypress.config.*'],
+    rules: {
+      'chai-friendly/no-unused-expressions': 'off',
     },
   },
   {

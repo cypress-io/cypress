@@ -3,7 +3,7 @@ import debugModule from 'debug'
 import { STATUS_CODES } from 'http'
 import { Readable } from 'stream'
 import type { ForHttpIntercept, HttpRequest } from '@packages/network-interception'
-import { HttpIntercept } from '@packages/network-interception'
+import { HttpIntercept, isRedirectStatus } from '@packages/network-interception'
 import type { ResourceType } from '@packages/proxy'
 import type { BodyDigest } from './body-digest'
 import { digestBody } from './body-digest'
@@ -12,7 +12,7 @@ import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
 import { CdpBodyCapture } from './cdp-body-capture'
 import { toNetworkError } from './cdp-network-error'
-import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER } from '../constants'
+import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER, getMetadataHeaderValue } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
 import type { CookiesBeforeIntercept } from './cdp-set-cookie-sync'
 import { planSetCookieSync } from './cdp-set-cookie-sync'
@@ -23,7 +23,6 @@ type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
 const RESPONSE_PAUSE_TIMEOUT_MS = 30000
-const REDIRECT_STATUS_CODES = [301, 302, 303, 307, 308]
 
 const setCookieHeaders = (headers: Protocol.Fetch.HeaderEntry[]): string[] => {
   return headers
@@ -55,7 +54,7 @@ const FETCH_PATTERNS: Protocol.Fetch.EnableRequest = {
 // so an untouched 3xx continues natively while a middleware that writes a body
 // onto one falls back to fulfill.
 const isRedirectPause = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
-  return REDIRECT_STATUS_CODES.includes(event.responseStatusCode as number)
+  return isRedirectStatus(event.responseStatusCode)
     && !!event.responseHeaders?.some(({ name }) => name.toLowerCase() === 'location')
 }
 
@@ -170,6 +169,9 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   captureStream?: Readable
   fulfilled?: boolean
   originalBodyDigest?: BodyDigest
+  // Paused in the redirect-received state, where Chrome ignores
+  // continueResponse overrides
+  redirectPause?: boolean
   // Chrome's cookie handling before cy.intercept ran: the baseline the
   // response's final Set-Cookie headers are synced against
   cookiesBeforeIntercept?: CookiesBeforeIntercept
@@ -578,7 +580,7 @@ export class CdpFetchTransport {
         debug('marking AUT frame document %s', event.request.url)
         // Node's IncomingMessage lowercases headers on the MITM path; the
         // synthetic CDP codec does not. Use the lowercase form ExtractCypressMetadataHeaders reads.
-        request.headers[AUT_FRAME_HEADER.toLowerCase()] = 'true'
+        request.headers[AUT_FRAME_HEADER.toLowerCase()] = getMetadataHeaderValue()
       }
 
       // Extra-target sessions (popups / _blank) share this transport with
@@ -586,7 +588,7 @@ export class CdpFetchTransport {
       // network path (the MITM proxy never sees those requests).
       if (this.options.isFromExtraTarget) {
         debug('marking extra-target request %s', event.request.url)
-        request.headers[EXTRA_TARGET_HEADER.toLowerCase()] = 'true'
+        request.headers[EXTRA_TARGET_HEADER.toLowerCase()] = getMetadataHeaderValue()
       }
 
       const responseDeferred: ResponsePauseDeferred = {
@@ -852,6 +854,7 @@ export class CdpFetchTransport {
 
     // no predicate composed → materialize everything
     const bodySkipped = this.options.shouldStreamBody?.(event, { hasMatchingRoute: deferred.hadMatchingRoutes ?? false }) ?? false
+    const redirectPause = isRedirectPause(event)
     let originalBody: Buffer
     let captureStream: Readable | undefined
 
@@ -863,7 +866,7 @@ export class CdpFetchTransport {
       // already be listening before that happens or its opening bytes are lost.
       // Redirect pauses never arm: their hop emits no loadingFinished, so an
       // armed entry would sit unread until the transport resets.
-      if (event.networkId && !isRedirectPause(event) && this.options.shouldCaptureBody?.()) {
+      if (event.networkId && !redirectPause && this.options.shouldCaptureBody?.()) {
         captureStream = await this.bodyCapture.arm(event.networkId, sessionId)
 
         // The flow may have been rejected while arming awaited CDP, by
@@ -894,7 +897,7 @@ export class CdpFetchTransport {
       originalBody = Buffer.alloc(0)
     } else {
       try {
-        originalBody = await this.fetchResponseBody(event, sessionId)
+        originalBody = await this.fetchResponseBody(event, redirectPause, sessionId)
       } catch (err) {
         deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
 
@@ -935,6 +938,7 @@ export class CdpFetchTransport {
       ...(cookiesBeforeIntercept ? { cookiesBeforeIntercept } : {}),
       sessionId,
       ...(bodySkipped ? { bodySkipped: true } : {}),
+      ...(redirectPause ? { redirectPause: true } : {}),
       ...(captureStream ? { captureStream } : {}),
     })
   }
@@ -1054,8 +1058,8 @@ export class CdpFetchTransport {
     })
   }
 
-  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<Buffer> => {
-    if (isRedirectPause(event)) {
+  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, redirectPause: boolean, sessionId?: string): Promise<Buffer> => {
+    if (redirectPause) {
       return Buffer.alloc(0)
     }
 

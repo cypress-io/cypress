@@ -1,6 +1,5 @@
 import { mount } from '@cypress/vue'
 
-/* eslint-env mocha */
 describe('document.body', () => {
   it('is set correctly', () => {
     mount({

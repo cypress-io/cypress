@@ -52,7 +52,7 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
     return print(ast).code
   } catch (e: any) {
     debug(`Error adding properties to %s: %s`, filePath, e.stack)
-    throw new Error(`Unable to automerge with the config file`)
+    throw new Error(`Unable to automerge with the config file`, { cause: e })
   }
 }
 

@@ -22,9 +22,6 @@ const base = './'
 const alias = {
   '@cy/components': path.resolve(__dirname, './src/components'),
   '@cy/gql-components': path.resolve(__dirname, './src/gql-components'),
-
-  // import { defaultMessages, useI18n } from '@cy/i18n'
-  '@cy/i18n': path.resolve(__dirname, './src/locales/i18n'),
 }
 
 const makePlugins = (plugins) => {
@@ -106,13 +103,18 @@ export const makeConfig = (config = {}, plugins = {}) => {
   // Don't overwrite plugins
   delete config.plugins
 
+  const { build, ...packageConfig } = config
+
   return {
     base,
     publicDir: path.resolve(__dirname, './src/public'),
 
-    // Production-only build options
+    // Set after the package's options so app and launchpad can't ship with
+    // different minification. Leave cssMinify unset: it follows minify, so the
+    // --minify false that `yarn dev` passes keeps both JS and CSS readable.
     build: {
-      minify: false,
+      ...build,
+      minify: 'oxc',
     },
 
     css: {
@@ -159,7 +161,7 @@ export const makeConfig = (config = {}, plugins = {}) => {
       'process.version': '99',
       'setImmediate': {},
     },
-    ...config,
+    ...packageConfig,
   }
 }
 

@@ -32,8 +32,8 @@ const sharedPromiseSetup = ({
   communicator,
   timeout = 1000,
 }: {
-  resolve: Function
-  reject: Function
+  resolve: (value: any) => void
+  reject: (err: Error) => void
   event: string
   specBridgeName: string
   communicator: EventEmitter
@@ -301,11 +301,12 @@ export class SpecBridgeCommunicator extends EventEmitter {
 
   /**
    * The callback handler that receives messages from the primary origin.
-   * @param {MessageEvent.data} data - a reference to the MessageEvent.data sent through the postMessage event. See https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data
+   * Only the parent window sends to the spec bridge.
+   * @param {MessageEvent} event - the MessageEvent received through the postMessage event. See https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
    * @returns {Void}
    */
-  onMessage ({ data }) {
-    if (!data) return
+  onMessage ({ data, source }: MessageEvent) {
+    if (!data || source !== window.parent) return
 
     this.emit(data.event, data.data, { responseEvent: data.responseEvent })
   }

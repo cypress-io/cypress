@@ -93,7 +93,8 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
         // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-        if (!options.videoApi) {
+        // Run mode always has a screencast running (see handleVideo), and stopping it here would end that one.
+        if (!options.videoApi && !options.isTextTerminal) {
           await pageCriClient.send('Page.startScreencast', screencastOpts())
           const ret = await fn(message, data)
 
@@ -157,7 +158,9 @@ async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpA
 
 export = {
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
-    const _this = this
+    // onNewWindow's own `this` is the window that opened the child, so it
+    // reaches this module through launchChild
+    const launchChild = (url: string, parent: BrowserWindow) => this._launchChild(url, parent, projectRoot, state, options, automation)
 
     const defaults: Windows.WindowOptions = {
       x: state.browserX || undefined,
@@ -212,6 +215,7 @@ export = {
         }
       },
       async onNewWindow (this: BrowserWindow, { url }) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- nulled once the window closes, which `this` can't be
         let _win: BrowserWindow | null = this
 
         _win.on('closed', () => {
@@ -221,7 +225,7 @@ export = {
         })
 
         try {
-          const child = await _this._launchChild(url, _win, projectRoot, state, options, automation)
+          const child = await launchChild(url, _win)
 
           // close child on parent close
           _win.on('close', () => {
@@ -487,6 +491,8 @@ export = {
     // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
     browserCriClient?.currentlyAttachedTarget?.send('Network.setUserAgentOverride', {
       userAgent,
+    }).catch((error) => {
+      debug('failed to set user agent through CDP, relying on the session %o', { error })
     })
 
     return webContents.session.setUserAgent(userAgent)

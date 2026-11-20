@@ -125,19 +125,6 @@ context('calculateWinner', () => {
     expect(winner).to.equal('O')
   })
 
-  it('returns O for second row of O', () => {
-    // preserve our Tic-Tac-Toe board formatting
-    // prettier-ignore
-    const squares = [
-      'X', 'X', null,
-      'O', 'O', 'O',
-      null, null, 'X',
-    ]
-    const winner = calculateWinner(squares)
-
-    expect(winner).to.equal('O')
-  })
-
   it('returns X for diagonal', () => {
     const _ = null
     const O = 'O'

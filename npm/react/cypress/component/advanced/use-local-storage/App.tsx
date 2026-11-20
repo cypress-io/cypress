@@ -1,10 +1,11 @@
 import * as React from 'react'
 
 export default function App () {
-  const storedCart = localStorage.getItem('cart')
-  const [cart, setCart] = React.useState<string[]>(
-    (storedCart && JSON.parse(storedCart)) || ['kiwi 🥝'],
-  )
+  const [cart, setCart] = React.useState<string[]>(() => {
+    const storedCart = localStorage.getItem('cart')
+
+    return (storedCart && JSON.parse(storedCart)) || ['kiwi 🥝']
+  })
 
   const addJuice = () => {
     const updatedCart = cart.concat('juice 🧃')

@@ -97,6 +97,6 @@ devServer.create = async function createDevServer (devServerConfig: ViteDevServe
       throw err
     }
 
-    throw new Error(err as string)
+    throw new Error(err as string, { cause: err })
   }
 }

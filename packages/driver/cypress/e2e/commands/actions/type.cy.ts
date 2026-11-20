@@ -966,6 +966,10 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.$$('#input-without-value').val('0').mouseup(function () {
         $(this).select()
       })
+
+      cy.get('#input-without-value')
+      .type('50')
+      .should('have.value', '50')
     })
 
     // https://github.com/cypress-io/cypress/issues/5703
@@ -1015,12 +1019,6 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get('#email-without-value')
       .type('b@foo.com')
       .should('have.value', 'b@foo.com')
-    })
-
-    it('overwrites text when selectAll in mouseup handler', () => {
-      cy.$$('#input-without-value').val('0').mouseup(function () {
-        $(this).select()
-      })
     })
 
     it('responsive to keydown handler', () => {
@@ -1379,6 +1377,80 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type('foo@bar.com').blur()
         .then(() => {
           expect(blurred).to.be.calledOnce
+        })
+      })
+    })
+
+    describe('input[type=url]', () => {
+      beforeEach(() => {
+        cy.get('#url-with-value').invoke('val', 'https://www.example.com')
+      })
+
+      it('moves the caret with {leftarrow}', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}').then(($input) => {
+          expect($input).to.have.value('https://www.example.com')
+          expect($input[0].selectionStart).to.eq('https://www.example.'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.example.'.length)
+        })
+      })
+
+      it('inserts text in the middle of the value', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}{leftarrow}/shop').then(($input) => {
+          expect($input).to.have.value('https://www.example/shop.com')
+          expect($input[0].selectionStart).to.eq('https://www.example/shop'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.example/shop'.length)
+        })
+      })
+
+      it('types at the caret position the app set', () => {
+        cy.get('#url-with-value').invoke('val', 'www.example.com')
+
+        cy.get<HTMLInputElement>('#url-with-value').then(($input) => {
+          $input[0].focus()
+          $input[0].setSelectionRange(0, 0)
+        })
+
+        cy.get<HTMLInputElement>('#url-with-value').type('https://').then(($input) => {
+          expect($input).to.have.value('https://www.example.com')
+          expect($input[0].selectionStart).to.eq('https://'.length)
+          expect($input[0].selectionEnd).to.eq('https://'.length)
+        })
+      })
+
+      it('replaces the value with {selectall}', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{selectall}https://shop.example.com').then(($input) => {
+          expect($input).to.have.value('https://shop.example.com')
+          expect($input[0].selectionStart).to.eq('https://shop.example.com'.length)
+          expect($input[0].selectionEnd).to.eq('https://shop.example.com'.length)
+        })
+      })
+
+      it('deletes before the caret with {backspace}', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}{leftarrow}{backspace}').then(($input) => {
+          expect($input).to.have.value('https://www.exampl.com')
+          expect($input[0].selectionStart).to.eq('https://www.exampl'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.exampl'.length)
+        })
+      })
+
+      it('deletes after the caret with {del}', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}{leftarrow}{del}').then(($input) => {
+          expect($input).to.have.value('https://www.examplecom')
+          expect($input[0].selectionStart).to.eq('https://www.example'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.example'.length)
+        })
+      })
+
+      it('replaces text the app selected with select()', () => {
+        cy.get<HTMLInputElement>('#url-with-value').then(($input) => {
+          $input[0].focus()
+          $input[0].select()
+        })
+
+        cy.get<HTMLInputElement>('#url-with-value').type('https://shop.example.com').then(($input) => {
+          expect($input).to.have.value('https://shop.example.com')
+          expect($input[0].selectionStart).to.eq('https://shop.example.com'.length)
+          expect($input[0].selectionEnd).to.eq('https://shop.example.com'.length)
         })
       })
     })
@@ -2858,8 +2930,6 @@ describe('src/cy/commands/actions/type - #type', () => {
           this.lastLog = log
         }
       })
-
-      null
     })
 
     it('eventually passes the assertion', () => {
@@ -3230,6 +3300,32 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#date-without-value').should('have.value', '1999-12-31')
         })
 
+        it('consecutive {upArrow} increases day once per arrow', () => {
+          cy.get('#date-without-value').type('1999-12-30').type('{upArrow}{upArrow}')
+          cy.get('#date-without-value').should('have.value', '2000-01-01')
+        })
+
+        it('consecutive {downArrow} decreases day once per arrow', () => {
+          cy.get('#date-without-value').type('2000-01-01').type('{downArrow}{downArrow}')
+          cy.get('#date-without-value').should('have.value', '1999-12-30')
+        })
+
+        it('mixed {upArrow} and {downArrow} step the day in order', () => {
+          cy.get('#date-without-value').type('2000-01-01').type('{upArrow}{downArrow}{upArrow}')
+          cy.get('#date-without-value').should('have.value', '2000-01-02')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid date')
+            expect(err.message).to.include('{ArrowUp}{ArrowLeft}')
+
+            done()
+          })
+
+          cy.get('#date-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#date-with-value')
           .then(($input) => {
@@ -3273,6 +3369,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#month-without-value').then(($input) => $input.val('2000-01'))
           cy.get('#month-without-value').type('{downArrow}')
           cy.get('#month-without-value').should('have.value', '1999-12')
+        })
+
+        it('consecutive {upArrow} and {downArrow} step the month once per arrow', () => {
+          cy.get('#month-without-value').type('1999-11').type('{upArrow}{upArrow}')
+          cy.get('#month-without-value').should('have.value', '2000-01')
+          cy.get('#month-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#month-without-value').should('have.value', '1999-12')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid month')
+
+            done()
+          })
+
+          cy.get('#month-without-value').type('{upArrow}{leftArrow}')
         })
 
         it('{upArrow} triggers events on input', () => {
@@ -3320,6 +3433,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#week-without-value').should('have.value', '2017-W04')
         })
 
+        it('consecutive {upArrow} and {downArrow} step the week once per arrow', () => {
+          cy.get('#week-without-value').type('2017-W05').type('{upArrow}{upArrow}')
+          cy.get('#week-without-value').should('have.value', '2017-W07')
+          cy.get('#week-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#week-without-value').should('have.value', '2017-W06')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid week')
+
+            done()
+          })
+
+          cy.get('#week-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#week-with-value')
           .then(($input) => {
@@ -3365,6 +3495,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#time-without-value').should('have.value', '01:22')
         })
 
+        it('consecutive {upArrow} and {downArrow} step the minute once per arrow', () => {
+          cy.get('#time-without-value').type('01:59').type('{upArrow}{upArrow}')
+          cy.get('#time-without-value').should('have.value', '02:01')
+          cy.get('#time-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#time-without-value').should('have.value', '02:00')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid time')
+
+            done()
+          })
+
+          cy.get('#time-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#time-with-value')
           .then(($input) => {
@@ -3404,6 +3551,23 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         it('{downArrow} decreases time value', () => {
           cy.get('#datetime-local-without-value').type('{downArrow}')
+        })
+
+        it('consecutive {upArrow} and {downArrow} step the value once per arrow', () => {
+          cy.get('#datetime-local-without-value').type('2000-01-01T01:30').type('{upArrow}{upArrow}')
+          cy.get('#datetime-local-without-value').should('have.value', '2000-01-01T01:32')
+          cy.get('#datetime-local-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#datetime-local-without-value').should('have.value', '2000-01-01T01:31')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid datetime')
+
+            done()
+          })
+
+          cy.get('#datetime-local-without-value').type('{upArrow}{leftArrow}')
         })
 
         it('{upArrow} triggers events on input', () => {

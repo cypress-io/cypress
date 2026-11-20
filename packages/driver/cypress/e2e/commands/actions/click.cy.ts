@@ -1696,8 +1696,6 @@ describe('src/cy/commands/actions/click', () => {
             this.lastLog = log
           }
         })
-
-        null
       })
 
       it('eventually passes the assertion', () => {
@@ -3269,15 +3267,18 @@ describe('mouse state', () => {
           y: 9,
         }
 
+        // div.item spans the viewport, so its center moves with the scrollbar width (0 for overlay scrollbars)
+        const firefoxCenterX = cy.state('document').documentElement.clientWidth / 2
+
         // TODO: add back assertion on Y values
         const coordsFirefox = {
-          clientX: 494,
+          clientX: firefoxCenterX,
           clientY: 10,
-          pageX: 494,
+          pageX: firefoxCenterX,
           pageY: 226,
-          screenX: 494,
+          screenX: firefoxCenterX,
           screenY: 10,
-          x: 494,
+          x: firefoxCenterX,
           y: 10,
         }
 

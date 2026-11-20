@@ -13,7 +13,6 @@ const upload = require('../../binary/upload')
 const uploadUtils = require('../../binary/util/upload')
 const { s3helpers } = require('../../binary/s3-api')
 
-/* eslint-env mocha */
 describe('upload-release-artifact', () => {
   describe('.getCDN', () => {
     it('returns CDN s3 url', () => {

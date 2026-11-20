@@ -10,7 +10,6 @@
     "**/build/**",
     "**/dist/**",
     "**/dist-test/**",
-    "**/.cy/**",
-    "**/v8-snapshot/cache/**"
+    "**/.cy/**"
   ]
 }

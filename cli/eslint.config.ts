@@ -1,8 +1,15 @@
-import { baseConfig, cliOverrides, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, cliOverrides, jsonConfig, nodeConfig, userNodeConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  {
+    ...userNodeConfig,
+    // CI runs the specs on the dev Node; only the shipped CLI runs on the user's
+    ignores: ['test/**'],
+  },
+  ...vitestConfig,
   ...cliOverrides,
   {
     languageOptions: {
@@ -12,10 +19,12 @@ export default [
     },
   },
   {
-    // Type tests declare values only so the type checker can assert on them
+    // Type tests declare values, and write bare `x // $ExpectType T`
+    // expressions, only so the type checker can assert on them
     files: ['types/tests/**'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
     },
   },
   {

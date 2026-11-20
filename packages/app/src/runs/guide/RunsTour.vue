@@ -4,16 +4,10 @@
     :medium="RUNS_TAB_MEDIUM"
   >
     <template #header>
-      <PromoHeader :title="t('runs.empty.title')">
+      <PromoHeader title="Copy the command below to record your first run">
         <template #description>
-          <i18n-t
-            scope="global"
-            keypath="runs.empty.description"
-          >
-            <ExternalLink :href="guideUrl">
-              {{ t('runs.empty.link') }}
-            </ExternalLink>
-          </i18n-t>
+          <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+          Review the <ExternalLink :href="guideUrl">guide on recording runs</ExternalLink> to Cypress Cloud
         </template>
         <template #content>
           <RecordPromptAdapter />
@@ -43,7 +37,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
 import { RUNS_TAB_MEDIUM } from '../utils/constants'
 import Promo from '../../components/promo/Promo.vue'
@@ -59,8 +52,6 @@ import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWith
 const props = defineProps<{
   campaign: string
 }>()
-
-const { t } = useI18n()
 
 const guideUrl = computed(() => {
   return getUrlWithParams({

@@ -74,7 +74,6 @@ import { gql, useMutation } from '@urql/vue'
 import type { GlobalProjectCardFragment } from '../generated/graphql'
 import { GlobalProjectCard_SetCurrentProjectDocument } from '../generated/graphql'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
-import { useI18n } from '@cy/i18n'
 
 gql`
 mutation GlobalProjectCard_setCurrentProject($path: String!) {
@@ -106,14 +105,13 @@ const emit = defineEmits<{
 const props = defineProps<{
   gql: GlobalProjectCardFragment
 }>()
-const { t } = useI18n()
 
 type eventName = 'removeProject' | 'openInIDE' | 'openInFinder'
 
 const menuItems: { name: string, event: eventName }[] = [
-  { name: t('globalPage.removeProject'), event: 'removeProject' },
-  { name: t('globalPage.openInIDE'), event: 'openInIDE' },
-  { name: t('globalPage.openInFinder'), event: 'openInFinder' },
+  { name: 'Remove project', event: 'removeProject' },
+  { name: 'Open in IDE', event: 'openInIDE' },
+  { name: 'Open in Finder', event: 'openInFinder' },
 ]
 
 const setCurrentProjectMutation = useMutation(GlobalProjectCard_SetCurrentProjectDocument)

@@ -23,11 +23,11 @@ These prefixes do **not** require an entry:
 
 Choosing `fix` asserts the change ships to users, so do not then skip the entry because the impact looks internal. Use `chore` or `refactor` if the change truly has no user-facing effect, or `internal` if it is user-facing but not yet reachable.
 
-This changelog describes the **binary**. Validation only considers changed files under `cli/` or `packages/` (excluding `cli/CHANGELOG.md` itself), so a pull request touching only `npm/`, `system-tests/`, `scripts/`, `tooling/`, or docs needs no entry — and should probably not carry a user-facing prefix. The `npm/*` packages are versioned and published independently by semantic-release and never appear here.
+This changelog describes the **binary**. Validation only considers changed files under `cli/` or `packages/` (excluding `cli/CHANGELOG.md` itself), so a pull request touching only `npm/`, `system-tests/`, `scripts/`, or docs needs no entry — and should probably not carry a user-facing prefix. The `npm/*` packages are versioned and published independently by semantic-release and never appear here.
 
 ## Writing Guidelines
 
-1. The changelog is formatted like the following. If there is not a pending changelog for the next release, add these sections.
+1. The changelog is formatted like the following. If there is not a pending changelog for the next release, add these sections. The topmost `## X.Y.Z` is not always pending: released versions carry no marker in the file, so check for a release tag with `git ls-remote --tags origin vX.Y.Z`. If the tag exists, that version has shipped, and your entry goes in a new section for the next version above it.
 
     ```md
     ## <RELEASE_VERSION>

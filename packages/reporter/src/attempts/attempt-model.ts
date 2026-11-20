@@ -43,7 +43,7 @@ export default class Attempt {
   _isOpen: boolean | null = null
 
   isOpenWhenLast: boolean | null = null
-  _callbackAfterUpdate: Function | null = null
+  _callbackAfterUpdate: (() => void) | null = null
   testId: string
 
   id: number

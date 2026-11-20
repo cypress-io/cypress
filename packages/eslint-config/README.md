@@ -20,9 +20,9 @@ This package provides a unified ESLint configuration that combines multiple popu
 - **Base ESLint**: `@eslint/js` recommended rules
 - **TypeScript**: `typescript-eslint` recommended rules with project service
 - **Cypress**: `eslint-plugin-cypress` recommended rules
-- **Mocha**: `eslint-plugin-mocha` recommended rules for testing
+- **Mocha**: `eslint-plugin-mocha` recommended rules for Cypress specs, and for Node-side mocha suites via `mochaConfig`. See [`mochaConfig`](./AGENTS.md#mochaconfig)
 - **Vue**: `eslint-plugin-vue` recommended rules
-- **React**: `eslint-plugin-react` recommended rules (React 18+)
+- **React**: `@eslint-react/eslint-plugin`'s `recommended-typescript` rules with a few changes (React 18), opt-in via `reactConfig`. See [`reactConfig`](./AGENTS.md#reactconfig)
 - **Stylistic**: `@stylistic/eslint-plugin` with custom formatting rules
 - **Import**: `eslint-plugin-import-x` for import/export validation
 - **GraphQL**: `@graphql-eslint/eslint-plugin` for `gql` template literals, opt-in via `graphqlConfig`
@@ -44,13 +44,13 @@ This package provides a unified ESLint configuration that combines multiple popu
 
 ### Temporarily Disabled Rules
 Some recommended rules are turned off because the codebase still has many violations. They are the rules set to `off` in the "gold standard, but have many violations" block of [`src/baseConfig.ts`](./src/baseConfig.ts):
-- Core rules: `prefer-rest-params`, `no-global-assign`, `no-async-promise-executor`
+- Core rules: `prefer-rest-params`, `no-async-promise-executor`
 - TypeScript-specific rules (`@typescript-eslint/*`)
-- Mocha testing rules (`mocha/no-exclusive-tests` stays an error)
+- Mocha testing rules, set in [`src/mochaConfig.ts`](./src/mochaConfig.ts) (`mocha/no-exclusive-tests` stays an error)
 - Vue component rules
 - Cypress-specific rules
 
-Re-enabling them, one rule or a small group at a time, is tracked in [cypress-io/cypress#35250](https://github.com/cypress-io/cypress/issues/35250). `react/react-in-jsx-scope` and `react/jsx-uses-react` are also off in that block, but for good: they don't apply to React 18's JSX transform.
+Re-enabling them, one rule or a small group at a time, is tracked in [cypress-io/cypress#35250](https://github.com/cypress-io/cypress/issues/35250).
 
 ## Usage
 
@@ -144,5 +144,5 @@ This package includes all necessary ESLint plugins and parsers as devDependencie
 
 - This configuration is designed for the Cypress monorepo and may need adjustments for other projects
 - Some recommended rules stay off until their existing violations are fixed; see [Temporarily Disabled Rules](#temporarily-disabled-rules)
-- The configuration uses the new flat config format (ESLint 9+)
+- The configuration uses the new flat config format (ESLint 10+)
 - TypeScript project service is enabled for better type-aware linting 

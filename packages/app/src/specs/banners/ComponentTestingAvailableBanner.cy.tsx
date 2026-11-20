@@ -1,5 +1,3 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 import ComponentTestingAvailableBanner from './ComponentTestingAvailableBanner.vue'
 import { TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
 import type Sinon from 'sinon'
@@ -24,7 +22,7 @@ describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
       )
 
       cy.findByTestId('alert-prefix-icon').should('be.visible')
-      cy.contains(defaultMessages.specPage.banners.componentTesting.title.replace('{0}', framework.name)).should('be.visible')
+      cy.contains(`${framework.name} component testing is available for this project`).should('be.visible')
     })
   })
 
