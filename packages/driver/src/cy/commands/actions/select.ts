@@ -83,7 +83,7 @@ export default (Commands, Cypress, cy) => {
           $errUtils.throwErrByPath('select.invalid_element', { args: { node } })
         }
 
-        if (options.$el.length && options.$el.length > 1) {
+        if (options.$el.length > 1) {
           $errUtils.throwErrByPath('select.multiple_elements', { args: { num: options.$el.length } })
         }
       }
@@ -112,8 +112,8 @@ export default (Commands, Cypress, cy) => {
 
       const subjectChain = cy.subjectChain()
 
-      const getOptions = () => {
-        options.$el = cy.getSubjectFromChain(subjectChain)
+      const getOptions = ($el = cy.getSubjectFromChain(subjectChain)) => {
+        options.$el = $el
         validateSelectSubject()
         let notAllUniqueValues
 
@@ -229,8 +229,17 @@ export default (Commands, Cypress, cy) => {
         return cy.now('click', options.$el, {
           $el: options.$el,
           subjectFn: () => {
+            const $el = cy.getSubjectFromChain(subjectChain)
+
+            // Leave an empty or detached re-queried subject to the click's own check, which
+            // reports it as the page updating, and only refresh the option metadata once
+            // there is a current element to read it from.
+            if ($el.length === 0 || $dom.isDetached($el)) {
+              return $el
+            }
+
             // Keep option metadata in sync with the element click re-queries.
-            ({ values, optionEls, optionsObjects, notAllUniqueValues } = getOptions())
+            ({ values, optionEls, optionsObjects, notAllUniqueValues } = getOptions($el))
             consoleProps.Selected = values
 
             return options.$el
