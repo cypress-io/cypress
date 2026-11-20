@@ -125,6 +125,15 @@ function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protoc
  * stale length headers. The pause-header fallback describes the wire body, not
  * the decoded body we fulfill with, so its encoding headers are stripped too.
  */
+/**
+ * The origin's headers for fulfilling it with its decoded body:
+ * `Content-Encoding: gzip`, `Content-Length` and `Transfer-Encoding` are
+ * dropped, since they describe the wire body, not the one being sent.
+ */
+export function toUnchangedFulfilledHeaders (headers: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] {
+  return stripHeaderEntries(headers, WIRE_ENCODING_HEADERS)
+}
+
 function toFulfilledHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
   if (middlewareHeaders) {
     return stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
@@ -262,7 +271,8 @@ function encodePausedResponse (
     })
 
   // A skipped body was never read, so its placeholder cannot replace the stream.
-  const fulfilled = bodyModified || (contentTypeModified && response.body !== undefined && !pausedResponse.bodySkipped) || redirectModified
+  // A taken body can't be continued, so it is fulfilled even when unchanged.
+  const fulfilled = pausedResponse.bodyTaken === true || bodyModified || (contentTypeModified && response.body !== undefined && !pausedResponse.bodySkipped) || redirectModified
 
   return {
     ...pausedResponse,

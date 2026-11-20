@@ -23,6 +23,7 @@ import type { CdpFetchTransportRequest, CdpFetchTransportResponse } from './brow
 import { InterceptionEscapeDetector } from './browsers/cdp-protocol/interception-escape-detector'
 import type { InterceptionEscape } from './browsers/cdp-protocol/interception-escape-detector'
 import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
+import { mayExceedWholeReadLimit } from './browsers/cdp-protocol/read-response-body'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
 import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isAnsweredByCypress, isReadMethod, resolveProxyUrlBase } from './adapters/internal-routes'
 
@@ -210,6 +211,8 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     useBrowserNetworkInterception: true,
   })
 
+  const readBodyInChunks = (event: Protocol.Fetch.RequestPausedEvent): boolean => mayExceedWholeReadLimit(event.responseHeaders)
+
   // Shared by the main transport and every extra-target transport so a popup
   // can never classify or gate capture differently than the page that opened
   // it.
@@ -328,6 +331,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     resolveOriginRedirect,
     onRequestCanceled,
     shouldStreamBody,
+    readBodyInChunks,
     shouldCaptureBody,
   })
 
@@ -374,6 +378,7 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
         resolveOriginRedirect,
         onRequestCanceled,
         shouldStreamBody,
+        readBodyInChunks,
         shouldCaptureBody,
       })
 
