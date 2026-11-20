@@ -1603,6 +1603,35 @@ describe('lib/server-base', () => {
       )
     })
 
+    it('calls proxy.ws with the bare address and port of an IPv6 host', () => {
+      server.remoteStates.set('http://localhost:3000')
+
+      const req = {
+        connection: {
+          encrypted: false,
+        },
+        url: '/',
+        headers: {
+          host: '[::1]:3000',
+        },
+      }
+
+      server.proxyWebsockets(proxy, '/foo', req, socket, head)
+
+      expect(proxy.ws).toHaveBeenCalledWith(
+        req,
+        socket,
+        head,
+        expect.objectContaining({
+          target: expect.objectContaining({
+            host: '::1',
+            protocol: 'http:',
+          }),
+        }),
+        expect.any(Function),
+      )
+    })
+
     it('removes Cypress cookies from the upgrade request', () => {
       server.remoteStates.set('https://www.foobar.com')
 

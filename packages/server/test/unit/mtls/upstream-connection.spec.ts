@@ -66,6 +66,21 @@ describe('connectUpstream through an upstream proxy', () => {
   // The status line can arrive split across segments, and the status check matches a prefix,
   // so a response judged on the first chunk alone would accept a partial line and then feed
   // the rest of the headers to the TLS handshake as if they were records.
+  it('sends the decoded proxy credentials', async () => {
+    let seen = ''
+    const port = await startProxy((socket, request) => {
+      seen = request
+      socket.destroy()
+    })
+
+    process.env.HTTP_PROXY = `http://jane.doe:s3cr3t%40Pa55@127.0.0.1:${port}`
+    process.env.HTTPS_PROXY = process.env.HTTP_PROXY
+
+    await connectUpstream({ hostname: 'origin.example', port: 443, alpnProtocols: [], material: {} }).catch(() => {})
+
+    expect(seen.split('\r\n')).toContain(`Proxy-Authorization: Basic ${Buffer.from('jane.doe:s3cr3t@Pa55').toString('base64')}`)
+  })
+
   it('waits for the whole response before judging it', async () => {
     const port = await startProxy((socket) => {
       socket.write('HTTP/1.1 4')

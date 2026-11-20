@@ -18,7 +18,7 @@ import { getRoutesForRequest } from '@packages/network-interception'
 import type { NetStubbingState } from '@packages/net-stubbing'
 import { DriverInterceptRegistrationAdapter, netStubbingState } from '@packages/net-stubbing'
 import { get as fixtureGet } from './fixture'
-import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
+import { agent, clientCertificates, httpUtils, concatStream, parseUrlFields } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
@@ -1082,7 +1082,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // get the protocol using req.connection.encrypted
       // get the port & hostname from host header
       const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
-      const { hostname, protocol } = url.parse(fullUrl)
+      const { hostname, protocol } = parseUrlFields(fullUrl)
       const { port } = parseUrlIntoHostProtocolDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
