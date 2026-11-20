@@ -58,12 +58,12 @@ export async function handleInterceptRequest (
         finalResBody: request.res.body!,
       } : {},
       mergeChanges: _.noop,
-    }).catch((error) => {
-      // The response has already been sent, so there is nothing left to fail
-      mw.debug('cy.intercept: error sending after:response %o', { error })
     }).finally(() => {
       mw.debug('cy.intercept: request/response finished, cleaning up')
       delete mw.netStubbingState.requests[request.id]
+    }).catch((error) => {
+      // The response has already been sent, so there is nothing left to fail
+      mw.debug('cy.intercept: error sending after:response %o', { error })
     })
   })
 

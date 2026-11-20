@@ -210,12 +210,12 @@ function navigateAboutBlank ({ inBetweenTestsAndNextTestHasTestIsolationOn }: { 
     return Promise.resolve()
   }
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     cy.once('window:load', resolve)
 
     Cypress.action('cy:url:changed', '')
 
-    Cypress.action('cy:visit:blank', { testIsolation: true })
+    Promise.resolve(Cypress.action('cy:visit:blank', { testIsolation: true })).catch(reject)
   })
 }
 
