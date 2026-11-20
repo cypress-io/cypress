@@ -1,7 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
-const { consolidateDeps, getSnapshotCacheDir } = require('@tooling/v8-snapshot')
 const del = require('del')
+const glob = require('glob')
 const esbuild = require('esbuild')
 const tempDir = require('temp-dir')
 const workingDir = path.join(tempDir, 'binary-cleanup-workdir')
@@ -35,8 +35,19 @@ async function removeEmptyDirectories (directory) {
   }
 }
 
-// Snapshot metadata follows the dev install's hoisting, so on a case-insensitive filesystem a stale
-// path can hit a different file, e.g. mime 1's `mime/mime.js` resolving to mime 3's `mime/Mime.js`.
+// bluebird and lodash are nested under many packages at the same major version, so every package uses the top-level copy
+const consolidateDuplicateDependencies = async (buildAppDir) => {
+  for (const dependency of ['bluebird', 'lodash']) {
+    const duplicates = glob.sync(`{packages,node_modules/@cypress,node_modules/@packages}/**/node_modules/${dependency}`, { cwd: buildAppDir })
+
+    console.log(`removing ${duplicates.length} nested copies of ${dependency}`)
+
+    await Promise.all(duplicates.map((duplicate) => fs.remove(path.join(buildAppDir, duplicate))))
+  }
+}
+
+// On a case-insensitive filesystem, a path whose case differs from the file on disk deletes that other file,
+// e.g. mime 1's `mime/mime.js` matching mime 3's `mime/Mime.js`.
 const createExactCaseChecker = (baseDir) => {
   const dirEntries = new Map()
 
@@ -63,9 +74,10 @@ const createExactCaseChecker = (baseDir) => {
   }
 }
 
-const getDependencyPathsToKeep = async (buildAppDir) => {
+const getDependencyPathsToKeep = async (buildAppDir, additionalEntryPoints = []) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const startingEntryPoints = [
+    ...additionalEntryPoints,
     'packages/server/lib/plugins/child/require_async_child.js',
     'packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor/dist/index.js',
     'packages/server/node_modules/ts-loader/index.js',
@@ -83,7 +95,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/mocha-7.2.0/index.js',
     'packages/server/node_modules/webdriver/build/index.js',
     'packages/server/node_modules/@wdio/utils/build/node.js',
-    // jimp is deferred in the snapshot, so its dependencies are loaded from disk
+    // jimp is required at runtime rather than bundled, so its dependencies are loaded from disk
     'node_modules/jimp/dist/commonjs/index.js',
     // dependencies needed for geckodriver when running firefox in the binary
     'node_modules/pump/index.js',
@@ -103,10 +115,10 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
   let esbuildResult
   let newEntryPointsFound = true
 
-  // The general idea here is to run esbuild on entry points that are used outside of the snapshot. If, during the process,
+  // The general idea here is to run esbuild on entry points that are used outside of the start bundle. If, during the process,
   // we find places where we do a require.resolve on a module, that should be treated as an additional entry point and we run
   // esbuild again. We do this until we no longer find any new entry points. The resulting metafile inputs are
-  // the dependency paths that we need to ensure stay in the snapshot.
+  // the dependency paths that we need to ensure stay in the binary.
   while (newEntryPointsFound) {
     esbuildResult = await esbuild.build({
       entryPoints: [...entryPoints],
@@ -157,77 +169,40 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
   return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints, 'package.json']
 }
 
-const createServerEntryPointBundle = async (buildAppDir) => {
-  const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
-  const entryPoints = [path.join(unixBuildAppDir, 'packages/server/index.js')]
-  // Build the binary entry point ignoring anything that happens in start-cypress since that will be in the v8 snapshot
-  const esbuildResult = await esbuild.build({
-    entryPoints,
-    bundle: true,
-    outdir: workingDir,
-    platform: 'node',
-    metafile: true,
-    absWorkingDir: unixBuildAppDir,
-    external: [
-      './transpile-ts',
-      './start-cypress',
-      'electron',
-    ],
-  })
-
-  console.log(`copying server entry point bundle from ${path.join(workingDir, 'index.js')} to ${path.join(buildAppDir, 'packages', 'server', 'index.js')}`)
-
-  await fs.copy(path.join(workingDir, 'index.js'), path.join(buildAppDir, 'packages', 'server', 'index.js'))
-
-  // Convert these inputs to a relative file path. Note that these paths are posix paths.
-  return [...Object.keys(esbuildResult.metafile.inputs)].filter((input) => input !== 'packages/server/index.js').map((input) => `./${input}`)
-}
-
-const buildEntryPointAndCleanup = async (buildAppDir) => {
-  const [keptDependencies, serverEntryPointBundleDependencies] = await Promise.all([
-    // 1. Retrieve all dependencies that still need to be kept in the binary. In theory, we could use the bundles generated here as single files within the binary,
-    // but for now, we just track on the dependencies that get pulled in
-    getDependencyPathsToKeep(buildAppDir),
-    // 2. Create a bundle for the server entry point. This will be used to start the server in the binary. It returns the dependencies that are pulled in by this bundle that potentially can now be removed
-    createServerEntryPointBundle(buildAppDir),
+// bundledDependencies are the files built into the start and server entry point bundles, and loadedFromDisk the
+// files the start bundle still requires at runtime, all relative to buildAppDir, which must be a real path
+const removeBundledDependencies = async (buildAppDir, { bundledDependencies, loadedFromDisk }) => {
+  // 1. Retrieve all dependencies that are loaded from disk and so must be kept in the binary
+  const keptDependencies = new Set([
+    ...await getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(c?js|json)$/.test(target))),
+    ...loadedFromDisk,
   ])
 
-  // 3. Gather the dependencies that could potentially be removed from the binary due to being in the snapshot or in the entry point bundle
-  const snapshotMetadata = require(path.join(getSnapshotCacheDir(), 'snapshot-meta.json'))
-  const potentiallyRemovedDependencies = [
-    ...snapshotMetadata.healthy,
-    ...snapshotMetadata.deferred,
-    ...snapshotMetadata.norewrite,
-    ...serverEntryPointBundleDependencies,
-  ]
+  // package.json and other data files stay: Node reads them to resolve the packages that are still loaded from disk
+  const potentiallyRemovedDependencies = bundledDependencies.filter((dependency) => /\.c?js$/.test(dependency))
 
   console.log(`potentially removing ${potentiallyRemovedDependencies.length} dependencies`)
 
-  // 4. Remove all dependencies that are in the snapshot but not in the list of kept dependencies from the binary
+  // 2. Remove the bundled dependencies that are not in the list of kept dependencies from the binary
   const existsWithExactCase = createExactCaseChecker(buildAppDir)
 
   await Promise.all(potentiallyRemovedDependencies.map(async (dependency) => {
-    const typeScriptlessDependency = dependency.replace(/\.ts$/, '.js')
-
     // babel/runtime requires all of its dependencies in a very non-standard dynamic way. We will keep anything in babel/runtime
-    if (!keptDependencies.includes(typeScriptlessDependency.slice(2)) && !typeScriptlessDependency.includes('@babel/runtime') && await existsWithExactCase(typeScriptlessDependency)) {
-      await fs.remove(path.join(buildAppDir, typeScriptlessDependency))
+    if (!keptDependencies.has(dependency.slice(2)) && !dependency.includes('@babel/runtime') && await existsWithExactCase(dependency)) {
+      await fs.remove(path.join(buildAppDir, dependency))
     }
   }))
-
-  // 5. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
-  await consolidateDeps({ projectBaseDir: buildAppDir })
 }
 
 const cleanupUnneededDependencies = async (buildAppDir) => {
   console.log(`removing unnecessary files from the binary to further lean out the distribution.`)
-  // 6. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
+  // 3. Remove various unnecessary files from the binary to further clean things up. Likely, there is additional work that can be done here
   // this is it's own function as we always want to clean out unneeded dependencies
   await del([
     // Remove test files
     path.join(buildAppDir, '**', 'test'),
     path.join(buildAppDir, '**', 'tests'),
-    // What we need of prettier is entirely encapsulated within the v8 snapshot, but has a few leftover large files
+    // What we need of prettier is entirely encapsulated within the start bundle, but has a few leftover large files
     path.join(buildAppDir, '**', 'prettier', 'esm'),
     path.join(buildAppDir, '**', 'prettier', 'standalone.js'),
     path.join(buildAppDir, '**', 'prettier', 'bin-prettier.js'),
@@ -284,7 +259,8 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
 }
 
 module.exports = {
+  consolidateDuplicateDependencies,
   createExactCaseChecker,
-  buildEntryPointAndCleanup,
+  removeBundledDependencies,
   cleanupUnneededDependencies,
 }

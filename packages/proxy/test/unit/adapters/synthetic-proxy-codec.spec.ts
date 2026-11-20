@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
 import { createSyntheticExpressContext, createSyntheticIncomingResponse } from '../../../lib/adapters/synthetic-express-context'
 import RequestMiddleware from '../../../lib/http/request-middleware'
+import { getMetadataHeaderValue } from '../../../lib/http/util/metadata-header-value'
 import { testMiddleware } from '../http/helpers'
 
 async function readStream (stream: Readable): Promise<string> {
@@ -736,12 +737,12 @@ describe('createSyntheticProxyCodec', () => {
       url: 'https://example.test/download-basic-auth.csv',
       method: 'GET',
       headers: {
-        'x-cypress-is-from-extra-target': 'true',
+        'x-cypress-is-from-extra-target': getMetadataHeaderValue(),
         accept: '*/*',
       },
     })
 
-    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal('true')
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal(getMetadataHeaderValue())
     expect(ctx.req.isFromExtraTarget).to.equal(false)
 
     let maybeSetBasicAuthHeadersRan = false

@@ -17,11 +17,13 @@ dayjs.extend(relativeTime)
 // Spec names are repository content, so they're passed to git as literal pathspec
 // arguments, never through a shell. SimpleGit caps how many `git log` calls run at once.
 
-// matches <timestamp> <when> <author>
-// $ git log -1 --pretty=format:%ci %ar %an <file>
-// eg '2021-09-14 13:43:19 +1000 2 days ago Lachlan Miller
-const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+].+?)\s(.+ago)\s([^|]*)\|([^|]*)\|([^|]*)/
-const GIT_LOG_ARGS = ['--literal-pathspecs', 'log', '--max-count=1', '--pretty=format:%ci %ar %an|%h|%s']
+// matches <committer date> <author date as unix seconds> <author>|<short hash>|<subject>
+// eg '2021-09-14 13:43:19 +1000 1631504599 Marisol Okafor|1a2b3c4|add spec'
+// The age is formatted from the unix time with dayjs, like the created and modified
+// specs, rather than read from `%ar`: git translates that in non-English locales and
+// replaces it with `in the future` for dates past the clock.
+const GIT_LOG_REGEXP = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+]\d{4})\s(\d+)\s([^|]*)\|([^|]*)\|([^|]*)/
+const GIT_LOG_ARGS = ['--literal-pathspecs', 'log', '--max-count=1', '--pretty=format:%ci %at %an|%h|%s']
 const GIT_ROOT_DIR_COMMAND = '--show-toplevel'
 const SIXTY_SECONDS = 60 * 1000
 
@@ -333,14 +335,14 @@ export class GitDataSource {
           if (file && info && info[1] && info[2] && info[3] && info[4] && info[5]) {
             toSet = {
               lastModifiedTimestamp: info[1],
-              lastModifiedHumanReadable: info[2],
+              lastModifiedHumanReadable: dayjs.unix(Number(info[2])).fromNow(),
               author: info[3],
               statusType: 'unmodified',
               subject: info[5],
               shortHash: info[4],
             }
           } else {
-            debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <time_ago> <author>|<short_hash>|<subject>'. Got: ${data}`)
+            debug(`did not get expected git log for ${file}, expected string with format '<timestamp> <unix_time> <author>|<short_hash>|<subject>'. Got: ${data}`)
             toSet = null
           }
         }
