@@ -1,6 +1,6 @@
 import { telemetry } from '@packages/telemetry'
 import { getSameSiteContext, shouldAttachAndSetCookies, addCookieJarCookiesToRequest } from '../http/util/cookies'
-import { doesTopNeedToBeSimulated } from '../http/util/top-simulation'
+import { doesBrowserSendAllCookies, doesTopNeedToBeSimulated } from '../http/util/top-simulation'
 import { isVerboseTelemetry as isVerbose } from '../http'
 import * as errors from '@packages/errors'
 import type { RequestInterceptionMiddlewareCtx } from './types'
@@ -12,13 +12,15 @@ export function attachCrossOriginCookies (mw: RequestInterceptionMiddlewareCtx):
   const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: mw.reqMiddlewareSpan, isVerbose })
 
   const doesTopNeedSimulation = doesTopNeedToBeSimulated(mw)
+  const doesBrowserSendAll = doesTopNeedSimulation && doesBrowserSendAllCookies(mw)
 
   span?.setAttributes({
     doesTopNeedToBeSimulated: doesTopNeedSimulation,
+    doesBrowserSendAllCookies: doesBrowserSendAll,
     resourceType: mw.req.resourceType,
   })
 
-  if (!doesTopNeedSimulation) {
+  if (!doesTopNeedSimulation || doesBrowserSendAll) {
     span?.end()
 
     return mw.next()
