@@ -31,6 +31,7 @@ lib/
   connect.ts             Socket helpers: DNS address resolution and retrying net/tls connections
   http-utils.ts          responseMustHaveEmptyBody, plus the lenient HTTP parser options for real-world traffic
   index.ts               Public entry point; re-exports every module except ca.ts, which is internal to agent.ts
+  url-fields.ts          parseUrlFields: parses a URL with `URL` into the shape `url.parse` gives, for code that dials the host
 ```
 
 ## Gotchas / Notes
