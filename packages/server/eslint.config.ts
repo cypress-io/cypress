@@ -1,4 +1,4 @@
-import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, userNodeConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, mochaConfig, nodeConfig, noFloatingPromisesConfig, userNodeConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
@@ -12,6 +12,7 @@ export default [
   },
   // Only the unit specs run on Vitest; integration and performance specs run on mocha
   ...vitestConfig.map((block) => ({ ...block, files: ['test/unit/**'] })),
+  ...mochaConfig.map((block) => ({ ...block, files: ['test/**'], ignores: [...(block.ignores ?? []), 'test/unit/**'] })),
   {
     languageOptions: {
       parserOptions: {
