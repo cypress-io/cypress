@@ -1,8 +1,16 @@
 # @cypress/puppeteer
 
-Use [Puppeteer's browser API](https://pptr.dev/api) from your Cypress tests with a single command.
+Enable [multi-tab testing in Cypress](https://on.cypress.io/multi-tab-testing) with the Puppeteer plugin.
 
-Cypress runs your tests in a single tab, so it can't switch to a tab or window that your app opens, or work with several pages at once. This plugin gives you a Puppeteer `Browser` connected to the browser Cypress launched. You do that work with Puppeteer, then pass the results back to your test for assertions.
+## Why use this plugin
+
+Cypress runs your tests in a single tab, so it can't switch to a tab or window that your app opens, or work with several pages at once. Use this plugin when your test needs to:
+
+- Check the content of a tab or window that your app opens, such as a link that opens in a new tab
+- Open an extra tab and visit a page in it
+- Work with several pages in one test
+
+The plugin gives you a [Puppeteer](https://pptr.dev/api) `Browser` connected to the browser Cypress launched, through a single command, `cy.puppeteer()`. You do the multi-tab work with Puppeteer, then pass the results back to your test for assertions.
 
 For anything Cypress can do on its own, use Cypress commands instead. They retry automatically and show each step in the Command Log, while `cy.puppeteer()` doesn't retry and logs a single entry for the whole handler.
 

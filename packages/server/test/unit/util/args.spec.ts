@@ -514,6 +514,11 @@ describe('lib/util/args', () => {
       ])
     })
 
+    it('keeps --headless when Cypress restarts itself under Electron', () => {
+      expect(toArray({ headless: true })).toStrictEqual(['--headless=true'])
+      expect(toObject(['--headless=true']).headless).toBe(true)
+    })
+
     it('does not pick disallowed args', () => {
       const result = toArray({ doNotPick: 'forbidden' })
 

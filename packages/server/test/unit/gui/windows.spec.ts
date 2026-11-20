@@ -2,12 +2,18 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 import { EventEmitter } from 'events'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { BrowserWindow } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import * as Windows from '../../../lib/gui/windows'
 import * as savedState from '../../../lib/saved_state'
 
 vi.mock('electron', () => {
   return {
+    app: {
+      dock: {
+        hide: vi.fn(),
+        show: vi.fn(() => Promise.resolve()),
+      },
+    },
     BrowserWindow: {
       fromWebContents () {},
     },
@@ -21,6 +27,8 @@ describe('lib/gui/windows', () => {
 
   beforeEach(() => {
     Windows.reset()
+    vi.mocked(app.dock!.hide).mockClear()
+    vi.mocked(app.dock!.show).mockClear()
 
     win = new EventEmitter()
     win.loadURL = vi.fn()
@@ -32,6 +40,8 @@ describe('lib/gui/windows', () => {
     win.webContents.setWindowOpenHandler = vi.fn()
     win.webContents.userAgent = DEFAULT_USER_AGENT
     win.isDestroyed = vi.fn(() => false)
+    win.show = vi.fn()
+    win.showInactive = vi.fn()
   })
 
   afterEach(() => {
@@ -71,6 +81,78 @@ describe('lib/gui/windows', () => {
     })
   })
 
+  describe('windows kept hidden', () => {
+    const openIndex = (keepHidden: boolean) => {
+      return Windows.open('/path/to/project', { type: 'INDEX', url: 'foo', keepHidden }, () => win)
+    }
+
+    it('shows a window that is already open', async () => {
+      await openIndex(false)
+      await openIndex(false)
+
+      expect(win.show).toHaveBeenCalledOnce()
+    })
+
+    it('leaves a kept-hidden window hidden when it is opened again', async () => {
+      await openIndex(true)
+      await openIndex(true)
+
+      expect(win.show).not.toHaveBeenCalled()
+    })
+
+    it('focuses the main window', async () => {
+      await openIndex(false)
+      Windows.focusMainWindow()
+
+      expect(win.show).toHaveBeenCalledOnce()
+    })
+
+    it('does not focus a main window that is kept hidden', async () => {
+      await openIndex(true)
+      Windows.focusMainWindow()
+
+      expect(win.show).not.toHaveBeenCalled()
+    })
+
+    it('shows every window inactive except the ones kept hidden', async () => {
+      await openIndex(false)
+      Windows.showAll()
+
+      expect(win.showInactive).toHaveBeenCalledOnce()
+
+      win.showInactive.mockClear()
+      Windows.reset()
+      await openIndex(true)
+      Windows.showAll()
+
+      expect(win.showInactive).not.toHaveBeenCalled()
+    })
+
+    it('keeps Cypress out of the macOS Dock while the window is kept hidden', async () => {
+      await openIndex(true)
+      Windows.focusMainWindow()
+      Windows.showAll()
+
+      expect(app.dock!.hide).toHaveBeenCalledOnce()
+      expect(app.dock!.show).not.toHaveBeenCalled()
+    })
+
+    it('leaves the Dock alone for a window that is not kept hidden', async () => {
+      await openIndex(false)
+
+      expect(app.dock!.hide).not.toHaveBeenCalled()
+    })
+
+    it('forgets the kept-hidden window on reset', async () => {
+      await openIndex(true)
+      Windows.reset()
+      await openIndex(false)
+      Windows.focusMainWindow()
+
+      expect(win.show).toHaveBeenCalled()
+    })
+  })
+
   describe('.create', () => {
     it('builds a hidden window without a frame or a thick frame', () => {
       let options
@@ -85,6 +167,31 @@ describe('lib/gui/windows', () => {
         frame: false,
         thickFrame: false,
       })
+    })
+
+    it('refocuses the web view of a hidden window when it navigates', () => {
+      win.focusOnWebView = vi.fn()
+      Windows.create('/foo/', { show: false }, () => win)
+
+      win.webContents.emit('did-start-loading')
+
+      expect(win.focusOnWebView).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not refocus the web view of a window kept hidden, since it is the Launchpad and no test types into it', () => {
+      win.focusOnWebView = vi.fn()
+      Windows.create('/foo/', { show: false, keepHidden: true }, () => win)
+
+      win.webContents.emit('did-start-loading')
+
+      expect(win.focusOnWebView).not.toHaveBeenCalled()
+    })
+
+    it('keeps dev tools closed for a hidden window, even when saved state has them open', () => {
+      Windows.create('/foo/', { devTools: true, show: false }, () => win)
+      Windows.create('/foo/', { devTools: true, show: false, keepHidden: true }, () => win)
+
+      expect(win.webContents.openDevTools).not.toHaveBeenCalled()
     })
 
     it('opens dev tools if saved state is open', () => {

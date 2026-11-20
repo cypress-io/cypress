@@ -135,3 +135,8 @@ export function origin (urlStr: string) {
     return `${scheme ? scheme[0] : ''}${getAuthority(urlStr)}`
   }
 }
+
+// browsers treat localhost as a secure context, so it sets and reads Secure cookies over http
+export function isSecureUrl (url: URL) {
+  return url.protocol === 'https:' || isLocalhost(url)
+}

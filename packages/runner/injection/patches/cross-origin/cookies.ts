@@ -1,8 +1,9 @@
 import {
   CookieJar,
-  toughCookieToAutomationCookie,
   automationCookieToToughCookie,
 } from '@packages/server/lib/automation/cookie/jar'
+import { isBlockedByExisting, isExpired, isSameCookie, meetsDocumentCookieRules, parseDocumentCookie } from '@packages/server/lib/automation/cookie/document-cookie-rules'
+import { isSecureUrl } from '@packages/network-tools/lib/uri'
 import type { Cookie as ToughCookie,
   SerializableAutomationCookie,
 } from '@packages/server/lib/automation/cookie/jar'
@@ -15,7 +16,10 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   if (!documentCookieString || !documentCookieString.trim().length) return []
 
   return documentCookieString.split(';').map((cookieString) => {
-    const [name, value] = cookieString.split('=')
+    // a cookie without a name has no '=', and a value may contain one
+    const separator = cookieString.indexOf('=')
+    const name = separator === -1 ? '' : cookieString.slice(0, separator)
+    const value = cookieString.slice(separator + 1)
 
     const cookieDomain = location.hostname
 
@@ -34,17 +38,14 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   })
 }
 
-export type SendCookie = (cookie: SerializableAutomationCookie) => void
+export type SendCookie = (cookieString: string, url: string) => void
 
-const sendCookieToServer: SendCookie = (cookie) => {
+const sendCookieToServer: SendCookie = (cookieString, url) => {
   window.top!.postMessage({
     event: 'cross:origin:aut:set:cookie',
     data: {
-      cookie,
-      url: location.href,
-      // url will always match the cookie domain, so strict context tells
-      // tough-cookie to allow it to be set
-      sameSiteContext: 'strict',
+      cookieString,
+      url,
     },
   }, '*')
 }
@@ -56,14 +57,18 @@ const sendCookieToServer: SendCookie = (cookie) => {
 // a different origin than top. The goal is to make it act like it would
 // if the user's app was run in top.
 export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[], sendCookie: SendCookie = sendCookieToServer) => {
+  // browsers keep reading and writing cookies against the url the document
+  // loaded with, even after history.pushState() changes location
   const url = location.href
+  const { pathname } = location
   const domain = location.hostname
   const cookieJar = new CookieJar()
+  const isSecure = isSecureUrl(new URL(url))
   const existingCookies = parseDocumentCookieString(document.cookie)
 
   const getDocumentCookieValue = () => {
-    return cookieJar.getCookies(url, undefined, { http: false }).map((cookie: ToughCookie) => {
-      return `${cookie.key}=${cookie.value}`
+    return cookieJar.getCookies(url, undefined, { http: false, secure: isSecure }).map((cookie: ToughCookie) => {
+      return cookie.key ? `${cookie.key}=${cookie.value}` : cookie.value
     }).join('; ')
   }
 
@@ -97,54 +102,34 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
 
     set (newValue: any) {
       const stringValue = `${newValue}`
-      const parsedCookie = CookieJar.parse(stringValue)
+      const cookie = parseDocumentCookie(stringValue, pathname)
 
-      if (parsedCookie?.hostOnly === null) {
-        // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates.
-        // in the case it is not set, we need to calculate it: only a cookie without a Domain attribute is host-only
-        parsedCookie.hostOnly = !parsedCookie.domain
+      // the server drops writes that break these rules, so keep them out of document.cookie too
+      if (!cookie || !meetsDocumentCookieRules(cookie, isSecure, domain)) return getDocumentCookieValue()
+
+      const stored = { name: cookie.key, domain: cookie.domain || domain, path: cookie.path || '/' }
+      const isBlocked = cookieJar.getAllCookies().some((existing) => {
+        return !isExpired(existing) && isBlockedByExisting({ ...existing, name: existing.key, domain: existing.domain || domain }, stored, isSecure)
+      })
+
+      if (isBlocked) return getDocumentCookieValue()
+
+      // tough-cookie refuses to replace an HttpOnly cookie, even one that has expired
+      if (cookieJar.getAllCookies().some((existing) => isExpired(existing) && isSameCookie({ name: existing.key, domain: existing.domain || domain, path: existing.path }, stored))) {
+        cookieJar.removeCookie(stored)
       }
 
-      // if result is undefined, it was invalid and couldn't be parsed
-      if (!parsedCookie) return getDocumentCookieValue()
+      if (!setCookie(cookie)) return getDocumentCookieValue()
 
-      // cookies written without a Path are stored at '/', so check them there
-      const cookieString = parsedCookie.path ? stringValue : `${stringValue}; Path=/`
-
-      // if the cookie is expired, remove it in our cookie jar
-      // and via setting it inside our automation client with the correct expiry.
-      // This will have the effect of removing the cookie
-      if (parsedCookie.expiryTime() < Date.now()) {
-        if (!setCookie(cookieString)) return getDocumentCookieValue()
-
-        cookieJar.removeCookie({
-          name: parsedCookie.key,
-          path: parsedCookie.path || '/',
-          domain: parsedCookie.domain as string,
-        })
-
-        // send the cookie to the server so it can be removed from the browser
-        // via automation. If the cookie expiry is set inside the server-side cookie jar,
-        // the cookie will be automatically removed.
-        sendCookie(toughCookieToAutomationCookie(parsedCookie, domain))
-
-        return getDocumentCookieValue()
+      // an expired cookie removes the one it replaces, here and in the browser
+      if (isExpired(cookie)) {
+        cookieJar.removeCookie(stored)
       }
 
-      // we should be able to pass in parsedCookie here instead of the string
-      // value, but tough-cookie doesn't recognize it using an instanceof
-      // check and throws an error. because we can't, we have to massage
-      // some of the properties below to be correct
-      const cookie = setCookie(cookieString)
-
-      if (cookie) {
-        cookie.sameSite = parsedCookie.sameSite
-
-        // send the cookie to the server so it can be set in the browser via
-        // automation and in our server-side cookie jar so it's available
-        // to subsequent injections
-        sendCookie(toughCookieToAutomationCookie(cookie, domain))
-      }
+      // send the cookie to the server so it can be set in the browser via
+      // automation and in our server-side cookie jar so it's available
+      // to subsequent injections
+      sendCookie(stringValue, url)
 
       return getDocumentCookieValue()
     },
@@ -159,8 +144,14 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     'set:cookie': (cookie: SerializableAutomationCookie) => {
       setCookie(automationCookieToToughCookie(cookie, domain), { http: true })
     },
-    'clear:cookie': (name: string) => {
-      cookieJar.removeCookie({ name, domain })
+    // with no path, the cookie is cleared at every path
+    'clear:cookie': (name: string, cleared?: { domain?: string, path?: string } | null) => {
+      cookieJar.removeCookie({
+        name,
+        // the browser clears one cookie, which may be one set for a parent domain
+        domain: cleared?.domain?.replace(/^\./, '') || domain,
+        path: cleared?.path,
+      })
     },
     'clear:cookies': reset,
   }
@@ -169,7 +160,11 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     Cypress.on('test:before:run', reset)
 
     Cypress.on('set:cookie', onCookieCommand['set:cookie'])
-    Cypress.on('clear:cookie', onCookieCommand['clear:cookie'])
+    Cypress.on('clear:cookie', (name: string, cleared?: { domain?: string, path?: string } | null) => {
+      // Chromium clears the cookie at every path, other browsers only the one they return
+      onCookieCommand['clear:cookie'](name, cleared && { ...cleared, path: Cypress.isBrowser({ family: 'chromium' }) ? undefined : cleared.path })
+    })
+
     Cypress.on('clear:cookies', onCookieCommand['clear:cookies'])
   }
 

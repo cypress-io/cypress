@@ -292,7 +292,7 @@ export class StudioLifecycleManager {
       projectId: currentProjectOptions.projectSlug,
       testingType: cfg.testingType,
       cloudApi: {
-        url: routes.getApiUrl(),
+        url: routes.apiUrl,
         retryWithBackoff: api.retryWithBackoff,
         requestPromise: api.rp,
       },

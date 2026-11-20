@@ -67,6 +67,7 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     projectApi: {
       setSessionLoadError: jest.fn().mockResolvedValue(undefined),
       clearSessionLoadError: jest.fn().mockResolvedValue(undefined),
+      setSessionPluginsError: jest.fn(),
       closeActiveProject: jest.fn(),
       insertProjectToCache: jest.fn().mockResolvedValue(undefined),
       getProjectRootsFromCache: jest.fn().mockResolvedValue([]),

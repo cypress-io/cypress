@@ -87,7 +87,7 @@ describe('lib/cloud/routes', () => {
 
       const loaded = await routes()
 
-      expect(loaded.getApiUrl()).toBe(`http://localhost:${workspace * 10000 + 1234}/`)
+      expect(loaded.apiUrl).toBe(`http://localhost:${workspace * 10000 + 1234}/`)
       expect(loaded.apiRoutes.instances(123)).toBe(`http://localhost:${workspace * 10000 + 1234}/runs/123/instances`)
     })
 
@@ -96,7 +96,7 @@ describe('lib/cloud/routes', () => {
       delete process.env.CYPRESS_INTERNAL_ENV
       process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '4'
 
-      expect((await routes()).getApiUrl()).toBe('http://localhost:41234/')
+      expect((await routes()).apiUrl).toBe('http://localhost:41234/')
     })
 
     it.each(['production', 'staging', 'test'])('ignores the workspace when CYPRESS_CONFIG_ENV selects %s', async (environment) => {
@@ -110,7 +110,7 @@ describe('lib/cloud/routes', () => {
         test: 'http://localhost:1234/',
       }
 
-      expect((await routes()).getApiUrl()).toBe(expected[environment])
+      expect((await routes()).apiUrl).toBe(expected[environment])
     })
 
     it.each(['', '6', '7'])('rejects an invalid workspace %j in development', async (workspace) => {
@@ -118,23 +118,7 @@ describe('lib/cloud/routes', () => {
       delete process.env.CYPRESS_CONFIG_ENV
       process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = workspace
 
-      const loaded = await routes()
-
-      expect(() => loaded.getApiUrl()).toThrow('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM must be an integer from 0 to 5')
-    })
-
-    it('resolves workspace changes per call', async () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'development'
-      delete process.env.CYPRESS_CONFIG_ENV
-      process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '0'
-
-      const loaded = await routes()
-
-      expect(loaded.getApiUrl()).toBe('http://localhost:1234/')
-
-      process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '4'
-
-      expect(loaded.getApiUrl()).toBe('http://localhost:41234/')
+      await expect(routes()).rejects.toThrow('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM must be an integer from 0 to 5')
     })
 
     it('supports staging environment', async () => {
@@ -168,19 +152,6 @@ describe('lib/cloud/routes', () => {
       ;(process.env as Record<string, string | undefined>)['CYPRESS_INTERNAL_ENV'] = 'test'
 
       expect((await routes()).apiRoutes.api()).toBe('https://api-staging.cypress.io/')
-    })
-
-    it('resolves per call rather than when the module is evaluated', async () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'staging'
-
-      const loaded = await routes()
-
-      expect(loaded.apiRoutes.api()).toBe('https://api-staging.cypress.io/')
-
-      process.env.CYPRESS_INTERNAL_ENV = 'production'
-
-      expect(loaded.apiRoutes.api()).toBe('https://api.cypress.io/')
-      expect(loaded.getApiUrl()).toBe('https://api.cypress.io/')
     })
   })
 })

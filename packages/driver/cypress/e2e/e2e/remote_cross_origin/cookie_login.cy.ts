@@ -588,9 +588,16 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       documentCookie().should('equal', 'key=value')
     })
 
-    it('does not set cookie when invalid', () => {
+    it('sets a cookie without a name', () => {
       cy.get('[data-cy="cross-origin-secondary-link"]').click()
       setDocumentCookie('=value')
+
+      documentCookie().should('equal', 'value')
+    })
+
+    it('does not set cookie when invalid', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      setDocumentCookie('=')
 
       documentCookie().should('equal', '')
     })
@@ -662,7 +669,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
           httpOnly: false,
           hostOnly: true,
           name: 'name',
-          path: '/',
+          path: '/fixtures/auth',
           sameSite: 'lax',
           secure: false,
           value: 'value',

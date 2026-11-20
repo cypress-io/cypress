@@ -584,8 +584,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
       validateDomainOption(userOptions.domain, 'clearCookie', log)
 
-      Cypress.emit('clear:cookie', name)
-
       // TODO: prevent clearing a cypress namespace
       return cy.retryIfCommandAUTOriginMismatch(() => {
         return automateCookies({
@@ -604,6 +602,8 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         .then(pickCookieProps)
         .then((result) => {
           cookie = result
+
+          Cypress.emit('clear:cookie', name, result)
 
           // null out the current subject
           return null

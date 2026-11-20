@@ -240,4 +240,64 @@ describe('config process exit', () => {
       expect(ipc.unexpectedExit).toBeUndefined()
     })
   })
+
+  // tap refuses every command on a load error, so a crash of a session that is already running must
+  // not be recorded as one, while a crash during loading still is
+  describe('a crash reported through ProjectConfigManager', () => {
+    const crash = async (state: 'ready' | 'loadingNodeEvents') => {
+      const ctx = createTestDataContext('open')
+      const reportLoadError = jest.spyOn(ctx, 'reportLoadError').mockImplementation(() => {})
+      const reportPluginsError = jest.spyOn(ctx, 'reportPluginsError').mockImplementation(() => {})
+
+      jest.spyOn(ctx, 'onError').mockImplementation(() => {})
+
+      const configManager = new ProjectConfigManager({
+        ctx,
+        configFile: 'cypress.config.js',
+        projectRoot: '/project',
+        handlers: [],
+        hasCypressEnvFile: false,
+        eventRegistrar: new EventRegistrar(),
+        onError: () => {},
+        onInitialConfigLoaded: () => {},
+        onFinalConfigLoaded: () => Promise.resolve(),
+        refreshLifecycle: () => Promise.resolve(),
+      })
+
+      configManager.configFilePath = '/project/cypress.config.js'
+
+      const internals = configManager as any
+
+      internals.loadConfig().catch(() => {})
+
+      const managerIpc: ProjectConfigIpc = internals._eventsIpc
+      const setup = managerIpc.callSetupNodeEventsWithConfig('e2e', {} as any, [])
+
+      managerIpc.emit('setupTestingType:reply', { setupConfig: null, requires: [], registrations: [] })
+      await setup
+
+      internals._state = state
+      child.emit('exit', null, 'SIGKILL')
+
+      managerIpc.cleanupIpc()
+
+      return { reportLoadError, reportPluginsError, state: internals._state }
+    }
+
+    it('records a crash of a running session as a plugins error, not a load error', async () => {
+      const { reportLoadError, reportPluginsError, state } = await crash('ready')
+
+      expect(reportPluginsError).toHaveBeenCalledTimes(1)
+      expect((reportPluginsError.mock.calls[0][0] as any).type).toBe('CONFIG_PROCESS_EXITED_UNEXPECTEDLY')
+      expect(reportLoadError).not.toHaveBeenCalled()
+      expect(state).toBe('errored')
+    })
+
+    it('records a crash while setting up node events as a load error', async () => {
+      const { reportLoadError, reportPluginsError } = await crash('loadingNodeEvents')
+
+      expect(reportLoadError).toHaveBeenCalledTimes(1)
+      expect(reportPluginsError).not.toHaveBeenCalled()
+    })
+  })
 })

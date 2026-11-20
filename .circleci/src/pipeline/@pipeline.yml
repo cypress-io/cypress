@@ -1094,11 +1094,11 @@ commands:
             fi
       - run:
           command: |
-            if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
+            if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.vue.cy.tsx/percy" ]]; then
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
-              yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
+              yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.vue.cy.tsx/percy
             else
               echo "skipping percy screenshots uploading"
             fi

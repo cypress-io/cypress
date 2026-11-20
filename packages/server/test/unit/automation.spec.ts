@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import _ from 'lodash'
 import { Automation } from '../../lib/automation'
-import { cookieJar } from '../../lib/automation/cookie/jar'
+import { cookieJar, writtenToJar } from '../../lib/automation/cookie/jar'
 
 describe('lib/automation', () => {
   let automation
@@ -181,6 +181,18 @@ describe('lib/automation', () => {
       })
     })
 
+    it('leaves the jar alone for a cookie its sender has already written there', () => {
+      const earlier = sessionCookie('earlier')
+
+      writtenToJar.add(earlier)
+      cookieJar.setCookie('sid=later; Path=/; SameSite=Lax', url, undefined)
+
+      return automation.normalize('set:cookie', earlier, acceptCookie)
+      .then(() => {
+        expect(jarCookies()).toStrictEqual(['sid=later'])
+      })
+    })
+
     it('keeps the synced value and resolves when a later cookie cannot be stored', () => {
       // a domain the jar cannot build a URL from must not fail the automation,
       // which has already succeeded against the browser by this point
@@ -215,6 +227,78 @@ describe('lib/automation', () => {
     it('yields null for a cookie past its expiry', async () => {
       expect(await automation.normalize('get:cookie', { name: 'expired', domain: 'localhost' }, () => Promise.resolve(cookie('expired', now - 1)))).toBeNull()
       expect(await automation.normalize('get:cookie', { name: 'later', domain: 'localhost' }, () => Promise.resolve(cookie('later', now + 60)))).toHaveProperty('name', 'later')
+    })
+  })
+
+  describe('.normalize clear:cookie', () => {
+    const url = 'https://app.foobar.com/'
+    const jarCookies = () => cookieJar.getAllCookies().map((cookie) => `${cookie.key}=${cookie.value} ${cookie.domain}`)
+
+    beforeEach(() => {
+      cookieJar.removeAllCookies()
+      cookieJar.setCookie('foo=parent; Domain=foobar.com; Path=/', url, undefined)
+      cookieJar.setCookie('bar=other; Domain=foobar.com; Path=/', url, undefined)
+    })
+
+    afterEach(() => {
+      cookieJar.removeAllCookies()
+    })
+
+    it('removes the parent-domain cookie the browser cleared from the jar', async () => {
+      await automation.normalize('clear:cookie', { name: 'foo', domain: 'app.foobar.com' }, async () => ({ name: 'foo', value: 'parent', domain: '.foobar.com', path: '/' }))
+
+      expect(jarCookies()).toStrictEqual(['bar=other foobar.com'])
+    })
+
+    it('keeps a host cookie when the browser cleared the one for the parent domain', async () => {
+      cookieJar.setCookie('foo=host; Path=/', url, undefined)
+
+      await automation.normalize('clear:cookie', { name: 'foo', domain: 'app.foobar.com' }, async () => ({ name: 'foo', value: 'parent', domain: '.foobar.com', path: '/' }))
+
+      expect(jarCookies().sort()).toStrictEqual(['bar=other foobar.com', 'foo=host app.foobar.com'])
+    })
+
+    describe('when the jar holds the cookie at two paths', () => {
+      const jarPaths = () => cookieJar.getAllCookies().filter((cookie) => cookie.key === 'pref').map((cookie) => `${cookie.value} ${cookie.path}`).sort()
+      const cleared = { name: 'pref', value: 'dark', domain: 'app.foobar.com', path: '/' }
+      const clear = (remaining: unknown) => {
+        return automation.normalize('clear:cookie', { name: 'pref', domain: 'app.foobar.com' }, async (message) => {
+          if (message !== 'get:cookies') return cleared
+
+          if (remaining instanceof Error) throw remaining
+
+          return remaining
+        })
+      }
+
+      beforeEach(() => {
+        cookieJar.setCookie('pref=dark; Path=/', url, undefined)
+        cookieJar.setCookie('pref=compact; Path=/account', url, undefined)
+      })
+
+      it('keeps the one the browser still has', async () => {
+        await clear([{ name: 'pref', value: 'compact', domain: 'app.foobar.com', path: '/account' }])
+
+        expect(jarPaths()).toStrictEqual(['compact /account'])
+      })
+
+      it('removes both when the browser cleared both', async () => {
+        await clear([])
+
+        expect(jarPaths()).toStrictEqual([])
+      })
+
+      it('removes only the one the browser returned when it cannot say what is left', async () => {
+        await clear(new Error('no answer'))
+
+        expect(jarPaths()).toStrictEqual(['compact /account'])
+      })
+    })
+
+    it('keeps a parent-domain cookie the browser did not clear', async () => {
+      await automation.normalize('clear:cookie', { name: 'foo', domain: 'app.foobar.com' }, async () => null)
+
+      expect(jarCookies().sort()).toStrictEqual(['bar=other foobar.com', 'foo=parent foobar.com'])
     })
   })
 })

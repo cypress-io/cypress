@@ -90,6 +90,16 @@ describe('gui/interactive', () => {
       })
     })
 
+    it('starts the window visible by default', () => {
+      expect(interactiveMode.getWindowArgs('http://app', {}).show).toBe(true)
+    })
+
+    it('starts the window hidden for good with --headless', () => {
+      vi.spyOn(getCtx(), 'isHeadless', 'get').mockReturnValue(true)
+
+      expect(interactiveMode.getWindowArgs('http://app', {})).toMatchObject({ show: false, keepHidden: true })
+    })
+
     describe('width + height dimensions', () => {
       // Choose preferred if you have no valid choice
       // Use the saved value if it's valid
