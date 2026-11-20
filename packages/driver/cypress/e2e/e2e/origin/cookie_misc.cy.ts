@@ -301,17 +301,15 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
-  // These use `session`, not the `foo` that the expiry tests above set and
-  // delete: under load, Firefox can still show the deleted `foo=bar` in
-  // document.cookie on later pages of this site, which would make an HttpOnly
-  // `foo` look readable.
   describe('document.cookie with HttpOnly cookies', () => {
+    // Firefox can keep a deleted cookie in document.cookie for the rest of the session, so use a name no other test sets
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=2093197
     beforeEach(() => {
       cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
       cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
       cy.origin(`https://app.foobar.com:3503`, () => {
         cy.window().then((win) => {
-          return cy.wrap(win.fetch(`/set-cookie?cookie=session=bar; Path=/; HttpOnly`))
+          return cy.wrap(win.fetch(`/set-cookie?cookie=qux=quux; Path=/; HttpOnly`))
         })
 
         cy.reload()
@@ -320,12 +318,12 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
     it('does not read HttpOnly cookies', () => {
       cy.origin(`https://app.foobar.com:3503`, () => {
-        cy.document().its('cookie').should('not.include', 'session=')
-        cy.getCookie('session').its('value').should('eq', 'bar')
+        cy.document().its('cookie').should('not.include', 'qux=')
+        cy.getCookie('qux').its('value').should('eq', 'quux')
       })
     })
 
-    const writes = ['session=changed; Path=/', 'session=changed', 'session=; Path=/; Max-Age=0', 'session=; Max-Age=0']
+    const writes = ['qux=changed; Path=/', 'qux=changed', 'qux=; Path=/; Max-Age=0', 'qux=; Max-Age=0']
 
     writes.forEach((cookie) => {
       it(`does not replace or expire HttpOnly cookies with "${cookie}"`, () => {
@@ -338,7 +336,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
           cy.getCookie('sync').should('exist')
 
-          cy.getCookie('session').should('include', { value: 'bar', httpOnly: true })
+          cy.getCookie('qux').should('include', { value: 'quux', httpOnly: true })
         })
       })
     })
@@ -346,14 +344,14 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     it('does not set cookies marked HttpOnly', () => {
       cy.origin(`https://app.foobar.com:3503`, () => {
         cy.window().then((win) => {
-          win.document.cookie = 'baz=qux; Path=/; HttpOnly'
+          win.document.cookie = 'corge=grault; Path=/; HttpOnly'
           win.document.cookie = 'sync=1; Path=/'
         })
 
         cy.getCookie('sync').should('exist')
 
-        cy.getCookie('baz').should('be.null')
-        cy.document().its('cookie').should('not.include', 'baz=')
+        cy.getCookie('corge').should('be.null')
+        cy.document().its('cookie').should('not.include', 'corge=')
       })
     })
   })
