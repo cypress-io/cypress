@@ -18,13 +18,17 @@ describe('start-bundle', () => {
       await fs.outputFile(path.join(appDir, 'node_modules', 'addon-package', 'dist', 'lib', 'index.js'), `module.exports = require('../../build/Release/addon.node')`)
       await fs.outputFile(path.join(appDir, 'node_modules', 'addon-package', 'build', 'Release', 'addon.node'), '')
 
+      // Stubs Node's `.node` loader so the spec can require a fake native addon, which no other hook can intercept
+      // eslint-disable-next-line n/no-deprecated-api -- see above
       loadNodeAddon = require.extensions['.node']
+      // eslint-disable-next-line n/no-deprecated-api -- see above
       require.extensions['.node'] = (addonModule, filename) => {
         addonModule.exports = filename
       }
     })
 
     afterEach(async () => {
+      // eslint-disable-next-line n/no-deprecated-api -- restores the loader stubbed above
       require.extensions['.node'] = loadNodeAddon
       await fs.remove(appDir)
     })

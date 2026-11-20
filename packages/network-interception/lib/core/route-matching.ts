@@ -119,6 +119,9 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
     }
   }
 
+  // Route matchers are written against `url.parse`'s fields: its `path` for `/a|b` is `/a%7Cb`, and its
+  // `query` gives `?tags=a&tags=b` as `{ tags: ['a', 'b'] }`, where `URLSearchParams` keeps only one.
+  // eslint-disable-next-line n/no-deprecated-api -- see above
   const proxiedUrl = url.parse(req.proxiedUrl, true)
 
   _.assign(matchable, _.pick(proxiedUrl, ['hostname', 'path', 'pathname', 'port', 'query']))
