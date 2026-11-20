@@ -58,7 +58,6 @@ export const baseConfig: Cypress.ConfigOptions = {
 export const EXPERIMENTAL_DRIVER_SPECS = [
   'cypress/e2e/e2e/remote_cross_origin/**/*.cy.ts',
   'cypress/e2e/cy/experimental_driver_{agents,aut_window,clock,commands,frames,isolation,isolation_dialogs,tabs}.cy.ts',
-  'cypress/e2e/cy/isolated_runner*.cy.ts',
 ]
 
 export default defineConfig({
