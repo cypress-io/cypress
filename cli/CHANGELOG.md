@@ -14,7 +14,6 @@
 - An assertion on a long string no longer makes the browser stop responding while Cypress formats the assertion for the Command Log. This happened when the string held many `![` sequences or long runs of whitespace, such as a large block of Markdown or preformatted text. Fixed in [#35388](https://github.com/cypress-io/cypress/pull/35388).
 - [`cy.intercept()`](https://on.cypress.io/intercept) responds faster to requests that it stubs with a fixture or a static `body` but no `Content-Type` header. Fixed in [#35360](https://github.com/cypress-io/cypress/pull/35360).
 - The Launchpad window that `cypress open` shows loads slightly faster. Fixed in [#35488](https://github.com/cypress-io/cypress/pull/35488).
-- A page whose `Content-Security-Policy` header holds a long run of spaces, such as `script-src 'self';` followed by thousands of spaces and a line break, now loads without delay. Previously, Cypress could stop responding for seconds or longer while it read the header. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Bugfixes:**
 

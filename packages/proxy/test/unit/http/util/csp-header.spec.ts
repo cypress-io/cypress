@@ -164,7 +164,8 @@ describe('http/util/csp-header', () => {
       ]],
     ]
 
-    // Inputs that only follow the header's syntax rules, to pin down edge behavior
+    // Inputs that only follow the header's syntax rules, to pin down edge behavior.
+    // The line-break rows can't arrive over HTTP and only pin how the parser treats them.
     const formatCases: [string, string, string[], [string, string[]][][]][] = [
       ['an empty header', '', [], []],
       ['only whitespace', '   ', [], [[]]],
@@ -200,6 +201,7 @@ describe('http/util/csp-header', () => {
       })
     })
 
+    // Both shapes reach the parser intact over HTTP, unlike a line break, which Node's HTTP parser rejects or folds into a space
     describe('adversarial input', () => {
       const parsesQuickly = (header: string, expected: [string, string[]][][]) => {
         const start = performance.now()
@@ -210,10 +212,9 @@ describe('http/util/csp-header', () => {
         expect(elapsed).toBeLessThan(200)
       }
 
-      it('parses a 50,000-space run between a separator and a line break in linear time', () => {
-        parsesQuickly(`script-src 'self';${' '.repeat(50_000)}\ndefault-src 'self'`, [[
+      it('parses 25,000 empty directives after a real one in linear time', () => {
+        parsesQuickly(`script-src 'self'${'; '.repeat(25_000)}`, [[
           ['script-src', [`'self'`]],
-          ['default-src', [`'self'`]],
         ]])
       })
 
