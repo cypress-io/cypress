@@ -35,6 +35,9 @@ const runRemoteAction = ({ Cypress, cy, name, subject, options, log, validate, p
 
   return resolveRemoteSubject(Cypress, subject)
   .then((resolved) => {
+    // highlight what the action acts on now, not what an earlier query found
+    log?.set({ $el: resolved })
+
     if (!resolved.length) {
       $errUtils.throwErrByPath('subject.not_element_empty_subject', {
         onFail: log,
