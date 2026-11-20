@@ -9,6 +9,7 @@ For anything Cypress can do on its own, use Cypress commands instead. They retry
 ## Table of Contents
 
 - [Installation](#installation)
+- [Upgrading to 2.0](#upgrading-to-20)
 - [Upgrading to 1.0](#upgrading-to-10)
 - [Compatibility](#compatibility)
 - [How it works](#how-it-works)
@@ -46,6 +47,39 @@ To get types for `cy.puppeteer()`, add the support types to your `tsconfig.json`
 ```
 
 The `setup` and `retry` functions ship with their own type definitions, so no extra configuration is needed for your Cypress config file.
+
+## Upgrading to 2.0
+
+Version 2.0 upgrades the bundled `puppeteer-core` from v24 to v25 and requires Node.js 22.12.0 or later. The plugin's own API hasn't changed: `setup`, `retry`, and `cy.puppeteer()` work the same way. Your message handlers, however, receive a Puppeteer `Browser` directly, so Puppeteer's breaking changes in v25 can affect the code inside them.
+
+Puppeteer v25 ships only as ES modules. The plugin loads it with `require()`, which Node.js supports for ES modules from 22.12.0. On an earlier Node.js version, loading your Cypress config fails with `ERR_REQUIRE_ESM`.
+
+### Does this affect me?
+
+It affects you if either of these is true:
+
+- **The Node.js that loads your Cypress config is older than 22.12.0.** Run `node --version` in your project to check.
+- **Your message handlers use a Puppeteer API that changed.**
+
+These are the Puppeteer changes most likely to show up in handlers:
+
+| Puppeteer v24 | Puppeteer v25 |
+| --- | --- |
+| `browser.isConnected()` | Removed. Use the `browser.connected` property. |
+| `clickCount` in `page.click()` and `mouse.click()` options | Removed. Use `count`. |
+| `sameParty` on cookies | Removed. |
+| A response header sent more than once comes back from `response.headers()` with its values joined by newlines | They're joined by `, ` instead. |
+
+For the complete list, see the breaking changes for version 25.0.0 in the [puppeteer-core changelog](https://github.com/puppeteer/puppeteer/blob/main/packages/puppeteer-core/CHANGELOG.md).
+
+### What to do next
+
+1. If your Node.js is older than 22.12.0, upgrade it.
+2. Search your message handlers for the APIs in the table above and update them.
+3. If you pass your own Puppeteer module with the [`puppeteer` option](#options), upgrade it to v25 as well.
+4. Run your specs that call `cy.puppeteer()`.
+
+If you can't make these changes yet, stay on the previous release with `npm install --save-dev @cypress/puppeteer@1` until you're ready.
 
 ## Upgrading to 1.0
 
@@ -86,7 +120,7 @@ If you can't make these changes yet, stay on the previous release with `npm inst
 ## Compatibility
 
 - **Cypress 14.0.0 or later.**
-- **Node.js 18 or later** for the process that loads your Cypress config, which every Node.js version Cypress 14 supports already meets. The bundled `puppeteer-core` v24 needs it.
+- **Node.js 22.12.0 or later** for the process that loads your Cypress config. The bundled `puppeteer-core` v25 needs it.
 - **Chromium-family browsers only.** Calling `cy.puppeteer()` in Firefox or WebKit fails with an error.
 
 What works depends on the browser and on whether it runs headless (`cypress run`) or headed (`cypress open` or `cypress run --headed`):
