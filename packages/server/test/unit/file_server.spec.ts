@@ -190,6 +190,21 @@ describe('lib/file_server', () => {
       expect(body).toBe('world')
     })
 
+    it('serves the file a request path names, ignoring its query and hash', async () => {
+      const { statusCode, body, filePath } = await new Promise<{ statusCode?: number, body: string, filePath: unknown }>((resolve, reject) => {
+        http.get(`${server.address()}/hello.txt?cache=bust#top`, { headers: { 'x-cypress-authorization': server.token } }, (res) => {
+          let body = ''
+
+          res.on('data', (chunk) => body += chunk)
+          res.on('end', () => resolve({ statusCode: res.statusCode, body, filePath: res.headers['x-cypress-file-path'] }))
+        }).on('error', reject)
+      })
+
+      expect(statusCode).toBe(200)
+      expect(body).toBe('world')
+      expect(decodeURI(String(filePath))).toMatch(/[\\/]hello\.txt$/)
+    })
+
     it('rejects requests missing the authorization token with a 401', async () => {
       const statusCode = await new Promise<number | undefined>((resolve, reject) => {
         http.get(`${server.address()}/hello.txt`, (res) => {
