@@ -13,6 +13,7 @@
     "@packages/electron": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@tooling/system-tests": "0.0.0-development",
+    "acorn": "^8.16.0",
     "chalk": "4.1.2",
     "chokidar": "3.6.0",
     "cross-fetch": "^3.1.5",

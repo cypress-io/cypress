@@ -6,6 +6,7 @@ const path = require('path')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
 const { consolidateDuplicateDependencies, removeBundledDependencies, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
 const { createStartCypressBundle, createServerEntryPointBundle, createStartBundleCodeCache } = require('./binary/start-bundle')
+const { writeBrowserBundlesAsAscii } = require('./binary/ascii-browser-bundles')
 const {
   getEncryptionFileSource,
   getCloudEnvironmentFileSource,
@@ -117,6 +118,8 @@ module.exports = async function (params) {
     })
 
     await cleanupUnneededDependencies(outputFolder)
+
+    await writeBrowserBundlesAsAscii(appDir)
 
     await validateShippedServerCode(path.join(appDir, 'packages', 'server'))
 
