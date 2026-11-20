@@ -24,8 +24,13 @@ function parsePlist (p: string, property: string): Promise<string> {
   return fs
   .readFile(pl, 'utf8')
   .then(plist.parse)
-  .then((val) => val[property])
-  .then(String) // explicitly convert value to String type
+  .then((val) => {
+    if (val[property] === undefined || val[property] === null) {
+      throw new Error(`property "${property}" not found`)
+    }
+
+    return String(val[property]) // explicitly convert value to String type
+  })
   .catch(failed) // to make TS compiler happy
 }
 
