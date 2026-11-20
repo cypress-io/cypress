@@ -540,6 +540,8 @@ describe('Routes', () => {
 
   context('privileged channel with the experimental driver', () => {
     beforeEach(function () {
+      process.env.CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER = '1'
+
       // the experimental driver requires baseUrl, which the server checks it can connect to
       sinon.stub(ensureUrl, 'isListening').resolves()
 
@@ -547,9 +549,12 @@ describe('Routes', () => {
         config: {
           port: 2000,
           baseUrl: 'http://www.foobar.com:8080',
-          experimentalDriver: true,
         },
       })
+    })
+
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER
     })
 
     it('includes the privileged channel in the spec frame on the runner\'s origin', async function () {
