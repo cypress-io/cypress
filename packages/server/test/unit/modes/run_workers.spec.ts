@@ -3,6 +3,7 @@ import path from 'path'
 import fs from 'fs/promises'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as errors from '../../../lib/errors'
+import * as gpu from '../../../lib/util/gpu'
 import {
   availableMemoryMb,
   BlockPrinter,
@@ -141,6 +142,16 @@ describe('lib/modes/run-workers', () => {
       expect(await resolveWorkerCount('auto', 10, { cpus: 4, availableMb: 99999, perWorkerMb: 1000 })).toBe(3)
       expect(await resolveWorkerCount('auto', 2, { cpus: 16, availableMb: 99999, perWorkerMb: 1000 })).toBe(2)
       expect(await resolveWorkerCount('auto', 10, { cpus: 1, availableMb: 100, perWorkerMb: 1000 })).toBe(1)
+    })
+
+    it('fits more workers in the same memory when rendering in software', async () => {
+      const isSoftwareRendering = vi.spyOn(gpu, 'isSoftwareRendering').mockReturnValue(false)
+
+      expect(await resolveWorkerCount('auto', 10, { cpus: 16, availableMb: 3600 })).toBe(2)
+
+      isSoftwareRendering.mockReturnValue(true)
+
+      expect(await resolveWorkerCount('auto', 10, { cpus: 16, availableMb: 3600 })).toBe(3)
     })
 
     it('warns but keeps an explicit count that exceeds available memory', async () => {

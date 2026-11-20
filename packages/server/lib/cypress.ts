@@ -8,6 +8,7 @@
 // mode.
 import type { ChildProcess } from 'child_process'
 import { WORKER_INDEX_ENV } from './util/worker_index'
+import { useSoftwareRendering } from './util/gpu'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import { toObject } from './util/args'
@@ -163,6 +164,11 @@ export = {
     // the plugins child is forked before run mode starts and inherits this
     if (options.workers != null && options.workerIndex == null) {
       process.env[WORKER_INDEX_ENV] = '0'
+    }
+
+    // Electron ignores switches appended after the app is ready, so this runs before the first await
+    if ((options.workers != null || options.workerIndex != null) && !options.enableGpu) {
+      useSoftwareRendering()
     }
 
     if (options.workerIndex != null) {

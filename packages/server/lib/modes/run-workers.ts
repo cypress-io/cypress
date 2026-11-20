@@ -11,6 +11,7 @@ import type { SpecWithRelativeRoot } from '@packages/types'
 import { defaultStats } from '../util/graceful_crash_handling'
 import type { RunResult } from './results'
 import { WORKER_INDEX_ENV } from '../util/worker_index'
+import { isSoftwareRendering } from '../util/gpu'
 import * as appData from '../util/app_data'
 
 const debug = Debug('cypress:server:workers')
@@ -34,8 +35,8 @@ type WorkerMessage =
 
 type CoordinatorMessage = { type: 'claimed', claim: Claim }
 
-// Typical peak RSS of one worker's process tree: Electron main, plugins child and browser
-export const PER_WORKER_MEMORY_MB = 1600
+// Peak memory of one worker's process tree with headroom for heavier apps; the GPU processes are its largest part
+export const perWorkerMemoryMb = () => isSoftwareRendering() ? 1200 : 1600
 
 const readNumber = async (file: string) => {
   try {
@@ -75,7 +76,7 @@ export async function availableMemoryMb (cgroupRoot = '/sys/fs/cgroup', getSyste
 export async function resolveWorkerCount (requested: unknown, specCount: number, {
   cpus = os.cpus().length,
   availableMb,
-  perWorkerMb = PER_WORKER_MEMORY_MB,
+  perWorkerMb = perWorkerMemoryMb(),
 }: { cpus?: number, availableMb?: number, perWorkerMb?: number } = {}): Promise<number> {
   const isAuto = requested === 'auto'
 

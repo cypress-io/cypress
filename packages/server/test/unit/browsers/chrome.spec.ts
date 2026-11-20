@@ -12,6 +12,7 @@ import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as protocol from '../../../lib/browsers/protocol'
+import * as gpu from '../../../lib/util/gpu'
 import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 
@@ -1492,6 +1493,26 @@ describe('lib/browsers/chrome', () => {
       const args = chrome._getArgs({} as any, {} as any, undefined as any)
 
       expect(args).not.toContain('--disable-gpu')
+    })
+
+    it('renders in software when software rendering is on', () => {
+      vi.spyOn(os, 'platform').mockReturnValue('darwin')
+      vi.spyOn(gpu, 'isSoftwareRendering').mockReturnValue(true)
+
+      const args = chrome._getArgs({} as any, {} as any, undefined as any)
+
+      expect(args).toContain('--disable-gpu')
+      expect(args).toContain('--enable-unsafe-swiftshader')
+    })
+
+    it('passes --disable-gpu once on linux when software rendering is on', () => {
+      vi.spyOn(os, 'platform').mockReturnValue('linux')
+      vi.spyOn(gpu, 'isSoftwareRendering').mockReturnValue(true)
+
+      const args = chrome._getArgs({} as any, {} as any, undefined as any)
+
+      expect(args.filter((arg) => arg === '--disable-gpu')).toHaveLength(1)
+      expect(args).toContain('--enable-unsafe-swiftshader')
     })
 
     it('turns off sandbox when linux', () => {

@@ -57,6 +57,11 @@ describe('cypress run --workers', () => {
       const downloadsFolder = downloadWorker === '0' ? 'downloads' : path.join('downloads', `worker-${downloadWorker}`)
 
       expect(await fs.pathExistsAsync(path.join(projectPath, 'cypress', downloadsFolder, 'hello.txt'))).to.be.true
+
+      const renderers = await readLines('renderers')
+
+      expect(new Set(renderers.map((line) => line.split(' ')[0])).size, 'renderers came from more than one worker').to.be.greaterThan(1)
+      renderers.forEach((line) => expect(line, 'WebGL renders in software').to.include('SwiftShader'))
     },
   })
 

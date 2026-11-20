@@ -105,6 +105,10 @@ declare namespace CypressCommandLine {
      */
     runnerUi: boolean
     /**
+     * Keep hardware-accelerated rendering on with `workers`, which otherwise renders in software to use less memory
+     */
+    enableGpu: boolean
+    /**
      * Run specs across this many local Cypress processes, or "auto" to pick a count from the available CPUs and memory
      */
     workers: number | 'auto'

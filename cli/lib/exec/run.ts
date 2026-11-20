@@ -114,6 +114,10 @@ const processRunOptions = (options: any = {}): string[] => {
     args.push('--parallel')
   }
 
+  if (options.enableGpu) {
+    args.push('--enable-gpu')
+  }
+
   if (options.passWithNoTests) {
     args.push('--pass-with-no-tests')
   }

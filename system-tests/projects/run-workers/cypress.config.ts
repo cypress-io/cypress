@@ -21,6 +21,11 @@ export default {
 
           return workerIndex() ?? null
         },
+        recordRenderer (renderer: string) {
+          record('renderers', `${workerIndex()} ${renderer}`)
+
+          return null
+        },
       })
     },
   },

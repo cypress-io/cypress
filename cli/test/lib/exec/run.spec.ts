@@ -147,6 +147,10 @@ describe('exec run', () => {
       expect(run.processRunOptions({ posixExitCodes: true })).toEqual(expect.arrayContaining(['--posix-exit-codes']))
     })
 
+    it('adds --enable-gpu', () => {
+      expect(run.processRunOptions({ enableGpu: true })).toEqual(expect.arrayContaining(['--enable-gpu']))
+    })
+
     it('adds --workers with a count or auto', () => {
       expect(run.processRunOptions({ workers: 3 })).toEqual(expect.arrayContaining(['--workers', 3]))
       expect(run.processRunOptions({ workers: 'auto' })).toEqual(expect.arrayContaining(['--workers', 'auto']))

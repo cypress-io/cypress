@@ -700,6 +700,11 @@ describe('cli', () => {
       expect(run.start).toBeCalledWith({ workers: '3' })
     })
 
+    it('calls run with --enable-gpu', async () => {
+      await exec('run --workers 2 --enable-gpu')
+      expect(run.start).toBeCalledWith({ workers: '2', enableGpu: true })
+    })
+
     it('calls run with --workers auto', async () => {
       await exec('run --workers auto')
       expect(run.start).toBeCalledWith({ workers: 'auto' })

@@ -126,6 +126,7 @@ const descriptions: any = {
   e2e: 'runs end to end tests',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs} or cypress.env.json',
   expose: 'sets exposed public configuration variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs}',
+  enableGpu: 'keeps hardware-accelerated rendering on with --workers, which otherwise renders in software to use less memory',
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if it were globally installed',
@@ -274,6 +275,7 @@ const addCypressRunCommand = (program: any): any => {
   .option('-k, --key <record-key>', text('key'))
   .option('--headed', text('headed'))
   .option('--headless', text('headless'))
+  .option('--enable-gpu', text('enableGpu'))
   .option('--no-exit', text('exit'))
   .option('--parallel', text('parallel'))
   .option('--pass-with-no-tests', text('passWithNoTests'))

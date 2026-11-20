@@ -25,6 +25,7 @@ import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyProm
 import type { CDPSocketServer } from '@packages/socket'
 import type { Protocol } from 'devtools-protocol'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
+import { isSoftwareRendering, SOFTWARE_RENDERING_SWITCHES } from '../util/gpu'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -479,6 +480,14 @@ export = {
     if (os.platform() === 'linux') {
       args.push('--disable-gpu')
       args.push('--no-sandbox')
+    }
+
+    if (isSoftwareRendering()) {
+      for (const name of SOFTWARE_RENDERING_SWITCHES) {
+        if (!args.includes(`--${name}`)) {
+          args.push(`--${name}`)
+        }
+      }
     }
 
     const ua = options.userAgent

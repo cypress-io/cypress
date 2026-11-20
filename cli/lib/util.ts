@@ -202,6 +202,7 @@ const parseOpts = (opts: any): any => {
     'exit',
     'env',
     'expose',
+    'enableGpu',
     'force',
     'global',
     'group',
