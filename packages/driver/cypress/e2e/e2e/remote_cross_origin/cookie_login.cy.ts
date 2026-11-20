@@ -437,14 +437,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
         // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
         cy.wait(1500) // give cookie time to expire
         cy.reload()
-
-        // WebKit on Linux parses cookies with libsoup, which applies whichever of Max-Age and Expires
-        // comes last instead of letting Max-Age win, so the browser keeps this cookie until Expires
-        if (Cypress.isBrowser('webkit') && Cypress.platform === 'linux') {
-          verifyLoggedIn(username)
-        } else {
-          verifyLocalhostNotLoggedIn()
-        }
+        verifyLocalhostNotLoggedIn()
       })
 
       it('before Max-Age, past Expires -> logged in', () => {
