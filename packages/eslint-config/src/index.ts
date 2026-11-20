@@ -10,6 +10,8 @@ export * from './graphqlConfig'
 
 export * from './jsonConfig'
 
+export * from './mochaConfig'
+
 export * from './nodeConfig'
 
 export * from './reactConfig'

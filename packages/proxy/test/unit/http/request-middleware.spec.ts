@@ -51,6 +51,7 @@ describe('http/request-middleware', () => {
       'CalculateCredentialLevelIfApplicable',
       'FormatCookiesIfApplicable',
       'MaybeAttachCrossOriginCookies',
+      'StripCypressCookies',
       'MaybeEndRequestWithBufferedResponse',
       'SetMatchingRoutes',
       'SendToDriver',
@@ -119,11 +120,16 @@ describe('http/request-middleware', () => {
         const ctx = prepareContext({
           'x-cypress-is-from-extra-target': getMetadataHeaderValue(),
         })
+        let stripCypressCookiesRan = false
         let maybeSetBasicAuthHeadersRan = false
         let skippedMiddlewareRan = false
 
         await testMiddleware({
           ExtractCypressMetadataHeaders,
+          StripCypressCookies () {
+            stripCypressCookiesRan = true
+            this.next()
+          },
           MaybeSetBasicAuthHeaders () {
             maybeSetBasicAuthHeadersRan = true
             this.next()
@@ -136,6 +142,7 @@ describe('http/request-middleware', () => {
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(true)
+        expect(stripCypressCookiesRan).toBe(true)
         expect(maybeSetBasicAuthHeadersRan).toBe(true)
         expect(skippedMiddlewareRan).toBe(false)
       })
@@ -455,6 +462,44 @@ describe('http/request-middleware', () => {
       await testMiddleware([MaybeSimulateSecHeaders], ctx)
 
       expect(ctx.req.headers['sec-fetch-dest']).toEqual('document')
+    })
+  })
+
+  describe('StripCypressCookies', () => {
+    const { StripCypressCookies } = RequestMiddleware
+
+    const stripFrom = async (cookie?: string) => {
+      const ctx = {
+        req: {
+          headers: cookie === undefined ? {} : { cookie },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([StripCypressCookies], ctx)
+
+      return ctx.req
+    }
+
+    it('removes the header when it only holds Cypress cookies', async () => {
+      const req = await stripFrom('__cypress.unload=true; __cypress.initial=true')
+
+      expect(req.headers).not.toHaveProperty('cookie')
+    })
+
+    it('keeps the application\'s cookies', async () => {
+      const req = await stripFrom('session_id=8f2c1e9a40b7; __cypress.unload=true; theme=dark')
+
+      expect(req.headers.cookie).toEqual('session_id=8f2c1e9a40b7; theme=dark')
+    })
+
+    it('passes through a request without cookies', async () => {
+      const req = await stripFrom()
+
+      expect(req.headers).not.toHaveProperty('cookie')
     })
   })
 
