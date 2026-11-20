@@ -119,6 +119,15 @@ describe('initCypressTests', () => {
       ])
     })
 
+    it('marks support and spec loaders as Vite dev server imports', async () => {
+      await import('../client/initCypressTests.js')
+
+      const scripts = mockCypressInstance.onSpecWindow.mock.calls[0][1]
+
+      expect(scripts).toHaveLength(2)
+      expect(scripts.every((script) => script.load.isViteDevServerImport)).toBe(true)
+    })
+
     describe('empty devServerPublicPathRoute', () => {
       it('load the support file along with the spec', async () => {
         mockDevServerPublicPathRoute = ''
@@ -232,6 +241,15 @@ describe('initCypressTests', () => {
     describe('when specPath is "__all"', () => {
       beforeEach(() => {
         global.document.location.search = '?specPath=__all'
+      })
+
+      it('marks support and all spec loaders as Vite dev server imports', async () => {
+        await import('../client/initCypressTests.js')
+
+        const scripts = mockCypressInstance.onSpecWindow.mock.calls[0][1]
+
+        expect(scripts).toHaveLength(4)
+        expect(scripts.every((script) => script.load.isViteDevServerImport)).toBe(true)
       })
 
       it('doesn\'t load the support file if one is not provided', async () => {
