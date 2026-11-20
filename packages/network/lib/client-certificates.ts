@@ -1,10 +1,10 @@
-import type { Url } from 'url'
 import { URL } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
 import fs from 'fs-extra'
 import { X509Certificate, createPrivateKey } from 'crypto'
 import tls from 'tls'
+import type { UrlFields } from './url-fields'
 
 const debug = debugModule('cypress:network:client-certificates')
 
@@ -133,7 +133,7 @@ export class ClientCertificateStore {
     this._urlClientCertificates.push(cert)
   }
 
-  getClientCertificateAgentOptionsForUrl (requestUrl: Url): ClientCertificates | null {
+  getClientCertificateAgentOptionsForUrl (requestUrl: UrlFields): ClientCertificates | null {
     if (this._urlClientCertificates.length === 0) {
       return null
     }

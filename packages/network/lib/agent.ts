@@ -10,6 +10,8 @@ import { lenientOptions } from './http-utils'
 import { clientCertificateStoreSingleton } from './client-certificates'
 import type { CaOptions } from './ca'
 import { getCaOptions } from './ca'
+import { parseUrlFields } from './url-fields'
+import type { UrlFields } from './url-fields'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -78,7 +80,7 @@ type FamilyCache = {
   [host: string]: 4 | 6
 }
 
-export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
+export function buildConnectReqHead (hostname: string, port: string, proxy: UrlFields) {
   const connectReq = [`CONNECT ${hostname}:${port} HTTP/1.1`]
 
   connectReq.push(`Host: ${hostname}:${port}`)
@@ -91,7 +93,7 @@ export function buildConnectReqHead (hostname: string, port: string, proxy: url.
 }
 
 interface CreateProxySockOpts {
-  proxy: url.Url
+  proxy: UrlFields
   shouldRetry?: boolean
 }
 
@@ -218,7 +220,7 @@ export class CombinedAgent {
       }) + options.path
     }
 
-    const uri = options.uri = options.uri ?? url.parse(options.href)
+    const uri = options.uri = options.uri ?? parseUrlFields(options.href)
 
     debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
 
@@ -295,7 +297,7 @@ class HttpAgent extends http.Agent {
   _addProxiedRequest (req: http.ClientRequest, options: RequestOptionsWithProxy) {
     debug(`Creating proxied request for ${options.href} through ${options.proxy}`)
 
-    const proxy = url.parse(options.proxy)
+    const proxy = parseUrlFields(options.proxy)
 
     // set req.path to the full path so the proxy can resolve it
     req.path = options.href
@@ -389,7 +391,7 @@ class HttpsAgent extends https.Agent {
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
 
-    const proxy = url.parse(options.proxy)
+    const proxy = parseUrlFields(options.proxy)
     const port = options.uri?.port || '443'
     const hostname = options.uri?.hostname || 'localhost'
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { ParsedUrl, UrlMatcher, UrlClientCertificates, ClientCertificateStore, clientCertificateStoreSingleton, ClientCertificates, loadClientCertificateConfig } from '../../lib/client-certificates'
 // import { clientCertificateStore } from '../../lib/agent'
-import urllib from 'url'
+import { parseUrlFields } from '../../lib/url-fields'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
@@ -135,8 +135,8 @@ describe('lib/client-certificates', () => {
 
   describe('ClientCertificateStore', () => {
     it('adds and retrieves certs for urls', () => {
-      const url1 = urllib.parse('https://host.com')
-      const url2 = urllib.parse('https://company.com')
+      const url1 = parseUrlFields('https://host.com')
+      const url2 = parseUrlFields('https://company.com')
       const store = new ClientCertificateStore()
 
       expect(store.getCertCount()).toEqual(0)
@@ -378,7 +378,7 @@ describe('lib/client-certificates', () => {
 
       loadClientCertificateConfig(config)
       const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
-        urllib.parse(url),
+        parseUrlFields(url),
       )
 
       expect(options).not.toBeNull()
@@ -447,7 +447,7 @@ describe('lib/client-certificates', () => {
 
       loadClientCertificateConfig(config)
       const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
-        urllib.parse(url),
+        parseUrlFields(url),
       )
 
       expect(options).not.toBeNull()
@@ -490,7 +490,7 @@ describe('lib/client-certificates', () => {
 
       loadClientCertificateConfig(config)
       const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
-        urllib.parse(url),
+        parseUrlFields(url),
       )
 
       expect(options).not.toBeNull()
@@ -522,7 +522,7 @@ describe('lib/client-certificates', () => {
 
       loadClientCertificateConfig(config)
       const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
-        urllib.parse(url),
+        parseUrlFields(url),
       )
 
       expect(options).not.toBeNull()
@@ -551,7 +551,7 @@ describe('lib/client-certificates', () => {
 
       loadClientCertificateConfig(config)
       const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
-        urllib.parse(url),
+        parseUrlFields(url),
       )
 
       expect(options).not.toBeNull()
@@ -589,7 +589,7 @@ describe('lib/client-certificates', () => {
 
       loadClientCertificateConfig(config)
       const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
-        urllib.parse(url),
+        parseUrlFields(url),
       )
 
       expect(options).not.toBeNull()
@@ -851,7 +851,7 @@ describe('lib/client-certificates', () => {
       loadClientCertificateConfig(config)
 
       const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
-        urllib.parse(url),
+        parseUrlFields(url),
       )
 
       expect(options).not.toBeNull()
@@ -878,7 +878,7 @@ describe('lib/client-certificates', () => {
       loadClientCertificateConfig(config)
 
       const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
-        urllib.parse(url),
+        parseUrlFields(url),
       )
 
       expect(options).not.toBeNull()

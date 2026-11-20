@@ -5,7 +5,6 @@ import http from 'http'
 import https from 'https'
 import net, { type ListenOptions } from 'net'
 import tls from 'tls'
-import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
 import Request from '@cypress/request-promise'
 
@@ -25,6 +24,7 @@ import { allowDestroy } from '../../lib/allow-destroy'
 import type { AsyncServer } from '../support/servers'
 import { Servers } from '../support/servers'
 import { clientCertificateStoreSingleton, UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
+import { parseUrlFields } from '../../lib/url-fields'
 import { execFileSync } from 'child_process'
 import fetch from 'cross-fetch'
 import os from 'os'
@@ -849,24 +849,22 @@ describe('lib/agent', function () {
 
   describe('.buildConnectReqHead', function () {
     it('builds the correct request', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', {} as url.Url)
+      const head = buildConnectReqHead('api.example.com', '443', parseUrlFields('http://proxy.example.com:3128'))
 
       expect(head).toEqual([
-        'CONNECT foo.bar:1234 HTTP/1.1',
-        'Host: foo.bar:1234',
+        'CONNECT api.example.com:443 HTTP/1.1',
+        'Host: api.example.com:443',
         '', '',
       ].join('\r\n'))
     })
 
     it('can do Proxy-Authorization', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', {
-        auth: 'baz:quux',
-      } as url.Url)
+      const head = buildConnectReqHead('api.example.com', '443', parseUrlFields('http://jane.doe:s3cr3t@proxy.example.com:3128'))
 
       expect(head).toEqual([
-        'CONNECT foo.bar:1234 HTTP/1.1',
-        'Host: foo.bar:1234',
-        'Proxy-Authorization: Basic YmF6OnF1dXg=',
+        'CONNECT api.example.com:443 HTTP/1.1',
+        'Host: api.example.com:443',
+        `Proxy-Authorization: Basic ${Buffer.from('jane.doe:s3cr3t').toString('base64')}`,
         '', '',
       ].join('\r\n'))
     })
@@ -875,11 +873,11 @@ describe('lib/agent', function () {
   describe('.createProxySock', function () {
     it('creates a `net` socket for an http url', function () {
       vi.spyOn(net, 'connect')
-      const proxy = url.parse('http://foo.bar:1234')
+      const proxy = parseUrlFields('http://proxy.example.com:3128')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
-          expect(net.connect).toHaveBeenCalledWith({ family: 4, host: 'foo.bar', port: 1234 }, expect.any(Function))
+          expect(net.connect).toHaveBeenCalledWith({ family: 4, host: 'proxy.example.com', port: 3128 }, expect.any(Function))
           resolve()
         })
       })
@@ -888,18 +886,18 @@ describe('lib/agent', function () {
     it('creates a `tls` socket for an https url', function () {
       vi.spyOn(tls, 'connect')
 
-      const proxy = url.parse('https://foo.bar:1234')
+      const proxy = parseUrlFields('https://proxy.example.com:3128')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
-          expect(tls.connect).toHaveBeenCalledWith({ family: 4, host: 'foo.bar', port: 1234, ALPNProtocols: ['http/1.1'] }, expect.any(Function))
+          expect(tls.connect).toHaveBeenCalledWith({ family: 4, host: 'proxy.example.com', port: 3128, ALPNProtocols: ['http/1.1'] }, expect.any(Function))
           resolve()
         })
       })
     })
 
     it('throws on unsupported proxy protocol', function () {
-      const proxy = url.parse('socksv5://foo.bar:1234')
+      const proxy = parseUrlFields('socksv5://proxy.example.com:3128')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, (err) => {
@@ -907,6 +905,103 @@ describe('lib/agent', function () {
           resolve()
         })
       })
+    })
+  })
+
+  describe('CombinedAgent#addRequest', function () {
+    afterEach(function () {
+      vi.restoreAllMocks()
+    })
+
+    it('parses the href into the uri used to match client certificates, keeping its port', function () {
+      const agent = new CombinedAgent()
+      const getCerts = vi.spyOn(clientCertificateStoreSingleton, 'getClientCertificateAgentOptionsForUrl').mockReturnValue(null)
+
+      vi.spyOn(agent.httpsAgent, 'addRequest').mockResolvedValue()
+
+      const options = { host: '127.0.0.1', port: 443, path: '/api/users?page=2', protocol: 'https:' } as any
+
+      agent.addRequest({} as http.ClientRequest, options)
+
+      expect(options.href).toEqual('https://127.0.0.1:443/api/users?page=2')
+      expect(options.uri).toMatchObject({ protocol: 'https:', hostname: '127.0.0.1', port: '443', path: '/api/users?page=2' })
+      expect(getCerts).toHaveBeenCalledWith(options.uri)
+    })
+
+    it('keeps a uri that is passed in', function () {
+      const agent = new CombinedAgent()
+      const getCerts = vi.spyOn(clientCertificateStoreSingleton, 'getClientCertificateAgentOptionsForUrl').mockReturnValue(null)
+
+      vi.spyOn(agent.httpsAgent, 'addRequest').mockResolvedValue()
+
+      const uri = parseUrlFields('https://127.0.0.1:8443/api/users')
+      const options = { href: 'https://127.0.0.1:8443/api/users', host: '127.0.0.1', port: 8443, uri } as any
+
+      agent.addRequest({} as http.ClientRequest, options)
+
+      expect(options.uri).toBe(uri)
+      expect(getCerts).toHaveBeenCalledWith(uri)
+    })
+  })
+
+  describe('HttpAgent#_addProxiedRequest', function () {
+    let req: any
+
+    beforeEach(function () {
+      req = { setHeader: vi.fn(), _implicitHeader: vi.fn() }
+    })
+
+    afterEach(function () {
+      vi.restoreAllMocks()
+    })
+
+    const proxiedOptions = (proxy: string) => {
+      return { href: 'http://www.example.com/users', host: 'www.example.com', port: 80, path: '/users', proxy } as any
+    }
+
+    it('dials the port written in an https proxy url, even when it is the default', function () {
+      const { httpAgent } = new CombinedAgent()
+      const addRequest = vi.spyOn(httpAgent.httpsAgent, 'addRequest').mockImplementation(() => {})
+      const options = proxiedOptions('https://proxy.example.com:443')
+
+      httpAgent._addProxiedRequest(req, options)
+
+      expect(options.host).toEqual('proxy.example.com')
+      expect(options.port).toEqual(443)
+      expect(addRequest).toHaveBeenCalledWith(req, options)
+    })
+
+    it('falls back to port 80 when the proxy url has no port', function () {
+      const { httpAgent } = new CombinedAgent()
+      const addRequest = vi.spyOn(http.Agent.prototype, 'addRequest').mockImplementation(() => {})
+      const options = proxiedOptions('http://proxy.example.com')
+
+      httpAgent._addProxiedRequest(req, options)
+
+      expect(options.port).toEqual(80)
+      expect(addRequest).toHaveBeenCalledWith(req, options)
+    })
+
+    it('dials the bare address of an IPv6 proxy', function () {
+      const { httpAgent } = new CombinedAgent()
+
+      vi.spyOn(http.Agent.prototype, 'addRequest').mockImplementation(() => {})
+      const options = proxiedOptions('http://[::1]:3128')
+
+      httpAgent._addProxiedRequest(req, options)
+
+      expect(options.host).toEqual('::1')
+      expect(options.port).toEqual(3128)
+    })
+
+    it('sends the decoded proxy credentials', function () {
+      const { httpAgent } = new CombinedAgent()
+
+      vi.spyOn(http.Agent.prototype, 'addRequest').mockImplementation(() => {})
+
+      httpAgent._addProxiedRequest(req, proxiedOptions('http://jane.doe:s3cr3t%40Pa55@proxy.example.com:3128'))
+
+      expect(req.setHeader).toHaveBeenCalledWith('proxy-authorization', `basic ${Buffer.from('jane.doe:s3cr3t@Pa55').toString('base64')}`)
     })
   })
 
@@ -942,9 +1037,9 @@ describe('lib/agent', function () {
         const createConnection = vi.spyOn(https.Agent.prototype, 'createConnection').mockReturnValue(new net.Socket() as any)
         const { httpsAgent } = new CombinedAgent()
         const options = {
-          href: 'https://foo.bar/',
-          uri: url.parse('https://foo.bar/'),
-          _agentKey: 'foo.bar:443:',
+          href: 'https://api.example.com/',
+          uri: parseUrlFields('https://api.example.com/'),
+          _agentKey: 'api.example.com:443:',
         } as any
 
         await new Promise<void>((resolve) => httpsAgent.createConnection(options, () => resolve()))

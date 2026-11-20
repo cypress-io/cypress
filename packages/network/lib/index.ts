@@ -18,3 +18,7 @@ export { allowDestroy } from './allow-destroy'
 export { concatStream } from './concat-stream'
 
 export { CombinedAgent, shouldProxyForUrl, getProxyOrTargetOverrideForUrl, buildConnectReqHead, createProxySock, isResponseStatusCode200 } from './agent'
+
+export { parseUrlFields } from './url-fields'
+
+export type { UrlFields } from './url-fields'
