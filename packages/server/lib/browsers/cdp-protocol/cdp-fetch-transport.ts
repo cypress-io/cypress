@@ -22,6 +22,7 @@ const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
+const INVALID_INTERCEPTION_ID = /Invalid InterceptionId/
 
 const setCookieHeaders = (headers: Protocol.Fetch.HeaderEntry[]): string[] => {
   return headers
@@ -656,7 +657,14 @@ export class CdpFetchTransport {
             ? { postData: (outbound.postDataBuffer ?? Buffer.from(outbound.postData ?? '', 'utf8')).toString('base64') }
             : {}),
           ...(headers ? { headers } : {}),
-        }, outbound.sessionId)
+        }, outbound.sessionId).catch((err: Error) => {
+          // The page aborting a paused request drops the pause, sometimes before Network.loadingFailed arrives
+          if (INVALID_INTERCEPTION_ID.test(err.message)) {
+            this.options.onRequestCanceled?.(request.id)
+          }
+
+          throw err
+        })
 
         requestContinued = true
 

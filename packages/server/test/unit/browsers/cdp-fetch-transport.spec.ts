@@ -4727,6 +4727,38 @@ describe('CdpFetchTransport', () => {
       expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
+    it('cancels the flow when the browser dropped the pause before it was continued', async () => {
+      const client = createClient()
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { httpIntercept: new HttpIntercept(createCdpFetchCodec()), onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.sendWithArgs('Fetch.continueRequest').rejects(new Error('Invalid InterceptionId.'))
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expectCalledOnceWith(onRequestCanceled, 'network-1')
+    })
+
+    it('does not cancel the flow for other continueRequest failures', async () => {
+      const client = createClient()
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { httpIntercept: new HttpIntercept(createCdpFetchCodec()), onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.sendWithArgs('Fetch.continueRequest').rejects(new Error('Invalid header: x-cypress-is-aut-frame'))
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expect(onRequestCanceled).not.toHaveBeenCalled()
+    })
+
     it('leaves a genuine network failure to the response error pause', async () => {
       const client = createClient()
       const { httpIntercept, parked } = parkedIntercept()
