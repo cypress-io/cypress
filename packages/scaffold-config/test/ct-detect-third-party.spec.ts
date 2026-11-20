@@ -222,7 +222,9 @@ describe('detectThirdPartyCTFrameworks', () => {
       return projectRoot
     }
 
-    async function writeThirdPartyFramework (packageRoot: string, packageName: string, dependency: Cypress.CypressComponentDependency) {
+    async function writeThirdPartyFramework (nodeModules: string, packageName: string, dependency: Cypress.CypressComponentDependency) {
+      const packageRoot = path.join(nodeModules, packageName)
+
       await fs.outputJson(path.join(packageRoot, 'package.json'), {
         name: packageName,
         version: '1.4.2',
@@ -265,8 +267,8 @@ describe('detectThirdPartyCTFrameworks', () => {
     it('detects global and namespaced third party frameworks when the project path has brackets and parentheses', async () => {
       const projectRoot = await createProject(`Jordan Rivera's app (v2) [beta]`)
       const nodeModules = path.join(projectRoot, 'node_modules')
-      const solidPath = await writeThirdPartyFramework(path.join(nodeModules, 'cypress-ct-solid-js'), 'cypress-ct-solid-js', solidDependency)
-      const qwikPath = await writeThirdPartyFramework(path.join(nodeModules, '@acme', 'cypress-ct-qwik'), '@acme/cypress-ct-qwik', qwikDependency)
+      const solidPath = await writeThirdPartyFramework(nodeModules, 'cypress-ct-solid-js', solidDependency)
+      const qwikPath = await writeThirdPartyFramework(nodeModules, '@acme/cypress-ct-qwik', qwikDependency)
 
       const { detected, erroredFrameworks } = await detect(projectRoot)
 
@@ -281,12 +283,12 @@ describe('detectThirdPartyCTFrameworks', () => {
       const projectRoot = await createProject('jordan-rivera-storefront')
       const nodeModules = path.join(projectRoot, 'node_modules')
       const solidPath = await writeThirdPartyFramework(
-        path.join(nodeModules, '.pnpm', 'cypress-ct-solid-js@1.4.2', 'node_modules', 'cypress-ct-solid-js'),
+        path.join(nodeModules, '.pnpm', 'cypress-ct-solid-js@1.4.2', 'node_modules'),
         'cypress-ct-solid-js',
         solidDependency,
       )
       const qwikPath = await writeThirdPartyFramework(
-        path.join(nodeModules, '.pnpm', '@acme+cypress-ct-qwik@1.4.2', 'node_modules', '@acme', 'cypress-ct-qwik'),
+        path.join(nodeModules, '.pnpm', '@acme+cypress-ct-qwik@1.4.2', 'node_modules'),
         '@acme/cypress-ct-qwik',
         qwikDependency,
       )
@@ -310,15 +312,14 @@ describe('detectThirdPartyCTFrameworks', () => {
     it('ignores packages that only resemble third party frameworks', async () => {
       const projectRoot = await createProject('jordan-rivera-storefront')
       const nodeModules = path.join(projectRoot, 'node_modules')
-      const solidRoot = path.join(nodeModules, 'cypress-ct-solid-js')
-      const solidPath = await writeThirdPartyFramework(solidRoot, 'cypress-ct-solid-js', solidDependency)
+      const solidPath = await writeThirdPartyFramework(nodeModules, 'cypress-ct-solid-js', solidDependency)
 
       // Any of these that matched would show up in `detected` or `erroredFrameworks`
-      await writeThirdPartyFramework(path.join(nodeModules, 'not-cypress-ct-qwik'), 'not-cypress-ct-qwik', qwikDependency)
-      await writeThirdPartyFramework(path.join(nodeModules, '@acme', 'not-cypress-ct-qwik'), '@acme/not-cypress-ct-qwik', qwikDependency)
-      await writeThirdPartyFramework(path.join(nodeModules, '@acme', 'cypress-ct-'), '@acme/cypress-ct-', qwikDependency)
-      await writeThirdPartyFramework(path.join(nodeModules, '@acme', 'tools', 'cypress-ct-qwik'), '@acme/tools/cypress-ct-qwik', qwikDependency)
-      await writeThirdPartyFramework(path.join(solidRoot, 'node_modules', 'cypress-ct-qwik'), 'cypress-ct-qwik', qwikDependency)
+      await writeThirdPartyFramework(nodeModules, 'not-cypress-ct-qwik', qwikDependency)
+      await writeThirdPartyFramework(nodeModules, '@acme/not-cypress-ct-qwik', qwikDependency)
+      await writeThirdPartyFramework(nodeModules, '@acme/cypress-ct-', qwikDependency)
+      await writeThirdPartyFramework(nodeModules, '@acme/tools/cypress-ct-qwik', qwikDependency)
+      await writeThirdPartyFramework(path.join(nodeModules, 'cypress-ct-solid-js', 'node_modules'), 'cypress-ct-qwik', qwikDependency)
 
       const { detected, erroredFrameworks } = await detect(projectRoot)
 

@@ -96,8 +96,10 @@ const ThirdPartyComponentFrameworkSchema = z.object({
   componentIndexHtml: z.optional(z.function()),
 })
 
-const CT_FRAMEWORK_GLOBAL_GLOB = 'node_modules/cypress-ct-*/package.json'
-const CT_FRAMEWORK_NAMESPACED_GLOB = 'node_modules/@*?/cypress-ct-*?/package.json'
+const CT_FRAMEWORK_GLOBS = [
+  'node_modules/cypress-ct-*/package.json',
+  'node_modules/@*?/cypress-ct-*?/package.json',
+]
 
 export interface ErroredFramework {
   path: string
@@ -119,7 +121,7 @@ export async function detectThirdPartyCTFrameworks (
 
       // Keep the directory in `cwd`, not the pattern: glob syntax would read the
       // brackets and parentheses in a path like `my-app (v2) [beta]` and match nothing
-      const newPackagePaths = (await glob([CT_FRAMEWORK_GLOBAL_GLOB, CT_FRAMEWORK_NAMESPACED_GLOB], {
+      const newPackagePaths = (await glob(CT_FRAMEWORK_GLOBS, {
         cwd: directory,
         absolute: true,
       })).sort()
