@@ -1,12 +1,14 @@
 import md5 from 'md5'
-import { fs } from 'memfs'
 import path from 'path'
-import webpack from 'webpack'
-import VirtualModulesPlugin from 'webpack-virtual-modules'
+import type webpackType from 'webpack'
 import * as resolve from '../../util/resolve'
 import type { CrossOriginCallbackArgs } from './types'
 
 export const processCallback = ({ file, fn, projectRoot }: CrossOriginCallbackArgs): Promise<string> => {
+  // loaded here so a plugins child only pays for webpack when a cy.origin callback uses Cypress.require
+  const webpack: typeof webpackType = require('webpack')
+  const { fs } = require('memfs')
+  const VirtualModulesPlugin = require('webpack-virtual-modules')
   const { getFullWebpackOptions } = require('@cypress/webpack-batteries-included-preprocessor')
 
   const source = fn.replace(/Cypress\.require/g, 'require')
@@ -41,7 +43,7 @@ export const processCallback = ({ file, fn, projectRoot }: CrossOriginCallbackAr
   const compiler = webpack(modifiedWebpackOptions)
 
   // memfs is compatible at runtime but its types don't match webpack's OutputFileSystem
-  compiler.outputFileSystem = fs as unknown as webpack.Compiler['outputFileSystem']
+  compiler.outputFileSystem = fs as unknown as webpackType.Compiler['outputFileSystem']
 
   return new Promise((resolvePromise, reject) => {
     const handle = (err?: Error | null) => {

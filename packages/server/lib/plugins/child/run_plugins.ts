@@ -12,6 +12,7 @@ import { combineHandlersByEvent } from './combine_handlers'
 import { nonNodeRequires, serializeError, wrapChildPromise } from '../util'
 import { validateEvent } from './validate_event'
 import { processCallback as processCrossOriginCallback } from './cross_origin'
+import { isSpawnedWorker } from '../../util/worker_index'
 import type {
   PluginChildIpc,
   PluginExecuteEvent,
@@ -117,6 +118,9 @@ export class RunPlugins {
     })
     .tap(() => {
       if (!this.registeredEventsByName['file:preprocessor']) {
+        // a spawned --workers process gets its bundles from the coordinator, so it never needs webpack
+        if (isSpawnedWorker()) return
+
         debug('register default preprocessor')
         registerChildEvent('file:preprocessor', this._getDefaultPreprocessor(initialConfig))
       } else {

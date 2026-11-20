@@ -46,6 +46,7 @@ const clientSideError = function (err: PreprocessorError): string {
 const baseEmitter = new EventEmitter()
 let fileObjects: Record<string, FileObject> = {}
 let fileProcessors: Record<string, Promise<string>> = {}
+let bundleSource: ((filePath: string) => PromiseLike<string>) | undefined
 
 plugins.registerHandler((ipc: PluginIpcHandler) => {
   ipc.on('preprocessor:rerun', (filePath: string) => {
@@ -66,6 +67,7 @@ interface PreprocessorAPI {
   clientSideError: (err: PreprocessorError) => string
   emitter: EventEmitter
   getFile: (filePath: string, config: Cfg) => Promise<string>
+  setBundleSource: (source: ((filePath: string) => PromiseLike<string>) | undefined) => void
   removeFile: (filePath: string, config: Cfg) => void
   close: () => void
 }
@@ -127,7 +129,9 @@ const API: PreprocessorAPI = {
     const preprocessor = (fileProcessors[filePath] = Promise.try(() => {
       const span = telemetry.startSpan({ name: 'file:preprocessor' })
 
-      return plugins.execute('file:preprocessor', fileObject).then((arg: string) => {
+      const bundled = bundleSource ? Promise.resolve(bundleSource(filePath)) : plugins.execute('file:preprocessor', fileObject)
+
+      return bundled.then((arg: string) => {
         span?.setAttribute('file', arg)
         span?.end()
 
@@ -136,6 +140,11 @@ const API: PreprocessorAPI = {
     }))
 
     return preprocessor
+  },
+
+  // A spawned `--workers` process bundles through its coordinator instead of its own plugins child
+  setBundleSource (source) {
+    bundleSource = source
   },
 
   removeFile (filePath: string, config: Cfg) {

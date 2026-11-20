@@ -8,7 +8,8 @@ import Bluebird from 'bluebird'
 import assert from 'assert'
 
 import recordMode from './record'
-import { readSpecDurations, resolveWorkerCount, specDurationsPath, startCoordinator, workerHooks, writeSpecDurations } from './run-workers'
+import { bundleFromCoordinator, readSpecDurations, resolveWorkerCount, specDurationsPath, startCoordinator, workerHooks, writeSpecDurations } from './run-workers'
+import preprocessor from '../plugins/preprocessor'
 import * as ciProvider from '../util/ci_provider'
 import { randomUUID } from 'crypto'
 import * as errors from '../errors'
@@ -1266,7 +1267,18 @@ async function ready (options: ReadyOptions) {
   const workers = isWorker || options.workers == null ? 1 : await resolveWorkerCount(options.workers, specs.length)
   const durationsFile = specDurationsPath(projectRoot)
   const durations = workers > 1 && !record ? await readSpecDurations(durationsFile) : undefined
-  const coordinator = workers > 1 ? startCoordinator({ specs, workers, downloadsFolder: config.downloadsFolder, durations, record: record ? { ciBuildId } : undefined }) : undefined
+  const coordinator = workers > 1 ? startCoordinator({
+    specs,
+    workers,
+    downloadsFolder: config.downloadsFolder,
+    durations,
+    record: record ? { ciBuildId } : undefined,
+    bundle: (filePath) => preprocessor.getFile(filePath, config),
+  }) : undefined
+
+  if (isWorker) {
+    preprocessor.setBundleSource(bundleFromCoordinator())
+  }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
     const cloudHooks = { beforeSpecRun, afterSpecRun }

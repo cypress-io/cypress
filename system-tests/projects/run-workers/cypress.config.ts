@@ -18,6 +18,7 @@ export default {
       on('task', {
         recordSpec (spec: string) {
           record('specs', `${workerIndex()} ${spec}`)
+          record('webpack', `${workerIndex()} ${Object.keys(require.cache).some((file) => /[\\/]node_modules[\\/]webpack[\\/]/.test(file))}`)
 
           return workerIndex() ?? null
         },

@@ -104,6 +104,24 @@ describe('lib/plugins/preprocessor', () => {
       expect(plugin).toHaveBeenCalledTimes(1)
     })
 
+    it('gets the file from the bundle source instead of the plugin when one is set', async () => {
+      const bundleSource = vi.fn().mockResolvedValue('/path/to/coordinator-output.js')
+
+      config.isTextTerminal = true
+      preprocessor.setBundleSource(bundleSource)
+
+      try {
+        expect(await preprocessor.getFile(filePath, config)).toBe('/path/to/coordinator-output.js')
+        expect(await preprocessor.getFile(filePath, config)).toBe('/path/to/coordinator-output.js')
+      } finally {
+        preprocessor.setBundleSource(undefined)
+      }
+
+      expect(bundleSource).toHaveBeenCalledOnce()
+      expect(bundleSource).toHaveBeenCalledWith(fullFilePath)
+      expect(plugin).not.toHaveBeenCalled()
+    })
+
     it('rejects and does not invoke the plugin for a file that is not a spec or the support file', async () => {
       isSpecFrameScript.mockReturnValue(false)
 

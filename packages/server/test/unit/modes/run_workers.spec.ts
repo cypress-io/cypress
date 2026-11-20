@@ -1,4 +1,5 @@
 import os from 'os'
+import { EventEmitter } from 'events'
 import path from 'path'
 import fs from 'fs/promises'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -7,6 +8,7 @@ import * as gpu from '../../../lib/util/gpu'
 import {
   availableMemoryMb,
   BlockPrinter,
+  bundleFromCoordinator,
   holdStdout,
   startCoordinator,
   orderByDuration,
@@ -266,7 +268,7 @@ describe('lib/modes/run-workers', () => {
           capture?.mockRestore()
         }),
       }
-      const coordinator = startCoordinator({ specs: [spec('a.cy.ts')], workers: 1, downloadsFolder: '/downloads', record: {}, write: () => {} })
+      const coordinator = startCoordinator({ specs: [spec('a.cy.ts')], workers: 1, downloadsFolder: '/downloads', record: {}, bundle: vi.fn(), write: () => {} })
       const hooks = coordinator.hooks(cloud)
 
       expect(await hooks.beforeSpecRun()).toMatchObject({ spec: 'a.cy.ts', instanceId: 'cloud-1' })
@@ -303,6 +305,43 @@ describe('lib/modes/run-workers', () => {
       printer.print('d')
 
       expect(written).toEqual(['a', 'b', 'c', 'd'])
+    })
+  })
+
+  describe('bundleFromCoordinator', () => {
+    let sent: any[]
+    let channel: EventEmitter & { send: (message: any) => boolean }
+
+    beforeEach(() => {
+      sent = []
+      channel = Object.assign(new EventEmitter(), { send: (message: any) => sent.push(message) > 0 })
+    })
+
+    it('resolves each request with the output path the coordinator replies with', async () => {
+      const bundle = bundleFromCoordinator(channel as any)
+      const spec = bundle('/project/cypress/e2e/a.cy.ts')
+      const support = bundle('/project/cypress/support/e2e.ts')
+
+      expect(sent).toEqual([
+        { type: 'bundle', id: 0, filePath: '/project/cypress/e2e/a.cy.ts' },
+        { type: 'bundle', id: 1, filePath: '/project/cypress/support/e2e.ts' },
+      ])
+
+      channel.emit('message', { type: 'claimed', claim: {} })
+      channel.emit('message', { type: 'bundled', id: 1, outputPath: '/bundles/support.js' })
+      channel.emit('message', { type: 'bundled', id: 0, outputPath: '/bundles/a.js' })
+
+      expect(await spec).toBe('/bundles/a.js')
+      expect(await support).toBe('/bundles/support.js')
+    })
+
+    it('rejects with an error that keeps the fields the spec controller reports', async () => {
+      const bundle = bundleFromCoordinator(channel as any)
+      const result = bundle('/project/cypress/e2e/a.cy.ts')
+
+      channel.emit('message', { type: 'bundleError', id: 0, error: { message: 'Module not found', originalStack: 'at a.cy.ts:1', filePath: '/project/cypress/e2e/a.cy.ts' } })
+
+      await expect(result).rejects.toMatchObject({ message: 'Module not found', originalStack: 'at a.cy.ts:1', filePath: '/project/cypress/e2e/a.cy.ts' })
     })
   })
 })

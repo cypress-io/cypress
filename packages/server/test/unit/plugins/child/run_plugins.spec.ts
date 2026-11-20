@@ -91,6 +91,22 @@ describe('lib/plugins/child/run_plugins', () => {
         expect(webpackPreprocessorFn, 'webpackPreprocessor').toHaveBeenCalled()
       })
 
+      it('does not register default preprocessor in a spawned --workers process', async () => {
+        const webpackPreprocessor = vi.fn()
+
+        vi.stubEnv('CYPRESS_WORKER_INDEX', '2')
+        registerWebpackPreprocessorMock(webpackPreprocessor)
+
+        await runPlugins.runSetupNodeEvents(config, setupNodeEventsFn)
+
+        const registrations = sentPayload('setupTestingType:reply').registrations
+
+        expect(webpackPreprocessor).not.toHaveBeenCalled()
+        expect(registrations.map(({ event }) => event)).not.toContain('file:preprocessor')
+
+        vi.unstubAllEnvs()
+      })
+
       it('does not register default preprocessor if registered by user', async () => {
         const userPreprocessorFn = vi.fn()
         const webpackPreprocessor = vi.fn()

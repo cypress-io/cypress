@@ -32,8 +32,19 @@ type WorkerMessage =
   | { type: 'claim' }
   | { type: 'started', spec: string }
   | { type: 'specResult', results: RunResult }
+  | { type: 'bundle', id: number, filePath: string }
 
-type CoordinatorMessage = { type: 'claimed', claim: Claim }
+// the IPC channel's structured clone drops an Error's own properties, which the spec controller reads
+type BundleError = { message: string, stack?: string, originalStack?: string, filePath?: string, annotated?: string }
+
+type CoordinatorMessage =
+  | { type: 'claimed', claim: Claim }
+  | { type: 'bundled', id: number, outputPath: string }
+  | { type: 'bundleError', id: number, error: BundleError }
+
+const toBundleError = (err: any): BundleError => {
+  return { message: String(err?.message ?? err), stack: err?.stack, originalStack: err?.originalStack, filePath: err?.filePath, annotated: err?.annotated }
+}
 
 // Peak memory of one worker's process tree with headroom for heavier apps; the GPU processes are its largest part
 export const perWorkerMemoryMb = () => isSoftwareRendering() ? 1200 : 1600
@@ -361,13 +372,15 @@ export interface Coordinator {
   }
 }
 
-export function startCoordinator ({ specs, workers, downloadsFolder, durations, record, write = process.stdout.write.bind(process.stdout) }: {
+export function startCoordinator ({ specs, workers, downloadsFolder, durations, record, bundle, write = process.stdout.write.bind(process.stdout) }: {
   specs: SpecWithRelativeRoot[]
   workers: number
   downloadsFolder: string
   durations?: SpecDurations
   /** Set when recording: every worker joins the same Cloud run and gets its specs from Cloud. */
   record?: RecordSettings
+  /** Bundles a spec or the support file for a worker and resolves with the output path. */
+  bundle: (filePath: string) => PromiseLike<string>
   write?: (s: string) => void
 }): Coordinator {
   const queue = new SpecQueue(specs, durations)
@@ -429,6 +442,18 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
         queue.start(index, message.spec)
       } else if (message.type === 'specResult') {
         queue.complete(index, message.results)
+      } else if (message.type === 'bundle') {
+        const { id, filePath } = message
+
+        Promise.resolve(bundle(filePath)).then((outputPath) => {
+          const reply: CoordinatorMessage = { type: 'bundled', id, outputPath }
+
+          child.send(reply)
+        }, (err) => {
+          const reply: CoordinatorMessage = { type: 'bundleError', id, error: toBundleError(err) }
+
+          child.send(reply)
+        })
       }
     })
 
@@ -543,5 +568,40 @@ export function workerHooks (cloud: SpecRunHooks = {}): Required<SpecRunHooks> {
 
       send(message)
     },
+  }
+}
+
+/** A bundle source for a spawned worker: the coordinator bundles each file, so the worker's plugins child never does. */
+export function bundleFromCoordinator (channel: Pick<NodeJS.Process, 'send' | 'on'> = process): (filePath: string) => Promise<string> {
+  if (typeof channel.send !== 'function') {
+    throw new Error('A Cypress worker must be started by a coordinator with an IPC channel.')
+  }
+
+  const send = channel.send.bind(channel)
+  const pending = new Map<number, { resolve: (outputPath: string) => void, reject: (err: Error) => void }>()
+  let nextId = 0
+
+  channel.on('message', (message: CoordinatorMessage) => {
+    if (message?.type !== 'bundled' && message?.type !== 'bundleError') return
+
+    const request = pending.get(message.id)
+
+    pending.delete(message.id)
+
+    if (message.type === 'bundled') {
+      request?.resolve(message.outputPath)
+    } else {
+      request?.reject(Object.assign(new Error(message.error.message), message.error))
+    }
+  })
+
+  return (filePath) => {
+    return new Promise((resolve, reject) => {
+      const id = nextId++
+      const request: WorkerMessage = { type: 'bundle', id, filePath }
+
+      pending.set(id, { resolve, reject })
+      send(request)
+    })
   }
 }

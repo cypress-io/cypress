@@ -58,6 +58,11 @@ describe('cypress run --workers', () => {
 
       expect(await fs.pathExistsAsync(path.join(projectPath, 'cypress', downloadsFolder, 'hello.txt'))).to.be.true
 
+      const webpackLoaded = new Map((await readLines('webpack')).map((line) => line.split(' ') as [string, string]))
+
+      expect(webpackLoaded.get('0'), 'the coordinator bundles the specs').to.eq('true')
+      expect([...webpackLoaded].filter(([index]) => index !== '0').map(([, loaded]) => loaded), 'spawned workers never load webpack').to.not.include('true')
+
       const renderers = await readLines('renderers')
 
       expect(new Set(renderers.map((line) => line.split(' ')[0])).size, 'renderers came from more than one worker').to.be.greaterThan(1)
