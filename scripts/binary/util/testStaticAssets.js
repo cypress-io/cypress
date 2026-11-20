@@ -25,15 +25,16 @@ const testStaticAssets = async (buildResourcePath) => {
       ],
       // each host module must be read through its webpack external, not bundled
       goodStrings: [
-        'window["__CYPRESS_HOST_MODULES__"]["react"]',
-        'window["__CYPRESS_HOST_MODULES__"]["react-dom"]',
-        'window["__CYPRESS_HOST_MODULES__"]["react-dom/client"]',
-        'window["__CYPRESS_HOST_MODULES__"]["mobx"]',
+        'window.__CYPRESS_HOST_MODULES__.react}',
+        'window.__CYPRESS_HOST_MODULES__["react-dom"]}',
+        'window.__CYPRESS_HOST_MODULES__["react-dom/client"]}',
+        'window.__CYPRESS_HOST_MODULES__.mobx}',
       ],
       testAssetStrings: [
         [
-          (str) => !str.split('\n').slice(-1)[0].includes('//# sourceMappingURL'),
-          'sourcemaps were detected, ensure `web-config/webpack.config.base.ts` does not have sourcemaps enabled in production',
+          // DevTools fetches an external map only while it is open; an inline one would sit in every runner page
+          (str) => str.split('\n').slice(-1)[0] === '//# sourceMappingURL=cypress_runner.js.map',
+          'expected the last line to link the external cypress_runner.js.map, ensure `runner/webpack.config.ts` builds a source map in production',
         ],
         [
           // only the production config's DefinePlugin replaces these comparisons
@@ -41,7 +42,7 @@ const testStaticAssets = async (buildResourcePath) => {
           'process.env.NODE_ENV comparisons were found, ensure webpack is run with NODE_ENV=production',
         ],
       ],
-      minLineCount: 5000,
+      sourceMap: true,
     }),
     testPackageStaticAssets({
       // the React that the app publishes to the runner must be the production build
@@ -133,7 +134,7 @@ const testPackageStaticAssets = async (options = {}) => {
     goodStrings: [],
     badStrings: [],
     testAssetStrings: [],
-    minLineCount: 0,
+    sourceMap: false,
   })
 
   const foundAssets = await globAsync(opts.assetGlob)
@@ -162,12 +163,11 @@ const testPackageStaticAssets = async (options = {}) => {
       la(testFn(fileStr), `Error in ${path}: ${errorMsg}`)
     })
 
-    if (opts.minLineCount) {
-      const lineCount = (fileStr.match(/\n/g) || '').length + 1
+    if (opts.sourceMap) {
+      const map = await fs.readJson(`${path}.map`)
 
-      la(lineCount > opts.minLineCount, stripIndent`
-      Error in ${chalk.red(path)}: Detected this file was minified, having fewer than ${opts.minLineCount} lines of code.
-      Minified code takes longer to inspect in browser Devtools, so we should leave it un-minified.
+      la(map.sources.length && map.sourcesContent?.length === map.sources.length && map.sourcesContent.every(Boolean), stripIndent`
+      Error in ${chalk.red(`${path}.map`)}: expected sourcesContent for every source, so DevTools can show the original code.
       `)
     }
 

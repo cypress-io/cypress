@@ -178,7 +178,7 @@ describe('testStaticAssets', () => {
     .property('message').contain('assets to be found')
   })
 
-  it('can detect asset with too many lines', async () => {
+  it('can detect a source map without the original sources', async () => {
     const buildDir = 'resources/app'
 
     mockfs({
@@ -186,9 +186,8 @@ describe('testStaticAssets', () => {
         'packages': {
           'runner': {
             'dist': {
-              'runner.js': `
-              ${'minified code;minified code;minified code;\n'.repeat(50)}
-              `,
+              'runner.js': 'minified code;\n//# sourceMappingURL=runner.js.map',
+              'runner.js.map': JSON.stringify({ version: 3, sources: ['cypress://driver/src/main.ts'], sourcesContent: [null], mappings: 'AAAA' }),
             },
           },
         },
@@ -197,9 +196,31 @@ describe('testStaticAssets', () => {
 
     await expect(testPackageStaticAssets({
       assetGlob: `${buildDir}/packages/runner/dist/*.js`,
-      minLineCount: 100,
+      sourceMap: true,
     })).to.rejected.with.eventually
-    .property('message').contain('minified')
+    .property('message').contain('sourcesContent')
+  })
+
+  it('can detect a missing source map', async () => {
+    const buildDir = 'resources/app'
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'runner': {
+            'dist': {
+              'runner.js': 'minified code;',
+            },
+          },
+        },
+      },
+    })
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/runner/dist/*.js`,
+      sourceMap: true,
+    })).to.rejected.with.eventually
+    .property('message').contain('runner.js.map')
   })
 
   it('can detect asset that includes specified number of goodStrings', async () => {

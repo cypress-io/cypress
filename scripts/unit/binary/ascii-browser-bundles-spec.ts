@@ -4,8 +4,11 @@ import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import vm from 'vm'
+import { transformSync } from 'esbuild'
+import { decode } from '@jridgewell/sourcemap-codec'
 
 const { toAscii, writeBrowserBundlesAsAscii } = require('../../binary/ascii-browser-bundles')
+const { escapeNonAscii } = require('../../binary/escape-non-ascii')
 
 const evaluate = (source: string) => vm.runInNewContext(source)
 const isAscii = (source: string) => !/[\u0080-\uffff]/.test(source)
@@ -55,6 +58,25 @@ describe('ascii-browser-bundles', () => {
     })
   })
 
+  context('escapeNonAscii', () => {
+    it('escapes regular expressions and comments, which esbuild leaves as written', () => {
+      const source = `/*! © */\n[/ẞ/.test('ẞ'), /\\ẞ/.test('ẞ'), /^[🙂]$/u.test('🙂')]`
+      const { code } = escapeNonAscii(source)
+
+      expect(isAscii(code)).to.be.true
+      expect(evaluate(code)).to.deep.equal(evaluate(source))
+    })
+
+    it('moves the source map columns that follow an escape on the same line', () => {
+      const source = `function normalize (text) {\n  return text.replace(/ẞ/g, 'ss').replace(/…/g, '...') + window.afterTheRegex(text)\n}\nwindow.normalize = normalize\n`
+      const minified = transformSync(source, { minify: true, charset: 'ascii', sourcemap: true, sourcefile: 'normalize.js' })
+      const { code, map } = escapeNonAscii(minified.code, JSON.parse(minified.map))
+      const segment = decode(map.mappings)[0].find(([column]) => column === code.indexOf('afterTheRegex'))
+
+      expect(segment?.slice(2)).to.deep.equal([1, source.split('\n')[1].indexOf('afterTheRegex')])
+    })
+  })
+
   context('writeBrowserBundlesAsAscii', () => {
     let appDir: string
 
@@ -80,6 +102,16 @@ describe('ascii-browser-bundles', () => {
       expect(await fs.readFile(runner, 'utf8')).to.include('"\\u1E9E"')
       expect(await fs.readFile(appChunk, 'utf8')).to.include('"\\u1E9E"')
       expect(await fs.readFile(css, 'utf8')).to.equal(`.a::before { content: 'ẞ' }`)
+    })
+
+    it('refuses a bundle with a linked source map, whose columns rewriting it would move', async () => {
+      const runner = path.join(appDir, 'packages', 'runner', 'dist', 'cypress_runner.js')
+
+      await fs.outputFile(runner, `window.pattern = /ẞ/\n//# sourceMappingURL=cypress_runner.js.map`)
+
+      const error = await writeBrowserBundlesAsAscii(appDir).catch((err: Error) => err)
+
+      expect(error).to.be.an('error').with.property('message').that.includes('has a source map')
     })
   })
 })

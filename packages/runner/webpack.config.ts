@@ -2,7 +2,10 @@ import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import { HOST_MODULES_GLOBAL, HOST_MODULE_SPECIFIERS } from '@packages/types/src/host-modules'
 import path from 'path'
+import TerserPlugin from 'terser-webpack-plugin'
+import type { TransformOptions } from 'esbuild'
 import type webpack from 'webpack'
+import { asciiEsbuildMinify } from './ascii-minify'
 
 const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()
@@ -21,15 +24,42 @@ const prismPlugin = [require.resolve('babel-plugin-prismjs'), {
 // @ts-expect-error - plugins is typed from web-config's own entries, none of which take prism's options
 babelLoader.options.plugins.push(prismPlugin)
 
+// Every runner page holds the bundle's source text, so production builds ship it minified, with an
+// external source map that DevTools loads only when it is open
+const productionBundleConfig: webpack.Configuration = process.env.NODE_ENV === 'production' ? {
+  devtool: 'source-map',
+  optimization: {
+    ...commonConfig.optimization,
+    minimize: true,
+    minimizer: [new TerserPlugin<TransformOptions>({
+      minify: asciiEsbuildMinify,
+      // workers receive the minify function as source text, without the module it closes over
+      parallel: false,
+      terserOptions: {
+        // function and class names appear in stack traces and some error messages
+        keepNames: true,
+        charset: 'ascii',
+        legalComments: 'eof',
+        // Babel's target in web-config; keeps esbuild from rewriting the output into newer syntax
+        target: 'chrome64',
+      },
+    })],
+  },
+} : {}
+
+const bundleOutput = {
+  path: path.resolve(__dirname, 'dist'),
+  filename: '[name].js',
+  devtoolModuleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+}
+
 const mainConfig: webpack.Configuration = {
   ...commonConfig,
+  ...productionBundleConfig,
   entry: {
     cypress_runner: [path.resolve(__dirname, 'src/assert-host-modules.ts'), path.resolve(__dirname, 'src/index.ts')],
   },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
-  },
+  output: bundleOutput,
   externalsType: 'window',
   externals: Object.fromEntries(HOST_MODULE_SPECIFIERS.map((specifier) => [specifier, [HOST_MODULES_GLOBAL, specifier]])),
 }
@@ -72,13 +102,11 @@ mainConfig.resolve = {
 
 const crossOriginConfig: webpack.Configuration = {
   ...commonConfig,
+  ...productionBundleConfig,
   entry: {
     cypress_cross_origin_runner: [path.resolve(__dirname, 'src/cross-origin.ts')],
   },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
-  },
+  output: bundleOutput,
 }
 
 const mainInjectionConfig: webpack.Configuration = {

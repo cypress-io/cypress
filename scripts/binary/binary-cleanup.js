@@ -215,8 +215,9 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
     path.join(buildAppDir, '**', 'graphql', '**', '*.mjs'),
     path.join(buildAppDir, '**', '@openTelemetry', '**', 'esm'),
     path.join(buildAppDir, '**', '@openTelemetry', '**', 'esnext'),
-    // We currently do not use any map files
+    // DevTools uses the runner's maps; no other map files are used
     path.join(buildAppDir, '**', '*js.map'),
+    `!${path.join(buildAppDir, 'packages', 'runner', 'dist', '*.js.map')}`,
     // License files need to be kept
     path.join(buildAppDir, '**', '!(LICENSE|license|License).md'),
     // These are type related files that are not used within the binary
