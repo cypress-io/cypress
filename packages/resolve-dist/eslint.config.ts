@@ -1,4 +1,6 @@
-import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, noMisusedPromisesConfig } from '@packages/eslint-config'
+
+const typeAwareFiles = ['lib/**/*.ts']
 
 export default [
   ...baseConfig,
@@ -11,5 +13,6 @@ export default [
       },
     },
   },
-  noFloatingPromisesConfig(['lib/**/*.ts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
 ]

@@ -1,4 +1,6 @@
-import { baseConfig, graphqlConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
+import { baseConfig, graphqlConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, noMisusedPromisesConfig, undeclaredWorkspaceImports } from '@packages/eslint-config'
+
+const typeAwareFiles = ['src/**/*.ts', 'graphql/**/*.ts']
 
 export default [
   ...baseConfig,
@@ -13,7 +15,8 @@ export default [
       },
     },
   },
-  noFloatingPromisesConfig(['src/**/*.ts', 'graphql/**/*.ts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
   {
     // Tests and build scripts may use sync fs and the other APIs restricted in shipped code
     files: ['test/**', 'scripts/**'],

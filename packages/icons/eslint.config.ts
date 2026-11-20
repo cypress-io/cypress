@@ -1,4 +1,6 @@
-import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, noMisusedPromisesConfig, vitestConfig } from '@packages/eslint-config'
+
+const typeAwareFiles = ['index.ts', 'index.mts']
 
 export default [
   ...baseConfig,
@@ -20,7 +22,8 @@ export default [
       'no-restricted-syntax': 'off',
     },
   },
-  noFloatingPromisesConfig(['index.ts', 'index.mts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
   {
     // `tsc -p tsconfig.cjs.json` emits the CJS entry and its declarations next to the source
     ignores: ['index.js', 'index.d.ts'],

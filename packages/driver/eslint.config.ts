@@ -1,4 +1,6 @@
-import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, noMisusedPromisesConfig, vitestConfig } from '@packages/eslint-config'
+
+const typeAwareFiles = ['index.ts', 'src/**/*.ts']
 
 export default [
   ...baseConfig,
@@ -13,7 +15,8 @@ export default [
       },
     },
   },
-  noFloatingPromisesConfig(['index.ts', 'src/**/*.ts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
   {
     // Specs may use sync fs and the other APIs restricted in shipped code
     files: ['cypress/**', 'test/**'],

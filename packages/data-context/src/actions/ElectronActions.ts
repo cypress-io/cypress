@@ -114,16 +114,16 @@ export class ElectronActions {
     })
   }
 
-  showSystemNotification (title: string, body: string, onClick: () => void) {
+  showSystemNotification (title: string, body: string, onClick: () => Promise<void>) {
     const notification = this.ctx.config.electronApi.createNotification(title, body)
 
     notifications.add(notification)
 
     debug('notification created %o', notification)
 
-    function clickFn (event: Electron.Event) {
+    const clickFn = (event: Electron.Event) => {
       debug('notification clicked %o', event)
-      onClick()
+      onClick().catch(this.ctx.logTraceError)
       notifications.delete(notification)
     }
 

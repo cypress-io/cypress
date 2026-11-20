@@ -34,7 +34,7 @@ export async function injectHtml (mw: ResponseInterceptionMiddlewareCtx): Promis
 
   const streamSpan = telemetry.startSpan({ name: `maybe:inject:html-resp:stream`, parentSpan: span, isVerbose })
 
-  mw.incomingResStream.pipe(concatStream(async (body) => {
+  const injectIntoBody = async (body: Buffer) => {
     const nodeCharset = getNodeCharsetFromResponse(mw.incomingRes.headers, body, mw.debug)
 
     const decodedBody = iconv.decode(body, nodeCharset)
@@ -61,6 +61,10 @@ export async function injectHtml (mw: ResponseInterceptionMiddlewareCtx): Promis
 
     streamSpan?.end()
     mw.next()
+  }
+
+  mw.incomingResStream.pipe(concatStream((body) => {
+    injectIntoBody(body).catch(mw.onError)
   })).on('error', mw.onError).once('close', () => {
     span?.end()
   })

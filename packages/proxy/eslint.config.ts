@@ -1,5 +1,7 @@
-import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, noMisusedPromisesConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
+
+const typeAwareFiles = ['lib/**/*.ts']
 
 export default [
   ...baseConfig,
@@ -13,7 +15,8 @@ export default [
       },
     },
   },
-  noFloatingPromisesConfig(['lib/**/*.ts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
   // The CommonJS entry point runs in Node
   {
     files: ['index.js'],

@@ -75,9 +75,11 @@ export class Poller<E extends EventType, T = never, M = never> {
     }
 
     debug(`setting timeout with interval of ${this.pollingInterval} second`)
-    this.#timeout = setTimeout(async () => {
+    this.#timeout = setTimeout(() => {
       this.#timeout = undefined
-      await this.#poll()
+      this.#poll().catch((e) => {
+        debug('error executing poller %o', e)
+      })
     }, this.pollingInterval * 1000)
   }
 

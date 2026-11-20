@@ -576,11 +576,12 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                   <Button
                     variant="outline-purple-dark-mode"
                     size="20"
-                    onClick={async (e) => {
+                    onClick={(e) => {
                       e.stopPropagation()
-                      const result = await getFeedbackUrl()
-
-                      events.emit('external:open', result)
+                      // getFeedbackUrl falls back to the report-issue URL rather than rejecting
+                      void getFeedbackUrl().then((result) => {
+                        events.emit('external:open', result)
+                      })
                     }}
                     className="command-prompt-get-feedback mr-1 whitespace-nowrap"
                   >

@@ -75,7 +75,8 @@ export enum HttpStages {
   Error,
 }
 
-export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
+// `_runStage` sends a rejected promise to `onError`, so a middleware can be async
+export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void | Promise<void>
 
 export type HttpMiddlewareStacks = {
   [stage in HttpStages]: {

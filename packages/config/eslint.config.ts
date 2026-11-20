@@ -1,4 +1,6 @@
-import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, noMisusedPromisesConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
+
+const typeAwareFiles = ['src/**/*.ts', 'test/**/*.ts']
 
 export default [
   ...baseConfig,
@@ -21,7 +23,8 @@ export default [
       'no-restricted-syntax': 'off',
     },
   },
-  noFloatingPromisesConfig(['src/**/*.ts', 'test/**/*.ts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
   {
     // babel-plugin-tester compares these inputs and outputs byte for byte, so autofix must not reformat them
     ignores: ['test/__fixtures__/**/*', 'test/__babel_fixtures__/**/*'],

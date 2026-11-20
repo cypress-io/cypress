@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto'
 import { decode, encode } from '../utils'
 import Debug from 'debug'
 
+const debug = Debug('cypress:server:socket:cdp-socket')
 const debugVerbose = Debug('cypress-verbose:server:socket:cdp-socket')
 
 /**
@@ -242,7 +243,7 @@ export class CDPSocket extends EventEmitter {
     this._namespace = namespace
     this._callerContexts = callerContexts
 
-    this._cdpClient.on('Runtime.bindingCalled', this.processCDPRuntimeBinding)
+    this._cdpClient.on('Runtime.bindingCalled', this.onRuntimeBindingCalled)
   }
 
   static async init (cdpClient: CDPSocketBridge, namespace: string, callerContexts: BindingCallerContexts): Promise<CDPSocket> {
@@ -310,8 +311,14 @@ export class CDPSocket extends EventEmitter {
   }
 
   close = () => {
-    this._cdpClient?.off('Runtime.bindingCalled', this.processCDPRuntimeBinding)
+    this._cdpClient?.off('Runtime.bindingCalled', this.onRuntimeBindingCalled)
     this._cdpClient = undefined
+  }
+
+  private onRuntimeBindingCalled = (bindingCalledEvent: Protocol.Runtime.BindingCalledEvent) => {
+    this.processCDPRuntimeBinding(bindingCalledEvent).catch((error) => {
+      debug('error processing message from browser %o', { error })
+    })
   }
 
   private processCDPRuntimeBinding = async (bindingCalledEvent: Protocol.Runtime.BindingCalledEvent) => {

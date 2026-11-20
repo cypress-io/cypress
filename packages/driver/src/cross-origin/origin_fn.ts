@@ -141,7 +141,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     cy.state('runnable').state = 'passed'
   }
 
-  Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunOriginFnOptions) => {
+  const runOriginFn = async (options: RunOriginFnOptions) => {
     const { config, args, expose, file, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
@@ -232,5 +232,11 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
       return
     }
+  }
+
+  Cypress.specBridgeCommunicator.on('run:origin:fn', (options: RunOriginFnOptions) => {
+    runOriginFn(options).catch((err) => {
+      Cypress.specBridgeCommunicator.toPrimary('ran:origin:fn', { err }, { syncGlobals: true })
+    })
   })
 }

@@ -51,17 +51,20 @@ export async function handleInterceptRequest (
     url: request.req.proxiedUrl,
   }) as CyHttpMessages.IncomingRequest
 
-  request.res.once('finish', async () => {
-    await request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
+  request.res.once('finish', () => {
+    request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
       eventName: 'after:response',
       data: request.includeBodyInAfterResponse ? {
         finalResBody: request.res.body!,
       } : {},
       mergeChanges: _.noop,
+    }).catch((error) => {
+      // The response has already been sent, so there is nothing left to fail
+      mw.debug('cy.intercept: error sending after:response %o', { error })
+    }).finally(() => {
+      mw.debug('cy.intercept: request/response finished, cleaning up')
+      delete mw.netStubbingState.requests[request.id]
     })
-
-    mw.debug('cy.intercept: request/response finished, cleaning up')
-    delete mw.netStubbingState.requests[request.id]
   })
 
   const ensureBody = () => {

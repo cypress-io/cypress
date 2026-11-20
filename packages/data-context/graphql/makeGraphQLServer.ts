@@ -328,8 +328,8 @@ export const graphqlWS = (httpServer: Server, targetRoute: string, options: Grap
   }
 }
 
-const makeGraphQLHTTP = (validationRules: readonly ValidationRule[]) => {
-  return graphqlHTTP((req, res, params) => {
+const makeGraphQLHTTP = (validationRules: readonly ValidationRule[]): express.Handler => {
+  const middleware = graphqlHTTP((req, res, params) => {
     const context = getCtx()
     let document: DocumentNode | undefined
 
@@ -371,6 +371,12 @@ const makeGraphQLHTTP = (validationRules: readonly ValidationRule[]) => {
       },
     }
   })
+
+  // express-graphql answers errors in the request itself; this forwards
+  // anything that escapes it, such as a failure writing the response
+  return (req, res, next) => {
+    middleware(req, res).catch(next)
+  }
 }
 
 /**

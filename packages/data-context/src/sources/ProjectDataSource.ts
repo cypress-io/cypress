@@ -383,10 +383,7 @@ export class ProjectDataSource {
       throw new Error('Cannot start spec watcher without current project')
     }
 
-    // When file system changes are detected, we retrieve any spec files matching
-    // the determined specPattern. This function is debounced to limit execution
-    // during sequential file operations.
-    const onProjectFileSystemChange = _.debounce(async (_type, _filePath) => {
+    const updateSpecs = async () => {
       const specs = await this.findSpecs({
         projectRoot,
         testingType,
@@ -407,6 +404,13 @@ export class ProjectDataSource {
       }
 
       this.ctx.actions.project.setSpecs(specs)
+    }
+
+    // When file system changes are detected, we retrieve any spec files matching
+    // the determined specPattern. This function is debounced to limit execution
+    // during sequential file operations.
+    const onProjectFileSystemChange = _.debounce(() => {
+      updateSpecs().catch(this.ctx.logTraceError)
     }, 250)
 
     // We respond to all changes to the project's filesystem when

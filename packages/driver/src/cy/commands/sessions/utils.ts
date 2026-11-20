@@ -215,7 +215,7 @@ function navigateAboutBlank ({ inBetweenTestsAndNextTestHasTestIsolationOn }: { 
 
     Cypress.action('cy:url:changed', '')
 
-    return Cypress.action('cy:visit:blank', { testIsolation: true })
+    Cypress.action('cy:visit:blank', { testIsolation: true })
   })
 }
 

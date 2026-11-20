@@ -69,7 +69,7 @@ interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
 interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
-  logout(): void
+  logout(): Promise<void>
   /**
    * Triggered when we have an initial stale response that is not fulfilled
    * by an additional fetch to the server. This means we've gotten into a bad state

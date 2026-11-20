@@ -623,8 +623,14 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 
   this.incomingResStream.setEncoding('utf8')
 
-  this.incomingResStream.pipe(concatStream(async (body) => {
-    const updatedBody = injectIntoServiceWorker(body)
+  this.incomingResStream.pipe(concatStream((body) => {
+    let updatedBody: string
+
+    try {
+      updatedBody = injectIntoServiceWorker(body)
+    } catch (err) {
+      return this.onError(err)
+    }
 
     const pt = new PassThrough
 

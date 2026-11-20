@@ -1,4 +1,6 @@
-import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, noMisusedPromisesConfig, undeclaredWorkspaceImports, vitestConfig } from '@packages/eslint-config'
+
+const typeAwareFiles = ['src/**/*.ts']
 
 export default [
   ...baseConfig,
@@ -21,7 +23,8 @@ export default [
       'no-restricted-syntax': 'off',
     },
   },
-  noFloatingPromisesConfig(['src/**/*.ts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
   {
     // build output of tsconfig.browser.json
     ignores: ['browser/**/*'],

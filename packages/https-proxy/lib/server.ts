@@ -197,7 +197,7 @@ export class Server {
       sem = (sslSemaphores[hostname] = semaphore(1))
     }
 
-    return sem.take(async () => {
+    const connectThroughSslServer = async () => {
       const leave = () => {
         return process.nextTick(() => {
           return sem.leave()
@@ -243,6 +243,16 @@ export class Server {
           return this._onError(e, browserSocket, head)
         }
       }
+    }
+
+    return sem.take(() => {
+      // Every path above leaves the semaphore before anything that can throw,
+      // so only the browser socket is left to clean up
+      connectThroughSslServer().catch((e) => {
+        debug('Error handling connection failure %o', { e })
+
+        browserSocket.destroy(e)
+      })
     })
   }
 

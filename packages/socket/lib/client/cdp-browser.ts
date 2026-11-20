@@ -26,7 +26,7 @@ export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap
 
     this._namespace = namespace
 
-    const send = async (payload: string) => {
+    const receive = async (payload: string) => {
       const parsed = JSON.parse(payload)
 
       await decode(parsed).then(async (decoded: any) => {
@@ -35,6 +35,13 @@ export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap
         super.emit(event, ...args)
         await this.emit(callbackEvent)
       })
+    }
+
+    // The server calls this through `Runtime.evaluate` and ignores the
+    // result, so report a failure the way an error thrown by a listener of a
+    // socket.io event would surface: to the page's global error handlers
+    const send = (payload: string) => {
+      receive(payload).catch(reportError)
     }
 
     let cypressSocket = window[`cypressSocket-${this._namespace}`]

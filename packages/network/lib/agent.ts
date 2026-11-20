@@ -333,7 +333,7 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  async addRequest (req: http.ClientRequest, options: http.RequestOptions): Promise<void> {
+  addRequest (req: http.ClientRequest, options: http.RequestOptions): void {
     const opts = options as https.RequestOptions
 
     // Ensure we have a proper port defined otherwise node has assumed we are port 80
@@ -351,11 +351,15 @@ class HttpsAgent extends https.Agent {
 
     if (baseCaOptions) {
       super.addRequest(req, mergeCAOptions(opts, baseCaOptions) as http.RequestOptions)
-    } else {
-      await baseCaOptionsPromise.then((caOptions) => {
-        super.addRequest(req, mergeCAOptions(opts, caOptions) as http.RequestOptions)
-      })
+
+      return
     }
+
+    baseCaOptionsPromise.then((caOptions) => {
+      super.addRequest(req, mergeCAOptions(opts, caOptions) as http.RequestOptions)
+    }).catch((err) => {
+      req.destroy(err)
+    })
   }
 
   createConnection (options: HttpsRequestOptions, cb?: any): any {

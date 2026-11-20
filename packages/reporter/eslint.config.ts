@@ -1,4 +1,6 @@
-import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, reactConfig } from '@packages/eslint-config'
+import { baseConfig, compatConfig, jsonConfig, noFloatingPromisesConfig, noMisusedPromisesConfig, reactConfig } from '@packages/eslint-config'
+
+const typeAwareFiles = ['src/**/*.{ts,tsx}', 'cypress/**/*.ts']
 
 export default [
   ...baseConfig,
@@ -12,7 +14,8 @@ export default [
       },
     },
   },
-  noFloatingPromisesConfig(['src/**/*.{ts,tsx}', 'cypress/**/*.ts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
   {
     files: ['tailwind.config.js'],
     languageOptions: {

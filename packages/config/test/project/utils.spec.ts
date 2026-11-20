@@ -792,6 +792,7 @@ describe('config/src/project/utils', () => {
       })
 
       // Mock pathExists to return true for the original path
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises -- fs-extra's last `pathExists` overload takes a callback and returns void; setSupportFileAndFolder awaits the promise overload
       vi.mocked(fs.pathExists).mockImplementation(async (filePath: string) => {
         if (filePath === originalSupportFile) {
           return true
@@ -834,6 +835,7 @@ describe('config/src/project/utils', () => {
       })
 
       // Mock pathExists to return false (file doesn't exist at original path)
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises -- fs-extra's last `pathExists` overload takes a callback and returns void; setSupportFileAndFolder awaits the promise overload
       vi.mocked(fs.pathExists).mockImplementation(async () => {
         return false
       })

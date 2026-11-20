@@ -105,7 +105,7 @@ export class RelevantRunSpecsDataSource {
 
         debug(`Run data is `, runs)
 
-        runs.forEach(async (run) => {
+        const processRun = async (run: typeof runs[number]) => {
           if (!run) {
             return
           }
@@ -129,7 +129,16 @@ export class RelevantRunSpecsDataSource {
 
             this.ctx.emitter.relevantRunSpecChange(run)
           }
-        })
+        }
+
+        // Runs are processed without holding up the next poll. A run that
+        // fails to refresh is logged rather than rethrown, which would stop
+        // the poller for every other run
+        for (const run of runs) {
+          processRun(run).catch((error) => {
+            debug('error processing run %o', { runId: run?.id, error })
+          })
+        }
 
         debug('processed runs')
       })

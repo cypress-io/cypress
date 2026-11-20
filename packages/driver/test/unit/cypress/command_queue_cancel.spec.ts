@@ -112,7 +112,7 @@ describe('@packages/driver/src/cypress/command_queue', () => {
 
         queue.endEarly({ canceled: false })
 
-        expect(state('promise').isCancelled()).toBe(true)
+        expect(state('promise')?.isCancelled()).toBe(true)
         expect(queue.index).to.equal(queue.length)
         expect(state('canceled')).toBeUndefined()
         expect(runnable.resetTimeout).not.toHaveBeenCalled()
@@ -136,7 +136,7 @@ describe('@packages/driver/src/cypress/command_queue', () => {
 
         queue.endEarly({ canceled: false })
 
-        expect(state('promise').isCancelled()).toBe(false)
+        expect(state('promise')?.isCancelled()).toBe(false)
         expect(state('isStable')).toBe(false)
         expect(runnable.resetTimeout).not.toHaveBeenCalled()
       })
@@ -148,7 +148,7 @@ describe('@packages/driver/src/cypress/command_queue', () => {
 
         queue.endEarly({ canceled: true })
 
-        expect(state('promise').isCancelled()).toBe(true)
+        expect(state('promise')?.isCancelled()).toBe(true)
         expect(queue.index).to.equal(queue.length)
         expect(state('canceled')).toBe(true)
         expect(runnable.resetTimeout).toHaveBeenCalled()

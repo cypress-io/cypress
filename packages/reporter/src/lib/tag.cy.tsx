@@ -76,10 +76,12 @@ describe('Tag', () => {
 
     aliases.forEach((type, index) => {
       if (index === 0) {
-        return cy.contains(type).should('not.contain', index)
+        cy.contains(type).should('not.contain', index)
+
+        return
       }
 
-      return cy.contains(type).siblings().contains(index)
+      cy.contains(type).siblings().contains(index)
     })
 
     cy.percySnapshot()

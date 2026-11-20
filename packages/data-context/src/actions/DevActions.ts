@@ -34,16 +34,20 @@ export class DevActions {
 
   // In a setTimeout so that we flush the triggering response to the client before sending
   triggerRelaunch () {
-    setTimeout(async () => {
-      try {
-        await this.ctx.destroy()
-      } catch (e) {
-        this.ctx.logTraceError(e)
-      } finally {
-        process.exitCode = 0
-        await this.ctx.fs.writeFile(DevActions.CY_TRIGGER_UPDATE, JSON.stringify(new Date()))
-      }
+    setTimeout(() => {
+      this.relaunch().catch(this.ctx.logTraceError)
     }, 10)
+  }
+
+  private async relaunch () {
+    try {
+      await this.ctx.destroy()
+    } catch (e) {
+      this.ctx.logTraceError(e)
+    } finally {
+      process.exitCode = 0
+      await this.ctx.fs.writeFile(DevActions.CY_TRIGGER_UPDATE, JSON.stringify(new Date()))
+    }
   }
 
   dismissRelaunch () {
