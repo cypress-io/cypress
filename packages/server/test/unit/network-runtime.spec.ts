@@ -30,6 +30,17 @@ const expectNotCalledWith = (mock: Mock, ...expected: unknown[]) => {
   expect(callsMatching(mock, expected), `calls matching ${String(expected[0])}`).toHaveLength(0)
 }
 
+// A materialized body is read whole or, without a small Content-Length, in chunks.
+const BODY_READS = ['Fetch.getResponseBody', 'Fetch.takeResponseBodyAsStream']
+
+const expectBodyRead = (mock: Mock) => {
+  expect(mock.mock.calls.filter(([method]) => BODY_READS.includes(method as string)), 'calls reading the response body').not.toHaveLength(0)
+}
+
+const expectBodyNotRead = (mock: Mock) => {
+  expect(mock.mock.calls.filter(([method]) => BODY_READS.includes(method as string)), 'calls reading the response body').toHaveLength(0)
+}
+
 const findCall = (mock: Mock, method: string) => {
   return mock.mock.calls.find((args) => args[0] === method)
 }
@@ -114,7 +125,9 @@ describe('lib/network-runtime', () => {
         headers: options.requestHeaders ?? {},
       },
       responseStatusCode: options.responseStatusCode,
-      responseHeaders: options.responseHeaders,
+      // Without headers of its own, a response pause describes a small body,
+      // which is read with one Fetch.getResponseBody.
+      responseHeaders: options.responseHeaders ?? (typeof options.responseStatusCode === 'number' ? [{ name: 'Content-Length', value: '64' }] : undefined),
     } as Protocol.Fetch.RequestPausedEvent
   }
 
@@ -1451,7 +1464,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expectCalledWith(client.send, 'Fetch.getResponseBody')
+    expectBodyRead(client.send)
     expect(timesRoute.disabled).toBe(true)
 
     client.send.mockClear()
@@ -1465,7 +1478,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expectNotCalledWith(client.send, 'Fetch.getResponseBody')
+    expectBodyNotRead(client.send)
     expectCalledWith(client.send, 'Fetch.continueResponse')
   })
 
@@ -1483,7 +1496,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expectNotCalledWith(client.send, 'Fetch.getResponseBody')
+    expectBodyNotRead(client.send)
 
     client.send.mockClear()
     runtime.netStubbingState.routes.push(minimalMatchingRoute('route-2'))
@@ -1497,7 +1510,7 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'application/x-ndjson' }],
     })
 
-    expectCalledWith(client.send, 'Fetch.getResponseBody')
+    expectBodyRead(client.send)
   })
 
   // Every other test in this file leaves both obstructive-code flags
@@ -1527,7 +1540,47 @@ describe('lib/network-runtime', () => {
       responseHeaders: [{ name: 'content-type', value: 'text/javascript' }],
     })
 
-    expectCalledWith(client.send, 'Fetch.getResponseBody')
+    expectBodyRead(client.send)
+  })
+
+  describe('how a materialized body is read', () => {
+    const driveScript = async (responseHeaders: Protocol.Fetch.HeaderEntry[]) => {
+      const client = createCdpClient({ withBody: true })
+      const runtime = createCdpFetchRuntime({
+        ...baseDeps(),
+        config: { clientRoute: '/__/', responseTimeout: 30000, modifyObstructiveCode: true } as Cypress.Config,
+        client,
+      })
+      const onRequestPaused = await startCdpRuntime(runtime, client)
+
+      await drivePausedRequest(onRequestPaused, {
+        requestId: 'bundle-request',
+        networkId: 'network-bundle-1',
+        url: 'https://app.example.test/main.js',
+        resourceType: 'Script',
+        responseStatusCode: 200,
+        responseHeaders,
+      })
+
+      return client
+    }
+
+    it('reads a script without a Content-Length in chunks', async () => {
+      const client = await driveScript([{ name: 'content-type', value: 'application/javascript' }])
+
+      expectCalledWith(client.send, 'Fetch.takeResponseBodyAsStream')
+      expectNotCalledWith(client.send, 'Fetch.getResponseBody')
+    })
+
+    it('reads a small script whole', async () => {
+      const client = await driveScript([
+        { name: 'content-type', value: 'application/javascript' },
+        { name: 'content-length', value: '48213' },
+      ])
+
+      expectCalledWith(client.send, 'Fetch.getResponseBody')
+      expectNotCalledWith(client.send, 'Fetch.takeResponseBodyAsStream')
+    })
   })
 
   it('arms capture for a stream-classified response once a protocol manager with isProtocolEnabled true is applied after createCdpFetchRuntime returns', async () => {

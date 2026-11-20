@@ -157,6 +157,7 @@ type CreateParams = {
   browserClient?: ICriClient
   onReconnectAttempt?: (retryIndex: number) => void
   onCriConnectionClosed?: () => void
+  onCriConnectionLost?: () => void
 }
 
 export class CriClient implements ICriClient {
@@ -223,6 +224,7 @@ export class CriClient implements ICriClient {
     private browserClient?: ICriClient,
     onReconnectAttempt?: (retryIndex: number) => void,
     onCriConnectionClosed?: () => void,
+    onCriConnectionLost?: () => void,
   ) {
     debug('creating cri client with', {
       host, port, targetId,
@@ -264,6 +266,10 @@ export class CriClient implements ICriClient {
 
     if (onCriConnectionClosed) {
       this.cdpConnection.addConnectionEventListener('cdp-connection-closed', onCriConnectionClosed)
+    }
+
+    if (onCriConnectionLost) {
+      this.cdpConnection.addConnectionEventListener('cdp-connection-lost', onCriConnectionLost)
     }
 
     if (onReconnectAttempt) {
@@ -319,8 +325,9 @@ export class CriClient implements ICriClient {
     browserClient,
     onReconnectAttempt,
     onCriConnectionClosed,
+    onCriConnectionLost,
   }: CreateParams): Promise<CriClient> {
-    const newClient = new CriClient(target, onAsynchronousError, host, port, onReconnect, protocolManager, fullyManageTabs, browserClient, onReconnectAttempt, onCriConnectionClosed)
+    const newClient = new CriClient(target, onAsynchronousError, host, port, onReconnect, protocolManager, fullyManageTabs, browserClient, onReconnectAttempt, onCriConnectionClosed, onCriConnectionLost)
 
     await newClient.connect()
 

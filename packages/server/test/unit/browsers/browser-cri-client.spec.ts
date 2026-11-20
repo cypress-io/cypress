@@ -1602,7 +1602,7 @@ describe('lib/browsers/browser-cri-client', function () {
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs(fieldsMatching({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } })).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
@@ -1622,7 +1622,7 @@ describe('lib/browsers/browser-cri-client', function () {
       }
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs(fieldsMatching({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } })).resolves(mockPageClient)
 
       const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
@@ -1646,7 +1646,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       send.withArgs('Network.enable').throws(new Error('ProtocolError: Inspected target navigated or closed'))
 
-      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs(fieldsMatching({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager, fullyManageTabs: true, browserClient: { on, off, send, close, removeSessionEnablements } })).resolves(mockPageClient)
 
       const browserClient = await getClient({ protocolManager, fullyManageTabs: true })
 
@@ -1675,7 +1675,7 @@ describe('lib/browsers/browser-cri-client', function () {
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }, { targetId: '3', url: 'http://baz.com' }] })
-      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs(fieldsMatching({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } })).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
@@ -1695,11 +1695,94 @@ describe('lib/browsers/browser-cri-client', function () {
 
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
       send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }, { targetId: '2', url: 'http://bar.com' }] })
-      criClientCreate.withArgs({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } }).resolves(mockPageClient)
+      criClientCreate.withArgs(fieldsMatching({ target: '1', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: { on, off, send, close, removeSessionEnablements } })).resolves(mockPageClient)
 
       const browserClient = await getClient()
 
       await expect(browserClient.attachToTargetUrl('http://baz.com')).rejects.toThrow()
+    })
+  })
+
+  describe('when the page connection is lost', function () {
+    let mockPageClient: { clone: Mock, targetId: string, closed: boolean, crashed: boolean }
+    let browserClient: BrowserCriClient
+    let onPageConnectionLost: MockInstance
+
+    const loseConnection = async () => {
+      const [createOptions] = criClientCreate.mock.calls.find(([options]) => options.target === '1')!
+
+      createOptions.onCriConnectionLost()
+
+      await onPageConnectionLost.mock.results.at(-1)!.value
+    }
+
+    beforeEach(async function () {
+      vi.spyOn(Bluebird, 'delay').mockImplementation(() => Bluebird.resolve() as any)
+
+      mockPageClient = { clone: vi.fn().mockResolvedValue({}), targetId: '1', closed: false, crashed: false }
+
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [{ targetId: '1', url: 'http://foo.com' }] })
+      criClientCreate.withArgs(fieldsMatching({ target: '1' })).resolves(mockPageClient)
+
+      browserClient = await getClient()
+      await browserClient.attachToTargetUrl('http://foo.com')
+
+      onPageConnectionLost = vi.spyOn(browserClient as any, '_onPageConnectionLost')
+    })
+
+    it('fails the run when the tab is still open', async function () {
+      await loseConnection()
+
+      expect(onError).toHaveBeenCalledOnce()
+      expect(onError.mock.calls[0][0]).toMatchObject({ type: 'CDP_PAGE_CONNECTION_LOST', isFatalApiErr: true })
+    })
+
+    it('leaves a closed tab to Target.targetDestroyed', async function () {
+      send.withArgs('Target.getTargets').resolves({ targetInfos: [] })
+
+      await loseConnection()
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('does nothing while resetting browser targets', async function () {
+      browserClient.resettingBrowserTargets = true
+
+      await loseConnection()
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('does nothing once the page client has been closed', async function () {
+      mockPageClient.closed = true
+
+      await loseConnection()
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('does nothing when the page target crashed', async function () {
+      mockPageClient.crashed = true
+
+      await loseConnection()
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('does nothing for a target that is no longer the current one', async function () {
+      browserClient.currentlyAttachedTarget = { ...mockPageClient, targetId: '2' } as any
+
+      await loseConnection()
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it('does nothing when the browser connection cannot list targets', async function () {
+      send.withArgs('Target.getTargets').rejects(new Error('WebSocket connection closed'))
+
+      await loseConnection()
+
+      expect(onError).not.toHaveBeenCalled()
     })
   })
 
@@ -1774,7 +1857,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       const browserClient = await getClient() as any
 
-      criClientCreate.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: browserClient.browserClient }).resolves(mockUpdatedCurrentlyAttachedTarget)
+      criClientCreate.withArgs(fieldsMatching({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: browserClient.browserClient })).resolves(mockUpdatedCurrentlyAttachedTarget)
 
       browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
       browserClient.currentlyAttachedProtocolTarget = mockCurrentlyAttachedProtocolTarget
