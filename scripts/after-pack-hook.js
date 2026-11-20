@@ -3,13 +3,10 @@ const { join } = require('path')
 const glob = require('glob')
 const os = require('os')
 const path = require('path')
-const { setupV8Snapshots } = require('@tooling/v8-snapshot')
 const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
-const { buildEntryPointAndCleanup, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
+const { consolidateDuplicateDependencies, removeBundledDependencies, cleanupUnneededDependencies } = require('./binary/binary-cleanup')
+const { createStartCypressBundle, createServerEntryPointBundle, createStartBundleCodeCache } = require('./binary/start-bundle')
 const {
-  getIntegrityCheckSource,
-  getBinaryEntryPointSource,
-  getBinaryByteNodeEntryPointSource,
   getEncryptionFileSource,
   getCloudEnvironmentFileSource,
   validateEncryptionFile,
@@ -18,26 +15,26 @@ const {
   validateProtocolFile,
   getStudioFileSource,
   validateStudioFile,
-  getIndexJscHash,
   getCyPromptFileSource,
   validateCyPromptFile,
-  DUMMY_INDEX_JSC_HASH,
+  validateShippedServerCode,
 } = require('./binary/binary-sources')
-const { needsSandbox } = require('../cli/lib/tasks/verify')
-const execa = require('execa')
-const meta = require('./binary/meta')
 
-const CY_ROOT_DIR = path.join(__dirname, '..')
-
-const createJscFromCypress = async () => {
-  const args = []
-
-  if (needsSandbox()) {
-    args.push('--no-sandbox')
-  }
-
-  await execa(`${meta.buildAppExecutable()}`, args)
-}
+// Strip test keys and local development overrides from the server code that the binary ships
+const appFileRewrites = [
+  ['packages/server/lib/cloud/encryption.js', getEncryptionFileSource, validateEncryptionFile],
+  ['packages/server/lib/cloud/environment.js', getCloudEnvironmentFileSource, validateCloudEnvironmentFile],
+  ['packages/server/lib/cloud/api/index.js', getProtocolFileSource, validateProtocolFile],
+  ['packages/server/lib/cloud/protocol.js', getProtocolFileSource, validateProtocolFile],
+  ['packages/server/lib/cloud/protocol.js', getStudioFileSource, validateStudioFile],
+  ['packages/server/lib/cloud/api/studio/report_studio_error.js', getStudioFileSource, validateStudioFile],
+  ['packages/server/lib/cloud/studio/StudioLifecycleManager.js', getStudioFileSource, validateStudioFile],
+  ['packages/server/lib/cloud/studio/studio.js', getStudioFileSource, validateStudioFile],
+  ['packages/server/lib/cloud/cy-prompt/CyPromptLifecycleManager.js', getCyPromptFileSource, validateCyPromptFile],
+  ['packages/server/lib/cloud/cy-prompt/CyPromptManager.js', getCyPromptFileSource, validateCyPromptFile],
+  ['packages/server/lib/cloud/api/cy-prompt/report_cy_prompt_error.js', getCyPromptFileSource, validateCyPromptFile],
+  ['packages/server/lib/project-base.js', getCyPromptFileSource, validateCyPromptFile],
+]
 
 module.exports = async function (params) {
   try {
@@ -86,126 +83,44 @@ module.exports = async function (params) {
       win32: join(params.appOutDir, 'Cypress.exe'),
     }
 
-    if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
-      const binaryByteNodeEntryPointSource = await getBinaryByteNodeEntryPointSource()
-      const binaryEntryPointSource = await getBinaryEntryPointSource()
-      const encryptionFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/encryption.ts')
-      const encryptionFileSource = await getEncryptionFileSource(encryptionFilePath)
-      const cloudEnvironmentFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/environment.ts')
-      const cloudEnvironmentFileSource = await getCloudEnvironmentFileSource(cloudEnvironmentFilePath)
+    // rewrites of the same file must run in order
+    for (const [file, getSource, validate] of appFileRewrites) {
+      const filePath = path.join(outputFolder, file)
 
-      await Promise.all([
-        fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource),
-        fs.writeFile(encryptionFilePath, encryptionFileSource),
-        fs.writeFile(cloudEnvironmentFilePath, cloudEnvironmentFileSource),
-      ])
-
-      // Remove local protocol env
-      const cloudApiFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/index.ts')
-      const cloudApiFileSource = await getProtocolFileSource(cloudApiFilePath)
-      const cloudProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
-      const cloudProtocolFileSource = await getProtocolFileSource(cloudProtocolFilePath)
-
-      await Promise.all([
-        fs.writeFile(cloudApiFilePath, cloudApiFileSource),
-        fs.writeFile(cloudProtocolFilePath, cloudProtocolFileSource),
-      ])
-
-      // Remove local studio env
-      const reportStudioErrorPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/api/studio/report_studio_error.ts')
-      const reportStudioErrorFileSource = await getStudioFileSource(reportStudioErrorPath)
-      const StudioLifecycleManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/studio/StudioLifecycleManager.ts')
-      const StudioLifecycleManagerFileSource = await getStudioFileSource(StudioLifecycleManagerPath)
-      const studioProtocolFilePath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/protocol.ts')
-      const studioProtocolFileSource = await getStudioFileSource(studioProtocolFilePath)
-      const studioPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/studio/studio.ts')
-      const studioPathFileSource = await getStudioFileSource(studioPath)
-
-      await Promise.all([
-        fs.writeFile(reportStudioErrorPath, reportStudioErrorFileSource),
-        fs.writeFile(StudioLifecycleManagerPath, StudioLifecycleManagerFileSource),
-        fs.writeFile(studioProtocolFilePath, studioProtocolFileSource),
-        fs.writeFile(studioPath, studioPathFileSource),
-      ])
-
-      // Remove local cy prompt env
-      const cyPromptLifecycleManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/cy-prompt/CyPromptLifecycleManager.ts')
-      const cyPromptLifecycleManagerFileSource = await getCyPromptFileSource(cyPromptLifecycleManagerPath)
-      const cyPromptManagerPath = path.join(CY_ROOT_DIR, 'packages/server/lib/cloud/cy-prompt/CyPromptManager.ts')
-      const cyPromptManagerFileSource = await getCyPromptFileSource(cyPromptManagerPath)
-
-      await Promise.all([
-        fs.writeFile(cyPromptLifecycleManagerPath, cyPromptLifecycleManagerFileSource),
-        fs.writeFile(cyPromptManagerPath, cyPromptManagerFileSource),
-      ])
-
-      const integrityCheckSource = getIntegrityCheckSource(outputFolder)
-
-      await fs.writeFile(path.join(outputFolder, 'index.js'), binaryByteNodeEntryPointSource)
-
-      await Promise.all([
-        validateEncryptionFile(encryptionFilePath),
-        validateCloudEnvironmentFile(cloudEnvironmentFilePath),
-        validateProtocolFile(cloudApiFilePath),
-        validateProtocolFile(cloudProtocolFilePath),
-        validateStudioFile(reportStudioErrorPath),
-        validateStudioFile(StudioLifecycleManagerPath),
-        validateCyPromptFile(cyPromptLifecycleManagerPath),
-        validateCyPromptFile(cyPromptManagerPath),
-        validateStudioFile(studioProtocolFilePath),
-        validateStudioFile(studioPath),
-      ])
-
-      await flipFuses(
-        exePathPerPlatform[os.platform()],
-        {
-          version: FuseVersion.V1,
-          resetAdHocDarwinSignature: os.platform() === 'darwin' && os.arch() === 'arm64',
-          [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
-          [FuseV1Options.EnableNodeCliInspectArguments]: false,
-        },
-      )
-
-      process.env.V8_UPDATE_METAFILE = '1'
-
-      // Build out the entry point and clean up prior to setting up v8 snapshots so that the state of the binary is correct
-      await buildEntryPointAndCleanup(outputFolder)
-      await cleanupUnneededDependencies(outputFolder)
-      await setupV8Snapshots({
-        cypressAppPath: params.appOutDir,
-        integrityCheckSource,
-      })
-
-      // Use Cypress to create the JSC entry point file
-      await createJscFromCypress()
-
-      const indexJscHash = await getIndexJscHash(outputFolder)
-
-      // This file is not needed at this point since it's been replaced by the jsc. So we remove it.
-      await fs.remove(path.join(outputFolder, 'packages/server/index.js'))
-      await fs.writeFile(path.join(outputFolder, 'index.js'), binaryEntryPointSource)
-
-      await flipFuses(
-        exePathPerPlatform[os.platform()],
-        {
-          version: FuseVersion.V1,
-          [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
-          [FuseV1Options.EnableNodeCliInspectArguments]: false,
-        },
-      )
-
-      // Regenerate the v8 snapshots. This time, we replace the JSC hash with what we calculated earlier. We use the existing snapshot script to avoid having to go through the entire v8 snapshot process
-      await setupV8Snapshots({
-        cypressAppPath: params.appOutDir,
-        useExistingSnapshotScript: true,
-        updateSnapshotScriptContents: (contents) => {
-          return contents.replace(DUMMY_INDEX_JSC_HASH, indexJscHash)
-        },
-      })
-    } else {
-      console.log(`value of DISABLE_SNAPSHOT_REQUIRE was ${process.env.DISABLE_SNAPSHOT_REQUIRE}. Skipping snapshot require...`)
-      await cleanupUnneededDependencies(outputFolder)
+      await fs.writeFile(filePath, await getSource(filePath))
+      await validate(filePath)
     }
+
+    await flipFuses(
+      exePathPerPlatform[os.platform()],
+      {
+        version: FuseVersion.V1,
+        resetAdHocDarwinSignature: os.platform() === 'darwin' && os.arch() === 'arm64',
+        [FuseV1Options.EnableNodeCliInspectArguments]: false,
+      },
+    )
+
+    // esbuild reports real paths, so a symlink in the build path (macOS's /var) would put every module outside the app
+    const appDir = await fs.realpath(outputFolder)
+
+    // Consolidate first so that the bundles and the files kept on disk resolve the copies that ship
+    await consolidateDuplicateDependencies(appDir)
+
+    const [startBundle, serverEntryPointBundledDependencies] = await Promise.all([
+      createStartCypressBundle(appDir),
+      createServerEntryPointBundle(appDir),
+    ])
+
+    await removeBundledDependencies(appDir, {
+      bundledDependencies: [...startBundle.bundledDependencies, ...serverEntryPointBundledDependencies],
+      loadedFromDisk: startBundle.loadedFromDisk,
+    })
+
+    await cleanupUnneededDependencies(outputFolder)
+
+    await validateShippedServerCode(path.join(appDir, 'packages', 'server'))
+
+    await createStartBundleCodeCache()
   } catch (error) {
     console.log(error)
     throw error

@@ -49,10 +49,8 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/stderr-filtering** — Utility for tagging and filtering noisy third-party stderr output into `debug` streams.
 - **@packages/agent-info** — Detects whether an AI coding agent invoked the current process, and which one, by fingerprinting environment variables.
 
-### Build & Snapshot Infrastructure
+### Build Infrastructure
 
-- **@packages/v8-snapshot-require** — Loads V8 heap snapshots created by `@tooling/v8-snapshot` to accelerate Electron startup time.
-- **@packages/packherd-require** — Module loader for bundles produced by `@tooling/packherd`; also provides on-demand TypeScript transpilation with source-map support.
 - **@packages/web-config** — Shared webpack/Vite configuration helpers for browser bundles inside the monorepo.
 - **@packages/ts** — Standardises `ts-node` version and base `tsconfig` options for development-time TypeScript require hooks.
 - **@packages/eslint-config** — Monorepo-wide ESLint flat-config with rules for TypeScript, Vue, React, Cypress tests, and imports.

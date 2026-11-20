@@ -123,7 +123,7 @@ jobs:
         - ready-to-test
   - system-tests-node-modules-install:
       context: test-runner:performance-tracking
-      filters: pipeline.parameters.run-npm-vite-dev-server-tests == true or pipeline.parameters.run-npm-webpack-dev-server-tests == true or pipeline.parameters.run-system-tests == true or pipeline.parameters.run-v8-tests == true
+      filters: pipeline.parameters.run-npm-vite-dev-server-tests == true or pipeline.parameters.run-npm-webpack-dev-server-tests == true or pipeline.parameters.run-system-tests == true
       requires:
         - ready-to-test
   - system-tests-chrome:
@@ -351,10 +351,6 @@ jobs:
       filters: &runNpmSchematicTests pipeline.parameters.run-npm-schematic-tests == true
       requires:
         - ready-to-test
-  - v8-integration-tests:
-      filters: &runV8Tests pipeline.parameters.run-v8-tests == true
-      requires:
-        - system-tests-node-modules-install
 
   - proxy-transport-unit-tests:
       filters: *runUnitTests
@@ -520,4 +516,3 @@ jobs:
         - npm-mount-utils
         - npm-grep
         - npm-cypress-schematic
-        - v8-integration-tests

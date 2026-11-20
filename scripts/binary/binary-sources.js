@@ -1,60 +1,56 @@
 const fs = require('fs-extra')
-const crypto = require('crypto')
+const glob = require('glob')
 const path = require('path')
-const esbuild = require('esbuild')
 
-const escapeString = (string) => string.replaceAll(`\``, `\\\``).replaceAll(`$`, `\\$`)
-const secret = require('crypto').randomBytes(48).toString('hex')
-const DUMMY_INDEX_JSC_HASH = 'abcddcbaabcddcbaabcddcbaabcddcba'
+const LOCAL_OVERRIDE_VARIABLES = ['CYPRESS_LOCAL_PROTOCOL_PATH', 'CYPRESS_LOCAL_STUDIO_PATH', 'CYPRESS_LOCAL_CY_PROMPT_PATH']
+// V8 keeps the source of these large scripts in memory, as two bytes per character if any character is above U+00FF
+const ONE_BYTE_SOURCES = ['start-cypress.bundle.js', 'index.js']
+const NON_LATIN1 = /[^\0-\xff]/
 
-function read (file) {
-  const pathToFile = require.resolve(`./${file}`)
+const getTestEncryptionKey = async () => {
+  const encryptionSource = await fs.readFile(path.join(__dirname, '../../packages/server/lib/cloud/encryption.ts'), 'utf8')
+  const testKey = encryptionSource.match(/const CY_TEST = `(.*?)`/)?.[1]
 
-  return fs.readFileSync(pathToFile, 'utf8')
+  if (!testKey) {
+    throw new Error(`Expected to find the test key in cloud encryption.ts`)
+  }
+
+  return testKey
 }
 
-const getBinaryEntryPointSource = async () => {
-  const esbuildResult = await esbuild.build({
-    entryPoints: [require.resolve('./binary-entry-point-source.js')],
-    bundle: true,
-    platform: 'node',
-    write: false,
-    minify: true,
-    treeShaking: true,
-  })
+// Checks the bundles and every other file the binary ships under packages/server, so a new read of a local override
+// that is missing from the rewrites, or a dependency change that makes a bundle two-byte, fails the build
+const validateShippedServerCode = async (serverDir, testKey) => {
+  testKey ??= await getTestEncryptionKey()
 
-  return esbuildResult.outputFiles[0].text
-}
+  const files = glob.sync('**/*.{js,cjs}', { cwd: serverDir, ignore: ['node_modules/**'], nodir: true })
+  const problems = []
 
-const getBinaryByteNodeEntryPointSource = async () => {
-  const esbuildResult = await esbuild.build({
-    entryPoints: [require.resolve('./binary-byte-node-entry-point-source.js')],
-    bundle: true,
-    platform: 'node',
-    write: false,
-    minify: true,
-    treeShaking: true,
-  })
+  await Promise.all(files.map(async (file) => {
+    const contents = await fs.readFile(path.join(serverDir, file), 'utf8')
 
-  return esbuildResult.outputFiles[0].text
-}
+    for (const variable of LOCAL_OVERRIDE_VARIABLES) {
+      if (contents.includes(variable)) {
+        problems.push(`${file} reads ${variable}`)
+      }
+    }
 
-const getIntegrityCheckSource = (baseDirectory) => {
-  const fileSource = read('binary-integrity-check-source.js')
+    if (contents.includes(testKey)) {
+      problems.push(`${file} contains the test encryption key`)
+    }
 
-  const mainIndexHash = crypto.createHmac('md5', secret).update(fs.readFileSync(path.join(baseDirectory, './index.js'), 'utf8')).digest('hex')
+    const nonLatin1 = ONE_BYTE_SOURCES.includes(file) && contents.match(NON_LATIN1)
 
-  return fileSource.split('\n').join(`\n  `)
-  .replaceAll('MAIN_INDEX_HASH', mainIndexHash)
-  .replaceAll('INDEX_JSC_HASH', DUMMY_INDEX_JSC_HASH)
-  .replaceAll('HMAC_SECRET', secret)
-  .replaceAll('CRYPTO_CREATE_HMAC_TO_STRING', escapeString(crypto.createHmac.toString()))
-  .replaceAll('CRYPTO_HMAC_UPDATE_TO_STRING', escapeString(crypto.Hmac.prototype.update.toString()))
-  .replaceAll('CRYPTO_HMAC_DIGEST_TO_STRING', escapeString(crypto.Hmac.prototype.digest.toString()))
-}
+    if (nonLatin1) {
+      const codePoint = `U+${nonLatin1[0].charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`
 
-const getIndexJscHash = (baseDirectory) => {
-  return crypto.createHmac('md5', secret).update(fs.readFileSync(path.join(baseDirectory, './packages/server/index.jsc'), 'utf8')).digest('hex')
+      problems.push(`${file} contains ${codePoint}, so V8 stores it as two-byte: ...${contents.slice(Math.max(0, nonLatin1.index - 60), nonLatin1.index + 20)}...`)
+    }
+  }))
+
+  if (problems.length) {
+    throw new Error(`The binary's server code failed validation:\n${problems.sort().join('\n')}`)
+  }
 }
 
 const getEncryptionFileSource = async (encryptionFilePath) => {
@@ -154,9 +150,6 @@ const validateCyPromptFile = async (cyPromptFilePath) => {
 }
 
 module.exports = {
-  getBinaryEntryPointSource,
-  getBinaryByteNodeEntryPointSource,
-  getIntegrityCheckSource,
   getEncryptionFileSource,
   validateEncryptionFile,
   getCloudEnvironmentFileSource,
@@ -167,6 +160,5 @@ module.exports = {
   validateStudioFile,
   getCyPromptFileSource,
   validateCyPromptFile,
-  getIndexJscHash,
-  DUMMY_INDEX_JSC_HASH,
+  validateShippedServerCode,
 }

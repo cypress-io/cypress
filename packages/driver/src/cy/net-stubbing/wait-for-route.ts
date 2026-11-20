@@ -37,15 +37,35 @@ export function waitForRoute (alias: string, state: StateFunc, specifier: 'reque
   }
 
   // When response, return the first request that has the wanted state.
+  // A browser-canceled request is passed over while a later, non-canceled one exists,
+  // since apps commonly abort and re-send the same request.
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i]
 
-    if (RESPONSE_WAITED_STATES.includes(request.state)) {
-      request.responseWaited = true
-
-      return request
+    if (!RESPONSE_WAITED_STATES.includes(request.state)) {
+      continue
     }
+
+    if (isBrowserCanceled(request) && requests.slice(i + 1).some((later) => !isBrowserCanceled(later))) {
+      continue
+    }
+
+    for (const passedOver of requests.slice(0, i)) {
+      if (isBrowserCanceled(passedOver)) {
+        passedOver.responseWaited = true
+      }
+    }
+
+    request.responseWaited = true
+
+    return request
   }
 
   return null
+}
+
+function isBrowserCanceled (request: Interception): boolean {
+  const { error } = request
+
+  return request.state === 'Errored' && !!error && 'code' in error && error.code === 'ERR_BROWSER_CONNECTION_CLOSED'
 }
