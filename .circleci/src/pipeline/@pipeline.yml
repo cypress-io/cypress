@@ -1129,15 +1129,14 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
-      - install-browsers:
-          install-chrome: true
-          install-chrome-for-testing: true
-      # System tests only launch the browser passed to --browser, so WebKit runs never need Firefox
+      # WebKit runs only launch the WebKit from playwright-webkit (the spec that opens Chrome is skipped below)
       - unless:
           condition:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-browsers:
+                install-chrome: true
+                install-chrome-for-testing: true
                 install-firefox: true
       - restore_cache:
           name: Restore Bun install cache
@@ -1190,6 +1189,11 @@ commands:
               for file in $ALL_SPECS; do
                 # filter out non_root tests, they have their own stage
                 if [[ "$file" == *"non_root"* ]]; then
+                  echo "Skipping $file"
+                  continue
+                fi
+                # tap_open_spec always opens Chrome, which the WebKit job does not install
+                if [[ "<< parameters.browser >>" == "webkit" && "$file" == *"tap_open_spec"* ]]; then
                   echo "Skipping $file"
                   continue
                 fi
