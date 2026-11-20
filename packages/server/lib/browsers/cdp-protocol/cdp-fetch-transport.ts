@@ -772,8 +772,12 @@ export class CdpFetchTransport {
         // (res.send({ forceNetworkError: true })) must reach the page as one
         // too. The request stage already continued, so the pause in hand is the
         // response — fail it rather than releasing the origin's response.
+        const failRequestId = response?.requestId ?? responseRequestId ?? event.requestId
+
+        this.takenBodies.delete(failRequestId)
+
         await this.safeSend('Fetch.failRequest', {
-          requestId: response?.requestId ?? responseRequestId ?? event.requestId,
+          requestId: failRequestId,
           errorReason: 'Failed',
         }, response?.sessionId ?? responseSessionId ?? sessionId)
       } else {

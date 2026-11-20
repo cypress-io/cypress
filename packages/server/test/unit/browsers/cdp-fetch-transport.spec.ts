@@ -1490,6 +1490,40 @@ describe('CdpFetchTransport', () => {
       expectNotCalledWith(client.send, 'Fetch.failRequest')
     })
 
+    it('drops a taken body once a response handler fails the request, so a later pause with the same id does not get it', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      let bodyInChunks = true
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => bodyInChunks })
+      const handlerErrors = [
+        Object.assign(new Error('forceNetworkError called'), { isForceNetworkError: true }),
+        new Error('handler threw'),
+      ]
+
+      serveTakenBody(client, scriptBody)
+      client.sendWithArgs('Fetch.getResponseBody').resolves({ body: 'b3JpZ2lu', base64Encoded: true })
+
+      httpIntercept.use(async (req, next) => {
+        await next(req)
+
+        throw handlerErrors.shift()
+      })
+
+      const onRequestPaused = await startTransport(transport, client)
+
+      await driveScriptPause(onRequestPaused)
+
+      expectCalledWith(client.send, 'Fetch.failRequest', { requestId: 'fetch-request', errorReason: 'Failed' })
+
+      bodyInChunks = false
+      client.send.mockClear()
+
+      await driveScriptPause(onRequestPaused)
+
+      expectCalledWith(client.send, 'Fetch.continueResponse', { requestId: 'fetch-request' })
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+    })
+
     it('fulfills the body it read when a reset rejects the flow during the read', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
