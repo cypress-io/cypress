@@ -7,7 +7,7 @@ import axios from 'axios'
 import pkg from '@packages/root'
 import { strictAgent } from '@packages/network'
 
-import app_config from '../../../config/app.json'
+import { getApiUrl } from '../routes'
 import { installErrorTransform } from './axios_middleware/transform_error'
 import { installLogging } from './axios_middleware/logging'
 import { installEncryption } from './axios_middleware/encryption'
@@ -35,8 +35,7 @@ interface CreateCloudRequestOptions {
 
 // Allows us to create customized Cloud Request instances w/ different baseURL & encryption configuration
 export const createCloudRequest = (options: CreateCloudRequestOptions = {}): AxiosInstance => {
-  const cfgKey = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
-  const { baseURL = app_config[cfgKey].api_url, enableLogging = true, enableErrorTransform = true } = options
+  const { baseURL = getApiUrl(), enableLogging = true, enableErrorTransform = true } = options
 
   const instance = axios.create({
     baseURL,

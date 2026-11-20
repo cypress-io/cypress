@@ -23,6 +23,7 @@ import { clearCtx, getCtx, makeDataContext, setCtx } from '../../lib/makeDataCon
 import { SocketCt } from '../../lib/socket-ct'
 import runEvents from '../../lib/plugins/run_events'
 import { GracefulExit } from '../../lib/util/graceful-exit'
+import { cookieJar } from '../../lib/automation/cookie/jar'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
 // `graphql` rejects. No test here issues a GraphQL request.
@@ -483,6 +484,46 @@ describe('lib/socket', () => {
             return done()
           })
         })
+      })
+    })
+
+    describe('on(backend:request, cross:origin:set:cookie)', () => {
+      const url = 'https://www.foobar.com/'
+
+      const makeCookie = (props = {}) => {
+        return { name: 'foo', value: 'bar', domain: 'www.foobar.com', path: '/', hostOnly: true, httpOnly: false, secure: false, expiry: null, maxAge: null, sameSite: 'lax', ...props }
+      }
+
+      const setCookie = (cookie) => {
+        return new Promise<void>((resolve) => {
+          client.emit('backend:request', 'cross:origin:set:cookie', { cookie, url, sameSiteContext: 'strict' }, () => resolve())
+        })
+      }
+
+      const jarCookies = () => cookieJar.getCookies(url).map(({ key, value, httpOnly }) => ({ key, value, httpOnly }))
+
+      beforeEach(() => {
+        cookieJar.removeAllCookies()
+      })
+
+      it('stores the cookie in the server-side cookie jar', async () => {
+        await setCookie(makeCookie())
+
+        expect(jarCookies()).toEqual([{ key: 'foo', value: 'bar', httpOnly: false }])
+      })
+
+      it('does not store HttpOnly cookies', async () => {
+        await setCookie(makeCookie({ httpOnly: true }))
+
+        expect(jarCookies()).toEqual([])
+      })
+
+      it('does not replace HttpOnly cookies', async () => {
+        cookieJar.setCookie('foo=bar; Path=/; HttpOnly', url, 'strict')
+
+        await setCookie(makeCookie({ value: 'changed' }))
+
+        expect(jarCookies()).toEqual([{ key: 'foo', value: 'bar', httpOnly: true }])
       })
     })
 

@@ -12,6 +12,7 @@ import type { ChromeStoreCookie } from '../../../lib/browsers/cdp-protocol/cdp-s
 import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
 import { toNetworkError } from '../../../lib/browsers/cdp-protocol/cdp-network-error'
 import { shouldStreamResponseBody } from '../../../lib/browsers/cdp-protocol/should-stream-response-body'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 function createPausedRequest (options: {
   requestId: string
@@ -758,6 +759,61 @@ describe('CdpFetchTransport', () => {
       expect(encoded.responseHeaders).toBeUndefined()
     })
 
+    // https://github.com/cypress-io/cypress/issues/35256
+    describe('a skipped (stream-shaped) response', () => {
+      const decodeSkippedResponse = (codec: ReturnType<typeof createCdpFetchCodec>) => {
+        const request: CdpFetchTransportRequest = {
+          id: 'network-1',
+          url: 'https://example.test/',
+          method: 'GET',
+          headers: {},
+          initialPriority: 'High',
+          referrerPolicy: 'strict-origin-when-cross-origin',
+        }
+
+        codec.decodeRequest(request)
+
+        return codec.decodeResponse({
+          ...request,
+          requestId: 'fetch-request',
+          responseCode: 200,
+          responseStatusText: 'OK',
+          responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+          bodySkipped: true,
+          originalBodyDigest: digestBody(Buffer.alloc(0)),
+        })
+      }
+
+      it('continues when middleware changes only the content-type', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodeSkippedResponse(codec)
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: Buffer.alloc(0),
+          headers: { ...response.headers, 'content-type': 'text/event-stream; charset=utf-8' },
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.body).toBeUndefined()
+        expect(encoded.responseHeaders).toEqual([{ name: 'content-type', value: 'text/event-stream; charset=utf-8' }])
+      })
+
+      it('fulfills when middleware sets a body', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodeSkippedResponse(codec)
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: Buffer.from('data: stubbed\n\n'),
+          headers: { ...response.headers, 'content-type': 'text/event-stream; charset=utf-8' },
+        })
+
+        expect(encoded.fulfilled).toBe(true)
+        expect(encoded.body).toBe(Buffer.from('data: stubbed\n\n').toString('base64'))
+      })
+    })
+
     describe('continuing a response whose headers only changed order', () => {
       const decodePausedResponse = (codec: ReturnType<typeof createCdpFetchCodec>, responseHeaders: Protocol.Fetch.HeaderEntry[]) => {
         const request: CdpFetchTransportRequest = {
@@ -1400,7 +1456,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       expectCalledOnceWith(isAUTFrame, 'frame-1')
-      expectCalledWith(seenIsAutFrameHeader, 'true')
+      expectCalledWith(seenIsAutFrameHeader, getMetadataHeaderValue())
       // AUT marker must not leave the process toward the origin.
       expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
@@ -1605,7 +1661,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expectCalledWith(seenExtraTargetHeader, 'true')
+      expectCalledWith(seenExtraTargetHeader, getMetadataHeaderValue())
       expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{

@@ -5,17 +5,15 @@ import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
 import cy from 'eslint-plugin-cypress'
 import chaiFriendly from 'eslint-plugin-chai-friendly'
 
-import mocha from 'eslint-plugin-mocha'
 import globals from 'globals'
 import vue from 'eslint-plugin-vue'
 import vueParser from 'vue-eslint-parser'
 import stylistic from '@stylistic/eslint-plugin'
-import react from 'eslint-plugin-react'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
+import { mochaConfig } from './mochaConfig'
 import { cypressDevPlugin } from './rules'
-import { reactRulesOff } from './reactRulesOff'
 
 const testFiles = [
   '**/test/**/*.{js,jsx,ts,tsx}',
@@ -50,16 +48,8 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
   ...tsConfigs.recommended,
   cy.configs.recommended,
-  mocha.configs?.recommended ?? {},
+  ...mochaConfig,
   ...vue.configs['flat/recommended'],
-  {
-    ...react.configs.flat.recommended,
-    settings: {
-      react: {
-        version: '18',
-      },
-    },
-  },
   // importing { config } from @stylistic/eslint-plugin causes errors
   stylistic.configs.customize({
     'braceStyle': '1tbs',
@@ -169,9 +159,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
       // `== null` is the idiomatic check for both null and undefined
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
-      // `eslint:recommended` enables these from ESLint 10, so they can go once it does
-      'no-useless-assignment': 'error',
-      'no-unassigned-vars': 'error',
       // Unused args and caught errors stay allowed: callbacks and interface
       // implementations often have to accept parameters they ignore. A leading
       // `_` keeps a variable that exists only to be type-checked, like `_typeCheck`
@@ -263,22 +250,10 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
 
-      'mocha/no-exclusive-tests': 'error',
-      'mocha/no-mocha-arrows': 'off',
-      'mocha/no-setup-in-describe': 'off',
-      'mocha/max-top-level-suites': 'off',
-      'mocha/no-top-level-hooks': 'off',
-      'mocha/no-global-tests': 'off',
-      'mocha/no-pending-tests': 'off',
-
       'vue/multi-word-component-names': 'off',
       'vue/no-dupe-keys': 'off',
 
       'cypress/unsafe-to-chain-command': 'off',
-
-      // we use react 18+, so these rules do not apply
-      'react/react-in-jsx-scope': 'off',
-      'react/jsx-uses-react': 'off',
 
       // noisy, and not that helpful at this point. Maybe down the line we can
       // enable it.
@@ -350,23 +325,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       // typings pull in other declarations with references instead
       '@typescript-eslint/triple-slash-reference': 'off',
     },
-  },
-
-  // eslint-plugin-mocha treats any file with a Mocha call, hooks included, as a
-  // test file, which takes in support files, test generators and plugin source
-  // whose exports are their purpose. The rule is there because importing a spec
-  // registers its tests in the importer, so only spec files are held to it.
-  {
-    ignores: ['**/*.cy.*', '**/*.spec.*', '**/*_spec.*', '**/*-spec.*', '**/*.test.*'],
-    rules: {
-      'mocha/no-exports': 'off',
-    },
-  },
-
-  // React rules do not apply to Vue SFCs. Vue JSX/TSX files need `vueTsxOverrides`.
-  {
-    files: ['**/*.vue'],
-    rules: reactRulesOff,
   },
 
   // common file patterns to ignore

@@ -175,8 +175,9 @@ export = {
       }
     }
 
+    // `cypress open` takes no --key, so open mode can only get a record key from the environment
     // @ts-expect-error TODO: Fix type that says attachRecordKey is not a function
-    telemetry.exporter()?.attachRecordKey(options.key)
+    telemetry.exporter()?.attachRecordKey(options.key ?? process.env.CYPRESS_RECORD_KEY)
 
     if (options.headless) {
       // --headless is same as --headed false

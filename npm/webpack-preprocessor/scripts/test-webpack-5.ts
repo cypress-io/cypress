@@ -17,7 +17,16 @@ const pkgJsonPath = path.join(__dirname, '..', 'package.json')
 const main = async () => {
   const originalPkg = JSON.stringify(pkg, null, 2)
 
-  const install = () => execa('yarn', ['install', '--ignore-scripts'], { stdio: 'inherit' })
+  const repoRoot = path.join(__dirname, '..', '..', '..')
+
+  // `--ignore-scripts` skips postinstall, which strips the patches the server loads from disk
+  const install = async () => {
+    await execa('yarn', ['install', '--ignore-scripts'], { stdio: 'inherit' })
+
+    for (const dir of ['.', 'packages/socket']) {
+      await execa(path.join(repoRoot, 'node_modules', '.bin', 'patch-package'), ['--error-on-fail'], { cwd: path.join(repoRoot, dir), stdio: 'inherit' })
+    }
+  }
 
   const resetPkg = async () => {
     fs.writeFileSync(pkgJsonPath, originalPkg, 'utf8')

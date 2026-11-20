@@ -13,7 +13,6 @@
     "@packages/electron": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@tooling/system-tests": "0.0.0-development",
-    "@tooling/v8-snapshot": "0.0.0-development",
     "chalk": "4.1.2",
     "chokidar": "3.6.0",
     "cross-fetch": "^3.1.5",
@@ -26,7 +25,7 @@
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "globals": "^15.12.0",
     "jiti": "^2.4.2"
   },

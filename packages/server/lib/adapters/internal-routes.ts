@@ -1,4 +1,5 @@
 import { id as randomId } from '../util/random'
+import { isLocalhost } from '@packages/network-tools'
 import type { HttpRequest } from '@packages/network-interception'
 
 // Fields are optional at the type level because RuntimeConfigOptions extends
@@ -29,6 +30,8 @@ export const CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER = 'x-cypress-internal-loopba
 // file-server authorization token).
 export const cypressInternalLoopbackToken = randomId(64)
 
+export const fullyQualifiedRe = /^https?:\/\//
+
 export function isTrustedInternalLoopback (
   headers: Record<string, string | string[] | undefined> | undefined,
 ): boolean {
@@ -51,6 +54,21 @@ export function getTrustedLoopbackUrl (
   const loopbackUrl = headers[CYPRESS_INTERNAL_LOOPBACK_HEADER]
 
   return typeof loopbackUrl === 'string' ? loopbackUrl : undefined
+}
+
+// Whether a Host header names this server by a loopback name on its listen port.
+export function isLoopbackHost (host: string | undefined, port: number | undefined): boolean {
+  if (!host || !port) {
+    return false
+  }
+
+  try {
+    const url = new URL(`http://${host}`)
+
+    return isLocalhost(url) && Number(url.port || 80) === port
+  } catch {
+    return false
+  }
 }
 
 const LOCALHOST_NAMES = new Set([

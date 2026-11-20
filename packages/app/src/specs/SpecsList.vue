@@ -226,6 +226,7 @@ import { useSubscription } from '../graphql'
 import TestingTypeSwitcher from './switcher/TestingTypeSwitcher.vue'
 import { useTestingType } from '../composables/useTestingType'
 import TestingTypePromo from './TestingTypePromo.vue'
+import { useSpecsListFirstRenderSpan } from './useSpecsListFirstRenderSpan'
 
 const props = withDefaults(defineProps<{
   gql: Specs_SpecsListFragment
@@ -394,6 +395,11 @@ const collapsible = computed(() => {
 const treeSpecList = computed(() => collapsible.value.tree.filter(((item) => !item.hidden.value)))
 
 const { containerProps, list, wrapperProps, scrollTo } = useVirtualList(treeSpecList, { itemHeight: 40, overscan: 10 })
+
+useSpecsListFirstRenderSpan({
+  specCount: computed(() => specs.value.length),
+  renderedRowCount: computed(() => list.value.length),
+})
 
 const scrollbarOffset = ref(0)
 
