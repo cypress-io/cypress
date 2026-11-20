@@ -1,3 +1,5 @@
+import { isRunningAsElectronProcess } from './electron-app'
+
 // SwiftShader keeps WebGL available once the GPU is off
 export const SOFTWARE_RENDERING_SWITCHES = ['disable-gpu', 'enable-unsafe-swiftshader'] as const
 
@@ -7,7 +9,7 @@ let softwareRendering = false
 export const useSoftwareRendering = () => {
   softwareRendering = true
 
-  if (process.versions.electron) {
+  if (process.versions.electron && isRunningAsElectronProcess()) {
     const { app } = require('electron')
 
     for (const name of SOFTWARE_RENDERING_SWITCHES) {

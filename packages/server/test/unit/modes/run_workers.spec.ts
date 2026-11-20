@@ -20,6 +20,7 @@ import {
   SpecQueue,
   workerArgv,
   workerEnv,
+  workerSpawnArgs,
 } from '../../../lib/modes/run-workers'
 import type { RunResult } from '../../../lib/modes/results'
 
@@ -90,6 +91,17 @@ describe('lib/modes/run-workers', () => {
     })
   })
 
+  describe('workerSpawnArgs', () => {
+    it('starts a plain Node worker with the entry script', () => {
+      expect(workerSpawnArgs(['--run-project', '/p'], 1, { entryScript: '/app/index.js' }))
+      .toEqual(['/app/index.js', '--run-project', '/p', '--worker-index', '1', '--port', '0'])
+    })
+
+    it('lets Electron load the app itself', () => {
+      expect(workerSpawnArgs(['--run-project', '/p'], 1)).toEqual(['--run-project', '/p', '--worker-index', '1', '--port', '0'])
+    })
+  })
+
   describe('workerEnv', () => {
     it('gives each worker its index and downloads folder, and leaves the fixed debugging port to the coordinator', () => {
       const env = workerEnv({ PATH: '/bin', ELECTRON_RUN_AS_NODE: '1', CYPRESS_REMOTE_DEBUGGING_PORT: '9222', FORCE_COLOR: '0' }, 2, '/project/downloads', true)
@@ -100,6 +112,10 @@ describe('lib/modes/run-workers', () => {
         CYPRESS_WORKER_INDEX: '2',
         CYPRESS_DOWNLOADS_FOLDER: path.join('/project/downloads', 'worker-2'),
       })
+    })
+
+    it('runs Electron as plain Node for a worker that does not need Electron', () => {
+      expect(workerEnv({}, 1, '/d', false, true).ELECTRON_RUN_AS_NODE).toBe('1')
     })
 
     it('keeps the inherited FORCE_COLOR when stdout is not a terminal', () => {

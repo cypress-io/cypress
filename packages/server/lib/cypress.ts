@@ -20,7 +20,7 @@ import { toNumber } from 'lodash'
 import { GracefulExit } from './util/graceful-exit'
 import type { BrowserWindow } from 'electron'
 import type { CypressRunResult } from './modes/results'
-import { isRunning, scale, setRemoteDebuggingPort } from './util/electron-app'
+import { isRunning, isRunningAsElectronProcess, scale, setRemoteDebuggingPort } from './util/electron-app'
 import * as appData from './util/app_data'
 const debug = Debug('cypress:server:cypress')
 
@@ -176,7 +176,7 @@ export = {
       process.once('disconnect', () => process.kill(process.pid, 'SIGTERM'))
 
       // each Electron process gets its own Dock icon on macOS; one per run is enough
-      if (process.platform === 'darwin' && process.versions.electron) {
+      if (process.platform === 'darwin' && process.versions.electron && isRunningAsElectronProcess()) {
         require('electron').app.setActivationPolicy('accessory')
       }
     }

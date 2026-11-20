@@ -19,7 +19,8 @@ describe('cypress run --workers', () => {
 
   systemTests.it('runs every spec once across workers and reports one combined result', {
     project: 'run-workers',
-    browser: 'electron',
+    // in Chrome, the spawned workers run as plain Node rather than Electron
+    browser: ['electron', 'chrome'],
     workers: 3,
     outputPath,
     expectedExitCode: 1,

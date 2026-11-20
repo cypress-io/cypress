@@ -1,5 +1,5 @@
 const Debug = require('debug')
-const { isRunning: isElectronRunning } = require('./lib/util/electron-app')
+const { isRunning: isElectronRunning, isRunningAsElectronProcess } = require('./lib/util/electron-app')
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
@@ -31,10 +31,13 @@ const pkg = require('@packages/root')
 if (isRunningElectron) {
   // if we are in the electron process, we need to patch the electron switches before Cypress launches the app
   // @see https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node
-  const { app } = require('electron')
-  const { appendElectronSwitches } = require('./lib/append_electron_switches')
+  // a --workers process started as plain Node has no Electron app to configure
+  if (isRunningAsElectronProcess()) {
+    const { app } = require('electron')
+    const { appendElectronSwitches } = require('./lib/append_electron_switches')
 
-  appendElectronSwitches(app)
+    appendElectronSwitches(app)
+  }
 
   // To pass unencrypted telemetry data to an independent open telemetry endpoint,
   // disable the encryption header, update the url, and add any other required headers.

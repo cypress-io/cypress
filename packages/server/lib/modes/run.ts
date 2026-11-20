@@ -1274,6 +1274,7 @@ async function ready (options: ReadyOptions) {
     durations,
     record: record ? { ciBuildId } : undefined,
     bundle: (filePath) => preprocessor.getFile(filePath, config),
+    runAsNode: browser.name !== 'electron',
   }) : undefined
 
   if (isWorker) {

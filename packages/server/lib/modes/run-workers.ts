@@ -225,7 +225,7 @@ export const crashedSpecResult = (spec: SpecWithRelativeRoot, error: Error): Run
   } as RunResult
 }
 
-export const workerEnv = (base: NodeJS.ProcessEnv, workerIndex: number, downloadsFolder: string, colors: boolean): NodeJS.ProcessEnv => {
+export const workerEnv = (base: NodeJS.ProcessEnv, workerIndex: number, downloadsFolder: string, colors: boolean, runAsNode = false): NodeJS.ProcessEnv => {
   const env: NodeJS.ProcessEnv = {
     ...base,
     FORCE_COLOR: colors ? '1' : base.FORCE_COLOR,
@@ -233,7 +233,12 @@ export const workerEnv = (base: NodeJS.ProcessEnv, workerIndex: number, download
     CYPRESS_DOWNLOADS_FOLDER: path.join(downloadsFolder, `worker-${workerIndex}`),
   }
 
-  delete env.ELECTRON_RUN_AS_NODE
+  if (runAsNode) {
+    env.ELECTRON_RUN_AS_NODE = '1'
+  } else {
+    delete env.ELECTRON_RUN_AS_NODE
+  }
+
   // a fixed port is only free for one browser; it stays with the coordinator's
   delete env.CYPRESS_REMOTE_DEBUGGING_PORT
 
@@ -268,6 +273,13 @@ export const workerArgv = (argv: string[], workerIndex: number, record?: RecordS
   const recordArgs = record ? ['--parallel', ...(record.ciBuildId ? ['--ci-build-id', record.ciBuildId] : [])] : []
 
   return [...args, ...recordArgs, '--worker-index', String(workerIndex), '--port', '0']
+}
+
+/** Electron loads the app on its own, but as plain Node the worker needs the entry script first. */
+export const workerSpawnArgs = (argv: string[], workerIndex: number, { record, entryScript }: { record?: RecordSettings, entryScript?: string } = {}) => {
+  const args = workerArgv(argv, workerIndex, record)
+
+  return entryScript ? [entryScript, ...args] : args
 }
 
 /** Splits a worker's stdout into whole-spec blocks. */
@@ -372,7 +384,7 @@ export interface Coordinator {
   }
 }
 
-export function startCoordinator ({ specs, workers, downloadsFolder, durations, record, bundle, write = process.stdout.write.bind(process.stdout) }: {
+export function startCoordinator ({ specs, workers, downloadsFolder, durations, record, bundle, runAsNode = false, write = process.stdout.write.bind(process.stdout) }: {
   specs: SpecWithRelativeRoot[]
   workers: number
   downloadsFolder: string
@@ -381,6 +393,8 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
   record?: RecordSettings
   /** Bundles a spec or the support file for a worker and resolves with the output path. */
   bundle: (filePath: string) => PromiseLike<string>
+  /** Starts workers as plain Node, which drops Electron's own processes, when the test browser isn't Electron. */
+  runAsNode?: boolean
   write?: (s: string) => void
 }): Coordinator {
   const queue = new SpecQueue(specs, durations)
@@ -414,8 +428,11 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
 
   process.once('exit', onExit)
 
+  // the server's own entry; require.main is Electron's init module in some launches
+  const entryScript = runAsNode ? path.join(__dirname, '..', '..', 'index.js') : undefined
+
   for (let index = 1; index <= spawnCount; index++) {
-    const args = workerArgv(process.argv.slice(1), index, record)
+    const args = workerSpawnArgs(process.argv.slice(1), index, { record, entryScript })
 
     debug('spawning worker %d: %s %o', index, process.execPath, args)
 
@@ -423,7 +440,7 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
       stdio: ['ignore', 'pipe', 'inherit', 'ipc'],
       // keeps Dates and other non-JSON values in per-spec results intact
       serialization: 'advanced',
-      env: workerEnv(process.env, index, downloadsFolder, Boolean(process.stdout.isTTY)),
+      env: workerEnv(process.env, index, downloadsFolder, Boolean(process.stdout.isTTY), Boolean(entryScript)),
     })
 
     children.push(child)

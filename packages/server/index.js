@@ -6,7 +6,22 @@ const runChildProcess = async (entryPoint) => {
   require(entryPoint)
 }
 
+const stubElectronModuleOutsideElectron = () => {
+  // Run as plain Node (a --workers process, or ELECTRON_RUN_AS_NODE=1 cypress run), Electron's built-in module
+  // doesn't exist and run mode never calls it, but modules that run mode loads still import it
+  if (!process.env.ELECTRON_RUN_AS_NODE || !process.versions.electron) return
+
+  const Module = require('module')
+  const load = Module._load
+
+  Module._load = function (request, ...args) {
+    return request === 'electron' ? {} : load.call(this, request, ...args)
+  }
+}
+
 const startCypress = async () => {
+  stubElectronModuleOutsideElectron()
+
   try {
     // The binary build replaces start-cypress.js with a single bundle of the main process and ships these modules
     // as JavaScript, so it needs no tsx
