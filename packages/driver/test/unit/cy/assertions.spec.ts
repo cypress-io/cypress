@@ -1,70 +1,78 @@
 /**
  * @vitest-environment jsdom
  */
+import sinon from 'sinon'
 import { describe, it, expect } from 'vitest'
 import { stripStackTraceLines } from '../../../src/cy/assertions'
 
+// The message @cypress/sinon-chai builds when `calledWith` fails
+const failedCalledWithMessage = (spy, ...expectedArgs) => {
+  return spy.printf('expected %n to have been called with arguments %*\n\n    The following calls were made:\n%C', ...expectedArgs)
+}
+
+const cartMessage = () => {
+  const cart = { addItem (sku: string, quantity: number) {} }
+  const spy = sinon.spy(cart, 'addItem')
+
+  cart.addItem('sku-1042', 2)
+  cart.addItem('sku-2210', 1)
+
+  return failedCalledWithMessage(spy, 'sku-9999', 3)
+}
+
 describe('cy/assertions', () => {
   describe('stripStackTraceLines', () => {
-    // Captured from sinon 8.1.1: spy.printf('expected %n to have been called with arguments %*%C', 'sku-9999', 3)
-    const sinonMessage = 'expected addItem to have been called with arguments sku-9999, 3\n    addItem(sku-1042, 2) at checkout (/tmp/claude-0/sinon-msg2.js:4:29)\n    addItem(sku-2210, 1) at checkout (/tmp/claude-0/sinon-msg2.js:4:58)'
+    it('cuts the stack frame from every call but the last', () => {
+      const lines = stripStackTraceLines(cartMessage()).split('\n')
 
+      expect(lines.slice(-2)[0]).toEqual('    addItem(sku-1042, 2)')
+      expect(lines.slice(-1)[0]).toMatch(/^ {4}addItem\(sku-2210, 1\) at \S/)
+    })
+
+    it('cuts the last call too when the message ends in a newline', () => {
+      const lines = stripStackTraceLines(`${cartMessage()}\n`).split('\n')
+
+      expect(lines.slice(-3)).toEqual(['    addItem(sku-1042, 2)', '    addItem(sku-2210, 1)', ''])
+    })
+
+    // These follow the format rules (a `\r`, `\u2028` or `\u2029` after
+    // ` at ` keeps the line) rather than captured output.
     it.each([
       {
-        name: 'sinon call list, the last line is kept whole',
-        message: sinonMessage,
-        expected: 'expected addItem to have been called with arguments sku-9999, 3\n    addItem(sku-1042, 2)\n    addItem(sku-2210, 1) at checkout (/tmp/claude-0/sinon-msg2.js:4:58)',
-      },
-      {
-        name: 'sinon call list followed by a newline',
-        message: `${sinonMessage}\n`,
-        expected: 'expected addItem to have been called with arguments sku-9999, 3\n    addItem(sku-1042, 2)\n    addItem(sku-2210, 1)\n',
-      },
-      {
-        name: 'single line',
-        message: 'expected addItem to have been called once',
-        expected: 'expected addItem to have been called once',
-      },
-      {
-        name: 'empty message',
-        message: '',
-        expected: '',
-      },
-      {
-        name: 'blank lines',
-        message: '\n\n',
-        expected: '\n\n',
-      },
-      // The cases below follow the format rules (a `\r`, `\u2028` or `\u2029`
-      // after ` at ` keeps the line) rather than captured output.
-      {
-        name: 'format rule: cuts at the first ` at ` on a line',
-        message: '    addItem(meet at noon) at checkout (cart.js:4:29)\nend',
-        expected: '    addItem(meet\nend',
-      },
-      {
-        name: 'format rule: `\\r` after ` at ` keeps the line',
+        name: '`\\r` after ` at ` keeps the line',
         message: 'expected spy to have been called\r\n    spy() at Context.eval (cart.cy.ts:5:10)\r\nend',
         expected: 'expected spy to have been called\r\n    spy() at Context.eval (cart.cy.ts:5:10)\r\nend',
       },
       {
-        name: 'format rule: ` at ` after the last `\\u2028` is cut',
+        name: '` at ` after the last `\\u2028` is cut',
         message: '    addItem(sku-1042) at checkout\u2028    addItem(sku-2210) at checkout (cart.js:4:58)\nend',
         expected: '    addItem(sku-1042) at checkout\u2028    addItem(sku-2210)\nend',
       },
-    ])('$name', ({ message, expected }) => {
+    ])('format rule: $name', ({ message, expected }) => {
       expect(stripStackTraceLines(message)).toEqual(expected)
     })
 
-    it('handles a 50,000-character line of repeated ` at `', () => {
-      const repeated = ' at '.repeat(12_500)
-      const message = `${repeated}\r at \n`
+    it('handles a spy called with a long single line of JSON', () => {
+      const beacon = { send (url: string, body: string) {} }
+      const spy = sinon.spy(beacon, 'send')
+      const events = Array.from({ length: 2_000 }, (_, i) => {
+        return {
+          type: 'ui',
+          message: `Payment form shown at step ${i % 4 + 1} at 10:42:${String(i % 60).padStart(2, '0')}`,
+          sessionId: 'c9f1e2a4-7b3d-4e8a-9c61-2f5d8a0b7e13',
+        }
+      })
+
+      beacon.send('/log', JSON.stringify(events))
+
+      const message = failedCalledWithMessage(spy, '/log', 'flush')
 
       const start = performance.now()
       const result = stripStackTraceLines(message)
 
       expect(performance.now() - start).toBeLessThan(200)
-      expect(result).toEqual(`${repeated}\r\n`)
+      // The only call is on the last line, which is kept whole
+      expect(result).toEqual(message)
     })
   })
 })

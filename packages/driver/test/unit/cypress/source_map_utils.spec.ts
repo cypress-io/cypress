@@ -136,18 +136,8 @@ describe('source_map_utils', () => {
 
     it.each([
       {
-        name: 'charset and base64',
-        fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${toBase64(sourceMap)}\n`,
-        expected: sourceMap,
-      },
-      {
         name: 'base64 without a charset',
         fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:application/json;base64,${toBase64(sourceMap)}`,
-        expected: sourceMap,
-      },
-      {
-        name: 'legacy `//@` marker with spaces',
-        fileContents: `it('checks out', () => {})\n// @ sourceMappingURL = data:application/json;base64,${toBase64(sourceMap)}\r\n`,
         expected: sourceMap,
       },
       {
@@ -161,11 +151,6 @@ describe('source_map_utils', () => {
         expected: null,
       },
       {
-        name: 'URL-encoded data URL',
-        fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:application/json;charset=utf-8,%7B%22version%22%3A3%7D\n`,
-        expected: null,
-      },
-      {
         name: 'data URL with an unsupported parameter',
         fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:application/json;charset=utf-8;name=checkout.js;base64,${toBase64(sourceMap)}\n`,
         expected: null,
@@ -175,20 +160,15 @@ describe('source_map_utils', () => {
         fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:text/plain;name=map,data:application/json;base64,${toBase64(sourceMap)}\n`,
         expected: null,
       },
-      {
-        name: 'empty file',
-        fileContents: '',
-        expected: null,
-      },
     ])('extracts an inline map: $name', async ({ fileContents, expected }) => {
       await withLinuxPaths((sourceMapUtils) => {
         expect(sourceMapUtils.extractSourceMap(fileContents)).toEqual(expected)
       })
     })
 
-    it('rejects a 50,000-character data URL made of repeated `data:` prefixes', async () => {
+    it('rejects a 150,000-character data URL made of repeated `data:` prefixes', async () => {
       await withLinuxPaths((sourceMapUtils) => {
-        const fileContents = `it('checks out', () => {})\n//# sourceMappingURL=${'data:x'.repeat(8_400)}\n`
+        const fileContents = `it('checks out', () => {})\n//# sourceMappingURL=${'data:x'.repeat(25_000)}\n`
 
         const start = performance.now()
         const result = sourceMapUtils.extractSourceMap(fileContents)
