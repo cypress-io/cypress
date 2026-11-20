@@ -3,6 +3,7 @@ import $dom from '../dom'
 import $elements from '../dom/elements'
 import type { Callbacks as AssertCallbacks, Methods, PartialAssertionArgs } from './assertions/assert'
 import { assert, assertDom, accessors, selectors, wrap } from './assertions/assert'
+import { isRemoteElement } from '../cy/remote/remote_element'
 
 const maybeCastNumberToString = (num: number | string) => {
   // if this is a finite number (no Infinity or NaN)
@@ -153,7 +154,9 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
 
     // some elements return a number for the .value property
     // in this case, we don't want to cast the expected value to a string
-    if ($el[0] && !$elements.isValueNumberTypeElement($el[0])) {
+    const firstTagName = isRemoteElement($el) ? $el.elements[0]?.tagName : $el[0] && $elements.getTagName($el[0])
+
+    if (firstTagName && !$elements.isValueNumberTypeTagName(firstTagName)) {
       value = maybeCastNumberToString(value)
     }
 
@@ -198,7 +201,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
 
   chai.Assertion.overwriteProperty('empty', (_super) => {
     return (function (...args) {
-      if ($dom.isDom(this._obj)) {
+      if ($dom.isDom(this._obj) || isRemoteElement(this._obj)) {
         return assert(
           this,
           chaiUtils,
@@ -219,7 +222,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
     return (function (...args) {
       const selector: string = args[0]
 
-      if ($dom.isDom(this._obj)) {
+      if ($dom.isDom(this._obj) || (isRemoteElement(this._obj) && typeof selector === 'string')) {
         return assert(
           this,
           chaiUtils,

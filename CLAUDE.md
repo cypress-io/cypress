@@ -44,6 +44,7 @@
 - Worktrees must use a full `yarn` install in the worktree. Do not symlink `node_modules` or packages back to another checkout.
 - Packaged-binary integration tests (`system-tests/test-binary`) need Docker and a built binary, so they do not run in the sandbox. When they are needed, provide the exact commands and ask the user to run them.
 - System tests under `system-tests/test` do run in cloud containers once the monorepo is built. Run them yourself rather than handing them off; see [Running system tests](./AGENTS.md#running-system-tests).
+- Don't skip a test or exclude a browser to get a green run, and don't assume an existing skip or browser filter is still needed (including ones carried over when porting specs): run it, find the cause, and fix it.
 - Keep follow-up work from the same task, such as review fixes and related instruction updates, on that task's branch. Create a separate branch only when the user asks for one.
 - After committing a merge of `develop`, run `git diff --name-only origin/develop` and check that every file listed is in the PR's scope. The pre-commit hook runs `eslint --fix` on every staged file, merged-in ones included, and `package-json/order-properties` reorders keys in `package.json` files that `develop` committed unsorted. Restore any such file with `git checkout origin/develop -- <file>` and commit with `--no-verify`.
 - When a change could reasonably be filed as `fix` or `chore` (for example, removing data the app sends to Cypress Cloud), ask the user which prefix to use before adding a `cli/CHANGELOG.md` entry. A `chore` gets no entry.
@@ -51,5 +52,6 @@
 - When a test feeds in output from a browser, tool or service (a stack trace, a CLI message, an API response), take its examples from real captured output, such as a fixture under `__fixtures__`, not names made up to look plausible. Keep inputs that only follow the format's rules in their own clearly labelled cases, and check that changelog examples come from the same real output.
 - Keep a `cli/CHANGELOG.md` entry to the user-facing change and the link, plus one before-and-after example only when it shows something the description doesn't. Cut any sentence that restates the change in other words, including a "For example" that only applies the description to one sample path or name.
 - Before committing or pushing, `yarn check-ts`, `yarn lint`, `yarn health-check` (knip), and relevant unit tests must pass locally. CI currently does not block expensive e2e jobs when these fail.
+- The pre-commit hook runs ESLint on every staged file in full, so an error already in a file you touch, including one you only rename, blocks the commit. Lint the whole of each touched file and fix what it reports in the same change, rather than calling it pre-existing.
 
 @AGENTS.md

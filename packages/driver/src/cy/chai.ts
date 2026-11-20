@@ -15,6 +15,7 @@ import * as chaiInspect from './chai/inspect'
 import { escapeMarkdown, formatMessageTemplate, removeOrKeepSingleQuotesBetweenStars } from './chai/message_format'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
+import { isRemoteElement } from './remote/remote_element'
 
 const doubleslashRe = /\\\\/g
 const escapedDoubleslashRe = /__double_slash__/g
@@ -59,10 +60,13 @@ chai.use((chai, u) => {
       switch (method) {
         case 'visible':
           if (!negated) {
-            // add reason hidden unless we expect the element to be hidden
-            const reason = $dom.getReasonIsHidden(obj)
+            // add reason hidden unless we expect the element to be hidden. A remote
+            // element's reason comes from the agent, since the element is in the AUT.
+            const reason = isRemoteElement(obj) ? obj.elements[0]?.hiddenReason : $dom.getReasonIsHidden(obj)
 
-            err.message += `\n\n${reason}`
+            if (reason) {
+              err.message += `\n\n${reason}`
+            }
           }
 
           break
@@ -209,6 +213,8 @@ chai.use((chai, u) => {
       if ($dom.isDom(obj)) {
         // replace object with our formatted one
         assert._obj = $dom.stringify(obj, 'short')
+      } else if (isRemoteElement(obj)) {
+        assert._obj = obj.node
       }
 
       const msg = _origGetmessage.call(this, assert, args)
@@ -223,7 +229,7 @@ chai.use((chai, u) => {
 
     chai.Assertion.overwriteMethod('match', (_super) => {
       return (function (regExp) {
-        if (_.isRegExp(regExp) || $dom.isDom(this._obj)) {
+        if (_.isRegExp(regExp) || $dom.isDom(this._obj) || isRemoteElement(this._obj)) {
           return _super.apply(this, arguments)
         }
 
@@ -237,6 +243,15 @@ chai.use((chai, u) => {
     const containFn1 = (_super) => {
       return (function (text) {
         let obj = this._obj
+
+        if (isRemoteElement(obj)) {
+          return this.assert(
+            obj.elements.some((el) => el.text.includes(text) || (el.tagName === 'input' && el.attributes.type === 'submit' && String(el.value).includes(text))),
+            'expected #{this} to contain #{exp}',
+            'expected #{this} not to contain #{exp}',
+            text,
+          )
+        }
 
         if (!($dom.isElement(obj))) {
           return _super.apply(this, arguments)
@@ -276,8 +291,9 @@ chai.use((chai, u) => {
       (_super) => {
         return (function (length) {
           let obj = this._obj
+          const isRemote = isRemoteElement(obj)
 
-          if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
+          if (!($dom.isJquery(obj) || $dom.isElement(obj) || isRemote)) {
             return _super.apply(this, arguments)
           }
 
@@ -287,13 +303,13 @@ chai.use((chai, u) => {
           // Cast to JQuery since we've already checked isJquery || isElement above
           const $obj = (obj as JQuery<any>)
 
-          if ($dom.isDetached($obj)) {
+          if (!isRemote && $dom.isDetached($obj)) {
             obj = (this._obj = $obj.filter((index, el) => {
               return $dom.isAttached(el)
             }))
           }
 
-          const node = $obj.length ? $dom.stringify($obj, 'short') : ($obj as any).selector
+          const node = isRemote ? obj.node : ($obj.length ? $dom.stringify($obj, 'short') : ($obj as any).selector)
 
           // if our length assertion fails we need to check to
           // ensure that the length argument is a finite number
@@ -345,6 +361,36 @@ chai.use((chai, u) => {
     const existAssertion = (_super) => {
       return (function () {
         const obj = this._obj
+
+        if (isRemoteElement(obj)) {
+          const exists = obj.length > 0
+
+          if (!exists) {
+            this._obj = null
+          }
+
+          try {
+            return this.assert(
+              exists,
+              'expected #{act} to exist in the DOM',
+              'expected #{act} not to exist in the DOM',
+              obj.node,
+              obj.node,
+            )
+          } catch (e1: any) {
+            e1.node = obj.node
+            e1.negated = chaiUtils.flag(this, 'negate')
+            e1.type = 'existence'
+
+            const newMessage = exists
+              ? `Expected ${obj.node} not to exist in the DOM, but it was continuously found.`
+              : `Expected to find element: \`${obj.selector}\`, but never found it.`
+
+            $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
+            throw e1
+          }
+        }
 
         if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
           try {

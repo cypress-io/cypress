@@ -8,7 +8,7 @@ import { AutomationNotImplemented } from '../automation/automation_not_implement
 import type Protocol from 'devtools-protocol'
 import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
-import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
+import type { AutomationMiddleware, AutomationCommands, RemoteAutScriptConfig, RemoteNavigation } from '@packages/types'
 import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
@@ -17,6 +17,10 @@ import type {
   NetworkResponseCompletedParameters,
   NetworkFetchErrorParameters,
   BrowsingContextInfo,
+  BrowsingContextUserPromptOpenedParameters,
+  ScriptMessageParameters,
+  BrowsingContextNavigationInfo,
+  BrowsingContextHistoryUpdatedParameters,
 } from 'webdriver/build/bidi/localTypes'
 import type { CyCookie as CyBaseCookie } from '../automation/cookie/util'
 import type { BidiCyCookie as CyCookie, StoragePartialCookie } from '../automation/cookie/converters/bidi'
@@ -25,6 +29,14 @@ import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
+import { BidiRemoteAgent, RemoteTabs } from '../automation/commands/remote_agent'
+import { RemoteVisit } from '../automation/commands/remote_visit'
+import type { AutScripts } from '../automation/commands/remote_visit'
+import { RemoteClock } from '../automation/commands/remote_clock'
+import { answerRemoteDialog } from '../automation/commands/remote_dialogs'
+import { RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
+import { getRemoteAutScript, callRemoteAut } from '../automation/commands/remote_aut_script'
+import { RemoteErrorReports } from '../automation/commands/remote_errors'
 import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -109,6 +121,9 @@ const buildBiDiClearCookieFilterFromCyCookie = (cookie: CyCookie): StoragePartia
   return cookieToClearFilter
 }
 
+// passed to the stub recorder in place of a global binding, so the AUT can't see it
+const REMOTE_STUB_CHANNEL = { type: 'channel', value: { channel: 'cypress-remote-stubs' } } as const
+
 export class BidiAutomation {
   // events needed to subscribe to in order for our BiDi automation to work properly
   static BIDI_EVENTS = [
@@ -118,11 +133,32 @@ export class BidiAutomation {
     'network.fetchError',
     'browsingContext.contextCreated',
     'browsingContext.contextDestroyed',
+    'browsingContext.userPromptOpened',
+    'script.message',
+  ]
+
+  // subscribed one at a time, since older Firefox releases reject the newer ones
+  static BIDI_NAVIGATION_EVENTS = [
+    'browsingContext.navigationStarted',
+    'browsingContext.load',
+    'browsingContext.navigationFailed',
+    'browsingContext.navigationAborted',
+    'browsingContext.downloadWillBegin',
+    'browsingContext.fragmentNavigated',
+    'browsingContext.historyUpdated',
   ]
 
   private webDriverClient: WebDriverClient
   private automation: Automation
+  private remoteAgent: BidiRemoteAgent
+  private remoteTabs: RemoteTabs
+  private remoteVisit: RemoteVisit
+  private remoteClock: RemoteClock
+  private remoteStubs: RemoteStubs
+  private remoteErrors: RemoteErrorReports
+  private evaluateInAut: (expression: string) => Promise<unknown>
   private autContextId: string | undefined = undefined
+  private autNavigationId: string | null | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
@@ -145,6 +181,66 @@ export class BidiAutomation {
     debug('initializing bidi automation')
     this.automation = automation
     this.webDriverClient = webDriverClient
+    this.remoteAgent = new BidiRemoteAgent(webDriverClient)
+    this.remoteTabs = new RemoteTabs(async () => {
+      return (await this.getExtraTabs()).map((tab) => {
+        return {
+          url: async () => tab.url,
+          call: (request) => this.remoteAgent.call(tab.context, request),
+        }
+      })
+    })
+
+    this.remoteStubs = new RemoteStubs({
+      addPreloadScript: async (source) => {
+        const { script } = await webDriverClient.scriptAddPreloadScript({
+          functionDeclaration: source,
+          arguments: [REMOTE_STUB_CHANNEL],
+          ...(this.topLevelContextId ? { contexts: [this.topLevelContextId] } : {}),
+        })
+
+        return () => webDriverClient.scriptRemovePreloadScript({ script })
+      },
+      callInAut: async (source) => {
+        const autContextId = await this.ensureAutContextId('Cannot stub the AUT: no AUT context initialized')
+        const result = await webDriverClient.scriptCallFunction({ functionDeclaration: source, arguments: [REMOTE_STUB_CHANNEL], target: { context: autContextId }, awaitPromise: false })
+
+        if (result.type === 'exception') {
+          throw new Error(result.exceptionDetails.text)
+        }
+      },
+    })
+
+    const autScripts: AutScripts = {
+      addPreloadScript: async (source) => {
+        const { script } = await webDriverClient.scriptAddPreloadScript({
+          functionDeclaration: `() => ${source}`,
+          ...(this.topLevelContextId ? { contexts: [this.topLevelContextId] } : {}),
+        })
+
+        return () => webDriverClient.scriptRemovePreloadScript({ script })
+      },
+      evaluateInAut: async (expression) => {
+        const autContextId = await this.ensureAutContextId('Cannot run the visit callbacks: no AUT context initialized')
+        const result = await webDriverClient.scriptEvaluate({ expression, target: { context: autContextId }, awaitPromise: false })
+
+        if (result.type === 'exception') {
+          throw new Error(result.exceptionDetails.text)
+        }
+
+        if (result.result.type !== 'string') {
+          throw new Error(`Expected the visit callbacks to return a string, but got ${result.result.type}`)
+        }
+
+        return result.result.value
+      },
+    }
+
+    this.remoteVisit = new RemoteVisit(autScripts)
+    this.remoteClock = new RemoteClock(autScripts)
+    this.remoteErrors = new RemoteErrorReports(autScripts.evaluateInAut)
+    this.evaluateInAut = autScripts.evaluateInAut
+
     // bind Bidi Events to update the standard automation client
     // Error here is expected until webdriver adds initiatorType and destination to the request object
     // @ts-expect-error - webdriver types request.destination as string, wider than our RequestDestination
@@ -154,6 +250,103 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+    this.webDriverClient.on('browsingContext.userPromptOpened', this.onUserPromptOpened)
+    this.webDriverClient.on('script.message', this.onScriptMessage)
+    this.webDriverClient.on('browsingContext.navigationStarted', this.onNavigationStarted)
+    this.webDriverClient.on('browsingContext.load', this.onNavigationEnded)
+    this.webDriverClient.on('browsingContext.navigationFailed', this.onNavigationEnded)
+    this.webDriverClient.on('browsingContext.navigationAborted', this.onNavigationEnded)
+    this.webDriverClient.on('browsingContext.downloadWillBegin', this.onNavigationEnded)
+    this.webDriverClient.on('browsingContext.fragmentNavigated', this.onFragmentNavigated)
+    this.webDriverClient.on('browsingContext.historyUpdated', this.onHistoryUpdated)
+  }
+
+  private pushAutNavigation = async (navigation: RemoteNavigation) => {
+    try {
+      await this.automation.push('remote:navigation', navigation)
+    } catch (err) {
+      debug('failed to report AUT navigation: %s', err?.message)
+    }
+  }
+
+  private onNavigationStarted = async ({ context, navigation }: BrowsingContextNavigationInfo) => {
+    if (context !== this.autContextId) {
+      return
+    }
+
+    this.autNavigationId = navigation
+    await this.pushAutNavigation({ event: 'started' })
+  }
+
+  // only the navigation in progress ends the AUT's load, not an earlier one it aborted
+  private onNavigationEnded = async ({ context, navigation }: BrowsingContextNavigationInfo) => {
+    if (context !== this.autContextId || this.autNavigationId === undefined || navigation !== this.autNavigationId) {
+      return
+    }
+
+    this.autNavigationId = undefined
+    await this.pushAutNavigation({ event: 'stopped' })
+  }
+
+  private onFragmentNavigated = async (info: BrowsingContextNavigationInfo) => {
+    if (info.context !== this.autContextId) {
+      return
+    }
+
+    await this.onNavigationEnded(info)
+    await this.pushAutNavigation({ event: 'withinDocument', source: 'hashchange' })
+  }
+
+  private onHistoryUpdated = async ({ context }: BrowsingContextHistoryUpdatedParameters) => {
+    if (context !== this.autContextId) {
+      return
+    }
+
+    await this.pushAutNavigation({ event: 'withinDocument', source: 'history' })
+  }
+
+  private onScriptMessage = async ({ channel, data, source }: ScriptMessageParameters) => {
+    if (channel !== REMOTE_STUB_CHANNEL.value.channel || source.context !== this.autContextId || data.type !== 'string') {
+      return
+    }
+
+    try {
+      await this.automation.push('remote:stub:call', parseStubCall(data.value))
+    } catch (err) {
+      debug('failed to report a stub call: %s', err?.message)
+    }
+  }
+
+  private onUserPromptOpened = async ({ context, type, message, handler }: BrowsingContextUserPromptOpenedParameters) => {
+    // any other handler means Firefox answers the prompt itself
+    if (handler !== 'ignore') {
+      return
+    }
+
+    try {
+      await answerRemoteDialog(this.automation, type, message, (accept) => this.webDriverClient.browsingContextHandleUserPrompt({ context, accept }))
+    } catch (err) {
+      debug('failed to report dialog: %s', err?.message)
+    }
+  }
+
+  // top-level contexts other than the runner's are tabs the app opened
+  private async getExtraTabs () {
+    const { contexts } = await this.webDriverClient.browsingContextGetTree({ maxDepth: 0 })
+
+    return contexts.filter((tab) => tab.context !== this.topLevelContextId)
+  }
+
+  async closeExtraTabs () {
+    for (const tab of await this.getExtraTabs()) {
+      debug('closing extra tab %s', tab.context)
+
+      try {
+        await this.webDriverClient.browsingContextClose({ context: tab.context })
+      } catch (err) {
+        debug('closing extra tab %s errored: %o', tab.context, err)
+      }
+    }
   }
 
   setTopLevelContextId = (contextId?: string) => {
@@ -651,6 +844,13 @@ export class BidiAutomation {
     this.webDriverClient.off('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
   }
 
+  // not tied to a context, so it covers every tab of the session
+  async addRemoteAutScript (config: RemoteAutScriptConfig) {
+    await this.webDriverClient.scriptAddPreloadScript({ functionDeclaration: `() => ${await getRemoteAutScript(config, { reportErrors: true })}` })
+
+    await this.remoteAgent.preload()
+  }
+
   static create (webdriverClient: WebDriverClient, automation: Automation) {
     return new BidiAutomation(webdriverClient, automation)
   }
@@ -849,6 +1049,34 @@ export class BidiAutomation {
 
           return bidiGetFrameTitle(this.webDriverClient, autContextId)
         }
+        case 'remote:stub:add':
+          return this.remoteStubs.add(data)
+        case 'remote:stub:update':
+          return this.remoteStubs.update(data)
+        case 'remote:stubs:reset':
+          return this.remoteStubs.reset()
+        case 'remote:clock:install':
+          return this.remoteClock.install(data)
+        case 'remote:clock:tick':
+          return this.remoteClock.tick(data)
+        case 'remote:clock:set:system:time':
+          return this.remoteClock.setSystemTime(data)
+        case 'remote:clock:restore':
+          return this.remoteClock.restore()
+        case 'remote:errors:flush':
+          return this.remoteErrors.flush()
+        case 'remote:aut:call':
+          return callRemoteAut(this.evaluateInAut, data)
+        case 'remote:visit:before:load':
+          return this.remoteVisit.beforeLoad(data)
+        case 'remote:visit:on:load':
+          return this.remoteVisit.onLoad(data)
+        case 'remote:agent':
+          return this.remoteTabs.call(data, async () => {
+            const autContextId = await this.ensureAutContextId('Cannot run the remote agent: no AUT context initialized')
+
+            return this.remoteAgent.call(autContextId, data)
+          })
         default:
           debug('BiDi automation not implemented for message: %s', message)
           throw new AutomationNotImplemented(message, 'BiDiAutomation')

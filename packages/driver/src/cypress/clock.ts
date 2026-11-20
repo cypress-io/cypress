@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import fakeTimers from '@sinonjs/fake-timers'
 
 // @sinonjs/fake-timers 13+ fakes every supported time function by default when
@@ -27,7 +26,7 @@ export const create = (win, now, methods) => {
   }
 
   const restore = () => {
-    _.each(clock.methods, (method) => {
+    (clock.methods ?? []).forEach((method) => {
       try {
         // before restoring the clock, we need to
         // reset the hadOwnProperty in case a
@@ -54,7 +53,7 @@ export const create = (win, now, methods) => {
   }
 
   const details = () => {
-    return _.pick(clock, 'now', 'methods')
+    return { now: clock.now, methods: clock.methods }
   }
 
   const setSystemTime = (now) => {

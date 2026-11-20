@@ -76,6 +76,8 @@ describe('lib/browsers/bidi_automation', () => {
       expectCalledWith(mockWebdriverClient.on, 'network.fetchError')
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextCreated')
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextDestroyed')
+      expectCalledWith(mockWebdriverClient.on, 'browsingContext.userPromptOpened')
+      expectCalledWith(mockWebdriverClient.on, 'script.message')
     })
 
     it('unbinds BIDI_EVENTS when close() is called', () => {
@@ -91,6 +93,98 @@ describe('lib/browsers/bidi_automation', () => {
       expectCalledWith(mockWebdriverClient.off, 'network.fetchError')
       expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextCreated')
       expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextDestroyed')
+    })
+
+    describe('experimental driver dialogs and stubs', () => {
+      let bidiAutomationInstance: BidiAutomation
+
+      beforeEach(() => {
+        mockAutomationClient.push = vi.fn().mockResolvedValue(undefined)
+        mockWebdriverClient.browsingContextHandleUserPrompt = vi.fn().mockResolvedValue({})
+        bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+        // @ts-expect-error - autContextId is private
+        bidiAutomationInstance.autContextId = 'aut'
+      })
+
+      it('answers a prompt Firefox left for it, then reports it', async () => {
+        mockWebdriverClient.emit('browsingContext.userPromptOpened', { context: 'top', type: 'alert', message: 'hi', handler: 'ignore' })
+        mockWebdriverClient.emit('browsingContext.userPromptOpened', { context: 'top', type: 'alert', message: 'handled', handler: 'dismiss' })
+
+        await flushPromises()
+
+        expect(mockWebdriverClient.browsingContextHandleUserPrompt).toHaveBeenCalledExactlyOnceWith({ context: 'top', accept: true })
+        expect(mockAutomationClient.push).toHaveBeenCalledExactlyOnceWith('remote:dialog', { type: 'alert', message: 'hi', accepted: true })
+      })
+
+      it('pushes a stub call sent on its channel from the AUT', async () => {
+        const message = (overrides: object) => ({ channel: 'cypress-remote-stubs', data: { type: 'string', value: '{"id":"stub-1","args":[]}' }, source: { realm: 'r', context: 'aut' }, ...overrides })
+
+        mockWebdriverClient.emit('script.message', message({}))
+        mockWebdriverClient.emit('script.message', message({ channel: 'other' }))
+        mockWebdriverClient.emit('script.message', message({ source: { realm: 'r', context: 'runner' } }))
+
+        await flushPromises()
+
+        expect(mockAutomationClient.push).toHaveBeenCalledExactlyOnceWith('remote:stub:call', { id: 'stub-1', args: [] })
+      })
+    })
+
+    describe('experimental driver navigation', () => {
+      const info = (overrides: object) => ({ context: 'aut', navigation: 'nav-1', timestamp: 0, url: 'http://www.foobar.com/', ...overrides })
+
+      beforeEach(() => {
+        mockAutomationClient.push = vi.fn().mockResolvedValue(undefined)
+        const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+        // @ts-expect-error - autContextId is private
+        bidiAutomationInstance.autContextId = 'aut'
+      })
+
+      it('pushes the start and end of the AUT\'s navigation, ignoring other contexts', async () => {
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({ context: 'runner' }))
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({}))
+        await flushPromises()
+        mockWebdriverClient.emit('browsingContext.load', info({ context: 'runner' }))
+        mockWebdriverClient.emit('browsingContext.load', info({}))
+        await flushPromises()
+
+        expect(mockAutomationClient.push.mock.calls).toEqual([
+          ['remote:navigation', { event: 'started' }],
+          ['remote:navigation', { event: 'stopped' }],
+        ])
+      })
+
+      it('doesn\'t end a navigation for an earlier one it aborted', async () => {
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({ navigation: 'nav-1' }))
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({ navigation: 'nav-2' }))
+        await flushPromises()
+        mockWebdriverClient.emit('browsingContext.navigationAborted', info({ navigation: 'nav-1' }))
+        await flushPromises()
+
+        expect(mockAutomationClient.push).not.toHaveBeenCalledWith('remote:navigation', { event: 'stopped' })
+
+        mockWebdriverClient.emit('browsingContext.downloadWillBegin', info({ navigation: 'nav-2' }))
+        await flushPromises()
+
+        expect(mockAutomationClient.push).toHaveBeenLastCalledWith('remote:navigation', { event: 'stopped' })
+      })
+
+      it('pushes URL changes within the AUT\'s document, ending a navigation that turned out to be one', async () => {
+        mockWebdriverClient.emit('browsingContext.navigationStarted', info({}))
+        await flushPromises()
+        mockWebdriverClient.emit('browsingContext.fragmentNavigated', info({ url: 'http://www.foobar.com/#a' }))
+        await flushPromises()
+        mockWebdriverClient.emit('browsingContext.historyUpdated', { context: 'aut', timestamp: 0, url: 'http://www.foobar.com/b' })
+        mockWebdriverClient.emit('browsingContext.historyUpdated', { context: 'runner', timestamp: 0, url: 'http://localhost/b' })
+        await flushPromises()
+
+        expect(mockAutomationClient.push.mock.calls).toEqual([
+          ['remote:navigation', { event: 'started' }],
+          ['remote:navigation', { event: 'stopped' }],
+          ['remote:navigation', { event: 'withinDocument', source: 'hashchange' }],
+          ['remote:navigation', { event: 'withinDocument', source: 'history' }],
+        ])
+      })
     })
 
     describe('BrowsingContext', () => {
@@ -2476,6 +2570,46 @@ describe('lib/browsers/bidi_automation', () => {
           bidiAutomationInstance.autContextId = undefined
 
           await expect(bidiAutomationInstance.automationMiddleware.onRequest('navigate:aut:history', undefined)).rejects.toThrow('Cannot navigate AUT frame history: no AUT context initialized')
+        })
+      })
+
+      describe('tabs the app opened', () => {
+        beforeEach(() => {
+          bidiAutomationInstance.setTopLevelContextId('runner')
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({
+            contexts: [
+              { context: 'runner', url: 'http://localhost:3500/__/' },
+              { context: 'popup', url: 'http://login.idp.test/popup' },
+            ],
+          })
+
+          mockWebdriverClient.browsingContextClose = vi.fn().mockResolvedValue({})
+        })
+
+        it('runs the remote agent in the matching tab', async () => {
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ type: 'success', result: { type: 'string', value: JSON.stringify({ ok: true, value: { coords: { x: 1, y: 2 } } }) } })
+
+          const response = await bidiAutomationInstance.automationMiddleware.onRequest('remote:agent', { method: 'click', context: {}, args: {}, tab: { url: 'idp' } })
+
+          expect(response).toEqual({ ok: true, value: { coords: { x: 1, y: 2 } } })
+          expectCalledWith(mockWebdriverClient.browsingContextGetTree, { maxDepth: 0 })
+          expect(vi.mocked(mockWebdriverClient.scriptEvaluate).mock.calls[0][0].target).toEqual({ context: 'popup', sandbox: '__cypress_remote_agent' })
+        })
+
+        it('closes every top-level context but the runner\'s, ignoring errors', async () => {
+          vi.mocked(mockWebdriverClient.browsingContextGetTree).mockResolvedValue({
+            contexts: [
+              { context: 'runner', url: 'http://localhost:3500/__/' },
+              { context: 'popup', url: 'http://login.idp.test/popup' },
+              { context: 'help', url: 'http://www.app.test/help' },
+            ],
+          } as any)
+
+          vi.mocked(mockWebdriverClient.browsingContextClose).mockRejectedValueOnce(new Error('no such frame'))
+
+          await bidiAutomationInstance.closeExtraTabs()
+
+          expect(vi.mocked(mockWebdriverClient.browsingContextClose).mock.calls).toEqual([[{ context: 'popup' }], [{ context: 'help' }]])
         })
       })
 

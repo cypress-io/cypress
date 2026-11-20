@@ -2,6 +2,7 @@ import Debug from 'debug'
 import { BidiAutomation } from './bidi_automation'
 import type { Client as WebDriverClient } from 'webdriver'
 import type { Automation } from '../automation'
+import type { RemoteAutScriptConfig } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:firefox-util')
 
@@ -29,6 +30,13 @@ async function connectToNewSpecBiDi (options, automation: Automation, browserBiD
 async function setupBiDi (webdriverClient: WebDriverClient, automation: Automation) {
   // webdriver needs to subscribe to the correct BiDi events or else the events we are expecting to stream in will not be sent
   await webdriverClient.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
+  await Promise.all(BidiAutomation.BIDI_NAVIGATION_EVENTS.map(async (event) => {
+    try {
+      await webdriverClient.sessionSubscribe({ events: [event] })
+    } catch (err) {
+      debug('firefox: could not subscribe to %s: %s', event, err?.message)
+    }
+  }))
 
   const biDiClient = BidiAutomation.create(webdriverClient, automation)
 
@@ -40,10 +48,12 @@ export default {
     automation,
     url,
     webdriverClient: wdInstance,
+    remoteAutScript,
   }: {
     automation: Automation
     url: string
     webdriverClient: WebDriverClient
+    remoteAutScript?: RemoteAutScriptConfig
   }): Promise<BidiAutomation> {
     // set the WebDriver classic instance instantiated from geckodriver
     webdriverClient = wdInstance
@@ -55,6 +65,10 @@ export default {
     // at this point there should only be one context: the top level context.
     // we need to set this to bind our AUT intercepts correctly. Hopefully we can move this in the future on a more sure implementation
     client.setTopLevelContextId(contexts[0].context)
+
+    if (remoteAutScript) {
+      await client.addRemoteAutScript(remoteAutScript)
+    }
 
     automation.use(client.automationMiddleware)
 

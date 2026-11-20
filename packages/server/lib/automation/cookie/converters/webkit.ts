@@ -1,5 +1,5 @@
 import type playwright from 'playwright-webkit'
-import { sameSiteExtensionToProtocolMap } from '../util'
+import { isHostOnlyCookie, sameSiteExtensionToProtocolMap } from '../util'
 import type { CyCookie } from '../util'
 
 function convertSameSiteExtensionToPlaywright (str: CyCookie['sameSite']): 'None' | 'Lax' | 'Strict' | undefined {
@@ -14,7 +14,8 @@ export const convertPlaywrightCookieToCyCookie = ({ name, value, domain, path, s
     path,
     secure,
     httpOnly,
-    hostOnly: false,
+    // a domain cookie keeps its leading dot, as in CDP
+    hostOnly: !!isHostOnlyCookie({ domain }),
     // Use expirationDate instead of expires
     ...expires !== -1 ? { expirationDate: expires } : {},
   }
@@ -32,8 +33,10 @@ export const convertCyCookieToPlaywrightCookie = (cookie: CyCookie): playwright.
   return {
     name: cookie.name,
     value: cookie.value,
-    path: cookie.path,
-    domain: cookie.domain,
+    // a cookie without a Path attribute (from cy.request) gets the default path, which Chrome applies in Network.setCookie
+    path: cookie.path ?? '/',
+    // without the leading dot, WebKit sets a cookie for 'foo.com' only on 'foo.com', not its subdomains
+    domain: !cookie.hostOnly && isHostOnlyCookie(cookie) ? `.${cookie.domain}` : cookie.domain,
     secure: cookie.secure,
     httpOnly: cookie.httpOnly,
     expires: cookie.expirationDate!,

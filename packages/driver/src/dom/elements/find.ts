@@ -5,6 +5,7 @@ import $jquery from '../jquery'
 import { getTagName } from './elementHelpers'
 import { isWithinShadowRoot, getShadowElementFromPoint } from './shadow'
 import { normalizeWhitespaces } from './utils'
+import { isRemoteElement } from '../../cy/remote/remote_element'
 
 /**
  * Find Parents relative to an initial element
@@ -220,6 +221,11 @@ export const getElements = ($el) => {
   // bail if no $el or length
   if (!_.get($el, 'length')) {
     return
+  }
+
+  // a remote element's nodes are in the AUT, so it stands in with its description
+  if (isRemoteElement($el)) {
+    return $el.node
   }
 
   // unroll the jquery object

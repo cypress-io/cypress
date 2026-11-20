@@ -87,6 +87,10 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, undefined, false, false, storageOrigins)
 
+  if (options.remoteAutScript) {
+    await automation.addRemoteAutScript(options.remoteAutScript)
+  }
+
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
       case 'take:screenshot': {

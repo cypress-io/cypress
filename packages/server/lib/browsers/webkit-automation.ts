@@ -3,7 +3,7 @@ import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp-protocol/normalize-resource-type'
 import os from 'os'
-import type { RunModeVideoApi } from '@packages/types'
+import type { RemoteAutScriptConfig, RemoteNavigation, RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
 import { cookieMatches } from '../automation/cookie/util'
@@ -14,6 +14,16 @@ import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
 import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
+import { RemoteTabs, WebKitRemoteAgent } from '../automation/commands/remote_agent'
+import { RemoteVisit } from '../automation/commands/remote_visit'
+import type { AutScripts } from '../automation/commands/remote_visit'
+import { RemoteClock } from '../automation/commands/remote_clock'
+import { answerRemoteDialog, isRemoteDialogType } from '../automation/commands/remote_dialogs'
+import { REMOTE_STUB_BINDING, RemoteStubs, parseStubCall } from '../automation/commands/remote_stubs'
+import { getRemoteAutScript, callRemoteAut } from '../automation/commands/remote_aut_script'
+import { RemoteErrorReports } from '../automation/commands/remote_errors'
+import { webkitReloadFrame } from '../automation/commands/reload_frame'
+import { webkitNavigateHistory } from '../automation/commands/navigate_history'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -30,6 +40,9 @@ type WebKitAutomationOpts = {
   userAgent?: string | null
   isHeadless: boolean
   cdpSocketServer?: CDPSocketServer
+  // launched for the experimental driver, which drives the AUT from outside the page
+  experimentalDriver?: boolean
+  remoteAutScript?: RemoteAutScriptConfig
 }
 
 export class WebKitAutomation {
@@ -39,6 +52,43 @@ export class WebKitAutomation {
   private page!: playwright.Page
   private userAgent: string | null
   private isHeadless: boolean
+  private experimentalDriver: boolean
+  private remoteAutScript?: RemoteAutScriptConfig
+  private remoteAgent = new WebKitRemoteAgent()
+  private remoteTabs = new RemoteTabs(() => {
+    return this.getExtraPages().map((page) => {
+      return {
+        url: async () => page.url(),
+        call: (request) => this.remoteAgent.call(page.mainFrame(), request),
+      }
+    })
+  })
+
+  private autScripts: AutScripts = {
+    addPreloadScript: async (source) => {
+      const script = await this.page.addInitScript({ content: source })
+
+      // older playwright-webkit can't remove an init script, so there onBeforeLoad also runs on later AUT loads
+      return async () => script?.dispose?.()
+    },
+    evaluateInAut: (expression) => this.getAutFrame().evaluate(expression),
+  }
+
+  private remoteVisit = new RemoteVisit(this.autScripts)
+
+  private remoteClock = new RemoteClock(this.autScripts)
+
+  private remoteErrors = new RemoteErrorReports(this.autScripts.evaluateInAut)
+
+  private remoteStubs = new RemoteStubs({
+    addPreloadScript: async (source) => {
+      const script = await this.page.addInitScript({ content: `(${source})(window.${REMOTE_STUB_BINDING})` })
+
+      return async () => script?.dispose?.()
+    },
+    callInAut: (source) => this.getAutFrame().evaluate(`(${source})(window.${REMOTE_STUB_BINDING})`),
+  })
+
   cdpSocketServer?: CDPSocketServer
 
   private constructor (opts: WebKitAutomationOpts) {
@@ -46,6 +96,8 @@ export class WebKitAutomation {
     this.browser = opts.browser
     this.userAgent = opts.userAgent ?? null
     this.isHeadless = opts.isHeadless
+    this.experimentalDriver = !!opts.experimentalDriver
+    this.remoteAutScript = opts.remoteAutScript
     this.cdpSocketServer = opts.cdpSocketServer
   }
 
@@ -93,6 +145,35 @@ export class WebKitAutomation {
     await this.cdpSocketServer?.attachCDPClient(new WebKitCDPBridge(this.page))
 
     this.handleRequestEvents()
+    if (this.experimentalDriver) {
+      if (this.remoteAutScript) {
+        await this.page.addInitScript({ content: await getRemoteAutScript(this.remoteAutScript, { reportErrors: true }) })
+      }
+
+      await this.context.exposeBinding(REMOTE_STUB_BINDING, async (source, payload: string) => {
+        try {
+          if (source.frame === this.getAutFrame()) {
+            await this.automation.push('remote:stub:call', parseStubCall(payload))
+          }
+        } catch (err) {
+          debug('failed to report a stub call: %s', err?.message)
+        }
+      })
+
+      this.listenForAutNavigation()
+
+      // Playwright dismisses a dialog itself only while nothing listens for them
+      this.page.on('dialog', (dialog) => {
+        const type = dialog.type()
+
+        if (!isRemoteDialogType(type)) {
+          return dialog.dismiss()
+        }
+
+        return answerRemoteDialog(this.automation, type, dialog.message(), (accept) => accept ? dialog.accept() : dialog.dismiss())
+        .catch((err) => debug('failed to report dialog: %s', err?.message))
+      })
+    }
 
     if (options.downloadsFolder) this.handleDownloadEvents(options.downloadsFolder)
 
@@ -148,9 +229,19 @@ export class WebKitAutomation {
   private async markAutIframeRequests () {
     function isAutIframeRequest (request: playwright.Request) {
       // is an iframe
-      return (request.resourceType() === 'document')
-        // is a top-level iframe (only 1 parent in chain)
-        && request.frame().parentFrame() && !request.frame().parentFrame()?.parentFrame()
+      if (request.resourceType() !== 'document') return false
+
+      let frame: playwright.Frame
+
+      try {
+        frame = request.frame()
+      } catch (err) {
+        // a new tab's first navigation, such as a target=_blank link, is issued before its frame exists
+        return false
+      }
+
+      // is a top-level iframe (only 1 parent in chain)
+      return !!frame.parentFrame() && !frame.parentFrame()?.parentFrame()
         // is not the runner itself
         && !request.url().includes('__cypress')
     }
@@ -351,6 +442,73 @@ export class WebKitAutomation {
    * back to its `id` attribute, both of which the runner sets to
    * `Your project: '<projectName>'` (see AUT_FRAME_NAME_IDENTIFIER).
    */
+  private isAutFrame (frame: playwright.Frame) {
+    try {
+      return frame === this.getAutFrame()
+    } catch {
+      return false
+    }
+  }
+
+  // Playwright has no event for a URL change within a document, so an AUT frame navigation
+  // with no navigation request in flight is taken to be one
+  private listenForAutNavigation () {
+    let pendingRequest: playwright.Request | undefined
+    let autUrl: string | undefined
+
+    const push = (navigation: RemoteNavigation) => {
+      this.automation.push('remote:navigation', navigation).catch((err) => debug('failed to report AUT navigation: %s', err?.message))
+    }
+
+    const end = (request: playwright.Request | undefined) => {
+      if (request && request === pendingRequest) {
+        pendingRequest = undefined
+        push({ event: 'stopped' })
+      }
+    }
+
+    this.page.on('request', (request) => {
+      if (request.isNavigationRequest() && this.isAutFrame(request.frame())) {
+        pendingRequest = request
+        push({ event: 'started' })
+      }
+    })
+
+    this.page.on('requestfailed', end)
+    this.page.on('download', () => end(pendingRequest))
+
+    // a 204 or 205 response leaves the current document in place
+    this.page.on('requestfinished', async (request) => {
+      if (request === pendingRequest && [204, 205].includes((await request.response())?.status() ?? 0)) {
+        end(request)
+      }
+    })
+
+    this.page.on('framenavigated', (frame) => {
+      if (!this.isAutFrame(frame)) {
+        return
+      }
+
+      const previousUrl = autUrl
+
+      autUrl = frame.url()
+
+      if (pendingRequest) {
+        const request = pendingRequest
+
+        frame.waitForLoadState('load')
+        .catch((err) => debug('AUT frame did not reach load after navigating: %o', err))
+        .finally(() => end(request))
+
+        return
+      }
+
+      const isHashChange = !!previousUrl && previousUrl.split('#')[0] === autUrl.split('#')[0]
+
+      push({ event: 'withinDocument', source: isHashChange ? 'hashchange' : 'history' })
+    })
+  }
+
   private getAutFrame (): playwright.Frame {
     const childFrames = this.page.mainFrame().childFrames()
 
@@ -376,6 +534,17 @@ export class WebKitAutomation {
     }
 
     return autFrame
+  }
+
+  // pages other than the runner's are tabs the app opened
+  private getExtraPages () {
+    return this.context.pages().filter((page) => page !== this.page)
+  }
+
+  async closeExtraPages () {
+    await Promise.all(this.getExtraPages().map((page) => {
+      return page.close().catch((err) => debug('closing extra page errored: %o', err))
+    }))
   }
 
   private async takeScreenshot (data) {
@@ -413,6 +582,34 @@ export class WebKitAutomation {
         return this.getAutFrame().url()
       case 'get:aut:title':
         return await this.getAutFrame().title()
+      case 'reload:aut:frame':
+        return await webkitReloadFrame(this.getAutFrame(), data.forceReload)
+      case 'navigate:aut:history':
+        return await webkitNavigateHistory(this.getAutFrame(), data.historyNumber)
+      case 'remote:stub:add':
+        return await this.remoteStubs.add(data)
+      case 'remote:stub:update':
+        return await this.remoteStubs.update(data)
+      case 'remote:stubs:reset':
+        return await this.remoteStubs.reset()
+      case 'remote:clock:install':
+        return await this.remoteClock.install(data)
+      case 'remote:clock:tick':
+        return await this.remoteClock.tick(data)
+      case 'remote:clock:set:system:time':
+        return await this.remoteClock.setSystemTime(data)
+      case 'remote:clock:restore':
+        return await this.remoteClock.restore()
+      case 'remote:errors:flush':
+        return await this.remoteErrors.flush()
+      case 'remote:aut:call':
+        return await callRemoteAut(this.autScripts.evaluateInAut, data)
+      case 'remote:visit:before:load':
+        return await this.remoteVisit.beforeLoad(data)
+      case 'remote:visit:on:load':
+        return await this.remoteVisit.onLoad(data)
+      case 'remote:agent':
+        return await this.remoteTabs.call(data, () => this.remoteAgent.call(this.getAutFrame(), data))
       case 'focus:browser:window':
         return await this.context.pages()[0]?.bringToFront()
       case 'reset:browser:state':

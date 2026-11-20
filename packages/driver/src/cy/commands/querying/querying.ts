@@ -8,6 +8,7 @@ import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 import { aliasRe, aliasIndexRe, aliasDisplayName } from '../../aliases'
+import { extendRemoteSubject, getRemoteWithinSubject, isExperimentalDriverEnabled, isRemoteSubject, throwUnsupportedOption } from '../../remote'
 
 type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow & {
   _log?: Log
@@ -180,6 +181,22 @@ export default (Commands, Cypress, cy, state) => {
 
     const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
+    if (isExperimentalDriverEnabled(Cypress)) {
+      if (userOptions.withinSubject !== undefined) {
+        throwUnsupportedOption('get', 'within')
+      }
+
+      return () => {
+        if (withinSubject) {
+          const within = getRemoteWithinSubject(() => cy.getSubjectFromChain(withinSubject), 'get')
+
+          return extendRemoteSubject('get', within, { type: 'traversal', method: 'find', args: [selector], includeShadowDom }, selector)
+        }
+
+        return extendRemoteSubject('get', undefined, { type: 'get', selector, includeShadowDom }, selector)
+      }
+    }
+
     return () => {
       Cypress.ensure.commandCanCommunicateWithAUT(cy)
 
@@ -339,6 +356,14 @@ export default (Commands, Cypress, cy, state) => {
 
     const withinSubject = cy.state('withinSubjectChain')
 
+    if (isExperimentalDriverEnabled(Cypress)) {
+      return (subject) => {
+        const scope = subject ?? (withinSubject ? getRemoteWithinSubject(() => cy.getSubjectFromChain(withinSubject), 'contains') : undefined)
+
+        return extendRemoteSubject('contains', scope, { type: 'contains', selector }, displayName)
+      }
+    }
+
     return (subject) => {
       Cypress.ensure.isType(subject, ['optional', 'element', 'window', 'document'], this.get('name'), cy)
 
@@ -382,6 +407,38 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
+  // tabs and cross-origin frames are only reachable through the experimental driver's automation, so the
+  // legacy driver doesn't register these at all
+  if (isExperimentalDriverEnabled(Cypress)) {
+    Commands.addQuery('tab', function tab (url?: string | RegExp, userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
+      const displayName = url === undefined ? 'a tab' : `a tab matching ${String(url)}`
+
+      if (userOptions.log !== false) {
+        Cypress.log({ message: url === undefined ? '' : String(url), timeout: userOptions.timeout })
+      }
+
+      this.set('timeout', userOptions.timeout)
+
+      const tabUrl = _.isRegExp(url) ? { source: url.source, flags: url.flags } : url
+
+      return () => extendRemoteSubject('tab', undefined, { type: 'tab', url: tabUrl }, displayName)
+    })
+
+    Commands.addQuery('frame', function frame (userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
+      const log = userOptions.log !== false && Cypress.log({ timeout: userOptions.timeout })
+
+      this.set('timeout', userOptions.timeout)
+
+      return (subject) => {
+        if (!isRemoteSubject(subject)) {
+          $errUtils.throwErrByPath('experimental_driver.unsupported_subject', { onFail: log, args: { cmd: 'frame' } })
+        }
+
+        return extendRemoteSubject('frame', subject, { type: 'frame', selector: subject.selector }, `${subject.selector} (frame)`)
+      }
+    })
+  }
+
   Commands.addQuery('shadow', function contains (userOptions: Cypress.LogTimeoutOptions) {
     userOptions = userOptions || {}
     const log = Cypress.log({
@@ -410,6 +467,10 @@ export default (Commands, Cypress, cy, state) => {
     })
 
     return (subject) => {
+      if (isExperimentalDriverEnabled(Cypress) && isRemoteSubject(subject)) {
+        return extendRemoteSubject('shadow', subject, { type: 'shadow' }, 'shadow')
+      }
+
       Cypress.ensure.isType(subject, 'element', 'shadow', cy)
 
       // find all shadow roots of the subject(s), if any exist

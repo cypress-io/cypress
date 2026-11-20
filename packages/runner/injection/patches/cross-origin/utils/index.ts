@@ -59,7 +59,15 @@ export const postMessagePromise = <T>({ event, data = {}, timeout }: { event: st
  * @param args - an object containing a url, resourceType and Credential status.
  * @returns A Promise or null depending on the url parameter.
  */
-export const requestSentWithCredentials = (args: { url?: string, resourceType: 'xhr' | 'fetch', credentialStatus: string | boolean }): Promise<void> | undefined => {
+export interface RequestCredentials {
+  url?: string
+  resourceType: 'xhr' | 'fetch'
+  credentialStatus: string | boolean
+}
+
+export type ReportCredentials = (args: RequestCredentials) => Promise<unknown> | undefined
+
+export const requestSentWithCredentials = (args: RequestCredentials): Promise<void> | undefined => {
   if (args.url) {
     // If cypress is enabled on the window use that, otherwise use post message to call out to the primary cypress instance.
     // cypress may be found on the window if this is either the primary cypress instance or if a spec bridge has already been created for this spec bridge.

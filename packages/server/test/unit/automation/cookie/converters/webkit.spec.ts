@@ -43,10 +43,15 @@ describe('lib/automation/cookie/converters/webkit', () => {
         path: '/',
         secure: false,
         httpOnly: false,
-        hostOnly: false,
+        hostOnly: true,
         expirationDate: 456,
         sameSite: 'lax',
       })
+    })
+
+    it('reports a cookie without a leading dot as host-only', () => {
+      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ domain: 'www.foo.com' })).hostOnly).toBe(true)
+      expect(convertPlaywrightCookieToCyCookie(playwrightCookie({ domain: '.foo.com' })).hostOnly).toBe(false)
     })
 
     it('omits expirationDate for the -1 session sentinel', () => {
@@ -74,7 +79,7 @@ describe('lib/automation/cookie/converters/webkit', () => {
 
   describe('.convertCyCookieToPlaywrightCookie', () => {
     it('maps the CyCookie shape to a playwright cookie', () => {
-      const cookie = convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'lax' }))
+      const cookie = convertCyCookieToPlaywrightCookie(cyCookie({ sameSite: 'lax', hostOnly: true }))
 
       expect(cookie).toStrictEqual({
         name: 'foo',
@@ -86,6 +91,17 @@ describe('lib/automation/cookie/converters/webkit', () => {
         expires: 123,
         sameSite: 'Lax',
       })
+    })
+
+    it('gives a cookie that is not host-only a leading dot, so it applies to subdomains', () => {
+      expect(convertCyCookieToPlaywrightCookie(cyCookie({ hostOnly: false })).domain).toBe('.foo.com')
+      expect(convertCyCookieToPlaywrightCookie(cyCookie({ hostOnly: false, domain: '.foo.com' })).domain).toBe('.foo.com')
+      expect(convertCyCookieToPlaywrightCookie(cyCookie({ hostOnly: true })).domain).toBe('foo.com')
+    })
+
+    it('gives a cookie without a path the default path', () => {
+      // @ts-expect-error - cy.request passes a null path for a cookie without a Path attribute
+      expect(convertCyCookieToPlaywrightCookie(cyCookie({ path: null })).path).toBe('/')
     })
 
     it('converts extension sameSite to the playwright vocabulary', () => {

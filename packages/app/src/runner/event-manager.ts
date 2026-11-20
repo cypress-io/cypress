@@ -178,6 +178,21 @@ export class EventManager {
         case 'canceled:download':
           Cypress.downloads.end(data, true)
           break
+        case 'remote:uncaught:exception':
+          Cypress.action('app:remote:uncaught:exception', data)
+          break
+        case 'remote:window:before:load':
+          Cypress.action('app:remote:window:before:load', data)
+          break
+        case 'remote:stub:call':
+          Cypress.action('app:remote:stub:call', data)
+          break
+        case 'remote:dialog':
+          Cypress.action('app:remote:dialog', data)
+          break
+        case 'remote:navigation':
+          Cypress.action('app:remote:navigation', data)
+          break
         default:
           break
       }

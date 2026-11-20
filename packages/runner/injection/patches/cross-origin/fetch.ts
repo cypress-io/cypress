@@ -1,6 +1,7 @@
 import { captureFullRequestUrl, requestSentWithCredentials } from './utils'
+import type { ReportCredentials } from './utils'
 
-export const patchFetch = (window) => {
+export const patchFetch = (window, reportCredentials: ReportCredentials = requestSentWithCredentials) => {
   // if fetch is available in the browser, or is polyfilled by whatwg fetch
   // intercept method calls and add cypress headers to determine cookie applications in the proxy
   // for simulated top. @see https://github.github.io/fetch/ for default options
@@ -34,7 +35,7 @@ export const patchFetch = (window) => {
       credentials = credentials || 'same-origin'
       // if the option is specified, communicate it to the the server to the proxy can make the request aware if it needs to potentially apply cross origin cookies
       // if the option isn't set, we can imply the default as we know the resourceType in the proxy
-      await requestSentWithCredentials({
+      await reportCredentials({
         url,
         resourceType: 'fetch',
         credentialStatus: credentials,

@@ -1,0 +1,194 @@
+const AUT_PAGE = 'http://www.foobar.com:3500/fixtures/experimental-driver-isolation.html'
+
+describe('experimental driver: the AUT window', () => {
+  describe('uncaught:exception', () => {
+    beforeEach(() => {
+      cy.visit(AUT_PAGE)
+    })
+
+    it('reports an error the app throws', () => {
+      const errors: string[] = []
+
+      cy.on('uncaught:exception', (err) => {
+        errors.push(err.message)
+
+        return false
+      })
+
+      cy.get('#throw').click()
+      cy.wrap(errors).should((e) => expect(e.join()).to.include('app boom'))
+    })
+
+    it('reports an unhandled rejection', () => {
+      const errors: string[] = []
+
+      cy.on('uncaught:exception', (err) => {
+        errors.push(err.message)
+
+        return false
+      })
+
+      cy.get('#reject').click()
+      cy.wrap(errors).should((e) => {
+        expect(e.join()).to.include('app rejection')
+        expect(e.join()).to.include('It was caused by an unhandled promise rejection.')
+      })
+    })
+
+    it('fails the test when the error is not handled, even after its last command', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('app boom')
+        expect(err.message).to.include('originated from your application code')
+
+        done()
+      })
+
+      cy.get('#throw').click()
+    })
+  })
+
+  describe('navigation', () => {
+    const logNames: string[] = []
+    const urls: string[] = []
+
+    beforeEach(() => {
+      logNames.length = 0
+      urls.length = 0
+
+      cy.visit(AUT_PAGE)
+      cy.on('log:added', (attrs) => logNames.push(attrs.name))
+      cy.on('url:changed', (url) => urls.push(url))
+    })
+
+    it('waits for a page load a command started', () => {
+      cy.get('#nav').click()
+      cy.get('#page').should('have.text', '2')
+      cy.wrap(null).then(() => {
+        expect(logNames).to.include('page load')
+        expect(logNames).to.include('new url')
+        expect(urls).to.include(`${AUT_PAGE}?page=2`)
+      })
+    })
+
+    it('waits for the page a click starts loading before running a command that does not retry', () => {
+      cy.visit('http://localhost:3500/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+      cy.setCookie('after-click', 'set')
+      cy.getCookie('after-click', { domain: 'www.foobar.com' }).should('have.property', 'value', 'set')
+    })
+
+    it('reports a hash change', () => {
+      cy.get('#hash').click()
+      cy.wrap(urls).should('include', `${AUT_PAGE}#section`)
+      cy.wrap(logNames).should('include', 'new url')
+      cy.url().should('eq', `${AUT_PAGE}#section`)
+    })
+
+    it('reports a URL the app pushes to history', () => {
+      cy.get('#push-state').click()
+      cy.wrap(urls).should('include', `${AUT_PAGE}?page=pushed`)
+      cy.wrap(logNames).should('not.include', 'page load')
+    })
+  })
+
+  describe('synchronous XHR', () => {
+    it('skips an intercept\'s route handler for it instead of blocking the AUT', () => {
+      cy.intercept('/sync-xhr', {
+        headers: { 'content-type': 'text/html' },
+        body: `<!DOCTYPE html>
+          <html><body>
+            <div id="sync_response"></div>
+            <script>
+              const xhr = new XMLHttpRequest()
+              xhr.open('GET', '/fixtures/valid.json', false)
+              xhr.send()
+              document.querySelector('#sync_response').textContent = JSON.parse(xhr.responseText).foo
+            </script>
+          </body></html>`,
+      })
+
+      const handler = cy.stub()
+
+      cy.intercept('/fixtures/valid.json', handler)
+      cy.visit('/sync-xhr')
+      cy.get('#sync_response').should('have.text', '1').then(() => {
+        expect(handler).not.to.be.called
+      })
+    })
+  })
+
+  describe('.invoke()', () => {
+    it('calls the method once when nothing retries it', () => {
+      cy.visit(AUT_PAGE)
+      cy.document().invoke('body.insertAdjacentHTML', 'beforeend', '<i class="invoked"></i>')
+      cy.get('body').should('exist')
+      cy.get('.invoked').should('have.length', 1)
+    })
+  })
+
+  describe('cy.$$', () => {
+    beforeEach(() => {
+      cy.visit(AUT_PAGE)
+    })
+
+    it('fails instead of querying the runner', () => {
+      expect(() => cy.$$('body')).to.throw('`cy.$$(\'body\')` and `Cypress.$(\'body\')` can\'t query the AUT')
+      expect(() => Cypress.$('body')).to.throw('can\'t query the AUT')
+    })
+
+    it('still builds elements from HTML', () => {
+      expect(Cypress.$('<div id="detached"></div>').attr('id')).to.eq('detached')
+    })
+  })
+
+  describe('cy.visit callbacks', () => {
+    it('runs onBeforeLoad in the page before its scripts', () => {
+      cy.visit(AUT_PAGE, {
+        args: { value: 'from the test' },
+        onBeforeLoad (win, args) {
+          Object.assign(win, { presetBeforeLoad: args.value })
+        },
+      })
+
+      cy.get('#preset').should('have.text', 'from the test')
+    })
+
+    it('runs onLoad in the page after it loads', () => {
+      cy.visit(AUT_PAGE, {
+        onLoad: (win) => {
+          win.document.getElementById('page')!.textContent = `loaded:${win.document.readyState}`
+        },
+      })
+
+      cy.get('#page').should('have.text', 'loaded:complete')
+    })
+
+    it('fails the visit when onBeforeLoad throws', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('before load boom')
+
+        done()
+      })
+
+      cy.visit(AUT_PAGE, {
+        onBeforeLoad () {
+          throw new Error('before load boom')
+        },
+      })
+    })
+
+    it('fails the visit when onLoad throws', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('load boom')
+
+        done()
+      })
+
+      cy.visit(AUT_PAGE, {
+        onLoad () {
+          throw new Error('load boom')
+        },
+      })
+    })
+  })
+})

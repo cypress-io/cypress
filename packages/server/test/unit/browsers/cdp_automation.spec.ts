@@ -1101,6 +1101,111 @@ describe('lib/browsers/cdp_automation', () => {
       })
     })
 
+    describe('remote:agent with a tab', () => {
+      const tabRequest = { method: 'click', context: {}, args: {}, tab: { url: 'login' } }
+
+      it('fails clearly when the browser has no tab tracking', async () => {
+        expect(await onRequest('remote:agent', tabRequest)).toEqual({
+          ok: false,
+          error: { name: 'Error', message: '`cy.tab()` is not supported in Electron yet.', retry: false },
+        })
+      })
+
+      it('looks for the tab among the ones it was given', async () => {
+        const getTabs = vi.fn(() => [])
+
+        cdpAutomation.useRemoteTabs(getTabs)
+
+        expect(await onRequest('remote:agent', { ...tabRequest, method: 'resolve' })).toEqual({ ok: true, value: { elements: [] } })
+        expect(getTabs).toHaveBeenCalled()
+      })
+    })
+
+    describe('Runtime.exceptionThrown', () => {
+      const emit = (event: string, params: unknown) => callsWith(onFn, event)[0][1](params)
+
+      beforeEach(async () => {
+        automation.push = vi.fn()
+
+        const client = {
+          send: createStub(() => Promise.resolve({})),
+          on: vi.fn(),
+          off: vi.fn(),
+        }
+
+        client.send.withArgs('Page.getFrameTree').resolves({
+          frameTree: {
+            frame: { id: 'root', url: 'about:blank' },
+            childFrames: [{ frame: { id: '1', name: 'Your project: foobar', url: 'http://www.foobar.com/' } }],
+          },
+        })
+
+        await cdpAutomation.seedFrameTree(client as any)
+
+        emit('Runtime.executionContextCreated', { context: { id: 7, auxData: { frameId: '1', isDefault: true } } })
+        emit('Runtime.executionContextCreated', { context: { id: 8, auxData: { frameId: '1', isDefault: false } } })
+        emit('Runtime.executionContextCreated', { context: { id: 9, auxData: { frameId: 'root', isDefault: true } } })
+
+        sendDebuggerCommand.withArgs('Runtime.callFunctionOn').resolves({ result: { value: { name: 'Error', message: 'app boom', stack: 'Error: app boom' } } })
+        sendDebuggerCommand.withArgs('Runtime.releaseObject').resolves({})
+      })
+
+      it('pushes an error thrown in the AUT\'s main world', async () => {
+        await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 7, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })
+
+        expect(automation.push).toHaveBeenCalledWith('remote:uncaught:exception', {
+          handlerType: 'error',
+          error: { name: 'Error', message: 'app boom', stack: 'Error: app boom' },
+        })
+      })
+
+      it('pushes a stub call from the AUT\'s main world only', async () => {
+        await emit('Runtime.bindingCalled', { name: '__cypressRemoteStubCall', executionContextId: 7, payload: '{"id":"stub-1","args":[1]}' })
+        await emit('Runtime.bindingCalled', { name: '__cypressRemoteStubCall', executionContextId: 9, payload: '{"id":"stub-1","args":[2]}' })
+
+        expect(automation.push).toHaveBeenCalledOnce()
+        expect(automation.push).toHaveBeenCalledWith('remote:stub:call', { id: 'stub-1', args: [1] })
+      })
+
+      it('answers a dialog, then reports it', async () => {
+        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').resolves({})
+
+        await emit('Page.javascriptDialogOpening', { type: 'confirm', message: 'sure?' })
+        await emit('Page.javascriptDialogOpening', { type: 'prompt', message: 'name?' })
+
+        expectCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog', { accept: true })
+        expectCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog', { accept: false })
+        expect(automation.push).toHaveBeenCalledWith('remote:dialog', { type: 'confirm', message: 'sure?', accepted: true })
+        expect(automation.push).toHaveBeenCalledWith('remote:dialog', { type: 'prompt', message: 'name?', accepted: false })
+      })
+
+      it('pushes the AUT frame\'s navigations only', async () => {
+        const request = (params) => ({ request: { url: 'http://www.foobar.com/', method: 'GET', headers: {} }, wallTime: 0, ...params })
+
+        await emit('Network.requestWillBeSent', request({ requestId: 'nav', loaderId: 'nav', frameId: '1', type: 'Document' }))
+        await emit('Network.requestWillBeSent', request({ requestId: 'img', loaderId: 'nav', frameId: '1', type: 'Image' }))
+        await emit('Network.requestWillBeSent', request({ requestId: 'child', loaderId: 'child', frameId: 'root', type: 'Document' }))
+        await emit('Page.navigatedWithinDocument', { frameId: '1', url: 'http://www.foobar.com/#a', navigationType: 'fragment' })
+        await emit('Page.navigatedWithinDocument', { frameId: '1', url: 'http://www.foobar.com/b', navigationType: 'historyApi' })
+        await emit('Page.frameStoppedLoading', { frameId: '1' })
+        await emit('Page.navigatedWithinDocument', { frameId: 'root', url: 'http://localhost/#a', navigationType: 'fragment' })
+
+        expect(automation.push.mock.calls).toEqual([
+          ['remote:navigation', { event: 'started' }],
+          ['remote:navigation', { event: 'withinDocument', source: 'hashchange' }],
+          ['remote:navigation', { event: 'withinDocument', source: 'history' }],
+          ['remote:navigation', { event: 'stopped' }],
+        ])
+      })
+
+      it('ignores errors from an isolated world or another frame', async () => {
+        await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 8, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })
+        await emit('Runtime.exceptionThrown', { exceptionDetails: { executionContextId: 9, text: 'Uncaught', exception: { type: 'object', objectId: 'err' } } })
+
+        expect(automation.push).not.toHaveBeenCalled()
+      })
+    })
+
     describe('get:aut:title', () => {
       it('is able to get the AUT title', async () => {
         sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({

@@ -38,7 +38,9 @@ const parseDocumentCookieString = (documentCookieString: string): SerializableAu
   })
 }
 
-const sendCookieToServer = (cookieString: string, url: string) => {
+export type SendCookie = (cookieString: string, url: string) => void
+
+const sendCookieToServer: SendCookie = (cookieString, url) => {
   window.top!.postMessage({
     event: 'cross:origin:aut:set:cookie',
     data: {
@@ -54,7 +56,7 @@ const sendCookieToServer = (cookieString: string, url: string) => {
 // document.cookie runs into cross-origin restrictions when the AUT is on
 // a different origin than top. The goal is to make it act like it would
 // if the user's app was run in top.
-export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[]) => {
+export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie[], sendCookie: SendCookie = sendCookieToServer) => {
   // browsers keep reading and writing cookies against the url the document
   // loaded with, even after history.pushState() changes location
   const url = location.href
@@ -127,7 +129,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
       // send the cookie to the server so it can be set in the browser via
       // automation and in our server-side cookie jar so it's available
       // to subsequent injections
-      sendCookieToServer(stringValue, url)
+      sendCookie(stringValue, url)
 
       return getDocumentCookieValue()
     },
@@ -137,29 +139,37 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     cookieJar.removeAllCookies()
   }
 
-  const bindCypressListeners = (Cypress: Cypress.Cypress) => {
-    Cypress.on('test:before:run', reset)
-
-    // the following listeners are called from Cypress cookie commands, so that
-    // the document.cookie value is updated optimistically
-    Cypress.on('set:cookie', (cookie: SerializableAutomationCookie) => {
+  // called for Cypress cookie commands, so that the document.cookie value is updated optimistically
+  const onCookieCommand = {
+    'set:cookie': (cookie: SerializableAutomationCookie) => {
       setCookie(automationCookieToToughCookie(cookie, domain), { http: true })
-    })
-
-    Cypress.on('clear:cookie', (name: string, cleared?: { domain?: string, path?: string } | null) => {
+    },
+    // with no path, the cookie is cleared at every path
+    'clear:cookie': (name: string, cleared?: { domain?: string, path?: string } | null) => {
       cookieJar.removeCookie({
         name,
         // the browser clears one cookie, which may be one set for a parent domain
         domain: cleared?.domain?.replace(/^\./, '') || domain,
-        // Chromium clears the cookie at every path, other browsers only the one they return
-        path: Cypress.isBrowser({ family: 'chromium' }) ? undefined : cleared?.path,
+        path: cleared?.path,
       })
+    },
+    'clear:cookies': reset,
+  }
+
+  const bindCypressListeners = (Cypress: Cypress.Cypress) => {
+    Cypress.on('test:before:run', reset)
+
+    Cypress.on('set:cookie', onCookieCommand['set:cookie'])
+    Cypress.on('clear:cookie', (name: string, cleared?: { domain?: string, path?: string } | null) => {
+      // Chromium clears the cookie at every path, other browsers only the one they return
+      onCookieCommand['clear:cookie'](name, cleared && { ...cleared, path: Cypress.isBrowser({ family: 'chromium' }) ? undefined : cleared.path })
     })
 
-    Cypress.on('clear:cookies', reset)
+    Cypress.on('clear:cookies', onCookieCommand['clear:cookies'])
   }
 
   return {
     onCypress: bindCypressListeners,
+    onCookieCommand,
   }
 }
