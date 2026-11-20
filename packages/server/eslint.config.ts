@@ -1,5 +1,7 @@
-import { baseConfig, jsonConfig, mochaConfig, nodeConfig, noFloatingPromisesConfig, userNodeConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, mochaConfig, nodeConfig, noFloatingPromisesConfig, noMisusedPromisesConfig, userNodeConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
+
+const typeAwareFiles = ['lib/**/*.ts']
 
 export default [
   ...baseConfig,
@@ -25,7 +27,8 @@ export default [
       },
     },
   },
-  noFloatingPromisesConfig(['lib/**/*.ts']),
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
   {
     files: ['test/**/*.{js,ts}'],
     languageOptions: {
