@@ -428,22 +428,34 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       })
     })
 
-    it('writes over an HttpOnly cookie that has expired', () => {
-      cy.origin(`https://app.foobar.com:3503`, () => {
-        cy.window().then((win) => {
-          return cy.wrap(win.fetch(`/set-cookie?cookie=expiringCookie=bar; Path=/; HttpOnly; Max-Age=2`))
-        })
+    const lifetimes = [
+      // the page loads partway through the Max-Age, and must not start it again
+      { attribute: 'Max-Age', loadsAfter: 1000, writesAfter: 1700 },
+      // Firefox can keep an Expires cookie a second longer than the date it was given
+      { attribute: 'Expires', loadsAfter: 0, writesAfter: 3200 },
+    ]
 
-        cy.reload()
-        // the cookie has to expire, and reading document.cookie to find out would purge it
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(2500)
-        cy.window().then((win) => {
-          win.document.cookie = 'expiringCookie=new; Path=/'
-        })
+    lifetimes.forEach((lifetime) => {
+      it(`writes over an HttpOnly cookie that has expired by its ${lifetime.attribute}`, () => {
+        cy.origin(`https://app.foobar.com:3503`, { args: lifetime }, ({ attribute, loadsAfter, writesAfter }) => {
+          cy.window().then((win) => {
+            // Expires only counts whole seconds
+            const expires = new Date(Math.ceil((Date.now() + 1000) / 1000) * 1000).toUTCString()
 
-        cy.document().its('cookie').should('include', 'expiringCookie=new')
-        cy.getCookie('expiringCookie').its('value').should('eq', 'new')
+            return cy.wrap(win.fetch(`/set-cookie?cookie=expiringCookie=bar; Path=/; HttpOnly; ${attribute === 'Max-Age' ? 'Max-Age=2' : `Expires=${expires}`}`))
+          })
+
+          cy.wait(loadsAfter)
+          cy.reload()
+          // the cookie has to expire, and reading document.cookie to find out would purge it
+          cy.wait(writesAfter)
+          cy.window().then((win) => {
+            win.document.cookie = 'expiringCookie=new; Path=/'
+          })
+
+          cy.document().its('cookie').should('include', 'expiringCookie=new')
+          cy.getCookie('expiringCookie').its('value').should('eq', 'new')
+        })
       })
     })
 

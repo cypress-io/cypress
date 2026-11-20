@@ -1,5 +1,5 @@
 import { telemetry } from '@packages/telemetry'
-import { isLocalhost } from '@packages/network-tools'
+import { isSecureUrl } from '@packages/network-tools'
 import { getSameSiteContext, shouldAttachAndSetCookies, addCookieJarCookiesToRequest } from '../http/util/cookies'
 import { doesBrowserSendAllCookies, doesTopNeedToBeSimulated } from '../http/util/top-simulation'
 import { isVerboseTelemetry as isVerbose } from '../http'
@@ -60,9 +60,7 @@ export function attachCrossOriginCookies (mw: RequestInterceptionMiddlewareCtx):
   })
 
   const url = new URL(mw.req.proxiedUrl)
-  // browsers treat localhost as a secure context, so they send it Secure cookies over http
-  const secure = url.protocol === 'https:' || isLocalhost(url)
-  const applicableCookiesInCookieJar = mw.getCookieJar().getCookies(mw.req.proxiedUrl, sameSiteContext, { secure })
+  const applicableCookiesInCookieJar = mw.getCookieJar().getCookies(mw.req.proxiedUrl, sameSiteContext, { secure: isSecureUrl(url) })
   const cookiesOnRequest = (mw.req.headers['cookie'] || '').split('; ')
 
   const existingCookiesInJar = applicableCookiesInCookieJar.join('; ')

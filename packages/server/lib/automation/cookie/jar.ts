@@ -54,11 +54,12 @@ export const automationCookieToToughCookie = (automationCookie: SerializableAuto
 
   return new Cookie({
     domain: automationCookie.domain || defaultDomain,
-    expires: expiry,
+    // tough-cookie reads maxAge ahead of expires and counts it from when this cookie is made,
+    // and the expiry already counts it from when the original was
+    ...(expiry ? { expires: expiry } : { maxAge: automationCookie.maxAge || 'Infinity' }),
     httpOnly: automationCookie.httpOnly,
     // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates
     hostOnly: automationCookie.hostOnly || false,
-    maxAge: automationCookie.maxAge || 'Infinity',
     key: automationCookie.name,
     path: automationCookie.path || undefined,
     sameSite: automationCookie.sameSite === 'no_restriction' ? 'none' : automationCookie.sameSite,

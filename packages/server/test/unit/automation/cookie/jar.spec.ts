@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-import { CookieJar } from '../../../../lib/automation/cookie/jar'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { CookieJar, automationCookieToToughCookie, toughCookieToAutomationCookie } from '../../../../lib/automation/cookie/jar'
 
 describe('lib/automation/cookie/jar', () => {
   let jar: CookieJar
@@ -34,6 +34,53 @@ describe('lib/automation/cookie/jar', () => {
       jar.removeCookie({ name: 'foo', domain: 'www.foobar.com' })
 
       expect(stored()).toEqual(['bar www.foobar.com /fixtures', 'foo app.foobar.com /fixtures'])
+    })
+  })
+
+  describe('automationCookieToToughCookie', () => {
+    const url = 'https://www.foobar.com/fixtures/page.html'
+
+    // the trip a cookie makes from the server-side jar to a page's document.cookie
+    const roundTrip = (setCookie: string) => {
+      const source = new CookieJar()
+
+      source.setCookie(setCookie, url, undefined)
+
+      return automationCookieToToughCookie(toughCookieToAutomationCookie(source.getAllCookies()[0], 'www.foobar.com'), 'www.foobar.com')
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2026-11-20T12:00:00Z'))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('keeps the expiry of a cookie set with Expires', () => {
+      const cookie = roundTrip('sid=tok_d41c9b07aa; HttpOnly; Expires=Fri, 20 Nov 2026 12:01:00 GMT')
+
+      expect(cookie.expiryTime()).toEqual(Date.parse('2026-11-20T12:01:00Z'))
+    })
+
+    it('counts Max-Age from when the cookie was set', () => {
+      const source = new CookieJar()
+
+      source.setCookie('sid=tok_d41c9b07aa; HttpOnly; Max-Age=60', url, undefined)
+      vi.setSystemTime(new Date('2026-11-20T12:00:50Z'))
+
+      const cookie = automationCookieToToughCookie(toughCookieToAutomationCookie(source.getAllCookies()[0], 'www.foobar.com'), 'www.foobar.com')
+
+      expect(cookie.expiryTime()).toEqual(Date.parse('2026-11-20T12:01:00Z'))
+    })
+
+    it('never expires a session cookie', () => {
+      expect(roundTrip('sid=tok_d41c9b07aa; HttpOnly').expiryTime()).toEqual(Infinity)
+    })
+
+    it('expires a cookie set with Max-Age=0', () => {
+      expect(roundTrip('sid=; Max-Age=0').expiryTime()).toBeLessThan(Date.now())
     })
   })
 })

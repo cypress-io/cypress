@@ -6,16 +6,15 @@ import { Cookie, canonicalDomain, defaultPath, domainMatch, getPublicSuffix, pat
 const MAX_NAME_VALUE_BYTES = 4096
 const MAX_ATTRIBUTE_BYTES = 1024
 
-const byteLength = (value: string) => new TextEncoder().encode(value).length
+let encoder: TextEncoder | undefined
+
+const byteLength = (value: string) => (encoder ??= new TextEncoder()).encode(value).length
 
 // every control character but a tab
-const hasControlCharacter = (value: string) => {
-  return Array.from(value).some((character) => {
-    const code = character.charCodeAt(0)
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHARACTER = /[\x00-\x08\x0a-\x1f\x7f]/
 
-    return (code < 0x20 && code !== 0x09) || code === 0x7f
-  })
-}
+const hasControlCharacter = (value: string) => CONTROL_CHARACTER.test(value)
 
 const isIpAddress = (domain: string) => domain.includes(':') || /^\d{1,3}(\.\d{1,3}){3}$/.test(domain)
 

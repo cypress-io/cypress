@@ -1,6 +1,6 @@
 import { URL } from 'url'
 import { telemetry } from '@packages/telemetry'
-import { isLocalhost } from '@packages/network-tools'
+import { isSecureUrl } from '@packages/network-tools'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import { CookiesHelper } from '../http/util/cookies'
 import { doesTopNeedToBeSimulated } from '../http/util/top-simulation'
@@ -16,8 +16,7 @@ function setSimulatedCookies (mw: ResponseInterceptionMiddlewareCtx) {
   const url = new URL(mw.req.proxiedUrl)
   const defaultDomain = url.hostname
 
-  // browsers treat localhost as a secure context, so its pages read Secure cookies over http
-  const isSecure = url.protocol === 'https:' || isLocalhost(url)
+  const isSecure = isSecureUrl(url)
 
   mw.simulatedCookies = mw.getCookieJar()
   .getCookies(mw.req.proxiedUrl, undefined, { secure: true })

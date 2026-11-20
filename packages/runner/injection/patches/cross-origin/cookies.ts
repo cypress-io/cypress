@@ -3,7 +3,7 @@ import {
   automationCookieToToughCookie,
 } from '@packages/server/lib/automation/cookie/jar'
 import { isBlockedByExisting, isExpired, isSameCookie, meetsDocumentCookieRules, parseDocumentCookie } from '@packages/server/lib/automation/cookie/document-cookie-rules'
-import { isLocalhost } from '@packages/network-tools/lib/uri'
+import { isSecureUrl } from '@packages/network-tools/lib/uri'
 import type { Cookie as ToughCookie,
   SerializableAutomationCookie,
 } from '@packages/server/lib/automation/cookie/jar'
@@ -61,8 +61,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
   const { pathname } = location
   const domain = location.hostname
   const cookieJar = new CookieJar()
-  // browsers treat localhost as a secure context, so it may set Secure cookies over http
-  const isSecure = location.protocol === 'https:' || isLocalhost(new URL(url))
+  const isSecure = isSecureUrl(new URL(url))
   const existingCookies = parseDocumentCookieString(document.cookie)
 
   const getDocumentCookieValue = () => {

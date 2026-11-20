@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import { CookieJar as ToughCookieJar } from 'tough-cookie'
 import type { Cookie } from 'tough-cookie'
-import { isLocalhost } from '@packages/network-tools'
+import { isSecureUrl } from '@packages/network-tools'
 import { cookieJar, toughCookieToAutomationCookie, writtenToJar } from './jar'
 import type { SerializableAutomationCookie } from './jar'
 import { isBlockedByExisting, isExpired, isSameCookie, meetsDocumentCookieRules, parseDocumentCookie } from './document-cookie-rules'
@@ -56,9 +56,6 @@ const answered = <T>(request: Promise<T>) => {
     request.then(resolve, reject).finally(() => clearTimeout(timer))
   })
 }
-
-// browsers treat localhost as a secure context, so it may set Secure cookies over http
-const isSecureUrl = (url: URL) => url.protocol === 'https:' || isLocalhost(url)
 
 const resolveDomain = (cookie: Cookie, url: URL): Cookie | undefined => {
   try {
