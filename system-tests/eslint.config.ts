@@ -1,5 +1,5 @@
 import { builtinRules } from 'eslint/use-at-your-own-risk'
-import { baseConfig, chaiFriendlyConfig, jsonConfig, nodeConfig, reactConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, mochaConfig, nodeConfig, reactConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
@@ -49,6 +49,9 @@ export default [
   // Fixtures are user projects with their own dependencies and Node, and
   // n/no-extraneous-import crashes resolving their tsconfig files
   ...nodeConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),
+  // The harness specs run on mocha, and fixture projects keep Cypress specs
+  // wherever their custom spec patterns point
+  ...mochaConfig.map((block) => ({ ...block, files: ['test/**', 'test-binary/**', 'lib/**', ...fixtureDirs] })),
   {
     languageOptions: {
       parserOptions: {
@@ -118,15 +121,6 @@ export default [
     files: ['projects/ids/cypress/**'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
-    },
-  },
-  {
-    // These exercise how the V8 snapshot bundler loads modules, so unused
-    // bindings and the `debugger` statement are deliberate
-    files: ['projects/v8-snapshot/**'],
-    rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-debugger': 'off',
     },
   },
   fixtureReactConfig,

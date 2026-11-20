@@ -58,7 +58,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/net-stubbing ✅ **COMPLETED**
 - [x] packages/network ✅ **COMPLETED**
 - [x] packages/network-tools ✅ **COMPLETED**
-- [x] packages/packherd-require ✅ **COMPLETED**
 - [ ] packages/proxy **PARTIAL** - entry point is JS
 - [x] packages/reporter ✅ **COMPLETED**
 - [x] packages/resolve-dist ✅ **COMPLETED**
@@ -71,7 +70,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts **PARTIAL** - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
-- [x] packages/v8-snapshot-require
 - [x] packages/web-config
 
 
@@ -106,7 +104,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/net-stubbing ✅ **COMPLETED**
 - [x] packages/network ✅ **COMPLETED**
 - [x] packages/network-tools ✅ **COMPLETED**
-- [x] packages/packherd-require ✅ **COMPLETED**
 - [x] packages/proxy ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
@@ -115,7 +112,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
-- [x] packages/v8-snapshot-require ✅ **COMPLETED**
 
 ### Phase 3: Bundle ESM/CJS versions of NPM packages 
 

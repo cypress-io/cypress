@@ -29,8 +29,11 @@ type BrowserCriClientOptions = {
   onExtraTargetCriClientReady?: OnExtraTargetCriClientReady
 }
 
+export type BrowserExit = { code: number | null, signal: NodeJS.Signals | null }
+
 type BrowserCriClientCreateOptions = {
   browserName: string
+  getBrowserExit?: () => BrowserExit | undefined
   fullyManageTabs?: boolean
   hosts: string[]
   onAsynchronousError: (err: CypressError) => void
@@ -81,7 +84,7 @@ interface TargetDestroyedOptions {
 // headroom without wedging a worker indefinitely if that never arrives.
 const CHILD_TARGET_INTERCEPTION_TIMEOUT_MS = 4000
 
-const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string): Promise<string> => {
+const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string, getBrowserExit?: () => BrowserExit | undefined): Promise<string> => {
   // since we may be attempting to connect to multiple hosts, 'connected'
   // is set to true once one of the connections succeeds so the others
   // can be cancelled
@@ -95,6 +98,12 @@ const ensureLiveBrowser = async (hosts: string[], port: number, browserName: str
         // if we successfully connected to a different host, cancel any remaining connection attempts
         if (connected) {
           debug('cancelling any additional retries %o', { host, port })
+
+          return
+        }
+
+        if (getBrowserExit?.()) {
+          debug('browser exited, cancelling any additional retries %o', { host, port })
 
           return
         }
@@ -114,7 +123,10 @@ const ensureLiveBrowser = async (hosts: string[], port: number, browserName: str
     .catch((err) => {
       // don't throw an error if we've already connected
       if (!connected) {
-        const e = errors.get('CDP_COULD_NOT_CONNECT', browserName, port, err)
+        const exit = getBrowserExit?.()
+        const e = exit
+          ? errors.get('CDP_BROWSER_EXITED_BEFORE_CONNECT', browserName, exit.code, exit.signal, err)
+          : errors.get('CDP_COULD_NOT_CONNECT', browserName, port, err)
 
         e.cause = {
           err,
@@ -145,13 +157,26 @@ const ensureLiveBrowser = async (hosts: string[], port: number, browserName: str
   })
 }
 
-const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number): Promise<T> => {
+const CONNECTION_ERROR_CODES = ['ECONNREFUSED', 'ECONNRESET', 'EPIPE']
+
+const isConnectionError = (err: unknown) => {
+  return err instanceof Error && 'code' in err && typeof err.code === 'string' && CONNECTION_ERROR_CODES.includes(err.code)
+}
+
+const retryWithIncreasingDelay = async <T>(retryable: () => Promise<T>, browserName: string, port: number, getBrowserExit?: () => BrowserExit | undefined): Promise<T> => {
   let retryIndex = 0
 
   const retry = async () => {
     try {
       return await retryable()
     } catch (err) {
+      const exit = isConnectionError(err) ? getBrowserExit?.() : undefined
+
+      if (exit) {
+        debug('browser exited, not retrying %o', { exit, err })
+        errors.throwErr('CDP_BROWSER_EXITED_BEFORE_CONNECT', browserName, exit.code, exit.signal, err)
+      }
+
       retryIndex++
       const delay = _getDelayMsForRetry(retryIndex, browserName)
 
@@ -281,6 +306,7 @@ export class BrowserCriClient {
    * @param {BrowserCriClientCreateOptions} options the options for creating the browser cri client
    * @param options.browserName the display name of the browser being launched
    * @param options.fullyManageTabs whether or not to fully manage tabs. This is useful for firefox where some work is done with GeckoDriver and some with CDP. We don't want to handle disconnections in this class in those scenarios
+   * @param options.getBrowserExit returns how the launched browser process exited, if it has; connecting stops retrying once it does
    * @param options.hosts the hosts to which to attempt to connect
    * @param options.onAsynchronousError callback for any cdp fatal errors
    * @param options.onReconnect callback for when the browser cri client reconnects to the browser
@@ -293,6 +319,7 @@ export class BrowserCriClient {
     const {
       browserName,
       fullyManageTabs,
+      getBrowserExit,
       hosts,
       onAsynchronousError,
       onReconnect,
@@ -302,7 +329,7 @@ export class BrowserCriClient {
       onExtraTargetCriClientReady,
     } = options
 
-    const host = await ensureLiveBrowser(hosts, port, browserName)
+    const host = await ensureLiveBrowser(hosts, port, browserName, getBrowserExit)
 
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
@@ -341,7 +368,7 @@ export class BrowserCriClient {
       }
 
       return browserCriClient
-    }, browserName, port)
+    }, browserName, port, getBrowserExit)
   }
 
   static async _manageTabs (options: ManageTabsOptions) {
