@@ -320,6 +320,101 @@ describe('lib/browsers/cri-client', () => {
         expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
       })
 
+      describe('service worker instrumentation', () => {
+        const expression = '(function __cypressInstrument () {})()'
+
+        it('sends the instrumentation to a waiting service worker before releasing it, without waiting on it', async () => {
+          // Chrome only answers a renderer-side command to a waiting service
+          // worker once the worker is released, so waiting on it would never
+          // release the worker
+          criStub.send.mockImplementation((command: string) => {
+            return command === 'Runtime.evaluate' ? new Promise(() => {}) : Promise.resolve(undefined)
+          })
+
+          client.serviceWorkerInstrumentation = expression
+          client.onChildTargetAttached = vi.fn(async () => {})
+
+          fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: true,
+            sessionId,
+            targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+          })
+
+          await drain()
+
+          const commands = criStub.send.mock.calls.map(([command]) => command)
+
+          expectCalledWith(criStub.send, 'Runtime.evaluate', { expression }, sessionId)
+          expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
+          expect(commands.indexOf('Runtime.evaluate')).toBeLessThan(commands.indexOf('Runtime.runIfWaitingForDebugger'))
+        })
+
+        it('still releases the service worker when the instrumentation fails', async () => {
+          criStub.send.mockImplementation((command: string) => {
+            return command === 'Runtime.evaluate' ? Promise.reject(new Error('Target closed')) : Promise.resolve(undefined)
+          })
+
+          client.serviceWorkerInstrumentation = expression
+          client.onChildTargetAttached = vi.fn(async () => {})
+
+          fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: true,
+            sessionId,
+            targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+          })
+
+          await drain()
+
+          expectCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
+        })
+
+        it('does not instrument an out-of-process iframe', async () => {
+          client.serviceWorkerInstrumentation = expression
+          client.onChildTargetAttached = vi.fn(async () => {})
+
+          fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: true,
+            sessionId,
+            targetInfo: { type: 'iframe' } as Protocol.Target.TargetInfo,
+          })
+
+          await drain()
+
+          expectNotCalledWith(criStub.send, 'Runtime.evaluate', { expression }, sessionId)
+        })
+
+        it('does not instrument a service worker that is already running', async () => {
+          // its script has already run, so the instrumentation would only wrap
+          // part of it
+          client.serviceWorkerInstrumentation = expression
+          client.onChildTargetAttached = vi.fn(async () => {})
+
+          fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: false,
+            sessionId,
+            targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+          })
+
+          await drain()
+
+          expectNotCalledWith(criStub.send, 'Runtime.evaluate', { expression }, sessionId)
+        })
+
+        it('sends nothing when no instrumentation is set', async () => {
+          client.onChildTargetAttached = vi.fn(async () => {})
+
+          fireCDPEvent('Target.attachedToTarget', {
+            waitingForDebugger: true,
+            sessionId,
+            targetInfo: { type: 'service_worker' } as Protocol.Target.TargetInfo,
+          })
+
+          await drain()
+
+          expect(criStub.send.mock.calls.map(([command]) => command)).not.toContain('Runtime.evaluate')
+        })
+      })
+
       it('does not enable interception for other target types', async () => {
         client.onChildTargetAttached = vi.fn(async () => {})
 
@@ -785,6 +880,19 @@ describe('lib/browsers/cri-client', () => {
         await drain()
       }
 
+      it('instruments the re-run service worker before the hook re-enables interception', async () => {
+        await attachServiceWorker()
+
+        client.serviceWorkerInstrumentation = '(function __cypressInstrument () {})()'
+        client.onChildTargetAttached = vi.fn(async () => {
+          expectCalledWith(criStub.send, 'Runtime.evaluate', { expression: '(function __cypressInstrument () {})()' }, sessionId)
+        })
+
+        await client.reenableChildTargetInterception(targetId)
+
+        expect(client.onChildTargetAttached).toHaveBeenCalledExactlyOnceWith(sessionId)
+      })
+
       it('evicts the stale handled entry, re-runs the hook against the session on file, and commits on success', async () => {
         await attachServiceWorker()
 
@@ -1074,6 +1182,20 @@ describe('lib/browsers/cri-client', () => {
         // releasing a crash-reloaded target from here is the browser
         // connection's job, not this one's
         expectNotCalledWith(criStub.send, 'Runtime.runIfWaitingForDebugger', undefined, sessionId)
+      })
+
+      it('instruments a crash-reloaded service worker, which re-runs its unmodified script', async () => {
+        await attachServiceWorker()
+
+        client.serviceWorkerInstrumentation = '(function __cypressInstrument () {})()'
+        client.onChildTargetAttached = vi.fn(async () => {})
+        criStub.send.mockClear()
+
+        fireCDPEvent('Inspector.targetReloadedAfterCrash', {}, sessionId)
+
+        await drain()
+
+        expectCalledWith(criStub.send, 'Runtime.evaluate', { expression: '(function __cypressInstrument () {})()' }, sessionId)
       })
 
       it('resolves a whenChildTargetHandled promise obtained after the crash event only once the re-run resolves', async () => {

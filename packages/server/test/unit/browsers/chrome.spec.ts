@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import os from 'os'
 import path from 'path'
 import mockfs from 'mock-fs'
@@ -169,9 +170,9 @@ describe('lib/browsers/chrome', () => {
       }
 
       // mock launched browser child process object
-      launchedBrowser = {
+      launchedBrowser = Object.assign(new EventEmitter(), {
         kill: vi.fn(),
-      }
+      })
 
       onCriEvent = async (event, data, options) => {
         await chrome.open({ isHeadless: true } as any, 'http://', { ...openOpts, ...options } as any, automation)
@@ -289,6 +290,18 @@ describe('lib/browsers/chrome', () => {
       await chrome.open({ isHeadless: true } as any, 'http://', mitmOpts as any, automation)
 
       expect(browserCriClient.reenableChildTargetInterception).toBeUndefined()
+    })
+
+    it('hands the service worker instrumentation to the page client on the browser (CDP) network path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...openOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBe('(function __cypressInstrument () {})()')
+    })
+
+    it('does not hand the page client service worker instrumentation on the MITM path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBeUndefined()
     })
 
     it('executeBeforeBrowserLaunch is noop if before:browser:launch is not registered', async () => {
@@ -557,6 +570,36 @@ describe('lib/browsers/chrome', () => {
 
       expect(browserCriClient.close).toHaveBeenCalledOnce()
       expect(kill).toHaveBeenCalledOnce()
+    })
+
+    it('reports a non-zero browser exit to the CDP connection while it is connecting', async () => {
+      let exitSeenWhileConnecting
+
+      vi.mocked(BrowserCriClient.create).mockImplementation(async ({ getBrowserExit }) => {
+        launchedBrowser.emit('exit', 21, null)
+        exitSeenWhileConnecting = getBrowserExit?.()
+
+        return browserCriClient
+      })
+
+      await chrome.open({ isHeadless: true } as any, 'http://', openOpts as any, automation)
+
+      expect(exitSeenWhileConnecting).toEqual({ code: 21, signal: null })
+    })
+
+    it('keeps connecting when the launched process exits with code 0', async () => {
+      let exitSeenWhileConnecting
+
+      vi.mocked(BrowserCriClient.create).mockImplementation(async ({ getBrowserExit }) => {
+        launchedBrowser.emit('exit', 0, null)
+        exitSeenWhileConnecting = getBrowserExit?.()
+
+        return browserCriClient
+      })
+
+      await chrome.open({ isHeadless: true } as any, 'http://', openOpts as any, automation)
+
+      expect(exitSeenWhileConnecting).toBeUndefined()
     })
 
     it('sends after:browser:launch with debugger url', async () => {
@@ -2211,9 +2254,9 @@ describe('lib/browsers/chrome', () => {
         onServiceWorkerClientEvent: vi.fn(),
       }
 
-      launchedBrowser = {
+      launchedBrowser = Object.assign(new EventEmitter(), {
         kill: vi.fn(),
-      }
+      })
 
       vi.spyOn(chrome, '_writeExtension').mockResolvedValue('/path/to/ext')
       vi.spyOn(BrowserCriClient, 'create').mockResolvedValue(browserCriClient)
