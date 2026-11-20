@@ -56,6 +56,12 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
     cy.get('h1').invoke('text').should('equal', 'No user found')
   }
 
+  // localhost sets the user cookie only at the end of the login redirects, which include a delayed
+  // client-side one, so a short-lived cookie's lifetime has to be timed from the welcome page
+  const waitForLocalhostLogin = (username: string) => {
+    cy.get('h1').should('have.text', `Welcome, ${username}!`)
+  }
+
   const login = (username: string, { cookieProps, localhostCookieProps, cookieKey }: { cookieProps?: string, localhostCookieProps?: string, cookieKey?: string } = {}) => {
     cy.get('[data-cy="username"]').type(username)
 
@@ -396,6 +402,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
     it('past max-age -> not logged in', () => {
       cy.get('[data-cy="cookie-login"]').click()
       login(username, { localhostCookieProps: 'Max-Age=1' })
+      waitForLocalhostLogin(username)
 
       // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1500) // give cookie time to expire
@@ -406,6 +413,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
     it('past max-age -> not accessible via cy.getCookie()', () => {
       cy.get('[data-cy="cookie-login"]').click()
       login(username, { localhostCookieProps: 'Max-Age=1' })
+      waitForLocalhostLogin(username)
 
       // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1500) // give cookie time to expire
@@ -433,6 +441,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
         const expires = dayjs().add(1, 'day').toDate().toUTCString()
 
         login(username, { localhostCookieProps: `Max-Age=1; Expires=${expires}` })
+        waitForLocalhostLogin(username)
 
         // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
         cy.wait(1500) // give cookie time to expire
@@ -665,8 +674,8 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-document-cookie"]').click()
       login(username)
 
-      // ensure we've redirected to the right page
-      cy.url().should('include', 'http://www.idp.com:3501/fixtures/auth/document-cookie.html')
+      // the redirect page before it has this URL in its query string, so match the path exactly
+      cy.location('pathname').should('equal', '/fixtures/auth/document-cookie.html')
       setDocumentCookie('key=value1; domain=www.idp.com')
       setDocumentCookie('key=value2; domain=idp.com')
 

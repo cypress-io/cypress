@@ -144,6 +144,13 @@ export type BrowserLaunchOpts = {
   experimentalDriver?: boolean
   // set with experimentalDriver: configures the script added to the main world of every frame
   remoteAutScript?: RemoteAutScriptConfig
+  /**
+   * Source evaluated in each service worker while it is paused for the debugger,
+   * ahead of its own script, on the browser network path. It replaces rewriting
+   * the script body there, so the stored script matches what the origin serves
+   * and Chrome's update checks do not see a changed script.
+   */
+  serviceWorkerInstrumentation?: string
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 

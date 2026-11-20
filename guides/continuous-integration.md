@@ -14,7 +14,7 @@ Runs on PRs targeting `develop` or `release/*` branches (excluding draft PRs).
 
 | Stage | What It Does |
 |-------|--------------|
-| Build | Installs dependencies, builds packages, generates V8 snapshots |
+| Build | Installs dependencies, builds packages |
 | Lint & Type Check | ESLint, TypeScript compilation, type linting |
 | Unit Tests | Runs unit tests across packages |
 | Integration Tests | Driver tests (Chrome, Firefox, Electron, WebKit), server tests, component tests |
@@ -83,7 +83,6 @@ GitHub Actions handle automation, PR validation, and compliance.
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | **Update Browser Versions** | Daily at 8am UTC | Checks for new Chrome stable/beta versions and creates PRs to update CI config |
-| **Update V8 Snapshot Cache** | Daily + release branch pushes | Regenerates V8 snapshots to maintain startup performance |
 
 ### PR Validation
 

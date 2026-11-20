@@ -17,11 +17,14 @@ import {
   mergeDefaults,
   shouldHonorNumTestsKeptInMemory,
 } from './utils'
+import type { GetFilesByGlob } from './types'
+
+export type { GetFilesByGlob }
 
 const debug = Debug('cypress:config:project')
 
 // TODO: any -> SetupFullConfigOptions in data-context/src/data/ProjectConfigManager.ts
-export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any): Promise<FullConfig> {
+export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: GetFilesByGlob): Promise<FullConfig> {
   debug('setting config object %o', obj)
   const { projectRoot, projectName, envFile, options, cliConfig, repoRoot } = obj
 

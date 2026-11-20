@@ -49,7 +49,7 @@ describe('Server', () => {
         // get all the config defaults
         // and allow us to override them
         // for each test
-        return setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
+        return setupFullConfigWithDefaults(obj, (...args) => getCtx().file.getFilesByGlob(...args))
         .then((cfg) => {
           // use a jar for each test
           // but reset it automatically
@@ -1273,6 +1273,8 @@ describe('Server', () => {
       const otherOrigin = 'http://www.google.com'
 
       beforeEach(async function () {
+        process.env.CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER = '1'
+
         nock(baseUrl).persist().get('/').reply(200, '<html>content</html>', { 'Content-Type': 'text/html' })
         nock(otherOrigin).get('/').reply(200, '<html>content</html>', { 'Content-Type': 'text/html' })
 
@@ -1282,9 +1284,12 @@ describe('Server', () => {
             port: 2000,
             supportFile: false,
             baseUrl,
-            experimentalDriver: true,
           },
         })
+      })
+
+      afterEach(() => {
+        delete process.env.CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER
       })
 
       it('keeps baseUrl as the primary origin when visiting another origin first', async function () {
