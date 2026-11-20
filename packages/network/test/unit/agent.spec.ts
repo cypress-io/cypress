@@ -5,7 +5,6 @@ import http from 'http'
 import https from 'https'
 import net, { type ListenOptions } from 'net'
 import tls from 'tls'
-import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
 import Request from '@cypress/request-promise'
 
@@ -25,6 +24,7 @@ import { allowDestroy } from '../../lib/allow-destroy'
 import type { AsyncServer } from '../support/servers'
 import { Servers } from '../support/servers'
 import { clientCertificateStoreSingleton, UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
+import { parseUrlFields } from '../../lib/url-fields'
 import { execFileSync } from 'child_process'
 import fetch from 'cross-fetch'
 import os from 'os'
@@ -849,7 +849,7 @@ describe('lib/agent', function () {
 
   describe('.buildConnectReqHead', function () {
     it('builds the correct request', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', {} as url.Url)
+      const head = buildConnectReqHead('foo.bar', '1234', parseUrlFields('http://proxy.example.com:3128'))
 
       expect(head).toEqual([
         'CONNECT foo.bar:1234 HTTP/1.1',
@@ -859,9 +859,7 @@ describe('lib/agent', function () {
     })
 
     it('can do Proxy-Authorization', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', {
-        auth: 'baz:quux',
-      } as url.Url)
+      const head = buildConnectReqHead('foo.bar', '1234', parseUrlFields('http://baz:quux@proxy.example.com:3128'))
 
       expect(head).toEqual([
         'CONNECT foo.bar:1234 HTTP/1.1',
@@ -875,7 +873,7 @@ describe('lib/agent', function () {
   describe('.createProxySock', function () {
     it('creates a `net` socket for an http url', function () {
       vi.spyOn(net, 'connect')
-      const proxy = url.parse('http://foo.bar:1234')
+      const proxy = parseUrlFields('http://foo.bar:1234')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
@@ -888,7 +886,7 @@ describe('lib/agent', function () {
     it('creates a `tls` socket for an https url', function () {
       vi.spyOn(tls, 'connect')
 
-      const proxy = url.parse('https://foo.bar:1234')
+      const proxy = parseUrlFields('https://foo.bar:1234')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
@@ -899,7 +897,7 @@ describe('lib/agent', function () {
     })
 
     it('throws on unsupported proxy protocol', function () {
-      const proxy = url.parse('socksv5://foo.bar:1234')
+      const proxy = parseUrlFields('socksv5://foo.bar:1234')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, (err) => {
@@ -943,7 +941,7 @@ describe('lib/agent', function () {
         const { httpsAgent } = new CombinedAgent()
         const options = {
           href: 'https://foo.bar/',
-          uri: url.parse('https://foo.bar/'),
+          uri: parseUrlFields('https://foo.bar/'),
           _agentKey: 'foo.bar:443:',
         } as any
 

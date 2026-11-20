@@ -31,7 +31,7 @@ declare module 'http' {
       proxy: Optional<string>
       servername: Optional<string>
       socket: Optional<Socket>
-      uri?: Url
+      uri?: Pick<Url, 'protocol' | 'auth' | 'hostname' | 'port' | 'path' | 'href'>
     }
 }
 
