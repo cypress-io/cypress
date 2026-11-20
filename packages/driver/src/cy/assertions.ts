@@ -15,8 +15,7 @@ const nonNewlineLineTerminators = ['\r', '\u2028', '\u2029']
 // `    addItem(sku-1042, 2) at checkout (cart.js:4:29)\n` becomes
 // `    addItem(sku-1042, 2)\n`. A ` at ` only counts when no `\r`,
 // `\u2028` or `\u2029` follows it on the line, and the last line is kept whole.
-// Splitting on newlines keeps this linear where a ` at .*\n` regex rescans
-// the rest of the line from every ` at ` it finds.
+// Each line is scanned a fixed number of times, however many ` at `s it holds.
 export const stripStackTraceLines = (message: string) => {
   const lines = message.split('\n')
 

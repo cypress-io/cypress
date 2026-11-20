@@ -594,8 +594,8 @@ const isAsciiDigitAt = (str: string, index: number) => {
 // Reads the `line:column` that ends a stack line, e.g. `at eval (spec.cy.ts:14:12)`
 // gives line 14 and column 12, with `start` and `end` bounding `14:12`. Chromium
 // wraps the location in parentheses and Firefox does not, so one trailing `)` is
-// allowed. Scanning back from the end keeps this linear on long lines of digits,
-// where an unanchored regex would restart at every digit.
+// allowed. Only the trailing `line:column` is read, so the length of the rest of
+// the line doesn't matter.
 const getTrailingLineAndColumn = (stackLine: string) => {
   const end = stackLine.endsWith(')') ? stackLine.length - 1 : stackLine.length
 

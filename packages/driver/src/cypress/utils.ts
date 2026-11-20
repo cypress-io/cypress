@@ -15,8 +15,9 @@ const webpackProtocol = 'webpack://'
 // Removes a webpack devtool namespace, from `webpack://` through the `./` after
 // it, e.g. `webpack://_N_E/./pages/index.cy.js` becomes `pages/index.cy.js`,
 // without touching relative paths like `../`. Returns undefined when there is no
-// namespace. Every `webpack://` before the same `.` shares its outcome, so the
-// search resumes after that `.` instead of rescanning, which keeps it linear.
+// namespace. Next.js adds the `_N_E` namespace, and "Open in IDE" links need the
+// path without it. Every `webpack://` before the same `.` has the same outcome,
+// so the search resumes after that `.` and reads each character at most once.
 const stripWebpackDevtoolNamespace = (filePath: string) => {
   let protocolIndex = filePath.indexOf(webpackProtocol)
 
@@ -526,9 +527,6 @@ export default {
       return
     }
 
-    // Check the path to see if custom namespaces have been applied and, if so, remove them
-    // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
-    // need to strip off the `_N_E` so that "Open in IDE" links work correctly
     return stripWebpackDevtoolNamespace(filePath) ?? filePath.replace(customProtocolRegex, '')
   },
 }
