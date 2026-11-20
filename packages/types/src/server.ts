@@ -149,7 +149,7 @@ export type BrowserLaunchOpts = {
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 
-export type BrowserNewTabOpts = { onInitializeNewBrowserTab: () => void } & BrowserLaunchOpts
+export type BrowserNewTabOpts = { onInitializeNewBrowserTab: () => void | Promise<void> } & BrowserLaunchOpts
 
 export interface LaunchArgs {
   _: [string] // Cypress App binary location

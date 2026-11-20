@@ -51,7 +51,7 @@ export interface ProjectApiShape {
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): AllowedState | undefined
   setPromptShown(slug: string): void
-  setProjectPreferences(stated: AllowedState): void
+  setProjectPreferences(stated: AllowedState): Promise<void>
   makeProjectSavedState(projectRoot: string): void
   getDevServer (): {
     updateSpecs(specs: SpecWithRelativeRoot[], options?: { neededForJustInTimeCompile?: boolean }): void
