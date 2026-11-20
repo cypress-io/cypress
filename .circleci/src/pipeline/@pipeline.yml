@@ -1132,7 +1132,13 @@ commands:
       - install-browsers:
           install-chrome: true
           install-chrome-for-testing: true
-          install-firefox: true
+      # System tests only launch the browser passed to --browser, so WebKit runs never need Firefox
+      - unless:
+          condition:
+            equal: [ webkit, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-firefox: true
       - restore_cache:
           name: Restore Bun install cache
           keys:
