@@ -30,7 +30,7 @@ const cloudMessage = {
   dismissal: {
     __typename: 'CloudAppMessageDismissal',
     // Test-fixture choice. Scope routing (user vs project) is unit-tested
-    // against the component directly in CloudMessageBanner.cy.tsx; here we
+    // against the component directly in CloudMessageBanner.vue.cy.tsx; here we
     // pick `'project'` so the dismiss assertion can intercept the simpler
     // project mutation without dragging the global state path through.
     scope: 'project',
