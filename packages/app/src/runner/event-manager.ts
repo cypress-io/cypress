@@ -777,8 +777,8 @@ export class EventManager {
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state.
-    // Prefer `toSource(source)` so replies work even when `crossOriginDriverWindows` was cleared
-    // (e.g. after test isolation); `toSpecBridge(origin)` would no-op without a map entry.
+    // Prefer `toSource(source)` so replies work even when `crossOriginDriverWindows` has no entry
+    // for the origin; `toSpecBridge(origin)` would no-op without one.
     Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (_data, { origin, source, responseEvent }) => {
       const value = cy.state('duringUserTestExecution')
 
@@ -1042,8 +1042,8 @@ export class EventManager {
 
   notifyCrossOriginBridgeReady (origin) {
     // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit.
-    // When the spec-bridge iframe already exists, the driver may have cleared
-    // `crossOriginDriverWindows` (e.g. after test isolation). Re-run the same
+    // When the spec-bridge iframe already exists, `crossOriginDriverWindows` may
+    // have been cleared by `removeAllListeners()`. Re-run the same
     // path as a real postMessage (`onMessage`) so the map is repopulated before
     // `bridge:ready` listeners run; emitting alone would leave `toSpecBridge` a no-op.
     const id = `Spec Bridge: ${origin}`
