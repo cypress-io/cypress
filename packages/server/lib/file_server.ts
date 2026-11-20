@@ -51,6 +51,7 @@ const onRequest = function (req: http.IncomingMessage, res: http.ServerResponse,
   // it does not understand query params
   // and make sure we decode the uri which swaps out
   // %20 with white space
+  // eslint-disable-next-line n/no-deprecated-api -- on Windows `url.parse` reads the drive of `C:\project\index.html` as a protocol and drops it, and the `File Served` path users see depends on that
   const file = decodeURI(url.parse(path.join(...args)).pathname as string)
 
   res.setHeader('x-cypress-file-path', encodeURI(file))

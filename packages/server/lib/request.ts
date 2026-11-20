@@ -706,6 +706,7 @@ export class Request {
         return false
       }
 
+      // eslint-disable-next-line n/no-deprecated-api -- @cypress/request follows the redirect to `url.resolve`'s result, which differs from `URL`'s for a Location such as `/é`, so the cookies have to be synced for that URL
       const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 
       // and when we know we should follow the redirect
@@ -813,6 +814,7 @@ export class Request {
         const syncRedirectCookies = this.redirectCookieSyncer(automationFn, options.url!, userCookieHeader)
 
         options.followRedirect = function (incomingRes) {
+          // eslint-disable-next-line n/no-deprecated-api -- the URL @cypress/request follows, which it resolves with `url.resolve` (see above)
           const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 
           // normalize the url
@@ -846,6 +848,7 @@ export class Request {
         if ((options.followRedirect === false) && resp.headers.location) {
           // resolve the new location head against
           // the current url
+          // eslint-disable-next-line n/no-deprecated-api -- resolved the way @cypress/request resolves the redirects it follows, so `redirectedToUrl` matches the URLs in `redirects`
           resp.redirectedToUrl = url.resolve(options.url!, resp.headers.location)
         }
 

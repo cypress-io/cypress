@@ -8,7 +8,6 @@ const compression = require('compression')
 const dns = require('dns')
 const express = require('express')
 const http = require('http')
-const url = require('url')
 let zlib = require('zlib')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
@@ -4586,15 +4585,15 @@ describe('Routes', () => {
         Fixtures.scaffoldProject('e2e')
         .then(() => {
           this.httpSrv = http.createServer((req, res) => {
-            const { query } = url.parse(req.url, true)
+            const { searchParams } = new URL(req.url, 'http://localhost')
 
-            if (_.has(query, 'chunked')) {
+            if (searchParams.has('chunked')) {
               res.setHeader('tranfer-encoding', 'chunked')
             } else {
               res.setHeader('content-length', '0')
             }
 
-            res.writeHead(Number(query.status), {
+            res.writeHead(Number(searchParams.get('status')), {
               'x-foo': 'bar',
             })
 

@@ -1336,6 +1336,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     // nuke any hashes from our url since
     // those those are client only and do
     // not apply to http requests
+    // eslint-disable-next-line n/no-deprecated-api -- `urlStr` can be a path relative to the file server, such as `index.html#top`, which `URL` can't parse without a base
     urlStr = url.parse(urlStr)
     urlStr.hash = null
     urlStr = urlStr.format()
@@ -1390,8 +1391,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
         const state = this._remoteStates.set(urlStr, options)
 
-        // TODO: Update url.resolve signature to not use deprecated methods
+        // `urlStr` is a relative path here, such as `index.html`. `URL` has no counterpart for
+        // `url.resolve('', urlStr)`, and resolves `/é.html` to `/%C3%A9.html` where `url.resolve`
+        // keeps the visited URL as written.
+        // eslint-disable-next-line n/no-deprecated-api -- see above
         urlFile = state?.fileServer ? url.resolve(state.fileServer, urlStr) : url.resolve('', urlStr)
+        // eslint-disable-next-line n/no-deprecated-api -- see above
         urlStr = state?.origin ? url.resolve(state.origin, urlStr) : url.resolve('', urlStr)
       }
 
@@ -1555,6 +1560,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
           const curr = newUrl != null ? newUrl : urlStr
 
+          // eslint-disable-next-line n/no-deprecated-api -- @cypress/request follows the redirect to `url.resolve`'s result, which differs from `URL`'s for a Location such as `/é`, and `redirects` reports the URLs it followed
           newUrl = url.resolve(curr, next)
 
           redirects.push([status, newUrl].join(': '))

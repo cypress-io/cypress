@@ -114,6 +114,9 @@ export async function handleInterceptRequest (
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
     request.req.proxiedUrl = core.mergeIncomingRequestChanges(before, after, {
       baseUrl: request.req.proxiedUrl,
+      // Every request is resolved, changed or not, and the result is the URL proxied upstream and shown to
+      // handlers. `URL` would rewrite `https://www.example.com:443/users` to drop the port and send `/a%7Cb` as `/a|b`.
+      // eslint-disable-next-line n/no-deprecated-api -- see above
       resolveUrl: (baseUrl, relativeUrl) => url.resolve(baseUrl, relativeUrl),
     })
   }

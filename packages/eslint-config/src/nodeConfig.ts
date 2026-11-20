@@ -26,7 +26,8 @@ const userNodeVersion: string = JSON.parse(readRepoFile('cli/package.json')).eng
 
 /**
  * Opt-in Node checks for Node-side workspaces: no runtime APIs or syntax
- * above the floor, and no imports of packages the workspace doesn't declare.
+ * above the floor, no APIs Node has deprecated, and no imports of packages the
+ * workspace doesn't declare.
  * Spread it after `baseConfig`. The floor is `bundledNodeVersion`; spread
  * `userNodeConfig` after it, scoped with `files`, for code that runs on the
  * user's Node.
@@ -51,6 +52,7 @@ export const nodeConfig: Linter.Config[] = [
       'n/no-unsupported-features/node-builtins': 'error',
       'n/no-unsupported-features/es-builtins': 'error',
       'n/no-unsupported-features/es-syntax': 'error',
+      'n/no-deprecated-api': 'error',
       'n/no-extraneous-import': 'error',
       'n/no-extraneous-require': 'error',
     },
