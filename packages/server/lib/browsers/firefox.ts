@@ -5,9 +5,9 @@ import fs from 'fs-extra'
 import Debug from 'debug'
 import getPort from 'get-port'
 import path from 'path'
-import urlUtil from 'url'
 import { debug as launcherDebug } from '@packages/launcher/lib/browsers'
 import { doubleEscape } from '@packages/launcher/lib/windows'
+import { parseUrlFields } from '@packages/network'
 import FirefoxProfile from 'firefox-profile'
 import * as errors from '../errors'
 import firefoxUtil from './firefox-util'
@@ -563,7 +563,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const ps = options.proxyServer
 
   if (ps) {
-    const parsedProxy = urlUtil.parse(ps)
+    const parsedProxy = parseUrlFields(ps)
     const { hostname, protocol } = parsedProxy
     let { port } = parsedProxy
 

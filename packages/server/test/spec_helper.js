@@ -137,5 +137,4 @@ module.exports = {
   nock: global.nock,
   proxyquire: global.proxyquire,
   sinon: global.sinon,
-  root: global.root,
 }

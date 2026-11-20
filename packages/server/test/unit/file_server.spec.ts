@@ -43,6 +43,28 @@ function fakeServerFactory (failCount: number, code = 'EADDRINUSE') {
 }
 
 describe('lib/file_server', () => {
+  describe('.requestPath', () => {
+    it('removes the query and hash', () => {
+      expect(fileServer.requestPath('/assets/app.css?foo=bar#hash')).toBe('/assets/app.css')
+    })
+
+    it('ends the path at a hash before a query', () => {
+      expect(fileServer.requestPath('/index.html#/users?page=2')).toBe('/index.html')
+    })
+
+    it('leaves percent-encoding for send to decode', () => {
+      expect(fileServer.requestPath('/a%20space/foo.txt')).toBe('/a%20space/foo.txt')
+    })
+
+    it('turns backslashes into slashes', () => {
+      expect(fileServer.requestPath('/dev\\assets\\app.css')).toBe('/dev/assets/app.css')
+    })
+
+    it('keeps a leading double slash as part of the path', () => {
+      expect(fileServer.requestPath('//dev/foo.txt')).toBe('//dev/foo.txt')
+    })
+  })
+
   afterEach(() => {
     vi.restoreAllMocks()
   })

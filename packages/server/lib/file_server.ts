@@ -21,6 +21,15 @@ export type FileServer = {
   close: () => Promise<void>
 }
 
+/**
+ * Returns the path of a request URL with its query and hash removed and its
+ * backslashes turned into slashes: `/a\b.html?x=1#top` becomes `/a/b.html`.
+ * Percent-encoding is left for `send` to decode.
+ */
+export const requestPath = (reqUrl: string): string => {
+  return reqUrl.replace(/[?#].*$/s, '').replace(/\\/g, '/')
+}
+
 const onRequest = function (req: http.IncomingMessage, res: http.ServerResponse, expectedToken: string, fileServerFolder: string) {
   const token = req.headers['x-cypress-authorization']
 
@@ -42,11 +51,12 @@ const onRequest = function (req: http.IncomingMessage, res: http.ServerResponse,
   // it does not understand query params
   // and make sure we decode the uri which swaps out
   // %20 with white space
+  // eslint-disable-next-line n/no-deprecated-api -- on Windows `url.parse` reads the drive of `C:\project\index.html` as a protocol and drops it, and the `File Served` path users see depends on that
   const file = decodeURI(url.parse(path.join(...args)).pathname as string)
 
   res.setHeader('x-cypress-file-path', encodeURI(file))
 
-  return send(req, url.parse(req.url as string).pathname as string, {
+  return send(req, requestPath(req.url ?? ''), {
     root: path.resolve(fileServerFolder),
   })
   .on('error', (err) => {

@@ -78,6 +78,12 @@ describe('lib/cloud/auth', function () {
 
       expect(origin).toBe('http://foo.invalid')
     })
+
+    it('keeps a port that is not the default', function () {
+      const origin = auth._internal.getOriginFromUrl('http://localhost:8080/login.html')
+
+      expect(origin).toBe('http://localhost:8080')
+    })
   })
 
   describe('_internal.buildFullLoginUrl', function () {

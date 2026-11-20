@@ -7,7 +7,7 @@ import debugModule from 'debug'
 import Promise from 'bluebird'
 import stream from 'stream'
 import duplexify from 'duplexify'
-import { agent } from '@packages/network'
+import { agent, parseUrlFields } from '@packages/network'
 import * as statusCode from './util/status_code'
 import { streamBuffer } from './util/stream_buffer'
 
@@ -569,7 +569,7 @@ export class Request {
 
   private setRedirectCookieHeader (req: Record<string, any>, newUrl: string, originalUrl: string, automationFn: AutomationFn, userCookieHeader?: string) {
     // a Cookie header passed by the user is meant for the host it was sent to
-    const existingHeader = url.parse(newUrl).hostname === url.parse(originalUrl).hostname ? userCookieHeader : undefined
+    const existingHeader = parseUrlFields(newUrl).hostname === parseUrlFields(originalUrl).hostname ? userCookieHeader : undefined
 
     caseInsensitiveDelete(req.headers, 'Cookie')
 
@@ -600,7 +600,7 @@ export class Request {
       cookies = [cookies]
     }
 
-    const parsedUrl = url.parse(resUrl)
+    const parsedUrl = parseUrlFields(resUrl)
     const defaultDomain = parsedUrl.hostname
 
     debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
@@ -706,6 +706,7 @@ export class Request {
         return false
       }
 
+      // eslint-disable-next-line n/no-deprecated-api -- @cypress/request follows the redirect to `url.resolve`'s result, which differs from `URL`'s for a Location such as `/é`, so the cookies have to be synced for that URL
       const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 
       // and when we know we should follow the redirect
@@ -813,6 +814,7 @@ export class Request {
         const syncRedirectCookies = this.redirectCookieSyncer(automationFn, options.url!, userCookieHeader)
 
         options.followRedirect = function (incomingRes) {
+          // eslint-disable-next-line n/no-deprecated-api -- the URL @cypress/request follows, which it resolves with `url.resolve` (see above)
           const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
 
           // normalize the url
@@ -846,6 +848,7 @@ export class Request {
         if ((options.followRedirect === false) && resp.headers.location) {
           // resolve the new location head against
           // the current url
+          // eslint-disable-next-line n/no-deprecated-api -- resolved the way @cypress/request resolves the redirects it follows, so `redirectedToUrl` matches the URLs in `redirects`
           resp.redirectedToUrl = url.resolve(options.url!, resp.headers.location)
         }
 

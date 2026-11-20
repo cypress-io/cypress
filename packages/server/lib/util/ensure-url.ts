@@ -2,8 +2,7 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import rp from '@cypress/request-promise'
-import * as url from 'url'
-import { agent, connect, shouldProxyForUrl } from '@packages/network'
+import { agent, connect, parseUrlFields, shouldProxyForUrl } from '@packages/network'
 
 const debug = debugModule('cypress:server:ensure-url')
 
@@ -50,7 +49,7 @@ export const retryIsListening = (urlStr: string, options: RetryOptions) => {
 
 export const isListening = (urlStr: string) => {
   // takes a urlStr and verifies the hostname + port is listening
-  const parsedUrl = url.parse(urlStr)
+  const parsedUrl = parseUrlFields(urlStr)
   const { hostname, protocol } = parsedUrl
   let { port } = parsedUrl
 
