@@ -212,6 +212,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         expect(win.length).to.equal(2)
         try {
           // but cannot access cross-origin properties
+          // eslint-disable-next-line chai-friendly/no-unused-expressions -- the catch block asserts on the error
           win[0].location.href
         } catch (e) {
           expect(e.name).to.equal('SecurityError')

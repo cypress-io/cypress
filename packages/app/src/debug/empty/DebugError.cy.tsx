@@ -1,11 +1,9 @@
 import DebugError from './DebugError.vue'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 describe('<DebugError />', () => {
   it('can mount', () => {
     cy.mount(<DebugError />)
-    cy.contains(defaultMessages.debugPage.emptyStates.gitRepositoryNotDetected)
-    cy.contains(defaultMessages.debugPage.emptyStates.ensureGitSetupCorrectly)
+    cy.contains('Git repository not detected')
+    cy.contains('Cypress uses Git to associate runs with your local state. Please ensure that Git is properly configured for your project.')
   })
 })

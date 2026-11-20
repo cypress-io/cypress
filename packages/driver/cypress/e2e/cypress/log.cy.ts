@@ -357,6 +357,7 @@ describe('src/cypress/log', function () {
 
       let log
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts no extra log events fire, so let the log debounce settle first
       cy.log('verify log:added event is triggered -- log({ name: mock })')
       .then(() => {
         log = this.log({ name: 'mock' })
@@ -392,6 +393,7 @@ describe('src/cypress/log', function () {
 
       let log
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts no extra log events fire, so let the log debounce settle first
       cy.log('verify log:added event is triggered -- log({ name: mock })')
       .then(() => {
         log = this.log({ name: 'mock' })

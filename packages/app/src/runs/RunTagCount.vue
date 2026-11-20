@@ -30,9 +30,7 @@
               {{ tooltipData.flaky }}
             </span>
             <div class="w-px my-[6px] h-6 border-white/20 border" />
-            <span class="font-semibold pl-1">
-              {{ t('specPage.flaky.badgeLabel') }}
-            </span>
+            <span class="font-semibold pl-1">Flaky</span>
           </div>
         </li>
         <li
@@ -43,11 +41,7 @@
             aria-hidden="true"
             class="shrink-0 mr-2 icon-dark-gray-500"
           />
-          <span
-            class="sr-only"
-          >
-            {{ t('runs.card.branchName') }}
-          </span>
+          <span class="sr-only">Branch Name:</span>
           <div class="grow-1 max-w-full overflow-hidden">
             <div class="max-w-full break-words whitespace-normal">
               {{ tooltipData.branchName }}
@@ -92,9 +86,6 @@ import { computed } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { IconTechnologyBranchH, IconDotOutlineSmall } from '@cypress-design/vue-icon'
 import RunTag from './RunTag.vue'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   value: number
@@ -109,11 +100,11 @@ const ariaLabel = computed(() => {
   let labelArray: string[] = []
 
   if (props.tooltipData.flaky) {
-    labelArray.push(`${props.tooltipData.flaky}`, t('specPage.flaky.badgeLabel'))
+    labelArray.push(`${props.tooltipData.flaky}`, 'Flaky')
   }
 
   if (props.tooltipData.branchName) {
-    labelArray.push(t('runs.card.branchName'), props.tooltipData.branchName)
+    labelArray.push('Branch Name:', props.tooltipData.branchName)
   }
 
   if (props.tooltipData.tags) {

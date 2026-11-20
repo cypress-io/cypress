@@ -30,7 +30,7 @@ export function extend (obj): Events {
   events.proxyTo = function (child) {
     const parent = obj
 
-    for (let fn of proxyFunctions) {
+    for (const fn of proxyFunctions) {
       // create a closure
       const original = parent[fn]
 
@@ -40,7 +40,7 @@ export function extend (obj): Events {
         // dont let our child emits also log
         logEmit = false
 
-        const ret2 = child[fn].apply(child, args)
+        const ret2 = child[fn](...args)
 
         logEmit = true
 

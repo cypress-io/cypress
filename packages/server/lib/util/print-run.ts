@@ -162,7 +162,7 @@ function formatPath (name: string, n: number | undefined, pathColor = 'reset') {
 
   // add newLines at each n char and colorize the path
   if (n) {
-    let nameWithNewLines = addNewlineAtEveryNChar(name, n)
+    const nameWithNewLines = addNewlineAtEveryNChar(name, n)
 
     return `${color(nameWithNewLines, pathColor)}`
   }

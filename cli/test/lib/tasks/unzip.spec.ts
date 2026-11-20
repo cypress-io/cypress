@@ -1,4 +1,5 @@
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
+import type { MockInstance } from 'vitest'
 import events from 'events'
 import os from 'os'
 import path from 'path'
@@ -9,6 +10,7 @@ import fs from 'fs-extra'
 import type { Systeminformation } from 'systeminformation'
 import si from 'systeminformation'
 import { Console } from 'console'
+import yauzl from 'yauzl'
 
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
@@ -170,6 +172,97 @@ describe('lib/tasks/unzip', function () {
     expect(onProgress).toHaveBeenCalled()
 
     await fs.stat(installDir)
+  })
+
+  describe('progress', () => {
+    const zipFilePath = 'entries.zip'
+    const onProgress = vi.fn()
+    let openSpy: MockInstance
+
+    const extractTicking = (entries: number) => {
+      return async (_zip: string, _dest: string, onEntry: () => void) => {
+        for (let i = 0; i < entries; i++) {
+          onEntry()
+        }
+      }
+    }
+
+    const percents = () => onProgress.mock.calls.map(([percent]) => percent)
+    const etas = () => onProgress.mock.calls.map(([, secsRemaining]) => secsRemaining)
+    const upTo = (max: number) => Array.from({ length: max + 1 }, (_, i) => i)
+
+    beforeEach(() => {
+      onProgress.mockReset()
+      vi.mocked(os.platform).mockReturnValue('win32')
+      // unzip() only opens the zip to read its entry count
+      openSpy = vi.spyOn(yauzl, 'open').mockImplementation((_path: string, optionsOrCallback?: unknown, maybeCallback?: unknown) => {
+        const callback = maybeCallback ?? optionsOrCallback
+
+        if (typeof callback === 'function') {
+          callback(null, { entryCount: 1000, close: () => {} })
+        }
+      })
+
+      // Freeze the clock so only percent changes trigger an update
+      vi.useFakeTimers({ toFake: ['Date'] })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+      openSpy.mockRestore()
+    })
+
+    it('reports once per percent while extracting a 1,000-entry zip and ends at 100', async function () {
+      vi.mocked(extractWithYauzl).mockImplementation(extractTicking(1000))
+
+      await unzip.start({ zipFilePath, installDir, progress: { onProgress } })
+
+      expect(percents()).toEqual(upTo(100))
+    })
+
+    it('reports an unchanged percent again once the throttle interval has passed', async function () {
+      vi.mocked(extractWithYauzl).mockImplementation(async (_zip, _dest, onEntry) => {
+        onEntry()
+        vi.advanceTimersByTime(99)
+        onEntry()
+        vi.advanceTimersByTime(1)
+        onEntry()
+      })
+
+      await unzip.start({ zipFilePath, installDir, progress: { onProgress } })
+
+      expect(percents()).toEqual([0, 0])
+    })
+
+    it('restarts progress and the ETA when the OS tool fails partway and node takes over', async function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.mocked(extractWithYauzl).mockImplementation(extractTicking(1000))
+
+      const unzipChildProcess = new events.EventEmitter() as any
+
+      unzipChildProcess.stdout = new events.EventEmitter()
+      unzipChildProcess.stderr = new events.EventEmitter()
+
+      vi.mocked(cp.spawn).mockImplementation(() => {
+        setImmediate(() => {
+          for (let i = 0; i < 600; i++) {
+            unzipChildProcess.stdout.emit('data', `  inflating: entries/${i}`)
+          }
+
+          // The node extraction below runs with the clock frozen, so its ETA
+          // is 0 unless it counts the time the failed tool used
+          vi.advanceTimersByTime(30_000)
+          unzipChildProcess.emit('close', 1)
+        })
+
+        return unzipChildProcess
+      })
+
+      await unzip.start({ zipFilePath, installDir, progress: { onProgress } })
+
+      expect(percents()).toEqual([...upTo(60), ...upTo(100)])
+      expect(etas().slice(61)).toEqual(Array(101).fill('0'))
+    })
   })
 
   describe('on linux', () => {

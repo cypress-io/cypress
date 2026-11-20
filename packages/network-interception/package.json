@@ -31,12 +31,12 @@
     "@packages/types": "0.0.0-development",
     "debug": "^4.3.4",
     "lodash": "^4.17.15",
-    "minimatch": "^3.1.2"
+    "minimatch": "^3.1.5"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "@types/minimatch": "^3.0.3",
-    "eslint": "^9.31.0",
+    "@types/minimatch": "^3.0.5",
+    "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "rimraf": "6.1.1",
     "vitest": "^3.2.4"

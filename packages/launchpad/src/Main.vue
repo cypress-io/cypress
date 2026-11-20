@@ -7,7 +7,7 @@
       v-if="shouldShowWelcome"
       class="pt-[64px]"
       role="main"
-      @clearLandingPage="handleClearLandingPage"
+      @clear-landing-page="handleClearLandingPage"
     />
     <main
       v-else
@@ -32,7 +32,7 @@
         <template v-else-if="!currentProject?.currentTestingType">
           <WarningList :gql="query.data.value" />
           <LaunchpadHeader
-            :title="t('welcomePage.title')"
+            title="Welcome to Cypress!"
             description=""
           />
           <StandardModal
@@ -41,7 +41,7 @@
             help-link="https://on.cypress.io/choosing-testing-type"
           >
             <template #title>
-              {{ t('welcomePage.compareTypes.modalTitle') }}
+              Key differences
             </template>
             <CompareTestingTypes />
           </StandardModal>
@@ -49,7 +49,7 @@
             class="mx-auto mt-[12px] text-indigo-500 text-[18px] block hocus-link-default group"
             @click="isTestingTypeModalOpen = true"
           >
-            {{ t('welcomePage.review') }}<i-cy-arrow-right_x16
+            Review the differences between each testing type<i-cy-arrow-right_x16
               class="ml-[4px] transform transition-transform ease-in translate-y-[-1px] duration-200 inline-block icon-dark-current group-hocus:translate-x-[2px]"
             />
           </button>
@@ -63,8 +63,8 @@
         />
         <template v-else-if="!currentProject?.isFullConfigReady">
           <LaunchpadHeader
-            :title="t('components.loading.config.title')"
-            :description="t('components.loading.config.description')"
+            title="Initializing config..."
+            description="Please wait while we load your project and find browsers installed on your system"
           />
           <Spinner />
         </template>
@@ -92,7 +92,6 @@ import Spinner from '@cy/components/Spinner.vue'
 import CompareTestingTypes from './setup/CompareTestingTypes.vue'
 import ScaffoldedFiles from './setup/ScaffoldedFiles.vue'
 import MajorVersionWelcome from './welcome/MajorVersionWelcome.vue'
-import { useI18n } from '@cy/i18n'
 import { computed, ref, watch } from 'vue'
 import LaunchpadHeader from './setup/LaunchpadHeader.vue'
 import OpenBrowser from './setup/OpenBrowser.vue'
@@ -102,7 +101,6 @@ import { usePromptManager } from '@cy/gql-components/composables/usePromptManage
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 
 const { setMajorVersionWelcomeDismissed } = usePromptManager()
-const { t } = useI18n()
 const isTestingTypeModalOpen = ref(false)
 
 gql`

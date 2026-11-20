@@ -1,9 +1,11 @@
 <template>
+  <!-- eslint-disable vue/no-v-html -- ansi-to-html output, with the error text escaped (escapeXML: true) -->
   <pre
     class="bg-white text-sm p-[24px] text-red-500 overflow-auto whitespace-pre-wrap break-all"
     :style="style"
     v-html="scriptError"
   />
+  <!-- eslint-enable vue/no-v-html -->
 </template>
 
 <script setup lang="ts">

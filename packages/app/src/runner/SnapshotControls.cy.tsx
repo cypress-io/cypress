@@ -3,7 +3,6 @@ import { autSnapshot } from '../../cypress/support/fixtures'
 import { useSnapshotStore } from './snapshot-store'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
-import { defaultMessages } from '@cy/i18n'
 
 const snapshotWithSnapshots = { ...autSnapshot }
 const snapshotPinned = { ...autSnapshot, snapshots: [] }
@@ -87,7 +86,7 @@ describe('SnapshotControls', { viewportHeight: 200, viewportWidth: 500 }, () => 
 
     mountSnapshotControls(eventManager, autIframe)
     cy.get('body')
-    .findByLabelText(defaultMessages.runner.snapshot.highlightsLabel)
+    .findByLabelText('Highlights')
     .click({ force: true })
   })
 

@@ -22,4 +22,8 @@ AUT browser, which Cypress does not control. For WebKit specifically, Cypress ru
 the build bundled with the installed `playwright-webkit`, not the user's system
 Safari — so the WebKit floor tracks that dependency's version.
 
+`compat/compat` (ESLint's `compatConfig`) checks shipped source against this floor,
+but it misses many newer ES built-ins and some web APIs. A clean lint run is not a
+caniuse check. See [`compatConfig`](../../packages/eslint-config/AGENTS.md#compatconfig).
+
 Full context: [Runtime targets](../../AGENTS.md#runtime-targets).

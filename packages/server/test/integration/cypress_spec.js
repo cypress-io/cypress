@@ -133,6 +133,7 @@ function mockEE () {
     on: sinon.stub(),
     session: {
       clearCache: sinon.stub().resolves(),
+      clearStorageData: sinon.stub().resolves(),
       setProxy: sinon.stub().resolves(),
       setUserAgent: sinon.stub(),
       on: sinon.stub(),
@@ -1100,6 +1101,8 @@ describe('lib/cypress', () => {
             off: sinon.stub(),
             send: sinon.stub(),
           }
+
+          criClient.send.withArgs('Page.getFrameTree').resolves({ frameTree: { frame: { id: 'main-frame' } } })
           const browserCriClient = {
             attachToTargetUrl: sinon.stub().resolves(criClient),
             close: sinon.stub().resolves(),
@@ -1174,6 +1177,8 @@ describe('lib/cypress', () => {
             off: sinon.stub(),
             send: sinon.stub(),
           }
+
+          criClient.send.withArgs('Page.getFrameTree').resolves({ frameTree: { frame: { id: 'main-frame' } } })
           const browserCriClient = {
             attachToTargetUrl: sinon.stub().resolves(criClient),
             currentlyAttachedTarget: criClient,
@@ -1370,7 +1375,7 @@ describe('lib/cypress', () => {
         },
       }
 
-      return Promise.all([
+      await Promise.all([
         // make sure we have no user object
         user.set({}),
 
@@ -1380,6 +1385,13 @@ describe('lib/cypress', () => {
           this.projectId = 'abc123'
         }),
       ])
+
+      browsers.open.restore()
+
+      const ee = mockEE()
+
+      sinon.stub(launch, 'launch').returns(ee)
+      sinon.stub(Windows, 'create').returns(ee)
     })
 
     afterEach(() => {
@@ -1561,15 +1573,6 @@ describe('lib/cypress', () => {
 
         return snapshotConsoleLogs('RECORD_PARAMS_WITHOUT_RECORDING-auto-cancel-after-failures 1')
       })
-    })
-
-    beforeEach(() => {
-      browsers.open.restore()
-
-      const ee = mockEE()
-
-      sinon.stub(launch, 'launch').returns(ee)
-      sinon.stub(Windows, 'create').returns(ee)
     })
 
     it('does not truncate a really long Cypress Cloud url', function () {

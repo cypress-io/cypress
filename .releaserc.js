@@ -22,7 +22,8 @@ module.exports = {
       ],
       message: 'chore: release ${nextRelease.gitTag}\n\n[skip ci]',
     }],
-    '@semantic-release/npm',
+    // A dry run never publishes, so it skips the npm auth check and needs no NPM_TOKEN
+    ['@semantic-release/npm', { npmPublish: !process.env.SEMANTIC_RELEASE_SKIP_NPM_PUBLISH }],
   ],
   extends: 'semantic-release-monorepo',
   branches: [

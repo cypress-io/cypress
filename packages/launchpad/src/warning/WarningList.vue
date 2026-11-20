@@ -6,7 +6,7 @@
     :message="warning.errorMessage"
     :retryable="Boolean(retryables[warning.errorType])"
     dismissible
-    @update:modelValue="dismiss(warning.id)"
+    @update:model-value="dismiss(warning.id)"
     @retry="retry(warning)"
   />
 </template>

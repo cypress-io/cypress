@@ -3,6 +3,9 @@ import '@packages/ts/register'
 import { createRequire } from 'module'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { handle } from '../../lib/unhandled_exceptions'
+import { getError } from '@packages/errors'
+import { GracefulExit } from '../../lib/util/graceful-exit'
+import { endRunOnConfigProcessExit, resetConfigProcessExitForTesting } from '../../lib/util/config_process_exit'
 
 const requireCjs = createRequire(import.meta.url)
 const errorsPath = requireCjs.resolve('../../lib/errors')
@@ -24,6 +27,7 @@ describe('lib/unhandled_exceptions', () => {
 
   afterEach(() => {
     delete requireCjs.cache[errorsPath]
+    resetConfigProcessExitForTesting()
     process.exitCode = originalExitCode
     logException.mockReset()
     vi.restoreAllMocks()
@@ -45,6 +49,22 @@ describe('lib/unhandled_exceptions', () => {
 
     expect(process.exitCode).toBe(1)
     expect(logException).toHaveBeenCalledExactlyOnceWith(err)
+  })
+
+  it('does not exit, and keeps handling, once a config process exit has been reported', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+    vi.spyOn(GracefulExit, 'exitGracefully').mockResolvedValue(undefined)
+    endRunOnConfigProcessExit(getError('CONFIG_PROCESS_EXITED_UNEXPECTEDLY', null, 'SIGKILL'))
+    handle()
+
+    process.emit('uncaughtException', new Error('consequence of the config process exit'))
+    // stands in for node's default handler, which would otherwise crash the worker
+    process.on('unhandledRejection', noop)
+    process.emit('uncaughtException', new Error('another one during teardown'))
+    await new Promise((resolve) => setTimeout(resolve, 20))
+
+    expect(process.exit).not.toHaveBeenCalled()
+    expect(logException).not.toHaveBeenCalled()
   })
 
   it('only binds once to unhandledRejection / uncaughtException, so a failing logException cannot loop forever', async () => {

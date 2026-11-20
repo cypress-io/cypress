@@ -365,7 +365,7 @@ export default function (Commands, Cypress, cy, state, config) {
           debug('onValueChange', originalText, el)
           // contenteditable should never be called here.
           // only inputs and textareas can have change events
-          let changeEvent = state('changeEvent')
+          const changeEvent = state('changeEvent')
 
           if (changeEvent) {
             if (!changeEvent(null, true)) {
@@ -510,7 +510,7 @@ export default function (Commands, Cypress, cy, state, config) {
             subjectFn: () => $elToClick,
           })
           .then(() => {
-            let activeElement = $elements.getActiveElByDocument($elToClick)
+            const activeElement = $elements.getActiveElByDocument($elToClick)
 
             if (!options.force && activeElement === null) {
               const node = $dom.stringify($elToClick)
@@ -637,7 +637,7 @@ export default function (Commands, Cypress, cy, state, config) {
           },
 
           onReady ($elToClick) {
-            let activeElement = $elements.getActiveElByDocument($elToClick)
+            const activeElement = $elements.getActiveElByDocument($elToClick)
 
             if (!options.force && activeElement === null || !$dom.isTextLike($elToClick.get(0))) {
               throwError($el)

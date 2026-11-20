@@ -123,9 +123,6 @@ const createApp = (port) => {
     res.end()
   })
 
-  // allows us to serve the testrunner into an iframe for testing
-  app.use('/isolated-runner', express.static(path.join(__dirname, '../../../runner/dist')))
-
   app.get('/node_modules/*', (req, res) => {
     return res.sendFile(path.join('node_modules', req.params[0]), {
       root: path.join(__dirname, '../..'),
@@ -450,7 +447,7 @@ const createApp = (port) => {
       const text = `encoding-${encodingType}-${assetType}`
 
       if (assetType === 'html') {
-        return `<html><head><link rel="stylesheet" href="/encoding/${encodingType}/css"></head><body><p id="encoding-test">${text}</p><p id="encoding-js"></p></body><script src="/encoding/${encodingType}/js"><\/script></html>`
+        return `<html><head><link rel="stylesheet" href="/encoding/${encodingType}/css"></head><body><p id="encoding-test">${text}</p><p id="encoding-js"></p></body><script src="/encoding/${encodingType}/js"></script></html>`
       }
 
       if (assetType === 'js') {

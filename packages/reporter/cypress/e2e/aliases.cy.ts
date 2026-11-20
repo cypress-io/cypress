@@ -208,7 +208,7 @@ describe('aliases', () => {
           displayName: 'xhr',
           event: true,
           name: 'xhr',
-          // @ts-ignore
+          // @ts-expect-error - the interception omits the command and type fields the test does not need
           renderProps: { message: 'GET --- /posts', indicator: 'successful', interceptions: [{ alias: 'getPosts' }] },
         })
 
@@ -218,7 +218,7 @@ describe('aliases', () => {
           displayName: 'xhr',
           event: true,
           name: 'xhr',
-          // @ts-ignore
+          // @ts-expect-error - the interception omits the command and type fields the test does not need
           renderProps: { message: 'GET --- /posts', indicator: 'successful', interceptions: [{ alias: 'getPosts' }] },
         })
 

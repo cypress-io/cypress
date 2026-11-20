@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import _ from 'lodash'
 import path from 'path'
 import dedent from 'dedent'
@@ -37,7 +36,8 @@ const debug = Debug('cypress:system-tests:record_spec')
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')
 
-let { runId, groupId, machineId, runUrl, tags } = postRunResponse
+const { runId, groupId, runUrl } = postRunResponse
+let { machineId, tags } = postRunResponse
 const { instanceId } = postRunInstanceResponse
 
 describe('e2e record', () => {
@@ -659,9 +659,7 @@ describe('e2e record', () => {
 
   context('record in non-parallel', () => {
     describe('api reordering specs', () => {
-      let mockServerState
-
-      mockServerState = setupStubbedServer(createRoutes({
+      const mockServerState = setupStubbedServer(createRoutes({
         postRun: {
           res (req, res) {
             console.log(req.body.specs)
@@ -692,7 +690,7 @@ describe('e2e record', () => {
   })
 
   describe('api skips specs', () => {
-    let mockServerState = setupStubbedServer(createRoutes({
+    const mockServerState = setupStubbedServer(createRoutes({
 
       postInstanceTests: {
         res: (req, res) => {
@@ -1432,7 +1430,7 @@ describe('e2e record', () => {
         })
       })
 
-      it('errors and exits when auto cancel not available in plan', function () {
+      it('errors and exits when auto cancel not available in plan with 1 when posix exit codes are enabled', function () {
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           configFile: 'cypress-with-project-id.config.js',
@@ -2116,7 +2114,7 @@ describe('e2e record', () => {
         })
       })
 
-      describe('[F5] 422 status code with valid decryption on createRun', async () => {
+      describe('[F5] 422 status code with valid decryption on createRun', () => {
         const mockServer = setupStubbedServer(createRoutes({
           sendPreflight: {
             res: async (req, res) => {
@@ -2653,6 +2651,7 @@ describe('e2e record', () => {
 
       describe('passing', () => {
         enableCaptureProtocol()
+
         it('retrieves the capture protocol, uploads the db, and updates the artifact upload report', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -2722,6 +2721,7 @@ describe('e2e record', () => {
 
       describe('when the tab crashes in chrome', () => {
         enableCaptureProtocol()
+
         it('posts accurate test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -2760,6 +2760,7 @@ describe('e2e record', () => {
 
       describe('when there is an async error thrown from config file', () => {
         enableCaptureProtocol()
+
         it('posts accurate test results', function () {
           return systemTests.exec(this, {
             key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
@@ -2781,6 +2782,7 @@ describe('e2e record', () => {
 
       describe('protocol runtime errors', () => {
         enableCaptureProtocol()
+
         describe('db size too large', () => {
           beforeEach(() => {
             return fsPromise.writeFile(archiveFile, randomBytes(1024))
@@ -2820,6 +2822,7 @@ describe('e2e record', () => {
 
         describe('db is unreadable', () => {
           enableCaptureProtocol(PROTOCOL_STUB_NO_DB_WRITE)
+
           beforeEach(() => {
             if (fs.existsSync(archiveFile)) {
               return fsPromise.rm(archiveFile)
@@ -3037,6 +3040,7 @@ describe('capture-protocol api errors', () => {
 
   describe('upload 500 - tries 3 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 
@@ -3077,6 +3081,7 @@ describe('capture-protocol api errors', () => {
     const errorResponseMimeType = 'application/xml'
 
     stubbedServerWithErrorOn('putCaptureProtocolUpload', Number.MAX_SAFE_INTEGER, 503, errorResponseMimeType, errorResponseBody)
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 
@@ -3176,6 +3181,7 @@ describe('capture-protocol api errors', () => {
 
   describe('fetch script 500', () => {
     stubbedServerWithErrorOn('getCaptureScript', Infinity, 500, 'text/plain', '500 - Internal Server Error')
+
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
 

@@ -49,6 +49,7 @@ module.exports = {
             agent,
             path: socketIoRoute,
             transports: ['websocket'],
+            extraHeaders: { origin: new URL(proxyUrl).origin },
           })
 
           return new Promise((resolve, reject) => {

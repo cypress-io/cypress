@@ -6,7 +6,7 @@ import _ from 'lodash'
 import { getPlatform } from './tree/useCollapsibleTree'
 import type { FuzzyFoundSpec } from './tree/useCollapsibleTree'
 
-export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
+export function fuzzySortSpecs<T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
   const normalizedSearchValue = normalizeSpecValue(searchValue)
 
   const fuzzySortResult = fuzzySort

@@ -15,8 +15,6 @@ import type { SubscriptionHook, MutationResolverCallback as MutationResolver } f
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
 import { each } from 'lodash'
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
-import { createI18n } from '@cy/i18n'
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
 import { getOperationNameFromDocument } from './clientTestUtils'
 
@@ -27,7 +25,7 @@ export interface MountFnOptions {
 export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   Cypress.Commands.add(
     'mount',
-    // @ts-ignore todo: figure out the correct types
+    // @ts-expect-error - TODO: the generic mount signature does not match the mount command type
     <C extends Parameters<typeof mount>[0]>(comp: C, options: Parameters<typeof mount>[1] = {}) => {
       options.global = options.global || {}
       options.global.stubs = options.global.stubs || {}
@@ -41,8 +39,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
         options?.global?.plugins?.push(pluginFn())
       })
 
-      options.global.plugins.push(createI18n())
-
       const context = makeClientTestContext()
 
       options.global.plugins.push({
@@ -51,7 +47,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
         },
       })
 
-      // @ts-ignore todo: figure out the correct types
+      // @ts-expect-error - TODO: the generic mount signature does not match the mount command type
       return mount(comp, options)
     },
   )
@@ -68,7 +64,6 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
           'transition-group': false,
         },
         plugins: [
-          createI18n(),
           {
             install (app) {
               app.use(urql, testUrqlClient(context, options.onResult, mutationResolvers, registerSubscriptionHook))
@@ -85,11 +80,10 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     let queryVariablesSegment = ''
 
     if (options.variableTypes) {
-      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `\$${name}: ${type}`).join(',')
+      queryVariablesSegment = Object.entries(options.variableTypes || {}).map(([name, type]) => `$${name}: ${type}`).join(',')
       queryVariablesSegment = `(${queryVariablesSegment})`
     }
 
-    // @ts-ignore todo: figure out the correct types
     return mount(defineComponent({
       name: `MountFragment`,
       setup () {
@@ -162,7 +156,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
     subscriptionHooks.set(name, hook)
   }
 
-  function stubSubscriptionEvent <T extends TypedDocumentNode<any, any>> (
+  function stubSubscriptionEvent<T extends TypedDocumentNode<any, any>> (
     document: T,
     emitEvent: () => ResultOf<T>,
   ) {

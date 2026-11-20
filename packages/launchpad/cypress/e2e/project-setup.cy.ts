@@ -102,6 +102,24 @@ describe('Launchpad: Setup Project', () => {
     verifyScaffoldedFiles('e2e')
   })
 
+  it('skips the configuration files page and moves to "Choose a browser" when an AI agent opens an unconfigured project with --e2e', () => {
+    cy.scaffoldProject('pristine')
+    cy.withCtx(() => {
+      process.env.CYPRESS_AGENT_MODE = '1'
+    })
+
+    cy.openProject('pristine', ['--e2e'])
+    cy.visitLaunchpad()
+
+    verifyChooseABrowserPage()
+    cy.contains('h1', 'Configuration files').should('not.exist')
+
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx.lifecycleManager.metaState.hasValidConfigFile).to.eq(true)
+      expect(ctx.coreData.scaffoldedFiles).to.eq(null)
+    })
+  })
+
   it('opens correctly in unconfigured project with --component', () => {
     cy.scaffoldProject('pristine')
     cy.openProject('pristine', ['--component'])
@@ -755,6 +773,7 @@ describe('Launchpad: Setup Project', () => {
         scaffoldAndOpenProject('config-with-ts-syntax-error')
         cy.visitLaunchpad()
         cy.get('[data-cy=error-header]').contains('Cypress configuration error')
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- the intercept throws on extra MainLaunchpadQuery calls, so leave time for any to arrive
         cy.wait(1000)
       })
     })

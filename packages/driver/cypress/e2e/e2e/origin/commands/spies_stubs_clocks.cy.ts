@@ -58,7 +58,7 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
         expect(Cypress.expose('foo')).to.equal('bar')
         expect(stubExpose).to.be.calledOnce
-        // @ts-ignore
+        // @ts-expect-error - `isSinonProxy` is a sinon internal not on the Cypress.expose type
         expect(Cypress.expose.isSinonProxy).to.be.true
 
         const stubbedExpose = Cypress.expose as unknown as { restore?: () => void }
@@ -72,7 +72,7 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
     it('verifies the stub got restored', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         expect(Cypress.expose('foo')).to.be.undefined
-        // @ts-ignore
+        // @ts-expect-error - `isSinonProxy` is a sinon internal not on the Cypress.expose type
         expect(Cypress.expose.isSinonProxy).to.be.undefined
       })
     })
@@ -91,7 +91,7 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
         Cypress.expose()
         expect(stubExpose).to.be.calledOnce
-        // @ts-ignore
+        // @ts-expect-error - `isSinonProxy` is a sinon internal not on the Cypress.expose type
         expect(Cypress.expose.isSinonProxy).to.be.true
 
         const spiedExpose = Cypress.expose as unknown as { restore?: () => void }
@@ -104,7 +104,7 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
     it('verifies the spy got restored', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        // @ts-ignore
+        // @ts-expect-error - `isSinonProxy` is a sinon internal not on the Cypress.expose type
         expect(Cypress.expose.isSinonProxy).to.be.undefined
       })
     })

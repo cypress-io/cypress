@@ -341,8 +341,8 @@ describe('windows browser detection', () => {
   })
 
   it('works with :browserName format in Windows', async () => {
-    let path = `${HOMEDIR}/foo/bar/browser.exe`
-    let win10Path = windowsHelper.doubleEscape(path)
+    const path = `${HOMEDIR}/foo/bar/browser.exe`
+    const win10Path = windowsHelper.doubleEscape(path)
 
     mockBrowsers.push({
       path,
@@ -367,8 +367,8 @@ describe('windows browser detection', () => {
   })
 
   it('identifies browser if name in path', async () => {
-    let path = `${HOMEDIR}/foo/bar/chrome.exe`
-    let win10Path = windowsHelper.doubleEscape(path)
+    const path = `${HOMEDIR}/foo/bar/chrome.exe`
+    const win10Path = windowsHelper.doubleEscape(path)
 
     mockBrowsers.push({
       path,
@@ -496,28 +496,28 @@ describe('windows browser detection', () => {
   })
 
   describe('#doubleEscape', () => {
-    let winPath = 'C:\\\\foo\\\\bar.exe'
+    const winPath = 'C:\\\\foo\\\\bar.exe'
 
     it('converts nix path into double escaped win path', async () => {
-      let nixPath = 'C:/foo/bar.exe'
+      const nixPath = 'C:/foo/bar.exe'
 
       expect(windowsHelper.doubleEscape(nixPath)).toEqual(winPath)
     })
 
     it('converts win path with different backslash combination into double escaped win path', async () => {
-      let badWinPath = 'C:\\\\\\\\\\foo\\bar.exe'
+      const badWinPath = 'C:\\\\\\\\\\foo\\bar.exe'
 
       expect(windowsHelper.doubleEscape(badWinPath)).toEqual(winPath)
     })
 
     it('converts single escaped win path into double escaped win path', async () => {
-      let badWinPath = 'C:\\foo\\bar.exe'
+      const badWinPath = 'C:\\foo\\bar.exe'
 
       expect(windowsHelper.doubleEscape(badWinPath)).toEqual(winPath)
     })
 
     it('does not affect an already double escaped win path', async () => {
-      let badWinPath = 'C:\\\\foo\\\\bar.exe'
+      const badWinPath = 'C:\\\\foo\\\\bar.exe'
 
       expect(windowsHelper.doubleEscape(badWinPath)).toEqual(badWinPath)
     })

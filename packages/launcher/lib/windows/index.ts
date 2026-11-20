@@ -142,7 +142,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       throw notInstalledErr(browser.name)
     }
 
-    let path = doubleEscape(exePath)
+    const path = doubleEscape(exePath)
 
     return fs.pathExists(path)
     .then((exists) => {
@@ -204,13 +204,13 @@ export function getVersionNumber (version: string) {
 export function getPathData (pathStr: string): PathData {
   const test = new RegExp(/^.+\.exe:(.+)$/)
   const res = test.exec(pathStr)
-  let browserKey = ''
   let path = pathStr
 
   if (res) {
     const pathParts = path.split(':')
 
-    browserKey = pathParts.pop() || ''
+    const browserKey = pathParts.pop() || ''
+
     path = doubleEscape(pathParts.join(':'))
 
     return { path, browserKey }

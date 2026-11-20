@@ -1,5 +1,3 @@
-/* eslint-disable quotes */
-
 const eslintRe = /\/. eslint.+\s+/g
 
 // The kitchensink app and specs are authored against a local dev server on port
@@ -11,12 +9,12 @@ export function convertExampleContent (str: string): string {
   }
 
   replace('http://localhost:8080', 'https://example.cypress.io')
-  replace("to.eq('localhost:8080')", "to.eq('example.cypress.io')")
-  replace("to.eq('localhost')", "to.eq('example.cypress.io')")
-  replace("to.eq('8080')", "to.eq('')")
-  replace("to.eq('http:')", "to.eq('https:')")
-  replace(eslintRe, "")
-  replace("imgSrcToDataURL('/assets", "imgSrcToDataURL('https://example.cypress.io/assets")
+  replace(`to.eq('localhost:8080')`, `to.eq('example.cypress.io')`)
+  replace(`to.eq('localhost')`, `to.eq('example.cypress.io')`)
+  replace(`to.eq('8080')`, `to.eq('')`)
+  replace(`to.eq('http:')`, `to.eq('https:')`)
+  replace(eslintRe, '')
+  replace(`imgSrcToDataURL('/assets`, `imgSrcToDataURL('https://example.cypress.io/assets`)
 
   return str
 }

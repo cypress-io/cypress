@@ -5,10 +5,10 @@ export const addNewlineAtEveryNChar = (str: string, n: number) => {
     return str
   }
 
-  let result: string[] = []
+  const result: string[] = []
   let idx = 0
 
-  let printableString = util.stripVTControlCharacters(str)
+  const printableString = util.stripVTControlCharacters(str)
 
   if (printableString.length !== str.length) {
     if (printableString.length <= n) {

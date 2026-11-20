@@ -317,7 +317,7 @@ function registerSignalEventsIfNeeded<T> (
 function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, component: { [key: string]: any } & Partial<OnChanges>, key: string, injector: Injector): void {
   if (config.componentProperties) {
     const expectedChangeKey = `${key}Change`
-    let changeKeyIfExists = !!Object.keys(config.componentProperties).find(
+    const changeKeyIfExists = !!Object.keys(config.componentProperties).find(
       (componentKey) => componentKey === expectedChangeKey,
     )
 
@@ -367,7 +367,7 @@ function setupComponent<T> (
 
     getComponentInputs(fixture.componentRef.componentType).forEach((key) => {
       // only assign props if they are passed into the component
-      if (config?.componentProperties?.hasOwnProperty(key)) {
+      if (config?.componentProperties && Object.hasOwn(config.componentProperties, key)) {
         // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
         const passedInValue = config?.componentProperties[key]
 
@@ -394,9 +394,9 @@ function setupComponent<T> (
       // With the introduction of https://github.com/cypress-io/cypress/pull/31993, we want to make sure that component inputs are reference safe inside cy.mount().
       // However, the exception to this is if the user passes in a Cypress output spy as a property in order to maintain backwards compatibility.
       // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
-      if (property instanceof EventEmitter || (config?.componentProperties?.hasOwnProperty(key) && config?.componentProperties[key] instanceof EventEmitter)) {
+      if (property instanceof EventEmitter || (config?.componentProperties && Object.hasOwn(config.componentProperties, key) && config?.componentProperties[key] instanceof EventEmitter)) {
       // only assign props if they are passed into the component
-        if (config?.componentProperties?.hasOwnProperty(key)) {
+        if (config?.componentProperties && Object.hasOwn(config.componentProperties, key)) {
         // @ts-expect-error key is a string, not keyof T, so it can't index componentProperties
           const passedInValue = config?.componentProperties[key]
 
@@ -488,7 +488,7 @@ export function mount<T> (
 
   let mountResponsePromiseResolver: any
   let mountResponsePromiseRejector: any
-  let mountResponsePromise: Promise<MountResponse<T>> = new Promise((resolve, reject) => {
+  const mountResponsePromise: Promise<MountResponse<T>> = new Promise((resolve, reject) => {
     mountResponsePromiseResolver = resolve
     mountResponsePromiseRejector = reject
   })

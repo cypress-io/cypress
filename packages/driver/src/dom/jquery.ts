@@ -7,7 +7,7 @@ function wrap (obj) {
 }
 
 const query = (selector, context) => {
-  // @ts-ignore
+  // @ts-expect-error - $.fn.init is not declared in the jQuery types
   return new $.fn.init(selector, context)
 }
 

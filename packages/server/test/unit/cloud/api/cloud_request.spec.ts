@@ -65,7 +65,7 @@ describe('CloudRequest', () => {
   })
 
   describe('Proxy Requests', () => {
-    let prevEnv = {
+    const prevEnv = {
       HTTP_PROXY: undefined,
       HTTPS_PROXY: undefined,
       CYPRESS_INTERNAL_ENV: undefined,

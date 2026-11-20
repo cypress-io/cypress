@@ -14,7 +14,7 @@ runnerStore.setSpec({
 
 describe('test errors', () => {
   let commandErr: Partial<Err>
-  let setError: Function
+  let setError: (err: Partial<Err>) => void
   let runnablesWithErr: RootRunnable
   let runner: EventEmitter
 
@@ -25,8 +25,8 @@ describe('test errors', () => {
     runner = new EventEmitter()
 
     cy.visit('/').then((win) => {
-      setError = (err: Error) => {
-        // @ts-ignore
+      setError = (err) => {
+        // @ts-expect-error - RootRunnable types suites as optional, and the fixture error is a Partial<Err>, not a full ErrProps
         runnablesWithErr.suites[0].tests[0].err = err
 
         cy.get('.reporter.mounted').then(() => {
@@ -48,12 +48,12 @@ describe('test errors', () => {
     })
 
     it('clicking prints to console', () => {
-      cy.spy(runner, 'emit')
-      cy.get('.runnable-err-print').click().should(() => {
-        expect(runner.emit).to.be.calledWith('runner:console:error')
+      const emit = cy.spy(runner, 'emit')
 
-        // @ts-ignore
-        const err = runner.emit.withArgs('runner:console:error').lastCall.args[1].err
+      cy.get('.runnable-err-print').click().should(() => {
+        expect(emit).to.be.calledWith('runner:console:error')
+
+        const err = emit.withArgs('runner:console:error').lastCall.args[1].err
 
         expect(err.message).to.equal(commandErr.message)
         expect(err.stack).to.equal(commandErr.stack)
@@ -293,7 +293,7 @@ describe('test errors', () => {
     })
   })
 
-  describe('code frames', () => {
+  describe('code frame fallbacks', () => {
     it('does not show code frame when not included on error', () => {
       commandErr.codeFrame = undefined
       setError(commandErr)
@@ -304,7 +304,7 @@ describe('test errors', () => {
     })
 
     it('falls back to text language class', () => {
-      // @ts-ignore
+      // @ts-expect-error - commandErr is a Partial<Err>, so codeFrame is optional
       commandErr.codeFrame.language = null
       setError(commandErr)
       cy

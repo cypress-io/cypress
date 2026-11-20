@@ -1,5 +1,3 @@
-// tslint:disable-next-line: no-implicit-dependencies - need to handle this
-import { defaultMessages } from '@cy/i18n'
 import InstallDependencies from './InstallDependencies.vue'
 import { InstallDependenciesFragmentDoc } from '../generated/graphql-test'
 import { WIZARD_DEPENDENCY_REACT, WIZARD_DEPENDENCY_REACT_DOM, WIZARD_DEPENDENCY_TYPESCRIPT } from '@packages/scaffold-config/browser/dependencies'
@@ -38,10 +36,10 @@ describe('<InstallDependencies />', () => {
       },
     })
 
-    cy.contains('button', defaultMessages.clipboard.copy).should('be.visible')
-    cy.contains('button', defaultMessages.setupPage.step.back).should('be.visible')
+    cy.contains('button', 'Copy').should('be.visible')
+    cy.contains('button', 'Back').should('be.visible')
 
-    cy.contains('button', defaultMessages.setupPage.step.skip).should('be.visible')
+    cy.contains('button', 'Skip').should('be.visible')
   })
 
   it('triggers back button callback', function () {
@@ -54,7 +52,7 @@ describe('<InstallDependencies />', () => {
     })
 
     cy.getByRole('button', {
-      name: defaultMessages.setupPage.step.back,
+      name: 'Back',
     })
     .should('be.visible')
     .click()

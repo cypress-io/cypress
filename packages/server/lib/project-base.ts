@@ -10,7 +10,6 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import { Reporter } from './reporter'
 import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
@@ -362,6 +361,9 @@ export class ProjectBase extends EE {
     if (!report) {
       return
     }
+
+    // the reporter loads mocha, which open mode only needs once a spec runs
+    const { Reporter }: typeof import('./reporter') = require('./reporter')
 
     try {
       Reporter.loadReporter(reporter, projectRoot)
@@ -726,7 +728,7 @@ export class ProjectBase extends EE {
 
   async initializeConfig (): Promise<Cfg> {
     this.ctx.lifecycleManager.setAndLoadCurrentTestingType(this.testingType)
-    let theCfg: Cfg = {
+    const theCfg: Cfg = {
       ...(await this.ctx.lifecycleManager.getFullInitialConfig()),
       testingType: this.testingType,
     } as Cfg // ?? types are definitely wrong here I think
@@ -807,7 +809,7 @@ export class ProjectBase extends EE {
       throw new Error('Missing project root')
     }
 
-    let state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
+    const state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
 
     await state.set(stateChanges)
     this.cfg.state = await state.get()

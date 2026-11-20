@@ -36,7 +36,6 @@ export default defineComponent({
 
 <script lang="ts" setup>
 
-// eslint-disable-next-line no-duplicate-imports
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 defineProps<{

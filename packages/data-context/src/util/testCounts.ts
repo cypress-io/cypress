@@ -13,7 +13,7 @@ export async function getTestCounts (specs: SpecWithRelativeRoot[]) {
   const startTime = performance.now()
 
   const specCountPromises = specs.map((spec) => {
-    return new Promise<{path: string, isExample: boolean, testCounts: number}>((resolve, reject) => {
+    return new Promise<{ path: string, isExample: boolean, testCounts: number }>((resolve, reject) => {
       let testCounts = 0
 
       readline.createInterface({

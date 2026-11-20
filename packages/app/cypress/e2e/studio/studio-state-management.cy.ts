@@ -89,6 +89,7 @@ describe('studio functionality', () => {
 })`)
     })
 
+    // eslint-disable-next-line cypress/no-unnecessary-waiting -- Studio has no visible signal that it has picked up the rewritten spec, and if that lands after the save it reloads the editor from disk and drops the recorded commands
     cy.wait(200)
 
     cy.findByTestId('studio-save-button').click()

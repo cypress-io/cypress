@@ -32,7 +32,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
-            args: ['6998637248317671'],
             commandName: 'readFile',
             options: {
               file: 'foo.json',
@@ -50,7 +49,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
-            args: ['6998637248317671', '2573904513237804'],
             commandName: 'readFile',
             options: {
               file: 'foo.json',
@@ -72,7 +70,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
-            args: ['6998637248317671', '6158203196586298'],
             commandName: 'readFile',
             options: {
               file: 'foo.json',
@@ -365,6 +362,45 @@ describe('src/cy/commands/files', () => {
         cy.readFile('foo.json', null)
       })
 
+      it('throws the existence error when it times out while re-reading the file', function (done) {
+        const err: FileError = new Error('ENOENT: no such file or directory, open \'foo.json\'')
+
+        err.name = 'ENOENT'
+        err.code = 'ENOENT'
+        err.filePath = '/path/to/foo.json'
+
+        const runPrivileged = backend.withArgs('run:privileged')
+
+        runPrivileged.callsFake(() => new Cypress.Promise(() => { /* re-read never settles */ }))
+        runPrivileged.onFirstCall().rejects(err)
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(stripIndent`
+            Timed out retrying after 50ms: \`cy.readFile(\"foo.json\")\` failed because the file does not exist at the following path:
+
+            \`/path/to/foo.json\``)
+
+          done()
+        })
+
+        cy.readFile('foo.json')
+      })
+
+      it('throws the assertion error when it times out while re-reading the file', function (done) {
+        const runPrivileged = backend.withArgs('run:privileged')
+
+        runPrivileged.callsFake(() => new Cypress.Promise(() => { /* re-read never settles */ }))
+        runPrivileged.onFirstCall().resolves({ contents: 'foo' })
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'foo\' to equal \'contents\'')
+
+          done()
+        })
+
+        cy.readFile('foo.json').should('equal', 'contents')
+      })
+
       it('throws a specific error when file exists when it shouldn\'t', function (done) {
         backend.resolves(okResponse)
 
@@ -471,7 +507,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
-            args: ['2916834115813688', '4891975990226114'],
             commandName: 'writeFile',
             options: {
               fileName: 'foo.txt',
@@ -491,7 +526,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
-            args: ['2916834115813688', '4891975990226114', '2573904513237804'],
             commandName: 'writeFile',
             options: {
               fileName: 'foo.txt',
@@ -514,7 +548,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
-            args: ['2916834115813688', '6309890104324788', '6158203196586298'],
             commandName: 'writeFile',
             options: {
               fileName: 'foo.txt',
@@ -534,7 +567,6 @@ describe('src/cy/commands/files', () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
-            args: ['2916834115813688', '4891975990226114', '4694939291947123'],
             commandName: 'writeFile',
             options: {
               fileName: 'foo.txt',
@@ -589,7 +621,6 @@ describe('src/cy/commands/files', () => {
           expect(Cypress.backend).to.be.calledWith(
             'run:privileged',
             {
-              args: ['2916834115813688', '4891975990226114', '2343101193011749'],
               commandName: 'writeFile',
               options: {
                 fileName: 'foo.txt',

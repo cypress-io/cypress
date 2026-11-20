@@ -251,7 +251,7 @@ export class IframeModel {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', autStore.url || '')
       Cypress.primaryOriginCommunicator.once('snapshot:final:generated', (finalSnapshot) => {
         // todo(lachlan): UNIFY-1318 - find correct default, if they are even needed, for required fields ($el, coords...)
-        // @ts-ignore
+        // @ts-expect-error - originalState is typed as a full AutSnapshot, but only these fields are known here
         this.originalState = {
           body: finalSnapshot.body,
           htmlAttrs: finalSnapshot.htmlAttrs,
@@ -275,7 +275,7 @@ export class IframeModel {
     const { body, htmlAttrs } = finalSnapshot
 
     // todo(lachlan): UNIFY-1318 - find correct default, if they are even needed, for required fields ($el, coords...)
-    // @ts-ignore
+    // @ts-expect-error - originalState is typed as a full AutSnapshot, but only these fields are known here
     this.originalState = {
       body,
       htmlAttrs,

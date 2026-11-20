@@ -8,5 +8,6 @@ export as namespace Bluebird
 
 declare namespace Bluebird {
   type BluebirdStatic = typeof ImportedBluebird
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- public type, an interface so users can augment it
   interface Promise<T> extends ImportedBluebird<T> {}
 }

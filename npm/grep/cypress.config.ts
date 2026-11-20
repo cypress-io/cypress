@@ -27,7 +27,7 @@ export default defineConfig({
         }
 
         // compare the file to the expected output
-        let actualArr = []
+        const actualArr = []
 
         // @ts-expect-error - runs is not typed
         for (const run of results.runs) {

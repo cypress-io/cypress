@@ -54,7 +54,7 @@ const props = defineProps<{
   title: string
   name?: string
   description: string
-  icon: FunctionalComponent<SVGAttributes, {}>
+  icon: FunctionalComponent<SVGAttributes>
   maxHeight: string
 }>()
 

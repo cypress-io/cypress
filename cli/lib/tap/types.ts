@@ -52,7 +52,7 @@ export interface TapRunState {
  */
 export interface TapStatus {
   /**
-   * Lifecycle phase: `not connected`, `browser not selected`,
+   * Lifecycle phase: `not connected`, `error`, `browser not selected`,
    * `spec not selected`, or the run state (`loading` | `running` | `passed` |
    * `failed`). Only `passed` and `failed` are verdicts.
    */
@@ -77,7 +77,7 @@ export interface TapStatus {
   totalTests?: number
   /** Per-outcome test counts for the selected spec. */
   results?: { passed: number, failed: number, pending: number, skipped: number }
-  /** Why the spec could not run, when it failed to build. */
+  /** Why the spec could not run, when it failed to build, or why the project could not load, when the status is `error`. */
   error?: string
   /** The currently pinned command, if any. */
   pinned?: PinnedView

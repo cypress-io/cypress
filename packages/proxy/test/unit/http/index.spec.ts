@@ -169,7 +169,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({}, { on, off })
 
       expect(incomingRequest, 'incomingRequest').toHaveBeenCalledOnce()
@@ -189,7 +189,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -219,7 +219,7 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -248,7 +248,7 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -278,7 +278,7 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -303,7 +303,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).toHaveBeenCalledOnce()
@@ -317,7 +317,7 @@ describe('http', function () {
       const resAdded = {}
       const errorAdded = {}
 
-      let expectedKeys = ['req', 'res', 'config', 'middleware']
+      const expectedKeys = ['req', 'res', 'config', 'middleware']
 
       incomingRequest.mockImplementation(function () {
         const keys = Object.keys(this)
@@ -377,7 +377,7 @@ describe('http', function () {
       middleware[HttpStages.IncomingResponse].incomingResponse2 = incomingResponse2
       middleware[HttpStages.Error].error2 = error2
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       const middlewareFunctions = [
         incomingRequest, incomingRequest2,
@@ -402,7 +402,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
 
       expect(incomingRequest).toHaveBeenCalledOnce()
@@ -410,6 +410,58 @@ describe('http', function () {
       expect(sendOutgoing).not.toHaveBeenCalled()
 
       sendOutgoing.mockRestore()
+    })
+
+    it('writes a request-stage short-circuit response to the client (#34810)', async function () {
+      // Models serveInternalRoutes answering an unowned reserved path without
+      // calling next(). Before the codec wrote synthesized responses on the
+      // Express transport, the 404 was produced and then silently discarded,
+      // so the client never received a response.
+      const http = new Http(httpOpts)
+      const httpIntercept = new HttpIntercept(proxyHttpCodec)
+      const written: { statusCode?: number, body?: unknown } = {}
+      const shortCircuit = vi.fn().mockImplementation((request) => {
+        return Promise.resolve({
+          id: request.id,
+          url: request.url,
+          statusCode: 404,
+          headers: { 'content-type': 'text/plain' },
+          body: 'Not Found',
+        })
+      })
+
+      httpIntercept.use(shortCircuit)
+      httpIntercept.use(http.createLegacyProxyPipeline(proxyHttpCodec))
+      http.networkInterception = httpIntercept
+
+      const res = {
+        headersSent: false,
+        writableFinished: false,
+        on,
+        off,
+        status (statusCode: number) {
+          written.statusCode = statusCode
+
+          return this
+        },
+        set () {
+          return this
+        },
+        end (body?: unknown) {
+          written.body = body
+          this.writableFinished = true
+
+          return this
+        },
+      }
+
+      // @ts-expect-error - partial request and response stubs, not a full CypressIncomingRequest / CypressOutgoingResponse
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'http://localhost:1234/__/does-not-exist', headers: {} }, res)
+
+      expect(shortCircuit).toHaveBeenCalledOnce()
+      expect(written.statusCode).toBe(404)
+      expect(written.body).toBe('Not Found')
+      expect(res.writableFinished).toBe(true)
     })
   })
 

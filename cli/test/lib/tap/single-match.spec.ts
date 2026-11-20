@@ -31,7 +31,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
   it('lets a selector matching exactly one element through, counting it in the AUT frame', async () => {
     const { session, callFunctionOn, createIsolatedWorld, call } = makeSession({ count: 1 })
 
-    expect(await resolveAmbiguity(session, frame, '.one')).to.be.undefined
+    expect(await resolveAmbiguity(session, frame, '.one')).toBeUndefined()
 
     expect(createIsolatedWorld).toHaveBeenCalledWith({ frameId: 'aut-frame-id', worldName: 'cypress-tap' }, SESSION_ID)
     expect(callFunctionOn.mock.calls[0][0]).toMatchObject({
@@ -47,7 +47,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
   it('lets a selector matching nothing through — each command reports that in its own shape', async () => {
     const { session } = makeSession({ count: 0 })
 
-    expect(await resolveAmbiguity(session, frame, '.missing')).to.be.undefined
+    expect(await resolveAmbiguity(session, frame, '.missing')).toBeUndefined()
   })
 
   it('answers a selector matching several with a unique selector for each', async () => {
@@ -90,7 +90,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
   it('lets an in-range --at through without asking for selectors', async () => {
     const { session, call } = makeSession({ count: 3 })
 
-    expect(await resolveAmbiguity(session, frame, '.item', 2)).to.be.undefined
+    expect(await resolveAmbiguity(session, frame, '.item', 2)).toBeUndefined()
     // The caller named which match it wants, so there is nothing to disambiguate.
     expect(call).not.toHaveBeenCalled()
   })
@@ -107,7 +107,7 @@ describe('lib/tap/aut/single-match resolveAmbiguity', () => {
   it('lets an --at through when the selector matched nothing, leaving the read to report it', async () => {
     const { session } = makeSession({ count: 0 })
 
-    expect(await resolveAmbiguity(session, frame, '.missing', 4)).to.be.undefined
+    expect(await resolveAmbiguity(session, frame, '.missing', 4)).toBeUndefined()
   })
 
   it('maps a bad selector to the selector it was given', async () => {

@@ -36,6 +36,10 @@ const ELECTRON_DEBUG_EVENTS = [
 let instance: BrowserInstance | null = null
 let browserCriClient: BrowserCriClient | null = null
 
+// Outlives each spec's window, so the reset when the next spec launches can
+// clear the origins the previous spec's window requested.
+const storageOrigins = new Set<string>()
+
 const tryToCall = function (win, method) {
   try {
     if (!win.isDestroyed()) {
@@ -81,7 +85,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     win.destroy()
   }
 
-  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
+  const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, undefined, false, false, storageOrigins)
 
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
@@ -89,7 +93,8 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
         // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-        if (!options.videoApi) {
+        // Run mode always has a screencast running (see handleVideo), and stopping it here would end that one.
+        if (!options.videoApi && !options.isTextTerminal) {
           await pageCriClient.send('Page.startScreencast', screencastOpts())
           const ret = await fn(message, data)
 
@@ -153,7 +158,9 @@ async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpA
 
 export = {
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
-    const _this = this
+    // onNewWindow's own `this` is the window that opened the child, so it
+    // reaches this module through launchChild
+    const launchChild = (url: string, parent: BrowserWindow) => this._launchChild(url, parent, projectRoot, state, options, automation)
 
     const defaults: Windows.WindowOptions = {
       x: state.browserX || undefined,
@@ -208,6 +215,7 @@ export = {
         }
       },
       async onNewWindow (this: BrowserWindow, { url }) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- nulled once the window closes, which `this` can't be
         let _win: BrowserWindow | null = this
 
         _win.on('closed', () => {
@@ -217,7 +225,7 @@ export = {
         })
 
         try {
-          const child = await _this._launchChild(url, _win, projectRoot, state, options, automation)
+          const child = await launchChild(url, _win)
 
           // close child on parent close
           _win.on('close', () => {
@@ -337,9 +345,7 @@ export = {
     }
 
     const setProxy = () => {
-      let ps
-
-      ps = options.proxyServer
+      const ps = options.proxyServer
 
       if (ps) {
         return this._setProxy(win.webContents, ps, options.proxyBypassList)
@@ -365,11 +371,11 @@ export = {
         handleVideo({ pageCriClient, cdpAutomation, videoApi, options }),
         this._handleDownloads(win, options.downloadsFolder, automation),
         utils.initializeCDP(pageCriClient, automation, options.useBrowserNetworkInterception),
-        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron
-        // Note that we are omitting `file_systems` as it is very non-performant to clear:
-        // https://github.com/cypress-io/cypress/pull/32703
-        pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }),
-        pageCriClient.send('Network.clearBrowserCache'),
+        // Ensure to clear browser state in between runs. This is handled differently in browsers when we launch new tabs, but we don't have that concept in electron.
+        // The session clear reaches every origin, including ones left by an earlier `cypress open`,
+        // but has no option for interest groups or shared storage, which the per-origin reset covers.
+        this._clearStorageData(win.webContents),
+        cdpAutomation.onRequest('reset:browser:state', undefined),
       ])
     }
 
@@ -456,6 +462,17 @@ export = {
     return webContents.session.clearCache()
   },
 
+  _clearStorageData (webContents) {
+    debug('clearing storage data')
+
+    // Clears every origin in the session, which Chrome's CDP no longer allows
+    // in one call. `filesystem` is left out because it is very slow to clear:
+    // https://github.com/cypress-io/cypress/pull/32703
+    return webContents.session.clearStorageData({
+      storages: ['cookies', 'indexdb', 'localstorage', 'shadercache', 'serviceworkers', 'cachestorage'],
+    })
+  },
+
   _getUserAgent (webContents) {
     const userAgent = webContents.session.getUserAgent()
 
@@ -474,6 +491,8 @@ export = {
     // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
     browserCriClient?.currentlyAttachedTarget?.send('Network.setUserAgentOverride', {
       userAgent,
+    }).catch((error) => {
+      debug('failed to set user agent through CDP, relying on the session %o', { error })
     })
 
     return webContents.session.setUserAgent(userAgent)

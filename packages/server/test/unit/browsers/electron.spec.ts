@@ -7,13 +7,14 @@ import { Automation } from '../../../lib/automation'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as electronApp from '../../../lib/util/electron-app'
 import utils from '../../../lib/browsers/utils'
-import { screencastOpts } from '../../../lib/browsers/cdp-protocol/cdp_automation'
+import { CdpAutomation, screencastOpts } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import menu from '../../../lib/gui/menu'
 import * as plugins from '../../../lib/plugins'
 import * as Windows from '../../../lib/gui/windows'
 import electron from '../../../lib/browsers/electron'
 import * as savedState from '../../../lib/saved_state'
 import type { BrowserLaunchOpts } from '@packages/types'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 vi.mock('electron', async () => {
   const { default: electronStub } = await import('../../support/helpers/electron_stub')
@@ -139,6 +140,7 @@ describe('lib/browsers/electron', () => {
           setUserAgent: vi.fn(),
           getUserAgent: vi.fn(),
           clearCache: vi.fn(),
+          clearStorageData: vi.fn(),
         },
         on: vi.fn(),
         getOSProcessId: vi.fn().mockReturnValue(ELECTRON_PID),
@@ -690,8 +692,13 @@ describe('lib/browsers/electron', () => {
     it('expects the browser to be reset', () => {
       return electron._launch(win, url, automation, options, undefined, undefined, { attachCDPClient: vi.fn() })
       .then(() => {
-        expectCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
+        expect(win.webContents.session.clearStorageData).toHaveBeenCalledWith({
+          storages: ['cookies', 'indexdb', 'localstorage', 'shadercache', 'serviceworkers', 'cachestorage'],
+        })
+
+        expectCalledWith(pageCriClient.send, 'Network.clearBrowserCookies')
         expectCalledWith(pageCriClient.send, 'Network.clearBrowserCache')
+        expectNotCalledWith(pageCriClient.send, 'Storage.clearDataForOrigin', { origin: '*' })
       })
     })
 
@@ -876,7 +883,7 @@ describe('lib/browsers/electron', () => {
             },
             {
               name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
+              value: getMetadataHeaderValue(),
             },
           ],
         })
@@ -1050,6 +1057,49 @@ describe('lib/browsers/electron', () => {
           })
         })
       })
+    })
+  })
+
+  describe('._getAutomation take:screenshot', () => {
+    let captureScreenshot: Mock
+
+    const takeScreenshot = async (launchOptions: Record<string, unknown>) => {
+      // @ts-expect-error - partial launch options
+      const automationInstance = await electron._getAutomation(win, { onError: () => {}, ...launchOptions }, automation)
+
+      return automationInstance.onRequest('take:screenshot', {} as any)
+    }
+
+    beforeEach(() => {
+      captureScreenshot = vi.fn().mockResolvedValue('data:image/png;base64,iVBORw0KGgo=')
+      // @ts-expect-error - partial CdpAutomation
+      vi.spyOn(CdpAutomation, 'create').mockResolvedValue({ onRequest: captureScreenshot })
+    })
+
+    it('wraps the screenshot in a screencast in open mode without video', async () => {
+      const result = await takeScreenshot({ isTextTerminal: false })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expect(pageCriClient.send.mock.calls.map(([command]) => command)).toStrictEqual(['Page.startScreencast', 'Page.stopScreencast'])
+      expect(pageCriClient.send).toHaveBeenCalledWith('Page.startScreencast', screencastOpts())
+      expect(pageCriClient.send.mock.invocationCallOrder[0]).toBeLessThan(captureScreenshot.mock.invocationCallOrder[0])
+      expect(captureScreenshot.mock.invocationCallOrder[0]).toBeLessThan(pageCriClient.send.mock.invocationCallOrder[1])
+    })
+
+    it('leaves the run-mode screencast running when video is disabled', async () => {
+      const result = await takeScreenshot({ isTextTerminal: true })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expectNotCalledWith(pageCriClient.send, 'Page.startScreencast', anyArg)
+      expectNotCalledWith(pageCriClient.send, 'Page.stopScreencast')
+    })
+
+    it('leaves the video screencast running when video is enabled', async () => {
+      const result = await takeScreenshot({ isTextTerminal: true, videoApi: {} })
+
+      expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
+      expectNotCalledWith(pageCriClient.send, 'Page.startScreencast', anyArg)
+      expectNotCalledWith(pageCriClient.send, 'Page.stopScreencast')
     })
   })
 
@@ -1238,6 +1288,7 @@ describe('lib/browsers/electron', () => {
   })
 
   // TODO: these all need to be updated
+  // eslint-disable-next-line vitest/no-disabled-tests
   describe.skip('._launchChild', () => {
     let childWin: any
     let event: any

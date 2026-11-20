@@ -8,9 +8,7 @@ const LazyDog = React.lazy(async () => {
   return comp
 })
 
-interface LazyComponentProps {}
-
-export const LazyComponent: React.FC<LazyComponentProps> = () => {
+export const LazyComponent: React.FC = () => {
   return (
     <div>
       Loading a dog:

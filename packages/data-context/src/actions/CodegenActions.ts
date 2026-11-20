@@ -16,7 +16,7 @@ interface ReactComponentDescriptor {
 export class CodegenActions {
   constructor (private ctx: DataContext) {}
 
-  async getReactComponentsFromFile (filePath: string, reactDocgen?: typeof import('react-docgen')): Promise<{components: ReactComponentDescriptor[], errored?: boolean }> {
+  async getReactComponentsFromFile (filePath: string, reactDocgen?: typeof import('react-docgen')): Promise<{ components: ReactComponentDescriptor[], errored?: boolean }> {
     try {
       const project = this.ctx.currentProject
 
@@ -41,7 +41,7 @@ export class CodegenActions {
       const src = await this.ctx.fs.readFile(componentPath, 'utf8')
 
       const exportResolver: ExportResolver = new Map()
-      let result = parseReactComponent(src, {
+      const result = parseReactComponent(src, {
         resolver: findAllWithLink(exportResolver, reactDocgenResolvers),
         babelOptions: {
           configFile: false,
@@ -117,7 +117,7 @@ export class CodegenActions {
       isDefault,
     })
 
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResults = await codeGenerator(
       { templateDir: templates[codeGenOptions.templateKey], target: codeGenOptions.overrideCodeGenDir || path.parse(codeGenPath).dir },
@@ -191,7 +191,7 @@ export class CodegenActions {
       return undefined
     }
 
-    // @ts-ignore - because of the conditional above, we know that devServer isn't a function
+    // @ts-expect-error - because of the conditional above, we know that devServer isn't a function
     return this.ctx.coreData.wizard.frameworks.find((framework) => framework.configFramework === config?.component?.devServer.framework)
   }
 }

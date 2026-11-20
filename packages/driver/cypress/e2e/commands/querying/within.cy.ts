@@ -9,6 +9,7 @@ describe('src/cy/commands/querying/within', () => {
     })
 
     it('invokes callback function with runnable.ctx', function () {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias -- compared against the callback's own `this`
       const ctx = this
 
       cy.get('div:first').within(function () {

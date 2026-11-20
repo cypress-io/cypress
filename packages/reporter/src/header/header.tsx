@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react'
 import React from 'react'
-// @ts-ignore
 import Tooltip from '../lib/tooltip'
 import Button from '@cypress-design/react-button'
 import type { Events } from '../lib/events'
@@ -41,8 +40,7 @@ const Header: React.FC<ReporterHeaderProps> = observer(({ appState, events = def
                 appState.toggleSpecList()
                 events.emit('save:state')
               })()
-            }
-            }>
+            }}>
             <MenuExpandRightIcon style={{ transform: appState.isSpecsListOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
           </Button>
         </div>

@@ -24,7 +24,7 @@ import { InterceptionEscapeDetector } from './browsers/cdp-protocol/interception
 import type { InterceptionEscape } from './browsers/cdp-protocol/interception-escape-detector'
 import { shouldStreamResponseBody } from './browsers/cdp-protocol/should-stream-response-body'
 import { createServeInternalRoutesMiddleware } from './adapters/serve-internal-routes'
-import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, getCypressReservedPathPrefixes, isAnsweredByCypress, isReadMethod, resolveProxyUrlBase } from './adapters/internal-routes'
+import { CYPRESS_INTERNAL_LOOPBACK_HEADER, CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken, isAnsweredByCypress, isReadMethod, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:network-runtime')
 
@@ -204,12 +204,10 @@ export function createCdpFetchRuntime (deps: CreateCdpFetchRuntimeDeps): CdpFetc
     middleware: defaultMiddleware,
     getRenderedHTMLOrigins: () => ({}),
     // Only the CDP Fetch runtime (browser network interception mode) sets this;
-    // createProxyRuntime (MITM) does not. See
-    // packages/proxy/lib/http/util/disable-navigation-preload.ts (#34652).
+    // createProxyRuntime (MITM) does not. It leaves service worker scripts
+    // unmodified, see getServiceWorkerInstrumentationExpression in
+    // packages/proxy/lib/http/util/service-worker-injector.ts.
     useBrowserNetworkInterception: true,
-    // The proxy cannot reach the route definitions, so hand it the list the
-    // service worker injector needs to make instrumented workers decline them.
-    reservedPathPrefixes: getCypressReservedPathPrefixes(deps.config),
   })
 
   // Shared by the main transport and every extra-target transport so a popup

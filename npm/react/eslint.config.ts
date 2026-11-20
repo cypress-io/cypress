@@ -1,4 +1,4 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, reactConfig } from '@packages/eslint-config'
 
 // Root config files outside tsconfig may use the default project (no ** globs allowed).
 const allowDefaultProject = [
@@ -23,13 +23,12 @@ export default [
   { ignores: ['**/dist', '**/*.d.ts', '**/package-lock.json', '**/tsconfig.json', '**/cypress/fixtures'] },
   ...baseConfig,
   ...jsonConfig,
+  reactConfig(['**/*.{js,jsx,ts,tsx}']),
   {
     files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
     rules: {
       'no-console': 'off',
-      'mocha/no-global-tests': 'off',
-      'react/prop-types': 'off',
-      'react/display-name': 'off',
+      'mocha/no-top-level-tests': 'off',
     },
   },
   {

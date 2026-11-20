@@ -53,6 +53,40 @@ describe('lib/exec/xvfb', function () {
       await expect(xvfb.start()).rejects.toThrow(message)
     })
 
+    it('tells a missing Xvfb apart, with install commands', async () => {
+      const e: any = new Error('spawn Xvfb ENOENT')
+
+      e.code = 'ENOENT'
+
+      vi.spyOn(_xvfb.prototype, 'start').mockImplementation((cb) => {
+        cb(e)
+      })
+
+      await expect(xvfb.start()).rejects.toThrow(expect.objectContaining({
+        message: expect.stringContaining('apt-get install -y xvfb'),
+        known: true,
+      }))
+    })
+
+    it.each([
+      ['did not start in time', Object.assign(new Error('Could not start Xvfb.'), { timedOut: true })],
+      ['is already in use', new Error('Display :99 is already in use and there is a lock file /tmp/.X99-lock.')],
+      ['cannot be run', Object.assign(new Error('spawn Xvfb EACCES'), { code: 'EACCES' })],
+    ])('tells an Xvfb that %s apart from a missing one, keeping the original message', async (_name, e) => {
+      vi.spyOn(_xvfb.prototype, 'start').mockImplementation((cb) => {
+        cb(e)
+      })
+
+      const failure = await xvfb.start().catch((err) => err)
+
+      expect(failure.message).toContain('Xvfb is installed but could not start.')
+      expect(failure.message).toContain('XVFB_DISPLAY_NUM')
+      expect(failure.message).toContain(`within ${xvfb._xvfbOptions.timeout / 1000} seconds`)
+      expect(failure.message).toContain(e.message)
+      expect(failure.message).not.toContain('missing the dependency')
+      expect(failure.known).toBe(true)
+    })
+
     it('fails when xvfb exited with non zero exit code', async () => {
       const e: any = new Error('something bad happened')
 
@@ -86,6 +120,29 @@ describe('lib/exec/xvfb', function () {
       vi.stubEnv('DISPLAY', ':99')
 
       expect(xvfb.isNeeded()).toBe(false)
+    })
+
+    it('does not need xvfb when the given env has ELECTRON_RUN_AS_NODE', function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.stubEnv('DISPLAY', undefined)
+
+      expect(xvfb.isNeeded({ ELECTRON_RUN_AS_NODE: '1' })).toBe(false)
+    })
+
+    it('reads DISPLAY from the given env instead of process.env', function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.stubEnv('DISPLAY', ':99')
+
+      expect(xvfb.isNeeded({})).toBe(true)
+      expect(xvfb.isNeeded({ DISPLAY: ':1' })).toBe(false)
+    })
+
+    it('ignores ELECTRON_RUN_AS_NODE in process.env when given a clean env', function () {
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+      vi.stubEnv('DISPLAY', undefined)
+
+      expect(xvfb.isNeeded({})).toBe(true)
     })
 
     it('does need xvfb on linux when no DISPLAY is set', function () {

@@ -1,6 +1,6 @@
 /* eslint-disable
     mocha/handle-done-callback,
-    mocha/no-global-tests,
+    mocha/no-top-level-tests,
 */
 it('catches regular promise errors', () => {
   return Promise.reject(new Error('bar'))

@@ -690,14 +690,94 @@ describe('lib/browsers/cdp_automation', () => {
     })
 
     describe('reset:browser:state', () => {
-      it('sends Storage.clearDataForOrigin and Network.clearBrowserCache', async () => {
-        sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }).resolves()
+      const storageTypes = 'indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage'
+
+      const request = (url: string) => {
+        onFn.withArgs('Network.requestWillBeSent').yield({ requestId: url, request: { url, method: 'GET', headers: {} }, type: 'Document', wallTime: 0 })
+      }
+
+      const clearedOrigins = () => {
+        return callsWith(sendDebuggerCommand, 'Storage.clearDataForOrigin').map(([, params]) => params.origin)
+      }
+
+      beforeEach(() => {
+        sendDebuggerCommand.withArgs('Network.clearBrowserCookies').resolves()
         sendDebuggerCommand.withArgs('Network.clearBrowserCache').resolves()
+        sendDebuggerCommand.withArgs('Storage.clearDataForOrigin').resolves()
+      })
+
+      it('clears cookies and the cache for the whole browser', async () => {
+        await onRequest('reset:browser:state')
+
+        expectCalledWith(sendDebuggerCommand, 'Network.clearBrowserCookies')
+        expectCalledWith(sendDebuggerCommand, 'Network.clearBrowserCache')
+      })
+
+      it('never clears every origin at once', async () => {
+        await onRequest('reset:browser:state')
+
+        expectNotCalledWith(sendDebuggerCommand, 'Storage.clearDataForOrigin', { origin: '*', storageTypes })
+      })
+
+      it('clears each http(s) origin the browser requested, by name', async () => {
+        request('http://localhost:3500/fixtures/a.html')
+        request('http://localhost:3500/fixtures/b.html')
+        request('https://www.foobar.com:8443/api')
+        request('chrome-extension://abc/background.js')
+        request('blob:http://localhost:3500/1234')
 
         await onRequest('reset:browser:state')
 
-        expectCalledWith(sendDebuggerCommand, 'Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
-        expectCalledWith(sendDebuggerCommand, 'Network.clearBrowserCache')
+        expect(clearedOrigins().sort()).toEqual(['http://localhost:3500', 'https://www.foobar.com:8443'])
+        expectCalledWith(sendDebuggerCommand, 'Storage.clearDataForOrigin', { origin: 'http://localhost:3500', storageTypes })
+      })
+
+      it('does not clear an origin again once it was cleared', async () => {
+        request('http://localhost:3500/fixtures/a.html')
+
+        await onRequest('reset:browser:state')
+        await onRequest('reset:browser:state')
+
+        expect(clearedOrigins()).toEqual(['http://localhost:3500'])
+      })
+
+      it('runs every clear, then rejects naming each one that failed', async () => {
+        sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: 'http://localhost:3500', storageTypes }).rejects(new Error('Permission denied'))
+        sendDebuggerCommand.withArgs('Network.clearBrowserCache').rejects(new Error('cache is busy'))
+        request('http://localhost:3500/fixtures/a.html')
+        request('http://localhost:3501/fixtures/b.html')
+
+        await expect(onRequest('reset:browser:state')).rejects.toThrow(
+          `Cypress could not clear the browser's state before the next spec:\n\nNetwork.clearBrowserCache: cache is busy\nStorage.clearDataForOrigin for http://localhost:3500: Permission denied`,
+        )
+
+        expect(clearedOrigins()).toEqual(['http://localhost:3500', 'http://localhost:3501'])
+        expectCalledWith(sendDebuggerCommand, 'Network.clearBrowserCookies')
+      })
+
+      it('retries an origin whose clear failed on the next reset', async () => {
+        sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: 'http://localhost:3500', storageTypes }).rejects(new Error('Permission denied'))
+        request('http://localhost:3500/fixtures/a.html')
+        request('http://localhost:3501/fixtures/b.html')
+
+        await expect(onRequest('reset:browser:state')).rejects.toThrow()
+        await expect(onRequest('reset:browser:state')).rejects.toThrow()
+
+        expect(clearedOrigins()).toEqual(['http://localhost:3500', 'http://localhost:3501', 'http://localhost:3500'])
+      })
+
+      it('clears the origins another instance recorded into a shared set', async () => {
+        const storageOrigins = new Set<string>()
+        const previousOnFn = createStub()
+
+        await CdpAutomation.create(sendDebuggerCommand, previousOnFn, offFn, sendCloseTargetCommand, automation, undefined, false, false, storageOrigins)
+        previousOnFn.withArgs('Network.requestWillBeSent').yield({ requestId: '1', request: { url: 'http://localhost:3500/', method: 'GET', headers: {} }, type: 'Document', wallTime: 0 })
+
+        const next = await CdpAutomation.create(sendDebuggerCommand, createStub(), offFn, sendCloseTargetCommand, automation, undefined, false, false, storageOrigins)
+
+        await next.onRequest('reset:browser:state', undefined)
+
+        expect(clearedOrigins()).toEqual(['http://localhost:3500'])
       })
     })
 

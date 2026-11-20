@@ -98,7 +98,7 @@ There are a few steps when adding a new sub-package.
 3. Add the sub-package's name to the following locations:
   - **`cli/.gitignore`**
   - **`cli/scripts/post-build.js`**
-  - **`.eslintignore`** (under cli/sub-package)
+  - the `ignores` list in **`cli/eslint.config.ts`**
 4. DO NOT manually update the **package.json** file. Running `yarn build` will automate this process.
 5. Commit the changed files.
 

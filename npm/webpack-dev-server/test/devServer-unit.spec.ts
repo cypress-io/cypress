@@ -44,6 +44,28 @@ describe('devServer', { timeout: 10000 }, function () {
     expect(result.version).toEqual(5)
   })
 
+  it('creates a new devServer webpack5, webpackDevServer6', async () => {
+    const sourceRelativeWebpackModules = await import('../src/helpers/sourceRelativeWebpackModules')
+
+    vi.mocked(sourceRelativeWebpackModules.sourceDefaultWebpackDependencies).mockReturnValue(createModuleMatrixResult({
+      webpack: 5,
+      webpackDevServer: 6,
+    }))
+
+    const { devServer } = await import('../src/devServer')
+
+    const result = await devServer.create({
+      specs: [],
+      cypressConfig,
+      webpackConfig: {},
+      devServerEvents: new EventEmitter(),
+    })
+
+    // webpack-dev-server 6 ships separate ESM and CommonJS builds, and Cypress loads the CommonJS one
+    expect(result.server).toBeInstanceOf(require('webpack-dev-server-6'))
+    expect(result.version).toEqual(6)
+  })
+
   // Writing to disk includes the correct source map size, where the difference will be made up from stat size vs parsed size
   // This is critical if a user is trying to debug to determine if they have large source maps or other large files in their dev-server under test
   describe('writes to disk if DEBUG=cypress-verbose:webpack-dev-server:bundle-analyzer is set', async () => {
