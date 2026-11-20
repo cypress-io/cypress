@@ -368,24 +368,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // v8 snapshot bundling fails on mixed inline type + value imports.
-  // Globs are package-relative: lint runs per package, not from the repo root.
-  {
-    files: [
-      'lib/**/*.{js,ts,tsx}',
-      'src/**/*.{js,ts,tsx}',
-    ],
-    ignores: [
-      '**/test/**',
-      '**/*.spec.*',
-      '**/cypress/**',
-      '**/__snapshots__/**',
-    ],
-    rules: {
-      'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-    },
-  },
-
   {
     files: ['**/*.{js,ts,tsx,vue}'],
     rules: {
