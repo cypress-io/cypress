@@ -894,6 +894,30 @@ describe('ProjectLifecycleManager', () => {
       expect(initialize.mock.invocationCallOrder[0]).toBeLessThan(cleared.mock.invocationCallOrder[0])
       expect(cleared.mock.invocationCallOrder[0]).toBeLessThan(chooseBrowser.mock.invocationCallOrder[0])
     })
+
+    // Loading the configuration again starts a new plugins process, so a crash of the old one no
+    // longer applies. Withdrawn after the session starts, since a session that is not running yet
+    // has no live state to withdraw it from.
+    it('withdraws a plugins error for cypress tap once the session has started again', async () => {
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+      // Safe because the config manager keeps the options it was created with, private, as `options`
+      const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
+
+      const initialize = jest.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
+
+      jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+
+      const setPluginsError = ctx._apis.projectApi.setSessionPluginsError as jest.Mock
+
+      ctx.coreData.currentProject = '/projects/foo'
+
+      await onFinalConfigLoaded(fullConfig, { shouldRestartBrowser: false })
+
+      expect(setPluginsError).toHaveBeenCalledTimes(1)
+      expect(setPluginsError).toHaveBeenCalledWith(null)
+      expect(initialize.mock.invocationCallOrder[0]).toBeLessThan(setPluginsError.mock.invocationCallOrder[0])
+    })
   })
 
   describe('onInitialConfigLoaded', () => {

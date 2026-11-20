@@ -62,7 +62,8 @@ export interface LiveSessionState extends CypressSession {
   /**
    * Why the plugins process exited after the session started. The project stays loaded and
    * the browser stays drivable, so unlike `loadError` it does not stop tap commands, but
-   * `setupNodeEvents`, `cy.task` and the preprocessor are gone until the configuration loads again.
+   * `setupNodeEvents`, `cy.task`, the preprocessor and, in component testing, the dev server are
+   * gone until the configuration loads again.
    */
   pluginsError?: { message: string }
 }

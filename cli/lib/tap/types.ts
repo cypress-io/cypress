@@ -81,7 +81,8 @@ export interface TapStatus {
   error?: string
   /**
    * Why the session's plugins process exited after it started. The session can still be driven,
-   * but `setupNodeEvents`, `cy.task` and the preprocessor are unavailable until the configuration loads again.
+   * but `setupNodeEvents`, `cy.task`, the preprocessor and, in component testing, the dev server
+   * are unavailable until the configuration loads again.
    */
   pluginsError?: string
   /** The currently pinned command, if any. */

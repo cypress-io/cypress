@@ -10,16 +10,20 @@ import { unmountReporter } from './reporter'
 // Error, such as a plain object, still gets its message rather than `[object Object]`.
 function formatSpecLoadError (err: unknown): string {
   if (err instanceof Error) {
-    return `${err.name}: ${err.message}`
+    return err.message ? `${err.name}: ${err.message}` : err.name
+  }
+
+  if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
+    const name = 'name' in err && typeof err.name === 'string' ? err.name : undefined
+
+    if (name === undefined) {
+      return err.message
+    }
+
+    return err.message ? `${name}: ${err.message}` : name
   }
 
   if (err && typeof err === 'object') {
-    const { name, message } = err as { name?: unknown, message?: unknown }
-
-    if (typeof message === 'string') {
-      return typeof name === 'string' ? `${name}: ${message}` : message
-    }
-
     try {
       return JSON.stringify(err)
     } catch {

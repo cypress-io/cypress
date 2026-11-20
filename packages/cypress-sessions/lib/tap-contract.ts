@@ -269,7 +269,12 @@ has started or finished.
 
 Poll the 'status' command for progress. Read status first and keep its
 startedAt: a verdict still carrying that same startedAt describes the spec
-before this one, so wait for a verdict whose startedAt differs.`,
+before this one, so wait for a verdict whose startedAt differs.
+
+If the session's plugins process has stopped, the output also carries
+\`pluginsError\`. An end-to-end spec then fails to build with that reason as
+its error. In component testing the dev server stops with the plugins process,
+so the spec may not load at all.`,
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
@@ -292,9 +297,10 @@ file became invalid, is listed as "could not load", with the reason as
 
 A session whose plugins process stopped after the project loaded is listed as
 "plugins stopped", with the reason as \`pluginsError\` in the JSON. Other tap
-commands still work on it, but \`cy.task\`, \`setupNodeEvents\` and the spec
-preprocessor do not, so a spec that has to build stays loading. Save the
-configuration file to load it again, or stop Cypress and start it again.`,
+commands still work on it, but \`cy.task\` fails with that reason, an end-to-end
+spec fails to build with it, and a component spec may not load at all, since
+the dev server stops with the plugins process. Save the configuration file to
+load it again, or stop Cypress and start it again.`,
 } as const satisfies TapNativeCommandSchema
 
 const statusMeta = {
@@ -335,9 +341,11 @@ spec or the new one.
 
 If the session's plugins process exits after the project loaded, every stage
 from browser not selected onwards also carries \`pluginsError\` with the reason.
-The session can still be driven, but \`cy.task\`, \`setupNodeEvents\` and the
-spec preprocessor do not work, so a spec that has to build stays loading. Save
-the configuration file to load it again, or stop Cypress and start it again;
+The session can still be driven, but \`cy.task\` fails with that reason, and an
+end-to-end spec fails to build and reports failed with it as the error. In
+component testing the dev server stops with the plugins process, so a spec may
+stay loading instead. Save the configuration file to load it again, or stop
+Cypress and start it again;
 \`pluginsError\` is gone once the configuration has loaded.`,
 } as const satisfies TapNativeCommandSchema
 

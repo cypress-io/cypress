@@ -32,8 +32,8 @@ export interface TapSessionSummary {
   loadError?: string
   /**
    * Why the session's plugins process exited after it started, when it did. The session can still
-   * be driven, but `cy.task`, `setupNodeEvents` and the spec preprocessor do not work until the
-   * configuration loads again.
+   * be driven, but `cy.task`, `setupNodeEvents`, the spec preprocessor and, in component testing,
+   * the dev server do not work until the configuration loads again.
    */
   pluginsError?: string
   /**

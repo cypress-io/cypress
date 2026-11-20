@@ -1204,6 +1204,18 @@ describe('lib/exec/tap', () => {
       })
     })
 
+    it('carries the plugins error of a session whose plugins process stopped', async () => {
+      mockLiveResolved(liveSession({ pluginsError: { message: 'The plugins process exited unexpectedly' } }))
+      mockSessionGraphql()
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        spec: 'cypress/e2e/login.cy.ts',
+        status: 'running',
+        pluginsError: 'The plugins process exited unexpectedly',
+      })
+    })
+
     it('sends the matched spec\'s session-reported absolute path to the TapRunSpec operation', async () => {
       const { session } = mockLiveResolved(liveSession())
 
