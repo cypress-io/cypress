@@ -35,6 +35,31 @@ describe('lib/url-fields', () => {
       expect(parseUrlFields('http://jane.doe@proxy.example.com:3128').auth).toEqual('jane.doe')
     })
 
+    it('keeps the colon of an empty password', () => {
+      expect(parseUrlFields('http://jane.doe:@proxy.example.com:3128').auth).toEqual('jane.doe:')
+    })
+
+    it('returns credentials it cannot decode as written', () => {
+      expect(parseUrlFields('http://jane.doe:s3cr3t%zz@proxy.example.com:3128').auth).toEqual('jane.doe:s3cr3t%zz')
+    })
+
+    it('returns the hostname and port when the port is out of range', () => {
+      expect(parseUrlFields('https://www.example.com:70000/users')).toMatchObject({ hostname: 'www.example.com', port: '70000', path: '/users' })
+    })
+
+    it('reads the port of a url with surrounding whitespace or backslashes', () => {
+      expect(parseUrlFields(' http://proxy.example.com:80 ').port).toEqual('80')
+      expect(parseUrlFields('http:\\\\proxy.example.com:80\\users').port).toEqual('80')
+    })
+
+    it('keeps the leading zeros of a written port', () => {
+      expect(parseUrlFields('https://www.example.com:0443/').port).toEqual('0443')
+    })
+
+    it('does not read a port out of the query', () => {
+      expect(parseUrlFields('https://www.example.com?time=10:30').port).toBeNull()
+    })
+
     it('strips the brackets from an IPv6 hostname', () => {
       expect(parseUrlFields('https://[::1]:8443/a').hostname).toEqual('::1')
       expect(parseUrlFields('https://[::1]:443/a').port).toEqual('443')
@@ -50,6 +75,10 @@ describe('lib/url-fields', () => {
 
     it('returns the protocol of a scheme it does not know', () => {
       expect(parseUrlFields('socksv5://proxy.example.com:1080')).toMatchObject({ protocol: 'socksv5:', hostname: 'proxy.example.com', port: '1080' })
+    })
+
+    it('returns null fields for a hostname URL rejects', () => {
+      expect(parseUrlFields('https://api|staging.example.com/users')).toMatchObject({ protocol: null, hostname: null, port: null })
     })
 
     it('returns null fields for a string that is not a url', () => {

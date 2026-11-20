@@ -849,22 +849,22 @@ describe('lib/agent', function () {
 
   describe('.buildConnectReqHead', function () {
     it('builds the correct request', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', parseUrlFields('http://proxy.example.com:3128'))
+      const head = buildConnectReqHead('api.example.com', '443', parseUrlFields('http://proxy.example.com:3128'))
 
       expect(head).toEqual([
-        'CONNECT foo.bar:1234 HTTP/1.1',
-        'Host: foo.bar:1234',
+        'CONNECT api.example.com:443 HTTP/1.1',
+        'Host: api.example.com:443',
         '', '',
       ].join('\r\n'))
     })
 
     it('can do Proxy-Authorization', function () {
-      const head = buildConnectReqHead('foo.bar', '1234', parseUrlFields('http://baz:quux@proxy.example.com:3128'))
+      const head = buildConnectReqHead('api.example.com', '443', parseUrlFields('http://jane.doe:s3cr3t@proxy.example.com:3128'))
 
       expect(head).toEqual([
-        'CONNECT foo.bar:1234 HTTP/1.1',
-        'Host: foo.bar:1234',
-        'Proxy-Authorization: Basic YmF6OnF1dXg=',
+        'CONNECT api.example.com:443 HTTP/1.1',
+        'Host: api.example.com:443',
+        `Proxy-Authorization: Basic ${Buffer.from('jane.doe:s3cr3t').toString('base64')}`,
         '', '',
       ].join('\r\n'))
     })
@@ -873,11 +873,11 @@ describe('lib/agent', function () {
   describe('.createProxySock', function () {
     it('creates a `net` socket for an http url', function () {
       vi.spyOn(net, 'connect')
-      const proxy = parseUrlFields('http://foo.bar:1234')
+      const proxy = parseUrlFields('http://proxy.example.com:3128')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
-          expect(net.connect).toHaveBeenCalledWith({ family: 4, host: 'foo.bar', port: 1234 }, expect.any(Function))
+          expect(net.connect).toHaveBeenCalledWith({ family: 4, host: 'proxy.example.com', port: 3128 }, expect.any(Function))
           resolve()
         })
       })
@@ -886,18 +886,18 @@ describe('lib/agent', function () {
     it('creates a `tls` socket for an https url', function () {
       vi.spyOn(tls, 'connect')
 
-      const proxy = parseUrlFields('https://foo.bar:1234')
+      const proxy = parseUrlFields('https://proxy.example.com:3128')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, () => {
-          expect(tls.connect).toHaveBeenCalledWith({ family: 4, host: 'foo.bar', port: 1234, ALPNProtocols: ['http/1.1'] }, expect.any(Function))
+          expect(tls.connect).toHaveBeenCalledWith({ family: 4, host: 'proxy.example.com', port: 3128, ALPNProtocols: ['http/1.1'] }, expect.any(Function))
           resolve()
         })
       })
     })
 
     it('throws on unsupported proxy protocol', function () {
-      const proxy = parseUrlFields('socksv5://foo.bar:1234')
+      const proxy = parseUrlFields('socksv5://proxy.example.com:3128')
 
       return new Promise<void>((resolve) => {
         createProxySock({ proxy }, (err) => {
@@ -1037,9 +1037,9 @@ describe('lib/agent', function () {
         const createConnection = vi.spyOn(https.Agent.prototype, 'createConnection').mockReturnValue(new net.Socket() as any)
         const { httpsAgent } = new CombinedAgent()
         const options = {
-          href: 'https://foo.bar/',
-          uri: parseUrlFields('https://foo.bar/'),
-          _agentKey: 'foo.bar:443:',
+          href: 'https://api.example.com/',
+          uri: parseUrlFields('https://api.example.com/'),
+          _agentKey: 'api.example.com:443:',
         } as any
 
         await new Promise<void>((resolve) => httpsAgent.createConnection(options, () => resolve()))

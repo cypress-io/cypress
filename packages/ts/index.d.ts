@@ -31,6 +31,7 @@ declare module 'http' {
       proxy: Optional<string>
       servername: Optional<string>
       socket: Optional<Socket>
+      // Matches `UrlFields` in @packages/network, which this package can't import
       uri?: Pick<Url, 'protocol' | 'auth' | 'hostname' | 'port' | 'path' | 'href'>
     }
 }
