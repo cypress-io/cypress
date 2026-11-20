@@ -17,6 +17,7 @@ const {
   validateStudioFile,
   getCyPromptFileSource,
   validateCyPromptFile,
+  validateShippedServerCode,
 } = require('./binary/binary-sources')
 
 // Strip test keys and local development overrides from the server code that the binary ships
@@ -31,6 +32,8 @@ const appFileRewrites = [
   ['packages/server/lib/cloud/studio/studio.js', getStudioFileSource, validateStudioFile],
   ['packages/server/lib/cloud/cy-prompt/CyPromptLifecycleManager.js', getCyPromptFileSource, validateCyPromptFile],
   ['packages/server/lib/cloud/cy-prompt/CyPromptManager.js', getCyPromptFileSource, validateCyPromptFile],
+  ['packages/server/lib/cloud/api/cy-prompt/report_cy_prompt_error.js', getCyPromptFileSource, validateCyPromptFile],
+  ['packages/server/lib/project-base.js', getCyPromptFileSource, validateCyPromptFile],
 ]
 
 module.exports = async function (params) {
@@ -114,6 +117,8 @@ module.exports = async function (params) {
     })
 
     await cleanupUnneededDependencies(outputFolder)
+
+    await validateShippedServerCode(path.join(appDir, 'packages', 'server'))
 
     await createStartBundleCodeCache()
   } catch (error) {
