@@ -32,6 +32,7 @@ const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
 const md = new Markdown()
+const mdBreaks = new Markdown({ breaks: true })
 const mdOnlyHTML = new Markdown('zero').enable(['html_inline', 'html_block'])
 
 const asterisksRegex = /^\*\*(.+?)\*\*$/gs
@@ -78,8 +79,9 @@ export const formattedMessage = (message: string, name?: string) => {
     return result.join('')
   }
 
-  // format markdown for everything else
-  return md.renderInline(message)
+  // format markdown for everything else. Command messages (cy.log, Cypress.log)
+  // render newlines as <br>; error messages (no command name) do not
+  return name ? mdBreaks.renderInline(message) : md.renderInline(message)
 }
 
 const invisibleMessage = (model: CommandModel) => {
