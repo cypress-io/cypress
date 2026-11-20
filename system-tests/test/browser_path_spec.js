@@ -40,12 +40,13 @@ describe('e2e launching browsers by path', () => {
   it('works with an installed browser path', async function () {
     const browserName = process.env.BROWSER || 'chrome'
 
-    // Electron ships inside Cypress and WebKit comes from playwright-webkit, so neither has an installed path
+    // NOTE: Electron ships inside Cypress and WebKit comes from playwright-webkit, so neither has an installed path
     if (browserName === 'electron' || browserName === 'webkit') {
       return this.skip()
     }
 
-    const browser = (await launcher.detect()).find(({ name }) => name === browserName)
+    // Beta, Dev and Canary share the name, but the snapshot only normalizes the stable display name
+    const browser = (await launcher.detect()).find(({ name, channel }) => name === browserName && channel === 'stable')
 
     if (!browser) {
       throw new Error(`${browserName} must be installed for this test`)
