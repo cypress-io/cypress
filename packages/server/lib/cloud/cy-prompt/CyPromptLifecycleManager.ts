@@ -300,7 +300,7 @@ export class CyPromptLifecycleManager {
     // Watch for changes to the cy prompt bundle
     CyPromptLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_CY_PROMPT_PATH, 'server', 'index.js'), {
       awaitWriteFinish: true,
-    }).on('change', async () => {
+    }).on('change', () => {
       this.cyPromptManager = undefined
       this.cyPromptManagerPromise = this.createCyPromptManager({
         cloudDataSource,

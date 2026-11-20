@@ -135,7 +135,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return cache.removeAllProjectPreferences()
       },
       insertProjectPreferencesToCache (projectTitle: string, preferences: Preferences) {
-        return cache.insertProjectPreferences(projectTitle, preferences)
+        cache.insertProjectPreferences(projectTitle, preferences).catch((err) => {
+          debug('failed to cache preferences for project %s: %o', projectTitle, err)
+        })
       },
       removeProjectFromCache (path: string) {
         return cache.removeProject(path)
@@ -162,16 +164,19 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         }
       },
       setPromptShown (slug) {
-        return openProject.getProject()
+        openProject.getProject()
         ?.saveState({
           promptsShown: {
             ...(openProject.getProject()?.state?.promptsShown ?? {}),
             [slug]: Date.now(),
           },
         })
+        .catch((err) => {
+          debug('failed to save that the %s prompt was shown: %o', slug, err)
+        })
       },
-      setProjectPreferences (state) {
-        return openProject.getProject()?.saveState(state)
+      async setProjectPreferences (state) {
+        await openProject.getProject()?.saveState(state)
       },
       makeProjectSavedState (projectRoot: string) {
         return () => savedState.create(projectRoot).then((s) => s.get())

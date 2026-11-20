@@ -18,6 +18,7 @@ import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
 import type { CriClient } from './cdp-protocol/cri-client'
+import { handleRejection } from '../util/async-listener'
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -186,7 +187,7 @@ export = {
       // prevents a tiny 1px padding around the window
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
-      async onCrashed () {
+      onCrashed: handleRejection(async () => {
         // Synchronously mark sibling CRI clients (which share the same targetId)
         // as crashed. Each sibling has its own websocket and its own listener for
         // Target.targetCrashed, but those listeners fire when Chromium happens
@@ -200,7 +201,11 @@ export = {
 
         const err = errors.get('RENDERER_CRASHED', 'Electron')
 
-        await memory.endProfiling()
+        try {
+          await memory.endProfiling()
+        } catch (profilingErr) {
+          debug('failed to end memory profiling after the renderer crashed: %o', profilingErr)
+        }
 
         if (!options.onError) {
           errors.log(err)
@@ -208,7 +213,9 @@ export = {
         }
 
         options.onError(err)
-      },
+      }, (err) => {
+        errors.log(err instanceof Error ? err : new Error(String(err)))
+      }),
       onFocus () {
         if (!options.browser.isHeadless) {
           return menu.set({ withInternalDevTools: true })

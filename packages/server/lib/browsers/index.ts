@@ -13,6 +13,7 @@ import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
 import type { CDPSocketServer } from '@packages/socket'
+import { handleRejection } from '../util/async-listener'
 
 const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = (browser: string) => BROWSER_FAMILY.includes(browser)
@@ -121,7 +122,11 @@ async function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): 
   return utils.throwBrowserNotFound(browser.name, browsers)
 }
 
-process.once('exit', () => kill({ isProcessExit: true }))
+process.once('exit', () => {
+  // kill signals the browser synchronously and its promise never rejects. The
+  // process is exiting, so nothing is left to wait for the browser to exit.
+  void kill({ isProcessExit: true })
+})
 
 const browsers = {
   ensureAndGetByNameOrPath: utils.ensureAndGetByNameOrPath,
@@ -271,7 +276,7 @@ const browsers = {
     // TODO: normalizing opening and closing / exiting
     // so that there is a default for each browser but
     // enable the browser to configure the interface
-    instance.once('exit', async (code, signal) => {
+    instance.once('exit', handleRejection(async (code, signal) => {
       // When the browser has unexpectedly exited, we need to send a signal to the attempt launcher to recreate the browser CRI clients.
       // We do NOT want to attempt to use existing CRI clients as the previous instance of the browser was terminated.
       // @see https://github.com/cypress-io/cypress/issues/27657
@@ -315,7 +320,9 @@ const browsers = {
 
         await options.onError(err)
       }
-    })
+    }, (err) => {
+      errors.log(err instanceof Error ? err : new Error(String(err)))
+    }))
 
     // Run mode already waits for the browser's socket to connect before it
     // considers the browser launched, so padding here only delays every spec.

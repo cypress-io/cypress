@@ -28,6 +28,7 @@ import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error
 import type { DebugData } from '@packages/types'
 import { GracefulExit } from '../../util/graceful-exit'
 import type { ExitStepKey } from '../../util/graceful-exit'
+import { handleRejection } from '../../util/async-listener'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
@@ -377,7 +378,7 @@ export class StudioLifecycleManager {
     // Watch for changes to the studio bundle
     StudioLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server', 'index.js'), {
       awaitWriteFinish: true,
-    }).on('change', async () => {
+    }).on('change', handleRejection(async () => {
       await this.studioManager?.destroy()
       this.studioManager = undefined
       this.studioManagerPromise = this.createStudioManager({
@@ -395,7 +396,9 @@ export class StudioLifecycleManager {
 
         return null
       })
-    })
+    }, (error) => {
+      logError('Error destroying studio manager before reload: %o', error)
+    }))
   }
 
   /**

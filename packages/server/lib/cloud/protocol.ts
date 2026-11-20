@@ -155,6 +155,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         }
 
         listenerMap.get(event)!.set(listener, wrapper)
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises -- the wrapper captures every error; only with a local protocol bundle does it rethrow, on purpose, so the developer sees it
         cdpClient.on(event, wrapper)
       },
       off: (event, listener) => {
@@ -162,6 +163,7 @@ export class ProtocolManager implements ProtocolManagerShape {
         const wrapper = eventListeners?.get(listener)
 
         if (wrapper) {
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises -- the wrapper captures every error; only with a local protocol bundle does it rethrow, on purpose, so the developer sees it
           cdpClient.off(event, wrapper)
           eventListeners!.delete(listener)
           if (eventListeners!.size === 0) {

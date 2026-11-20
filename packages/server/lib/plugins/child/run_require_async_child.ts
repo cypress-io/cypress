@@ -6,6 +6,7 @@ import type { ConfigFileExport, DevServerInfo, PluginChildIpc, SetupNodeEventsFn
 import { getError } from '@packages/errors'
 import type { TestingType } from '@packages/types'
 import type { TransformError } from '@packages/types'
+import { handleRejection } from '../../util/async-listener'
 
 const debug = debugLib(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 
@@ -47,6 +48,13 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
 
     ipc.send('childProcess:unhandledError', util.serializeError(err as Error))
   })
+
+  // The IPC emitter drops what its listeners return, so a rejection from one is
+  // reported the way the unhandledRejection handler above reports it
+  const reportRejection = (err: unknown) => {
+    debug('ipc listener rejected:', err)
+    ipc.send('childProcess:unhandledError', util.serializeError(err as Error))
+  }
 
   const isValidSetupNodeEvents = (config: ConfigFileExport, testingType: TestingType): boolean => {
     const testingTypeConfig = config[testingType] as ConfigFileExport['component'] | undefined
@@ -109,7 +117,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
     return require(configFilePath)
   }
 
-  ipc.on('loadConfig', async () => {
+  ipc.on('loadConfig', handleRejection(async () => {
     try {
       debug('try loading', file)
       const configFileExport = await loadFile(file)
@@ -125,7 +133,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
 
       let hasSetup = false
 
-      ipc.on('setupTestingType', async (testingType: TestingType, options: Cypress.PluginConfigOptions) => {
+      ipc.on('setupTestingType', handleRejection(async (testingType: TestingType, options: Cypress.PluginConfigOptions) => {
         if (hasSetup) {
           throw new Error('Already Setup')
         }
@@ -188,7 +196,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
             requires: util.nonNodeRequires(),
           })
         }
-      })
+      }, reportRejection))
 
       debug('loaded config from %s %o', file, result)
     } catch (err) {
@@ -221,7 +229,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
         getError('CONFIG_FILE_REQUIRE_ERROR', file, loadErr),
       ))
     }
-  })
+  }, reportRejection))
 
   ipc.send('ready')
 }

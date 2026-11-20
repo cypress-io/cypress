@@ -50,6 +50,19 @@ const callsWith = (mock: Mock, ...expected: unknown[]) => {
   return mock.mock.calls.filter((call) => argsMatch(call, expected))
 }
 
+// The registered crash listener drops the handler's promise, so return the
+// promise of the handling it started for a spec to wait on.
+const crashHandlerFor = (browserClient: { on: Mock }) => {
+  const listener = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
+  const onCrash = vi.spyOn(BrowserCriClient, '_onTargetReloadedAfterCrash')
+
+  return (event: unknown, sessionId?: string): Promise<void> => {
+    listener(event, sessionId)
+
+    return onCrash.mock.results[onCrash.mock.results.length - 1].value
+  }
+}
+
 const expectCalledWith = (mock: Mock, ...expected: unknown[]) => {
   expect(callsWith(mock, ...expected), `calls matching ${String(expected[0])}`).not.toHaveLength(0)
 }
@@ -830,7 +843,7 @@ describe('lib/browsers/browser-cri-client', function () {
         childTargetInterceptionTimeoutMs: 5,
       } as any)
 
-      const crashHandler = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
+      const crashHandler = crashHandlerFor(browserClient)
 
       const sessionId = 'ext-session'
       const targetId = 'ext-target-id'
@@ -888,7 +901,7 @@ describe('lib/browsers/browser-cri-client', function () {
         childTargetInterceptionTimeoutMs: 5,
       } as any)
 
-      const crashHandler = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
+      const crashHandler = crashHandlerFor(browserClient)
 
       const sessionId = 'ext-session'
       const targetId = 'ext-target-id'
@@ -1041,7 +1054,7 @@ describe('lib/browsers/browser-cri-client', function () {
         ...(childTargetInterceptionTimeoutMs !== undefined ? { childTargetInterceptionTimeoutMs } : {}),
       } as any)
 
-      const crashHandler = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
+      const crashHandler = crashHandlerFor(browserClient)
       const detachHandler = callsWith(browserClient.on, 'Target.detachedFromTarget')[0][1]
 
       return { browserClient, browserCriClient, crashHandler, detachHandler }
@@ -1251,7 +1264,7 @@ describe('lib/browsers/browser-cri-client', function () {
         ...(childTargetInterceptionTimeoutMs !== undefined ? { childTargetInterceptionTimeoutMs } : {}),
       } as any)
 
-      const crashHandler = callsWith(browserClient.on, 'Inspector.targetReloadedAfterCrash')[0][1]
+      const crashHandler = crashHandlerFor(browserClient)
 
       return { browserClient, crashHandler }
     }

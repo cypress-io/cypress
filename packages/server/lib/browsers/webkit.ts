@@ -152,10 +152,13 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       this.suppressUnhandledEconnreset()
     }
 
-    async kill () {
+    kill () {
       debug('closing pwBrowser')
       clearInstanceState()
-      await pwBrowser.close()
+      // Nothing awaits kill. A browser that fails to close has usually exited already.
+      pwBrowser.close().catch((err) => {
+        debug('error closing pwBrowser: %o', err)
+      })
     }
 
     /**

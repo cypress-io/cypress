@@ -73,6 +73,7 @@ export const iframesController = {
 
     // use the node proxy here instead of the network proxy to avoid
     // the user accidentally intercepting and modifying our internal index.html handler
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises -- in run mode the rethrow below has to reach the unhandledRejection handler, which reports it and exits so the run doesn't hang
     nodeProxy.web(req, res, {}, async (e) => {
       if (e) {
         if (config.isTextTerminal) {

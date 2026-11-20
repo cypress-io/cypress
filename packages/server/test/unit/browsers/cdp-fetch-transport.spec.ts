@@ -169,10 +169,15 @@ async function startTransport (transport: CdpFetchTransport, client: ReturnType<
   await transport.start()
   client.send.mockClear()
 
+  // The registered listeners drop the handlers' promises, so call the
+  // handlers themselves to wait for each pause to be handled.
+  expect(handlersFor(client, 'Fetch.requestPaused')).toEqual([transport['interceptRequestListener'], transport['resolveResponseListener']])
+
   return (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => {
-    return Promise.all(handlersFor(client, 'Fetch.requestPaused').map((handler: (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string) => void) => {
-      return handler(event, sessionId)
-    }))
+    return Promise.all([
+      transport['interceptRequest'](event, sessionId),
+      transport['resolveResponse'](event, sessionId),
+    ])
   }
 }
 

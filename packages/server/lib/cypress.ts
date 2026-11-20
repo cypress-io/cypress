@@ -110,7 +110,7 @@ export = {
         return require('./modes')(mode, options)
       }
 
-      return new Promise(async (resolve) => {
+      return new Promise((resolve, reject) => {
         debug('starting Electron')
         const cypressElectron = require('@packages/electron')
 
@@ -121,18 +121,18 @@ export = {
         // const mainEntryFile = require.main.filename
         const serverMain = getCwd()
 
-        const child: ChildProcess = await cypressElectron.open(serverMain, args)
+        cypressElectron.open(serverMain, args).then((child: ChildProcess) => {
+          child.on('close', (exitCode, signal) => {
+            debug('electron closed with', { code: exitCode, signal })
+            const code = signal ? 1 : (exitCode ?? 0)
 
-        child.on('close', (exitCode, signal) => {
-          debug('electron closed with', { code: exitCode, signal })
-          const code = signal ? 1 : (exitCode ?? 0)
-
-          if (mode === 'smokeTest') {
-            resolve(code)
-          } else {
-            resolve({ totalFailed: code })
-          }
-        })
+            if (mode === 'smokeTest') {
+              resolve(code)
+            } else {
+              resolve({ totalFailed: code })
+            }
+          })
+        }, reject)
       })
     })
   },

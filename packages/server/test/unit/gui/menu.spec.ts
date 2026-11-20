@@ -35,8 +35,9 @@ describe('gui/menu', () => {
     vi.spyOn(os, 'platform').mockReturnValue('darwin')
     vi.spyOn(electron.Menu, 'buildFromTemplate').mockImplementation(() => undefined as any)
     vi.spyOn(electron.Menu, 'setApplicationMenu').mockImplementation(() => {})
-    electron.shell.openExternal = vi.fn()
-    electron.shell.openPath = vi.fn()
+    electron.shell.openExternal = vi.fn().mockResolvedValue(undefined)
+    // Electron resolves openPath with an error message, empty on success
+    electron.shell.openPath = vi.fn().mockResolvedValue('')
   })
 
   afterEach(() => {

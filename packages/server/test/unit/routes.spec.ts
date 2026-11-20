@@ -753,10 +753,14 @@ describe('lib/routes', () => {
       })
       const req = { url: 'http://example.com/late', method: 'GET', headers: {} }
       const res = { destroy: vi.fn() }
+      const next = vi.fn()
 
-      await expect(handler(req, res, vi.fn())).resolves.toBeUndefined()
+      handler(req, res, next)
+
+      await new Promise((resolve) => setImmediate(resolve))
 
       expect(res.destroy).toHaveBeenCalled()
+      expect(next).not.toHaveBeenCalled()
     })
 
     it('falls through for URLs the file server cannot resolve', async () => {

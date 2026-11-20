@@ -2,6 +2,7 @@
 import Debug from 'debug'
 import { randomUUID } from 'crypto'
 import os from 'os'
+import { handleRejection } from './async-listener'
 
 /** Window after teardown starts in which extra signals are treated as duplicate delivery, not a second user interrupt. */
 const SIGNAL_DEDUP_MS = 200
@@ -99,9 +100,12 @@ export class GracefulExit {
     this.debug('initializing graceful exit in process %s', process.pid)
 
     for (const sig of this.handledSignals) {
-      const listener = async (received?: NodeJS.Signals): Promise<void> => {
+      const listener = handleRejection(async (received?: NodeJS.Signals): Promise<void> => {
         await this.handleProcessSignal(sig, received)
-      }
+      }, (err) => {
+        this.debug('graceful exit errored after %s: %o', sig, err)
+        process.exit(1)
+      })
 
       process.on(sig, listener)
       this.signalHandlers.push({ signal: sig, listener })

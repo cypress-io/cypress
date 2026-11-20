@@ -27,6 +27,7 @@ import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
+import { handleRejection } from '../../util/async-listener'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -103,7 +104,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   }
 
   async startVideoRecording (writeVideoFrame: WriteVideoFrame, screencastOpts) {
-    this.onFn('Page.screencastFrame', async (e) => {
+    this.onFn('Page.screencastFrame', handleRejection(async (e: Protocol.Page.ScreencastFrameEvent) => {
       writeVideoFrame(Buffer.from(e.data, 'base64'))
       try {
         await this.sendDebuggerCommandFn('Page.screencastFrameAck', { sessionId: e.sessionId })
@@ -114,7 +115,11 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
           throw e
         }
       }
-    })
+    }, (err) => {
+      // Chrome sends no further frames until this one is acknowledged, so the
+      // video ends here
+      debug('failed to acknowledge screencast frame: %o', err)
+    }))
 
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
@@ -181,7 +186,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
   }
 
-  private onNetworkRequestWillBeSent = async (params: Protocol.Network.RequestWillBeSentEvent) => {
+  private onNetworkRequestWillBeSent = handleRejection(async (params: Protocol.Network.RequestWillBeSentEvent) => {
     debugVerbose('received networkRequestWillBeSent %o', params)
 
     const url = params.request.url
@@ -217,7 +222,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
 
     await this.automation.onBrowserPreRequest?.(browserPreRequest)
-  }
+  }, (err) => {
+    debug('error handling Network.requestWillBeSent: %o', err)
+  })
 
   private recordStorageOrigin (url: string) {
     try {
@@ -363,7 +370,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   }
 
   private _updateFrameTree = (client: CriClient, eventName) => {
-    return async () => {
+    return () => {
       debugVerbose(`update frame tree for ${eventName}`)
 
       this.gettingFrameTree = (async () => {
@@ -472,7 +479,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
   }
 
-  private _onFrameNavigated = async (params: Protocol.Page.FrameNavigatedEvent) => {
+  private _onFrameNavigated = handleRejection(async (params: Protocol.Page.FrameNavigatedEvent) => {
     if (!this.autFrameNavigatedListener) {
       return
     }
@@ -484,7 +491,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     } catch (err) {
       debugVerbose('frameNavigated AUT lookup failed: %s', err?.message)
     }
-  }
+  }, (err) => {
+    debugVerbose('error handling Page.frameNavigated: %o', err)
+  })
 
   private _getAutFrame = async () => {
     try {
@@ -532,7 +541,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
-    client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+    client.on('Fetch.requestPaused', handleRejection(async (params: Protocol.Fetch.RequestPausedEvent) => {
       if (await this._isAUTFrame(params.frameId)) {
         debugVerbose('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 
@@ -543,7 +552,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       }
 
       return this._continueRequest(client, params)
-    })
+    }, (err) => {
+      debug('error handling Fetch.requestPaused: %o', err)
+    }))
   }
 
   // we can't get the frame tree during the Fetch.requestPaused event, because

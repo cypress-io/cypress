@@ -11,6 +11,7 @@ import { CDPDisconnectedError, CDPTerminatedError, CDPAlreadyConnectedError } fr
 import { asyncRetry } from '../../util/async_retry'
 import * as errors from '../../errors'
 import type WebSocket from 'ws'
+import { handleRejection } from '../../util/async-listener'
 
 const verboseDebugNs = 'cypress-verbose:server:browsers:cdp-connection'
 
@@ -119,7 +120,7 @@ export class CDPConnection {
     }
   }
 
-  private _onTerminalDisconnect = async () => {
+  private _onTerminalDisconnect = handleRejection(async () => {
     this.debug('terminal disconnect for target %s (reconnection disabled)', this._options.target)
 
     this._terminated = true
@@ -131,7 +132,9 @@ export class CDPConnection {
     }
 
     this._emitter.emit('cdp-connection-closed')
-  }
+  }, (err) => {
+    this.debug('error handling terminal disconnect: %o', err)
+  })
 
   async disconnect () {
     this.debug('disconnect of target %s requested.', this._options.target, { terminated: this._terminated, connection: !!this._connection, reconnection: !!this._reconnection })
@@ -182,7 +185,7 @@ export class CDPConnection {
     }
   }
 
-  private _reconnect = async () => {
+  private _reconnect = handleRejection(async () => {
     this.debug('Reconnection requested')
     if (this._terminated) {
       return
@@ -252,7 +255,9 @@ export class CDPConnection {
     }
 
     this._reconnection = undefined
-  }
+  }, (err) => {
+    this.debug('error reconnecting: %o', err)
+  })
 
   private _broadcastEvent = ({ method, params, sessionId }: { method: CdpEvent, params: Record<string, any>, sessionId?: string }) => {
     this.verboseDebug('rebroadcasting event', method, params, sessionId)

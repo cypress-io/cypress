@@ -8,6 +8,7 @@ import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
 import type { ProcessOptions, WriteVideoFrame } from '@packages/types'
+import { handleRejection } from './util/async-listener'
 
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')
@@ -382,7 +383,7 @@ export async function compress (options: ProcessOptions) {
 
       return reject(err)
     })
-    .on('end', async () => {
+    .on('end', handleRejection(async () => {
       debug('compression ended')
 
       // we are done progressing
@@ -398,6 +399,6 @@ export async function compress (options: ProcessOptions) {
       }
 
       resolve()
-    }).save(options.compressedVideoName)
+    }, reject)).save(options.compressedVideoName)
   })
 }

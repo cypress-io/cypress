@@ -27,6 +27,7 @@ import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
 import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
+import { handleRejection } from '../util/async-listener'
 
 const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
 const BIDI_COOKIE_DEBUG_NAMESPACE = `${BIDI_DEBUG_NAMESPACE}:cookies`
@@ -161,7 +162,7 @@ export class BidiAutomation {
     this.topLevelContextId = contextId
   }
 
-  private onBrowsingContextCreated = async (params: BrowsingContextInfo) => {
+  private onBrowsingContextCreated = handleRejection(async (params: BrowsingContextInfo) => {
     debug('received browsingContext.contextCreated %o', params)
 
     // Only direct children of the top-level context are candidates for the AUT.
@@ -170,7 +171,9 @@ export class BidiAutomation {
     }
 
     await this.identifyAndSetAutContext(params.context, params.parent)
-  }
+  }, (error) => {
+    debug('error handling browsingContext.contextCreated: %o', error)
+  })
 
   private setAndResolveAutContextId (contextId: string) {
     this.autContextId = contextId
@@ -372,7 +375,7 @@ export class BidiAutomation {
     throw new Error(failureMessage)
   }
 
-  private onBrowsingContextDestroyed = async (params: BrowsingContextInfo) => {
+  private onBrowsingContextDestroyed = handleRejection(async (params: BrowsingContextInfo) => {
     debugVerbose('received browsingContext.contextDestroyed %o', params)
 
     // A frame with an identification round trip in flight has no autContextId
@@ -415,9 +418,11 @@ export class BidiAutomation {
 
       this.autContextId = undefined
     }
-  }
+  }, (error) => {
+    debug('error handling browsingContext.contextDestroyed: %o', error)
+  })
 
-  private onBeforeRequestSent = async (params: NetworkBeforeRequestSentParametersModified) => {
+  private onBeforeRequestSent = handleRejection(async (params: NetworkBeforeRequestSentParametersModified) => {
     debugVerbose('received network.beforeRequestSend %o', params)
 
     const url = params.request.url
@@ -494,7 +499,9 @@ export class BidiAutomation {
         }
       }
     }
-  }
+  }, (error) => {
+    debug('error handling network.beforeRequestSent: %o', error)
+  })
 
   private onResponseStarted = (params: NetworkResponseStartedParameters) => {
     debugVerbose('received network.responseStarted %o', params)

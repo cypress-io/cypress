@@ -180,15 +180,13 @@ export = {
     // or quit lifecycle never completes (see cypress runElectron + GracefulExit.detachProcessSignalHandlers).
     // https://github.com/cypress-io/cypress/issues/22026
 
-    app.on('before-quit', async (event: Electron.Event) => {
+    app.on('before-quit', (event: Electron.Event) => {
       event.preventDefault()
-      setImmediate(async () => {
-        try {
-          await GracefulExit.exitGracefully(0)
-        } catch (e) {
+      setImmediate(() => {
+        GracefulExit.exitGracefully(0).catch((e) => {
           debug(`graceful exit errored during quit: ${(e as Error)?.message}`)
           process.exit(1)
-        }
+        })
       })
     })
 

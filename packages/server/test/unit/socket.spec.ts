@@ -1268,7 +1268,7 @@ describe('lib/socket', () => {
           of: vi.fn(() => ({ on () {} })),
           on: vi.fn((_event, callback) => callback(mockClient)),
           emit: vi.fn(),
-          close: vi.fn(),
+          close: vi.fn().mockResolvedValue(undefined),
         }
 
         vi.spyOn(SocketE2E.prototype, 'createSocketIo').mockReturnValue(io)
@@ -1560,7 +1560,7 @@ describe('lib/socket', () => {
 
             return socket.onCloudTestFileChange('foo/bar.js').then(() => {
               expectCalledWith(onTestFileChange, 'foo/bar.js')
-              expectCalledWith(preprocessorOff, 'file:updated', socket.onCloudTestFileChange)
+              expectCalledWith(preprocessorOff, 'file:updated', socket['onCloudTestFileChangeListener'])
             })
           })
         })
@@ -1573,7 +1573,7 @@ describe('lib/socket', () => {
 
             socket.onBeforeSave(cfg)
 
-            expectCalledWith(preprocessorOn, 'file:updated', socket.onCloudTestFileChange)
+            expectCalledWith(preprocessorOn, 'file:updated', socket['onCloudTestFileChangeListener'])
           })
 
           it('calls #onTestFileChange and does not listen for file:updated when config.watchForFileChanges is true', () => {
@@ -1595,7 +1595,7 @@ describe('lib/socket', () => {
 
             socket.onAfterSave(cfg, new Error('test error'))
 
-            expectCalledWith(preprocessorOff, 'file:updated', socket.onCloudTestFileChange)
+            expectCalledWith(preprocessorOff, 'file:updated', socket['onCloudTestFileChangeListener'])
           })
 
           it('does not remove listener for file:updated when there is an error and config.watchForFileChanges is true', () => {
@@ -1640,7 +1640,7 @@ describe('lib/socket', () => {
           of: vi.fn(() => ({ on () {} })),
           on: vi.fn((_event, callback) => callback(mockClient)),
           emit: vi.fn(),
-          close: vi.fn(),
+          close: vi.fn().mockResolvedValue(undefined),
         }
 
         vi.spyOn(SocketE2E.prototype, 'createSocketIo').mockReturnValue(io)

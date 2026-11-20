@@ -245,7 +245,7 @@ describe('lib/browsers/cdp_automation', () => {
         await screencastFrameHandler(frameMeta)
       })
 
-      it('rethrows other errors from the ack', async () => {
+      it('handles other errors from the ack instead of leaving them unhandled', async () => {
         const writeVideoFrame = vi.fn()
         const frameMeta = { data: Buffer.from('foo'), sessionId: '1' }
         const err = new Error('boom')
@@ -257,7 +257,12 @@ describe('lib/browsers/cdp_automation', () => {
 
         const screencastFrameHandler = callsWith(onFn, 'Page.screencastFrame')[0][1]
 
-        await expect(screencastFrameHandler(frameMeta)).rejects.toBe(err)
+        expect(screencastFrameHandler(frameMeta)).toBeUndefined()
+
+        // Vitest fails the run on an unhandled rejection, so let the ack settle
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expectCalledWith(sendDebuggerCommand, 'Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
       })
     })
 

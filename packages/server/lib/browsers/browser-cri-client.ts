@@ -13,6 +13,7 @@ import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } 
 import type { CyPromptManagerShape, ProtocolManagerShape, CdpClientShape, OnExtraTargetCriClientReady, ExtraTargetDetach } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { EXTRA_TARGET_HEADER, getMetadataHeaderValue } from './constants'
+import { handleRejection } from '../util/async-listener'
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
@@ -37,7 +38,7 @@ type BrowserCriClientCreateOptions = {
   fullyManageTabs?: boolean
   hosts: string[]
   onAsynchronousError: (err: CypressError) => void
-  onReconnect?: (client: CriClient) => void
+  onReconnect?: (client: CriClient) => void | Promise<void>
   port: number
   protocolManager?: ProtocolManagerShape
   cyPromptManager?: CyPromptManagerShape
@@ -67,6 +68,13 @@ interface AttachedToTargetOptions {
   protocolManager?: ProtocolManagerShape
   // Overrides CHILD_TARGET_INTERCEPTION_TIMEOUT_MS. Exposed for tests only.
   childTargetInterceptionTimeoutMs?: number
+}
+
+interface TargetReloadedAfterCrashOptions {
+  browserClient: CriClient
+  browserCriClient: BrowserCriClient
+  sessionId?: string
+  childTargetInterceptionTimeoutMs: number
 }
 
 interface TargetDestroyedOptions {
@@ -378,9 +386,11 @@ export class BrowserCriClient {
       browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
     ]
 
-    browserClient.on('Target.attachedToTarget', async (event: Protocol.Target.AttachedToTargetEvent) => {
+    browserClient.on('Target.attachedToTarget', handleRejection(async (event: Protocol.Target.AttachedToTargetEvent) => {
       await this._onAttachToTarget({ browserClient, browserCriClient, event, host, port, protocolManager, childTargetInterceptionTimeoutMs })
-    })
+    }, (error) => {
+      debug('error handling Target.attachedToTarget: %o', error)
+    }))
 
     browserClient.on('Target.targetDestroyed', (event: Protocol.Target.TargetDestroyedEvent) => {
       this._onTargetDestroyed({ browserClient, browserCriClient, browserName, event, onAsynchronousError })
@@ -395,56 +405,64 @@ export class BrowserCriClient {
       browserClient.removeSessionEnablements(event.sessionId)
     })
 
-    browserClient.on('Inspector.targetReloadedAfterCrash', async (event, sessionId) => {
-      // Things like service workers will effectively crash in terms of CDP when the page is reloaded in the middle of things
-      // We will still auto attach in this case, but we need to runIfWaitingForDebugger to get the page back to a running state
-      //
-      // A crashed-and-reloaded service worker is the same worker
-      // _onAttachToTarget originally paused, not a fresh attach - so this
-      // is the other release path for the exact race #34674 guards
-      // against. This event carries only a sessionId, not a TargetInfo;
-      // sessionTargetInfo (populated in _onAttachToTarget) is how this
-      // path tells a service worker's session apart from anything else
-      // that can crash.
-      //
-      // Kept in its own try/catch, separate from the release below: even a
-      // hypothetical throw while deciding whether to hold must never skip
-      // the release itself.
-      try {
-        const targetInfo = sessionId ? browserCriClient.sessionTargetInfo.get(sessionId) : undefined
-
-        if (!targetInfo) {
-          debug('crash-release-unknown-session: no TargetInfo recorded for session %s, releasing immediately', sessionId)
-        } else if (targetInfo.type !== 'service_worker') {
-          debug('crash-release-skipped: session %s is a %s target (not a service worker), releasing immediately', sessionId, targetInfo.type)
-        } else if (targetInfo.url.includes('chrome-extension://')) {
-          debug('crash-release-skipped-extension: session %s is the extension service worker %s, releasing immediately', sessionId, targetInfo.targetId)
-        } else if (!browserCriClient.reenableChildTargetInterception) {
-          debug('crash-release-no-reenable: session %s is service worker %s but no re-enable hook is registered, releasing immediately', sessionId, targetInfo.targetId)
-        } else {
-          debug('crash-release-held: session %s (service worker %s) holding for re-enabled interception before release', sessionId, targetInfo.targetId)
-
-          // See reenableChildTargetInterception's doc comment for why this
-          // is asked to re-run interception rather than merely awaited for
-          // a confirmation that may already be stale, or already fresh, by
-          // the time this runs (#34674).
-          const targetId = targetInfo.targetId
-
-          await this._holdForChildTargetInterception(targetId, childTargetInterceptionTimeoutMs, () => browserCriClient.reenableChildTargetInterception!(targetId))
-        }
-      } catch (error) {
-        debug('error deciding whether to hold session %s for interception coverage: %s', sessionId, error)
-      }
-
-      try {
-        await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
-      } catch (error) {
-        // it's possible that the target was closed before we can run. If so, just ignore
-        debug('error running Runtime.runIfWaitingForDebugger:', error)
-      }
-    })
+    browserClient.on('Inspector.targetReloadedAfterCrash', handleRejection((event: unknown, sessionId?: string) => {
+      return this._onTargetReloadedAfterCrash({ browserClient, browserCriClient, sessionId, childTargetInterceptionTimeoutMs })
+    }, (error) => {
+      debug('error handling Inspector.targetReloadedAfterCrash: %o', error)
+    }))
 
     await Promise.all(promises)
+  }
+
+  static async _onTargetReloadedAfterCrash (options: TargetReloadedAfterCrashOptions) {
+    const { browserClient, browserCriClient, sessionId, childTargetInterceptionTimeoutMs } = options
+
+    // Things like service workers will effectively crash in terms of CDP when the page is reloaded in the middle of things
+    // We will still auto attach in this case, but we need to runIfWaitingForDebugger to get the page back to a running state
+    //
+    // A crashed-and-reloaded service worker is the same worker
+    // _onAttachToTarget originally paused, not a fresh attach - so this
+    // is the other release path for the exact race #34674 guards
+    // against. This event carries only a sessionId, not a TargetInfo;
+    // sessionTargetInfo (populated in _onAttachToTarget) is how this
+    // path tells a service worker's session apart from anything else
+    // that can crash.
+    //
+    // Kept in its own try/catch, separate from the release below: even a
+    // hypothetical throw while deciding whether to hold must never skip
+    // the release itself.
+    try {
+      const targetInfo = sessionId ? browserCriClient.sessionTargetInfo.get(sessionId) : undefined
+
+      if (!targetInfo) {
+        debug('crash-release-unknown-session: no TargetInfo recorded for session %s, releasing immediately', sessionId)
+      } else if (targetInfo.type !== 'service_worker') {
+        debug('crash-release-skipped: session %s is a %s target (not a service worker), releasing immediately', sessionId, targetInfo.type)
+      } else if (targetInfo.url.includes('chrome-extension://')) {
+        debug('crash-release-skipped-extension: session %s is the extension service worker %s, releasing immediately', sessionId, targetInfo.targetId)
+      } else if (!browserCriClient.reenableChildTargetInterception) {
+        debug('crash-release-no-reenable: session %s is service worker %s but no re-enable hook is registered, releasing immediately', sessionId, targetInfo.targetId)
+      } else {
+        debug('crash-release-held: session %s (service worker %s) holding for re-enabled interception before release', sessionId, targetInfo.targetId)
+
+        // See reenableChildTargetInterception's doc comment for why this
+        // is asked to re-run interception rather than merely awaited for
+        // a confirmation that may already be stale, or already fresh, by
+        // the time this runs (#34674).
+        const targetId = targetInfo.targetId
+
+        await this._holdForChildTargetInterception(targetId, childTargetInterceptionTimeoutMs, () => browserCriClient.reenableChildTargetInterception!(targetId))
+      }
+    } catch (error) {
+      debug('error deciding whether to hold session %s for interception coverage: %s', sessionId, error)
+    }
+
+    try {
+      await browserClient.send('Runtime.runIfWaitingForDebugger', undefined, sessionId)
+    } catch (error) {
+      // it's possible that the target was closed before we can run. If so, just ignore
+      debug('error running Runtime.runIfWaitingForDebugger:', error)
+    }
   }
 
   // Races getOutcome() against timeoutMs and returns either way; the caller

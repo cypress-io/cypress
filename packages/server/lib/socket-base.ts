@@ -38,7 +38,7 @@ function getInterceptRegistration (options: StartListeningOptions): ForIntercept
   return options.interceptRegistration
 }
 
-const retry = (fn: (res: any) => void) => {
+const retry = (fn: () => unknown) => {
   return Bluebird.delay(25).then(fn)
 }
 
@@ -183,7 +183,7 @@ export class SocketBase implements SocketBroadcaster {
     const cdpIo = this._cdpIo = this.createCDPIo(socketIoRoute, options.isTrustedOrigin)
 
     automation.use({
-      onPush: async (message, data) => {
+      onPush: (message, data) => {
         socketIo.emit('automation:push:message', message, data)
         cdpIo.emit('automation:push:message', message, data)
       },
@@ -785,7 +785,10 @@ export class SocketBase implements SocketBroadcaster {
   }
 
   close () {
-    this.getIos().forEach((io) => io?.close())
+    this._cdpIo?.close()
+    this._socketIo?.close().catch((err) => {
+      debug('error closing socket.io server: %o', err)
+    })
   }
 
   changeToUrl (url: string) {

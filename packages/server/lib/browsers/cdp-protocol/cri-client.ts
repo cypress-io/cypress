@@ -9,6 +9,7 @@ import type { CypressError } from '@packages/errors'
 import type { SendDebuggerCommand, OnFn, OffFn, CdpCommand, CdpEvent } from './cdp_automation'
 import { CDPDisconnectedError } from './cri-errors'
 import type { ProtocolManagerShape } from '@packages/types'
+import { handleRejection } from '../../util/async-listener'
 
 const debug = debugModule('cypress:server:browsers:cri-client')
 
@@ -151,7 +152,7 @@ type CreateParams = {
   onAsynchronousError: (err: CypressError) => void
   host?: string
   port?: number
-  onReconnect?: (client: CriClient) => void
+  onReconnect?: (client: CriClient) => void | Promise<void>
   protocolManager?: ProtocolManagerShape
   fullyManageTabs?: boolean
   browserClient?: ICriClient
@@ -217,7 +218,7 @@ export class CriClient implements ICriClient {
     private onAsynchronousError: (err: CypressError) => void,
     private host?: string,
     private port?: number,
-    private onReconnect?: (client: CriClient) => void,
+    private onReconnect?: (client: CriClient) => void | Promise<void>,
     private protocolManager?: ProtocolManagerShape,
     private fullyManageTabs?: boolean,
     private browserClient?: ICriClient,
@@ -274,7 +275,7 @@ export class CriClient implements ICriClient {
 
     if (this._isChildTarget) {
       // If crash listeners are added at the browser level, tabs/page connections do not emit them.
-      this.cdpConnection.on('Target.targetCrashed', async (event) => {
+      this.cdpConnection.on('Target.targetCrashed', (event) => {
         debug('crash event detected', event)
         if (event.targetId !== this.targetId) {
           return
@@ -813,7 +814,7 @@ export class CriClient implements ICriClient {
     })
   }
 
-  private _onAttachedToTarget = async (event: ProtocolMapping.Events['Target.attachedToTarget'][0]) => {
+  private _onAttachedToTarget = handleRejection(async (event: ProtocolMapping.Events['Target.attachedToTarget'][0]) => {
     // We're only interested in child target traffic. Browser cri traffic is
     // handled in browser-cri-client.ts. The basic approach here is we attach
     // to targets and enable network traffic. We must attach in a paused state
@@ -890,7 +891,9 @@ export class CriClient implements ICriClient {
         debug('error running Runtime.runIfWaitingForDebugger: %o', { error, event })
       }
     }
-  }
+  }, (err) => {
+    debug('error handling Target.attachedToTarget: %o', err)
+  })
 
   // Marks targetId handled and resolves its waiter, unless this attach's
   // token is no longer the in-flight one for targetId (a detach, or a newer
@@ -939,7 +942,7 @@ export class CriClient implements ICriClient {
   // twice for the same session is harmless, so nothing here needs to
   // coordinate with reenableChildTargetInterception beyond the token
   // identity check both funnel through in _commitChildTargetAttach.
-  private _onChildTargetReloadedAfterCrash = async (_event: unknown, sessionId?: string) => {
+  private _onChildTargetReloadedAfterCrash = handleRejection(async (_event: unknown, sessionId?: string) => {
     if (!sessionId || !this.onChildTargetAttached) {
       return
     }
@@ -970,7 +973,9 @@ export class CriClient implements ICriClient {
     }
 
     this._commitChildTargetAttach(targetId, token, childTargetInterceptionFailed)
-  }
+  }, (err) => {
+    debug('error handling Inspector.targetReloadedAfterCrash: %o', err)
+  })
 
   /**
    * Sends serviceWorkerInstrumentation to a service worker that is still
@@ -1023,7 +1028,7 @@ export class CriClient implements ICriClient {
     this._commandQueue.reject(new CDPDisconnectedError(`The CRI connection to Target ${this.targetId} has been closed; enqueued commands will never run`))
   }
 
-  private _onCdpConnectionReconnect = async () => {
+  private _onCdpConnectionReconnect = handleRejection(async () => {
     debug('cdp connection reconnected')
     try {
       await this._restoreState()
@@ -1041,7 +1046,9 @@ export class CriClient implements ICriClient {
     } catch (e) {
       debug('error re-establishing state on reconnection to target %s; %d enablement(s) registered, %d command(s) still enqueued: ', this.targetId, this.enableCommands.length, this._commandQueue.entries.length, e)
     }
-  }
+  }, (err) => {
+    debug('error handling cdp-connection-reconnect: %o', err)
+  })
 
   private async _restoreState () {
     // '*.enable' commands need to be resent on reconnect or any events in

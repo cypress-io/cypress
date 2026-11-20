@@ -1,9 +1,12 @@
 import _ from 'lodash'
+import Debug from 'debug'
 import os from 'os'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { Menu, shell } from 'electron'
 import type { MenuItemConstructorOptions } from 'electron'
 import * as appData from '../util/app_data'
+
+const debug = Debug('cypress:server:gui:menu')
 
 // hoist up options and allow calling menu.set({})
 // to override existing options or be called multiple
@@ -196,7 +199,9 @@ export = {
       {
         label: 'View App Data',
         click () {
-          return shell.openPath(appData.path())
+          shell.openPath(appData.path()).catch((err) => {
+            debug('failed to open the app data directory: %o', err)
+          })
         },
       },
     ]
@@ -207,7 +212,9 @@ export = {
         label: 'GraphiQL',
         click () {
           // @ts-expect-error TODO: Update so types sees this as valid
-          return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
+          shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`).catch((err) => {
+            debug('failed to open GraphiQL: %o', err)
+          })
         },
       })
     }

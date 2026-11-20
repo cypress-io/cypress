@@ -843,7 +843,7 @@ describe('lib/browsers/electron', () => {
 
         yieldTo(pageCriClient.on, 'Page.frameAttached')()
 
-        await callsWith(pageCriClient.on, 'Fetch.requestPaused')[0][1]({
+        callsWith(pageCriClient.on, 'Fetch.requestPaused')[0][1]({
           frameId: 'spec-frame-id',
           requestId: '1234',
           resourceType: 'Document',
@@ -851,6 +851,9 @@ describe('lib/browsers/electron', () => {
             url: '/__cypress/integration/spec.js',
           },
         })
+
+        // The listener drops its promise; let the frame lookup and continueRequest settle
+        await new Promise((resolve) => setImmediate(resolve))
 
         expectCalledWith(pageCriClient.send, 'Fetch.continueRequest', {
           requestId: '1234',
@@ -862,7 +865,7 @@ describe('lib/browsers/electron', () => {
 
         yieldTo(pageCriClient.on, 'Page.frameAttached')()
 
-        await callsWith(pageCriClient.on, 'Fetch.requestPaused')[0][1]({
+        callsWith(pageCriClient.on, 'Fetch.requestPaused')[0][1]({
           frameId: 'aut-frame-id',
           requestId: '1234',
           resourceType: 'Document',
@@ -873,6 +876,9 @@ describe('lib/browsers/electron', () => {
             },
           },
         })
+
+        // The listener drops its promise; let the frame lookup and continueRequest settle
+        await new Promise((resolve) => setImmediate(resolve))
 
         expectCalledWith(pageCriClient.send, 'Fetch.continueRequest', {
           requestId: '1234',

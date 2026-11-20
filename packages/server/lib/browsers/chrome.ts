@@ -25,6 +25,7 @@ import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyProm
 import type { CDPSocketServer } from '@packages/socket'
 import type { Protocol } from 'devtools-protocol'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
+import { handleRejection } from '../util/async-listener'
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -411,7 +412,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
   })
 }
 
-let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
+let onReconnect: (client: CriClient) => void | Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal, storageOrigins)
@@ -715,7 +716,7 @@ export = {
 
     // Handle chrome tab crashes.
     debug('attaching crash handler to target ', pageCriClient.targetId)
-    pageCriClient.on('Target.targetCrashed', async (event) => {
+    pageCriClient.on('Target.targetCrashed', handleRejection(async (event: Protocol.Target.TargetCrashedEvent) => {
       debug('target crashed!', event)
       if (event.targetId !== browserCriClient?.currentlyAttachedTarget?.targetId) {
         debug('Target.targetCrashed received for target %s while the currently attached target is %s; event ignored, no sibling CRI clients marked as crashed', event.targetId, browserCriClient?.currentlyAttachedTarget?.targetId)
@@ -735,7 +736,11 @@ export = {
 
       const err = errors.get('RENDERER_CRASHED', browser.displayName)
 
-      await memory.endProfiling()
+      try {
+        await memory.endProfiling()
+      } catch (profilingErr) {
+        debug('failed to end memory profiling after the renderer crashed: %o', profilingErr)
+      }
 
       if (!options.onError) {
         errors.log(err)
@@ -743,7 +748,9 @@ export = {
       }
 
       options.onError(err)
-    })
+    }, (err) => {
+      errors.log(err instanceof Error ? err : new Error(String(err)))
+    }))
 
     if (!browserCriClient) throw new Error('Missing browserCriClient in attachListeners')
 

@@ -25,6 +25,7 @@ import * as plugins from './plugins'
 import { getOrigin, privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { cypressSessions } from './cypress-sessions'
 import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
+import { forwardRejectionToNext } from './util/async-listener'
 import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, fullyQualifiedRe, isLoopbackHost, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
@@ -188,13 +189,13 @@ export const createCommonRoutes = ({
   // If we are in cypress in cypress we need to pass along the studio and cy-prompt routes
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
-    router.all(`${CYPRESS_STUDIO_ROUTE}*`, async (req, res) => {
+    router.all(`${CYPRESS_STUDIO_ROUTE}*`, forwardRejectionToNext(async (req, res) => {
       await handleHttpRequest(req, res)
-    })
+    }))
 
-    router.all(`${CYPRESS_CY_PROMPT_ROUTE}*`, async (req, res) => {
+    router.all(`${CYPRESS_CY_PROMPT_ROUTE}*`, forwardRejectionToNext(async (req, res) => {
       await handleHttpRequest(req, res)
-    })
+    }))
 
     router.get('/status-code-test/:num', (req, res) => {
       res.sendStatus(Number(req.params.num))
@@ -225,7 +226,7 @@ export const createCommonRoutes = ({
     specController.handle(test, req, res, config, next, onError)
   })
 
-  router.post(`/${config.namespace}/process-origin-callback`, bodyParser.json(), async (req, res) => {
+  router.post(`/${config.namespace}/process-origin-callback`, bodyParser.json(), forwardRejectionToNext(async (req, res) => {
     if (!isRunnerRequest(req)) {
       res.sendStatus(403)
 
@@ -249,7 +250,7 @@ export const createCommonRoutes = ({
         error: errorMessage,
       })
     }
-  })
+  }))
 
   router.get(`/${config.namespace}/socket.io.js`, (req, res) => {
     client.handle(req, res)
@@ -285,7 +286,7 @@ export const createCommonRoutes = ({
     return send(req, encodeURI(req.params[0] ?? ''), { root, etag: false }).pipe(res)
   })
 
-  router.get(`/${config.namespace}/spec-bridge-iframes`, async (req, res) => {
+  router.get(`/${config.namespace}/spec-bridge-iframes`, forwardRejectionToNext(async (req, res) => {
     debug('handling cross-origin iframe for domain: %s', req.hostname)
 
     // Chrome plans to make document.domain immutable in Chrome 109, with the default value
@@ -296,7 +297,7 @@ export const createCommonRoutes = ({
     res.setHeader('Origin-Agent-Cluster', '?0')
 
     await files.handleCrossOriginIframe(req, res, config)
-  })
+  }))
 
   router.post(`/${config.namespace}/add-verified-command`, bodyParser.json(), (req, res) => {
     if (!isRunnerRequest(req)) {
@@ -314,7 +315,7 @@ export const createCommonRoutes = ({
   // external tool can attach to; the record is only written in open mode, so don't
   // expose the probe route for headless `cypress run`.
   if (!config.isTextTerminal) {
-    router.get(`${SESSIONS_ROUTE_PREFIX}:sessionId`, async (req, res) => {
+    router.get(`${SESSIONS_ROUTE_PREFIX}:sessionId`, forwardRejectionToNext(async (req, res) => {
       const state = cypressSessions.getCurrent()
 
       debug('session probe for %s; current session is %s', req.params.sessionId, state?.sessionId ?? 'none')
@@ -332,7 +333,7 @@ export const createCommonRoutes = ({
         machineId: await ctx.coreData.machineId.catch(() => null),
         userId: ctx.coreData.user?.id ?? null,
       })
-    })
+    }))
 
     // The tap CLI's mount; the app sends GraphQL over the socket instead. The
     // session id is only in the session record on disk, never in the page.
@@ -363,7 +364,7 @@ export const createCommonRoutes = ({
     runner.handle(req, res)
   })
 
-  router.get(`/${namespace}/iframes/*`, async (req, res) => {
+  router.get(`/${namespace}/iframes/*`, forwardRejectionToNext(async (req, res) => {
     if (testingType === 'e2e') {
       await iframesController.e2e({ config, getSpec, remoteStates }, req, res)
     }
@@ -371,7 +372,7 @@ export const createCommonRoutes = ({
     if (testingType === 'component') {
       iframesController.component({ config, nodeProxy }, req, res)
     }
-  })
+  }))
 
   if (!clientRoute) {
     throw Error(`clientRoute is required. Received ${clientRoute}`)
@@ -435,7 +436,7 @@ export const createCommonRoutes = ({
   // Firefox on the proxy, and open mode can switch browsers afterwards against
   // this same router. Mounting both would not work either: the MITM branch
   // never calls next(), so mount order would decide the behavior permanently.
-  router.all('*', async (req: Request & { proxiedUrl?: string }, res, next) => {
+  router.all('*', forwardRejectionToNext(async (req: Request & { proxiedUrl?: string }, res, next) => {
     // MITM path: every browser request arrives here in absolute form, so the
     // pipeline owns all of it.
     if (!isBrowserNetworkMode()) {
@@ -490,7 +491,7 @@ export const createCommonRoutes = ({
     debug('falling through, not a file server url: %s %s', req.method, absoluteUrl)
 
     return next()
-  })
+  }))
 
   // when we experience uncaught errors
   // during routing just log them out to

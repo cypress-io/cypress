@@ -6,6 +6,7 @@ import type { StartListeningOptions } from './socket-base'
 import { fs } from './util/fs'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import type { FoundSpec } from '@packages/types'
+import { handleRejection } from './util/async-listener'
 
 const debug = Debug('cypress:server:socket-e2e')
 
@@ -24,7 +25,7 @@ export class SocketE2E extends SocketBase {
     this.onTestFileChange = this.onTestFileChange.bind(this)
 
     if (config.watchForFileChanges) {
-      preprocessor.emitter.on('file:updated', this.onTestFileChange)
+      preprocessor.emitter.on('file:updated', this.onTestFileChangeListener)
     }
   }
 
@@ -32,7 +33,7 @@ export class SocketE2E extends SocketBase {
     // even if the user has turned off file watching
     // we want to force a reload on save
     if (!config.watchForFileChanges) {
-      preprocessor.emitter.on('file:updated', this.onCloudTestFileChange)
+      preprocessor.emitter.on('file:updated', this.onCloudTestFileChangeListener)
     }
   }
 
@@ -40,7 +41,7 @@ export class SocketE2E extends SocketBase {
     // even if the user has turned off file watching
     // we want to force a reload on save
     if (error && !config.watchForFileChanges) {
-      preprocessor.emitter.off('file:updated', this.onCloudTestFileChange)
+      preprocessor.emitter.off('file:updated', this.onCloudTestFileChangeListener)
     }
   }
 
@@ -53,7 +54,7 @@ export class SocketE2E extends SocketBase {
   }
 
   removeOnCloudTestFileChange () {
-    return preprocessor.emitter.off('file:updated', this.onCloudTestFileChange)
+    return preprocessor.emitter.off('file:updated', this.onCloudTestFileChangeListener)
   }
 
   onTestFileChange = (filePath) => {
@@ -67,6 +68,16 @@ export class SocketE2E extends SocketBase {
       return debug('could not find test file that changed %o', filePath)
     })
   }
+
+  // The preprocessor emitter drops what its listeners return. onTestFileChange
+  // catches its own errors, so these only log what still escapes it.
+  private onTestFileChangeListener = handleRejection((filePath: string) => this.onTestFileChange(filePath), (err) => {
+    debug('error handling test file change: %o', err)
+  })
+
+  private onCloudTestFileChangeListener = handleRejection((filePath: string) => this.onCloudTestFileChange(filePath), (err) => {
+    debug('error handling cloud test file change: %o', err)
+  })
 
   watchTestFileByPath (config, specConfig: FoundSpec) {
     debug('watching spec with config %o', specConfig)
@@ -128,7 +139,7 @@ export class SocketE2E extends SocketBase {
   }
 
   close () {
-    preprocessor.emitter.removeListener('file:updated', this.onTestFileChange)
+    preprocessor.emitter.removeListener('file:updated', this.onTestFileChangeListener)
 
     return super.close()
   }

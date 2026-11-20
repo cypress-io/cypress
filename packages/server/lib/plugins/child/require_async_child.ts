@@ -9,6 +9,7 @@ import * as util from '../util'
 import { gracefulify } from 'graceful-fs'
 import { suppress as suppressWarnings } from '../../util/suppress_warnings'
 import { run as runRequireAsyncChild } from './run_require_async_child'
+import { handleRejection } from '../../util/async-listener'
 
 const argv = minimist(process.argv.slice(2))
 
@@ -57,7 +58,7 @@ const willDisconnect = new Promise<void>((resolve) => {
   resolveWillDisconnect = resolve
 })
 
-process.on('disconnect', async () => {
+process.on('disconnect', handleRejection(async () => {
   try {
     debug('received disconnect event')
     resolveWillDisconnect()
@@ -65,10 +66,12 @@ process.on('disconnect', async () => {
   } finally {
     process.exit()
   }
-})
+}, (err) => {
+  debug('error handling disconnect: %o', err)
+}))
 
 debug('registering main:process:will:disconnect listener')
-ipc.on('main:process:will:disconnect', async () => {
+ipc.on('main:process:will:disconnect', handleRejection(async () => {
   debug('received main:process:will:disconnect')
   if (span) {
     debug('ending span')
@@ -79,16 +82,24 @@ ipc.on('main:process:will:disconnect', async () => {
   debug('waiting telemetry shutdown')
   const p = disconnection ?? (disconnection = telemetry.shutdown())
 
-  await p
-  debug('telemetry shutdown complete')
+  // Ack even when telemetry fails to shut down, so the main process isn't
+  // left waiting on this one
+  try {
+    await p
+    debug('telemetry shutdown complete')
+  } catch (err) {
+    debug('telemetry shutdown failed: %o', err)
+  }
 
   debug('sending main:process:will:disconnect:ack')
   ipc.send('main:process:will:disconnect:ack')
   resolveWillDisconnect()
-})
+}, (err) => {
+  debug('error handling main:process:will:disconnect: %o', err)
+}))
 
 ;['SIGINT', 'SIGTERM'].forEach((signal) => {
-  process.on(signal, async () => {
+  process.on(signal, handleRejection(async () => {
     debug('received signal', signal)
     await Promise.race([
       willDisconnect,
@@ -101,7 +112,9 @@ ipc.on('main:process:will:disconnect', async () => {
     ])
 
     process.exit(128 + os.constants.signals[signal])
-  })
+  }, (err) => {
+    debug('error handling %s: %o', signal, err)
+  }))
 })
 
 debug('run')

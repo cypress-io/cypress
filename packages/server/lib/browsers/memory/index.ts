@@ -13,6 +13,7 @@ import { telemetry } from '@packages/telemetry'
 import type { Automation } from '../../automation'
 import type { BrowserInstance } from '../types'
 import type { MemoryLog } from './cgroup-util'
+import { handleRejection } from '../../util/async-listener'
 
 const debug = debugModule('cypress:server:browsers:memory')
 const debugVerbose = debugModule('cypress-verbose:server:browsers:memory')
@@ -335,7 +336,9 @@ const gatherMemoryStats = async () => {
 const scheduleMemoryCheck = () => {
   if (started) {
     // not setinterval, since gatherMemoryStats is asynchronous
-    timer = setTimeout(gatherMemoryStats, MEMORY_PROFILER_INTERVAL)
+    timer = setTimeout(handleRejection(gatherMemoryStats, (err) => {
+      debug('error gathering memory stats: %o', err)
+    }), MEMORY_PROFILER_INTERVAL)
   }
 }
 
@@ -360,7 +363,7 @@ async function startProfiling (automation: Automation, spec: { fileName: string 
     browserInstance = browsers.getBrowserInstance()
 
     // stop the profiler when the browser exits
-    browserInstance?.once('exit', endProfiling)
+    browserInstance?.once('exit', endProfilingOnExit)
 
     // save the current spec file name to be used later for saving the cumulative stats
     currentSpecFileName = spec?.fileName
@@ -406,7 +409,7 @@ const reset = () => {
   currentSpecFileName = null
   statsLog = {}
   gcLog = {}
-  browserInstance?.removeListener('exit', endProfiling)
+  browserInstance?.removeListener('exit', endProfilingOnExit)
   browserInstance = null
 }
 
@@ -426,6 +429,10 @@ const endProfiling = async () => {
 
   debugVerbose('end memory profiler')
 }
+
+const endProfilingOnExit = handleRejection(endProfiling, (err) => {
+  debug('error ending memory profiler after the browser exited: %o', err)
+})
 
 /**
  * Returns all of the memory stats collected thus far.

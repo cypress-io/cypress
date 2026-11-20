@@ -3,6 +3,7 @@ import la from 'lazy-ass'
 import _ from 'lodash'
 import type si from 'systeminformation'
 import { concatStream } from '@packages/network'
+import { handleRejection } from './async-listener'
 
 const browsers = require('../browsers').default
 const plugins = require('../plugins')
@@ -246,7 +247,9 @@ function _checkProcesses () {
 
 function _scheduleProcessCheck () {
   // not setinterval, since checkProcesses is asynchronous
-  setTimeout(_checkProcesses, interval)
+  setTimeout(handleRejection(_checkProcesses, (err) => {
+    debug('error running process profiler: %o', err)
+  }), interval)
 }
 
 export function start () {

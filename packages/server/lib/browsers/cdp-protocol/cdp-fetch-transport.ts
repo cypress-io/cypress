@@ -16,6 +16,7 @@ import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER, getMetadataHeaderValue } from '.
 import { normalizeResourceType } from './normalize-resource-type'
 import type { CookiesBeforeIntercept } from './cdp-set-cookie-sync'
 import { planSetCookieSync } from './cdp-set-cookie-sync'
+import { handleRejection } from '../../util/async-listener'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -298,8 +299,8 @@ export class CdpFetchTransport {
     }
 
     debug('starting CDP Fetch transport')
-    this.client.on('Fetch.requestPaused', this.interceptRequest)
-    this.client.on('Fetch.requestPaused', this.resolveResponse)
+    this.client.on('Fetch.requestPaused', this.interceptRequestListener)
+    this.client.on('Fetch.requestPaused', this.resolveResponseListener)
     // The Fetch domain reports nothing when a paused request is canceled, so
     // the Network domain is the only signal that a flow is never coming back.
     this.client.on('Network.loadingFailed', this.onLoadingFailed)
@@ -320,8 +321,8 @@ export class CdpFetchTransport {
       debug('CDP Fetch transport started')
     })
     .catch((err) => {
-      this.client.off('Fetch.requestPaused', this.interceptRequest)
-      this.client.off('Fetch.requestPaused', this.resolveResponse)
+      this.client.off('Fetch.requestPaused', this.interceptRequestListener)
+      this.client.off('Fetch.requestPaused', this.resolveResponseListener)
       this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.networkExtraInfo.stop()
       this.bodyCapture.stop()
@@ -432,8 +433,8 @@ export class CdpFetchTransport {
     try {
       await this.client.send('Fetch.disable')
     } finally {
-      this.client.off('Fetch.requestPaused', this.interceptRequest)
-      this.client.off('Fetch.requestPaused', this.resolveResponse)
+      this.client.off('Fetch.requestPaused', this.interceptRequestListener)
+      this.client.off('Fetch.requestPaused', this.resolveResponseListener)
       this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.rejectAll(new Error('CDP Fetch transport stopped'))
       this.networkExtraInfo.stop()
@@ -942,6 +943,16 @@ export class CdpFetchTransport {
       ...(captureStream ? { captureStream } : {}),
     })
   }
+
+  // The CDP client ignores what a listener returns. Both handlers release the
+  // pause themselves on failure, so whatever still escapes them is only logged.
+  private interceptRequestListener = handleRejection(this.interceptRequest, (err) => {
+    debug('error intercepting paused request: %o', err)
+  })
+
+  private resolveResponseListener = handleRejection(this.resolveResponse, (err) => {
+    debug('error resolving paused response: %o', err)
+  })
 
   private resolveCookieHeaders = async (event: Protocol.Fetch.RequestPausedEvent, sessionId?: string): Promise<{
     responseHeaders?: Protocol.Fetch.HeaderEntry[]

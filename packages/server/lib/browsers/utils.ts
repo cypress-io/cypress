@@ -16,6 +16,8 @@ import { fs } from '../util/fs'
 import * as extension from '@packages/extension'
 import getPort from 'get-port'
 import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload'
+import type { Protocol } from 'devtools-protocol'
+import { handleRejection } from '../util/async-listener'
 
 declare global {
   interface Window {
@@ -410,7 +412,7 @@ const initializeCDP = async (criClient: CriClient, automation: Automation, useBr
     name: 'cypressUtilityBinding',
   })
 
-  await criClient.on('Runtime.bindingCalled', async (data) => {
+  await criClient.on('Runtime.bindingCalled', handleRejection(async (data: Protocol.Runtime.BindingCalledEvent) => {
     if (data.name === 'cypressUtilityBinding') {
       const event = JSON.parse(data.payload)
 
@@ -430,7 +432,9 @@ const initializeCDP = async (criClient: CriClient, automation: Automation, useBr
           throw new Error(`Unknown cypressUtilityBinding event type: ${event.type}`)
       }
     }
-  })
+  }, (err) => {
+    debug('error handling Runtime.bindingCalled: %o', err)
+  }))
 
   // Window-realm half of the #34652 fix. The worker-realm half, the shared
   // mechanism, and its limits are documented in disable-navigation-preload.ts.
