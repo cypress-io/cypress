@@ -293,9 +293,6 @@ linux-x64:
     - npm-cypress-schematic:
         requires:
           - build
-    - v8-integration-tests:
-        requires:
-          - system-tests-node-modules-install
 
     - ready-to-release:
         requires:
@@ -351,7 +348,6 @@ linux-x64:
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
-          - v8-integration-tests
 
     - npm-release:
         filters:
@@ -556,11 +552,6 @@ linux-arm64:
         requires:
           - linux-arm64-build
 
-    - v8-integration-tests:
-        executor: linux-arm64
-        resource_class: arm.medium
-        requires:
-          - linux-arm64-build
     - driver-integration-memory-tests:
         executor: linux-arm64
         resource_class: arm.medium
@@ -611,13 +602,6 @@ darwin-x64:
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-        executor: darwin-amd64
-        resource_class: cypress-io/intel-macstadium
-        requires:
-          - darwin-x64-build
-
-    - v8-integration-tests:
-        name: darwin-x64-v8-integration-tests
         executor: darwin-amd64
         resource_class: cypress-io/intel-macstadium
         requires:
@@ -681,12 +665,6 @@ darwin-arm64:
         requires:
           - darwin-arm64-build
 
-    - v8-integration-tests:
-        name: darwin-arm64-v8-integration-tests
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-arm64-build
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
         executor: darwin-arm64
@@ -782,12 +760,6 @@ windows:
         requires:
           - windows-create-build-artifacts
 
-    - v8-integration-tests:
-        name: windows-v8-integration-tests
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
     - driver-integration-memory-tests:
         name: windows-driver-integration-memory-tests
         executor: windows

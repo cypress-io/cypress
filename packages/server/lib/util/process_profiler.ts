@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import la from 'lazy-ass'
 import _ from 'lodash'
-import si from 'systeminformation'
+import type si from 'systeminformation'
 import { concatStream } from '@packages/network'
 
 const browsers = require('../browsers').default
@@ -230,7 +230,10 @@ export const _printGroupedProcesses = (groupTotals) => {
 }
 
 function _checkProcesses () {
-  return si.processes()
+  // the profiler only runs with its debug namespace enabled, so don't load systeminformation at startup
+  const systemInformation: typeof si = require('systeminformation')
+
+  return systemInformation.processes()
   .then(groupCyProcesses)
   .then(_renameBrowserGroup)
   .then(_aggregateGroups)
