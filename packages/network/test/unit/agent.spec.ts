@@ -908,6 +908,103 @@ describe('lib/agent', function () {
     })
   })
 
+  describe('CombinedAgent#addRequest', function () {
+    afterEach(function () {
+      vi.restoreAllMocks()
+    })
+
+    it('parses the href into the uri used to match client certificates, keeping its port', function () {
+      const agent = new CombinedAgent()
+      const getCerts = vi.spyOn(clientCertificateStoreSingleton, 'getClientCertificateAgentOptionsForUrl').mockReturnValue(null)
+
+      vi.spyOn(agent.httpsAgent, 'addRequest').mockResolvedValue()
+
+      const options = { host: '127.0.0.1', port: 443, path: '/api/users?page=2', protocol: 'https:' } as any
+
+      agent.addRequest({} as http.ClientRequest, options)
+
+      expect(options.href).toEqual('https://127.0.0.1:443/api/users?page=2')
+      expect(options.uri).toMatchObject({ protocol: 'https:', hostname: '127.0.0.1', port: '443', path: '/api/users?page=2' })
+      expect(getCerts).toHaveBeenCalledWith(options.uri)
+    })
+
+    it('keeps a uri that is passed in', function () {
+      const agent = new CombinedAgent()
+      const getCerts = vi.spyOn(clientCertificateStoreSingleton, 'getClientCertificateAgentOptionsForUrl').mockReturnValue(null)
+
+      vi.spyOn(agent.httpsAgent, 'addRequest').mockResolvedValue()
+
+      const uri = parseUrlFields('https://127.0.0.1:8443/api/users')
+      const options = { href: 'https://127.0.0.1:8443/api/users', host: '127.0.0.1', port: 8443, uri } as any
+
+      agent.addRequest({} as http.ClientRequest, options)
+
+      expect(options.uri).toBe(uri)
+      expect(getCerts).toHaveBeenCalledWith(uri)
+    })
+  })
+
+  describe('HttpAgent#_addProxiedRequest', function () {
+    let req: any
+
+    beforeEach(function () {
+      req = { setHeader: vi.fn(), _implicitHeader: vi.fn() }
+    })
+
+    afterEach(function () {
+      vi.restoreAllMocks()
+    })
+
+    const proxiedOptions = (proxy: string) => {
+      return { href: 'http://www.example.com/users', host: 'www.example.com', port: 80, path: '/users', proxy } as any
+    }
+
+    it('dials the port written in an https proxy url, even when it is the default', function () {
+      const { httpAgent } = new CombinedAgent()
+      const addRequest = vi.spyOn(httpAgent.httpsAgent, 'addRequest').mockImplementation(() => {})
+      const options = proxiedOptions('https://proxy.example.com:443')
+
+      httpAgent._addProxiedRequest(req, options)
+
+      expect(options.host).toEqual('proxy.example.com')
+      expect(options.port).toEqual(443)
+      expect(addRequest).toHaveBeenCalledWith(req, options)
+    })
+
+    it('falls back to port 80 when the proxy url has no port', function () {
+      const { httpAgent } = new CombinedAgent()
+      const addRequest = vi.spyOn(http.Agent.prototype, 'addRequest').mockImplementation(() => {})
+      const options = proxiedOptions('http://proxy.example.com')
+
+      httpAgent._addProxiedRequest(req, options)
+
+      expect(options.port).toEqual(80)
+      expect(addRequest).toHaveBeenCalledWith(req, options)
+    })
+
+    it('dials the bare address of an IPv6 proxy', function () {
+      const { httpAgent } = new CombinedAgent()
+
+      vi.spyOn(http.Agent.prototype, 'addRequest').mockImplementation(() => {})
+      const options = proxiedOptions('http://[::1]:3128')
+
+      httpAgent._addProxiedRequest(req, options)
+
+      expect(options.host).toEqual('::1')
+      expect(options.port).toEqual(3128)
+    })
+
+    it('sends the decoded proxy credentials', function () {
+      const { httpAgent } = new CombinedAgent()
+
+      vi.spyOn(http.Agent.prototype, 'addRequest').mockImplementation(() => {})
+
+      httpAgent._addProxiedRequest(req, proxiedOptions('http://jane.doe:s3cr3t%40Pa55@proxy.example.com:3128'))
+
+      expect(req.setHeader).toHaveBeenCalledWith('proxy-authorization', `basic ${Buffer.from('jane.doe:s3cr3t@Pa55').toString('base64')}`)
+    })
+  })
+
   describe('HttpsAgent#createConnection', function () {
     afterEach(function () {
       vi.restoreAllMocks()
