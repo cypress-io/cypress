@@ -16,6 +16,10 @@ import * as savedState from '../../../lib/saved_state'
 import type { BrowserLaunchOpts } from '@packages/types'
 import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
+// The `Fetch.requestPaused` listener drops its handler's promise, so a spec
+// waits a macrotask for the frame lookup and continueRequest to settle
+const settleRequestPaused = () => new Promise((resolve) => setImmediate(resolve))
+
 vi.mock('electron', async () => {
   const { default: electronStub } = await import('../../support/helpers/electron_stub')
 
@@ -852,8 +856,7 @@ describe('lib/browsers/electron', () => {
           },
         })
 
-        // The listener drops its promise; let the frame lookup and continueRequest settle
-        await new Promise((resolve) => setImmediate(resolve))
+        await settleRequestPaused()
 
         expectCalledWith(pageCriClient.send, 'Fetch.continueRequest', {
           requestId: '1234',
@@ -877,8 +880,7 @@ describe('lib/browsers/electron', () => {
           },
         })
 
-        // The listener drops its promise; let the frame lookup and continueRequest settle
-        await new Promise((resolve) => setImmediate(resolve))
+        await settleRequestPaused()
 
         expectCalledWith(pageCriClient.send, 'Fetch.continueRequest', {
           requestId: '1234',

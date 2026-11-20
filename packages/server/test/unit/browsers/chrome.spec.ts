@@ -69,6 +69,10 @@ const stubFsByPath = (method: 'readJson' | 'outputJson', behaviors: PathBehavior
 
 const enoent = () => Promise.reject({ code: 'ENOENT' })
 
+// The `Fetch.requestPaused` listener drops its handler's promise, so a spec
+// waits a macrotask for the frame lookup and continueRequest to settle
+const settleRequestPaused = () => new Promise((resolve) => setImmediate(resolve))
+
 const resolved = () => Promise.resolve()
 
 const matchesPrefix = (call: unknown[], expected: unknown[]) => {
@@ -757,8 +761,7 @@ describe('lib/browsers/chrome', () => {
           },
         })
 
-        // The listener drops its promise; let the frame lookup and continueRequest settle
-        await new Promise((resolve) => setImmediate(resolve))
+        await settleRequestPaused()
 
         expectCalledWith(pageCriClient.send, 'Fetch.continueRequest', {
           requestId: '1234',
@@ -782,8 +785,7 @@ describe('lib/browsers/chrome', () => {
           },
         })
 
-        // The listener drops its promise; let the frame lookup and continueRequest settle
-        await new Promise((resolve) => setImmediate(resolve))
+        await settleRequestPaused()
 
         expectCalledWith(pageCriClient.send, 'Fetch.continueRequest', {
           requestId: '1234',

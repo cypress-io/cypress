@@ -4,7 +4,7 @@ import type { NextFunction, Request, Response } from 'express'
  * Wraps an async listener for a caller that drops the promise it returns, such
  * as an EventEmitter, socket.io or Electron, and sends a rejection to
  * `onRejection`. Unwrapped, the rejection reaches the process's
- * `unhandledRejection` handler, which exits Cypress.
+ * `unhandledRejection` handler, which in the main process exits Cypress.
  *
  * The wrapper is a new function, so pass the same wrapped reference to `on`
  * and `off`.
