@@ -202,6 +202,24 @@ describe('darwin browser detection', () => {
       expect(fs.readFile).toHaveBeenNthCalledWith(2, plistPath(thirdPartyApp), 'utf8')
     })
 
+    it('tries the next mdfind result when the first Info.plist has no version', async () => {
+      stubMdFind([userApp, thirdPartyApp].join('\n'))
+      // @ts-expect-error - mock implementation doesn't match fs.readFile's overloads
+      vi.mocked(fs.readFile).mockImplementation((file: string): Promise<string> => {
+        if (file === plistPath(userApp)) {
+          return Promise.resolve(generatePlist('CFBundleName', 'Google Chrome'))
+        }
+
+        if (file === plistPath(thirdPartyApp)) {
+          return Promise.resolve(generatePlist(chrome.versionProperty, '100.0.1'))
+        }
+
+        return Promise.reject(new Error('File not found'))
+      })
+
+      await expect(findApp(chrome)).resolves.toEqual(expectedApp(thirdPartyApp, '100.0.1'))
+    })
+
     it('falls back to /Applications when mdfind returns nothing', async () => {
       stubMdFind('')
       stubPlists({ [plistPath(applicationsApp)]: '101.0.2' })
