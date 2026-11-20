@@ -1129,7 +1129,7 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
-      # WebKit runs only launch the WebKit from playwright-webkit (the spec that opens Chrome is skipped below)
+      # WebKit runs only launch the WebKit from playwright-webkit (tap_open_spec, which opens Chrome itself, is skipped below)
       - unless:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -1159,6 +1159,11 @@ commands:
               command -v bun
               bun --version
               exit 0
+            fi
+
+            # Bun's installer needs unzip, which the image only gets from install-browsers on non-WebKit jobs
+            if ! command -v unzip >/dev/null 2>&1; then
+              apt-get update && apt-get install -y unzip
             fi
 
             curl -fsSL https://bun.sh/install | bash -s "${BUN_RELEASE}"
