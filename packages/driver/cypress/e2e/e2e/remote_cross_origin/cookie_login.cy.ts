@@ -674,8 +674,8 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-document-cookie"]').click()
       login(username)
 
-      // ensure we've redirected to the right page
-      cy.url().should('include', 'http://www.idp.com:3501/fixtures/auth/document-cookie.html')
+      // the redirect page before it has this URL in its query string, so match the path exactly
+      cy.location('pathname').should('equal', '/fixtures/auth/document-cookie.html')
       setDocumentCookie('key=value1; domain=www.idp.com')
       setDocumentCookie('key=value2; domain=idp.com')
 
