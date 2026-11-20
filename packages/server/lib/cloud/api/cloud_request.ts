@@ -7,7 +7,7 @@ import axios from 'axios'
 import pkg from '@packages/root'
 import { strictAgent } from '@packages/network'
 
-import { getApiUrl } from '../routes'
+import { apiUrl } from '../routes'
 import { installErrorTransform } from './axios_middleware/transform_error'
 import { installLogging } from './axios_middleware/logging'
 import { installEncryption } from './axios_middleware/encryption'
@@ -35,7 +35,7 @@ interface CreateCloudRequestOptions {
 
 // Allows us to create customized Cloud Request instances w/ different baseURL & encryption configuration
 export const createCloudRequest = (options: CreateCloudRequestOptions = {}): AxiosInstance => {
-  const { baseURL = getApiUrl(), enableLogging = true, enableErrorTransform = true } = options
+  const { baseURL = apiUrl, enableLogging = true, enableErrorTransform = true } = options
 
   const instance = axios.create({
     baseURL,
