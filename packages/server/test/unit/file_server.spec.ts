@@ -43,6 +43,28 @@ function fakeServerFactory (failCount: number, code = 'EADDRINUSE') {
 }
 
 describe('lib/file_server', () => {
+  describe('.requestPath', () => {
+    it('removes the query and hash', () => {
+      expect(fileServer.requestPath('/assets/app.css?foo=bar#hash')).toBe('/assets/app.css')
+    })
+
+    it('ends the path at a hash before a query', () => {
+      expect(fileServer.requestPath('/index.html#/users?page=2')).toBe('/index.html')
+    })
+
+    it('leaves percent-encoding for send to decode', () => {
+      expect(fileServer.requestPath('/a%20space/foo.txt')).toBe('/a%20space/foo.txt')
+    })
+
+    it('turns backslashes into slashes', () => {
+      expect(fileServer.requestPath('/dev\\assets\\app.css')).toBe('/dev/assets/app.css')
+    })
+
+    it('keeps a leading double slash as part of the path', () => {
+      expect(fileServer.requestPath('//dev/foo.txt')).toBe('//dev/foo.txt')
+    })
+  })
+
   afterEach(() => {
     vi.restoreAllMocks()
   })
@@ -166,6 +188,21 @@ describe('lib/file_server', () => {
 
       expect(statusCode).toBe(200)
       expect(body).toBe('world')
+    })
+
+    it('serves the file a request path names, ignoring its query and hash', async () => {
+      const { statusCode, body, filePath } = await new Promise<{ statusCode?: number, body: string, filePath: unknown }>((resolve, reject) => {
+        http.get(`${server.address()}/hello.txt?cache=bust#top`, { headers: { 'x-cypress-authorization': server.token } }, (res) => {
+          let body = ''
+
+          res.on('data', (chunk) => body += chunk)
+          res.on('end', () => resolve({ statusCode: res.statusCode, body, filePath: res.headers['x-cypress-file-path'] }))
+        }).on('error', reject)
+      })
+
+      expect(statusCode).toBe(200)
+      expect(body).toBe('world')
+      expect(decodeURI(String(filePath))).toMatch(/[\\/]hello\.txt$/)
     })
 
     it('rejects requests missing the authorization token with a 401', async () => {
