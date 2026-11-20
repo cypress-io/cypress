@@ -107,25 +107,12 @@ describe('legacy driver: iframes in the AUT', () => {
 
     cy.get('#cross').its('0.contentDocument.body', { timeout: 500 })
   })
-
-  itWithLegacyDriver('.frame() requires the experimental driver', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('`cy.frame()` requires the experimental driver. Set `CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER=1` when starting Cypress to enable it.')
-      done()
-    })
-
-    cy.get('#cross').frame()
-  })
 })
 
-describe('legacy driver: tabs', () => {
-  itWithLegacyDriver('.tab() requires the experimental driver', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('`cy.tab()` requires the experimental driver. Set `CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER=1` when starting Cypress to enable it.')
-
-      done()
-    })
-
-    cy.tab()
+describe('legacy driver: experimental driver queries', () => {
+  itWithLegacyDriver('does not register .tab() or .frame()', () => {
+    expect('tab' in cy, 'cy.tab').to.be.false
+    expect('frame' in cy, 'cy.frame').to.be.false
+    expect('frame' in cy.wrap(null), '.frame() on a chain').to.be.false
   })
 })

@@ -407,38 +407,37 @@ export default (Commands, Cypress, cy, state) => {
     }
   })
 
-  Commands.addQuery('tab', function tab (url?: string | RegExp, userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
-    const displayName = url === undefined ? 'a tab' : `a tab matching ${String(url)}`
-    const log = userOptions.log !== false && Cypress.log({ message: url === undefined ? '' : String(url), timeout: userOptions.timeout })
+  // tabs and cross-origin frames are only reachable through the experimental driver's automation, so the
+  // legacy driver doesn't register these at all
+  if (isExperimentalDriverEnabled(Cypress)) {
+    Commands.addQuery('tab', function tab (url?: string | RegExp, userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
+      const displayName = url === undefined ? 'a tab' : `a tab matching ${String(url)}`
 
-    this.set('timeout', userOptions.timeout)
-
-    if (!isExperimentalDriverEnabled(Cypress)) {
-      $errUtils.throwErrByPath('experimental_driver.tab_requires_experimental_driver', { onFail: log })
-    }
-
-    const tabUrl = _.isRegExp(url) ? { source: url.source, flags: url.flags } : url
-
-    return () => extendRemoteSubject('tab', undefined, { type: 'tab', url: tabUrl }, displayName)
-  })
-
-  Commands.addQuery('frame', function frame (userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
-    const log = userOptions.log !== false && Cypress.log({ timeout: userOptions.timeout })
-
-    this.set('timeout', userOptions.timeout)
-
-    if (!isExperimentalDriverEnabled(Cypress)) {
-      $errUtils.throwErrByPath('experimental_driver.frame_requires_experimental_driver', { onFail: log })
-    }
-
-    return (subject) => {
-      if (!isRemoteSubject(subject)) {
-        $errUtils.throwErrByPath('experimental_driver.unsupported_subject', { onFail: log, args: { cmd: 'frame' } })
+      if (userOptions.log !== false) {
+        Cypress.log({ message: url === undefined ? '' : String(url), timeout: userOptions.timeout })
       }
 
-      return extendRemoteSubject('frame', subject, { type: 'frame', selector: subject.selector }, `${subject.selector} (frame)`)
-    }
-  })
+      this.set('timeout', userOptions.timeout)
+
+      const tabUrl = _.isRegExp(url) ? { source: url.source, flags: url.flags } : url
+
+      return () => extendRemoteSubject('tab', undefined, { type: 'tab', url: tabUrl }, displayName)
+    })
+
+    Commands.addQuery('frame', function frame (userOptions: Partial<Cypress.LogTimeoutOptions> = {}) {
+      const log = userOptions.log !== false && Cypress.log({ timeout: userOptions.timeout })
+
+      this.set('timeout', userOptions.timeout)
+
+      return (subject) => {
+        if (!isRemoteSubject(subject)) {
+          $errUtils.throwErrByPath('experimental_driver.unsupported_subject', { onFail: log, args: { cmd: 'frame' } })
+        }
+
+        return extendRemoteSubject('frame', subject, { type: 'frame', selector: subject.selector }, `${subject.selector} (frame)`)
+      }
+    })
+  }
 
   Commands.addQuery('shadow', function contains (userOptions: Cypress.LogTimeoutOptions) {
     userOptions = userOptions || {}

@@ -1,3 +1,5 @@
+/// <reference types="cypress/types/experimental-driver" />
+
 const PAGE = 'http://localhost:3500/fixtures/experimental-driver-frames.html'
 
 describe('experimental driver: iframes in the AUT', () => {
