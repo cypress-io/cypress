@@ -129,6 +129,102 @@ describe('http/util/csp-header', () => {
     })
   })
 
+  describe('parseCspHeaders output', () => {
+    const parse = (header: string, excludeDirectives: string[] = []) => {
+      return parseCspHeaders({ 'Content-Security-Policy': header }, 'content-security-policy', excludeDirectives)
+      .map((policyMap) => Array.from(policyMap.entries()))
+    }
+
+    // Shapes the AUT sends in packages/server/test/integration/http_requests_spec.js
+    const callSiteCases: [string, string, string[], [string, string[]][][]][] = [
+      ['script-src-elem with a CDN', `object-src 'none'; script-src-elem 'self' https://cdn.example.com`, [], [[
+        ['object-src', [`'none'`]],
+        ['script-src-elem', [`'self'`, 'https://cdn.example.com']],
+      ]]],
+      ['trailing semicolon', `object-src 'none'; script-src 'self' https://cdn.example.com;`, [], [[
+        ['object-src', [`'none'`]],
+        ['script-src', [`'self'`, 'https://cdn.example.com']],
+      ]]],
+      ['three directives', `object-src 'none'; script-src 'self' https://cdn.example.com; default-src 'self'`, [], [[
+        ['object-src', [`'none'`]],
+        ['script-src', [`'self'`, 'https://cdn.example.com']],
+        ['default-src', [`'self'`]],
+      ]]],
+      ['stripping the directives response-middleware removes', `object-src 'none'; frame-ancestors 'self'; script-src 'self' https://cdn.example.com; base-uri 'self'`, ['frame-ancestors', 'script-src'], [[
+        ['object-src', [`'none'`]],
+        ['base-uri', [`'self'`]],
+      ]]],
+      ['a header set-injection-level already gave a nonce', `script-src 'self' 'nonce-q7TUo5OyZDgtIRWgJbGUHQ=='; default-src 'self'`, [], [[
+        ['script-src', [`'self'`, `'nonce-q7TUo5OyZDgtIRWgJbGUHQ=='`]],
+        ['default-src', [`'self'`]],
+      ]]],
+      ['two comma-separated policies', `default-src 'self', script-src https://cdn.example.com`, [], [
+        [['default-src', [`'self'`]]],
+        [['script-src', ['https://cdn.example.com']]],
+      ]],
+    ]
+
+    // Inputs that only follow the header's syntax rules, to pin down edge behavior
+    const formatCases: [string, string, string[], [string, string[]][][]][] = [
+      ['an empty header', '', [], []],
+      ['only whitespace', '   ', [], [[]]],
+      ['only separators', ';; ;\n;', [], [[]]],
+      ['a directive with no value', 'upgrade-insecure-requests', [], [[['upgrade-insecure-requests', []]]]],
+      ['repeated spaces and leading semicolons', `;;  default-src    'self'   https://a.example.com  ;`, [], [[
+        ['default-src', [`'self'`, 'https://a.example.com']],
+      ]]],
+      ['a repeated directive', `script-src 'self'; script-src https://cdn.example.com`, [], [[
+        ['script-src', [`'self'`, 'https://cdn.example.com']],
+      ]]],
+      ['CRLF and LF line breaks', `default-src 'self'\r\nscript-src https://a.example.com\nhttps://b.example.com`, [], [[
+        ['default-src', [`'self'`]],
+        ['script-src', ['https://a.example.com']],
+        ['https://b.example.com', []],
+      ]]],
+      ['a tab, which is not a separator', `script-src\t'self'`, [], [[[`script-src\t'self'`, []]]]],
+      ['a Windows path', String.raw`report-uri C:\csp\reports; default-src 'self'`, [], [[
+        ['report-uri', [String.raw`C:\csp\reports`]],
+        ['default-src', [`'self'`]],
+      ]]],
+    ]
+
+    describe('real call-site shapes', () => {
+      it.each(callSiteCases)('parses %s', (_name, header, excludeDirectives, expected) => {
+        expect(parse(header, excludeDirectives)).toEqual(expected)
+      })
+    })
+
+    describe('format edge cases', () => {
+      it.each(formatCases)('parses %s', (_name, header, excludeDirectives, expected) => {
+        expect(parse(header, excludeDirectives)).toEqual(expected)
+      })
+    })
+
+    describe('adversarial input', () => {
+      const parsesQuickly = (header: string, expected: [string, string[]][][]) => {
+        const start = performance.now()
+        const result = parse(header)
+        const elapsed = performance.now() - start
+
+        expect(result).toEqual(expected)
+        expect(elapsed).toBeLessThan(200)
+      }
+
+      it('parses a 50,000-space run between a separator and a line break in linear time', () => {
+        parsesQuickly(`script-src 'self';${' '.repeat(50_000)}\ndefault-src 'self'`, [[
+          ['script-src', [`'self'`]],
+          ['default-src', [`'self'`]],
+        ]])
+      })
+
+      it('parses one directive repeated across a 50,000-character header in linear time', () => {
+        parsesQuickly('script-src https://a.example.com;'.repeat(1_516), [[
+          ['script-src', Array(1_516).fill('https://a.example.com')],
+        ]])
+      })
+    })
+  })
+
   describe('generateCspDirectives', () => {
     it(`should generate a CSP directive string from a policy map`, () => {
       const policyMap = new Map<string, string[]>()

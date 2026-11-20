@@ -1,6 +1,8 @@
 import type { OutgoingHttpHeaders } from 'http'
 
-const cspRegExp = /[; ]*([^\n\r; ]+) ?([^\n\r;]+)*/g
+// `default-src 'self';script-src a\nb` splits into `default-src 'self'`, `script-src a` and `b`:
+// a line break ends a directive just as `;` does.
+const cspDirectiveSeparator = /[\n\r;]/
 
 export const cspHeaderNames = ['content-security-policy', 'content-security-policy-report-only'] as const
 
@@ -92,18 +94,21 @@ export function parseCspHeaders (headers: OutgoingHttpHeaders, headerName: strin
   // We must make an policy map for each CSP header individually
   return cspHeaders.reduce((acc: Map<string, string[]>[], cspHeader) => {
     const policies = new Map<string, string[]>()
-    let policy = cspRegExp.exec(cspHeader)
 
-    while (policy) {
-      const [/* regExpMatch */, directive, values = ''] = policy
+    for (const directiveString of cspHeader.split(cspDirectiveSeparator)) {
+      const [directive, ...values] = directiveString.split(' ').filter(Boolean)
 
-      if (!excludeDirectives.includes(directive)) {
-        const currentDirective = policies.get(directive) || []
-
-        policies.set(directive, [...currentDirective, ...values.split(' ').filter(Boolean)])
+      if (!directive || excludeDirectives.includes(directive)) {
+        continue
       }
 
-      policy = cspRegExp.exec(cspHeader)
+      const currentValues = policies.get(directive)
+
+      if (currentValues) {
+        currentValues.push(...values)
+      } else {
+        policies.set(directive, values)
+      }
     }
 
     acc.push(policies)
