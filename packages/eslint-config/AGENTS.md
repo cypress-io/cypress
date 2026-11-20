@@ -25,7 +25,7 @@ src/
   mochaConfig.ts        eslint-plugin-mocha's rules, which `baseConfig` applies to Cypress specs and mocha workspaces add for their Node-side suites
   nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
   reactConfig.ts        `reactConfig(files)`: opt-in React rules (@eslint-react/eslint-plugin), scoped to the React files given. Requires the plugin on call
-  typeAwareConfig.ts    `noFloatingPromisesConfig(files)`: opt-in `@typescript-eslint/no-floating-promises` with a project service, scoped to the files given
+  typeAwareConfig.ts    `noFloatingPromisesConfig(files)` and `noMisusedPromisesConfig(files)`: opt-in type-aware promise rules with a project service, scoped to the files given
   vitestConfig.ts       Opt-in linting of Vitest specs (@vitest/eslint-plugin), for workspaces whose unit tests run on Vitest
   rules/                Cypress-authored rules, registered under the `@cypress/dev` namespace
   index.ts              Main entry: composes and exports the full flat-config array
@@ -165,6 +165,32 @@ These workspaces opt in, for their shipped source only:
 - `icons`: `index.ts` and `index.mts`
 
 Specs are left out (`config` and `reporter` predate this and keep theirs): they commonly start a promise and assert on it later, so the hits are mostly noise, and giving them a project service would slow lint further. The other workspaces don't opt in yet; adding one means fixing its hits and measuring its lint time first.
+
+## `noMisusedPromisesConfig`
+
+`noMisusedPromisesConfig(files)` turns on `@typescript-eslint/no-misused-promises` for `files`. It reports a promise where nothing will handle it: an async function passed where the callee expects a function returning `void` (an emitter or socket listener, an HTTP or stream callback, a `setTimeout` callback, an `onClick` prop), assigned to a property typed that way, or overriding a method that returns `void`, and a promise used as a condition. A rejection there is never handled, so it surfaces as an unhandled rejection, if at all.
+
+It is the sibling of `noFloatingPromisesConfig` and shares its project service: both are built by the same helper in `typeAwareConfig.ts`, so pass them the same `files` and lint parses each file once. Add it right after that block. A workspace keeps the shared list in one `const`:
+
+```ts
+const typeAwareFiles = ['lib/**/*.ts']
+
+export default [
+  // ...
+  noFloatingPromisesConfig(typeAwareFiles),
+  noMisusedPromisesConfig(typeAwareFiles),
+]
+```
+
+Every workspace that spreads `noFloatingPromisesConfig` opts in with the same files (see the list under [`noFloatingPromisesConfig`](#nofloatingpromisesconfig)). The others don't, for the same reason: neither rule runs without a project service, and adding one to a workspace means fixing its hits and measuring its lint time first.
+
+Fix a hit by deciding what should happen when the async work fails:
+
+- **The callee awaits it.** Change the callee's type to accept `Promise<void>`, as `@packages/proxy`'s `HttpMiddleware` does, since `_runStage` sends a rejected middleware to `onError`.
+- **There is an error path.** Keep the handler synchronous and forward the rejection to it: `next`, an `onError`, `req.destroy(err)`.
+- **There is none.** Catch and log it with the file's `debug` or `logTraceError`.
+
+Don't turn off `checksVoidReturn`, which reports nearly every hit. If one kind of call site is safe, because the library it is passed to awaits the handler and handles its rejection, turn off only the sub-option for that kind and name the library in a comment. Where one hit is intentional, use `// eslint-disable-next-line @typescript-eslint/no-misused-promises -- <reason>`. `config`'s `fs.pathExists` mocks are the example: fs-extra's last overload takes a callback, so the rule checks the mock against that one.
 
 ## `reactConfig`
 
