@@ -1,7 +1,6 @@
 import net from 'net'
 import tls from 'tls'
-import url from 'url'
-import { buildConnectReqHead, createProxySock, getProxyOrTargetOverrideForUrl, isResponseStatusCode200 } from '@packages/network'
+import { buildConnectReqHead, createProxySock, getProxyOrTargetOverrideForUrl, isResponseStatusCode200, parseUrlFields } from '@packages/network'
 import type { UpstreamConnectOptions, UpstreamConnection } from './mtls-bridge'
 
 const HEADERS_END = Buffer.from('\r\n\r\n')
@@ -101,7 +100,7 @@ function dial (hostname: string, port: number): Promise<net.Socket> {
 }
 
 function dialThroughProxy (hostname: string, port: number, proxy: string): Promise<net.Socket> {
-  const parsed = url.parse(proxy)
+  const parsed = parseUrlFields(proxy)
 
   return new Promise((resolve, reject) => {
     const onProxySock = (err?: Error, socket?: net.Socket) => {

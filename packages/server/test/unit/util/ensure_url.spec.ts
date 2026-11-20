@@ -37,6 +37,24 @@ describe('lib/util/ensure-url', function () {
       })
     })
 
+    it('connects to port 443 for an https URL without a port', function () {
+      const stub = stubGetAddressFor(443, 'foo.bar.invalid', () => Promise.resolve() as any)
+
+      return isListening('https://foo.bar.invalid')
+      .then(() => {
+        expect(callsWith(stub, 443, 'foo.bar.invalid')).toHaveLength(1)
+      })
+    })
+
+    it('connects to the bare address of an IPv6 URL', function () {
+      const stub = stubGetAddressFor(8080, '::1', () => Promise.resolve() as any)
+
+      return isListening('http://[::1]:8080')
+      .then(() => {
+        expect(callsWith(stub, 8080, '::1')).toHaveLength(1)
+      })
+    })
+
     it(`rejects if a URL doesn't connect`, function () {
       const stub = stubGetAddressFor(80, 'foo.bar.invalid', () => Promise.reject(new Error('Error')))
 

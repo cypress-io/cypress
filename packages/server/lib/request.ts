@@ -7,7 +7,7 @@ import debugModule from 'debug'
 import Promise from 'bluebird'
 import stream from 'stream'
 import duplexify from 'duplexify'
-import { agent } from '@packages/network'
+import { agent, parseUrlFields } from '@packages/network'
 import * as statusCode from './util/status_code'
 import { streamBuffer } from './util/stream_buffer'
 
@@ -569,7 +569,7 @@ export class Request {
 
   private setRedirectCookieHeader (req: Record<string, any>, newUrl: string, originalUrl: string, automationFn: AutomationFn, userCookieHeader?: string) {
     // a Cookie header passed by the user is meant for the host it was sent to
-    const existingHeader = url.parse(newUrl).hostname === url.parse(originalUrl).hostname ? userCookieHeader : undefined
+    const existingHeader = parseUrlFields(newUrl).hostname === parseUrlFields(originalUrl).hostname ? userCookieHeader : undefined
 
     caseInsensitiveDelete(req.headers, 'Cookie')
 
@@ -600,7 +600,7 @@ export class Request {
       cookies = [cookies]
     }
 
-    const parsedUrl = url.parse(resUrl)
+    const parsedUrl = parseUrlFields(resUrl)
     const defaultDomain = parsedUrl.hostname
 
     debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
