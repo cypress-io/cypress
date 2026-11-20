@@ -257,7 +257,9 @@ describe('detectThirdPartyCTFrameworks', () => {
     }
 
     beforeEach(async () => {
-      tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'ct-detect-third-party-'))
+      // `require.resolve` reports real paths, and the temp directory can sit
+      // behind a link, such as `/var` → `/private/var` on macOS
+      tempDir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'ct-detect-third-party-')))
     })
 
     afterEach(async () => {
