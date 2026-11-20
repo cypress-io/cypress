@@ -123,15 +123,6 @@ export default [
       '@typescript-eslint/no-unused-vars': 'off',
     },
   },
-  {
-    // These exercise how the V8 snapshot bundler loads modules, so unused
-    // bindings and the `debugger` statement are deliberate
-    files: ['projects/v8-snapshot/**'],
-    rules: {
-      '@typescript-eslint/no-unused-vars': 'off',
-      'no-debugger': 'off',
-    },
-  },
   fixtureReactConfig,
   {
     files: fixtureReactFiles,

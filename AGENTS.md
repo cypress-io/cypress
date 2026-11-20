@@ -9,13 +9,12 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
 - **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more
 - **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling
-- **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot`
 - **`system-tests/`** — Full end-to-end system test suite: `test/` runs against the dev app, `test-binary/` against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
 
 ## Task runbooks
 
-Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), [V8 snapshots](./guides/v8-snapshots.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
+Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
 
 `.claude/skills/*/SKILL.md` adds a thin layer on top for the two workflows that need agent-specific execution guidance — which permissions a phase needs, long-running commands, and host quirks that would be noise in a contributor guide. Claude Code loads them on demand; **other agents should read the file directly**, since nothing loads them automatically:
 
@@ -111,12 +110,6 @@ yarn lint:fix
 # Full monorepo build
 yarn build
 
-# Build V8 snapshot (dev)
-yarn build-v8-snapshot-dev
-
-# Build V8 snapshot (prod)
-yarn build-v8-snapshot-prod
-
 # Clean all build artifacts
 yarn clean
 
@@ -126,7 +119,7 @@ yarn clean-deps && yarn
 
 ## Architecture
 
-Orientation, not a registry — the directories under `packages/`, `npm/`, and `tooling/` are the authoritative list, and each carries its own `AGENTS.md` with the detail. Read a package's own file before working in it rather than relying on the one-liner here.
+Orientation, not a registry — the directories under `packages/` and `npm/` are the authoritative list, and each carries its own `AGENTS.md` with the detail. Read a package's own file before working in it rather than relying on the one-liner here.
 
 ### CLI & Distribution
 
@@ -176,17 +169,12 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **`@packages/example`** — The bundled kitchensink example project. Its `cypress/` and `app/` contents are generated from upstream `cypress-example-kitchensink` — change it there, not here.
 - **`@packages/root`** — Root package metadata consumed by the binary build.
 
-### Build & Snapshot Infrastructure
+### Build Infrastructure
 
-- **`@packages/v8-snapshot-require`** — Module loading utilities for V8 snapshots in Electron.
-- **`@packages/packherd-require`** — Module loader for dependencies bundled by `@tooling/packherd`.
 - **`@packages/web-config`** — Webpack/PostCSS configuration for the Vue frontend bundles.
 - **`@packages/ts`** — Shared TypeScript configuration and `ts-node` register helper.
 - **`@packages/eslint-config`** — Shared ESLint configuration preset used across packages.
 - **`@packages/resolve-dist`** — Resolves paths to compiled distribution artifacts.
-- **`@tooling/v8-snapshot`** — V8 snapshot creation tooling for Electron startup optimization.
-- **`@tooling/packherd`** — Bundles all reachable dependencies from an entry point into a single artifact.
-- **`@tooling/electron-mksnapshot`** — Configurable `mksnapshot` binary wrapper for the target Electron version.
 
 ### Component Testing Adapters (published via `npm/`)
 
@@ -355,6 +343,6 @@ Prefer this over `yarn --ignore-engines`: the flag only silences the check for t
 
 ### Key caveats
 
-- The postinstall takes ~4-5 minutes (build + V8 snapshot generation). If `yarn` is interrupted, re-run it.
+- The postinstall takes ~4-5 minutes (mostly `yarn build`). If `yarn` is interrupted, re-run it.
 - `yarn --frozen-lockfile` should be preferred when the lockfile hasn't changed; it falls back to `yarn` (which runs postinstall) if it fails.
 - Do not run `yarn` from within sub-packages. Always run from the repo root.

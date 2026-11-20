@@ -46,8 +46,8 @@ const consolidateDuplicateDependencies = async (buildAppDir) => {
   }
 }
 
-// Snapshot metadata follows the dev install's hoisting, so on a case-insensitive filesystem a stale
-// path can hit a different file, e.g. mime 1's `mime/mime.js` resolving to mime 3's `mime/Mime.js`.
+// On a case-insensitive filesystem, a path whose case differs from the file on disk deletes that other file,
+// e.g. mime 1's `mime/mime.js` matching mime 3's `mime/Mime.js`.
 const createExactCaseChecker = (baseDir) => {
   const dirEntries = new Map()
 
@@ -95,7 +95,7 @@ const getDependencyPathsToKeep = async (buildAppDir, additionalEntryPoints = [])
     'node_modules/mocha-7.2.0/index.js',
     'packages/server/node_modules/webdriver/build/index.js',
     'packages/server/node_modules/@wdio/utils/build/node.js',
-    // jimp is deferred in the snapshot, so its dependencies are loaded from disk
+    // jimp is required at runtime rather than bundled, so its dependencies are loaded from disk
     'node_modules/jimp/dist/commonjs/index.js',
     // dependencies needed for geckodriver when running firefox in the binary
     'node_modules/pump/index.js',
@@ -115,10 +115,10 @@ const getDependencyPathsToKeep = async (buildAppDir, additionalEntryPoints = [])
   let esbuildResult
   let newEntryPointsFound = true
 
-  // The general idea here is to run esbuild on entry points that are used outside of the snapshot. If, during the process,
+  // The general idea here is to run esbuild on entry points that are used outside of the start bundle. If, during the process,
   // we find places where we do a require.resolve on a module, that should be treated as an additional entry point and we run
   // esbuild again. We do this until we no longer find any new entry points. The resulting metafile inputs are
-  // the dependency paths that we need to ensure stay in the snapshot.
+  // the dependency paths that we need to ensure stay in the binary.
   while (newEntryPointsFound) {
     esbuildResult = await esbuild.build({
       entryPoints: [...entryPoints],
@@ -202,7 +202,7 @@ const cleanupUnneededDependencies = async (buildAppDir) => {
     // Remove test files
     path.join(buildAppDir, '**', 'test'),
     path.join(buildAppDir, '**', 'tests'),
-    // What we need of prettier is entirely encapsulated within the v8 snapshot, but has a few leftover large files
+    // What we need of prettier is entirely encapsulated within the start bundle, but has a few leftover large files
     path.join(buildAppDir, '**', 'prettier', 'esm'),
     path.join(buildAppDir, '**', 'prettier', 'standalone.js'),
     path.join(buildAppDir, '**', 'prettier', 'bin-prettier.js'),
