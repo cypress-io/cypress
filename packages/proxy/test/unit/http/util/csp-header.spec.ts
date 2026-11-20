@@ -218,6 +218,13 @@ describe('http/util/csp-header', () => {
         ]])
       })
 
+      // About 900 KB, inside the 1 MiB response-header limit Cypress's agent allows
+      it('merges a repeated directive with more values than fit in a function call', () => {
+        parsesQuickly(`img-src 'self'; img-src${' data:'.repeat(150_000)}`, [[
+          ['img-src', [`'self'`, ...Array(150_000).fill('data:')]],
+        ]])
+      })
+
       it('parses one directive repeated across a 50,000-character header in linear time', () => {
         parsesQuickly('script-src https://a.example.com;'.repeat(1_516), [[
           ['script-src', Array(1_516).fill('https://a.example.com')],

@@ -105,7 +105,11 @@ export function parseCspHeaders (headers: OutgoingHttpHeaders, headerName: strin
       const currentValues = policies.get(directive)
 
       if (currentValues) {
-        currentValues.push(...values)
+        // A loop rather than `push(...values)`, which throws a RangeError once a directive has
+        // more values than fit in a function call's arguments
+        for (const value of values) {
+          currentValues.push(value)
+        }
       } else {
         policies.set(directive, values)
       }
