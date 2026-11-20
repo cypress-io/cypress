@@ -50,6 +50,7 @@
 
 - Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#35284](https://github.com/cypress-io/cypress/pull/35284).
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
+- Renderer-crash errors during [`cypress run`](https://on.cypress.io/command-line#cypress-run) no longer suggest lowering [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global), an option normally ignored in run mode. The suggestion remains available during `cypress open`. Addresses [#28578](https://github.com/cypress-io/cypress/issues/28578).
 
 **Dependency Updates:**
 
