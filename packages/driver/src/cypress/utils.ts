@@ -10,8 +10,30 @@ import { $Location } from './location'
 import $errUtils from './error_utils'
 
 const customProtocolRegex = /^[^:/]+:\/{1,3}/
-// Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
-const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
+const webpackProtocol = 'webpack://'
+
+// Removes a webpack devtool namespace, from `webpack://` through the `./` after
+// it, e.g. `webpack://_N_E/./pages/index.cy.js` becomes `pages/index.cy.js`,
+// without touching relative paths like `../`. Returns undefined when there is no
+// namespace. Every `webpack://` before the same `.` shares its outcome, so the
+// search resumes after that `.` instead of rescanning, which keeps it linear.
+const stripWebpackDevtoolNamespace = (filePath: string) => {
+  let protocolIndex = filePath.indexOf(webpackProtocol)
+
+  while (protocolIndex !== -1) {
+    const dotIndex = filePath.indexOf('.', protocolIndex + webpackProtocol.length)
+
+    if (dotIndex === -1) return undefined
+
+    if (filePath[dotIndex + 1] === '/') {
+      return `${filePath.slice(0, protocolIndex)}${filePath.slice(dotIndex + 2)}`
+    }
+
+    protocolIndex = filePath.indexOf(webpackProtocol, dotIndex + 1)
+  }
+
+  return undefined
+}
 
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
@@ -507,10 +529,6 @@ export default {
     // Check the path to see if custom namespaces have been applied and, if so, remove them
     // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
     // need to strip off the `_N_E` so that "Open in IDE" links work correctly
-    if (webpackDevtoolNamespaceRegex.test(filePath)) {
-      return filePath.replace(webpackDevtoolNamespaceRegex, '')
-    }
-
-    return filePath.replace(customProtocolRegex, '')
+    return stripWebpackDevtoolNamespace(filePath) ?? filePath.replace(customProtocolRegex, '')
   },
 }

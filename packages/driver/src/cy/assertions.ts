@@ -9,7 +9,27 @@ import type { $Cy } from '../cypress/cy'
 const butRe = /,? but\b/
 const bTagOpen = /\*\*/g
 const bTagClosed = /\*\*/g
-const stackTracesRe = / at .*\n/gm
+const nonNewlineLineTerminators = ['\r', '\u2028', '\u2029']
+
+// Cuts every newline-terminated line at its first ` at `, e.g. the sinon call
+// `    addItem(sku-1042, 2) at checkout (cart.js:4:29)\n` becomes
+// `    addItem(sku-1042, 2)\n`. A ` at ` only counts when no `\r`,
+// `\u2028` or `\u2029` follows it on the line, and the last line is kept whole.
+// Splitting on newlines keeps this linear where a ` at .*\n` regex rescans
+// the rest of the line from every ` at ` it finds.
+export const stripStackTraceLines = (message: string) => {
+  const lines = message.split('\n')
+
+  for (let i = 0; i < lines.length - 1; i++) {
+    const line = lines[i]
+    const searchFrom = Math.max(...nonNewlineLineTerminators.map((terminator) => line.lastIndexOf(terminator))) + 1
+    const atIndex = line.indexOf(' at ', searchFrom)
+
+    if (atIndex !== -1) lines[i] = line.slice(0, atIndex)
+  }
+
+  return lines.join('\n')
+}
 
 const IS_DOM_TYPES = [$dom.isElement, $dom.isDocument, $dom.isWindow]
 
@@ -171,7 +191,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     }
 
     if (getProperty(value, 'isSinonProxy')) {
-      message = message.replace(stackTracesRe, '\n')
+      message = stripStackTraceLines(message)
     }
 
     const parsed = parseValueActualAndExpected(value, actual, expected)

@@ -585,6 +585,42 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   return normalizeStackIndentation(nonCypressStackLines)
 }
 
+const isAsciiDigitAt = (str: string, index: number) => {
+  const code = str.charCodeAt(index)
+
+  return code >= 48 && code <= 57
+}
+
+// Reads the `line:column` that ends a stack line, e.g. `at eval (spec.cy.ts:14:12)`
+// gives line 14 and column 12, with `start` and `end` bounding `14:12`. Chromium
+// wraps the location in parentheses and Firefox does not, so one trailing `)` is
+// allowed. Scanning back from the end keeps this linear on long lines of digits,
+// where an unanchored regex would restart at every digit.
+const getTrailingLineAndColumn = (stackLine: string) => {
+  const end = stackLine.endsWith(')') ? stackLine.length - 1 : stackLine.length
+
+  let columnStart = end
+
+  while (columnStart > 0 && isAsciiDigitAt(stackLine, columnStart - 1)) columnStart--
+
+  const colonIndex = columnStart - 1
+
+  if (columnStart === end || stackLine[colonIndex] !== ':') return null
+
+  let start = colonIndex
+
+  while (start > 0 && isAsciiDigitAt(stackLine, start - 1)) start--
+
+  if (start === colonIndex) return null
+
+  return {
+    line: Number(stackLine.slice(start, colonIndex)),
+    column: Number(stackLine.slice(columnStart, end)),
+    start,
+    end,
+  }
+}
+
 const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, originUserInvocationStack: string) => {
   // The method here is:
   // 1. Grab the line/column from the first line of the origin user invocation stack
@@ -597,23 +633,16 @@ const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, origin
 
   if (userStackLines.length === 0 || originStackLines.length === 0) return userInvocationStack
 
-  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not
-  const userStackMatch = userStackLines[0].match(/(\d+):(\d+)\)?$/)
+  const userLocation = getTrailingLineAndColumn(userStackLines[0])
 
-  if (!userStackMatch) return userInvocationStack
+  if (!userLocation) return userInvocationStack
 
-  const userLine = Number(userStackMatch[1])
-  const userColumn = Number(userStackMatch[2])
+  const originStackLine = originStackLines[0]
+  const originLocation = getTrailingLineAndColumn(originStackLine)
 
-  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not
-  const originStackMatch = originStackLines[0].match(/(\d+):(\d+)\)?$/)
+  if (!originLocation) return userInvocationStack
 
-  if (!originStackMatch) return userInvocationStack
-
-  const originLine = Number(originStackMatch[1])
-
-  // Note: chrome adds a parenthesis to the end of the stack line and firefox does not so we need to keep whatever we find
-  const newUserStackLine = `${originStackLines[0].replace(/(\d+:\d+)(\)?)$/, `${originLine + userLine - 1}:${userColumn}$2`)}`
+  const newUserStackLine = `${originStackLine.slice(0, originLocation.start)}${originLocation.line + userLocation.line - 1}:${userLocation.column}${originStackLine.slice(originLocation.end)}`
 
   return userInvocationStack.replace(userStackLines[0], newUserStackLine)
 }

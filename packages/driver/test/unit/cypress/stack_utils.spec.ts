@@ -413,5 +413,72 @@ describe('stack_utils', () => {
       // Line should be 5 + 1 - 1 = 5, column should remain 15
       expect(result).toContain('cypress:///../driver/src/cypress/cy.ts:5:15')
     })
+
+    const chromiumEvalLine = '    at eval (eval at invokeOriginFn (cypress:///../driver/src/cross-origin/origin_fn.ts), <anonymous>:3:9)'
+
+    it.each([
+      {
+        name: 'Chromium, location in parentheses',
+        user: chromiumEvalLine,
+        origin: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:20:5)',
+        expected: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:22:9)',
+      },
+      {
+        name: 'Firefox, location without parentheses',
+        user: 'eval@cypress:///../driver/src/cross-origin/origin_fn.ts line 176 > eval:3:9',
+        origin: 'Context.eval@http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:20:5',
+        expected: 'Context.eval@http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:22:9',
+      },
+      {
+        name: 'Windows file path',
+        user: chromiumEvalLine,
+        origin: '    at Context.eval (file:///C:/Users/jane/checkout-app/cypress/e2e/checkout.cy.ts:20:5)',
+        expected: '    at Context.eval (file:///C:/Users/jane/checkout-app/cypress/e2e/checkout.cy.ts:22:9)',
+      },
+      {
+        name: 'multi-digit line and column',
+        user: '    at eval (eval at invokeOriginFn (cypress:///../driver/src/cross-origin/origin_fn.ts), <anonymous>:12:345)',
+        origin: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:1020:5)',
+        expected: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:1031:345)',
+      },
+      {
+        name: 'multi-line user stack, only the first line is replaced',
+        user: `${chromiumEvalLine}\n    at invokeOriginFn (cypress:///../driver/src/cross-origin/origin_fn.ts:176:42)`,
+        origin: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:20:5)',
+        expected: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:22:9)\n    at invokeOriginFn (cypress:///../driver/src/cross-origin/origin_fn.ts:176:42)',
+      },
+      {
+        name: 'user line without a location',
+        user: '    at <unknown>',
+        origin: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:20:5)',
+        expected: '    at <unknown>',
+      },
+      {
+        name: 'origin line without a location',
+        user: chromiumEvalLine,
+        origin: '    at Array.forEach ([native code])',
+        expected: chromiumEvalLine,
+      },
+      {
+        name: 'empty stacks',
+        user: '',
+        origin: '',
+        expected: '',
+      },
+    ])('merges the trailing line and column: $name', ({ user, origin, expected }) => {
+      expect(stack_utils.mergeCrossOriginUserInvocationStack(user, origin)).toEqual(expected)
+    })
+
+    it('reads the trailing location of a 50,000-character line of digits', () => {
+      const digits = '0'.repeat(50_000)
+      const user = `    at eval (${digits})x:3:9)`
+      const origin = `    at Context.eval (${digits})x:20:5)`
+
+      const start = performance.now()
+      const result = stack_utils.mergeCrossOriginUserInvocationStack(user, origin)
+
+      expect(performance.now() - start).toBeLessThan(200)
+      expect(result).toEqual(`    at Context.eval (${digits})x:22:9)`)
+    })
   })
 })

@@ -36,4 +36,33 @@ describe('driver/src/cypress/utils', () => {
       expect($utils.decodeBase64Unicode('77u/e30=')).toBe('﻿{}')
     })
   })
+
+  describe('.stripCustomProtocol', () => {
+    it.each([
+      ['webpack://_N_E/./pages/index.cy.js', 'pages/index.cy.js'],
+      ['webpack:///./cypress/e2e/checkout.cy.ts', 'cypress/e2e/checkout.cy.ts'],
+      ['webpack://checkout-app/./src/components/Cart.tsx', 'src/components/Cart.tsx'],
+      ['webpack://checkout-app/../shared/src/format.ts', 'checkout-app/../shared/src/format.ts'],
+      ['webpack://checkout-app/node_modules/.pnpm/lodash@4.17.21/./lodash.js', 'checkout-app/node_modules/.pnpm/lodash@4.17.21/./lodash.js'],
+      ['webpack://_N_E/webpack://inner/./pages/index.cy.js', 'pages/index.cy.js'],
+      ['webpack:///C:/Users/jane/checkout-app/cypress/e2e/checkout.cy.ts', 'C:/Users/jane/checkout-app/cypress/e2e/checkout.cy.ts'],
+      ['webpack://checkout-app/./', ''],
+      ['cypress:///../driver/src/cypress/cy.ts', '../driver/src/cypress/cy.ts'],
+      ['cypress/e2e/checkout.cy.ts', 'cypress/e2e/checkout.cy.ts'],
+      ['http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts', undefined],
+      ['', undefined],
+    ])('strips %j to %j', (filePath, expected) => {
+      expect($utils.stripCustomProtocol(filePath)).toEqual(expected)
+    })
+
+    it('handles 50,000 characters of repeated webpack protocols with no namespace', () => {
+      const filePath = `${'/webpack://p'.repeat(4_200)}/`
+
+      const start = performance.now()
+      const result = $utils.stripCustomProtocol(filePath)
+
+      expect(performance.now() - start).toBeLessThan(200)
+      expect(result).toEqual(filePath)
+    })
+  })
 })

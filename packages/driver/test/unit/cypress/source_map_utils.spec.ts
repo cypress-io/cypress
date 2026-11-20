@@ -124,6 +124,79 @@ describe('source_map_utils', () => {
         expect(sourceMapUtils.extractSourceMap(withInlineMap(mapBase64))).toBeNull()
       })
     })
+
+    const sourceMap = {
+      version: 3,
+      sources: ['cypress/e2e/checkout.cy.ts'],
+      names: [],
+      mappings: 'AAAA',
+    }
+    const otherSourceMap = { ...sourceMap, sources: ['cypress/support/e2e.ts'] }
+    const toBase64 = (map: object) => Buffer.from(JSON.stringify(map)).toString('base64')
+
+    it.each([
+      {
+        name: 'charset and base64',
+        fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${toBase64(sourceMap)}\n`,
+        expected: sourceMap,
+      },
+      {
+        name: 'base64 without a charset',
+        fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:application/json;base64,${toBase64(sourceMap)}`,
+        expected: sourceMap,
+      },
+      {
+        name: 'legacy `//@` marker with spaces',
+        fileContents: `it('checks out', () => {})\n// @ sourceMappingURL = data:application/json;base64,${toBase64(sourceMap)}\r\n`,
+        expected: sourceMap,
+      },
+      {
+        name: 'several inline maps, the last one wins',
+        fileContents: `//# sourceMappingURL=data:application/json;base64,${toBase64(otherSourceMap)}\nit('checks out', () => {})\n//# sourceMappingURL=data:application/json;base64,${toBase64(sourceMap)}\n`,
+        expected: sourceMap,
+      },
+      {
+        name: 'external map file',
+        fileContents: `it('checks out', () => {})\n//# sourceMappingURL=checkout.cy.js.map\n`,
+        expected: null,
+      },
+      {
+        name: 'URL-encoded data URL',
+        fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:application/json;charset=utf-8,%7B%22version%22%3A3%7D\n`,
+        expected: null,
+      },
+      {
+        name: 'data URL with an unsupported parameter',
+        fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:application/json;charset=utf-8;name=checkout.js;base64,${toBase64(sourceMap)}\n`,
+        expected: null,
+      },
+      {
+        name: 'data URL nested inside a non-base64 one is not decoded',
+        fileContents: `it('checks out', () => {})\n//# sourceMappingURL=data:text/plain;name=map,data:application/json;base64,${toBase64(sourceMap)}\n`,
+        expected: null,
+      },
+      {
+        name: 'empty file',
+        fileContents: '',
+        expected: null,
+      },
+    ])('extracts an inline map: $name', async ({ fileContents, expected }) => {
+      await withLinuxPaths((sourceMapUtils) => {
+        expect(sourceMapUtils.extractSourceMap(fileContents)).toEqual(expected)
+      })
+    })
+
+    it('rejects a 50,000-character data URL made of repeated `data:` prefixes', async () => {
+      await withLinuxPaths((sourceMapUtils) => {
+        const fileContents = `it('checks out', () => {})\n//# sourceMappingURL=${'data:x'.repeat(8_400)}\n`
+
+        const start = performance.now()
+        const result = sourceMapUtils.extractSourceMap(fileContents)
+
+        expect(performance.now() - start).toBeLessThan(200)
+        expect(result).toBeNull()
+      })
+    })
   })
 
   describe('areSourceMapsAvailable', () => {
