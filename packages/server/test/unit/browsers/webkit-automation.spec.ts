@@ -4,6 +4,7 @@ import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 import { WebKitCDPBridge } from '../../../lib/browsers/webkit-cdp-bridge'
 import type { RunModeVideoApi } from '@packages/types'
 import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 vi.mock('../../../lib/automation/commands/remote_aut_script', async (importOriginal) => {
   return { ...await importOriginal<typeof import('../../../lib/automation/commands/remote_aut_script')>(), getRemoteAutScript: vi.fn(async () => 'remote AUT script') }
@@ -235,7 +236,7 @@ describe('lib/browsers/webkit-automation', () => {
 
       await getRouteHandler()(route, request)
 
-      expect(route.continue).toHaveBeenCalledWith({ headers: { 'accept': 'text/html', 'X-Cypress-Is-AUT-Frame': 'true' } })
+      expect(route.continue).toHaveBeenCalledWith({ headers: { 'accept': 'text/html', 'X-Cypress-Is-AUT-Frame': getMetadataHeaderValue() } })
     })
 
     it('lets a new tab\'s first navigation through, though its frame does not exist yet', async () => {

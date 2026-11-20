@@ -13,7 +13,6 @@ import fs from 'fs/promises'
 import { createReadStream } from 'fs'
 import { pipeline } from 'stream/promises'
 import crypto from 'crypto'
-import { flipFuses, FuseVersion, FuseV1Options } from '@electron/fuses'
 import { move, remove } from 'fs-extra'
 import * as cyIcons from '@packages/icons'
 import pkg from '@packages/root'
@@ -147,7 +146,7 @@ interface PkgElectronAppOptions {
 // retries and re-fetches SHASUMS256.txt even on cache hits. Calling it here
 // lets us retry; electronZipDir then points the packager at the result.
 async function downloadElectronZipWithRetries (options: { version: string, platform: string, arch: string }): Promise<string> {
-  // required dynamically for the same mksnapshot reason as @electron/packager below
+  // required dynamically for the same bundling reason as @electron/packager below
   const e = 'electron'
   const { downloadArtifact } = require(`@${e}/get`)
   const retryDelaysMs = [2000, 4000, 8000, 16000, 32000]
@@ -175,12 +174,8 @@ async function pkgElectronApp (
   options: Partial<PkgElectronAppOptions> = {},
 ) {
   /**
-   * NOTE: electron-packager as of v16.0.0 does not play well with
-   * our mksnapshot. Requiring the package in this way, dynamically, will
-   * make it undiscoverable by mksnapshot, which is OK since electron-packager
-   * is a build dependency.
-   * Converted to use @electron/packager for >= v18.x.x.
-   * This is the renamed electron-packager.
+   * NOTE: Requiring @electron/packager dynamically keeps this build dependency
+   * out of the binary's start bundle.
    *
    * TODO: split this into two libs; one being the build tool, and the other as
    * the runtime lib for opening Electron. This will allow us to import these
@@ -229,20 +224,6 @@ async function pkgElectronApp (
     await move(appPath, resolvedOptions.dist)
     debug('removed app', path.dirname(appPath))
     await remove(path.dirname(appPath))
-  }
-
-  try {
-    if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE ?? '')) {
-      await flipFuses(getPathToExec(), {
-        version: FuseVersion.V1,
-        resetAdHocDarwinSignature: platform === 'darwin' && arch === 'arm64',
-        [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: true,
-      })
-    }
-  } catch (err) {
-    console.log((err as Error).stack)
-
-    return process.exit(1)
   }
 }
 

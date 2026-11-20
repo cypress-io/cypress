@@ -10,7 +10,6 @@ import { GET_MAJOR_VERSION_FOR_CONTENT, type Browser, type FoundBrowser, type Op
 
 import type { SinonStub } from 'sinon'
 import type sinon from 'sinon'
-import 'cypress-plugin-tab'
 import type { Response } from 'cross-fetch'
 import type nock from 'nock'
 

@@ -1603,6 +1603,25 @@ describe('lib/server-base', () => {
       )
     })
 
+    it('removes Cypress cookies from the upgrade request', () => {
+      server.remoteStates.set('https://www.foobar.com')
+
+      const upgradeWith = (cookie: string) => {
+        const req = {
+          connection: { encrypted: true },
+          url: '/',
+          headers: { host: 'www.foobar.com', cookie },
+        }
+
+        server.proxyWebsockets(proxy, '/foo', req, socket, head)
+
+        return req.headers
+      }
+
+      expect(upgradeWith('session_id=8f2c1e9a40b7; __cypress.unload=true').cookie).toEqual('session_id=8f2c1e9a40b7')
+      expect(upgradeWith('__cypress.unload=true')).not.toHaveProperty('cookie')
+    })
+
     it('ends the socket if its writable and there is no __cypress.remoteHost', () => {
       const req = {
         url: '/',

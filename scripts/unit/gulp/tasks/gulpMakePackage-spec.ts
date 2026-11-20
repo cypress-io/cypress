@@ -40,7 +40,7 @@ describe('gulpMakePackage', () => {
     })
 
     it('rejects the name of an existing package', () => {
-      for (const name of ['server', 'ts', 'v8-snapshot-require']) {
+      for (const name of ['server', 'ts', 'telemetry']) {
         expect(validate(name), name).to.equal(`packages/${name} already exists. Choose a different name.`)
       }
     })
