@@ -41,7 +41,6 @@ import type { StateFunc } from './cypress/state'
 
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
-import * as resolvers from './cypress/resolvers'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
@@ -55,6 +54,7 @@ const debug = debugFn('cypress:driver:cypress')
 
 declare global {
   interface Window {
+    __attachToCypress?: (Cypress: Cypress.Cypress) => void
     __cySkipValidateConfig: boolean
     Cypress: Cypress.Cypress
     Runner: any
@@ -69,7 +69,7 @@ const jqueryProxyFn = function (...args) {
     $errUtils.throwErrByPath('miscellaneous.no_cy')
   }
 
-  return this.cy.$$.apply(this.cy, args)
+  return this.cy.$$(...args)
 }
 
 const throwPrivateCommandInterface = (method) => {
@@ -158,6 +158,7 @@ class $Cypress {
   specBridgeCommunicator: SpecBridgeCommunicator
   isCrossOriginSpecBridge: boolean
   on: any
+  once: any
   stackUtils: typeof $stackUtils | null = null
 
   // attach to $Cypress to access
@@ -175,8 +176,6 @@ class $Cypress {
   Log = LogUtils
   LocalStorage = $LocalStorage
   Mocha = $Mocha
-  resolveWindowReference = resolvers.resolveWindowReference
-  resolveLocationReference = resolvers.resolveLocationReference
   Mouse = {
     create: createMouse,
   }
@@ -197,6 +196,7 @@ class $Cypress {
       })
     },
   }
+
   utils = $utils
   _ = _
   Blob = blobUtil
@@ -337,7 +337,7 @@ class $Cypress {
     this.Cookies = $Cookies.create(config.namespace, domainName)
 
     // TODO: Remove this after $Events functions are added to $Cypress.
-    // @ts-ignore
+    // @ts-expect-error - ProxyLogging expects the public Cypress type, not $Cypress
     this.ProxyLogging = new ProxyLogging(this)
 
     return this.action('cypress:config', config)
@@ -416,7 +416,7 @@ class $Cypress {
     this.stackUtils = $stackUtils
 
     // wire up command create to cy
-    // @ts-expect-error
+    // @ts-expect-error - $Commands.create expects the public Cypress type, not $Cypress
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
 
     this.events.proxyTo(this.cy)

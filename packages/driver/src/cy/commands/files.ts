@@ -52,7 +52,6 @@ export default (Commands, Cypress, cy, state) => {
         return
       }
 
-      fileResult = null
       filePromise = runPrivilegedCommand({
         commandName: 'readFile',
         cy,
@@ -110,14 +109,17 @@ export default (Commands, Cypress, cy, state) => {
         // by verifyUpcomingAssertions, when the command_queue receives the null file contents.
         fileResult = { contents: null, filePath: err.filePath }
       })
-      .catch((err) => mostRecentError = err)
+      .catch((err) => {
+        fileResult = null
+        mostRecentError = err
+      })
       // Pass or fail, we always clear the filePromise, so future retries know there's no
       // live request to the server.
       .finally(() => filePromise = null)
     }
 
-    // When an assertion attached to this command fails, then we want to throw away the existing result
-    // and create a new promise to read a new one.
+    // When an assertion attached to this command fails, read the file again. The existing result stays
+    // until the new read settles, so a timeout mid-read still reports the assertion's error.
     this.set('onFail', (err, timedOut) => {
       if (err.type === 'existence') {
         // file exists but it shouldn't - or - file doesn't exist but it should
@@ -135,8 +137,7 @@ export default (Commands, Cypress, cy, state) => {
     })
 
     return () => {
-      // Once we've read a file, that remains the result, unless it's cleared
-      // because of a failed assertion in `onFail` above.
+      // Once we've read a file, that remains the result until a re-read from `onFail` replaces it.
       if (fileResult) {
         const props = {
           'Contents': fileResult?.contents,

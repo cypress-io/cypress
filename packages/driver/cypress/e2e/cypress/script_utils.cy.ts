@@ -42,7 +42,7 @@ describe('src/cypress/script_utils', () => {
       })
     })
 
-    it('appends each script in e2e webkit', async () => {
+    it('appends each script in e2e webkit', () => {
       const foundScript = {
         after: cy.stub(),
       }
@@ -71,26 +71,31 @@ describe('src/cypress/script_utils', () => {
         testingType: 'e2e',
       })
 
-      // each script is appended and run before the next
+      // appendScripts goes through Bluebird.each, which appends each script a tick
+      // after the previous one loads, so wait a tick before checking each one
+      return Promise.delay(1)
+      .then(() => {
+        expect(createdScript1.addEventListener).to.be.calledWith('load')
+        createdScript1.addEventListener.lastCall.args[1]()
 
-      await Promise.delay(1) // wait a tick due to promise
-      expect(createdScript1.addEventListener).to.be.calledWith('load')
-      createdScript1.addEventListener.lastCall.args[1]()
+        return Promise.delay(1)
+      })
+      .then(() => {
+        expect(createdScript2.addEventListener).to.be.calledWith('load')
+        createdScript2.addEventListener.lastCall.args[1]()
 
-      await Promise.delay(1) // wait a tick due to promise
-      expect(createdScript2.addEventListener).to.be.calledWith('load')
-      createdScript2.addEventListener.lastCall.args[1]()
+        return runScriptsPromise
+      })
+      .then(() => {
+        // sets script src
+        expect(createdScript1.src).to.equal(scripts[0].relativeUrl)
+        expect(createdScript2.src).to.equal(scripts[1].relativeUrl)
 
-      await runScriptsPromise
-
-      // sets script src
-      expect(createdScript1.src).to.equal(scripts[0].relativeUrl)
-      expect(createdScript2.src).to.equal(scripts[1].relativeUrl)
-
-      // appends scripts
-      expect(foundScript.after).to.be.calledTwice
-      expect(foundScript.after).to.be.calledWith(createdScript1)
-      expect(foundScript.after).to.be.calledWith(createdScript2)
+        // appends scripts
+        expect(foundScript.after).to.be.calledTwice
+        expect(foundScript.after).to.be.calledWith(createdScript1)
+        expect(foundScript.after).to.be.calledWith(createdScript2)
+      })
     })
 
     it('extracts the source map from each script', () => {
@@ -123,16 +128,18 @@ describe('src/cypress/script_utils', () => {
   })
 
   context('#runPromises', () => {
-    it('handles promises and doesnt try to fetch + eval manually', async () => {
+    it('handles promises and doesnt try to fetch + eval manually', () => {
       const scriptsAsPromises = [() => Promise.resolve(), () => Promise.resolve()]
-      const result = await runScripts({
+
+      return runScripts({
         browser: { family: 'chromium' },
         scripts: scriptsAsPromises,
         specWindow: {},
         testingType: 'e2e',
       })
-
-      expect(result).to.have.length(scriptsAsPromises.length)
+      .then((result) => {
+        expect(result).to.have.length(scriptsAsPromises.length)
+      })
     })
   })
 })

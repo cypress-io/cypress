@@ -1,4 +1,3 @@
-/* eslint-disable no-dupe-class-members */
 import { getError } from '@packages/errors'
 import type { CypressError } from '@packages/errors'
 import type { DebugData, FullConfig, TestingType } from '@packages/types'
@@ -53,7 +52,7 @@ const isSandboxNeeded = () => {
 export interface SetupNodeEventsReply {
   setupConfig: Cypress.ConfigOptions | null
   requires: string[]
-  registrations: Array<{event: string, eventId: string}>
+  registrations: Array<{ event: string, eventId: string }>
 }
 
 export interface LoadConfigReply {
@@ -73,6 +72,14 @@ interface SerializedLoadConfigReply {
  */
 export class ProjectConfigIpc extends EventEmitter {
   private _childProcess: ChildProcess
+  private _exitIsExpected = false
+  private _setupComplete = false
+  private _testingType?: TestingType
+
+  /**
+   * Set if the child exited without a shutdown being requested.
+   */
+  unexpectedExit?: CypressError
 
   constructor (
     readonly nodePath: string | undefined | null,
@@ -99,6 +106,19 @@ export class ProjectConfigIpc extends EventEmitter {
       this.emit('disconnect')
     })
 
+    this._childProcess.on('exit', (code, signal) => {
+      debug('child process %s exited with code %s and signal %s', this._childProcess.pid, code, signal)
+      this.emit('exit', code, signal)
+
+      try {
+        if (!this._exitIsExpected) {
+          this.handleUnexpectedExit(code, signal)
+        }
+      } finally {
+        this.cleanupIpc()
+      }
+    })
+
     // This forwards telemetry requests from the child process to the server
     this.on('export:telemetry', (data) => {
       // Not too worried about tracking successes
@@ -114,11 +134,18 @@ export class ProjectConfigIpc extends EventEmitter {
     return this._childProcess?.pid
   }
 
+  /**
+   * Declares that the child is about to exit on purpose, so its exit is not reported as an error.
+   */
+  expectExit () {
+    this._exitIsExpected = true
+  }
+
   // TODO: options => Cypress.TestingTypeOptions
-  send(event: 'execute:plugins', evt: string, ids: {eventId: string, invocationId: string}, args: any[]): boolean
-  send(event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
-  send(event: 'loadConfig'): boolean
-  send(event: 'main:process:will:disconnect'): boolean
+  send (event: 'execute:plugins', evt: string, ids: { eventId: string, invocationId: string }, args: any[]): boolean
+  send (event: 'setupTestingType', testingType: TestingType, options: Cypress.PluginConfigOptions): boolean
+  send (event: 'loadConfig'): boolean
+  send (event: 'main:process:will:disconnect'): boolean
   send (event: string, ...args: any[]) {
     if (this._childProcess.killed || !this._childProcess.connected) {
       debug('not sending %s message to child process. Killed? %s, Connected? %s', event, this._childProcess.killed, this._childProcess.connected)
@@ -131,32 +158,33 @@ export class ProjectConfigIpc extends EventEmitter {
     return this._childProcess.send({ event, args })
   }
 
-  on(evt: 'childProcess:unhandledError', listener: (err: CypressError) => void): this
-  on(evt: 'export:telemetry', listener: (data: string) => void): void
-  on(evt: 'main:process:will:disconnect:ack', listener: () => void): void
-  on(evt: 'warning', listener: (warningErr: CypressError) => void): this
-  on(evt: 'disconnect', listener: () => void): this
-  on(evt: 'exit', listener: (code: number, signal: string) => void): this
+  on (evt: 'childProcess:unhandledError', listener: (err: CypressError) => void): this
+  on (evt: 'export:telemetry', listener: (data: string) => void): void
+  on (evt: 'main:process:will:disconnect:ack', listener: () => void): void
+  on (evt: 'warning', listener: (warningErr: CypressError) => void): this
+  on (evt: 'disconnect', listener: () => void): this
+  on (evt: 'exit', listener: (code: number, signal: string) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
   }
 
-  once(evt: `promise:fulfilled:${string}`, listener: (err: any, value: any) => void): this
+  once (evt: 'exit:unexpected', listener: (err: CypressError) => void): this
+  once (evt: `promise:fulfilled:${string}`, listener: (err: any, value: any) => void): this
 
   /**
    * When the config is loaded, it comes back with either a "reply", or an "error" if there was a problem
    * sourcing the config (script error, etc.)
    */
-  once(evt: 'ready', listener: () => void): this
-  once(evt: 'loadConfig:reply', listener: (payload: SerializedLoadConfigReply) => void): this
-  once(evt: 'loadConfig:error', listener: (err: CypressError) => void): this
+  once (evt: 'ready', listener: () => void): this
+  once (evt: 'loadConfig:reply', listener: (payload: SerializedLoadConfigReply) => void): this
+  once (evt: 'loadConfig:error', listener: (err: CypressError) => void): this
 
   /**
    * When
    */
-  once(evt: 'setupTestingType:reply', listener: (payload: SetupNodeEventsReply) => void): this
-  once(evt: 'setupTestingType:error', listener: (error: CypressError) => void): this
-  once(evt: 'file:preprocessor:overridden', listener: (payload: { handlerText: string }) => void): this
+  once (evt: 'setupTestingType:reply', listener: (payload: SetupNodeEventsReply) => void): this
+  once (evt: 'setupTestingType:error', listener: (error: CypressError) => void): this
+  once (evt: 'file:preprocessor:overridden', listener: (payload: { handlerText: string }) => void): this
   once (evt: string, listener: (...args: any[]) => void) {
     return super.once(evt, listener)
   }
@@ -180,7 +208,7 @@ export class ProjectConfigIpc extends EventEmitter {
         if (err.code === 'EPIPE') {
           debug('EPIPE error in loadConfig() of child process %s', err)
 
-          // @ts-ignore
+          // @ts-expect-error - resolve() expects the config; this path settles the promise without one
           resolve()
 
           return
@@ -189,12 +217,6 @@ export class ProjectConfigIpc extends EventEmitter {
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
-      })
-
-      this._childProcess.on('exit', (code, signal) => {
-        debug('child process %s exited with code %s and signal %s', this._childProcess.pid, code, signal)
-        this.emit('exit', code, signal)
-        this.cleanupIpc()
       })
 
       /**
@@ -208,6 +230,8 @@ export class ProjectConfigIpc extends EventEmitter {
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
       })
+
+      this.rejectOnUnexpectedExit(reject)
 
       this.once('loadConfig:reply', (val) => {
         debug('loadConfig:reply')
@@ -233,19 +257,19 @@ export class ProjectConfigIpc extends EventEmitter {
       handler(this)
     }
 
+    this._testingType = testingType
+
     const promise = this.registerSetupIpcHandlers()
 
     const overrides = config[testingType] ?? {}
     const mergedConfig = { ...config, ...overrides }
 
     // alphabetize config by keys
-    let orderedConfig = {} as Cypress.PluginConfigOptions
+    const orderedConfig = {} as Cypress.PluginConfigOptions
 
     Object.keys(mergedConfig).sort().forEach((key) => {
-      const k = key as keyof typeof mergedConfig
-
-      // @ts-ignore
-      orderedConfig[k] = mergedConfig[k]
+      // Safe because `key` comes from `Object.keys(mergedConfig)`
+      Reflect.set(orderedConfig, key, mergedConfig[key as keyof typeof mergedConfig])
     })
 
     this.send('setupTestingType', testingType, {
@@ -267,7 +291,7 @@ export class ProjectConfigIpc extends EventEmitter {
         if (err.code === 'EPIPE') {
           debug('EPIPE error in registerSetupIpcHandlers() of child process %s', err)
 
-          // @ts-ignore
+          // @ts-expect-error - resolve() expects the config; this path settles the promise without one
           resolve()
 
           return
@@ -277,13 +301,19 @@ export class ProjectConfigIpc extends EventEmitter {
         reject(err)
       })
 
+      this.rejectOnUnexpectedExit(reject)
+
       // For every registration event, we want to turn into an RPC with the child process
       this.once('setupTestingType:reply', (val) => {
         resolved = true
+        this._setupComplete = true
         resolve(val)
       })
 
       this.once('setupTestingType:error', (err) => {
+        // The child may exit right after reporting this, e.g. when the dev server finds no config file.
+        // That exit must not replace the error it just reported.
+        this.expectExit()
         this.onError(err)
         reject(err)
       })
@@ -418,6 +448,34 @@ export class ProjectConfigIpc extends EventEmitter {
     return fork(CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions)
   }
 
+  private handleUnexpectedExit (code: number | null, signal: string | null) {
+    const err = getError('CONFIG_PROCESS_EXITED_UNEXPECTEDLY', code, signal, this._testingType)
+
+    err.title = 'Config process error'
+    this.unexpectedExit = err
+    this.emit('exit:unexpected', err)
+
+    // No reply can arrive any more. Answering each pending node event with the error settles it and removes its listener.
+    for (const eventName of this.eventNames()) {
+      if (typeof eventName === 'string' && eventName.startsWith('promise:fulfilled:')) {
+        this.emit(eventName, err)
+      }
+    }
+
+    // Before setup completes the pending loadConfig/setupTestingType promises carry the error to their caller.
+    if (this._setupComplete) {
+      this.onError(err)
+    }
+  }
+
+  private rejectOnUnexpectedExit (reject: (err: CypressError) => void) {
+    if (this.unexpectedExit) {
+      reject(this.unexpectedExit)
+    } else {
+      this.once('exit:unexpected', reject)
+    }
+  }
+
   private handleChildProcessError (err: any, ipc: ProjectConfigIpc, resolved: boolean, reject: (reason?: any) => void) {
     debug('plugins process error:', err.stack)
 
@@ -442,6 +500,7 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   private killChildProcess (): void {
+    this.expectExit()
     this._childProcess.stdout?.removeAllListeners()
     this._childProcess.stderr?.removeAllListeners()
     this._childProcess.removeAllListeners()

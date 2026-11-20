@@ -148,6 +148,7 @@ describe('Proxy Logging', () => {
         fetch('/some-url')
       }, 100)
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the fetch has to fire while cy.wait() is running
       cy.wait(200).then(() => {
         expect(logs).to.have.length(1)
         expect(logs[0].message).to.eq('')

@@ -1,4 +1,5 @@
-export {} // make typescript see this as a module
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
+export {}
 
 const Screenshot = Cypress.Screenshot as unknown as InternalScreenshot
 
@@ -114,7 +115,7 @@ describe('src/cypress/screenshot', () => {
         [[20, 10, 20, 10], [20, 10, 20, 10]],
       ]
 
-      for (let test of tests) {
+      for (const test of tests) {
         const [input, expected] = test
 
         Screenshot.defaults({

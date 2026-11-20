@@ -2,6 +2,7 @@ import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
+import { mergeLaunchOptions } from '../plugins/merge_plugin_results'
 import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
 import type { Browser } from './types'
@@ -219,21 +220,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
     errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
   }
 
-  _.forEach(launchOptions, (val, key) => {
-    const pluginResultValue = pluginConfigResult[key]
-
-    if (pluginResultValue) {
-      if (_.isPlainObject(val)) {
-        launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
-
-        return
-      }
-
-      launchOptions[key] = pluginResultValue
-
-      return
-    }
-  })
+  Object.assign(launchOptions, mergeLaunchOptions(launchOptions, pluginConfigResult))
 
   return launchOptions
 }
@@ -251,6 +238,7 @@ const getWebKitBrowserVersion = async (pwWebkitModulePath?: string) => {
     // `playwright-core`, resolving from the webkit module's location finds the
     // correct `browsers.json`.
     const paths = pwWebkitModulePath ? [path.dirname(pwWebkitModulePath), process.cwd()] : [process.cwd()]
+    // eslint-disable-next-line n/no-extraneous-require -- playwright-webkit owns the playwright-core version
     const pwCorePath = path.dirname(require.resolve('playwright-core', { paths }))
     const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
     const browsersJsonContents = await fs.readFile(browsersJsonPath, 'utf8')

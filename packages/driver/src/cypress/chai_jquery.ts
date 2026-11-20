@@ -51,7 +51,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
     )
   }
 
-  chai.Assertion.addMethod('data', function (...args) {
+  chai.Assertion.addMethod('data', function (...args: [name: string, value?: unknown, message?: string]) {
     // @ts-expect-error - Custom assertions expect messages for failures
     assertDom(this, chaiUtils, callbacks, 'data')
 
@@ -61,8 +61,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
       a = a.not
     }
 
-    // @ts-expect-error - TODO: Fix this
-    return a.property.apply(a, args)
+    return a.property(...args)
   })
 
   chai.Assertion.addMethod('class', function (className: string) {
@@ -299,13 +298,13 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
         let negatedMessage: string
 
         if (_.isUndefined(actual)) {
-          message = `expected \#{this} to have ${description} ${inspect(name)}`
+          message = `expected #{this} to have ${description} ${inspect(name)}`
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)}`
+          negatedMessage = `expected #{this} not to have ${description} ${inspect(name)}`
         } else {
-          message = `expected \#{this} to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          message = `expected #{this} to have ${description} ${inspect(name)} with the value #{exp}, but the value was #{act}`
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          negatedMessage = `expected #{this} not to have ${description} ${inspect(name)} with the value #{exp}, but the value was #{act}`
         }
 
         // only cast .attr() as a string

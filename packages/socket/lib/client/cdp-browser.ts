@@ -56,7 +56,7 @@ export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap
     }, 0)
   }
 
-  // @ts-expect-error TODO: fix emit type
+  // @ts-expect-error - TODO: emit is async, so it returns a Promise where Emitter's emit returns this
   emit = async (event: string, ...args: any[]) => {
     // Generate a unique key for this event
     const uuid = uuidv4()

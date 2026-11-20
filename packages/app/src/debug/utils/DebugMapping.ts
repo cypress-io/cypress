@@ -20,9 +20,9 @@ export type CloudDebugSpec = {
 
 export const specsList = ({ specs, tests, localSpecs, currentTestingType, groups }: DebugSpecsArgs): CloudDebugSpec[] => {
   const localSpecsSet = new Set(localSpecs.map(((spec) => posixify(spec.relative))))
-  const groupsMap = groups.reduce<{[id: string]: DebugSpecListGroupsFragment}>((acc, group) => ({ ...acc, [group.id]: group }), {})
+  const groupsMap = groups.reduce<{ [id: string]: DebugSpecListGroupsFragment }>((acc, group) => ({ ...acc, [group.id]: group }), {})
 
-  const mappedTests = tests.reduce<{[id: string]: CloudDebugSpec}>((acc, curr) => {
+  const mappedTests = tests.reduce<{ [id: string]: CloudDebugSpec }>((acc, curr) => {
     let debugResult = acc[curr.specId]
 
     if (!debugResult) {
@@ -34,7 +34,7 @@ export const specsList = ({ specs, tests, localSpecs, currentTestingType, groups
         throw new Error(`Could not find spec for id ${ curr.specId}`)
       }
 
-      const groupsMapping = (foundSpec.groupIds || []).reduce<{[grpId: string]: DebugSpecListGroupsFragment}>((acc, id) => {
+      const groupsMapping = (foundSpec.groupIds || []).reduce<{ [grpId: string]: DebugSpecListGroupsFragment }>((acc, id) => {
         if (id) {
           acc[id] = groupsMap[id]
         }

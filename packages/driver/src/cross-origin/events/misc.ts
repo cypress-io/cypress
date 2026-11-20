@@ -15,7 +15,6 @@ export const handleMiscEvents = (Cypress: Cypress.Cypress, cy: $Cy) => {
   })
 
   // Forward url:changed Message to the primary origin to enable changing the url displayed in the AUT
-  // @ts-ignore
   Cypress.on('url:changed', (url) => {
     Cypress.specBridgeCommunicator.toPrimary('url:changed', { url })
   })

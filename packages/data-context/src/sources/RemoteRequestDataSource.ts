@@ -29,7 +29,7 @@ interface OperationDefinition {
   operation: string
   operationDoc: DocumentNode
   operationHash: string
-  operationVariableDefs: [string, {type: TypeNode, defaultValue?: ValueNode}][]
+  operationVariableDefs: [string, { type: TypeNode, defaultValue?: ValueNode }][]
   remoteQueryField: string
   fieldArgMapping: Record<string, string>
 }
@@ -314,7 +314,7 @@ export class RemoteRequestDataSource {
 
     const remoteFieldArgs = queryFieldDef.args
 
-    const operationVariableDefs: [string, {type: TypeNode, defaultValue?: ValueNode}][] = []
+    const operationVariableDefs: [string, { type: TypeNode, defaultValue?: ValueNode }][] = []
     const fieldArgs: [string, ValueNode][] = []
 
     const fieldArgMapping: Record<string, string> = {}
@@ -373,7 +373,7 @@ export class RemoteRequestDataSource {
   // Gather the referenced variables from each of the field nodes we
   // are generating a query with
   #getReferencedVariables (selectionNodes: readonly SelectionNode[], outerVariableDefs: readonly VariableDefinitionNode[]) {
-    const variableDefinitions: Record<string, {type: TypeNode, defaultValue?: ValueNode}> = {}
+    const variableDefinitions: Record<string, { type: TypeNode, defaultValue?: ValueNode }> = {}
 
     selectionNodes.map((node) => {
       visit(node, {
@@ -412,7 +412,7 @@ export class RemoteRequestDataSource {
       fieldName: string
       fieldArgs: [string, ValueNode][]
       fieldNodes: readonly SelectionNode[]
-      operationVariableDefs: [string, {type: TypeNode, defaultValue?: ValueNode}][]
+      operationVariableDefs: [string, { type: TypeNode, defaultValue?: ValueNode }][]
     },
   ): DocumentNode {
     const { operationVariableDefs = [], fieldArgs = [] } = params

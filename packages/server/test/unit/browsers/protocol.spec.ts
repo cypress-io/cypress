@@ -14,7 +14,7 @@ describe('lib/browsers/protocol', () => {
     it('retries as expected for up to 50 seconds', () => {
       const log = vi.spyOn(console, 'log')
 
-      let delays = []
+      const delays = []
       let delay: number
       let i = 0
 

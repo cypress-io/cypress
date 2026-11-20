@@ -20,8 +20,8 @@ describe('lint-staged', () => {
   })
 
   // lint-staged hands a file to the nearest package.json with a `lint-staged`
-  // key. Without one, a flat-config workspace falls through to the root config
-  // and is linted by ESLint 8 against `.eslintrc.js`.
+  // key. Without one, a workspace falls through to the root `eslint.config.ts`,
+  // which ignores everything below the repo root, so its files go unlinted.
   it('gives every flat-config workspace its own lint-staged config', () => {
     const missing = flatConfigWorkspaces().filter((dir) => !readPackageJson(dir)['lint-staged'])
 

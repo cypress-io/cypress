@@ -35,7 +35,7 @@
 import IconFolder from '~icons/cy/folder_x16.svg'
 import HighlightedText from './HighlightedText.vue'
 
-withDefaults(defineProps<{ name: string, expanded: boolean, indexes: number[], depth: number }>(), {
+withDefaults(defineProps<{ name?: string, expanded?: boolean, indexes?: number[], depth: number }>(), {
   name: '',
   expanded: false,
   indexes: () => [],

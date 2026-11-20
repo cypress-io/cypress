@@ -14,13 +14,13 @@ describe('VersionsDataSource', () => {
     let ctx: DataContext
     let fetchMock: jest.Mock
     let isDependencyInstalledByNameStub: jest.Mock
-    let mockNow: Date = new Date()
-    let currentCypressVersion: string = pkg.version
+    const mockNow: Date = new Date()
+    const currentCypressVersion: string = pkg.version
 
     beforeEach(() => {
       ctx = createTestDataContext('open')
 
-      // @ts-expect-error
+      // @ts-expect-error - `_cachedInitialConfig` is private
       ctx.lifecycleManager._cachedInitialConfig = {
         component: {
           devServer: {
@@ -38,9 +38,9 @@ describe('VersionsDataSource', () => {
 
       isDependencyInstalledByNameStub = jest.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - a bare `jest.fn()` doesn't match the `fetch` signature
       jest.spyOn(ctx.util, 'fetch').mockImplementation(fetchMock)
-      // @ts-expect-error
+      // @ts-expect-error - a bare `jest.fn()` doesn't match the `isDependencyInstalledByName` signature
       jest.spyOn(ctx.util, 'isDependencyInstalledByName').mockImplementation(isDependencyInstalledByNameStub)
       jest.spyOn(os, 'platform').mockReturnValue('darwin')
       jest.spyOn(os, 'arch').mockReturnValue('x64')
@@ -55,7 +55,7 @@ describe('VersionsDataSource', () => {
       fetchMock.mockImplementation((url: string, options: { headers: Record<string, string> }) => {
         if (url === NPM_CYPRESS_REGISTRY_URL) {
           return Promise.resolve({
-            // @ts-expect-error
+            // @ts-expect-error - a bare `jest.fn()` resolves `never`
             json: jest.fn().mockResolvedValue({
               'time': {
                 modified: '2022-01-31T21:14:41.593Z',
@@ -78,7 +78,7 @@ describe('VersionsDataSource', () => {
           options.headers['x-testing-type'] === 'e2e' &&
           options.headers['x-logged-in'] === 'false') {
           return Promise.resolve({
-            // @ts-expect-error
+            // @ts-expect-error - a bare `jest.fn()` resolves `never`
             json: jest.fn().mockResolvedValue({
               name: 'Cypress',
               version: '18.0.0',
@@ -114,7 +114,7 @@ describe('VersionsDataSource', () => {
       fetchMock.mockImplementation((url: string, options: { headers: Record<string, string> }) => {
         if (url === NPM_CYPRESS_REGISTRY_URL) {
           return Promise.resolve({
-            // @ts-expect-error
+            // @ts-expect-error - a bare `jest.fn()` resolves `never`
             json: jest.fn().mockResolvedValue({
               'time': {
                 modified: '2022-01-31T21:14:41.593Z',
@@ -137,7 +137,7 @@ describe('VersionsDataSource', () => {
           options.headers['x-testing-type'] === 'component' &&
           options.headers['x-logged-in'] === 'false') {
           return Promise.resolve({
-            // @ts-expect-error
+            // @ts-expect-error - a bare `jest.fn()` resolves `never`
             json: jest.fn().mockResolvedValue({
               name: 'Cypress',
               version: '15.0.0',
@@ -157,7 +157,7 @@ describe('VersionsDataSource', () => {
           options.headers['x-logged-in'] === 'false' &&
           options.headers['x-initial-launch'] === String(false)) {
           return Promise.resolve({
-            // @ts-expect-error
+            // @ts-expect-error - a bare `jest.fn()` resolves `never`
             json: jest.fn().mockResolvedValue({
               name: 'Cypress',
               version: '16.0.0',
@@ -236,7 +236,7 @@ describe('VersionsDataSource', () => {
       const versionInfo = await versionsDataSource.versionData()
 
       // Reset the testing type in the class
-      // @ts-ignore
+      // @ts-expect-error - `_currentTestingType` is private
       versionsDataSource._currentTestingType = null
 
       versionsDataSource.resetLatestVersionTelemetry()
@@ -314,7 +314,7 @@ describe('VersionsDataSource', () => {
           notifyWhenRunCompletes: ['errored'],
           notifyWhenRunStarts: true,
           notifyWhenRunStartsFailing: true,
-        }as unknown as AllowedState)
+        } as unknown as AllowedState)
       })
 
       const versionsDataSource = new VersionsDataSource(ctx)

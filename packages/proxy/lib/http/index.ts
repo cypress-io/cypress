@@ -72,7 +72,7 @@ const createBrowserConnectionClosedError = () => {
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
-  Error
+  Error,
 }
 
 export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
@@ -125,20 +125,17 @@ export type ServerCtx = Readonly<{
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
-  // See disable-navigation-preload.ts (#34652). Named to match the launch
+  // Leaves service worker scripts unmodified when set, see
+  // getServiceWorkerInstrumentationExpression. Named to match the launch
   // option (BrowserLaunchOpts.useBrowserNetworkInterception), not
   // network-mode.ts's isBrowserNetworkMode() - same concept, but that name
   // is already an established function/method elsewhere in this codebase
   // (network-mode.ts, ServerBase), and a plain boolean field of the same
   // name here would read as callable.
   useBrowserNetworkInterception?: boolean
-  // Path prefixes Cypress reserves on every origin under test. This package
-  // cannot import from @packages/server, which owns the routes, so the server
-  // supplies the list (adapters/internal-routes.ts) at construction time.
-  reservedPathPrefixes?: string[]
 }>
 
-const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
+const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<unknown>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
@@ -167,7 +164,7 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
   onlyRunMiddleware: (names: string[]) => void
 }>
 
-export function _runStage (type: HttpStages, ctx: any, onError: Function) {
+export function _runStage (type: HttpStages, ctx: any, onError: (error: Error) => unknown) {
   ctx.stage = HttpStages[type]
 
   const runMiddlewareStack = (): Promise<void> => {
@@ -351,13 +348,12 @@ export class Http {
   request: ServerRequest
   socket: SocketBroadcaster
   serverBus: EventEmitter
-  renderedHTMLOrigins: {[key: string]: boolean} = {}
+  renderedHTMLOrigins: { [key: string]: boolean } = {}
   autUrl?: string
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
   useBrowserNetworkInterception?: boolean
-  reservedPathPrefixes?: string[]
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -375,7 +371,6 @@ export class Http {
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
     this.useBrowserNetworkInterception = opts.useBrowserNetworkInterception
-    this.reservedPathPrefixes = opts.reservedPathPrefixes
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -562,7 +557,6 @@ export class Http {
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
       useBrowserNetworkInterception: this.useBrowserNetworkInterception,
-      reservedPathPrefixes: this.reservedPathPrefixes,
     }
 
     return ctx

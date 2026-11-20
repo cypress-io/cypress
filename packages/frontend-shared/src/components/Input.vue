@@ -66,7 +66,6 @@ export default {
 import _ from 'lodash'
 
 import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes, Ref } from 'vue'
-// eslint-disable-next-line no-duplicate-imports
 import { computed, useSlots, useAttrs } from 'vue'
 import { useModelWrapper } from '../composables'
 
@@ -78,9 +77,9 @@ const inputAttrs = _.omit(attrs, 'class')
 const props = withDefaults(defineProps<{
   type?: InputHTMLAttributes['type']
   inputClasses?: string | string[] | Record<string, string>
-  prefixIcon?: FunctionalComponent<SVGAttributes, {}>
+  prefixIcon?: FunctionalComponent<SVGAttributes>
   prefixIconClasses?: string | string[] | Record<string, string>
-  suffixIcon?: FunctionalComponent<SVGAttributes, {}>
+  suffixIcon?: FunctionalComponent<SVGAttributes>
   suffixIconClasses?: string | string[] | Record<string, string>
   modelValue?: string
   style?: string

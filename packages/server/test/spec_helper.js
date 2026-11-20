@@ -72,9 +72,7 @@ sinon.useFakeTimers = function (...args) {
 }
 
 sinon.restore = function (...args) {
-  let c
-
-  c = sinon._clock
+  const c = sinon._clock
 
   if (c) {
     c.restore()
@@ -87,17 +85,15 @@ enable(mockery)
 
 mockElectron(mockery)
 
-before(function () {
-  if (hasOnly) {
-    this.test.parent._onlyTests = [true]
-  }
-})
-
 // appData.ensure()
 
 const { setCtx, getCtx, clearCtx, makeDataContext } = require('../lib/makeDataContext')
 
-before(async () => {
+before(async function () {
+  if (hasOnly) {
+    this.test.parent._onlyTests = [true]
+  }
+
   await clearCtx()
   setCtx(makeDataContext({}))
 })

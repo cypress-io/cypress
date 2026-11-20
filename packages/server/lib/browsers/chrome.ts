@@ -15,6 +15,7 @@ import * as protocol from './protocol'
 import utils from './utils'
 import * as errors from '../errors'
 import { BrowserCriClient } from './browser-cri-client'
+import type { BrowserExit } from './browser-cri-client'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import type { CriClient } from './cdp-protocol/cri-client'
 import type { Automation } from '../automation'
@@ -45,6 +46,10 @@ const pathToExtension = extension.getPathToV3Extension()
 const pathToTheme = extension.getPathToTheme()
 
 let browserCriClient: BrowserCriClient | undefined
+
+// Outlives each spec's CdpAutomation, so the reset that runs when the next
+// spec's tab opens can clear the origins the previous spec's tab requested.
+const storageOrigins = new Set<string>()
 
 // Generates default Chrome preferences that Cypress applies to all Chrome instances
 const _getDefaultChromePreferences = (): ChromePreferences => {
@@ -120,7 +125,7 @@ const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: Chr
       return original
     }
 
-    let deletions: any[] = []
+    const deletions: any[] = []
 
     _.mergeWith(original, newPrefs[prefPath], (_objValue, newValue, key, obj) => {
       if (newValue == null) {
@@ -409,7 +414,7 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
 const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal)
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal, storageOrigins)
 
   automation.use(cdpAutomation)
 
@@ -787,6 +792,7 @@ export = {
       // new one before this runs again.
       browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
       browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
+      pageCriClient.serviceWorkerInstrumentation = options.serviceWorkerInstrumentation
 
       // The runner document is served on the AUT's origin, so a root-scoped
       // worker the origin registered in an earlier session is entitled to
@@ -903,10 +909,18 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
+    let browserExit: BrowserExit | undefined
+
+    launchedBrowser.once('exit', (code: number | null, signal: NodeJS.Signals | null) => {
+      // a launcher that exits 0 may have left the browser running, so keep trying to connect
+      if (code !== 0) browserExit = { code, signal }
+    })
+
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
       port,
       browserName: browser.displayName,
+      getBrowserExit: () => browserExit,
       onAsynchronousError: options.onError,
       onReconnect,
       protocolManager: options.protocolManager,

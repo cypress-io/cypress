@@ -25,7 +25,6 @@ export const monorepoPaths = {
   pkgNetwork: path.join(__dirname, '../../packages/network'),
   pkgNetworkInterception: path.join(__dirname, '../../packages/network-interception'),
   pkgNetworkTools: path.join(__dirname, '../../packages/network-tools'),
-  pkgPackherdRequire: path.join(__dirname, '../../packages/packherd-require'),
   pkgProxy: path.join(__dirname, '../../packages/proxy'),
   pkgReporter: path.join(__dirname, '../../packages/reporter'),
   pkgResolveDist: path.join(__dirname, '../../packages/resolve-dist'),
@@ -38,6 +37,5 @@ export const monorepoPaths = {
   pkgTelemetry: path.join(__dirname, '../../packages/telemetry'),
   pkgTs: path.join(__dirname, '../../packages/ts'),
   pkgTypes: path.join(__dirname, '../../packages/types'),
-  pkgV8SnapshotRequire: path.join(__dirname, '../../packages/v8-snapshot-require'),
   pkgWebConfig: path.join(__dirname, '../../packages/web-config')
 } as const

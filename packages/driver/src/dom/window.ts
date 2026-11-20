@@ -22,7 +22,9 @@ const isWindow = function (obj) {
  * @param {HTMLElement} el
  * @returns {Window & typeof globalThis}
  */
-const getWindowByElement = function (el) {
+const getWindowByElement = function (elOrJquery) {
+  const el = $jquery.isJquery(elOrJquery) ? elOrJquery[0] : elOrJquery
+
   if (isWindow(el)) {
     return el
   }

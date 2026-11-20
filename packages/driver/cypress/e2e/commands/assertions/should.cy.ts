@@ -250,13 +250,11 @@ describe('src/cy/commands/assertions', () => {
       it('logs two assertions', () => {
         _.delay(() => {
           cy.$$('body').addClass('foo')
-        }
-        , Math.random() * 300)
+        }, Math.random() * 300)
 
         _.delay(() => {
           cy.$$('body').prop('id', 'bar')
-        }
-        , Math.random() * 300)
+        }, Math.random() * 300)
 
         cy
         .get('body').should(($body) => {
@@ -279,13 +277,11 @@ describe('src/cy/commands/assertions', () => {
       it('logs assertions as children even if subject is different', () => {
         _.delay(() => {
           cy.$$('body').addClass('foo')
-        }
-        , Math.random() * 300)
+        }, Math.random() * 300)
 
         _.delay(() => {
           cy.$$('body').prop('id', 'bar')
-        }
-        , Math.random() * 300)
+        }, Math.random() * 300)
 
         cy
         .get('body').should(($body) => {

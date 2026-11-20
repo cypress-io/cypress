@@ -29,7 +29,7 @@ describe('RelevantRunSpecsDataSource', () => {
     })
 
     it('returns the runs the cloud sends and sets the polling interval', async () => {
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC)
 
       expect(dataSource.pollingInterval).toEqual(15)
@@ -59,7 +59,7 @@ describe('RelevantRunSpecsDataSource', () => {
 
       const runId = testData.data.cloudNodesByIds[0].id
 
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT)
 
       const query = `
@@ -166,7 +166,7 @@ describe('RelevantRunSpecsDataSource', () => {
     })
 
     it('should create query', async () => {
-      // @ts-expect-error
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       const gqlStub = jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({ data: {} })
 
       const fields = {

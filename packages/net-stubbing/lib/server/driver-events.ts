@@ -79,7 +79,8 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
       return
     }
 
-    let { value, type } = obj
+    const { type } = obj
+    let { value } = obj
 
     if (type === 'regex') {
       const lastSlashI = value.lastIndexOf('/')

@@ -11,6 +11,5 @@ describe('HelloX component', () => {
   it('renders Unicode', () => {
     mount(<HelloX name="🌎" />)
     cy.contains('Hello 🌎!')
-    cy.wait(1000)
   })
 })

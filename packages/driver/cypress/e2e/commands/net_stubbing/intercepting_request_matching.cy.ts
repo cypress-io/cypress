@@ -403,7 +403,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
       it('fails test if req.continue is called with a non-function parameter', function (done) {
         testFail((err) => {
-          expect(err.message).to.contain('\`req.continue\` requires the parameter to be a function')
+          expect(err.message).to.contain('`req.continue` requires the parameter to be a function')
           done()
         })
 

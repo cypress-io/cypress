@@ -4,7 +4,7 @@ type ProjectDirs = typeof fixtureDirs
 
 const JIT_DIR: ProjectDirs[number] = 'justInTimeCompile'
 
-const PROJECTS: {bundler: 'vite' | 'webpack'}[] = [
+const PROJECTS: { bundler: 'vite' | 'webpack' }[] = [
   // when running for vite, justInTimeCompile=true is set but is a no-op for vite since JIT compiling is not supported in vite
   { bundler: 'vite' },
   { bundler: 'webpack' },
@@ -22,13 +22,13 @@ for (const { bundler } of PROJECTS) {
     }
 
     beforeEach(() => {
-      // @ts-expect-error
+      // @ts-expect-error - the project name is built at runtime, so it does not narrow to the typed list of fixture projects
       cy.scaffoldProject(PROJECT_NAME)
       cy.findBrowsers()
-    }),
+    })
 
     it(`can run multiple CT tests without interruption`, () => {
-      // @ts-expect-error
+      // @ts-expect-error - the project name is built at runtime, so it does not narrow to the typed list of fixture projects
       cy.openProject(PROJECT_NAME, ['--component'])
       cy.startAppServer('component')
       cy.visitApp()

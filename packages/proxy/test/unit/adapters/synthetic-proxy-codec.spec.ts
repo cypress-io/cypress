@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
 import { createSyntheticExpressContext, createSyntheticIncomingResponse } from '../../../lib/adapters/synthetic-express-context'
 import RequestMiddleware from '../../../lib/http/request-middleware'
+import { getMetadataHeaderValue } from '../../../lib/http/util/metadata-header-value'
 import { testMiddleware } from '../http/helpers'
 
 async function readStream (stream: Readable): Promise<string> {
@@ -163,7 +164,7 @@ describe('createSyntheticExpressContext', () => {
       statusCode: 200,
     })
 
-    expect(incomingRes.httpVersion).to.be.null
+    expect(incomingRes.httpVersion).toBeNull()
   })
 
   it('keeps malformed cookie values without throwing', () => {
@@ -205,8 +206,8 @@ describe('createSyntheticExpressContext', () => {
       url: 'https://example.test/',
     })
 
-    expect(res.wantsInjection).to.be.null
-    expect(res.wantsSecurityRemoved).to.be.null
+    expect(res.wantsInjection).toBeNull()
+    expect(res.wantsSecurityRemoved).toBeNull()
   })
 
   it('exposes a Node-compatible kOutHeaders symbol for header patching', () => {
@@ -219,7 +220,7 @@ describe('createSyntheticExpressContext', () => {
       return sym.toString() === 'Symbol(kOutHeaders)'
     })
 
-    expect(kOutHeaders).to.exist
+    expect(kOutHeaders).toEqual(expect.anything())
   })
 
   it('serializes cookies with Express-compatible Path and attributes', () => {
@@ -714,8 +715,8 @@ describe('createSyntheticProxyCodec', () => {
       bodyStream: Readable.from(['origin']),
     })
 
-    expect(ctx.resBodySkipped).to.be.undefined
-    expect(ctx.resCaptureStream).to.be.undefined
+    expect(ctx.resBodySkipped).toBeUndefined()
+    expect(ctx.resCaptureStream).toBeUndefined()
   })
 
   it('carries the extra-target marker so ExtractCypressMetadataHeaders can narrow middleware', async () => {
@@ -736,12 +737,12 @@ describe('createSyntheticProxyCodec', () => {
       url: 'https://example.test/download-basic-auth.csv',
       method: 'GET',
       headers: {
-        'x-cypress-is-from-extra-target': 'true',
+        'x-cypress-is-from-extra-target': getMetadataHeaderValue(),
         accept: '*/*',
       },
     })
 
-    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal('true')
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal(getMetadataHeaderValue())
     expect(ctx.req.isFromExtraTarget).to.equal(false)
 
     let maybeSetBasicAuthHeadersRan = false
@@ -759,7 +760,7 @@ describe('createSyntheticProxyCodec', () => {
       },
     }, ctx)
 
-    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.be.undefined
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).toBeUndefined()
     expect(ctx.req.isFromExtraTarget).to.equal(true)
     expect(maybeSetBasicAuthHeadersRan).to.equal(true)
     expect(skippedMiddlewareRan).to.equal(false)

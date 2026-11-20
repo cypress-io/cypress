@@ -1,31 +1,28 @@
 import { fs } from './fs'
 import os from 'os'
 import path from 'path'
-import trash from 'trash'
+import { shell } from 'electron'
+import { isRunningAsElectronProcess } from './electron-app'
 
-// Trashes a single item, tolerating the case where the underlying trash
-// implementation reports a failure even though the item was actually removed.
-// On Windows, when the Recycle Bin is configured with "Don't move files to the
-// Recycle Bin. Remove files immediately when deleted.", windows-trash.exe
-// deletes the file but exits with a non-zero code, which `trash` surfaces as an
-// error. If the item no longer exists, the removal succeeded and we should not
-// warn.
 const trashItem = async (itemPath: string): Promise<void> => {
   try {
-    await trash([itemPath])
+    await shell.trashItem(itemPath)
   } catch (error) {
-    if (await fs.pathExists(itemPath)) {
+    // Windows rejects without deleting when the Recycle Bin is set to remove files immediately
+    if (os.platform() !== 'win32') {
       throw error
     }
+
+    await fs.remove(itemPath)
   }
 }
 
-// Moves a folder's contents to the trash (or empties it on Linux)
+// Moves a folder's contents to the trash, or empties it on Linux and when running as Node without Electron's shell
 export const folder = async (pathToFolder: string): Promise<void> => {
   try {
     await fs.statAsync(pathToFolder)
 
-    if (os.platform() === 'linux') {
+    if (os.platform() === 'linux' || !isRunningAsElectronProcess()) {
       await fs.emptyDir(pathToFolder)
 
       return

@@ -5,8 +5,8 @@ import _ from 'lodash'
 // to `string`.
 const testOptions = <const T>(commandName: string, options: T, order: number, f: (options: T) => void) => {
   it(commandName, () => {
-    let usedOptions = _.clone(options)
-    let expectedOptions = _.clone(options)
+    const usedOptions = _.clone(options)
+    const expectedOptions = _.clone(options)
     let count = 0
 
     cy.on('log:added', () => {
@@ -283,6 +283,7 @@ describe('command log', () => {
 
       testOptions('wait', { requestTimeout: 2000 }, 0, (options) => {
         // @ts-expect-error - requestTimeout is not part of the public options for the numeric overload
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- tests that cy.wait() does not mutate its options
         cy.wait(100, options)
       })
 

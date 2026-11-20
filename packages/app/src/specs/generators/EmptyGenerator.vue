@@ -6,8 +6,8 @@
           <Input
             v-model="specFile"
             :input-ref="inputRefFn"
-            :placeholder="t('createSpec.e2e.importTemplateSpec.inputPlaceholder')"
-            :aria-label="t('createSpec.e2e.importTemplateSpec.inputPlaceholder')"
+            placeholder="Enter a relative path..."
+            aria-label="Enter a relative path..."
             :has-error="hasError"
           >
             <template #prefix>
@@ -36,7 +36,7 @@
             class="rounded flex font-medium bg-warning-100 mt-[16px] p-[16px] text-warning-600 gap-[8px] items-center"
           >
             <i-cy-errored-outline_x16 class="icon-dark-warning-600" />
-            {{ t('createSpec.e2e.importTemplateSpec.specExtensionWarning') }}<span class="rounded bg-warning-200 py-[2px] px-[8px] text-warning-700">{{ recommendedFileName }}</span>
+            We recommend naming your spec to match the following pattern: <span class="rounded bg-warning-200 py-[2px] px-[8px] text-warning-700">{{ recommendedFileName }}</span>
           </div>
 
           <div
@@ -60,7 +60,7 @@
           :disabled="!isValidSpecFile"
           @click="createSpec"
         >
-          {{ t('createSpec.createSpec') }}
+          Create spec
         </Button>
 
         <Button
@@ -69,7 +69,7 @@
           variant="outline"
           @click="emits('restart')"
         >
-          {{ t('components.button.back') }}
+          Back
         </Button>
         <Button
           v-else
@@ -77,7 +77,7 @@
           variant="outline"
           @click="emits('close')"
         >
-          {{ t('components.button.cancel') }}
+          Cancel
         </Button>
       </StandardModalFooter>
     </template>
@@ -109,7 +109,7 @@
             prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
             @click="emits('close')"
           >
-            {{ t('createSpec.successPage.runSpecButton') }}
+            Okay, run the spec
           </Button>
         </router-link>
         <Button
@@ -119,7 +119,7 @@
           variant="outline"
           @click="emits('restart')"
         >
-          {{ t('createSpec.successPage.createAnotherSpecButton') }}
+          Create another spec
         </Button>
       </StandardModalFooter>
     </template>
@@ -128,7 +128,6 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
-import { useI18n } from '@packages/frontend-shared/src/locales/i18n'
 import Input from '@packages/frontend-shared/src/components/Input.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { useVModels, whenever } from '@vueuse/core'
@@ -150,8 +149,6 @@ const props = defineProps<{
   /** is there any other generator available when clicking "Back" */
   otherGenerators: boolean
 }>()
-
-const { t } = useI18n()
 
 gql`
 fragment EmptyGenerator on CurrentProject {
@@ -221,8 +218,8 @@ onMounted(() => {
 })
 
 whenever(result, () => {
-  title.value = t('createSpec.successPage.header')
-  emits('updateTitle', t('createSpec.successPage.header'))
+  title.value = 'Great! The spec was successfully added'
+  emits('updateTitle', 'Great! The spec was successfully added')
 })
 
 const createSpec = async () => {
@@ -241,7 +238,7 @@ watch(specFile, async (value) => {
   isValidSpecFile.value = result.data?.matchesSpecPattern ?? false
 }, { immediate: true })
 
-title.value = t('createSpec.e2e.importTemplateSpec.chooseFilenameHeader')
+title.value = 'Enter the path for your new spec'
 
 const showExtensionWarning = computed(() => isValidSpecFile.value && !specFile.value.includes('.cy'))
 const recommendedFileName = computed(() => {
@@ -250,6 +247,6 @@ const recommendedFileName = computed(() => {
   return `{filename}.cy.${split[split.length - 1]}`
 })
 
-const invalidSpecWarning = computed(() => props.type === 'e2e' ? t('createSpec.e2e.importTemplateSpec.invalidSpecWarning') : t('createSpec.component.importTemplateSpec.invalidComponentWarning'))
+const invalidSpecWarning = computed(() => props.type === 'e2e' ? 'This path is invalid because it doesn\'t match the following ' : 'We couldn\'t generate a valid path matching your custom ')
 
 </script>

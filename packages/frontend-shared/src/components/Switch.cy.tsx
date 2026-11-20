@@ -9,9 +9,7 @@ describe('<Switch />', () => {
       <div class="p-6">
         <label id="test-switch">Switch</label>
         <Switch
-          // @ts-ignore
           value={valueRef.value}
-          // @ts-ignore
           onUpdate={(newVal) => (valueRef.value = newVal)}
           labelId="test-switch"
         />

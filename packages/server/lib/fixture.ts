@@ -150,7 +150,7 @@ async function parseJson (p: string, fixture: string) {
 
     return friendlyJsonParse(content)
   } catch (err) {
-    throw new Error(`'${fixture}' is not valid JSON.\n${err.message}`)
+    throw new Error(`'${fixture}' is not valid JSON.\n${err.message}`, { cause: err })
   }
 }
 
@@ -174,7 +174,7 @@ async function parseJs (p: string, fixture: string) {
 
     return obj
   } catch (err) {
-    throw new Error(`'${fixture}' is not a valid JavaScript object.\n${err.toString()}`)
+    throw new Error(`'${fixture}' is not a valid JavaScript object.\n${err.toString()}`, { cause: err })
   }
 }
 
@@ -184,7 +184,7 @@ async function parseHtml (p: string, fixture: string) {
 
     return content
   } catch (err) {
-    throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`)
+    throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`, { cause: err })
   }
 }
 
@@ -194,6 +194,6 @@ async function parse (p: string, fixture: string, encoding: (ObjectEncodingOptio
 
     return content
   } catch (err) {
-    throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`)
+    throw new Error(`Unable to parse '${fixture}'.\n${err.toString()}`, { cause: err })
   }
 }

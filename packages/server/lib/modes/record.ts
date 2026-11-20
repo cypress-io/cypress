@@ -172,7 +172,8 @@ const updateInstanceStdout = async (options: any = {}) => {
 
 const postInstanceResults = (options: any = {}) => {
   const { runId, instanceId, results, group, parallel, ciBuildId } = options
-  let { stats, tests, video, screenshots, reporterStats, error } = results
+  const { stats, reporterStats, error } = results
+  let { tests, video, screenshots } = results
 
   video = Boolean(video)
 
@@ -241,7 +242,8 @@ const createRun = Promise.method((options: any = {}) => {
     ciBuildId: null,
   })
 
-  let { projectRoot, projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags, testingType, autoCancelAfterFailures, project } = options
+  const { projectRoot, projectId, platform, git, parallel, group, tags, testingType, autoCancelAfterFailures, project } = options
+  let { recordKey, specPattern, specs, ciBuildId } = options
 
   if (recordKey == null) {
     recordKey = env.get('CYPRESS_RECORD_KEY')
@@ -522,7 +524,7 @@ interface InstanceOptions {
 }
 
 async function createInstance (options: InstanceOptions) {
-  let { spec, runId, group, groupId, parallel, machineId, ciBuildId, platform } = options
+  const { spec, runId, group, groupId, parallel, machineId, ciBuildId, platform } = options
 
   const resolvedSpec = spec ? getSpecRelativePath(spec) : null
 

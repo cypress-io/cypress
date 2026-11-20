@@ -8,7 +8,7 @@ describe('<ExternalLink />', () => {
     cy.mount(() => (
       <ExternalLink
         href='https://on.cypress.io/ci'
-        // @ts-ignore - vue @click isn't represented in JSX
+        // @ts-expect-error - vue @click isn't represented in JSX
         onClick={onClickSpy}
       >
         Click me!

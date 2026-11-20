@@ -93,9 +93,9 @@ export class CookieJar {
     this._cookieJar = new ToughCookieJar(undefined, { allowSpecialUseDomain: true })
   }
 
-  getCookies (url: string, sameSiteContext: SameSiteContext = undefined) {
+  getCookies (url: string, sameSiteContext: SameSiteContext = undefined, { http = true }: { http?: boolean } = {}) {
     // @ts-expect-error - tough-cookie supports sameSiteContext, but GetCookiesOptions does not declare it
-    return this._cookieJar.getCookiesSync(url, { sameSiteContext })
+    return this._cookieJar.getCookiesSync(url, { sameSiteContext, http })
   }
 
   getAllCookies () {
@@ -111,9 +111,9 @@ export class CookieJar {
     return cookies
   }
 
-  setCookie (cookie: string | Cookie, url: string, sameSiteContext: SameSiteContext) {
+  setCookie (cookie: string | Cookie, url: string, sameSiteContext: SameSiteContext, { http = true }: { http?: boolean } = {}) {
     // @ts-expect-error - tough-cookie supports sameSiteContext, but SetCookieOptions does not declare it
-    return this._cookieJar.setCookieSync(cookie, url, { sameSiteContext })
+    return this._cookieJar.setCookieSync(cookie, url, { sameSiteContext, http })
   }
 
   removeCookie (cookieData: CookieData) {

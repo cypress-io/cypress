@@ -144,7 +144,7 @@ function getAlias (selector, log, cy) {
 }
 
 function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | Cypress.LogTimeoutOptions = {}, queryCommand: QueryCommandOptions = '') {
-  if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+  if (!isEmpty(queryCommand) && _.isPlainObject(options) && Object.prototype.hasOwnProperty.call(options, 'timeout') && !_.isFinite(options.timeout)) {
     $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
       args: { timeout: options.timeout },
     })
@@ -343,7 +343,7 @@ export default (Commands, Cypress, cy, state) => {
       Cypress.ensure.isType(subject, ['optional', 'element', 'window', 'document'], this.get('name'), cy)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
-        subject = cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
+        subject = cy.$$(cy.getSubjectFromChain(withinSubject || [cy.$$('body')]))
       }
 
       let $el = cy.$$()

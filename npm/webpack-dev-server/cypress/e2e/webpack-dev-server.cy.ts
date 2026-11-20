@@ -1,5 +1,3 @@
-/// <reference path="../support/e2e.ts" />
-
 import dedent from 'dedent'
 
 describe('Config options', () => {
@@ -131,7 +129,7 @@ describe('sourcemaps', () => {
       cy.waitForSpecToFinish()
       cy.reporter().find('.failed > .num').should('contain', 2)
       cy.window().then((win) => {
-        // @ts-expect-error
+        // @ts-expect-error - getEventManager is attached to the runner window and not typed on AUTWindow
         cy.stub(win.getEventManager(), 'emit').as('emit')
       })
 

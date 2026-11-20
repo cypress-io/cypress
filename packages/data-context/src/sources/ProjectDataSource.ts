@@ -119,7 +119,7 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   if (!paths[0]) return ''
 
   function getPathParts (pathname: string) {
-    return pathname.split(/[\/\\]/g)
+    return pathname.split(/[/\\]/g)
   }
 
   const lcp = getPathParts(paths[0])
@@ -152,7 +152,7 @@ export function getPathFromSpecPattern ({
 { specPattern: string
   testingType: TestingType
   fileExtensionToUse?: FileExtension
-  name?: string}) {
+  name?: string }) {
   function replaceWildCard (s: string, fallback: string) {
     return s.replace(/\*/g, fallback)
   }
@@ -462,7 +462,7 @@ export class ProjectDataSource {
 
   async defaultSpecFileName (): Promise<string> {
     const { specPattern = [] } = await this.ctx.project.specPatterns()
-    let fileExtensionToUse: FileExtension = this.ctx.lifecycleManager.fileExtensionToUse
+    const fileExtensionToUse: FileExtension = this.ctx.lifecycleManager.fileExtensionToUse
 
     // If generating a component test then check whether there are JSX/TSX files present in the project.
     // If project uses JSX then user likely wants to use JSX for their tests as well.

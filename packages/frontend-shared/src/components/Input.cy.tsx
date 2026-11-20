@@ -10,7 +10,7 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
     const value = ref('')
     const textToType = 'My wonderful input text'
 
-    // @ts-ignore = vModel is v-model in vue
+    // @ts-expect-error - vModel is v-model in Vue JSX, which the component props do not declare
     cy.mount(() => <Input vModel={value.value} aria-label="status"/>)
     cy.get('input').type(textToType, { delay: 0 })
 
@@ -26,7 +26,7 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
 
     cy.mount(() => (
       <Input
-        // @ts-ignore = vModel is v-model in vue
+        // @ts-expect-error - vModel is v-model in Vue JSX, which the component props do not declare
         vModel={value.value}
         prefixIcon={CoffeeIcon}
         suffixIcon={LoadingIcon}
@@ -41,7 +41,7 @@ describe('<Input/>', { viewportWidth: 400, viewportHeight: 80 }, () => {
   it('ensures autocomplete is disabled', () => {
     const value = ref('')
 
-    // @ts-ignore = vModel is v-model in vue
+    // @ts-expect-error - vModel is v-model in Vue JSX, which the component props do not declare
     cy.mount(() => <Input vModel={value.value} aria-label="status"/>)
     cy.get('input').should('have.attr', 'autocomplete', 'off')
   })

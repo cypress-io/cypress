@@ -72,7 +72,7 @@ export class CDPCommandQueue {
     // this should find, remove, and return if found a given command
 
     const index = this.queue.findIndex((enqueued) => {
-      for (let k of Object.keys(search)) {
+      for (const k of Object.keys(search)) {
         if (search[k] !== enqueued[k]) {
           return false
         }

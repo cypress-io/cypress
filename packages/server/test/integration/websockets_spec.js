@@ -90,7 +90,7 @@ describe('Web Sockets', () => {
         agent,
       })
 
-      return client.on('error', (err) => {
+      client.on('error', (err) => {
         expect(err.code).to.eq('ECONNRESET')
         expect(err.message).to.eq('socket hang up')
 
@@ -119,7 +119,7 @@ describe('Web Sockets', () => {
         return done()
       })
 
-      return client.on('open', () => {
+      client.on('open', () => {
         return client.send('foo')
       })
     })
@@ -146,7 +146,7 @@ describe('Web Sockets', () => {
         return done()
       })
 
-      return client.on('open', () => {
+      client.on('open', () => {
         return client.send('foo')
       })
     })
@@ -177,7 +177,7 @@ describe('Web Sockets', () => {
         return done()
       })
 
-      return client.on('open', () => {
+      client.on('open', () => {
         return client.send('foo')
       })
     })
@@ -217,7 +217,7 @@ describe('Web Sockets', () => {
         return done()
       })
 
-      return client.on('open', () => {
+      client.on('open', () => {
         return client.send('foo')
       })
     })
@@ -249,9 +249,10 @@ describe('Web Sockets', () => {
             path: this.cfg.socketIoRoute,
             transports: ['websocket'],
             rejectUnauthorized: false,
+            extraHeaders: { origin: new URL(wsUrl || this.cfg.proxyUrl).origin },
           })
 
-          return this.wsClient.on('connect', () => {
+          this.wsClient.on('connect', () => {
             return done()
           })
         })
@@ -261,7 +262,7 @@ describe('Web Sockets', () => {
         })
 
         it('continues to handle socket.io requests just fine', function (done) {
-          return this.wsClient.emit('backend:request', 'get:fixture', 'example.json', {}, (data) => {
+          this.wsClient.emit('backend:request', 'get:fixture', 'example.json', {}, (data) => {
             expect(data.response).to.deep.eq({ foo: 'bar' })
 
             return done()
@@ -290,7 +291,7 @@ describe('Web Sockets', () => {
             return done(new Error('should not have been able to connect'))
           })
 
-          return this.wsClient.io.on('error', () => {
+          this.wsClient.io.on('error', () => {
             return done()
           })
         })
@@ -307,7 +308,7 @@ describe('Web Sockets', () => {
             return done(new Error('should not have been able to connect'))
           })
 
-          return this.wsClient.io.on('error', () => {
+          this.wsClient.io.on('error', () => {
             return done()
           })
         })
@@ -382,22 +383,28 @@ describe('Web Sockets', () => {
       })
     }
 
-    it('accepts upgrade when Origin port differs from cypress server port', async () => {
+    it('accepts upgrade when Origin is the primary origin on a port other than the cypress server port', async function () {
+      this.server.remoteStates.set(`http://localhost:${otherPort}`)
+
       const result = await openGraphqlWs(`http://localhost:${otherPort}`)
 
       expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
     })
 
-    it('accepts upgrade when Origin hostname is not localhost', async () => {
+    it('refuses upgrade when Origin is not the primary origin', async function () {
+      this.server.remoteStates.set(`http://localhost:${otherPort}`)
+
       const result = await openGraphqlWs('http://foobar.com:4455')
 
-      expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
+      expect(result.opened).to.be.false
+      expect(result.statusCode).to.eq(400)
     })
 
-    it('accepts upgrade with no Origin header', async () => {
+    it('refuses upgrade with no Origin header', async () => {
       const result = await openGraphqlWs(undefined)
 
-      expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
+      expect(result.opened).to.be.false
+      expect(result.statusCode).to.eq(400)
     })
   })
 })

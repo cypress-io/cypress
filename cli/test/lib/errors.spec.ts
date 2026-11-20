@@ -4,7 +4,7 @@ import path from 'path'
 import type { Systeminformation } from 'systeminformation'
 import si from 'systeminformation'
 import util from '../../lib/util'
-import { errors, getError, formErrorText } from '../../lib/errors'
+import { errors, getError, formErrorText, parseMissingLibraries } from '../../lib/errors'
 
 vi.mock('os', async (importActual) => {
   const actual = await importActual()
@@ -78,6 +78,81 @@ describe('errors', function () {
       expect(e).toBeInstanceOf(Error)
       expect(e).toHaveProperty('known', true)
       expect(e.message).toMatchSnapshot()
+    })
+  })
+
+  describe('.parseMissingLibraries', () => {
+    it('finds each library the dynamic linker could not load, once', () => {
+      const output = [
+        '/root/.cache/Cypress/Cypress: error while loading shared libraries: libnss3.so: cannot open shared object file: No such file or directory',
+        '/root/.cache/Cypress/Cypress: error while loading shared libraries: libgbm.so.1: cannot open shared object file: No such file or directory',
+        '/root/.cache/Cypress/Cypress: error while loading shared libraries: libnss3.so: cannot open shared object file: No such file or directory',
+      ].join('\n')
+
+      expect(parseMissingLibraries(output)).toEqual(['libnss3.so', 'libgbm.so.1'])
+    })
+
+    it('finds none in other output', () => {
+      expect(parseMissingLibraries('Missing X server or $DISPLAY')).toEqual([])
+      expect(parseMissingLibraries()).toEqual([])
+    })
+  })
+
+  describe('.errors.missingDependency', () => {
+    const textFor = (stderr: string) => formErrorText(errors.missingDependency, stderr)
+
+    it('names a known library and the package that provides it', async () => {
+      const text = await textFor('error while loading shared libraries: libgtk-3.so.0: cannot open shared object file')
+
+      expect(text).toContain('libgtk-3.so.0')
+      expect(text).toContain('apt-get install -y libgtk-3-0')
+    })
+
+    it.each([
+      ['libXtst.so.6', 'libxtst6'],
+      ['libatk-bridge-2.0.so.0', 'libatk-bridge2.0-0'],
+      ['libcups.so.2', 'libcups2'],
+      ['libnspr4.so', 'libnspr4'],
+    ])('knows the package for %s', async (library, apt) => {
+      const text = await textFor(`error while loading shared libraries: ${library}: cannot open shared object file`)
+
+      expect(text).toContain(`apt-get install -y ${apt}`)
+    })
+
+    it('prints an install line a shell can run for libasound', async () => {
+      const text = await textFor('error while loading shared libraries: libasound.so.2: cannot open shared object file')
+      const line = text.split('\n').find((l) => l.includes('apt-get install'))
+
+      expect(line).toContain('libasound2t64')
+      expect(line).not.toMatch(/[()]/)
+    })
+
+    it('points to apt-file for a library it has no package for', async () => {
+      const text = await textFor('error while loading shared libraries: libweird.so.9: cannot open shared object file')
+
+      expect(text).toContain('apt-file search libweird.so.9')
+      expect(text).not.toContain('apt-get install')
+    })
+
+    it('keeps the original output and the platform details', async () => {
+      const text = await textFor('error while loading shared libraries: libnss3.so: cannot open shared object file')
+
+      expect(text).toContain('cannot open shared object file')
+      expect(text).toContain('Platform:')
+    })
+
+    it('leaves out the error section when there was no output to show', async () => {
+      const text = await formErrorText(errors.missingDependency)
+
+      expect(text).toContain('This may be due to a missing library or dependency.')
+      expect(text).not.toContain('Please refer to the error below')
+    })
+
+    it('gives the general advice when the output names no library', async () => {
+      const text = await textFor('an error about dependencies')
+
+      expect(text).toContain('This may be due to a missing library or dependency.')
+      expect(text).toContain('an error about dependencies')
     })
   })
 

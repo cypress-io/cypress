@@ -3,11 +3,10 @@ import errors from '@packages/errors'
 import { updateWithPluginValues } from '../../src/project'
 
 vi.mock('@packages/errors', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('@packages/errors')>()
 
   return {
     default: {
-      // @ts-expect-error
       ...actual.default,
       throwErr: vi.fn(),
     },

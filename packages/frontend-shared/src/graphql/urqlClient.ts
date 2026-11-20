@@ -99,7 +99,7 @@ declare global {
     __CYPRESS_BROWSER_NETWORK_MODE__?: boolean
     __RUN_MODE_SPECS__: SpecFile[]
     __CYPRESS_TESTING_TYPE__: 'e2e' | 'component'
-    __CYPRESS_BROWSER__: Partial<Browser> & {majorVersion: string | number}
+    __CYPRESS_BROWSER__: Partial<Browser> & { majorVersion: string | number }
     __CYPRESS_CONFIG__: {
       base64Config: string
       namespace: AutomationElementId
@@ -164,7 +164,6 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
       forwardSubscription (op) {
         return {
           subscribe: (sink) => {
-            // @ts-ignore
             const dispose = socketClient.subscribe(op, sink)
 
             return {

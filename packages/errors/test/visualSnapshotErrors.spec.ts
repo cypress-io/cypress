@@ -610,6 +610,11 @@ describe('visual error templates', () => {
         default: [2020],
       }
     },
+    PORT_BLOCKED_BY_BROWSER: () => {
+      return {
+        default: [],
+      }
+    },
     FILE_SERVER_COULD_NOT_LISTEN: () => {
       return {
         default: [3, makeErr()],
@@ -691,6 +696,14 @@ describe('visual error templates', () => {
 
       return {
         default: ['/path/to/cypress.config.js', err],
+      }
+    },
+    CONFIG_PROCESS_EXITED_UNEXPECTEDLY: () => {
+      return {
+        default: [1, null],
+        unknown: [null, null],
+        sigkill: [null, 'SIGKILL'],
+        sigkillComponent: [null, 'SIGKILL', 'component'],
       }
     },
     TRUSTED_CERTIFICATES_LOAD_ERROR: () => {
@@ -929,6 +942,15 @@ describe('visual error templates', () => {
       return {
         default: ['chrome', 2345, makeErr()],
         electron: ['electron', 2345, makeErr()],
+      }
+    },
+    CDP_BROWSER_EXITED_BEFORE_CONNECT: () => {
+      const err = makeErr()
+
+      return {
+        default: ['Chrome', 1, null, err],
+        profileInUse: ['Chrome', 21, null, err],
+        signal: ['Chrome', null, 'SIGKILL', err],
       }
     },
     FIREFOX_COULD_NOT_CONNECT: () => {

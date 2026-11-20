@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
-import type { CDPSocketBridge } from '@packages/socket'
+import type { CDPSocketBridge, CDPSocketBridgeEvent, CDPSocketBridgeEventPayload } from '@packages/socket'
 
 const debug = Debug('cypress:server:browsers:webkit-cdp-bridge')
 const debugVerbose = Debug('cypress-verbose:server:browsers:webkit-cdp-bridge')
@@ -10,11 +10,27 @@ const debugVerbose = Debug('cypress-verbose:server:browsers:webkit-cdp-bridge')
 // messages are dispatched anyway
 const EVALUATE_ORDER_TIMEOUT_MS = 5000
 
+// WebKit doesn't assign frame ids, so use 'main' as the main frame's id
+const MAIN_FRAME_ID = 'main'
+
 type RuntimeParams = {
   name?: string
   expression?: string
   contextId?: number
   returnByValue?: boolean
+}
+
+type MainFrameContext = {
+  id: number
+  origin: string
+}
+
+const originOf = (url: string) => {
+  try {
+    return new URL(url).origin
+  } catch {
+    return 'null'
+  }
 }
 
 /**
@@ -25,28 +41,67 @@ type RuntimeParams = {
  * Unlike CDP, `Runtime.evaluate` resolves to the evaluated value directly —
  * not a `{ result }` envelope — and `returnByValue` is ignored since
  * Playwright always returns by value.
+ *
+ * Only the main frame has an execution context. A new one is reported each
+ * time the main frame commits a document at a different origin, standing in
+ * for CDP's per-document contexts; binding calls from child frames are dropped.
  */
 export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
-  private frameByContextId = new Map<number, playwright.Frame>()
-  private contextIdByFrame = new WeakMap<playwright.Frame, number>()
   private registeredBindings = new Set<string>()
   private nextContextId = 1
+  private mainFrameContext?: MainFrameContext
   // serializes evaluations so messages reach the browser in emit order, like CDP's transport
   private evaluateChain: Promise<unknown> = Promise.resolve()
 
   constructor (private page: playwright.Page, private evaluateOrderTimeout: number = EVALUATE_ORDER_TIMEOUT_MS) {
     super()
 
-    page.on('framedetached', (frame) => {
-      const contextId = this.contextIdByFrame.get(frame)
-
-      if (contextId !== undefined) this.frameByContextId.delete(contextId)
+    page.on('framenavigated', (frame) => {
+      if (frame === this.page.mainFrame()) this.updateMainFrameContext()
     })
   }
 
-  async send (command: 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate', params: RuntimeParams = {}): Promise<any> {
+  private updateMainFrameContext (): MainFrameContext {
+    const origin = originOf(this.page.mainFrame().url())
+
+    if (this.mainFrameContext?.origin === origin) return this.mainFrameContext
+
+    if (this.mainFrameContext) {
+      this.emitEvent('Runtime.executionContextDestroyed', { executionContextId: this.mainFrameContext.id, executionContextUniqueId: String(this.mainFrameContext.id) })
+    }
+
+    this.mainFrameContext = { id: this.nextContextId++, origin }
+    this.emitContextCreated(this.mainFrameContext)
+
+    return this.mainFrameContext
+  }
+
+  private emitContextCreated ({ id, origin }: MainFrameContext) {
+    this.emitEvent('Runtime.executionContextCreated', {
+      context: { id, origin, name: '', uniqueId: String(id), auxData: { frameId: MAIN_FRAME_ID, isDefault: true } },
+    })
+  }
+
+  private emitEvent<E extends CDPSocketBridgeEvent> (event: E, payload: CDPSocketBridgeEventPayload<E>) {
+    this.emit(event, payload)
+  }
+
+  async send (command: 'Page.enable' | 'Page.getFrameTree' | 'Runtime.enable' | 'Runtime.addBinding' | 'Runtime.evaluate', params: RuntimeParams = {}): Promise<any> {
     switch (command) {
+      case 'Page.enable':
+        return
+
+      case 'Page.getFrameTree':
+        return { frameTree: { frame: { id: MAIN_FRAME_ID }, childFrames: [] } }
+
       case 'Runtime.enable':
+        // like CDP, report the context that already exists
+        if (this.mainFrameContext) {
+          this.emitContextCreated(this.mainFrameContext)
+        } else {
+          this.updateMainFrameContext()
+        }
+
         return
 
       case 'Runtime.addBinding':
@@ -56,21 +111,26 @@ export class WebKitCDPBridge extends EventEmitter implements CDPSocketBridge {
         this.registeredBindings.add(params.name!)
 
         return this.page.exposeBinding(params.name!, ({ frame }, payload: string) => {
-          let executionContextId = this.contextIdByFrame.get(frame)
+          if (frame !== this.page.mainFrame()) {
+            debugVerbose('dropping binding call from a child frame %o', { name: params.name, url: frame.url() })
 
-          if (executionContextId === undefined) {
-            executionContextId = this.nextContextId++
-            this.contextIdByFrame.set(frame, executionContextId)
-            this.frameByContextId.set(executionContextId, frame)
+            return
           }
+
+          const executionContextId = this.updateMainFrameContext().id
 
           debugVerbose('binding called %o', { name: params.name, executionContextId })
 
-          this.emit('Runtime.bindingCalled', { name: params.name, payload, executionContextId })
+          this.emitEvent('Runtime.bindingCalled', { name: params.name!, payload, executionContextId })
         })
 
       case 'Runtime.evaluate': {
-        const frame = (params.contextId && this.frameByContextId.get(params.contextId)) || this.page.mainFrame()
+        // like CDP, a context left behind by a navigation to another origin can't be evaluated in
+        if (params.contextId !== undefined && params.contextId !== this.mainFrameContext?.id) {
+          throw new Error(`Cannot find context with specified id: ${params.contextId}`)
+        }
+
+        const frame = this.page.mainFrame()
 
         // wrap in an IIFE so the multi-statement expression is valid for Playwright's string evaluation
         const evaluation = this.evaluateChain.then(() => frame.evaluate(`(() => {${params.expression}})()`))

@@ -13,7 +13,7 @@ runnerStore.setSpec({
 describe('routes', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
-  let start: Function
+  let start: () => void
 
   beforeEach(() => {
     cy.fixture('runnables_routes').then((_runnables) => {

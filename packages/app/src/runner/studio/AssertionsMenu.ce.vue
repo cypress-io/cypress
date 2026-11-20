@@ -61,6 +61,7 @@
 </template>
 
 <script lang="ts" setup>
+/* global JQuery -- the jQuery type from @types/jquery, which no-undef cannot see in a .vue file */
 import { createPopper } from '@popperjs/core'
 import AssertionType from './AssertionType.ce.vue'
 import _ from 'lodash'

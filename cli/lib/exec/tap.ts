@@ -20,6 +20,7 @@ const debug = Debug('cypress:cli:tap')
 // without one, so these — and only these — lose to a help invocation.
 const DISCOVERY_CODES: ReadonlySet<string> = new Set([
   'NO_SESSION',
+  'PROJECT_NOT_LOADED',
   'SESSION_NOT_FOUND',
   'STALE_SESSION',
   'NO_BROWSER_ATTACHED',

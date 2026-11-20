@@ -12,7 +12,9 @@ import $elements from '../../../src/dom/elements'
 const createState = (): StateFunc => {
   const values: Record<string, any> = {}
 
-  const state = ((key?: string | Record<string, any>, value?: any) => {
+  const state = ((...args: [key?: string | Record<string, any>, value?: any]) => {
+    const [key, value] = args
+
     if (typeof key === 'undefined') {
       return values
     }
@@ -23,7 +25,7 @@ const createState = (): StateFunc => {
       return values
     }
 
-    if (arguments.length === 2) {
+    if (args.length === 2) {
       values[key] = value
     }
 
@@ -97,6 +99,7 @@ describe('src/cy/keyboard', () => {
 
     const shortcut = {
       type: 'shortcut' as const,
+      originalSequence: '{meta+a}',
       key: {
         type: 'key' as const,
         key: 'a',

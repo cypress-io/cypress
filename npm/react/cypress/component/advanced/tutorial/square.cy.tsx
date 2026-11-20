@@ -3,7 +3,7 @@ import { mount } from '@cypress/react'
 import './tic-tac-toe.css'
 
 // let's put React component right in the spec file
-export default function Square ({ value: valueAsProp }: { value?: string }) {
+function Square ({ value: valueAsProp }: { value?: string }) {
   const [valueAsState, setValueAsState] = useState<string | null | undefined>(null)
 
   return (
@@ -29,10 +29,7 @@ describe('Square', () => {
   it('looks good', () => {
     mount(<Square />)
 
-    // pause to show it
-    cy.wait(1000)
     cy.get('.square').click()
-    cy.wait(1000)
 
     cy.get('.square')
     .should('have.css', 'background-color', 'rgb(255, 255, 255)')

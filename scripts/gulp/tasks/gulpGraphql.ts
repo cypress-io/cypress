@@ -11,6 +11,7 @@ import { nexusTypegen, watchNexusTypegen } from '../utils/nexusTypegenUtil'
 import { monorepoPaths } from '../monorepoPaths'
 import { spawned, universalSpawn } from '../utils/childProcessUtils'
 import { DEFAULT_INTERNAL_CLOUD_ENV } from '../gulpConstants'
+import { resolveDevelopmentCloudWorkspaceUrl } from '../../../packages/config/src/developmentCloudWorkspaceUrl'
 
 export async function nexusCodegen () {
   return nexusTypegen({
@@ -43,7 +44,6 @@ export async function graphqlCodegenWatch () {
     cwd: monorepoPaths.pkgDataContext,
   })
   const dfd = Promise.withResolvers()
-  let hasResolved = false
 
   spawned.stdout.on('data', (chunk) => {
     const strs = `${chunk}`.split('\n').filter((f) => f)
@@ -53,7 +53,7 @@ export async function graphqlCodegenWatch () {
     strs.forEach((str) => {
       let codegenMsg = timestampRegex.test(str) ? str.slice(10) : str
 
-      if (codegenMsg.includes('Watching for changes') && !hasResolved) {
+      if (codegenMsg.includes('Watching for changes')) {
         dfd.resolve({})
       }
 
@@ -90,7 +90,8 @@ export async function syncRemoteGraphQL () {
   }
 
   try {
-    const body = await rp.get(`${ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV]}/test-runner-graphql-schema`)
+    const cloudUrl = resolveDevelopmentCloudWorkspaceUrl(ENV_MAP[DEFAULT_INTERNAL_CLOUD_ENV], DEFAULT_INTERNAL_CLOUD_ENV)
+    const body = await rp.get(`${cloudUrl}/test-runner-graphql-schema`)
 
     // TODO(tim): fix
     await fs.ensureDir(path.join(monorepoPaths.pkgDataContext, 'src/gen'))

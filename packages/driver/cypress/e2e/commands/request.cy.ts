@@ -5,6 +5,11 @@ const { _, Promise } = Cypress
 
 const RESPONSE_TIMEOUT = 22222
 
+const expectNoUnescapedCharactersRequestError = (message: string) => {
+  expect(message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
+  expect(message).to.match(/`cy\.request\(\)` (failed trying to load:|timed out waiting)/)
+}
+
 describe('src/cy/commands/request', () => {
   context('#request', {
     responseTimeout: RESPONSE_TIMEOUT,
@@ -1163,6 +1168,23 @@ describe('src/cy/commands/request', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/24192
+      for (const encoding of [false, 0, '']) {
+        it(`rejects invalid falsy encoding ${JSON.stringify(encoding)}`, function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.request()` was called with invalid encoding:')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/request')
+            done()
+          })
+
+          // @ts-expect-error - intentionally passing an invalid encoding
+          cy.request({
+            url: 'http://localhost:1234/foo',
+            encoding,
+          })
+        })
+      }
+
       it('throws when encoding is not valid', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -1447,8 +1469,7 @@ describe('src/cy/commands/request', () => {
       // https://github.com/cypress-io/cypress/issues/5274
       it('dont throw UNESCAPED_CHARACTERS error for url with ’ character in pathname', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`cy.request()` failed trying to load:')
-          expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
+          expectNoUnescapedCharactersRequestError(err.message)
 
           done()
         })
@@ -1458,8 +1479,7 @@ describe('src/cy/commands/request', () => {
 
       it('dont throw UNESCAPED_CHARACTERS error for url with % character in pathname', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`cy.request()` failed trying to load:')
-          expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
+          expectNoUnescapedCharactersRequestError(err.message)
 
           done()
         })
@@ -1469,8 +1489,7 @@ describe('src/cy/commands/request', () => {
 
       it('dont throw UNESCAPED_CHARACTERS error for url with ’ escaped in pathname', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`cy.request()` failed trying to load:')
-          expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
+          expectNoUnescapedCharactersRequestError(err.message)
 
           done()
         })
@@ -1480,8 +1499,7 @@ describe('src/cy/commands/request', () => {
 
       it('dont throw UNESCAPED_CHARACTERS error for url with Unicode in pathname from BMP to Astral Plane', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`cy.request()` failed trying to load:')
-          expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
+          expectNoUnescapedCharactersRequestError(err.message)
 
           done()
         })
@@ -1491,8 +1509,7 @@ describe('src/cy/commands/request', () => {
 
       it('dont throw UNESCAPED_CHARACTERS error for url with any Unicode escaped character in pathname', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`cy.request()` failed trying to load:')
-          expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
+          expectNoUnescapedCharactersRequestError(err.message)
 
           done()
         })

@@ -7,7 +7,7 @@
       item-value="name"
       item-key="id"
       :label-id="labelId"
-      :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
+      placeholder="Choose your editor..."
       class="w-[400px]"
       data-cy="selectEditor"
       @update:model-value="updateEditor"
@@ -15,7 +15,7 @@
       <template #input-prefix="{ value }">
         <Icon
           v-if="value"
-          :icon="icons[value.id]"
+          :icon="icons[value.id] ?? Terminal"
           class="text-md text-gray-500"
           icon-class="icon-dark-gray-500"
         />
@@ -32,40 +32,22 @@
       </template>
     </Select>
   </div>
-
-  <div
-    v-if="editorToUse === 'custom'"
-    class="flex py-[16px] pb-[4px] items-center"
-  >
-    <div class="w-[400px]">
-      <Input
-        id="customPath"
-        v-model="customBinary"
-        data-cy="custom-editor"
-        input-classes="text-sm text-gray-500"
-        :placeholder="t('settingsPage.editor.customPathPlaceholder')"
-      >
-        <template #prefix>
-          <i-cy-technology-command-line_x16
-            class="text-md icon-dark-gray-500"
-          />
-        </template>
-      </Input>
-      <label
-        for="customPath"
-        class="sr-only"
-      >{{ t('settingsPage.editor.customPathPlaceholder') }}</label>
-    </div>
-  </div>
+  <!-- eslint-disable vue/multiline-html-element-content-newline -->
+  <p
+    class="mt-[8px] max-w-[400px] text-sm text-gray-600"
+    data-cy="launch-editor-hint"
+  >Editor not listed? Set <ExternalLink :href="launchEditorHintLink">
+    <code class="font-medium">LAUNCH_EDITOR</code>
+  </ExternalLink> and restart.</p>
+  <!-- eslint-enable vue/multiline-html-element-content-newline -->
 </template>
 
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import Icon from '@cy/components/Icon.vue'
-import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
-import Input from '@cy/components/Input.vue'
+import ExternalLink from './ExternalLink.vue'
 import Cursor from '~icons/logos/cursor'
 import VSCode from '~icons/logos/visual-studio-code'
 import Atom from '~icons/logos/atom-icon'
@@ -75,10 +57,20 @@ import Sublime from '~icons/logos/sublimetext-icon'
 import Computer from '~icons/mdi/computer'
 import Emacs from '~icons/logos/emacs'
 import Terminal from '~icons/cy/terminal_x16.svg'
+import { IconTechnologyCodeEditor } from '@cypress-design/vue-icon'
 import { gql } from '@urql/core'
 import type { ChooseExternalEditorFragment } from '../generated/graphql'
+import { getUrlWithParams } from '../utils/getUrlWithParams'
 
-const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
+const launchEditorHintLink = getUrlWithParams({
+  url: 'https://on.cypress.io/file-opener-preference',
+  params: {
+    utm_medium: 'Choose External Editor',
+    utm_content: 'Launch Editor Hint',
+  },
+})
+
+const icons: Record<string, FunctionalComponent<SVGAttributes>> = {
   'code': VSCode,
   'cursor': Cursor,
   'webstorm': Webstorm,
@@ -92,17 +84,11 @@ const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
   'computer': Computer,
   'File Explorer': Computer,
   'File System': Computer,
-  'custom': Terminal,
+  'launch-editor': IconTechnologyCodeEditor,
 }
 
-const customEditor = { id: 'custom', icon: Terminal, name: 'Custom', binary: 'custom' }
-
 const editorOptions = computed(() => {
-  const editors = props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] ?? icons['custom'] })) || []
-
-  editors.push(customEditor)
-
-  return editors
+  return props.gql.localSettings.availableEditors?.map((x) => ({ ...x, icon: icons[x.id] ?? Terminal })) || []
 })
 
 gql`
@@ -125,53 +111,19 @@ const props = defineProps<{
   labelId: string
 }>()
 
-const { t } = useI18n()
-
 type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][number]
 
-type EditorType = 'found' | 'custom'
-
-const selectedWellKnownEditor: Editor | undefined = props.gql.localSettings.availableEditors.find((editor) => {
+const selectedEditor = ref<Editor | undefined>(props.gql.localSettings.availableEditors.find((editor) => {
   return editor.binary && editor.binary === props.gql.localSettings.preferences.preferredEditorBinary
-})
-
-const customBinary = ref<string>(
-  selectedWellKnownEditor
-    ? ''
-    : props.gql.localSettings.preferences.preferredEditorBinary ?? '',
-)
-
-const editorToUse = ref<EditorType>(
-  customBinary.value ? 'custom' : 'found',
-)
-
-const selectedEditor = ref<Editor | undefined>(
-  editorToUse.value === 'custom' ? customEditor : selectedWellKnownEditor,
-)
+}))
 
 const emit = defineEmits<{
   (e: 'choseEditor', binary: string | null): void
 }>()
 
-watch(customBinary, (val) => {
-  if (editorToUse.value !== 'custom') {
-    editorToUse.value = 'custom'
-  }
-
-  emit('choseEditor', val)
-})
-
 const updateEditor = (editor: Editor) => {
   selectedEditor.value = editor
 
-  if (editor.id === 'custom') {
-    editorToUse.value = 'custom'
-    if (customBinary.value) {
-      emit('choseEditor', customBinary.value)
-    }
-  } else {
-    editorToUse.value = 'found'
-    emit('choseEditor', selectedEditor.value.binary)
-  }
+  emit('choseEditor', editor.binary)
 }
 </script>

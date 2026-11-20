@@ -43,7 +43,7 @@ module.exports = {
 }`)
         })
 
-        cy.contains(cy.i18n.launchpadErrors.generic.retryButton).click()
+        cy.contains('Try again').click()
         cy.contains('Error').should('not.exist')
       })
 
@@ -74,7 +74,7 @@ module.exports = {
 }`)
         })
 
-        cy.contains(cy.i18n.launchpadErrors.generic.retryButton).click()
+        cy.contains('Try again').click()
         cy.contains('h2', 'SyntaxError').should('not.exist')
       })
     })

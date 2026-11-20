@@ -32,11 +32,11 @@ describe('<FlakySpecSummary />', () => {
           specName="test"
           specExtension=".cy.tsx"
           severity={'unknown_value'}
-          // @ts-ignore
+          // @ts-expect-error - checks that the component tolerates a null count, which the prop type excludes
           totalFlakyRuns={null}
-          // @ts-ignore
+          // @ts-expect-error - checks that the component tolerates a null count, which the prop type excludes
           totalRuns={null}
-          // @ts-ignore
+          // @ts-expect-error - checks that the component tolerates a null count, which the prop type excludes
           runsSinceLastFlake={null}
         />,
       </div>)

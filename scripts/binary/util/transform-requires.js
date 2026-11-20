@@ -1,13 +1,13 @@
 const fs = require('fs-extra')
 const path = require('path')
 const glob = require('glob')
-const chalk = require('chalk').default
+const chalk = require('chalk')
 const Promise = require('bluebird')
 const Debug = require('debug')
 
 const debug = Debug('cypress:scripts:util:transform-requires')
 
-const requireRE = /(require\(["'`])@packages\/(.+?)([\/"'`])/g
+const requireRE = /(require\(["'`])@packages\/(.+?)([/"'`])/g
 const globAsync = Promise.promisify(glob)
 
 const rewritePackageNames = (fileStr, buildRoot, filePath, onFound) => {

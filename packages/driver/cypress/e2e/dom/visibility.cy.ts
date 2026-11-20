@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error - spec is a script, so destructuring `$` redeclares the global jQuery `$`
 const { $, dom } = Cypress
 
 describe('src/cypress/dom/visibility', {
@@ -85,7 +85,7 @@ describe('src/cypress/dom/visibility', {
 
         it('throws when not passed a DOM element', () => {
           const fn = () => {
-            // @ts-ignore
+            // @ts-expect-error - deliberately passes a selector string instead of a DOM element
             dom.isVisible('form')
           }
 
@@ -109,6 +109,14 @@ describe('src/cypress/dom/visibility', {
           }
 
           expect(fn()).to.be.true
+        })
+
+        it('returns true for a scrollable window passed directly or wrapped in jQuery', function () {
+          this.add('<div style="height: 1000px; width: 10px;" />')
+          const win = cy.state('window')
+
+          expect(dom.isScrollable(win)).to.be.true
+          expect(dom.isScrollable($(win))).to.be.true
         })
 
         it('returns false if window and body < window height', () => {
@@ -216,6 +224,39 @@ describe('src/cypress/dom/visibility', {
           }
 
           expect(fn()).to.be.true
+        })
+
+        it('returns true for a scrollable element passed as a DOM element or a jQuery object', function () {
+          const $scrollable = this.add(`\
+<div style="height: 100px; width: 100px; overflow: auto;">
+  <div style="height: 150px;">Vertical Scroll</div>
+</div>\
+`)
+
+          expect(dom.isScrollable($scrollable[0])).to.be.true
+          expect(dom.isScrollable($scrollable)).to.be.true
+        })
+
+        it('returns false for a non-scrollable element passed as a DOM element or a jQuery object', function () {
+          const $noScroll = this.add(`\
+<div style="height: 100px; overflow: auto;">
+  <div>No Scroll</div>
+</div>\
+`)
+
+          expect(dom.isScrollable($noScroll[0])).to.be.false
+          expect(dom.isScrollable($noScroll)).to.be.false
+        })
+
+        it('checks a <select> passed as a DOM element itself, not its first option', function () {
+          const $select = this.add(`\
+<select size="2" style="height: 30px; overflow: auto;">
+  <option>one</option><option>two</option><option>three</option><option>four</option>
+</select>\
+`)
+
+          expect(dom.isScrollable($select)).to.be.true
+          expect(dom.isScrollable($select[0])).to.be.true
         })
       })
 
@@ -423,6 +464,7 @@ describe('src/cypress/dom/visibility', {
   context('#getReasonIsHidden (legacy)', { visibilityStrategy: 'legacy' }, () => {
     const reasonIs = ($el: JQuery, str: string) => {
       expect(dom.getReasonIsHidden($el)).to.eq(str)
+      expect(dom.getReasonIsHidden($el[0])).to.eq(str)
     }
 
     describe('basic css / box model', () => {
@@ -585,6 +627,14 @@ describe('src/cypress/dom/visibility', {
         const reason = dom.getReasonIsHidden($el)
 
         expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+      })
+    })
+
+    it('returns the same reason for a DOM element as for a jQuery object', () => {
+      prepareFixtureSection('display-property')
+      cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        expect(dom.getReasonIsHidden($el[0])).to.eq(dom.getReasonIsHidden($el))
+        expect(dom.getReasonIsHidden($el[0])).to.contain('`display: none`')
       })
     })
 

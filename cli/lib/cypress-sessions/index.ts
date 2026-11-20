@@ -1,9 +1,9 @@
 import path from 'path'
 
-import { TapError, SessionNotFoundTapError, isTapSupportedBrowser } from './record'
+import { TapError, SessionNotFoundTapError, isTapSupportedBrowser, isStartingRecord } from './record'
 import type { LiveSessionState, ReadySessionState, CypressSession } from './record'
-import { isPidAlive, verifySessionRecord } from './liveness'
-import { readLiveSessions } from './store'
+import { verifySessionRecord } from './liveness'
+import { readLiveSessions, readStartingSessions } from './store'
 
 export { TAP_TARGET, TapError, isTapError, SESSIONS_DIRNAME, isTapSupportedBrowser } from './record'
 
@@ -29,12 +29,11 @@ const matchesSession = (record: CypressSession, session: number | undefined): bo
   return session === undefined || record.pid === session
 }
 
-// A dead pid is skipped without a probe (it proves the writer is gone); the
-// survivors carry the live browser CDP state from their probe response.
+// Every match is probed, whether or not its pid can be signalled from here: the
+// pid check cannot see across PID namespaces. The survivors carry the live
+// browser CDP state from their probe response.
 const probeMatches = async (matches: CypressSession[], probeTimeoutMs?: number): Promise<LiveSessionState[]> => {
-  const probed = await Promise.all(matches.map(async (record) => {
-    return isPidAlive(record.pid) ? verifySessionRecord(record, probeTimeoutMs) : null
-  }))
+  const probed = await Promise.all(matches.map((record) => verifySessionRecord(record, probeTimeoutMs)))
 
   return probed.filter((session): session is LiveSessionState => session !== null)
 }
@@ -42,9 +41,30 @@ const probeMatches = async (matches: CypressSession[], probeTimeoutMs?: number):
 export const listLiveSessions = async (options: ListSessionOptions = {}): Promise<LiveSessionState[]> => {
   const records = await readLiveSessions()
 
-  const matches = records.filter((record) => matchesSession(record, options.session))
+  const matches = records.filter((record) => !isStartingRecord(record) && matchesSession(record, options.session))
 
   return probeMatches(matches, options.probeTimeoutMs)
+}
+
+export interface FindStartingSessionOptions {
+  session?: number
+  cwd: string
+}
+
+// The session whose project failed to load, if there is one: it never became a
+// live session, so `status` goes looking for it to say why, and every other command
+// points to `status`. Prefers the project at the cwd, then the lowest pid, as
+// selection does.
+export const findStartingSession = async ({ session, cwd }: FindStartingSessionOptions): Promise<CypressSession | null> => {
+  const starting = (await readStartingSessions()).filter((record) => matchesSession(record, session))
+
+  if (starting.length === 0) {
+    return null
+  }
+
+  const atCwd = starting.filter((record) => matchesProject(record, cwd))
+
+  return lowestPid(atCwd.length > 0 ? atCwd : starting)
 }
 
 export type SessionSelectionReason = 'explicit' | 'only' | 'cwd-match' | 'arbitrary'
@@ -82,7 +102,7 @@ export const resolvedSessionIdentity = (): ResolvedSessionIdentity | null => las
 
 export const resolvedSessionId = (): string | null => lastResolvedIdentity?.sessionId ?? null
 
-const lowestPid = <T extends LiveSessionState>(sessions: T[]): T => {
+const lowestPid = <T extends CypressSession>(sessions: T[]): T => {
   return [...sessions].sort((a, b) => a.pid - b.pid)[0]
 }
 
@@ -107,10 +127,25 @@ const selectSession = <T extends LiveSessionState>(candidates: T[], options: Res
 // for — STALE_SESSION when matches exist but none responds, and
 // UNSUPPORTED_BROWSER when every one that does has a browser tap cannot drive.
 const liveMatches = async (options: ResolveSessionOptions): Promise<LiveSessionState[]> => {
-  const { session, probeTimeoutMs } = options
+  const { session, cwd, probeTimeoutMs } = options
   const records = await readLiveSessions()
 
-  const matches = records.filter((record) => matchesSession(record, session))
+  // A project that failed to load has a starting record but no session to drive, so it is
+  // never among the matches
+  const matches = records.filter((record) => !isStartingRecord(record) && matchesSession(record, session))
+
+  // With nothing live to drive, or only sessions of other projects when none was named, a
+  // project that failed to load at the caller's directory is the one to report. Cypress is
+  // running, so telling an agent to start it would start a second one.
+  const noneAtCwd = session === undefined && !matches.some((record) => matchesProject(record, cwd))
+
+  if (matches.length === 0 || noneAtCwd) {
+    const starting = await readStartingSessions()
+
+    if (starting.some((record) => matchesSession(record, session) && (matches.length === 0 || matchesProject(record, cwd)))) {
+      throw new TapError('PROJECT_NOT_LOADED')
+    }
+  }
 
   if (matches.length === 0) {
     throw session === undefined

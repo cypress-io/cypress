@@ -675,7 +675,7 @@ export const AllCypressErrors = {
       return AllCypressErrors.CLOUD_PROTOCOL_UPLOAD_HTTP_FAILURE(error.errors[0] as Error & { url: string, status: number, statusText: string, responseBody: string })
     }
 
-    let systemErr = error.errors.find((err) => {
+    const systemErr = error.errors.find((err) => {
       return err.kind === 'SystemError'
     })
     const recommendation = systemErr ? errPartial`Some or all of the errors encountered are system-level network errors. Please verify your network configuration for connecting to ${fmt.highlightSecondary(systemErr.url)}` : null
@@ -732,6 +732,14 @@ export const AllCypressErrors = {
   },
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
+  },
+  PORT_BLOCKED_BY_BROWSER: () => {
+    return errTemplate`\
+        Cypress could not find a port that browsers allow
+
+        Chrome, Electron, Firefox and WebKit refuse to load any URL on the ports Cypress was randomly assigned, so the runner could never connect to Cypress
+
+        Set the ${fmt.highlightSecondary('port')} option in your Cypress configuration to a port browsers allow`
   },
   FILE_SERVER_COULD_NOT_LISTEN: (attempts: number, err: Error) => {
     return errTemplate`\
@@ -903,6 +911,17 @@ export const AllCypressErrors = {
       ${fmt.stackTrace(err)}
     `
   },
+  CONFIG_PROCESS_EXITED_UNEXPECTEDLY: (code: number | null, signal: string | null, testingType?: string) => {
+    const exitedWith = signal ? `signal ${signal}` : code !== null ? `code ${code}` : 'no exit code or signal'
+    const oomHint = signal === 'SIGKILL'
+      ? fmt.off(`\n\nA SIGKILL usually means the operating system ran out of memory and killed the process.${testingType === 'component' ? ' In component testing this process also runs your dev server, which can use a lot of memory.' : ''}`)
+      : fmt.off('')
+
+    return errTemplate`\
+      The process that loads your ${fmt.highlight(`configFile`)} and runs your Node events exited unexpectedly (${fmt.highlightSecondary(exitedWith)}).${oomHint}
+
+      Cypress cannot run your Node events without this process.`
+  },
   TRUSTED_CERTIFICATES_LOAD_ERROR: (filePathOrLabel: string, err: Error) => {
     return errTemplate`\
       Cypress could not load a certificate you listed in ${fmt.highlight(`trustedCertificates`)}.
@@ -1032,7 +1051,7 @@ export const AllCypressErrors = {
 
         ${fmt.stringify(browsers)}
 
-        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine — it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
+        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine; it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
 
         To run your tests in a specific browser, remove that value and pass the browser by name instead:
 
@@ -1278,6 +1297,26 @@ export const AllCypressErrors = {
         There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
         ${fmt.stackTrace(arg1)}`
+  },
+  CDP_BROWSER_EXITED_BEFORE_CONNECT: (browserName: string, code: number | null, signal: string | null, err: Error) => {
+    const exitStatus = code === null ? `signal ${signal}` : `code ${code}`
+
+    // 21 is Chromium's PROFILE_IN_USE: the browser handed its launch to a running instance on the same profile, which refused it
+    if (code === 21) {
+      return errTemplate`\
+          Cypress could not connect to ${fmt.off(_.capitalize(browserName))} because the browser exited with ${fmt.highlight(exitStatus)} before the Chrome DevTools Protocol connection was established.
+
+          This exit code means the browser found another ${fmt.off(_.capitalize(browserName))} window already running on the same profile. This usually happens when the ${fmt.highlightSecondary('UserDataDir')} enterprise or group policy is set, because the policy overrides the profile directory Cypress launches the browser with. You can review the applied policies by visiting ${fmt.url('chrome://policy')} (or ${fmt.url('edge://policy')} for Edge).
+
+          Close every ${fmt.off(_.capitalize(browserName))} window and try again, or run your tests in a different browser.
+
+          ${fmt.stackTrace(err)}`
+    }
+
+    return errTemplate`\
+        Cypress could not connect to ${fmt.off(_.capitalize(browserName))} because the browser exited with ${fmt.highlight(exitStatus)} before the Chrome DevTools Protocol connection was established.
+
+        ${fmt.stackTrace(err)}`
   },
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
@@ -1731,7 +1770,7 @@ export const AllCypressErrors = {
     return errTemplate`
       The testing type selected (${fmt.highlight(testingType)}) is not configured in your config file.
 
-      Please run ‘cypress open’ and choose your testing type to automatically update your configuration file.
+      Please run ${fmt.highlight(`cypress open`)} and choose your testing type to automatically update your configuration file.
 
       https://on.cypress.io/configuration
     `
@@ -1884,8 +1923,8 @@ export const cloneErr = function (err: CypressError | GenericError, options: { h
     // revert back the distorted characters
     // in case there is an error in a child_process
     // that contains quotes
-    .replace(/\&\#x27;/g, '\'')
-    .replace(/\&quot\;/g, '"')
+    .replace(/&#x27;/g, '\'')
+    .replace(/&quot;/g, '"')
   }
 
   // and any own (custom) properties

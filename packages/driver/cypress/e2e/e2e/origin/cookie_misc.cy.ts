@@ -301,6 +301,59 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  describe('document.cookie with HttpOnly cookies', () => {
+    beforeEach(() => {
+      cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+      cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.window().then((win) => {
+          return cy.wrap(win.fetch(`/set-cookie?cookie=foo=bar; Path=/; HttpOnly`))
+        })
+
+        cy.reload()
+      })
+    })
+
+    it('does not read HttpOnly cookies', () => {
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.document().its('cookie').should('not.include', 'foo=')
+        cy.getCookie('foo').its('value').should('eq', 'bar')
+      })
+    })
+
+    const writes = ['foo=changed; Path=/', 'foo=changed', 'foo=; Path=/; Max-Age=0', 'foo=; Max-Age=0']
+
+    writes.forEach((cookie) => {
+      it(`does not replace or expire HttpOnly cookies with "${cookie}"`, () => {
+        cy.origin(`https://app.foobar.com:3503`, { args: { cookie } }, ({ cookie }) => {
+          cy.window().then((win) => {
+            win.document.cookie = cookie
+            // the second write landing means the first has been handled
+            win.document.cookie = 'sync=1; Path=/'
+          })
+
+          cy.getCookie('sync').should('exist')
+
+          cy.getCookie('foo').should('include', { value: 'bar', httpOnly: true })
+        })
+      })
+    })
+
+    it('does not set cookies marked HttpOnly', () => {
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.window().then((win) => {
+          win.document.cookie = 'baz=qux; Path=/; HttpOnly'
+          win.document.cookie = 'sync=1; Path=/'
+        })
+
+        cy.getCookie('sync').should('exist')
+
+        cy.getCookie('baz').should('be.null')
+        cy.document().its('cookie').should('not.include', 'baz=')
+      })
+    })
+  })
+
   describe('Same-Site Cross-Origin cookie behavior', () => {
     const cookie = 'foo1=bar2'
     const site = 'foobar.com'
@@ -319,7 +372,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       // 1. visits www.foobar.com:3500: The AUT and top are the same-origin
       cy.visit(`http://${hostnameA}`).then(() => {
         // 2. set a cookie via Set-Cookie Response header. Since top and AUT are the same-origin, this works
-        // @ts-expect-error
+        // @ts-expect-error - window.top is possibly null and is not typed as an AUTWindow
         cy.wrap(makeRequest(window.top, `http://${hostnameA}/set-cookie?cookie=${cookie}; Domain=${site}`, 'fetch'))
       })
 
@@ -333,13 +386,13 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         // for same super domain origin and not same origin in Cypress <= 13, so the cookies are NOT simulated.
         // In Cypress 14, we are changing this to check for same origin for simulation conditions, which will allow this cookie
         // to be set and correctly simulate the AUT as top.
-        // @ts-expect-error
+        // @ts-expect-error - window.top is possibly null and is not typed as an AUTWindow
         cy.wrap(makeRequest(window.top, `http://${hostnameB}/set-cookie?cookie=${cookie}; Domain=${site}`, 'fetch'))
       })
 
       // 5. mock a navigation back to the first domain (this isn't necessary but makes the test cleaner) now AUT and top are same-origin
       cy.visit(`http://${hostnameA}`).then(() => {
-        // @ts-expect-error
+        // @ts-expect-error - window.top is possibly null and is not typed as an AUTWindow
         cy.wrap(makeRequest(window.top, `http://${hostnameA}/test-request`, 'fetch'))
 
         cy.wait('@cookiedRequest').then(({ request }) => {

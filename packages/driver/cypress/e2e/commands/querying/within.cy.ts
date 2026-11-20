@@ -9,6 +9,7 @@ describe('src/cy/commands/querying/within', () => {
     })
 
     it('invokes callback function with runnable.ctx', function () {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias -- compared against the callback's own `this`
       const ctx = this
 
       cy.get('div:first').within(function () {
@@ -41,6 +42,27 @@ describe('src/cy/commands/querying/within', () => {
 
           expect(firstSpan).to.eq(span.get(0))
         })
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24178
+    it('finds content within a document subject', () => {
+      cy.document().within(() => {
+        cy.contains('#nested-div span', 'foo').should('exist')
+        cy.contains('foo').should('exist')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24178
+    it('reports missing content within a document as an assertion error', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.name).to.eq('AssertionError')
+        expect(err.message).to.eq('Timed out retrying after 100ms: Expected to find content: \'document-scope-missing-content\' within the element: <document> but never did.')
+        done()
+      })
+
+      cy.document().within(() => {
+        cy.contains('document-scope-missing-content', { timeout: 100 })
       })
     })
 

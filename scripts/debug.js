@@ -23,7 +23,6 @@ args.unshift(`--inspect-brk=${INSPECT_PORT}`)
 args.push(...userArgs)
 
 const log = (k, v) => {
-  // eslint-disable-next-line
   console.log(chalk.yellow(k), chalk.cyan(v))
 }
 

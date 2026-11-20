@@ -10,5 +10,9 @@
     "types": [
       "node"
     ]
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "eslint.config.ts"
+  ]
 }

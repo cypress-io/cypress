@@ -10,7 +10,7 @@ describe('SpecItem', () => {
         route={{ path: '/specs/runner', query: { file: '' } }}
         gridColumns="grid-cols-[1fr,1fr]"
         onToggleRow={toggleRowHandler}
-        // @ts-ignore - doesn't know about vSlots
+        // @ts-expect-error - the component's JSX types do not declare vSlots
         vSlots={{
           file: () => <span>File Name</span>,
           'git-info': () => <span>Git Info</span>,
@@ -38,7 +38,7 @@ describe('SpecItem', () => {
         isLeaf={false}
         gridColumns="grid-cols-[1fr]"
         onToggleRow={toggleRowHandler}
-        // @ts-ignore - doesn't know about vSlots
+        // @ts-expect-error - the component's JSX types do not declare vSlots
         vSlots={{
           file: () => <span>Directory Name</span>,
         }}

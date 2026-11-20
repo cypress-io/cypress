@@ -13,13 +13,13 @@ describe('InterceptedRequest', () => {
       const interceptedRequest = new InterceptedRequest({
         req: {
           matchingRoutes: [
-            // @ts-ignore
+            // @ts-expect-error - partial route stub, missing getFixture and matches from BackendRoute
             {
               id: '1',
               hasInterceptor: true,
               routeMatcher: {},
             },
-            // @ts-ignore
+            // @ts-expect-error - partial route stub, missing getFixture and matches from BackendRoute
             {
               id: '2',
               hasInterceptor: true,
@@ -72,14 +72,14 @@ describe('InterceptedRequest', () => {
       const interceptedRequest = new InterceptedRequest({
         req: {
           matchingRoutes: [
-            // @ts-ignore
+            // @ts-expect-error - partial route stub, missing getFixture and matches from BackendRoute
             {
               id: '1',
               hasInterceptor: true,
               routeMatcher: {},
               disabled: true,
             },
-            // @ts-ignore
+            // @ts-expect-error - partial route stub, missing getFixture and matches from BackendRoute
             {
               id: '2',
               hasInterceptor: true,

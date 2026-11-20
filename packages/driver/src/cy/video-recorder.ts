@@ -27,7 +27,7 @@ export const initVideoRecorder = async (Cypress) => {
         audio: false,
         video: {
           // mediaSource "browser" is supported by a firefox user preference
-          // @ts-ignore
+          // @ts-expect-error - mediaSource is Firefox-only and not in MediaTrackConstraints
           mediaSource: 'browser',
           frameRate: {
             exact: 30,

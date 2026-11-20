@@ -109,7 +109,7 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
   const isHttps = opts.proxy.protocol === 'https:'
   const port = opts.proxy.port || (isHttps ? 443 : 80)
 
-  let connectOpts: any = {
+  const connectOpts: any = {
     port: Number(port),
     host: opts.proxy.hostname,
     useTls: isHttps,
@@ -298,7 +298,6 @@ class HttpAgent extends http.Agent {
     const proxy = url.parse(options.proxy)
 
     // set req.path to the full path so the proxy can resolve it
-    // @ts-ignore: Cannot assign to 'path' because it is a constant or a read-only property.
     req.path = options.href
 
     delete req._header // so we can set headers again
@@ -382,7 +381,6 @@ class HttpsAgent extends https.Agent {
       }
     }
 
-    // @ts-ignore
     cb?.(null, super.createConnection(options) as any)
   }
 

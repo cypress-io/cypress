@@ -59,7 +59,6 @@ Or read stdout from a prior partial build’s `dist/`. A mismatch fails with `di
 ```bash
 export SKIP_NOTARIZATION=1
 export RESET_ADHOC_SIGNATURE=1   # arm64 only; harmless to omit on Intel
-export V8_SNAPSHOT_DISABLE_MINIFY=1   # optional: faster packaging
 BINARY_VERSION="$(env -u ELECTRON_RUN_AS_NODE node packages/server/index.js --version)"
 env -u ELECTRON_RUN_AS_NODE yarn binary-build --version "$BINARY_VERSION" --platform darwin
 env -u ELECTRON_RUN_AS_NODE yarn binary-package --version "$BINARY_VERSION" --platform darwin
@@ -77,7 +76,6 @@ Yarn 1 forwards extra args to the script; an explicit `--` before flags also wor
 
 | Variable | Effect |
 |----------|--------|
-| `V8_SNAPSHOT_DISABLE_MINIFY=1` | Faster packaging (less minification work). |
 | `RESET_ADHOC_SIGNATURE=1` | **Apple Silicon (M1+)** — often required to run the packaged binary locally after an ad-hoc sign. |
 | `SKIP_NOTARIZATION=1` | Skip macOS notarization for local builds. |
 

@@ -17,7 +17,7 @@ function toLiteral (value: boolean | number | string) {
   return typeof value === 'string' ? `'${value.replace(/[\\']/g, '\\$&').replace(/\n/g, '\\n').replace(/\r/g, '\\r')}'` : stringify(value)
 }
 
-export async function insertValuesInConfigFile (file: string, obj: {}, errors: ErrorObj) {
+export async function insertValuesInConfigFile (file: string, obj: Record<string, any>, errors: ErrorObj) {
   const fileContents = await fs.readFile(file, { encoding: 'utf8' })
 
   const transformedFileContents = await insertValueInJSString(fileContents, obj, errors)
@@ -204,7 +204,7 @@ function setSubKeysSplicers (
 
   const keysToUpdateWithObjects: string[] = []
 
-  const objSubkeys = Object.keys(obj).filter((key) => typeof obj[key] === 'object').reduce((acc: Array<{parent: string, subkey: string}>, key) => {
+  const objSubkeys = Object.keys(obj).filter((key) => typeof obj[key] === 'object').reduce((acc: Array<{ parent: string, subkey: string }>, key) => {
     keysToUpdateWithObjects.push(key)
     Object.entries(obj[key]).forEach(([subkey, value]) => {
       if (['boolean', 'number', 'string'].includes(typeof value)) {
@@ -298,7 +298,7 @@ function isUndefinedOrNull (value: NodePath['node']): value is namedTypes.Identi
   return value.type === 'Identifier' && ['undefined', 'null'].includes(value.name)
 }
 
-interface Splicer{
+interface Splicer {
   start: number
   end: number
   replaceString: string

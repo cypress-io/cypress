@@ -25,10 +25,11 @@
             v-if="helpLinkHref"
             class="ml-[4px]"
           >
+            <!-- Interpolated text drops the whitespace that static text would keep inside the link -->
             <ExternalLink
               :href="helpLink"
             >
-              {{ t('links.learnMoreButton') }}
+              {{ 'Learn more' }}
               <span class="sr-only">
                 {{ helpLinkSrText }}
               </span>
@@ -50,12 +51,9 @@
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
-import { useI18n } from '@packages/frontend-shared/src/locales/i18n'
 
 import { DEBUG_TAB_MEDIUM } from '../utils/constants'
 import type { Component } from 'vue'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   title: string

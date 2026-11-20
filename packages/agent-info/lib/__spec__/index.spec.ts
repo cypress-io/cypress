@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { detectAgent, isAgent } from '..'
+import { detectAgent, isAgent, isAgentMode } from '..'
 
 describe('lib/agent-info', () => {
   afterEach(() => {
@@ -122,5 +122,31 @@ describe('lib/agent-info', () => {
 
     expect(detectAgent()).toBe('claude')
     expect(isAgent()).toBe(true)
+  })
+
+  describe('isAgentMode', () => {
+    it('follows detection when the override is not set', () => {
+      expect(isAgentMode({})).toBe(false)
+      expect(isAgentMode({ CLAUDECODE: '1' })).toBe(true)
+    })
+
+    it.each(['1', 'true', 'TRUE', ' true '])('is forced on by CYPRESS_AGENT_MODE=%j, with no agent detected', (value) => {
+      expect(isAgentMode({ CYPRESS_AGENT_MODE: value })).toBe(true)
+    })
+
+    it.each(['0', 'false', 'FALSE'])('is forced off by CYPRESS_AGENT_MODE=%j, even when an agent is detected', (value) => {
+      expect(isAgentMode({ CYPRESS_AGENT_MODE: value, CLAUDECODE: '1' })).toBe(false)
+    })
+
+    it.each(['', 'yes', 'auto'])('defers to detection for the unrecognised value %j', (value) => {
+      expect(isAgentMode({ CYPRESS_AGENT_MODE: value })).toBe(false)
+      expect(isAgentMode({ CYPRESS_AGENT_MODE: value, CLAUDECODE: '1' })).toBe(true)
+    })
+
+    it('reads process.env by default', () => {
+      vi.stubEnv('CYPRESS_AGENT_MODE', '1')
+
+      expect(isAgentMode()).toBe(true)
+    })
   })
 })

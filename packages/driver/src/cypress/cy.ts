@@ -1,4 +1,3 @@
-/* eslint-disable prefer-rest-params */
 import _ from 'lodash'
 import Promise from 'bluebird'
 import debugFn from 'debug'
@@ -153,15 +152,15 @@ const ensureRunnable = (cy, cmd) => {
   }
 }
 
-interface ICyFocused extends Omit<
+type ICyFocused = Omit<
   IFocused,
   'documentHasFocus' | 'interceptFocus' | 'interceptBlur'
-> { }
+>
 
-interface ICySnapshots extends Omit<
+type ICySnapshots = Omit<
   ISnapshots,
   'onCssModified' | 'onBeforeWindowLoad'
-> { }
+>
 
 // How many times each runnable has started. Hooks are reused across tests and retries,
 // so this tells a completion from an earlier run apart from one for the current run.
@@ -179,6 +178,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     keyboard: Keyboard
     mouse: Mouse
   }
+
   queue: CommandQueue
 
   timeout: ITimeouts['timeout']
@@ -231,8 +231,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
   private testConfigOverride: TestConfigOverride
-  private commandFns: Record<string, Function> = {}
-  private queryFns: Record<string, Function> = {}
+  private commandFns: Record<string, (...args: any[]) => any> = {}
+  private queryFns: Record<string, (...args: any[]) => any> = {}
 
   constructor (specWindow: SpecWindow, Cypress: ICypress, Cookies: ICookies, state: StateFunc, config: ICypress['config']) {
     super()
@@ -245,9 +245,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.config = config
     this.Cypress = Cypress
     this.Cookies = Cookies
-    // TODO: this should be awaited
-    /* tslint:disable:no-floating-promises */
-    initVideoRecorder(Cypress)
+    // The constructor can't wait on recording, and initVideoRecorder swallows its own errors
+    void initVideoRecorder(Cypress)
 
     this.testConfigOverride = new TestConfigOverride()
 
@@ -433,11 +432,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // store the error on state now
     this.state('error', err)
 
-    const cy = this
-
-    const finish = function (err) {
+    const finish = (err) => {
       // if the test has a (done) callback, we fail the test with that
-      const d = cy.state('done')
+      const d = this.state('done')
 
       if (d) {
         return d(err)
@@ -446,7 +443,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // if this failure was asynchronously called (outside the promise chain)
       // but the promise chain is still active, reject it. if we're inside
       // the promise chain, this isn't necessary and will actually mess it up
-      const r = cy.state('reject')
+      const r = this.state('reject')
 
       if (options.async && r) {
         return r(err)
@@ -538,6 +535,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         try {
           // Test to see if we can communicate with the AUT.
+          // eslint-disable-next-line chai-friendly/no-unused-expressions -- reading href throws when the AUT is cross-origin
           autWindow.location.href
           isRunnerAbleToCommunicateWithAUT = true
         } catch (err: any) {
@@ -691,6 +689,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addCommandSync (name, fn) {
+    // normalizedUserInvocationStack drops this wrapper's frame from user stacks by
+    // the name the browser infers from `cy[name] = function`, so keep that shape
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- see above
     const cy = this
 
     cy[name] = function () {
@@ -703,6 +704,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addCommand ({ name, fn, type, prevSubject }) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- the user-stack filter matches `cy[name]`, see addCommandSync
     const cy = this
 
     this.commandFns[name] = fn
@@ -756,13 +758,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     cy[name] = function (...args) {
       ensureRunnable(cy, name)
 
-      // for privileged commands, we send a message to the server that verifies
-      // them as coming from the spec. the fulfillment of this promise means
-      // the message was received. the implementation for those commands
-      // checks to make sure this promise is fulfilled before sending its
-      // websocket message for running the command to ensure prevent a race
-      // condition where running the command happens before the command is
-      // verified
+      // for privileged commands invoked from the spec, the privileged channel
+      // returns a function the command calls with its options to verify them
+      // with the server before sending its websocket message to run them
       const privilegeVerification = Cypress.emitMap('command:invocation', { name, args })
 
       // this is the first call on cypress
@@ -819,6 +817,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   addQuery ({ name, fn }) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- the user-stack filter matches `cy[name]`, see addCommandSync
     const cy = this
 
     this.queryFns[name] = fn
@@ -863,13 +862,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     cy[name] = function (...args) {
       ensureRunnable(cy, name)
 
-      // for privileged commands, we send a message to the server that verifies
-      // them as coming from the spec. the fulfillment of this promise means
-      // the message was received. the implementation for those commands
-      // checks to make sure this promise is fulfilled before sending its
-      // websocket message for running the command to ensure prevent a race
-      // condition where running the command happens before the command is
-      // verified
+      // for privileged commands invoked from the spec, the privileged channel
+      // returns a function the command calls with its options to verify them
+      // with the server before sending its websocket message to run them
       const privilegeVerification = Cypress.emitMap('command:invocation', { name, args })
 
       // this is the first call on cypress
@@ -998,6 +993,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // completion of the new run and fail it, so those are dropped.
     const isStaleRun = () => runnableRuns.get(runnable) !== run
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- runnable.fn forwards its own `this` and `arguments` to the user's test function
     const cy = this
 
     runnable.fn = function () {
@@ -1154,14 +1150,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   private contentWindowListeners (contentWindow) {
-    const cy = this
-
     bindToListeners(contentWindow, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
         const { originalErr, err, promise } = $errUtils.errorFromUncaughtEvent(handlerType, event) as ErrorFromProjectRejectionEvent
 
-        const handled = cy.onUncaughtException({
+        const handled = this.onUncaughtException({
           err,
           promise,
           handlerType,
@@ -1170,49 +1164,49 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         debugErrors('uncaught AUT error: %o', originalErr)
 
-        $errUtils.logError(cy.Cypress, handlerType, originalErr, handled)
+        $errUtils.logError(this.Cypress, handlerType, originalErr, handled)
 
         // return undefined so the browser does its default
         // uncaught exception behavior (logging to console)
         return undefined
       },
-      onHistoryNav (delta) {
-        cy.state('navHistoryDelta', delta)
+      onHistoryNav: (delta) => {
+        this.state('navHistoryDelta', delta)
       },
-      onSubmit (e) {
-        return cy.Cypress.action('app:form:submitted', e)
+      onSubmit: (e) => {
+        return this.Cypress.action('app:form:submitted', e)
       },
-      onLoad () { },
-      onBeforeUnload (e) {
-        cy.isStable(false, 'beforeunload')
+      onLoad: () => { },
+      onBeforeUnload: (e) => {
+        this.isStable(false, 'beforeunload')
 
-        cy.Cookies.setInitial()
+        this.Cookies.setInitial()
 
-        cy.resetTimer()
+        this.resetTimer()
 
-        cy.Cypress.action('app:window:before:unload', e)
+        this.Cypress.action('app:window:before:unload', e)
 
         // return undefined so our beforeunload handler
         // doesn't trigger a confirmation dialog
         return undefined
       },
-      onUnload (e) {
-        return cy.Cypress.action('app:window:unload', e)
+      onUnload: (e) => {
+        return this.Cypress.action('app:window:unload', e)
       },
-      onNavigation (...args) {
-        return cy.Cypress.action('app:navigation:changed', ...args)
+      onNavigation: (...args) => {
+        return this.Cypress.action('app:navigation:changed', ...args)
       },
-      onAlert (str) {
-        return cy.Cypress.action('app:window:alert', str)
+      onAlert: (str) => {
+        return this.Cypress.action('app:window:alert', str)
       },
-      onConfirm (str) {
-        const results = cy.Cypress.action('app:window:confirm', str)
+      onConfirm: (str) => {
+        const results = this.Cypress.action('app:window:confirm', str)
 
         // return false if ANY results are false
         // else true
         const ret = !_.some(results, returnedFalse)
 
-        cy.Cypress.action('app:window:confirmed', str, ret)
+        this.Cypress.action('app:window:confirmed', str, ret)
 
         return ret
       },
@@ -1234,7 +1228,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
         args: {
           cmd: name,
-          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+          args: _.isString(args[0]) ? `"${stringifiedArg}"` : stringifiedArg,
         },
       })
     }
@@ -1248,7 +1242,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // make sure our current subject is valid for
       // what we expect in this command
 
-      // @ts-ignore
+      // @ts-expect-error - ensure.isType expects a Chainable, not the $Cy instance
       Cypress.ensure.isType(subject, prevSubject as any, this.state('current').get('name'), this)
     }
 

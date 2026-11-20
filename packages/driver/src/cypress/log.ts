@@ -278,39 +278,54 @@ export const LogUtils = {
 
   toSerializedJSON (attrs) {
     const { isDom } = $dom
+    // Every object seen during this call, not just the ancestors of the current
+    // value: re-walking an object on each path that reaches it is exponential
+    // in densely linked graphs. So any later reference, cyclic or not, is `null`.
+    const seen = new WeakSet<object>()
 
     const stringify = function (value, key) {
       if (BLACKLIST_PROPS.includes(key)) {
         return null
       }
 
-      if (_.isArray(value)) {
-        return _.map(value, stringify)
-      }
+      // Anything that throws, such as a getter or a revoked Proxy, becomes `null`
+      try {
+        if (isDom(value)) {
+          return $dom.stringify(value, 'short')
+        }
 
-      if (isDom(value)) {
-        return $dom.stringify(value, 'short')
-      }
+        if (_.isFunction(value) && groupsOrTableRe.test(key)) {
+          // Under another key, so a function that `groups` or `table` returns is not called in turn
+          return stringify(value(), '')
+        }
 
-      if (_.isFunction(value) && groupsOrTableRe.test(key)) {
-        return value()
-      }
+        if (_.isFunction(value) || _.isSymbol(value)) {
+          return value.toString()
+        }
 
-      if (_.isFunction(value) || _.isSymbol(value)) {
-        return value.toString()
-      }
+        if (!_.isObject(value)) {
+          return value
+        }
 
-      if (_.isObject(value)) {
-        // clone to nuke circular references
-        // and blow away anything that throws
-        try {
-          return _.mapValues(clone(value), stringify)
-        } catch (err) {
+        if (seen.has(value)) {
           return null
         }
-      }
 
-      return value
+        seen.add(value)
+
+        // `clone` copies a promise by subscribing to it, so a rejected one would
+        // reject its copy too, with nothing to handle it
+        if (value instanceof Promise) {
+          return {}
+        }
+
+        // A shallow clone picks which properties to keep (it skips getter-only
+        // ones on the prototype, which throw on objects like XMLHttpRequest) but
+        // leaves the children as the originals, so the check above sees them.
+        return _.isArray(value) ? _.map(value, stringify) : _.mapValues(clone(value, false, 1), stringify)
+      } catch (err) {
+        return null
+      }
     }
 
     return _.mapValues(attrs, stringify)
@@ -348,7 +363,7 @@ export const LogUtils = {
     return _
     .chain(tests)
     .flatMap((test) => test.prevAttempts ? [test, ...test.prevAttempts] : [test])
-    .flatMap<{id: string}>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
+    .flatMap<{ id: string }>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
     .compact()
     .union([{ id: '0' }])
     // id is a string in the form of 'log-origin-#', grab the number off the end.
@@ -800,28 +815,31 @@ export class Log {
   }
 
   wrapConsoleProps () {
-    const _this = this
+    // the wrapper passes its own `this` on to the original consoleProps, so it
+    // reads this log through these arrows
+    const get = (attr: string) => this.get(attr)
+    const getError = (err) => this.getError(err)
 
     const { consoleProps } = this.attributes
 
     this.attributes.consoleProps = function (...invokedArgs) {
       const consoleObj: Record<string, any> = {
-        name: _this.get('name'),
-        type: _this.get('event') ? 'event' : 'command',
+        name: get('name'),
+        type: get('event') ? 'event' : 'command',
       }
 
       // TODO: right here we need to automatically
       // merge in "Yielded + Element" if there is an $el
 
       // and finally add error if one exists
-      if (_this.get('error')) {
+      if (get('error')) {
         _.defaults(consoleObj, {
-          error: _this.getError(_this.get('error')),
+          error: getError(get('error')),
         })
       }
 
       // add note if no snapshot exists on command instruments
-      if ((_this.get('instrument') === 'command') && _this.get('snapshot') && !_this.get('snapshots')) {
+      if ((get('instrument') === 'command') && get('snapshot') && !get('snapshots')) {
         consoleObj.snapshot = 'The snapshot is missing. Displaying current state of the DOM.'
       } else {
         delete consoleObj.snapshot

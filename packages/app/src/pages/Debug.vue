@@ -37,7 +37,7 @@ subscription Debug_specsChange {
 }
 `
 
-gql `
+gql`
 query Debug($runNumber: Int!, $commitShas: [String!]!) {
   ...DebugSpecs
 }

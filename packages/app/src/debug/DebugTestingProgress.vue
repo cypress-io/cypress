@@ -9,13 +9,13 @@
         class="font-medium"
       >
         <span v-if="timeRemaining">
-          {{ t('debugPage.pending.scheduledTime', {time: timeRemaining}) }}
+          Scheduled to complete in {{ timeRemaining }}
         </span>
         <span v-else-if="scheduledCompletionExpired">
-          {{ t('debugPage.pending.scheduledCompletionExpired') }}
+          Scheduled to complete soon
         </span>
         <span v-else>
-          {{ t('debugPage.pending.title') }}
+          Testing in progress...
         </span>
       </div>
       <div class="font-normal before-dot">
@@ -36,7 +36,6 @@
 
 <script setup lang="ts">
 import { gql } from '@urql/core'
-import { useI18n } from 'vue-i18n'
 import DebugPendingRunCounts from './DebugPendingRunCounts.vue'
 import { DebugTestingProgress_SpecsDocument } from '../generated/graphql'
 import { computed, ref, watch } from 'vue'
@@ -53,8 +52,6 @@ subscription DebugTestingProgress_Specs($id: ID!) {
   }
 }
 `
-
-const { t } = useI18n()
 
 const props = defineProps<{
   runId: string

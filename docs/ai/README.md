@@ -40,7 +40,6 @@ cli/svelte/CLAUDE.md
 cli/vue/CLAUDE.md
 npm/CLAUDE.md                                ← npm workspace
 npm/angular/CLAUDE.md
-npm/eslint-plugin-dev/CLAUDE.md
 npm/grep/CLAUDE.md
 npm/mount-utils/CLAUDE.md
 npm/puppeteer/CLAUDE.md
@@ -70,7 +69,6 @@ packages/launchpad/CLAUDE.md
 packages/net-stubbing/CLAUDE.md
 packages/network/CLAUDE.md
 packages/network-tools/CLAUDE.md
-packages/packherd-require/CLAUDE.md
 packages/proxy/CLAUDE.md
 packages/reporter/CLAUDE.md
 packages/resolve-dist/CLAUDE.md
@@ -83,12 +81,7 @@ packages/stderr-filtering/CLAUDE.md
 packages/telemetry/CLAUDE.md
 packages/ts/CLAUDE.md
 packages/types/CLAUDE.md
-packages/v8-snapshot-require/CLAUDE.md
 packages/web-config/CLAUDE.md
-tooling/CLAUDE.md                            ← tooling workspace
-tooling/electron-mksnapshot/CLAUDE.md
-tooling/packherd/CLAUDE.md
-tooling/v8-snapshot/CLAUDE.md
 system-tests/CLAUDE.md
 scripts/CLAUDE.md
 ```
