@@ -196,6 +196,41 @@ describe('DataContext open mode error output', () => {
       await new Promise((resolve) => setImmediate(resolve))
     })
 
+    describe('a plugins process that exited after the session started', () => {
+      const pluginsRecorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionPluginsError as jest.Mock
+
+      it('is recorded apart from the load errors, without color codes', () => {
+        const projectCtx = openProject('/projects/foo')
+        const error = getError('CONFIG_PROCESS_EXITED_UNEXPECTEDLY', 1, null, 'e2e')
+
+        error.details = '\u001b[31msegfault\u001b[39m'
+
+        projectCtx.reportPluginsError(error)
+
+        const [message] = pluginsRecorded(projectCtx).mock.calls[0] as [string]
+
+        expect(message).toContain('segfault')
+        expect(message).not.toContain('\u001b')
+        expect(recorded(projectCtx)).not.toHaveBeenCalled()
+      })
+
+      it('is withdrawn when the configuration loads again', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.clearPluginsError()
+
+        expect(pluginsRecorded(projectCtx)).toHaveBeenLastCalledWith(null)
+      })
+
+      it('is not recorded in run mode', () => {
+        const runCtx = createTestDataContext('run')
+
+        runCtx.reportPluginsError(requireError('boom'))
+
+        expect(pluginsRecorded(runCtx)).not.toHaveBeenCalled()
+      })
+    })
+
     describe('withdrawing the record', () => {
       const cleared = (projectCtx: DataContext) => projectCtx._apis.projectApi.clearSessionLoadError as jest.Mock
 

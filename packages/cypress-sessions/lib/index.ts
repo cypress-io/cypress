@@ -59,6 +59,12 @@ export interface LiveSessionState extends CypressSession {
   machineId: string | null
   /** Cloud user id of the logged-in user, or `null` when logged out or not yet resolved. */
   userId: string | null
+  /**
+   * Why the plugins process exited after the session started. The project stays loaded and
+   * the browser stays drivable, so unlike `loadError` it does not stop tap commands, but
+   * `setupNodeEvents`, `cy.task` and the preprocessor are gone until the configuration loads again.
+   */
+  pluginsError?: { message: string }
 }
 
 export interface ReadySessionState extends LiveSessionState {

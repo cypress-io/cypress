@@ -92,6 +92,7 @@ const reportStatus = async (options: TapCliOptions): Promise<number> => {
     testingType: session.testingType,
     browserAttached,
     browserName: session.browserName,
+    ...(session.pluginsError ? { pluginsError: session.pluginsError.message } : {}),
   }
 
   if (!browserAttached) {

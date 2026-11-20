@@ -206,6 +206,22 @@ describe('lib/cypress-sessions', () => {
       expect(await verifySessionRecord(recordFor(olderPort))).not.toHaveProperty('loadError')
     })
 
+    it('carries the plugins error of a session whose plugins process exited after it started', async () => {
+      const port = await startFakeSession({ respondWith: { sessionId: SESSION_ID, pluginsError: { message: 'The plugins process exited unexpectedly' } } })
+      const live = await verifySessionRecord(recordFor(port))
+
+      expect(live!.pluginsError).toEqual({ message: 'The plugins process exited unexpectedly' })
+      expect(live).not.toHaveProperty('loadError')
+    })
+
+    it('drops a plugins error with no message, or one an older session omits', async () => {
+      const junkPort = await startFakeSession({ respondWith: { sessionId: SESSION_ID, pluginsError: { message: 42 } } })
+      const olderPort = await startFakeSession({ respondWith: { sessionId: SESSION_ID } })
+
+      expect(await verifySessionRecord(recordFor(junkPort))).not.toHaveProperty('pluginsError')
+      expect(await verifySessionRecord(recordFor(olderPort))).not.toHaveProperty('pluginsError')
+    })
+
     it('keeps the browser the session has open even when the CDP endpoint is unreachable', async () => {
       const deadCdpPort = await getClosedPort()
       const port = await startFakeSession({ respondWith: { sessionId: SESSION_ID, cdpBrowserWsUrl: `ws://127.0.0.1:${deadCdpPort}/devtools/browser/abc`, browserName: 'Chrome', browserFamily: 'chromium' } })

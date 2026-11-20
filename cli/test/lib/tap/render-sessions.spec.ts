@@ -34,6 +34,18 @@ describe('lib/tap/render/sessions', () => {
     ].join('\n'))
   })
 
+  it('marks a session whose plugins process stopped after it started', () => {
+    const output = render([
+      { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true, pluginsError: 'The plugins process exited unexpectedly' },
+    ])
+
+    expect(output).toBe([
+      'SESSIONS (1)',
+      '  PID  PROJECT                          TYPE  BROWSER',
+      '  111  /projects/app (plugins stopped)  e2e   Chrome',
+    ].join('\n'))
+  })
+
   // An attached browser whose page will not answer is the state every other
   // command fails in, so the row has to say so rather than read as healthy.
   it('marks an attached browser whose renderer is not answering', () => {

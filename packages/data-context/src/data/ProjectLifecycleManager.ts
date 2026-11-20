@@ -317,6 +317,7 @@ export class ProjectLifecycleManager {
         // to start keeps its error until the session replaces it, instead of `cypress tap status`
         // reporting nothing in between. A browser error is for choosing the browser to settle.
         this.ctx.clearLoadError(['config', 'setup'])
+        this.ctx.clearPluginsError()
 
         await this.setInitialActiveBrowser()
 

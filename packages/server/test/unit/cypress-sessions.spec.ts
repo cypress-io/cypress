@@ -227,6 +227,42 @@ describe('lib/cypress-sessions', () => {
     })
   })
 
+  describe('.setPluginsError', () => {
+    it('puts the error on the live state without touching the disk record or the load error', async () => {
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455, testingType: 'e2e' })
+
+      const onDiskBefore = await fs.readJson(recordPath)
+
+      cypressSessions.setPluginsError('The plugins process exited unexpectedly')
+
+      expect(cypressSessions.getCurrent()?.pluginsError).toEqual({ message: 'The plugins process exited unexpectedly' })
+      expect(cypressSessions.getCurrent()?.loadError).toBeUndefined()
+      expect(await fs.readJson(recordPath)).toStrictEqual(onDiskBefore)
+    })
+
+    it('is withdrawn with null', async () => {
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455, testingType: 'e2e' })
+      cypressSessions.setPluginsError('boom')
+      cypressSessions.setPluginsError(null)
+
+      expect(JSON.parse(JSON.stringify(cypressSessions.getCurrent()))).not.toHaveProperty('pluginsError')
+    })
+
+    it('does not carry over to the next session', async () => {
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455, testingType: 'e2e' })
+      cypressSessions.setPluginsError('boom')
+      await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4456, testingType: 'e2e' })
+
+      expect(cypressSessions.getCurrent()?.pluginsError).toBeUndefined()
+    })
+
+    it('is a no-op when no session is running', () => {
+      cypressSessions.setPluginsError('boom')
+
+      expect(cypressSessions.getCurrent()).toBeNull()
+    })
+  })
+
   describe('.setBrowser', () => {
     it('records the open browser without touching the disk record', async () => {
       await cypressSessions.addSession({ projectRoot: '/p', serverPort: 4455 })

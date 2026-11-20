@@ -288,7 +288,13 @@ tap command refuses it.
 
 A session whose project stopped loading, for example because its configuration
 file became invalid, is listed as "could not load", with the reason as
-\`loadError\` in the JSON. Every tap command but \`status\` refuses it.`,
+\`loadError\` in the JSON. Every tap command but \`status\` refuses it.
+
+A session whose plugins process stopped after the project loaded is listed as
+"plugins stopped", with the reason as \`pluginsError\` in the JSON. Other tap
+commands still work on it, but \`cy.task\`, \`setupNodeEvents\` and the spec
+preprocessor do not, so a spec that has to build stays loading. Save the
+configuration file to load it again, or stop Cypress and start it again.`,
 } as const satisfies TapNativeCommandSchema
 
 const statusMeta = {
@@ -325,7 +331,14 @@ From loading onwards the output carries \`startedAt\`, the spec every other fiel
 describes (null while loading). In the event of a rerun the previous spec's
 verdict remains visible until the new one begins, identical on every other
 field, so use \`startedAt\` to validate whether output describes the previous
-spec or the new one.`,
+spec or the new one.
+
+If the session's plugins process exits after the project loaded, every stage
+from browser not selected onwards also carries \`pluginsError\` with the reason.
+The session can still be driven, but \`cy.task\`, \`setupNodeEvents\` and the
+spec preprocessor do not work, so a spec that has to build stays loading. Save
+the configuration file to load it again, or stop Cypress and start it again;
+\`pluginsError\` is gone once the configuration has loaded.`,
 } as const satisfies TapNativeCommandSchema
 
 const specsMeta = {

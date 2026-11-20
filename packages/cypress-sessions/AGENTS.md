@@ -44,6 +44,11 @@ yarn workspace @packages/cypress-sessions test
   `cypress tap status` reports it until the configuration loads again. Cypress stops
   watching the configuration file after a load error, so that takes a person
   choosing Try again in the Cypress window, or a restart.
+- A running session whose plugins process exits after setup finished is not a load
+  error: the project is loaded and the browser can still be driven. The probe response
+  carries it as `pluginsError` instead, which no tap command refuses on, and
+  `cypress tap status` reports it beside the session's stage until the configuration
+  loads again.
 
 **Gotchas / Notes**
 

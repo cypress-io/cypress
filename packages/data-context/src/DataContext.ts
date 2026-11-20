@@ -384,6 +384,29 @@ export class DataContext {
     this.recordLoadErrorForTap()
   }
 
+  /**
+   * Records, for `cypress tap status`, that the plugins process exited after the session
+   * started. It is kept apart from the load errors because the project is still loaded and
+   * its browser still drivable, so tap keeps working, but anything that needs the process,
+   * such as `cy.task`, fails until the configuration loads again.
+   */
+  reportPluginsError (error: CypressError) {
+    if (!this.isOpenMode) {
+      return
+    }
+
+    this._apis.projectApi.setSessionPluginsError(stripVTControlCharacters(formatForOutput(error)))
+  }
+
+  /** Withdraws the record `reportPluginsError` made, once the configuration loads again and restarts the process */
+  clearPluginsError () {
+    if (!this.isOpenMode) {
+      return
+    }
+
+    this._apis.projectApi.setSessionPluginsError(null)
+  }
+
   onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {
     if (this.isRunMode) {
       if (this.lifecycleManager?.runModeExitEarly) {

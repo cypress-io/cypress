@@ -59,7 +59,7 @@ export const verifySessionRecord = async (record: CypressSession, timeoutMs: num
 
     // Safe because every field is read through a type check below, so a response of another
     // shape, such as one from an older session, only drops the fields it lacks
-    const live = await response.json() as { sessionId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown, loadError?: unknown }
+    const live = await response.json() as { sessionId?: unknown, cdpBrowserWsUrl?: unknown, browserName?: unknown, browserFamily?: unknown, machineId?: unknown, userId?: unknown, loadError?: unknown, pluginsError?: unknown }
 
     if (live.sessionId !== record.sessionId) {
       return null
@@ -79,6 +79,7 @@ export const verifySessionRecord = async (record: CypressSession, timeoutMs: num
       userId: typeof live.userId === 'string' ? live.userId : null,
       // A running session's record never carries one, so the probe is the only place it shows up
       ...(isLoadError(live.loadError) ? { loadError: { message: live.loadError.message } } : {}),
+      ...(isLoadError(live.pluginsError) ? { pluginsError: { message: live.pluginsError.message } } : {}),
     }
   } catch (err) {
     debug('liveness probe failed for pid %d on port %d: %o', record.pid, record.serverPort, err)

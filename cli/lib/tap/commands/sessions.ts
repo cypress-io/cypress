@@ -31,6 +31,12 @@ export interface TapSessionSummary {
    */
   loadError?: string
   /**
+   * Why the session's plugins process exited after it started, when it did. The session can still
+   * be driven, but `cy.task`, `setupNodeEvents` and the spec preprocessor do not work until the
+   * configuration loads again.
+   */
+  pluginsError?: string
+  /**
    * Whether the runner page answered. `browserAttached` only says the browser
    * process is reachable, so this is what separates a healthy session from one
    * whose page is wedged — the state in which every other command fails. Absent
@@ -77,6 +83,7 @@ const listSessions = async (options: TapCliOptions): Promise<number> => {
       browserName: session.browserName,
       browserSupported: isTapSupportedBrowser(session.browserFamily),
       ...(session.loadError ? { loadError: session.loadError.message } : {}),
+      ...(session.pluginsError ? { pluginsError: session.pluginsError.message } : {}),
       ...(responsive[index] === undefined ? {} : { rendererResponsive: responsive[index] }),
     }
   })

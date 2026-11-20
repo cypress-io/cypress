@@ -124,6 +124,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       clearSessionLoadError () {
         return cypressSessions.clearLoadError()
       },
+      setSessionPluginsError (message) {
+        cypressSessions.setPluginsError(message)
+      },
       async launchProject (browser: FoundBrowser, spec: Cypress.Spec, options: OpenProjectLaunchOpts) {
         await openProject.launch({ ...browser }, spec, options)
       },

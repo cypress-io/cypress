@@ -79,6 +79,11 @@ export interface TapStatus {
   results?: { passed: number, failed: number, pending: number, skipped: number }
   /** Why the spec could not run, when it failed to build or threw while loading, or why the project could not load, when the status is `error`. */
   error?: string
+  /**
+   * Why the session's plugins process exited after it started. The session can still be driven,
+   * but `setupNodeEvents`, `cy.task` and the preprocessor are unavailable until the configuration loads again.
+   */
+  pluginsError?: string
   /** The currently pinned command, if any. */
   pinned?: PinnedView
 }

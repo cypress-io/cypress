@@ -31,6 +31,11 @@ export interface ProjectApiShape {
   setSessionLoadError(args: { projectRoot: string, testingType: Cypress.TestingType | null, loadError: string }): Promise<void>
   clearSessionLoadError(): Promise<void>
   /**
+   * Records, for `cypress tap`, that the plugins process of a running session exited, or
+   * withdraws that record with `null`.
+   */
+  setSessionPluginsError(message: string | null): void
+  /**
    * "Initializes" the given mode, since plugins can define the browsers available
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup

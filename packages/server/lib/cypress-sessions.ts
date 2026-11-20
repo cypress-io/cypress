@@ -122,6 +122,19 @@ export const cypressSessions = {
     }
   },
 
+  /**
+   * Records, on the live state, that the plugins process exited after the session started,
+   * or withdraws that record with `null` once the configuration has loaded again
+   */
+  setPluginsError (message: string | null): void {
+    if (!currentState) {
+      return
+    }
+
+    currentState = { ...currentState, pluginsError: message === null ? undefined : { message } }
+    debug('running cypress session %s a plugins error', message === null ? 'no longer has' : 'has')
+  },
+
   async addSession ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
     const record: CypressSession = {
       schemaVersion: SCHEMA_VERSION,
