@@ -45,6 +45,7 @@
 - In Firefox, error stack traces in the Command Log and in `cypress run` output no longer end the names of nested anonymous functions with a stray `/` or `/</`. For example, a test's callback now shows as `at ./cypress/spec.cy.js` instead of `at ./cypress/spec.cy.js/`. A frame with no name to show now reads `at <unknown>` instead of being blank. Fixed in [#35462](https://github.com/cypress-io/cypress/pull/35462).
 - Requests from your application no longer carry Cypress's internal `__cypress.initial` and `__cypress.unload` cookies to your server or to [`cy.intercept()`](https://on.cypress.io/intercept) request handlers. For example, a request with no cookies of its own could arrive with `Cookie: __cypress.unload=true`, and now arrives without a `Cookie` header. Fixed in [#35470](https://github.com/cypress-io/cypress/pull/35470).
 - Fixed an issue where run mode durations of 24 hours or more dropped the whole days, so a run that took exactly 24 hours was reported as `0ms` and a run of 26 hours as `2:00:00`. Fixes [#34976](https://github.com/cypress-io/cypress/issues/34976).
+- Fixed an issue where [`.select()`](https://on.cypress.io/select) changed a `<select>` element that had been removed from the page instead of the one that replaced it. Fixes [#25754](https://github.com/cypress-io/cypress/issues/25754). Fixed in [#35145](https://github.com/cypress-io/cypress/pull/35145).
 
 **Misc:**
 
