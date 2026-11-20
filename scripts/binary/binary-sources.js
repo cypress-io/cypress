@@ -1,4 +1,57 @@
 const fs = require('fs-extra')
+const glob = require('glob')
+const path = require('path')
+
+const LOCAL_OVERRIDE_VARIABLES = ['CYPRESS_LOCAL_PROTOCOL_PATH', 'CYPRESS_LOCAL_STUDIO_PATH', 'CYPRESS_LOCAL_CY_PROMPT_PATH']
+// V8 keeps the source of these large scripts in memory, as two bytes per character if any character is above U+00FF
+const ONE_BYTE_SOURCES = ['start-cypress.bundle.js', 'index.js']
+const NON_LATIN1 = /[^\0-\xff]/
+
+const getTestEncryptionKey = async () => {
+  const encryptionSource = await fs.readFile(path.join(__dirname, '../../packages/server/lib/cloud/encryption.ts'), 'utf8')
+  const testKey = encryptionSource.match(/const CY_TEST = `(.*?)`/)?.[1]
+
+  if (!testKey) {
+    throw new Error(`Expected to find the test key in cloud encryption.ts`)
+  }
+
+  return testKey
+}
+
+// Checks the bundles and every other file the binary ships under packages/server, so a new read of a local override
+// that is missing from the rewrites, or a dependency change that makes a bundle two-byte, fails the build
+const validateShippedServerCode = async (serverDir, testKey) => {
+  testKey ??= await getTestEncryptionKey()
+
+  const files = glob.sync('**/*.{js,cjs}', { cwd: serverDir, ignore: ['node_modules/**'], nodir: true })
+  const problems = []
+
+  await Promise.all(files.map(async (file) => {
+    const contents = await fs.readFile(path.join(serverDir, file), 'utf8')
+
+    for (const variable of LOCAL_OVERRIDE_VARIABLES) {
+      if (contents.includes(variable)) {
+        problems.push(`${file} reads ${variable}`)
+      }
+    }
+
+    if (contents.includes(testKey)) {
+      problems.push(`${file} contains the test encryption key`)
+    }
+
+    const nonLatin1 = ONE_BYTE_SOURCES.includes(file) && contents.match(NON_LATIN1)
+
+    if (nonLatin1) {
+      const codePoint = `U+${nonLatin1[0].charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`
+
+      problems.push(`${file} contains ${codePoint}, so V8 stores it as two-byte: ...${contents.slice(Math.max(0, nonLatin1.index - 60), nonLatin1.index + 20)}...`)
+    }
+  }))
+
+  if (problems.length) {
+    throw new Error(`The binary's server code failed validation:\n${problems.sort().join('\n')}`)
+  }
+}
 
 const getEncryptionFileSource = async (encryptionFilePath) => {
   const fileContents = await fs.readFile(encryptionFilePath, 'utf8')
@@ -107,4 +160,5 @@ module.exports = {
   validateStudioFile,
   getCyPromptFileSource,
   validateCyPromptFile,
+  validateShippedServerCode,
 }

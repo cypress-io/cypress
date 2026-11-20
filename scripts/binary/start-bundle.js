@@ -135,6 +135,7 @@ const createStartCypressBundle = async (buildAppDir) => {
     minify: true,
     // error stacks and code that reads `constructor.name` need the original names
     keepNames: true,
+    legalComments: 'external',
     external: ['electron'],
     banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
     plugins: [
@@ -168,6 +169,9 @@ const createServerEntryPointBundle = async (buildAppDir) => {
       platform: 'node',
       metafile: true,
       absWorkingDir: unixBuildAppDir,
+      minify: true,
+      keepNames: true,
+      legalComments: 'external',
       external: [
         './transpile-ts',
         './start-cypress',
@@ -176,6 +180,10 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     })
 
     await fs.copy(path.join(outdir, 'index.js'), entryPoint)
+
+    for (const legalFile of (await fs.readdir(outdir)).filter((file) => file.endsWith('.LEGAL.txt'))) {
+      await fs.copy(path.join(outdir, legalFile), path.join(path.dirname(entryPoint), legalFile))
+    }
 
     return Object.keys(esbuildResult.metafile.inputs).filter((input) => input !== 'packages/server/index.js').map((input) => `./${input}`)
   } finally {
@@ -195,7 +203,8 @@ const createStartBundleCodeCache = async () => {
   const getAppEnv = () => {
     const env = { ...process.env, CYPRESS_INTERNAL_WRITE_START_BUNDLE_CACHE: '1' }
 
-    // V8 rejects a code cache made under different flags, so NODE_OPTIONS must not leak into the app
+    // only for this build-time run: the shipped cache is made without the build machine's NODE_OPTIONS,
+    // and the user's own NODE_OPTIONS still apply when they run Cypress
     delete env.NODE_OPTIONS
     delete env.ELECTRON_RUN_AS_NODE
 
