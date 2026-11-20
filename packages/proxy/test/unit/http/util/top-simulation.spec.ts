@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { HttpMiddlewareThis } from '../../../../lib/http'
-import { doesTopNeedToBeSimulated } from '../../../../lib/http/util/top-simulation'
+import { doesBrowserSendAllCookies, doesTopNeedToBeSimulated } from '../../../../lib/http/util/top-simulation'
 
 describe('.doesTopNeedToBeSimulated', () => {
   const autUrl = 'http://localhost:8080'
@@ -56,5 +56,61 @@ describe('.doesTopNeedToBeSimulated', () => {
     }
 
     expect(doesTopNeedToBeSimulated(mockCtx)).toBe(true)
+  })
+})
+
+describe('.doesBrowserSendAllCookies', () => {
+  const primaryUrl = 'http://localhost:8080/dashboard'
+  const crossOriginUrl = 'http://www.idp.com:8081/authorize'
+
+  const getCtx = ({ autUrl, requestUrl, isAUTFrame = true, secFetchSite = 'same-origin', browserFamily = 'firefox' }: { autUrl?: string, requestUrl: string, isAUTFrame?: boolean, secFetchSite?: string, browserFamily?: string }): HttpMiddlewareThis<any> => {
+    return {
+      getAUTUrl: vi.fn().mockReturnValue(autUrl),
+      getCurrentBrowser: vi.fn().mockReturnValue(browserFamily ? { family: browserFamily } : undefined),
+      req: {
+        isAUTFrame,
+        proxiedUrl: requestUrl,
+        headers: secFetchSite ? { 'sec-fetch-site': secFetchSite } : {},
+      },
+      remoteStates: {
+        isPrimarySuperDomainOrigin: vi.fn((url: string) => url.startsWith('http://localhost:8080')),
+      },
+    }
+  }
+
+  it.each(['same-origin', 'same-site'])('returns true when the AUT frame navigates within the primary origin and sec-fetch-site is %s', (secFetchSite) => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/settings', secFetchSite }))).toBe(true)
+  })
+
+  it.each(['cross-site', 'none', 'same-origin, cross-site'])('returns false when sec-fetch-site is %s', (secFetchSite) => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/callback', secFetchSite }))).toBe(false)
+  })
+
+  it('returns false when a browser other than Chromium does not send sec-fetch-site', () => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/settings', secFetchSite: '' }))).toBe(false)
+  })
+
+  it('returns false when there is no current browser and no sec-fetch-site', () => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/settings', secFetchSite: '', browserFamily: '' }))).toBe(false)
+  })
+
+  it.each(['', 'cross-site'])('returns true in a Chromium browser when sec-fetch-site is "%s"', (secFetchSite) => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/callback', secFetchSite, browserFamily: 'chromium' }))).toBe(true)
+  })
+
+  it('returns false when the AUT frame navigates to another origin', () => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: crossOriginUrl }))).toBe(false)
+  })
+
+  it('returns false when the AUT frame navigates back to the primary origin from another origin', () => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: crossOriginUrl, requestUrl: primaryUrl }))).toBe(false)
+  })
+
+  it('returns false when the request is not from the AUT frame', () => {
+    expect(doesBrowserSendAllCookies(getCtx({ autUrl: primaryUrl, requestUrl: 'http://localhost:8080/api/users', isAUTFrame: false }))).toBe(false)
+  })
+
+  it('returns false when the AUT Url is not defined', () => {
+    expect(doesBrowserSendAllCookies(getCtx({ requestUrl: primaryUrl }))).toBe(false)
   })
 })

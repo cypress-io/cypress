@@ -1,12 +1,13 @@
-import { baseConfig, compatConfig, frontendOverrides, graphqlConfig, jsonConfig, vueTsxOverrides } from '@packages/eslint-config'
+import { baseConfig, compatConfig, frontendOverrides, graphqlConfig, jsonConfig, mochaConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
   ...compatConfig,
-  ...vueTsxOverrides,
   ...frontendOverrides,
   ...graphqlConfig(),
+  // The component specs' `specPattern` also takes in `*.spec.*` files
+  ...mochaConfig.map((block) => ({ ...block, files: ['src/**/*.spec.{js,jsx,ts,tsx}'] })),
   {
     languageOptions: {
       parserOptions: {

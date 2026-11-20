@@ -301,6 +301,61 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  describe('document.cookie with HttpOnly cookies', () => {
+    // Firefox can keep a deleted cookie in document.cookie for the rest of the session, so use a name no other test sets
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=2093197
+    beforeEach(() => {
+      cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+      cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.window().then((win) => {
+          return cy.wrap(win.fetch(`/set-cookie?cookie=qux=quux; Path=/; HttpOnly`))
+        })
+
+        cy.reload()
+      })
+    })
+
+    it('does not read HttpOnly cookies', () => {
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.document().its('cookie').should('not.include', 'qux=')
+        cy.getCookie('qux').its('value').should('eq', 'quux')
+      })
+    })
+
+    const writes = ['qux=changed; Path=/', 'qux=changed', 'qux=; Path=/; Max-Age=0', 'qux=; Max-Age=0']
+
+    writes.forEach((cookie) => {
+      it(`does not replace or expire HttpOnly cookies with "${cookie}"`, () => {
+        cy.origin(`https://app.foobar.com:3503`, { args: { cookie } }, ({ cookie }) => {
+          cy.window().then((win) => {
+            win.document.cookie = cookie
+            // the second write landing means the first has been handled
+            win.document.cookie = 'sync=1; Path=/'
+          })
+
+          cy.getCookie('sync').should('exist')
+
+          cy.getCookie('qux').should('include', { value: 'quux', httpOnly: true })
+        })
+      })
+    })
+
+    it('does not set cookies marked HttpOnly', () => {
+      cy.origin(`https://app.foobar.com:3503`, () => {
+        cy.window().then((win) => {
+          win.document.cookie = 'corge=grault; Path=/; HttpOnly'
+          win.document.cookie = 'sync=1; Path=/'
+        })
+
+        cy.getCookie('sync').should('exist')
+
+        cy.getCookie('corge').should('be.null')
+        cy.document().its('cookie').should('not.include', 'corge=')
+      })
+    })
+  })
+
   describe('Same-Site Cross-Origin cookie behavior', () => {
     const cookie = 'foo1=bar2'
     const site = 'foobar.com'

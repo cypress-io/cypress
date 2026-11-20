@@ -15,6 +15,12 @@ export const vitestConfig: Linter.Config[] = [
     files: ['**/*.{test,spec}.{ts,tsx,js}', 'test/**'],
     // Fixtures are inputs that specs bundle or load, not specs themselves
     ignores: ['**/fixtures/**', '**/__fixtures__/**'],
+    languageOptions: {
+      // Specs in workspaces that set Vitest's `globals: true` call `describe`,
+      // `it` and `vi` without importing them. Read-only, so `no-global-assign`
+      // still reports a spec that overwrites one
+      globals: Object.fromEntries(Object.keys(vitest.environments.env.globals).map((name) => [name, 'readonly'])),
+    },
     rules: {
       ...vitest.configs.recommended.rules,
       'vitest/no-focused-tests': 'error',
@@ -37,7 +43,7 @@ export const vitestConfig: Linter.Config[] = [
       // Style: `toHaveBeenCalledOnce()` plus `toHaveBeenCalledWith()` asserts
       // the same thing
       'vitest/prefer-called-exactly-once-with': 'off',
-      // `baseConfig` already enforces this through `mocha/no-identical-title`
+      // Off until the existing duplicate titles it reports are renamed
       'vitest/no-identical-title': 'off',
       // Without type information the rule rejects every title passed as a
       // variable, as table-driven specs do; the rest of its hits are wording

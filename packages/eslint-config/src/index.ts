@@ -10,13 +10,15 @@ export * from './graphqlConfig'
 
 export * from './jsonConfig'
 
+export * from './mochaConfig'
+
 export * from './nodeConfig'
+
+export * from './reactConfig'
 
 export * from './typeAwareConfig'
 
 export * from './vitestConfig'
-
-export * from './vueTsxOverrides'
 
 import * as globalImport from 'globals'
 
