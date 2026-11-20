@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import winVersionInfo from 'win-version-info'
 import _ from 'lodash'
 import * as windowsHelper from '../../lib/windows'
 import { knownBrowsers } from '../../lib/known-browsers'
 import fs from 'fs-extra'
 import os from 'os'
+import { normalize } from 'path'
 import type { Browser } from '@packages/types'
 import { detectByPath } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
@@ -143,6 +144,10 @@ describe('windows browser detection', () => {
     })
   })
 
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('detects browsers as expected', async () => {
     const mappedBrowsers = []
 
@@ -199,6 +204,32 @@ describe('windows browser detection', () => {
 
     expect(snapshotBrowser.version).toEqual('4.4.4')
     expect(snapshotBrowser).toMatchSnapshot()
+  })
+
+  it('detects Chrome Stable installed for the current user', async () => {
+    _.remove(mockBrowsers, (browser) => browser.path.includes('/Google/Chrome/Application/'))
+    vi.stubEnv('LOCALAPPDATA', `${HOMEDIR}/AppData/Local`)
+
+    const path = `${HOMEDIR}/AppData/Local/Google/Chrome/Application/chrome.exe`
+
+    mockBrowsers.push({ path, version: '123.0.0' })
+
+    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })! as Browser
+
+    expect(await windowsHelper.detect(chrome)).toEqual({ name: 'chrome', version: '123.0.0', path: normalize(path) })
+  })
+
+  it('uses the Windows local app data directory for Chrome Stable', async () => {
+    _.remove(mockBrowsers, (browser) => browser.path.includes('/Google/Chrome/Application/'))
+    vi.stubEnv('LOCALAPPDATA', 'D:/Profiles/flotwig/Local')
+
+    const path = 'D:/Profiles/flotwig/Local/Google/Chrome/Application/chrome.exe'
+
+    mockBrowsers.push({ path, version: '124.0.0' })
+
+    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })! as Browser
+
+    expect(await windowsHelper.detect(chrome)).toEqual({ name: 'chrome', version: '124.0.0', path: normalize(path) })
   })
 
   it('detects Chrome for Testing 32-bit install', async () => {
