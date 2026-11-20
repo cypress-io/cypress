@@ -6,6 +6,34 @@ import { useStudioStore } from '../store/studio-store'
 import { empty, getReporterElement, getRunnerElement } from './utils'
 import { unmountReporter } from './reporter'
 
+// `cypress tap` reports this as the reason the spec could not load. A rejection that is not an
+// Error, such as a plain object, still gets its message rather than `[object Object]`.
+function formatSpecLoadError (err: unknown): string {
+  if (err instanceof Error) {
+    return err.message ? `${err.name}: ${err.message}` : err.name
+  }
+
+  if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
+    const name = 'name' in err && typeof err.name === 'string' ? err.name : undefined
+
+    if (name === undefined) {
+      return err.message
+    }
+
+    return err.message ? `${name}: ${err.message}` : name
+  }
+
+  if (err && typeof err === 'object') {
+    try {
+      return JSON.stringify(err)
+    } catch {
+      return String(err)
+    }
+  }
+
+  return String(err)
+}
+
 export function useEventManager () {
   const eventManager = getEventManager()
 
@@ -20,6 +48,7 @@ export function useEventManager () {
     }
 
     autStore.setScriptError(null)
+    autStore.setSpecLoadError(null)
     await UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun)
   }
 
@@ -36,6 +65,10 @@ export function useEventManager () {
 
     eventManager.on('script:error', (err) => {
       autStore.setScriptError(err)
+    })
+
+    eventManager.on('spec:load:error', (err) => {
+      autStore.setSpecLoadError(formatSpecLoadError(err))
     })
 
     eventManager.on('visit:failed', (payload) => {

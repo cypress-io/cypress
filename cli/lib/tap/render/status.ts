@@ -41,6 +41,7 @@ export const renderStatusHuman = (status: TapStatus): string => {
     testingType: status.testingType ?? null,
     browserName: status.browserName ?? null,
     browserAttached: status.browserAttached,
+    pluginsError: status.pluginsError,
   }
 
   const progress = [phaseLine(status)]
@@ -55,6 +56,10 @@ export const renderStatusHuman = (status: TapStatus): string => {
   // only thing the run has to say.
   if (status.error) {
     blocks.push([color.fail(status.error)])
+  }
+
+  if (status.pluginsError) {
+    blocks.push([color.warn(status.pluginsError)])
   }
 
   if (status.pinned) {
