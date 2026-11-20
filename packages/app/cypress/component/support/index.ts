@@ -6,7 +6,6 @@ import { createPinia } from '../../../src/store'
 import { setActivePinia } from 'pinia'
 import type { Pinia } from 'pinia'
 import 'cypress-real-events/support'
-import 'cypress-plugin-tab'
 
 import { installCustomPercyCommand } from '@packages/frontend-shared/cypress/support/customPercyCommand'
 import { tabUntil } from '@packages/frontend-shared/cypress/support/tab-until'
