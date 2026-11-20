@@ -47,6 +47,7 @@
 
 - Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#35284](https://github.com/cypress-io/cypress/pull/35284).
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
+- Renderer-crash errors during [`cypress run`](https://on.cypress.io/command-line#cypress-run) no longer suggest lowering [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global), an option normally ignored in run mode. The suggestion remains available during `cypress open`. Addresses [#28578](https://github.com/cypress-io/cypress/issues/28578).
 
 **Dependency Updates:**
 
@@ -162,8 +163,6 @@
 - These [`Cypress.dom`](https://on.cypress.io/dom) methods now accept either a DOM element or a jQuery object, as their types already said: `isFocused()`, `isScrollable()`, `isFocusable()`, `isDescendent()`, `getReasonIsHidden()`, `isTextLike()`, `isSelector()`, `getWindowByElement()`, `getFirstScrollableParent()`, `getFirstStickyPositionParent()`, and `getFirstFixedOrStickyPositionParent()`. Previously, passing the other form threw a `TypeError` or returned a wrong result, such as `isFocused()` returning `false` for a focused element. Fixed in [#35155](https://github.com/cypress-io/cypress/pull/35155).
 
 **Misc:**
-
-- Renderer-crash errors during [`cypress run`](https://on.cypress.io/command-line#cypress-run) no longer suggest lowering [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global), an option normally ignored in run mode. The suggestion remains available during `cypress open`. Addresses [#28578](https://github.com/cypress-io/cypress/issues/28578).
 
 - The [`before:run`](https://on.cypress.io/before-run-api) event's `details.config` is now typed as the resolved plugin configuration, so TypeScript can access fields such as `projectRoot`, `configFile`, `testingType`, and `browsers` without a cast. Addresses [#30420](https://github.com/cypress-io/cypress/issues/30420). Addressed in [#35134](https://github.com/cypress-io/cypress/pull/35134).
 - The TypeScript types now accept a number as the expected value of the `attr`, `id`, `text`, and `value` assertions, including the `contain` and `include` forms of `text` and `value`, such as `expect($el).to.have.attr('tabindex', 0)` or `expect($el).to.have.text(123)`. Cypress already accepted numbers for these assertions at runtime, but TypeScript reported an error. Addresses [#7314](https://github.com/cypress-io/cypress/issues/7314).
