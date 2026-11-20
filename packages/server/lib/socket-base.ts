@@ -13,8 +13,8 @@ import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import type { SameSiteContext, SerializableAutomationCookie } from './automation/cookie/jar'
-import { cookieJar, automationCookieToToughCookie } from './automation/cookie/jar'
+import { cookieJar } from './automation/cookie/jar'
+import { setDocumentCookie } from './automation/cookie/document-cookie'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { getSpanNames, telemetry } from '@packages/telemetry'
@@ -208,6 +208,14 @@ export class SocketBase implements SocketBroadcaster {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
+    // document.cookie writes from a cross-origin AUT that have not reached the browser yet
+    const documentCookieWrites = new Set<Promise<void>>()
+
+    // anything that reads the browser's cookies after a document.cookie write has to see that write
+    const afterDocumentCookieWrites = <T>(fn: () => T | Promise<T>): T | Promise<T> => {
+      return documentCookieWrites.size ? Promise.all(documentCookieWrites).then(fn) : fn()
+    }
+
     const getFixture = (path, opts) => fixtureGet(config.fixturesFolder, path, opts)
 
     this.getIos().forEach((io) => {
@@ -301,7 +309,11 @@ export class SocketBase implements SocketBroadcaster {
         socket.on('automation:request', (message: keyof AutomationCommands, data, cb) => {
           debug('automation:request %s %o', message, data)
 
-          return automationRequest(message, data)
+          const request = async () => {
+            return message.includes('cookie') ? afterDocumentCookieWrites(() => automationRequest(message, data)) : automationRequest(message, data)
+          }
+
+          return request()
           .then((resp) => {
             return cb({ response: resp })
           }).catch((err) => {
@@ -405,10 +417,20 @@ export class SocketBase implements SocketBroadcaster {
           })
         })
 
-        const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
-          const { hostname } = new URL(url)
+        const setCrossOriginCookie = (data: { cookieString?: unknown, url?: unknown }) => {
+          const write = setDocumentCookie(data, {
+            getCookies: (filter) => automationRequest('get:cookies', filter),
+            setCookie: (cookie) => automationRequest('set:cookie', cookie),
+          })
 
-          cookieJar.setCookie(automationCookieToToughCookie(cookie, hostname), url, sameSiteContext, { http: false })
+          // setDocumentCookie bounds each of its browser requests, so this always settles
+          const settled: Promise<void> = write.then(() => {}, () => {}).then(() => {
+            documentCookieWrites.delete(settled)
+          })
+
+          documentCookieWrites.add(settled)
+
+          return write
         }
 
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {
@@ -523,10 +545,10 @@ export class SocketBase implements SocketBroadcaster {
               case 'resolve:url': {
                 const [url, resolveOpts] = args
 
-                return options.onResolveUrl(url, userAgent, automationRequest, resolveOpts)
+                return afterDocumentCookieWrites(() => options.onResolveUrl(url, userAgent, automationRequest, resolveOpts))
               }
               case 'http:request':
-                return options.onRequest(userAgent, automationRequest, args[0])
+                return afterDocumentCookieWrites(() => options.onRequest(userAgent, automationRequest, args[0]))
               case 'reset:server:state':
                 return options.onResetServerState(args[0])
               case 'get:fixture':
