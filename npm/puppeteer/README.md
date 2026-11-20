@@ -50,14 +50,15 @@ The `setup` and `retry` functions ship with their own type definitions, so no ex
 
 ## Upgrading to 2.0
 
-Version 2.0 upgrades the bundled `puppeteer-core` from v24 to v25 and requires Node.js 22.12.0 or later. The plugin's own API hasn't changed: `setup`, `retry`, and `cy.puppeteer()` work the same way. Your message handlers, however, receive a Puppeteer `Browser` directly, so Puppeteer's breaking changes in v25 can affect the code inside them.
+Version 2.0 upgrades the bundled `puppeteer-core` from v24 to v25 and requires Cypress 15.0.0 or later and Node.js 22.12.0 or later. The plugin's own API hasn't changed: `setup`, `retry`, and `cy.puppeteer()` work the same way. Your message handlers, however, receive a Puppeteer `Browser` directly, so Puppeteer's breaking changes in v25 can affect the code inside them.
 
-Puppeteer v25 ships only as ES modules. The plugin loads it with `require()`, which Node.js supports for ES modules from 22.12.0. On an earlier Node.js version, loading your Cypress config fails with `ERR_REQUIRE_ESM`.
+Puppeteer v25 ships only as ES modules. The plugin loads it with `require()`, which Node.js supports for ES modules from 22.12.0. On an earlier Node.js version, loading your Cypress config fails with `ERR_REQUIRE_ESM`. When Cypress can't find a Node.js on your system, it loads your config with the Node.js it bundles. Cypress 14 bundles Node.js 20, so it isn't supported. Cypress 15.0.0 is the first release that bundles Node.js 22.
 
 ### Does this affect me?
 
-It affects you if either of these is true:
+It affects you if any of these is true:
 
+- **You use Cypress 14.** Upgrade to Cypress 15.0.0 or later first.
 - **The Node.js that loads your Cypress config is older than 22.12.0.** Run `node --version` in your project to check.
 - **Your message handlers use a Puppeteer API that changed.**
 
@@ -74,10 +75,11 @@ For the complete list, see the breaking changes for version 25.0.0 in the [puppe
 
 ### What to do next
 
-1. If your Node.js is older than 22.12.0, upgrade it.
-2. Search your message handlers for the APIs in the table above and update them.
-3. If you pass your own Puppeteer module with the [`puppeteer` option](#options), upgrade it to v25 as well.
-4. Run your specs that call `cy.puppeteer()`.
+1. If you're on Cypress 14, upgrade to Cypress 15.0.0 or later.
+2. If your Node.js is older than 22.12.0, upgrade it.
+3. Search your message handlers for the APIs in the table above and update them.
+4. If you pass your own Puppeteer module with the [`puppeteer` option](#options), upgrade it to v25 as well.
+5. Run your specs that call `cy.puppeteer()`.
 
 If you can't make these changes yet, stay on the previous release with `npm install --save-dev @cypress/puppeteer@1` until you're ready.
 
@@ -119,7 +121,7 @@ If you can't make these changes yet, stay on the previous release with `npm inst
 
 ## Compatibility
 
-- **Cypress 14.0.0 or later.**
+- **Cypress 15.0.0 or later.**
 - **Node.js 22.12.0 or later** for the process that loads your Cypress config. The bundled `puppeteer-core` v25 needs it.
 - **Chromium-family browsers only.** Calling `cy.puppeteer()` in Firefox or WebKit fails with an error.
 
