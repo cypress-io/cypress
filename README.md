@@ -21,9 +21,6 @@
   Run your suite in a real browser, rewind any failure, and see what your tests never reach.<br />
   One quality platform wherever you work: your machine, CI, or your coding agent.
 </p>
-<p align="center">
-  Join us, we're <a href="https://cypress.io/jobs">hiring</a>.
-</p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/v/cypress?style=flat&logo=npm&label=npm&color=CB3837" alt="npm version"/></a>
@@ -71,6 +68,10 @@ npx skills add cypress-io/ai-toolkit
 ```
 
 ![installing-cli e1693232](./assets/cypress-installation.gif)
+
+## Community plugins
+
+Extend Cypress with plugins built by the community and the Cypress team, covering everything from visual testing and accessibility to authentication and reporting. Browse the full list in the [plugins directory](https://docs.cypress.io/app/plugins/plugins-list).
 
 ## Contributing
 
