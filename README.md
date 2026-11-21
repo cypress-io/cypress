@@ -97,12 +97,6 @@ Extend Cypress with plugins built by the community and the Cypress team, coverin
 
 Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 
-Thank you to everyone who has contributed to Cypress!
-
-<a href="https://github.com/cypress-io/cypress/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=cypress-io/cypress" alt="Avatars of Cypress contributors" />
-</a>
-
 ## License
 
 [![MIT license](https://img.shields.io/badge/license-MIT-00814D?style=for-the-badge&labelColor=1B1E2E)](./LICENSE)
