@@ -39,6 +39,25 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/35257
+    it('sends only the Set-Cookie headers left when the handler filters one out and rewrites another', function () {
+      cy.intercept('/set-cookie?*', (req) => {
+        req.on('response', (res) => {
+          expect(res.headers['set-cookie']).to.deep.eq(['kept=origin; Path=/', 'dropped=origin; Path=/'])
+
+          res.headers['set-cookie'] = ([] as string[]).concat(res.headers['set-cookie'])
+          .filter((line) => !line.startsWith('kept='))
+          .map((line) => line.replace('dropped=origin', 'dropped=rewritten'))
+        })
+      })
+      .as('setCookie')
+      .then(() => fetch(`/set-cookie?cookie=${encodeURIComponent('kept=origin; Path=/')}&cookie=${encodeURIComponent('dropped=origin; Path=/')}`))
+      .wait('@setCookie')
+
+      cy.getCookie('kept').should('be.null')
+      cy.getCookie('dropped').its('value').should('eq', 'rewritten')
+    })
+
     it('intercepts redirects as expected', function () {
       const href = `/fixtures/generic.html?t=${Date.now()}`
       const url = `/redirect?href=${encodeURIComponent(href)}`

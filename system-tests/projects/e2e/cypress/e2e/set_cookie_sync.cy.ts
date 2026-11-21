@@ -215,6 +215,25 @@ describe('cy.intercept rewrites Set-Cookie headers', () => {
     expectPageCookies()
   })
 
+  // https://github.com/cypress-io/cypress/issues/35257
+  it('stores only the cookies left when the handler filters one out and rewrites another', () => {
+    cy.intercept('/cookie_sync/page', (req) => {
+      req.on('response', (res) => {
+        expect(setCookieLines(res)).to.deep.eq(['kept=origin; Path=/', 'dropped=origin; Path=/'])
+
+        res.headers['set-cookie'] = setCookieLines(res)
+        .filter((line) => !line.startsWith('kept='))
+        .map((line) => line.replace('dropped=origin', 'dropped=rewritten'))
+      })
+    }).as('page')
+
+    fetchText('/cookie_sync/page')
+    cy.wait('@page')
+
+    cy.getCookie('kept').should('be.null')
+    cy.getCookie('dropped').its('value').should('eq', 'rewritten')
+  })
+
   it('keeps a cookie Chrome blocked out of the store while syncing another', () => {
     cy.intercept('/cookie_sync/blocked', (req) => {
       req.on('response', (res) => {

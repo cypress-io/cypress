@@ -3,6 +3,8 @@ import {
   NetworkInterceptionCore,
   planSubscriptions,
   mergeIncomingRequestChanges,
+  mergeWithPreservedBuffers,
+  mergeDeletedHeaders,
 } from '../../lib'
 import type { BackendRoute } from '../../lib/types/backend-route'
 
@@ -123,6 +125,141 @@ describe('core/merge-handler-result', () => {
 
     expect(before.headers.foo).toBe('original')
     expect(before.headers.bar).toBeUndefined()
+  })
+
+  // https://github.com/cypress-io/cypress/issues/35257
+  it('replaces a request header array the handler shortened', () => {
+    const before = {
+      url: 'http://example.com/',
+      headers: { 'x-forwarded-for': ['203.0.113.7', '198.51.100.24'] },
+      body: '',
+      method: 'GET',
+    } as any
+
+    const after = {
+      url: 'http://example.com/',
+      headers: { 'x-forwarded-for': ['192.0.2.15'] },
+      body: '',
+      method: 'GET',
+    } as any
+
+    mergeIncomingRequestChanges(before, after, {
+      baseUrl: 'http://example.com/',
+      resolveUrl: (base, relative) => `${base}${relative}`,
+    })
+
+    expect(before.headers['x-forwarded-for']).toEqual(['192.0.2.15'])
+  })
+
+  it('replaces a request query array the handler shortened', () => {
+    const before = {
+      url: 'http://example.com/search?tag=cypress&tag=testing',
+      headers: {},
+      body: '',
+      method: 'GET',
+      query: { tag: ['cypress', 'testing'] },
+    } as any
+
+    const after = {
+      url: 'http://example.com/search?tag=testing',
+      headers: {},
+      body: '',
+      method: 'GET',
+      query: { tag: ['testing'] },
+    } as any
+
+    mergeIncomingRequestChanges(before, after, {
+      baseUrl: 'http://example.com/',
+      resolveUrl: (base, relative) => new URL(relative, base).toString(),
+    })
+
+    expect(before.query.tag).toEqual(['testing'])
+  })
+})
+
+// the response handler merges through these two directly
+describe('core/merge-handler-result response changes', () => {
+  const mergeResponse = (before, after) => {
+    mergeWithPreservedBuffers(before, after)
+    mergeDeletedHeaders(before, after)
+  }
+
+  // https://github.com/cypress-io/cypress/issues/35257
+  it('replaces a set-cookie array the handler shortened', () => {
+    const before = {
+      headers: {
+        'content-type': 'text/html',
+        'set-cookie': ['kept=origin; Path=/', 'dropped=origin; Path=/'],
+      },
+      body: '<html></html>',
+    } as any
+
+    const after = {
+      headers: {
+        'content-type': 'text/html',
+        'set-cookie': ['dropped=rewritten; Path=/'],
+      },
+      body: '<html></html>',
+    } as any
+
+    mergeResponse(before, after)
+
+    expect(before.headers['set-cookie']).toEqual(['dropped=rewritten; Path=/'])
+    expect(before.headers['content-type']).toBe('text/html')
+  })
+
+  it('replaces a set-cookie array the handler emptied', () => {
+    const before = {
+      headers: { 'set-cookie': ['session=8f14e45fceea167a5a36dedd4bea2543; Path=/'] },
+      body: '',
+    } as any
+
+    mergeResponse(before, { headers: { 'set-cookie': [] }, body: '' } as any)
+
+    expect(before.headers['set-cookie']).toEqual([])
+  })
+
+  it('takes a set-cookie array the handler lengthened', () => {
+    const before = {
+      headers: { 'set-cookie': ['session=8f14e45fceea167a5a36dedd4bea2543; Path=/'] },
+      body: '',
+    } as any
+
+    mergeResponse(before, {
+      headers: { 'set-cookie': ['session=8f14e45fceea167a5a36dedd4bea2543; Path=/', 'theme=dark; Path=/'] },
+      body: '',
+    } as any)
+
+    expect(before.headers['set-cookie']).toEqual(['session=8f14e45fceea167a5a36dedd4bea2543; Path=/', 'theme=dark; Path=/'])
+  })
+
+  it('keeps a Buffer body the handler set as a Buffer', () => {
+    const before = { headers: {}, body: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a]) } as any
+    const body = Buffer.from([0xff, 0xd8, 0xff, 0xe0])
+
+    mergeResponse(before, { headers: {}, body } as any)
+
+    expect(Buffer.isBuffer(before.body)).toBe(true)
+    expect(before.body.equals(body)).toBe(true)
+  })
+
+  // https://github.com/cypress-io/cypress/issues/25767
+  it('removes headers the handler deleted and keeps empty-string ones', () => {
+    const before = {
+      headers: {
+        'set-cookie': ['kept=origin; Path=/', 'dropped=origin; Path=/'],
+        'x-request-id': '4b2c1d0e-9f3a-4c8e-a1b7-6d5e4f3a2b1c',
+        'cache-control': 'no-store',
+      },
+      body: '',
+    } as any
+
+    mergeResponse(before, {
+      headers: { 'x-request-id': '' },
+      body: '',
+    } as any)
+
+    expect(before.headers).toEqual({ 'x-request-id': '' })
   })
 })
 

@@ -13,11 +13,13 @@ export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: 
 }
 
 export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
-  // lodash merge converts Buffer into Array (by design)
-  // https://github.com/lodash/lodash/issues/2964
-  // @see https://github.com/cypress-io/cypress/issues/15898
   _.mergeWith(before, after, (_a, b) => {
-    if (b instanceof Buffer) {
+    // Take Buffers and arrays from the handler whole, as an assignment would.
+    // lodash turns a Buffer into an array (https://github.com/lodash/lodash/issues/2964,
+    // https://github.com/cypress-io/cypress/issues/15898), and merges arrays
+    // index by index, so `['b=2']` over `['a=1', 'b=1']` would become
+    // `['b=2', 'b=1']` (https://github.com/cypress-io/cypress/issues/35257).
+    if (b instanceof Buffer || Array.isArray(b)) {
       return b
     }
 
