@@ -1999,7 +1999,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 - The [`videoCompression`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option now defaults to `false`. Addresses [#26160](https://github.com/cypress-io/cypress/issues/26160).
 - The [`videoUploadOnPasses`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option has been removed. Please see our [screenshots & videos guide](https://docs.cypress.io/guides/guides/screenshots-and-videos#Delete-videos-for-specs-without-failing-or-retried-tests) on how to accomplish similar functionality. Addresses [#26899](https://github.com/cypress-io/cypress/issues/26899).
 - Requests for assets at relative paths for component testing are now correctly forwarded to the dev server. Fixes [#26725](https://github.com/cypress-io/cypress/issues/26725).
-- The [`cy.readFile()`](https://docs.cypress.io/api/commands/readfile) command is now retry-able as a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using [`Cypress.Commands.overwrite()`](https://docs.cypress.io/api/cypress-api/custom-commands#Overwrite-Existing-Commands). Addressed in [#25595](https://github.com/cypress-io/cypress/pull/25595).
+- The [`cy.readFile()`](https://on.cypress.io/readfile?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=readfile) command is now retry-able as a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using [`Cypress.Commands.overwrite()`](https://on.cypress.io/custom-commands?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=custom-commands#Overwrite-Existing-Commands). Addressed in [#25595](https://github.com/cypress-io/cypress/pull/25595).
 - The current spec path is now passed from the AUT iframe using a query parameter rather than a path segment. This allows for requests for assets at relative paths to be correctly forwarded to the dev server. Fixes [#26725](https://github.com/cypress-io/cypress/issues/26725).
 - The deprecated configuration option `nodeVersion` has been removed. Addresses [#27016](https://github.com/cypress-io/cypress/issues/27016).
 - The properties and values returned by the [Module API](https://docs.cypress.io/guides/guides/module-api) and included in the arguments of handlers for the [`after:run`](https://docs.cypress.io/api/plugins/after-run-api) and  [`after:spec`](https://docs.cypress.io/api/plugins/after-spec-api) have been changed to be more consistent. Addresses [#23805](https://github.com/cypress-io/cypress/issues/23805).
@@ -2372,38 +2372,38 @@ during Component Testing onboarding. Addresses [#26852](https://github.com/cypre
 - Added official support for Vite 4 in component testing. Addresses
   [#24969](https://github.com/cypress-io/cypress/issues/24969).
 - Added new
-  [`experimentalMemoryManagement`](https://docs.cypress.io/app/references/experiments#Configuration)
+  [`experimentalMemoryManagement`](https://on.cypress.io/experiments?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=experiments#Configuration)
   configuration option to improve memory management in Chromium-based browsers.
   Enable this option with `experimentalMemoryManagement=true` if you have
   experienced "Out of Memory" issues. Addresses
   [#23391](https://github.com/cypress-io/cypress/issues/23391).
 - Added new
-  [`experimentalSkipDomainInjection`](https://docs.cypress.io/app/references/migration-guide#Changes-to-cyorigin)
+  [`experimentalSkipDomainInjection`](https://on.cypress.io/migration-guide?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=migration-guide#Changes-to-cyorigin)
   configuration option to disable Cypress from setting `document.domain` on
   injection, allowing users to test Salesforce domains. If you believe you are
   having `document.domain` issues, please see the
-  [`experimentalSkipDomainInjection`](https://docs.cypress.io/app/references/migration-guide#Changes-to-cyorigin)
+  [`experimentalSkipDomainInjection`](https://on.cypress.io/migration-guide?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=migration-guide#Changes-to-cyorigin)
   guide. This config option is end-to-end only. Addresses
   [#2367](https://github.com/cypress-io/cypress/issues/2367),
   [#23958](https://github.com/cypress-io/cypress/issues/23958),
   [#24290](https://github.com/cypress-io/cypress/issues/24290), and
   [#24418](https://github.com/cypress-io/cypress/issues/24418).
-- The [`.as`](https://docs.cypress.io/api/commands/as) command now accepts an options argument,
+- The [`.as`](https://on.cypress.io/as?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=as) command now accepts an options argument,
   allowing an alias to be stored as type "query" or "static" value. This is
   stored as "query" by default. Addresses
   [#25173](https://github.com/cypress-io/cypress/issues/25173).
 - The `cy.log()` command will now display a line break where the `\n` character
   is used. Addresses
   [#24964](https://github.com/cypress-io/cypress/issues/24964).
-- [`component.specPattern`](https://docs.cypress.io/app/references/configuration#component) now
+- [`component.specPattern`](https://on.cypress.io/configuration?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=configuration#component) now
   utilizes a JSX/TSX file extension when generating a new empty spec file if
   project contains at least one file with those extensions. This applies only to
   component testing and is skipped if
-  [`component.specPattern`](https://docs.cypress.io/app/references/configuration#component) has been
+  [`component.specPattern`](https://on.cypress.io/configuration?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=configuration#component) has been
   configured to exclude files with those extensions. Addresses
   [#24495](https://github.com/cypress-io/cypress/issues/24495).
 - Added support for the `data-qa` selector in the
-  [Selector Playground](https://on.cypress.io/selector-playground) in
+  [Selector Playground](https://on.cypress.io/selector-playground?utm_source=github&utm_medium=changelog&utm_campaign=cypress-repo&utm_content=selector-playground) in
   addition to `data-cy`, `data-test` and `data-testid`. Addresses
   [#25305](https://github.com/cypress-io/cypress/issues/25305).
 
