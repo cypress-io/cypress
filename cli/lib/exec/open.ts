@@ -112,6 +112,7 @@ const start = async (options: any = {}): Promise<any> => {
       const spawnOptions: any = {
         dev: options.dev,
         detached: Boolean(options.detached),
+        headless: Boolean(options.headless),
       }
 
       if (env) {

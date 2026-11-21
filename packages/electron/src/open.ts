@@ -30,6 +30,20 @@ function getInspectFromOpts (argv: string[]): string | undefined {
   return undefined
 }
 
+// Puts a Linux app whose windows stay hidden (`cypress run` without `--headed`, or
+// `cypress open --headless`) on X11, unless ELECTRON_EXTRA_LAUNCH_ARGS names a platform.
+// The CLI does the same for the binary; the reason is in cli/lib/exec/spawn.ts.
+function getOzonePlatformArg (argv: string[]): string | undefined {
+  const { runProject, headed, headless } = minimist(argv)
+  const hidesWindows = runProject ? String(headed) !== 'true' : String(headless) === 'true'
+
+  if (os.platform() !== 'linux' || !hidesWindows || process.env.ELECTRON_EXTRA_LAUNCH_ARGS?.includes('--ozone-platform')) {
+    return undefined
+  }
+
+  return '--ozone-platform=x11'
+}
+
 export async function open (
   appPath: string,
   argv: string[],
@@ -76,6 +90,7 @@ export async function open (
         // eslint-disable-next-line no-restricted-properties
         os.platform() === 'linux' && (process.geteuid?.() === 0) ? '--no-sandbox' : '',
         inspectArg ?? '',
+        getOzonePlatformArg(argv) ?? '',
       ].filter(Boolean),
       { stdio: 'pipe' },
     )

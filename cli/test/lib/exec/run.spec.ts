@@ -186,7 +186,17 @@ describe('exec run', () => {
 
     it('spawns with --headed true', async () => {
       await run.start({ headed: true })
-      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--headed', true], expect.anything())
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--headed', true], expect.objectContaining({ headless: false }))
+    })
+
+    it('spawns headless by default', async () => {
+      await run.start()
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd()], expect.objectContaining({ headless: true }))
+    })
+
+    it('spawns headless with --headless', async () => {
+      await run.start({ headless: true })
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--headed', 'false'], expect.objectContaining({ headless: true }))
     })
 
     it('spawns with --no-exit', async () => {

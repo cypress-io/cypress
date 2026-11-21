@@ -258,6 +258,41 @@ describe('open', () => {
         expect(spawn).toHaveBeenCalledWith(execPath, expect.not.arrayContaining(['--no-sandbox']), { stdio: 'pipe' })
       })
     })
+
+    describe('ozone platform', () => {
+      // The shape @packages/server's args.toArray gives these options
+      const runArgv = ['--browser=electron', '--cwd=/home/jane/projects/storefront', '--runProject=/home/jane/projects/storefront']
+      const openArgv = ['--cwd=/home/jane/projects/storefront', '--project=/home/jane/projects/storefront', '--testingType=e2e']
+
+      it.each([
+        ['a run', runArgv],
+        ['a run with --headless', [...runArgv, '--headed=false', '--headless=true']],
+        ['cypress open --headless', [...openArgv, '--headless=true']],
+      ])('spawns with --ozone-platform=x11 for %s', async (_name, argv) => {
+        await open(appPath, argv)
+        expect(spawn).toHaveBeenCalledWith(execPath, expect.arrayContaining(['--ozone-platform=x11']), { stdio: 'pipe' })
+      })
+
+      it.each([
+        ['a run with --headed', [...runArgv, '--headed=true']],
+        ['cypress open', openArgv],
+      ])('leaves the platform to Electron for %s', async (_name, argv) => {
+        await open(appPath, argv)
+        expect(spawn).toHaveBeenCalledWith(execPath, expect.not.arrayContaining(['--ozone-platform=x11']), { stdio: 'pipe' })
+      })
+
+      it('leaves the platform to ELECTRON_EXTRA_LAUNCH_ARGS when it names one', async () => {
+        vi.stubEnv('ELECTRON_EXTRA_LAUNCH_ARGS', '--ozone-platform=wayland')
+
+        await open(appPath, runArgv)
+        expect(spawn).toHaveBeenCalledWith(execPath, expect.not.arrayContaining(['--ozone-platform=x11']), { stdio: 'pipe' })
+      })
+    })
+  })
+
+  it('leaves the platform to Electron for a run on other operating systems', async () => {
+    await open(appPath, ['--browser=electron', '--runProject=/home/jane/projects/storefront'])
+    expect(spawn).toHaveBeenCalledWith(execPath, expect.not.arrayContaining(['--ozone-platform=x11']), { stdio: 'pipe' })
   })
 
   describe('child process', () => {
