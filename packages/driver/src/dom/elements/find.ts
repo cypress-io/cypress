@@ -330,10 +330,13 @@ export const getInputFromLabel = ($el: JQuery<HTMLElement>) => {
   // If an element has a "for" attribute, then clicking on it won't
   // focus / activate any contained inputs, even if the "for" target doesn't
   // exist.
-  if ($el.attr('for')) {
+  const forId = $el.attr('for')
+
+  if (forId) {
     // The parent().last() is the current document, which is where we want to
-    // search from.
-    return $(`#${$el.attr('for')}`, $el.parents().last())
+    // search from. Ids may contain characters that are selector syntax, so
+    // `user.email` must become `#user\.email`, not id `user` with class `email`.
+    return $(`#${CSS.escape(forId)}`, $el.parents().last())
   }
 
   // Alternately, if a label contains inputs, clicking it focuses / activates

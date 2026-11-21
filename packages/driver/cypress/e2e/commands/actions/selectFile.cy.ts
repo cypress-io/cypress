@@ -116,6 +116,43 @@ describe('src/cy/commands/actions/selectFile', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/34304
+    it('selects files with an input from a label whose "for" id contains a dot', () => {
+      cy.get('#dot-id-label').selectFile({ contents: '@foo' })
+
+      cy.get('[id="user.email"]')
+      .then(getFileContents)
+      .then((contents) => {
+        expect(contents[0]).to.eql('foo')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34304
+    it('selects files with an input from a label whose "for" id contains a colon', () => {
+      cy.get('#colon-id-label').selectFile({ contents: '@foo' })
+
+      cy.get('[id="form:field"]')
+      .then(getFileContents)
+      .then((contents) => {
+        expect(contents[0]).to.eql('foo')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34304
+    it('selects files on the label\'s input, not an element matching its "for" id read as a selector', () => {
+      cy.get('#decoy-id-label').selectFile({ contents: '@foo' })
+
+      cy.get('[id="avatar.upload"]')
+      .then(getFileContents)
+      .then((contents) => {
+        expect(contents[0]).to.eql('foo')
+      })
+
+      cy.get('#avatar').then((input) => {
+        expect((input[0] as HTMLInputElement).files?.length).to.eq(0)
+      })
+    })
+
     it('invokes change and input events on the input', (done) => {
       const $input = cy.$$('#basic')
 
