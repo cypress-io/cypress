@@ -19,7 +19,7 @@
 
 <p align="center">
   Run end-to-end and component tests in a real browser and rewind any failure.<br />
-  One quality platform wherever you work: your machine, CI, or your coding agent.
+  Works wherever you do: your machine, CI, or your coding agent.
 </p>
 
 <p align="center">
