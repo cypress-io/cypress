@@ -195,16 +195,52 @@ describe('normalizeStdout', () => {
   })
 
   context('stack traces', () => {
-    it('collapses a chrome-style stack up to the next blank line', () => {
-      const input = 'Error: boom\n    at foo (http://localhost:3500/foo.js:1:2)\n    at bar (bar.js:3:4)\n\nnext\n'
+    // The failure header, and the blank lines and `(Results)` that follow the stack, are from the
+    // "deterministic flaky test" output in system-tests/__snapshots__/experimental_retries.spec.ts.js,
+    // which stores it with the stack already collapsed
+    const failureHeader = [
+      '  1) deterministic flaky test',
+      '       deterministically runs pass/fail on this test:',
+      '     AssertionError: expected true to be false',
+    ]
 
-      expect(replaceStackTraceLines(input, 'chrome')).to.eq('Error: boom\n      [stack trace lines]\n\nnext\n')
+    it('collapses a chrome-style stack up to the next blank line', () => {
+      // First five frames of the chrome dev e2e scenario in
+      // packages/driver/test/unit/cypress/__fixtures__/getUserInvocationStack_stackFrames.json
+      const stack = [
+        '    at Context.eval (http://localhost:53021/__cypress/tests?p=cypress/spec.cy.js:14:16)',
+        '    at __stackReplacementMarker (cypress:///../driver/src/cypress/cy.ts:85:13)',
+        '    at runnable.fn (cypress:///../driver/src/cypress/cy.ts:872:19)',
+        '    at callFn (cypress:///../driver/node_modules/mocha/lib/runnable.js:394:21)',
+        '    at Runnable.run (cypress:///../driver/node_modules/mocha/lib/runnable.js:381:7)',
+      ]
+      const input = [...failureHeader, ...stack, '', '', '', '', '  (Results)', ''].join('\n')
+
+      expect(replaceStackTraceLines(input, 'chrome')).to.eq([
+        ...failureHeader,
+        '      [stack trace lines]',
+        '',
+        '',
+        '',
+        '',
+        '  (Results)',
+        '',
+      ].join('\n'))
     })
 
     it('collapses a firefox-style stack up to the end of the output', () => {
-      const input = 'Error: boom\nfoo@http://localhost:3500/foo.js:1:2\nbar@bar.js:3:4\n'
+      // First five frames of the firefox binary e2e scenario in
+      // packages/driver/test/unit/cypress/__fixtures__/getUserInvocationStack_stackFrames.json
+      const stack = [
+        '@http://localhost:54823/__cypress/tests?p=cypress/spec.cy.js:14:16',
+        '__stackReplacementMarker@http://localhost:54823/__cypress/runner/cypress_runner.js:136677:13',
+        '__webpack_modules__</setRunnable/runnable.fn@http://localhost:54823/__cypress/runner/cypress_runner.js:137464:43',
+        'callFn@http://localhost:54823/__cypress/runner/cypress_runner.js:156061:21',
+        '__webpack_modules__</Runnable.prototype.run@http://localhost:54823/__cypress/runner/cypress_runner.js:156048:13',
+      ]
+      const input = [...failureHeader, ...stack, ''].join('\n')
 
-      expect(replaceStackTraceLines(input, 'firefox')).to.eq('Error: boom\n      [stack trace lines]')
+      expect(replaceStackTraceLines(input, 'firefox')).to.eq([...failureHeader, '      [stack trace lines]'].join('\n'))
     })
   })
 })

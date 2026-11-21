@@ -30,11 +30,11 @@ describe('src/cy/aliases', () => {
 
   describe('aliasDisplayName', () => {
     it.each([
-      ['@foo', 'foo'],
-      ['@@foo', 'foo'],
-      ['foo', 'foo'],
-      ['foo@bar', 'foo@bar'],
-      ['@foo@bar', 'foo@bar'],
+      ['@getUsers', 'getUsers'],
+      ['@@getUsers', 'getUsers'],
+      ['getUsers', 'getUsers'],
+      ['user@example.com', 'user@example.com'],
+      ['@user@example.com', 'user@example.com'],
     ])('turns %s into %s', (name, displayName) => {
       expect(aliasDisplayName(name)).toBe(displayName)
     })
@@ -45,11 +45,11 @@ describe('src/cy/aliases', () => {
     const aliases = create({} as $Cy)
 
     it('rejects an alias that starts with @ and suggests the name without them', () => {
-      expect(() => aliases.validateAlias('@@foo')).toThrow('Try renaming the alias to `foo`,')
+      expect(() => aliases.validateAlias('@@getUsers')).toThrow('Try renaming the alias to `getUsers`,')
     })
 
     it('accepts an alias that contains @ after its first character', () => {
-      expect(() => aliases.validateAlias('foo@bar')).not.toThrow()
+      expect(() => aliases.validateAlias('user@example.com')).not.toThrow()
     })
   })
 })

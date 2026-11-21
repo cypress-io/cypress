@@ -11,20 +11,21 @@ const inspect = (value: unknown) => inspectWithOptions(value, false, 2, false)
 describe('src/cy/chai/inspect', () => {
   describe('property names', () => {
     it.each([
-      ['foo', '{ foo: 1 }'],
-      ['_foo', '{ _foo: 1 }'],
-      ['FooBar', '{ FooBar: 1 }'],
-      ['mIxEd_Case_9', '{ mIxEd_Case_9: 1 }'],
+      ['firstName', '{ firstName: 1 }'],
+      ['_internalId', '{ _internalId: 1 }'],
+      ['UserProfile', '{ UserProfile: 1 }'],
+      ['shippingAddress_Line2', '{ shippingAddress_Line2: 1 }'],
     ])('leaves the identifier %s unquoted', (key, expected) => {
       expect(inspect({ [key]: 1 })).toBe(expected)
     })
 
     it.each([
-      ['9lives', `{ '9lives': 1 }`],
-      ['foo-bar', `{ 'foo-bar': 1 }`],
-      ['foo bar', `{ 'foo bar': 1 }`],
+      ['2faEnabled', `{ '2faEnabled': 1 }`],
+      ['content-type', `{ 'content-type': 1 }`],
+      ['first name', `{ 'first name': 1 }`],
+      ['$el', `{ '$el': 1 }`],
       ['', `{ '': 1 }`],
-      ['café', `{ 'café': 1 }`],
+      ['prénom', `{ 'prénom': 1 }`],
     ])('quotes the non-identifier %j', (key, expected) => {
       expect(inspect({ [key]: 1 })).toBe(expected)
     })
@@ -40,11 +41,11 @@ describe('src/cy/chai/inspect', () => {
     })
 
     it('formats any object whose tag ends in Array as a typed array', () => {
-      expect(inspect({ [Symbol.toStringTag]: 'FooArray', length: 1, 0: 'a' })).toBe('[ a ]')
+      expect(inspect({ [Symbol.toStringTag]: 'PixelArray', length: 1, 0: 255 })).toBe('[ 255 ]')
     })
 
     it('does not format an object whose tag only contains Array as a typed array', () => {
-      expect(inspect({ [Symbol.toStringTag]: 'FooArrayLike', length: 1 })).toBe('{ length: 1 }')
+      expect(inspect({ [Symbol.toStringTag]: 'PixelArrayLike', length: 1 })).toBe('{ length: 1 }')
     })
 
     it('does not format an ArrayBuffer as a typed array', () => {

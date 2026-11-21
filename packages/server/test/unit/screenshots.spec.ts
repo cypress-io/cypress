@@ -748,12 +748,12 @@ describe('lib/screenshots', { timeout: 1000 }, () => {
 
     it('splits spec name and name on backslashes and mixed separators', async () => {
       const p = await screenshots.getPath({
-        specName: 'examples\\user/list.js',
-        titles: ['bar', 'baz'],
-        name: 'quux\\lorem/ipsum',
+        specName: 'cypress\\e2e/onboarding.cy.ts',
+        titles: ['onboarding', 'shows the welcome modal on first sign-in'],
+        name: 'onboarding\\step-1/welcome-modal',
       }, 'png', 'path/to/screenshots')
 
-      expect(p).toBe('path/to/screenshots/examples/user/list.js/quux/lorem/ipsum.png')
+      expect(p).toBe('path/to/screenshots/cypress/e2e/onboarding.cy.ts/onboarding/step-1/welcome-modal.png')
     })
 
     it('concats spec name, screenshotsFolder, and titles', () => {

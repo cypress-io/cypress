@@ -18,13 +18,13 @@ describe('src/cypress/local_storage', () => {
 
     it('removes every item except those whose key mentions debug', () => {
       localStorage.setItem('debug', 'cypress:*')
-      localStorage.setItem('my-debug-flag', 'true')
-      localStorage.setItem('token', 'abc')
-      localStorage.setItem('Debug', 'not special')
+      localStorage.setItem('app:debugMode', 'true')
+      localStorage.setItem('authToken', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGYzYTJjNzEiLCJlbWFpbCI6ImphbmUuZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYzNjgzMjAwfQ.JaVsgIApSBU0bEGfl0rHAJoU2ao8VW3nks_QEma_Y50')
+      localStorage.setItem('DEBUG', 'express:*')
 
       $LocalStorage.clear([])
 
-      expect(Object.keys(localStorage).sort()).toEqual(['debug', 'my-debug-flag'])
+      expect(Object.keys(localStorage).sort()).toEqual(['app:debugMode', 'debug'])
     })
   })
 })
