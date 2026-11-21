@@ -21,7 +21,7 @@ Write down three things before you look at the pattern. They belong in the PR de
 
 ## 2. Run a static check
 
-[`recheck`](https://makenowjust-labs.github.io/recheck/) analyses a pattern and reports `safe`, `vulnerable` or `unknown`, along with its complexity and an attack string. It's a root devDependency, so a root `yarn` install is all you need. Pass the script the regex literal, in single quotes so the shell leaves it alone:
+[`recheck`](https://makenowjust-labs.github.io/recheck/) analyses a pattern and reports `safe`, `vulnerable` or `unknown`, along with its complexity and a worst-case input (which `recheck` calls an attack string). It's a root devDependency, so a root `yarn` install is all you need. Pass the script the regex literal, in single quotes so the shell leaves it alone:
 
 ```bash
 yarn check-regex '/^\s+\S[^\s:]*:/u'
@@ -41,7 +41,7 @@ If `recheck` reports `unknown` (for example, its analysis timed out), treat it l
 Static analysis says whether a pattern *can* blow up. Timing tells you whether it does at the sizes your input really reaches. The script handles both halves:
 
 - **Real inputs at realistic size.** Pass captured output with `--samples <file>` (one input per line, or a JSON array in a `.json` file for inputs that span lines). Capture it from the real tool or browser. Don't hand-write lines that only look plausible.
-- **The worst case.** When `recheck` finds an attack string, the script grows it to 1,000, 10,000 and 50,000 characters. To time a rewrite against the pattern it replaces, pass the old pattern with `--attack-from`.
+- **The worst case.** When `recheck` finds a worst-case input, the script grows it to 1,000, 10,000 and 50,000 characters. To time a rewrite against the pattern it replaces, pass the old pattern with `--worst-case-from`.
 
 Each run happens in a worker thread that the main thread stops after 2,000 milliseconds. That matters: a runaway regex blocks the thread it runs on, so a `setTimeout` in the same thread doesn't fire until the regex returns. A row whose time reads `> 2000` means the regex was still running when the cap hit.
 
@@ -66,7 +66,7 @@ A rewrite has to accept the same inputs as the original, too. Check it against t
 
 ## 5. Add a regression test
 
-Pin the fix with a test that feeds in a 50,000-character adversarial input, usually the attack string from step 3, and asserts a time bound that's generous enough to pass on a slow CI machine but well below what the old pattern took. This one comes from [`packages/stderr-filtering/lib/__spec__/constants.spec.ts`](../packages/stderr-filtering/lib/__spec__/constants.spec.ts):
+Pin the fix with a test that feeds in a 50,000-character worst-case input, usually the one from step 3, and asserts a time bound that's generous enough to pass on a slow CI machine but well below what the old pattern took. This one comes from [`packages/stderr-filtering/lib/__spec__/constants.spec.ts`](../packages/stderr-filtering/lib/__spec__/constants.spec.ts):
 
 ```ts
 it.each(cases)('handles %s in linear time', (_name, input, expected) => {
@@ -105,7 +105,7 @@ These come from merged fixes. Each "Before" result was measured with `yarn check
 Here's the first example as the script shows it. `node-stack-lines.txt` holds the `at` lines of a real Node stack trace.
 
 ```bash
-yarn check-regex '/:(\d+):(\d+)\)?$/' --samples node-stack-lines.txt --attack-from '/^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/'
+yarn check-regex '/:(\d+):(\d+)\)?$/' --samples node-stack-lines.txt --worst-case-from '/^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/'
 ```
 
-The rewrite stays flat on the old pattern's attack string at every size. One sample, `at [eval]:1:7`, matches the rewrite and not the original, because `parseStackLine` now rejects that line with its `lastIndexOf('(')` check instead. It's a good reminder to compare the whole function, not just the pattern.
+The rewrite stays flat on the old pattern's worst-case input at every size. One sample, `at [eval]:1:7`, matches the rewrite and not the original, because `parseStackLine` now rejects that line with its `lastIndexOf('(')` check instead. It's a good reminder to compare the whole function, not just the pattern.

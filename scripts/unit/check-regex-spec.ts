@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 
-const { buildAttackString, parsePatternArg } = require('../check-regex')
+const { buildWorstCaseInput, parsePatternArg } = require('../check-regex')
 
 describe('check-regex', () => {
   describe('parsePatternArg', () => {
@@ -17,27 +17,27 @@ describe('check-regex', () => {
     })
   })
 
-  describe('buildAttackString', () => {
-    // recheck 4.6.2's attack for /^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/
-    const attack = {
+  describe('buildWorstCaseInput', () => {
+    // recheck 4.6.2's worst-case input for /^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/
+    const worstCase = {
       pumps: [{ prefix: '', pump: ' ', bias: 0 }, { prefix: '', pump: '(', bias: 0 }],
       suffix: ' ',
       base: 1651,
     }
 
     it('rebuilds recheck\'s own string at its base length', () => {
-      expect(buildAttackString(attack, 3303)).to.equal(`${' '.repeat(1651)}${'('.repeat(1651)} `)
+      expect(buildWorstCaseInput(worstCase, 3303)).to.equal(`${' '.repeat(1651)}${'('.repeat(1651)} `)
     })
 
     it('scales to the requested length', () => {
-      const str = buildAttackString(attack, 50_000)
+      const str = buildWorstCaseInput(worstCase, 50_000)
 
       expect(str.length).to.be.within(49_998, 50_000)
       expect(str.startsWith(' '.repeat(24_999))).to.be.true
     })
 
     it('honours prefixes and bias', () => {
-      expect(buildAttackString({ pumps: [{ prefix: 'x', pump: 'ab', bias: 1 }], suffix: '!' }, 10)).to.equal('xabababab!')
+      expect(buildWorstCaseInput({ pumps: [{ prefix: 'x', pump: 'ab', bias: 1 }], suffix: '!' }, 10)).to.equal('xabababab!')
     })
   })
 })

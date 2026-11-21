@@ -8,10 +8,10 @@ const recheck = require('recheck')
 const SIZES = [1_000, 10_000, 50_000]
 const TIMEOUT_MS = 2_000
 
-const USAGE = `Usage: yarn check-regex '/<source>/<flags>' [--samples <file>] [--attack-from '/<source>/<flags>']
+const USAGE = `Usage: yarn check-regex '/<source>/<flags>' [--samples <file>] [--worst-case-from '/<source>/<flags>']
 
-  --samples      Real inputs, one per line, or a JSON array of strings in a .json file
-  --attack-from  Also time against another regex's attack string, such as the one this replaces
+  --samples          Real inputs, one per line, or a JSON array of strings in a .json file
+  --worst-case-from  Also time against another regex's worst-case input, such as the one this replaces
 
 Exits 1 when recheck does not rate the regex safe or a run takes longer than ${TIMEOUT_MS} ms.`
 
@@ -27,19 +27,20 @@ const parsePatternArg = (arg) => {
 }
 
 /**
- * Grows recheck's attack to about `length` characters: at length 10,
+ * Grows recheck's worst-case input to about `length` characters: at length 10,
  * `{ pumps: [{ prefix: 'x', pump: 'ab', bias: 1 }], suffix: '!' }` becomes
  * `'xabababab!'`. Each pump contributes `prefix + pump.repeat(n + bias)` and
- * the suffix follows, which is how recheck builds `attack.string` from `base`.
- * @param {{ pumps: { prefix: string, pump: string, bias: number }[], suffix: string }} attack
+ * the suffix follows, which is how recheck builds its own `attack.string`
+ * from `base`.
+ * @param {{ pumps: { prefix: string, pump: string, bias: number }[], suffix: string }} worstCase
  * @param {number} length
  */
-const buildAttackString = (attack, length) => {
-  const fixed = attack.pumps.reduce((sum, { prefix, pump, bias }) => sum + prefix.length + pump.length * bias, attack.suffix.length)
-  const perRepeat = attack.pumps.reduce((sum, { pump }) => sum + pump.length, 0)
+const buildWorstCaseInput = (worstCase, length) => {
+  const fixed = worstCase.pumps.reduce((sum, { prefix, pump, bias }) => sum + prefix.length + pump.length * bias, worstCase.suffix.length)
+  const perRepeat = worstCase.pumps.reduce((sum, { pump }) => sum + pump.length, 0)
   const repeats = Math.max(1, Math.floor((length - fixed) / perRepeat))
 
-  return attack.pumps.map(({ prefix, pump, bias }) => prefix + pump.repeat(repeats + bias)).join('') + attack.suffix
+  return worstCase.pumps.map(({ prefix, pump, bias }) => prefix + pump.repeat(repeats + bias)).join('') + worstCase.suffix
 }
 
 // Runs in a worker so the main thread can stop it: a catastrophically
@@ -90,7 +91,7 @@ const main = async () => {
     allowPositionals: true,
     options: {
       'samples': { type: 'string' },
-      'attack-from': { type: 'string' },
+      'worst-case-from': { type: 'string' },
       'help': { type: 'boolean', short: 'h' },
     },
   })
@@ -117,29 +118,29 @@ const main = async () => {
     console.log(`  complexity: ${diagnostics.complexity.summary}`)
   }
 
-  const attacks = []
+  const worstCases = []
 
   if (diagnostics.status === 'vulnerable') {
-    console.log(`  attack:     ${diagnostics.attack.pattern}`)
-    attacks.push({ name: 'attack', attack: diagnostics.attack })
+    console.log(`  worst case: ${diagnostics.attack.pattern}`)
+    worstCases.push({ name: 'worst case', worstCase: diagnostics.attack })
   }
 
-  if (values['attack-from']) {
-    const from = parsePatternArg(values['attack-from'])
+  if (values['worst-case-from']) {
+    const from = parsePatternArg(values['worst-case-from'])
     const fromDiagnostics = await recheck.check(from.source, from.flags)
 
     if (fromDiagnostics.status !== 'vulnerable') {
-      throw new Error(`--attack-from: recheck rates /${from.source}/${from.flags} ${fromDiagnostics.status}, so it has no attack string`)
+      throw new Error(`--worst-case-from: recheck rates /${from.source}/${from.flags} ${fromDiagnostics.status}, so it has no worst-case input`)
     }
 
-    attacks.push({ name: 'borrowed attack', attack: fromDiagnostics.attack })
+    worstCases.push({ name: 'borrowed worst case', worstCase: fromDiagnostics.attack })
   }
 
   const inputs = values.samples ? (await readSamples(values.samples)).map((input, i) => ({ name: `sample ${i + 1}`, input })) : []
 
-  for (const { name, attack } of attacks) {
+  for (const { name, worstCase } of worstCases) {
     for (const size of SIZES) {
-      inputs.push({ name: `${name} @ ${size}`, input: buildAttackString(attack, size) })
+      inputs.push({ name: `${name} @ ${size}`, input: buildWorstCaseInput(worstCase, size) })
     }
   }
 
@@ -159,7 +160,7 @@ const main = async () => {
   return diagnostics.status === 'safe' && rows.every((row) => typeof row.ms === 'number') ? 0 : 1
 }
 
-module.exports = { buildAttackString, parsePatternArg }
+module.exports = { buildWorstCaseInput, parsePatternArg }
 
 if (require.main === module) {
   main().then((code) => {
