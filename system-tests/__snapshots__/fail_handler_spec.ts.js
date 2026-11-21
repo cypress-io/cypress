@@ -1,4 +1,4 @@
-exports['e2e fail handlers / passes tests whose fail handlers do not throw'] = `
+exports['e2e fail handlers / passes or fails each test according to its fail handler'] = `
 
 ====================================================================================================
 
