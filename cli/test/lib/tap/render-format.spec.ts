@@ -83,13 +83,16 @@ describe('lib/tap/render/format', () => {
   })
 
   describe('trimTrailingNewlines', () => {
-    // A code frame as the driver reports it for a failed `should`, trailing newline included.
-    const codeFrame = `  56 |     // https://on.cypress.io/clear\n  57 |     cy.get(".action-select").type("Clear this text");\n> 58 |     cy.get(".action-clear").should("have.value", "Clear this text");\n     |                             ^\n  59 |     cy.get(".action-clear").clear();\n`
+    // @babel/code-frame's output for the kitchensink's `actions.cy.js` line 54,
+    // which is what the driver reports. It never ends in a newline.
+    const codeFrame = `  52 |     // https://on.cypress.io/clear\n  53 |     cy.get('.action-clear').type('Clear this text')\n> 54 |     cy.get('.action-clear').should('have.value', 'Clear this text')\n     |                            ^\n  55 |     cy.get('.action-clear').clear()\n  56 |     cy.get('.action-clear').should('have.value', '')\n  57 |   })`
 
     it.each([
-      ['a code frame with one trailing newline', codeFrame, codeFrame.slice(0, -1)],
-      ['several trailing newlines', `${codeFrame}\n\n`, codeFrame.slice(0, -1)],
-      ['no trailing newline', codeFrame.slice(0, -1), codeFrame.slice(0, -1)],
+      ['a driver code frame', codeFrame, codeFrame],
+      ['a driver code frame at the end of a file', '  329 |   })\n> 330 | })\n      | ^\n  331 |', '  329 |   })\n> 330 | })\n      | ^\n  331 |'],
+      // Inputs below follow the code frame format rather than captured output.
+      ['one trailing newline', `${codeFrame}\n`, codeFrame],
+      ['several trailing newlines', `${codeFrame}\n\n\n`, codeFrame],
       ['an empty string', '', ''],
       ['only newlines', '\n\n\n', ''],
       ['blank lines inside the frame', '  1 | a\n\n  2 | b\n', '  1 | a\n\n  2 | b'],
