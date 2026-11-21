@@ -30,10 +30,10 @@ interface CompileSuccessData {
   specFile?: string
 }
 
+const pluginsChildren = new Set<PluginIpcHandler>()
+
 plugins.registerHandler((ipc: PluginIpcHandler) => {
-  baseEmitter.on('dev-server:specs:changed', (specsAndOptions: SpecsChangedData) => {
-    ipc.send('dev-server:specs:changed', specsAndOptions)
-  })
+  pluginsChildren.add(ipc)
 
   ipc.on('dev-server:specs:delivered', ({ id }: { id: number }) => {
     delivered.get(id)?.()
@@ -49,8 +49,6 @@ plugins.registerHandler((ipc: PluginIpcHandler) => {
  * the dev server has the new list, so a spec loaded afterwards waits for the build that includes it.
  */
 export const emitSpecsChanged: UpdateSpecs = (specs, options) => {
-  if (!baseEmitter.listenerCount('dev-server:specs:changed')) return Promise.resolve()
-
   const id = nextSpecsChangedId++
 
   return new Promise<void>((resolve) => {
@@ -66,8 +64,18 @@ export const emitSpecsChanged: UpdateSpecs = (specs, options) => {
 
     delivered.set(id, done)
     const data: SpecsChangedData = { id, specs, options }
+    let sent = false
 
-    baseEmitter.emit('dev-server:specs:changed', data)
+    for (const ipc of pluginsChildren) {
+      // a child from an earlier config load that has since exited can't reply
+      if (ipc.send('dev-server:specs:changed', data)) {
+        sent = true
+      } else {
+        pluginsChildren.delete(ipc)
+      }
+    }
+
+    if (!sent) done()
   })
 }
 
@@ -100,6 +108,7 @@ const API: DevServerAPI = {
   close () {
     debugFn('close dev-server')
     delivered.forEach((done) => done())
+    pluginsChildren.clear()
     baseEmitter.removeAllListeners()
   },
 }

@@ -14,7 +14,7 @@ vi.mock('../../../lib/plugins/util', () => {
 
 const spec = (relative: string) => ({ relative, absolute: `/project/${relative}`, name: relative }) as SpecWithRelativeRoot
 
-const fakeIpc = () => Object.assign(new EventEmitter(), { send: vi.fn() })
+const fakeIpc = ({ connected = true } = {}) => Object.assign(new EventEmitter(), { send: vi.fn(() => connected) })
 
 describe('lib/plugins/dev-server', () => {
   beforeEach(() => {
@@ -40,6 +40,18 @@ describe('lib/plugins/dev-server', () => {
     ipc.emit('dev-server:specs:delivered', { id: 0 })
     await update
     expect(resolved).toBe(true)
+  })
+
+  it('does not wait on a plugins child that has exited', async () => {
+    const { emitSpecsChanged } = await import('../../../lib/plugins/dev-server')
+    const exited = fakeIpc({ connected: false })
+
+    handlers.forEach((handler) => handler(exited))
+
+    await expect(emitSpecsChanged([spec('a.cy.tsx')], { neededForJustInTimeCompile: true })).resolves.toBeUndefined()
+    await emitSpecsChanged([spec('b.cy.tsx')])
+
+    expect(exited.send).toHaveBeenCalledTimes(1)
   })
 
   it('resolves right away when no plugins child is running', async () => {
