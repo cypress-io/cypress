@@ -207,6 +207,13 @@ describe('lib/modes/run-workers', () => {
       expect(await resolveWorkerCount('auto', 10, { cpus: 1, availableMb: 100, perWorkerMb: 1000 })).toBe(1)
     })
 
+    it('counts the CPUs a container is limited to rather than the host\'s', async () => {
+      vi.spyOn(os, 'cpus').mockReturnValue(new Array(18).fill(os.cpus()[0]))
+      vi.spyOn(os, 'availableParallelism').mockReturnValue(4)
+
+      expect(await resolveWorkerCount('auto', 20, { availableMb: 99999, perWorkerMb: 1000 })).toBe(3)
+    })
+
     it('fits more workers in the same memory when rendering in software', async () => {
       const isSoftwareRendering = vi.spyOn(gpu, 'isSoftwareRendering').mockReturnValue(false)
 
@@ -248,12 +255,21 @@ describe('lib/modes/run-workers', () => {
       expect(await availableMemoryMb(root, async () => 64 * 1024 ** 3)).toBe(3072)
     })
 
+    it('counts inactive page cache in the container as available', async () => {
+      await fs.writeFile(path.join(root, 'memory.max'), `${8 * 1024 ** 3}\n`)
+      await fs.writeFile(path.join(root, 'memory.current'), `${7 * 1024 ** 3}\n`)
+      await fs.writeFile(path.join(root, 'memory.stat'), `anon ${1024 ** 3}\nfile ${6 * 1024 ** 3}\ninactive_file ${5 * 1024 ** 3}\n`)
+
+      expect(await availableMemoryMb(root, async () => 64 * 1024 ** 3)).toBe(6144)
+    })
+
     it('uses the cgroup v1 limit when v2 is absent', async () => {
       await fs.mkdir(path.join(root, 'memory'))
       await fs.writeFile(path.join(root, 'memory', 'memory.limit_in_bytes'), `${2 * 1024 ** 3}`)
       await fs.writeFile(path.join(root, 'memory', 'memory.usage_in_bytes'), `${1024 ** 3}`)
+      await fs.writeFile(path.join(root, 'memory', 'memory.stat'), `inactive_file 0\ntotal_inactive_file ${512 * 1024 ** 2}\n`)
 
-      expect(await availableMemoryMb(root, async () => 64 * 1024 ** 3)).toBe(1024)
+      expect(await availableMemoryMb(root, async () => 64 * 1024 ** 3)).toBe(1536)
     })
 
     it('uses system available memory when the cgroup is unlimited', async () => {

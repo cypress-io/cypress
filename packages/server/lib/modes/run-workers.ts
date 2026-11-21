@@ -67,21 +67,35 @@ const systemAvailableBytes = async () => (await si.mem()).available
 
 // os.freemem() counts reclaimable cache as used on macOS, and inside a container
 // the system figures describe the host rather than the container's limit
+const readStat = async (file: string, key: string) => {
+  try {
+    const line = (await fs.readFile(file, 'utf8')).split('\n').find((l) => l.startsWith(`${key} `))
+
+    return line ? Number(line.split(' ')[1]) || 0 : 0
+  } catch {
+    return 0
+  }
+}
+
 export async function availableMemoryMb (cgroupRoot = '/sys/fs/cgroup', getSystemAvailable = systemAvailableBytes): Promise<number> {
-  const limits: [string, string][] = [
-    [path.join(cgroupRoot, 'memory.max'), path.join(cgroupRoot, 'memory.current')],
-    [path.join(cgroupRoot, 'memory', 'memory.limit_in_bytes'), path.join(cgroupRoot, 'memory', 'memory.usage_in_bytes')],
+  const v1 = path.join(cgroupRoot, 'memory')
+  const limits: [string, string, string, string][] = [
+    [path.join(cgroupRoot, 'memory.max'), path.join(cgroupRoot, 'memory.current'), path.join(cgroupRoot, 'memory.stat'), 'inactive_file'],
+    [path.join(v1, 'memory.limit_in_bytes'), path.join(v1, 'memory.usage_in_bytes'), path.join(v1, 'memory.stat'), 'total_inactive_file'],
   ]
 
   const available = await getSystemAvailable()
 
-  for (const [limitFile, usageFile] of limits) {
+  for (const [limitFile, usageFile, statFile, inactiveFileKey] of limits) {
     const limit = await readNumber(limitFile)
     const usage = await readNumber(usageFile)
 
     // an unlimited cgroup v1 reports a huge sentinel rather than "max"
     if (limit !== undefined && usage !== undefined && limit < os.totalmem()) {
-      return Math.floor(Math.min(limit - usage, available) / 1024 / 1024)
+      // usage counts page cache the kernel reclaims under pressure, such as files left by an install
+      const reclaimable = await readStat(statFile, inactiveFileKey)
+
+      return Math.floor(Math.min(limit - usage + reclaimable, available) / 1024 / 1024)
     }
   }
 
@@ -89,7 +103,8 @@ export async function availableMemoryMb (cgroupRoot = '/sys/fs/cgroup', getSyste
 }
 
 export async function resolveWorkerCount (requested: unknown, specCount: number, {
-  cpus = os.cpus().length,
+  // os.cpus() lists the host's CPUs inside a container; this respects its CPU quota
+  cpus = os.availableParallelism(),
   availableMb,
   perWorkerMb = perWorkerMemoryMb(),
 }: { cpus?: number, availableMb?: number, perWorkerMb?: number } = {}): Promise<number> {
