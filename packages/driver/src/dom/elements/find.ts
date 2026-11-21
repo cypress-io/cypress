@@ -283,10 +283,10 @@ $.expr.pseudos['cy-contains-regex'] = $.expr.createPseudo((text) => {
 
   // taken from jquery's normal contains method
   return function (elem) {
-    // With the g or y flag, `test()` starts at `lastIndex` and moves it past the
-    // match, so `/Hello/g` would miss "Hello" in the next element tested. jQuery
-    // tests an element more than once and caches this matcher across queries,
-    // so start every test from the beginning of the text.
+    // Test every element from the start of its text, as a fresh RegExp would.
+    // With the g or y flag, `test()` resumes from `lastIndex`, which the last
+    // match moved forward, and jQuery reuses this matcher to test an element
+    // more than once and for later queries with the same selector.
     regex.lastIndex = 0
 
     if (isSubmit(elem)) {
