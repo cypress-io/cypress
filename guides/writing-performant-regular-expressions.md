@@ -93,16 +93,26 @@ Keep the cases that check what the regex *matches* separate from the timing case
 
 These come from merged fixes. Each "Before" result was measured with `yarn check-regex` on one machine. Every regex left in the rewrites comes back `safe`.
 
-| Fix | Before | After |
-| --- | --- | --- |
-| Stack line location, `parseStackLine` ([#35368](https://github.com/cypress-io/cypress/pull/35368)) | `/^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/`: 3rd-degree polynomial. Stopped at the cap from 10,000 characters. | `/:(\d+):(\d+)\)?$/`, plus `lastIndexOf('(')` for the path |
-| Debug-output prefix, `DEBUG_PREFIX` ([#35495](https://github.com/cypress-io/cypress/pull/35495)) | `/^\s+((\u001b\[\d+(;\d+)*m)*(\S+):)+/u`: 2nd-degree polynomial. About ×90 slower from 1,000 to 10,000 characters. | `/^\s+\S[^\s:]*:/u` |
-| Stack line test, `stackLineRegex` ([#35343](https://github.com/cypress-io/cypress/pull/35343)) | `/^\s*(at )?.*@?(?:\(?.*(?::\d+:\d+\|<unknown>\|\[native code\])+\)?)$/`: 4th-degree polynomial. Stopped at the cap from 1,000 characters. | `/(?::\d+:\d+\|<unknown>\|\[native code\])\)?$/` |
-| WebKit stack normalisation ([#35343](https://github.com/cypress-io/cypress/pull/35343)) | `/(.*)@(.*)(\n?)/g`: 2nd-degree polynomial | `split('\n')` and `lastIndexOf('@')` |
-| `CYPRESS_API_URL` from `ps eww` ([#35372](https://github.com/cypress-io/cypress/pull/35372)) | `/(\d+)\s.*CYPRESS_API_URL=(\S+)\s/`: 3rd-degree polynomial | `/^(\d+)\s/`, plus `lastIndexOf` for the key |
-| Stubbed-response HTML sniffing ([#35360](https://github.com/cypress-io/cypress/pull/35360)) | `/<.+>[\s\S]+<\/.+>/`: 4th-degree polynomial. Stopped at the cap from 1,000 characters. | A single forward scan, no regex |
+- **Stack line location, `parseStackLine`** ([#35368](https://github.com/cypress-io/cypress/pull/35368))
+  - Before: `/^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/`, a 3rd-degree polynomial. It hit the time cap from 10,000 characters.
+  - After: `/:(\d+):(\d+)\)?$/`, plus `lastIndexOf('(')` for the path.
+- **Debug-output prefix, `DEBUG_PREFIX`** ([#35495](https://github.com/cypress-io/cypress/pull/35495))
+  - Before: `/^\s+((\u001b\[\d+(;\d+)*m)*(\S+):)+/u`, a 2nd-degree polynomial. It took about ×90 longer at 10,000 characters than at 1,000.
+  - After: `/^\s+\S[^\s:]*:/u`.
+- **Stack line test, `stackLineRegex`** ([#35343](https://github.com/cypress-io/cypress/pull/35343))
+  - Before: `/^\s*(at )?.*@?(?:\(?.*(?::\d+:\d+|<unknown>|\[native code\])+\)?)$/`, a 4th-degree polynomial. It hit the time cap from 1,000 characters.
+  - After: `/(?::\d+:\d+|<unknown>|\[native code\])\)?$/`.
+- **WebKit stack normalisation** ([#35343](https://github.com/cypress-io/cypress/pull/35343))
+  - Before: `/(.*)@(.*)(\n?)/g`, a 2nd-degree polynomial.
+  - After: `split('\n')` and `lastIndexOf('@')`.
+- **`CYPRESS_API_URL` from `ps eww`** ([#35372](https://github.com/cypress-io/cypress/pull/35372))
+  - Before: `/(\d+)\s.*CYPRESS_API_URL=(\S+)\s/`, a 3rd-degree polynomial.
+  - After: `/^(\d+)\s/`, plus `lastIndexOf` for the key.
+- **Stubbed-response HTML sniffing** ([#35360](https://github.com/cypress-io/cypress/pull/35360))
+  - Before: `/<.+>[\s\S]+<\/.+>/`, a 4th-degree polynomial. It hit the time cap from 1,000 characters.
+  - After: a single forward scan, no regex.
 
-Here's the first row as the script shows it. `node-stack-lines.txt` holds the `at` lines of a real Node stack trace.
+Here's the first example as the script shows it. `node-stack-lines.txt` holds the `at` lines of a real Node stack trace.
 
 ```bash
 yarn check-regex '/:(\d+):(\d+)\)?$/' --samples node-stack-lines.txt --attack-from '/^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/'

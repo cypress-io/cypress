@@ -98,9 +98,10 @@ const findRegexesOnLine = (code, line, fileName = 'input.ts') => {
 }
 
 /**
- * Repeats recheck's pumps so the attack string is about `length` characters.
- * Each pump contributes `prefix + pump.repeat(n + bias)`, then the suffix
- * follows, which is how recheck builds its own `attack.string` from `base`.
+ * Grows recheck's attack to about `length` characters: at length 10,
+ * `{ pumps: [{ prefix: 'x', pump: 'ab', bias: 1 }], suffix: '!' }` becomes
+ * `'xabababab!'`. Each pump contributes `prefix + pump.repeat(n + bias)` and
+ * the suffix follows, which is how recheck builds `attack.string` from `base`.
  * @param {{ pumps: { prefix: string, pump: string, bias: number }[], suffix: string }} attack
  * @param {number} length
  */
@@ -113,7 +114,8 @@ const buildAttackString = (attack, length) => {
 }
 
 // Runs in a worker so the main thread can stop it: a catastrophically
-// backtracking regex blocks its own thread, so a timer there would never fire.
+// backtracking regex blocks its own thread, so a timer there would not fire
+// until the regex returned.
 const WORKER_SOURCE = `
 const { parentPort, workerData } = require('worker_threads')
 const { performance } = require('perf_hooks')
