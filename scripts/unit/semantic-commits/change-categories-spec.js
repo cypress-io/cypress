@@ -17,10 +17,11 @@ describe('semantic-commits/change-categories parserOpts', () => {
     ;[
       // Real titles from develop.
       ['fix: apply the browser\'s rules to document.cookie writes in cy.origin() (#35294)', ['fix', undefined, 'apply the browser\'s rules to document.cookie writes in cy.origin() (#35294)']],
-      ['chore(deps): update dependency vite to v8.1.5 (#35210)', ['chore', 'deps', 'update dependency vite to v8.1.5 (#35210)']],
-      ['feat(cy.prompt): add support for custom selectors (#34981)', ['feat', 'cy.prompt', 'add support for custom selectors (#34981)']],
+      ['chore(deps): update dependency rollup to v4.59.0 [security] (#35400)', ['chore', 'deps', 'update dependency rollup to v4.59.0 [security] (#35400)']],
+      ['feat(driver): support HTTP QUERY method in cy.request() and cy.intercept() (#34459)', ['feat', 'driver', 'support HTTP QUERY method in cy.request() and cy.intercept() (#34459)']],
+      ['fix(server): fragment CDP messages over Chrome\'s frame cap (#35378)', ['fix', 'server', 'fragment CDP messages over Chrome\'s frame cap (#35378)']],
       ['revert: "fix: truncate long strings in chai inspect (#33512)" (#33611)', ['revert', undefined, '"fix: truncate long strings in chai inspect (#33512)" (#33611)']],
-      // Edge cases.
+      // Edge cases that follow the header format but aren't taken from history.
       ['fix(a(b)): nested parens', ['fix', 'a(b)', 'nested parens']],
       ['fix(server): handle foo(): bar', ['fix', 'server): handle foo(', 'bar']],
       ['fix: ', ['fix', undefined, '']],
@@ -39,7 +40,7 @@ describe('semantic-commits/change-categories parserOpts', () => {
     })
 
     it('lets the PR title check read a real title', () => {
-      expect(() => _validateTitle('chore(deps): update dependency vite to v8.1.5 (#35210)')).not.to.throw()
+      expect(() => _validateTitle('chore(deps): update dependency rollup to v4.59.0 [security] (#35400)')).not.to.throw()
     })
 
     it('parses a 50,000-character scope of "): " ending in a carriage return in linear time', () => {
