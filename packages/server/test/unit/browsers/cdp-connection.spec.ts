@@ -5,7 +5,7 @@ import type { CdpEvent, CdpCommand } from '../../../lib/browsers/cdp-protocol/cd
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { CDPConnection } from '../../../lib/browsers/cdp-protocol/cdp-connection'
 import { CDPTerminatedError, CDPAlreadyConnectedError, CDPDisconnectedError } from '../../../lib/browsers/cdp-protocol/cri-errors'
-import { FRAGMENT_MESSAGES_OVER_BYTES } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
+import { FRAGMENT_CHARS } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
 import { fireDisconnect as fireDisconnectListeners } from '../../support/helpers/cdp-disconnect'
 import WebSocket from 'ws'
 
@@ -178,12 +178,12 @@ describe('CDPConnection', () => {
         await expect(cdpConnection.connect()).resolves.toBeUndefined()
       })
 
-      it('sends messages over the fragmenting threshold as fragments', async () => {
+      it('sends messages longer than FRAGMENT_CHARS as fragments', async () => {
         const originalSend = stubbedWebSocket.send
 
         await cdpConnection.connect()
 
-        stubbedWebSocket.send('a'.repeat(FRAGMENT_MESSAGES_OVER_BYTES + 1))
+        stubbedWebSocket.send('a'.repeat(FRAGMENT_CHARS + 1))
 
         expect(vi.mocked(originalSend).mock.calls.length).toBeGreaterThan(1)
       })
