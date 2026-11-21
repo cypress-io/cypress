@@ -28,7 +28,6 @@
   <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=for-the-badge&labelColor=1B1E2E&logo=github&color=181717" alt="GitHub stars"/></a>
   <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/Discord-join%20chat-5865F2?style=for-the-badge&labelColor=1B1E2E&logo=discord&logoColor=white" alt="Discord chat"/></a>
   <a href="https://skills.sh/cypress-io/ai-toolkit"><img src="https://skills.sh/b/cypress-io/ai-toolkit?style=for-the-badge" alt="skills.sh"/></a>
-  <a href="https://github.com/cypress-io/cypress/blob/develop/LICENSE"><img src="https://img.shields.io/badge/license-MIT-04C38E?style=for-the-badge&labelColor=1B1E2E" alt="MIT license"/></a>
 </p>
 
 ## What is Cypress?
@@ -82,7 +81,7 @@ Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo o
 
 ## License
 
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/develop/LICENSE)
+[![MIT license](https://img.shields.io/badge/license-MIT-04C38E?style=for-the-badge&labelColor=1B1E2E)](https://github.com/cypress-io/cypress/blob/develop/LICENSE)
 
 This project is licensed under the terms of the [MIT license](/LICENSE).
 
