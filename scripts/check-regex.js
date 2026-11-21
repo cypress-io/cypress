@@ -105,6 +105,7 @@ const main = async () => {
 
   const pattern = parsePatternArg(positionals[0])
 
+  // Throws the engine's own syntax error, which says more than recheck's `unknown`
   new RegExp(pattern.source, pattern.flags)
 
   const diagnostics = await recheck.check(pattern.source, pattern.flags)

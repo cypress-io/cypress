@@ -34,7 +34,7 @@ The result should be `safe`. If `recheck` says `vulnerable` and you're keeping t
 
 "The input is usually short" isn't a justification. Most of the fixes listed below began as exactly that assumption.
 
-If `recheck` reports `unknown` (it timed out or doesn't support a feature such as a backreference), treat it like `vulnerable`: rely on the step 3 timings and explain them.
+If `recheck` reports `unknown` (for example, its analysis timed out), treat it like `vulnerable`: rely on the step 3 timings and explain them.
 
 ## 3. Time it
 
@@ -45,7 +45,7 @@ Static analysis says whether a pattern *can* blow up. Timing tells you whether i
 
 Each run happens in a worker thread that the main thread stops after 2,000 milliseconds. That matters: a runaway regex blocks the thread it runs on, so a `setTimeout` in the same thread doesn't fire until the regex returns. A row whose time reads `> 2000` means the regex was still running when the cap hit.
 
-Read the timings as relative, not absolute. They come from one machine, so compare rows against each other rather than with numbers measured somewhere else. The thing to look for is growth. Going from 1,000 to 10,000 characters, a linear regex takes roughly ten times as long, a quadratic one roughly a hundred times, and an exponential one never comes back.
+Read the timings as relative, not absolute. They come from one machine, so compare rows against each other rather than with numbers measured somewhere else. The thing to look for is growth. Each run has a fixed overhead of a fraction of a millisecond, so judge growth once the times are well above that. Going from 1,000 to 10,000 characters, a linear regex takes roughly ten times as long, a quadratic one roughly a hundred times, and an exponential one never comes back.
 
 The script exits `1` when `recheck` doesn't rate a pattern `safe` or a run hits the cap.
 
@@ -59,7 +59,7 @@ Most fixes come from a short list of rewrites:
 - **Don't end with an unanchored `\s+$` or `\d+$`.** Each start position inside a long run of spaces or digits scans to the end and fails. Use `trimEnd()`, or walk back from the end of the string.
 - **Use string methods where a regex isn't needed.** `indexOf`, `lastIndexOf`, `startsWith`, `endsWith`, `split` and `trimEnd` are linear and easier to read. Several fixes below keep only a short anchored regex and find the rest with `lastIndexOf`.
 - **Escape user input before passing it to `new RegExp`.** `_.escapeRegExp(value)` stops a value that contains regex syntax from changing the pattern.
-- **Hoist regexes to module scope.** That saves recompiling them on every call. Watch out with the `g` or `y` flag, though: `test` and `exec` keep `lastIndex` between calls, so a hoisted global regex carries state from one input to the next. Drop the flag if you only test each input once.
+- **Hoist regexes to module scope.** The regex is then built once rather than on every call, which matters most for one built with `new RegExp`. Watch out with the `g` or `y` flag, though: `test` and `exec` keep `lastIndex` between calls, so a hoisted global regex carries state from one input to the next. Drop the flag if you only test each input once.
 - **Check the browser floor for newer syntax in driver code.** Lookbehind (`(?<=…)`, `(?<!…)`), named groups and the `v` flag have to work on every browser in [`browser-bundles.browserslistrc`](../browser-bundles.browserslistrc). See [Runtime targets](../AGENTS.md#runtime-targets). ESLint's `compat/compat` rule checks APIs, not regex syntax, so you'll need to check this by hand.
 
 A rewrite has to accept the same inputs as the original, too. Check it against the existing tests and against the real samples from step 3. If the regex is only part of a function, compare the function, not just the pattern.
@@ -87,7 +87,7 @@ These come from merged fixes. Each "Before" result was measured with `yarn check
   - Before: `/^\s*(?:at )?.*@?\((.*?):(\d+):(\d+)\)?$/`, a 3rd-degree polynomial. It hit the time cap from 10,000 characters.
   - After: `/:(\d+):(\d+)\)?$/`, plus `lastIndexOf('(')` for the path.
 - **Debug-output prefix, `DEBUG_PREFIX`** ([#35495](https://github.com/cypress-io/cypress/pull/35495))
-  - Before: `/^\s+((\u001b\[\d+(;\d+)*m)*(\S+):)+/u`, a 2nd-degree polynomial. It took about ×90 longer at 10,000 characters than at 1,000.
+  - Before: `/^\s+((\u001b\[\d+(;\d+)*m)*(\S+):)+/u`, a 2nd-degree polynomial. It took more than 1,000 times longer at 50,000 characters than at 1,000.
   - After: `/^\s+\S[^\s:]*:/u`.
 - **Stack line test, `stackLineRegex`** ([#35343](https://github.com/cypress-io/cypress/pull/35343))
   - Before: `/^\s*(at )?.*@?(?:\(?.*(?::\d+:\d+|<unknown>|\[native code\])+\)?)$/`, a 4th-degree polynomial. It hit the time cap from 1,000 characters.
