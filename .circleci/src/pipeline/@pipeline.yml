@@ -3462,6 +3462,11 @@ jobs:
     working_directory: ~/cypress
     steps:
       - checkout
+      # Installs only the pinned checker, not the monorepo, so a docs-only PR
+      # skips the full install.
+      - run:
+          name: Install markdown-link-check
+          command: npm install --global "markdown-link-check@$(node -p "require('./package.json').devDependencies['markdown-link-check']")"
       - run:
           name: Check Markdown links 🔗
           command: yarn check-markdown-links
