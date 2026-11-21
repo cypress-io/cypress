@@ -7,11 +7,6 @@
     </picture>
   </a>
 </p>
-<p align="center">
-  <a href="https://on.cypress.io">Documentation</a> |
-  <a href="https://on.cypress.io/changelog">Changelog</a> |
-  <a href="https://www.cypress.io/roadmap">Roadmap</a>
-</p>
 
 <h3 align="center">
   AI writes the code. Cypress proves it works.
@@ -20,6 +15,12 @@
 <p align="center">
   Run end-to-end and component tests in a real browser and rewind any failure.<br />
   Works wherever you do: your machine, CI, or your coding agent.
+</p>
+
+<p align="center">
+  <a href="https://on.cypress.io">Documentation</a> |
+  <a href="https://on.cypress.io/changelog">Changelog</a> |
+  <a href="https://www.cypress.io/roadmap">Roadmap</a>
 </p>
 
 <p align="center">
