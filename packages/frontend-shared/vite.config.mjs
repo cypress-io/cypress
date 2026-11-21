@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+import react from '@vitejs/plugin-react'
 import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 import VueSvgLoader from 'vite-svg-loader'
 import Components from 'unplugin-vue-components/vite'
@@ -24,10 +25,16 @@ const alias = {
   '@cy/gql-components': path.resolve(__dirname, './src/gql-components'),
 }
 
+const vueJsxFile = /\.vue\.tsx$/
+
 const makePlugins = (plugins) => {
   return ([
     vue(),
-    vueJsx(), // Used mostly for testing in *.(t|j)sx files.
+    // `built-in` compiles only the JSX and leaves TypeScript to Vite's Oxc
+    // transform. Without it, plugin-vue-jsx limits Oxc to `.ts`, so React
+    // `.tsx` files would never have their JSX compiled.
+    vueJsx({ include: vueJsxFile, tsTransform: 'built-in' }),
+    react({ include: /\.tsx$/, exclude: [/\/node_modules\//, vueJsxFile] }),
     vueI18n({
       include: path.resolve(__dirname, './src/locales/**/*.json'),
       ...plugins.vueI18nOptions,
