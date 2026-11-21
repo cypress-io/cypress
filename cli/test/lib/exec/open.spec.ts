@@ -50,6 +50,7 @@ describe('exec open', function () {
       await open.start({ dev: true })
       expect(spawnStart).toHaveBeenCalledWith([], {
         detached: false,
+        headless: false,
         dev: true,
       })
     })
@@ -143,7 +144,7 @@ describe('exec open', function () {
 
         await open.start({ dev: true })
 
-        expect(spawnStart).toHaveBeenCalledWith([], { detached: false, dev: true })
+        expect(spawnStart).toHaveBeenCalledWith([], { detached: false, dev: true, headless: false })
         expect(logger.warn).not.toHaveBeenCalled()
       })
 
@@ -251,7 +252,7 @@ describe('exec open', function () {
     describe('--headless', () => {
       it('spawns with --headless before the testing type', async () => {
         await open.start({ headless: true, project: '/path/to/project', browser: 'chrome', e2e: true })
-        expect(spawnStart).toHaveBeenCalledWith(['--browser', 'chrome', '--project', '/path/to/project', '--headless', '--testing-type', 'e2e'], expect.anything())
+        expect(spawnStart).toHaveBeenCalledWith(['--browser', 'chrome', '--project', '/path/to/project', '--headless', '--testing-type', 'e2e'], expect.objectContaining({ headless: true }))
       })
 
       it('accepts a testingType from the module API', () => {

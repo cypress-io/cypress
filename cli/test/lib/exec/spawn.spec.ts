@@ -619,6 +619,57 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    describe('ozone platform', () => {
+      const cypressArgs = ['--', '--run-project', '/home/jane/projects/storefront', '--cwd', cwd, '--userNodePath', execPath, '--userNodeVersion', nodeVersion]
+
+      // Only the executable and args, so a failed assertion does not print the env
+      const spawnArgs = async (options: Parameters<typeof start>[1]) => {
+        const startPromise = start(['--run-project', '/home/jane/projects/storefront'], options)
+
+        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+        spawnedProcess.emit('close', 0)
+        await startPromise
+
+        return vi.mocked(cp.spawn).mock.calls[0].slice(0, 2)
+      }
+
+      beforeEach(() => {
+        vi.mocked(needsSandbox).mockReturnValue(false)
+        vi.mocked(os.platform).mockReturnValue('linux')
+        vi.stubEnv('DISPLAY', ':0')
+      })
+
+      it('passes --ozone-platform=x11 before the separator when headless on Linux', async () => {
+        expect(await spawnArgs({ headless: true })).toEqual(['/path/to/cypress', ['--ozone-platform=x11', ...cypressArgs]])
+      })
+
+      it('leaves the platform to Electron when the windows are shown', async () => {
+        expect(await spawnArgs({ headless: false })).toEqual(['/path/to/cypress', cypressArgs])
+      })
+
+      it('leaves the platform to Electron on other operating systems', async () => {
+        vi.mocked(os.platform).mockReturnValue('darwin')
+
+        expect(await spawnArgs({ headless: true })).toEqual(['/path/to/cypress', cypressArgs])
+      })
+
+      it.each([
+        '--ozone-platform=wayland',
+        '--disable-gpu --ozone-platform-hint=auto',
+      ])('leaves the platform to ELECTRON_EXTRA_LAUNCH_ARGS=%s', async (extraArgs) => {
+        vi.stubEnv('ELECTRON_EXTRA_LAUNCH_ARGS', extraArgs)
+
+        expect(await spawnArgs({ headless: true })).toEqual(['/path/to/cypress', cypressArgs])
+      })
+
+      it('does not pass it in dev mode, where @packages/electron launches Electron', async () => {
+        const [executable, args] = await spawnArgs({ headless: true, dev: true })
+
+        expect(executable).toEqual('node')
+        expect(args).not.toContain('--ozone-platform=x11')
+      })
+    })
+
     it('rejects with error from spawn', async () => {
       const msg = 'the error message'
 

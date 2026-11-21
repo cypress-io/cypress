@@ -193,6 +193,7 @@ const runModule = {
 
         return spawnStart(args, {
           dev: options.dev,
+          headless: !options.headed,
         })
       } catch (err: any) {
         if (err.details) {

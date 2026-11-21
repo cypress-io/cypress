@@ -30,6 +30,21 @@ function getInspectFromOpts (argv: string[]): string | undefined {
   return undefined
 }
 
+// As a native Wayland client a hidden window gets no frames, so screenshots never complete.
+// The CLI passes the same flag to the binary in `needsX11OzonePlatform`
+// (cli/lib/exec/spawn.ts), so a change to when it applies belongs in both.
+function getOzonePlatformArg (argv: string[]): string | undefined {
+  const { runProject, headed, headless } = minimist(argv)
+  // Values arrive as strings, so `--headed=false` gives the truthy 'false'
+  const hidesWindows = runProject ? String(headed) !== 'true' : String(headless) === 'true'
+
+  if (os.platform() !== 'linux' || !hidesWindows || process.env.ELECTRON_EXTRA_LAUNCH_ARGS?.includes('--ozone-platform')) {
+    return undefined
+  }
+
+  return '--ozone-platform=x11'
+}
+
 export async function open (
   appPath: string,
   argv: string[],
@@ -76,6 +91,7 @@ export async function open (
         // eslint-disable-next-line no-restricted-properties
         os.platform() === 'linux' && (process.geteuid?.() === 0) ? '--no-sandbox' : '',
         inspectArg ?? '',
+        getOzonePlatformArg(argv) ?? '',
       ].filter(Boolean),
       { stdio: 'pipe' },
     )

@@ -109,6 +109,18 @@ function killApp (child: cp.ChildProcess, signal: NodeJS.Signals = 'SIGTERM'): v
   child.kill(signal)
 }
 
+// In a Wayland session Electron runs as a native Wayland client, and a hidden window gets
+// no frames from the compositor, so CDP screenshots and the screencast that records video
+// never complete. On X11 (XWayland, or the Xvfb started when DISPLAY is unset) hidden
+// windows keep rendering. Electron picks the platform before the app's code runs, so this
+// has to be a launch argument.
+// https://github.com/cypress-io/cypress/issues/35508
+function needsX11OzonePlatform (headless: boolean | undefined, env: NodeJS.ProcessEnv): boolean {
+  return Boolean(headless)
+    && isPlatform('linux')
+    && !env.ELECTRON_EXTRA_LAUNCH_ARGS?.includes('--ozone-platform')
+}
+
 function createSpawnFunction (
   executable: string,
   baseArgs: string[],
@@ -179,6 +191,10 @@ function createSpawnFunction (
 
       if (!options.dev && needsSandbox()) {
         electronArgs.push('--no-sandbox')
+      }
+
+      if (!options.dev && needsX11OzonePlatform(options.headless, options.env)) {
+        electronArgs.push('--ozone-platform=x11')
       }
 
       // strip dev out of child process options
@@ -552,6 +568,8 @@ interface StartOptions {
   dev?: boolean
   env?: Record<string, string | undefined>
   detached?: boolean
+  // The app keeps its windows hidden: `cypress run` without `--headed`, or `cypress open --headless`
+  headless?: boolean
   stdio?: string | string[]
 }
 
@@ -579,7 +597,7 @@ export async function start (args: string | string[], options: StartOptions = {}
   const dev = options.dev ?? false
   const detached = options.detached ?? false
 
-  const spawn = createSpawnFunction(executable, decoratedArgs, { stdio, dev, detached, env })
+  const spawn = createSpawnFunction(executable, decoratedArgs, { stdio, dev, detached, env, headless: options.headless })
 
   let code: number
 
