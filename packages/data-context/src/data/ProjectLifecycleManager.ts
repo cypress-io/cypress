@@ -247,7 +247,9 @@ export class ProjectLifecycleManager {
            *      leverage the dev server cache for recompiling for when we actually have a spec to add to the dev server entry.
            *      The empty specs are handled within the @cypress/webpack-dev-server package as this has no impact on vite.
            */
-          const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+          // a spawned `--workers` process uses the coordinator's dev server rather than starting its own
+          const sharedDevServerPort = Number(process.env.CYPRESS_INTERNAL_SHARED_DEV_SERVER_PORT) || undefined
+          const devServerOptions = sharedDevServerPort ? { port: sharedDevServerPort } : await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
           .catch((err) => {
             span?.end()
             const devServer = this.loadedConfigFile?.component?.devServer

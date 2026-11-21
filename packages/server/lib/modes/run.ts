@@ -8,8 +8,9 @@ import Bluebird from 'bluebird'
 import assert from 'assert'
 
 import recordMode from './record'
-import { bundleFromCoordinator, readSpecDurations, resolveWorkerCount, specDurationsPath, startCoordinator, workerHooks, writeSpecDurations } from './run-workers'
+import { bundleFromCoordinator, devServerSpecsToCoordinator, readSpecDurations, reportWorkerFinished, resolveWorkerCount, SHARED_DEV_SERVER_PORT_ENV, specDurationsPath, startCoordinator, workerHooks, writeSpecDurations } from './run-workers'
 import preprocessor from '../plugins/preprocessor'
+import { emitSpecsChanged, routeSpecUpdates } from '../plugins/dev-server'
 import * as ciProvider from '../util/ci_provider'
 import { randomUUID } from 'crypto'
 import * as errors from '../errors'
@@ -1274,11 +1275,23 @@ async function ready (options: ReadyOptions) {
     durations,
     record: record ? { ciBuildId } : undefined,
     bundle: (filePath) => preprocessor.getFile(filePath, config),
+    // component testing sets baseUrl to the dev server it started
+    devServer: testingType === 'component' && config.baseUrl ? { port: Number(new URL(config.baseUrl).port), updateSpecs: emitSpecsChanged } : undefined,
     runAsNode: browser.name !== 'electron',
   }) : undefined
 
+  if (coordinator && testingType === 'component') {
+    routeSpecUpdates((specs, options) => {
+      return options?.neededForJustInTimeCompile ? coordinator.updateDevServerSpecs(specs, options) : emitSpecsChanged(specs, options)
+    })
+  }
+
   if (isWorker) {
     preprocessor.setBundleSource(bundleFromCoordinator())
+
+    if (process.env[SHARED_DEV_SERVER_PORT_ENV]) {
+      routeSpecUpdates(devServerSpecsToCoordinator())
+    }
   }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
@@ -1317,6 +1330,10 @@ async function ready (options: ReadyOptions) {
       isWorker,
       collectRuns: coordinatorHooks?.collectRuns,
     })
+
+    if (isWorker) {
+      await reportWorkerFinished()
+    }
 
     if (!options.quiet && !isWorker) {
       printResults.renderSummaryTable(runUrl, results)

@@ -13,6 +13,7 @@ import type { RunResult } from './results'
 import { WORKER_INDEX_ENV } from '../util/worker_index'
 import { isSoftwareRendering } from '../util/gpu'
 import * as appData from '../util/app_data'
+import type { SpecsChangedOptions } from '../plugins/dev-server'
 
 const debug = Debug('cypress:server:workers')
 
@@ -33,6 +34,8 @@ type WorkerMessage =
   | { type: 'started', spec: string }
   | { type: 'specResult', results: RunResult }
   | { type: 'bundle', id: number, filePath: string }
+  | { type: 'devServerSpecs', id: number, specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions }
+  | { type: 'finished' }
 
 // the IPC channel's structured clone drops an Error's own properties, which the spec controller reads
 type BundleError = { message: string, stack?: string, originalStack?: string, filePath?: string, annotated?: string }
@@ -41,6 +44,7 @@ type CoordinatorMessage =
   | { type: 'claimed', claim: Claim }
   | { type: 'bundled', id: number, outputPath: string }
   | { type: 'bundleError', id: number, error: BundleError }
+  | { type: 'devServerSpecsUpdated', id: number }
 
 const toBundleError = (err: any): BundleError => {
   return { message: String(err?.message ?? err), stack: err?.stack, originalStack: err?.originalStack, filePath: err?.filePath, annotated: err?.annotated }
@@ -225,12 +229,18 @@ export const crashedSpecResult = (spec: SpecWithRelativeRoot, error: Error): Run
   } as RunResult
 }
 
-export const workerEnv = (base: NodeJS.ProcessEnv, workerIndex: number, downloadsFolder: string, colors: boolean, runAsNode = false): NodeJS.ProcessEnv => {
+export const SHARED_DEV_SERVER_PORT_ENV = 'CYPRESS_INTERNAL_SHARED_DEV_SERVER_PORT'
+
+export const workerEnv = (base: NodeJS.ProcessEnv, workerIndex: number, downloadsFolder: string, colors: boolean, runAsNode = false, devServerPort?: number): NodeJS.ProcessEnv => {
   const env: NodeJS.ProcessEnv = {
     ...base,
     FORCE_COLOR: colors ? '1' : base.FORCE_COLOR,
     [WORKER_INDEX_ENV]: String(workerIndex),
     CYPRESS_DOWNLOADS_FOLDER: path.join(downloadsFolder, `worker-${workerIndex}`),
+  }
+
+  if (devServerPort) {
+    env[SHARED_DEV_SERVER_PORT_ENV] = String(devServerPort)
   }
 
   if (runAsNode) {
@@ -382,22 +392,57 @@ export interface Coordinator {
     /** Resolves with every worker's runs, in spec order, once all workers have exited. */
     collectRuns: (ownRuns: RunResult[]) => Promise<RunResult[]>
   }
+  /** Sets the specs the coordinator's own runs need from the shared component testing dev server. */
+  updateDevServerSpecs: (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) => void | Promise<void>
 }
 
-/** What to print when a spawned worker exits; a worker that fails to start would otherwise go unnoticed, its specs run by the others. */
-export const workerExitNotice = (index: number, { code, signal, abandoned }: { code: number | null, signal: NodeJS.Signals | null, abandoned?: string }) => {
+/**
+ * The specs the shared component testing dev server compiles: each worker's current spec, so that
+ * compiling one worker's next spec doesn't drop the spec another worker is running.
+ */
+export class DevServerSpecs {
+  private byWorker = new Map<number, SpecWithRelativeRoot[]>()
+
+  constructor (private update: (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) => void | Promise<void>) {}
+
+  set (workerIndex: number, specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) {
+    this.byWorker.set(workerIndex, specs)
+
+    return this.update(this.all(), options)
+  }
+
+  remove (workerIndex: number) {
+    this.byWorker.delete(workerIndex)
+  }
+
+  private all () {
+    const byPath = new Map<string, SpecWithRelativeRoot>()
+
+    for (const index of [...this.byWorker.keys()].sort((a, b) => a - b)) {
+      for (const spec of this.byWorker.get(index)!) byPath.set(spec.absolute, spec)
+    }
+
+    return [...byPath.values()]
+  }
+}
+
+/**
+ * What to print when a spawned worker exits; a worker that fails to start would otherwise go unnoticed, its specs run by the others.
+ * A worker's exit code is its failed test count, so only a worker that never reported finishing exited early.
+ */
+export const workerExitNotice = (index: number, { code, signal, abandoned, finished }: { code: number | null, signal: NodeJS.Signals | null, abandoned?: string, finished: boolean }) => {
   if (abandoned) {
     return `${os.EOL}Worker ${index} exited while running ${abandoned}; the spec is marked as failed.${os.EOL}`
   }
 
-  if (code !== 0) {
+  if (!finished) {
     return `${os.EOL}Worker ${index} exited early (${signal ?? `code ${code}`}); the other workers ran its share of the specs.${os.EOL}`
   }
 
   return undefined
 }
 
-export function startCoordinator ({ specs, workers, downloadsFolder, durations, record, bundle, runAsNode = false, write = process.stdout.write.bind(process.stdout) }: {
+export function startCoordinator ({ specs, workers, downloadsFolder, durations, record, bundle, devServer, runAsNode = false, write = process.stdout.write.bind(process.stdout) }: {
   specs: SpecWithRelativeRoot[]
   workers: number
   downloadsFolder: string
@@ -406,11 +451,14 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
   record?: RecordSettings
   /** Bundles a spec or the support file for a worker and resolves with the output path. */
   bundle: (filePath: string) => PromiseLike<string>
+  /** The coordinator's component testing dev server, which every worker uses instead of starting its own. */
+  devServer?: { port: number, updateSpecs: (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) => void | Promise<void> }
   /** Starts workers as plain Node, which drops Electron's own processes, when the test browser isn't Electron. */
   runAsNode?: boolean
   write?: (s: string) => void
 }): Coordinator {
   const queue = new SpecQueue(specs, durations)
+  const devServerSpecs = devServer ? new DevServerSpecs(devServer.updateSpecs) : undefined
   const spawnCount = Math.min(workers, specs.length) - 1
   const exits: Promise<void>[] = []
   const children: ChildProcess[] = []
@@ -453,12 +501,13 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
       stdio: ['ignore', 'pipe', 'inherit', 'ipc'],
       // keeps Dates and other non-JSON values in per-spec results intact
       serialization: 'advanced',
-      env: workerEnv(process.env, index, downloadsFolder, Boolean(process.stdout.isTTY), Boolean(entryScript)),
+      env: workerEnv(process.env, index, downloadsFolder, Boolean(process.stdout.isTTY), Boolean(entryScript), devServer?.port),
     })
 
     children.push(child)
 
     const output = new SpecOutputBuffer(printBlock)
+    let finished = false
 
     child.stdout!.setEncoding('utf8')
     child.stdout!.on('data', (chunk: string) => output.write(chunk))
@@ -484,16 +533,31 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
 
           child.send(reply)
         })
+      } else if (message.type === 'finished') {
+        finished = true
+      } else if (message.type === 'devServerSpecs') {
+        const { id, specs, options } = message
+
+        const reply = (err?: Error) => {
+          if (err) debug('could not update the dev server specs for worker %d: %o', index, err)
+
+          const updated: CoordinatorMessage = { type: 'devServerSpecsUpdated', id }
+
+          if (child.connected) child.send(updated)
+        }
+
+        Promise.resolve(devServerSpecs?.set(index, specs, options)).then(() => reply(), reply)
       }
     })
 
     exits.push(new Promise((resolve) => {
       child.once('exit', (code, signal) => {
         output.flush()
+        devServerSpecs?.remove(index)
         debug('worker %d exited %o', index, { code, signal })
 
         const abandoned = queue.abandon(index, new Error(`The Cypress worker process running this spec exited unexpectedly (${signal ?? `code ${code}`}).`))
-        const notice = workerExitNotice(index, { code, signal, abandoned })
+        const notice = workerExitNotice(index, { code, signal, abandoned, finished })
 
         if (notice) printBlock(notice)
 
@@ -503,6 +567,9 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
   }
 
   return {
+    updateDevServerSpecs (specs, options) {
+      return devServerSpecs?.set(0, specs, options)
+    },
     hooks (cloud = {}) {
       return {
         async beforeSpecRun () {
@@ -600,6 +667,16 @@ export function workerHooks (cloud: SpecRunHooks = {}): Required<SpecRunHooks> {
   }
 }
 
+/** Tells the coordinator this worker ran its share of the run, so a non-zero exit code from failed tests isn't taken for a crash. */
+export function reportWorkerFinished (channel: Pick<NodeJS.Process, 'send'> = process): Promise<void> {
+  return new Promise((resolve) => {
+    const message: WorkerMessage = { type: 'finished' }
+
+    // the callback runs once the message is sent, so it isn't lost when the worker exits right after
+    channel.send?.(message, undefined, undefined, () => resolve()) ?? resolve()
+  })
+}
+
 /** A bundle source for a spawned worker: the coordinator bundles each file, so the worker's plugins child never does. */
 export function bundleFromCoordinator (channel: Pick<NodeJS.Process, 'send' | 'on'> = process): (filePath: string) => Promise<string> {
   if (typeof channel.send !== 'function') {
@@ -630,6 +707,40 @@ export function bundleFromCoordinator (channel: Pick<NodeJS.Process, 'send' | 'o
       const request: WorkerMessage = { type: 'bundle', id, filePath }
 
       pending.set(id, { resolve, reject })
+      send(request)
+    })
+  }
+}
+
+/**
+ * Spec updates for a spawned worker's dev server, which is the coordinator's: just-in-time compile
+ * requests go to the coordinator, and resolve once it has passed them on. A worker has no dev server
+ * of its own for the full spec list to reach.
+ */
+export function devServerSpecsToCoordinator (channel: Pick<NodeJS.Process, 'send' | 'on'> = process) {
+  if (typeof channel.send !== 'function') {
+    throw new Error('A Cypress worker must be started by a coordinator with an IPC channel.')
+  }
+
+  const send = channel.send.bind(channel)
+  const pending = new Map<number, () => void>()
+  let nextId = 0
+
+  channel.on('message', (message: CoordinatorMessage) => {
+    if (message?.type !== 'devServerSpecsUpdated') return
+
+    pending.get(message.id)?.()
+    pending.delete(message.id)
+  })
+
+  return (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions): Promise<void> => {
+    if (!options?.neededForJustInTimeCompile) return Promise.resolve()
+
+    return new Promise((resolve) => {
+      const id = nextId++
+      const request: WorkerMessage = { type: 'devServerSpecs', id, specs, options }
+
+      pending.set(id, resolve)
       send(request)
     })
   }

@@ -9,7 +9,10 @@ import {
   availableMemoryMb,
   BlockPrinter,
   bundleFromCoordinator,
+  DevServerSpecs,
+  devServerSpecsToCoordinator,
   holdStdout,
+  reportWorkerFinished,
   startCoordinator,
   orderByDuration,
   readSpecDurations,
@@ -78,15 +81,37 @@ describe('lib/modes/run-workers', () => {
 
   describe('workerExitNotice', () => {
     it('names the spec a worker was running when it exited', () => {
-      expect(workerExitNotice(2, { code: null, signal: 'SIGKILL', abandoned: 'a.cy.ts' })).toContain('Worker 2 exited while running a.cy.ts; the spec is marked as failed.')
+      expect(workerExitNotice(2, { code: null, signal: 'SIGKILL', abandoned: 'a.cy.ts', finished: false })).toContain('Worker 2 exited while running a.cy.ts; the spec is marked as failed.')
     })
 
     it('reports a worker that exited early between specs, such as one whose dev server could not start', () => {
-      expect(workerExitNotice(1, { code: 1, signal: null })).toContain('Worker 1 exited early (code 1); the other workers ran its share of the specs.')
+      expect(workerExitNotice(1, { code: 1, signal: null, finished: false })).toContain('Worker 1 exited early (code 1); the other workers ran its share of the specs.')
     })
 
-    it('says nothing when a worker finishes normally', () => {
-      expect(workerExitNotice(1, { code: 0, signal: null })).toBeUndefined()
+    it('says nothing when a worker finishes, including with failed tests as its exit code', () => {
+      expect(workerExitNotice(1, { code: 0, signal: null, finished: true })).toBeUndefined()
+      expect(workerExitNotice(1, { code: 3, signal: null, finished: true })).toBeUndefined()
+    })
+  })
+
+  describe('reportWorkerFinished', () => {
+    it('resolves once the message is sent, so the worker can exit right after', async () => {
+      let sendCallback: (() => void) | undefined
+      const send = vi.fn((message, handle, options, callback) => {
+        sendCallback = callback
+
+        return true
+      })
+      let resolved = false
+      const reported = reportWorkerFinished({ send } as any).then(() => resolved = true)
+
+      expect(send).toHaveBeenCalledWith({ type: 'finished' }, undefined, undefined, expect.any(Function))
+      await Promise.resolve()
+      expect(resolved).toBe(false)
+
+      sendCallback!()
+      await reported
+      expect(resolved).toBe(true)
     })
   })
 
@@ -127,6 +152,11 @@ describe('lib/modes/run-workers', () => {
         CYPRESS_WORKER_INDEX: '2',
         CYPRESS_DOWNLOADS_FOLDER: path.join('/project/downloads', 'worker-2'),
       })
+    })
+
+    it('points a worker at the coordinator\'s component testing dev server', () => {
+      expect(workerEnv({}, 1, '/project/downloads', false, false, 61234)).toMatchObject({ CYPRESS_INTERNAL_SHARED_DEV_SERVER_PORT: '61234' })
+      expect(workerEnv({}, 1, '/project/downloads', false)).not.toHaveProperty('CYPRESS_INTERNAL_SHARED_DEV_SERVER_PORT')
     })
 
     it('runs Electron as plain Node for a worker that does not need Electron', () => {
@@ -373,6 +403,72 @@ describe('lib/modes/run-workers', () => {
       channel.emit('message', { type: 'bundleError', id: 0, error: { message: 'Module not found', originalStack: 'at a.cy.ts:1', filePath: '/project/cypress/e2e/a.cy.ts' } })
 
       await expect(result).rejects.toMatchObject({ message: 'Module not found', originalStack: 'at a.cy.ts:1', filePath: '/project/cypress/e2e/a.cy.ts' })
+    })
+  })
+
+  describe('DevServerSpecs', () => {
+    const jit = { neededForJustInTimeCompile: true }
+
+    it('compiles every worker\'s current spec, so one worker\'s next spec keeps the others', () => {
+      const update = vi.fn()
+      const specs = new DevServerSpecs(update)
+
+      specs.set(0, [spec('a.cy.tsx')], jit)
+      specs.set(2, [spec('b.cy.tsx')], jit)
+      specs.set(0, [spec('c.cy.tsx')], jit)
+
+      expect(update.mock.calls.map(([specs]) => specs.map((s) => s.relative))).toEqual([
+        ['a.cy.tsx'],
+        ['a.cy.tsx', 'b.cy.tsx'],
+        ['c.cy.tsx', 'b.cy.tsx'],
+      ])
+
+      expect(update).toHaveBeenLastCalledWith(expect.anything(), jit)
+    })
+
+    it('lists a spec two workers need once and drops the specs of a worker that exited', () => {
+      const update = vi.fn()
+      const specs = new DevServerSpecs(update)
+
+      specs.set(1, [spec('a.cy.tsx')], jit)
+      specs.set(2, [spec('a.cy.tsx')], jit)
+      specs.remove(1)
+      specs.set(0, [spec('b.cy.tsx')], jit)
+
+      expect(update.mock.calls[1][0].map((s) => s.relative)).toEqual(['a.cy.tsx'])
+      expect(update.mock.calls[2][0].map((s) => s.relative)).toEqual(['b.cy.tsx', 'a.cy.tsx'])
+    })
+  })
+
+  describe('devServerSpecsToCoordinator', () => {
+    let sent: any[]
+    let channel: EventEmitter & { send: (message: any) => boolean }
+
+    beforeEach(() => {
+      sent = []
+      channel = Object.assign(new EventEmitter(), { send: (message: any) => sent.push(message) > 0 })
+    })
+
+    it('sends just-in-time compile requests and resolves when the coordinator has passed them on', async () => {
+      const updateSpecs = devServerSpecsToCoordinator(channel as any)
+      let updated = false
+      const request = updateSpecs([spec('a.cy.tsx')], { neededForJustInTimeCompile: true }).then(() => updated = true)
+
+      expect(sent).toEqual([{ type: 'devServerSpecs', id: 0, specs: [spec('a.cy.tsx')], options: { neededForJustInTimeCompile: true } }])
+
+      channel.emit('message', { type: 'bundled', id: 0, outputPath: '/bundles/a.js' })
+      await Promise.resolve()
+      expect(updated).toBe(false)
+
+      channel.emit('message', { type: 'devServerSpecsUpdated', id: 0 })
+      await request
+      expect(updated).toBe(true)
+    })
+
+    it('leaves the full spec list to the coordinator, whose dev server already has it', async () => {
+      await devServerSpecsToCoordinator(channel as any)([spec('a.cy.tsx'), spec('b.cy.tsx')])
+
+      expect(sent).toEqual([])
     })
   })
 })

@@ -25,7 +25,10 @@ describe('cypress run --workers', () => {
     outputPath,
     expectedExitCode: 1,
     async onRun (exec) {
-      await exec()
+      const { stdout } = await exec()
+
+      // the worker that ran failing.cy.ts exits with its failure count, which is not an early exit
+      expect(stdout).not.to.include('exited early')
 
       const results = await fs.readJsonAsync(outputPath)
       const ranSpecs = results.runs.map((run) => run.spec.relative)
@@ -96,10 +99,18 @@ describe('cypress run --component --workers', () => {
       async onRun (exec) {
         const ctOutputPath = path.join(Fixtures.projectPath(project), 'output.json')
 
-        const { stdout } = await exec({ outputPath: ctOutputPath })
+        const { stdout, stderr } = await exec({ outputPath: ctOutputPath })
+        const output = stdout + stderr
 
-        // a worker whose dev server can't start leaves its specs to the others, so the results alone don't show it
-        expect(stdout).not.to.include('exited early')
+        // a worker that can't start leaves its specs to the others, so the results alone don't show it
+        expect(output).not.to.include('exited early')
+
+        // workers use the coordinator's dev server instead of starting their own
+        if (project.endsWith('webpack')) {
+          expect(output.match(/\[webpack-dev-server\] Project is running at/g), 'webpack dev servers started').to.have.length(1)
+        } else {
+          expect(output).not.to.include('is in use, trying another one')
+        }
 
         const results = await fs.readJsonAsync(ctOutputPath)
 

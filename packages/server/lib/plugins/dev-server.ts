@@ -7,9 +7,11 @@ const debugFn = debug('cypress:ct:dev-server')
 
 const baseEmitter = new EventEmitter()
 
-interface SpecsChangedOptions {
+export interface SpecsChangedOptions {
   neededForJustInTimeCompile?: boolean
 }
+
+type UpdateSpecs = (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) => void | Promise<void>
 
 interface SpecsChangedData {
   specs: SpecWithRelativeRoot[]
@@ -30,11 +32,23 @@ plugins.registerHandler((ipc: PluginIpcHandler) => {
   })
 })
 
+/** Tells this process's own dev server, in its plugins child, which specs to compile. */
+export const emitSpecsChanged: UpdateSpecs = (specs, options) => {
+  baseEmitter.emit('dev-server:specs:changed', { specs, options })
+}
+
+let specUpdates: UpdateSpecs = emitSpecsChanged
+
+/** With `--workers`, one dev server serves every worker, so the coordinator decides which specs it compiles. */
+export const routeSpecUpdates = (route: UpdateSpecs) => {
+  specUpdates = route
+}
+
 // for simpler stubbing from unit tests
 interface DevServerAPI {
   emitter: EventEmitter
   start: (options: { specs: Cypress.Spec[], config: FullConfig }) => Promise<Cypress.ResolvedDevServerConfig>
-  updateSpecs: (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) => void
+  updateSpecs: UpdateSpecs
   close: () => void
 }
 
@@ -46,7 +60,7 @@ const API: DevServerAPI = {
   },
 
   updateSpecs (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) {
-    baseEmitter.emit('dev-server:specs:changed', { specs, options })
+    return specUpdates(specs, options)
   },
 
   close () {
