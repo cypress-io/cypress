@@ -6767,6 +6767,7 @@ declare namespace Cypress {
      * Fires when the test has failed. Binding to this event without rethrowing the error
      * prevents the test from failing, and Cypress doesn't run the test's remaining commands.
      * Throw the error, or another error, from the handler to fail the test.
+     * A test that takes a `done` callback still fails with a timeout unless the handler calls `done`.
      * Preventing a test from failing is **strongly discouraged**. Tests should never legitimately fail.
      * This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
