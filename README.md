@@ -82,7 +82,7 @@ Extend Cypress with plugins built by the community and the Cypress team, coverin
 
 ## Community & resources
 
-- **[Discord](https://on.cypress.io/discord)**: ask questions and chat with other Cypress users.
+- **[Discord](https://on.cypress.io/discord)**: join thousands of developers and testers in the Cypress community.
 - **[GitHub Issues](https://github.com/cypress-io/cypress/issues)**: report bugs and request features.
 - **[Documentation](https://docs.cypress.io/?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=resources-docs)**: guides, API reference, and examples.
 - **[Changelog](https://on.cypress.io/changelog?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=resources-changelog)**: see what's new in each release.
