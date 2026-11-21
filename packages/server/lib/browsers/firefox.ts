@@ -676,7 +676,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     ...launchOptions.env,
   }
 
-  debug('launching geckodriver with browser envs %o', BROWSER_ENVS)
+  debug('launching geckodriver with browser env names %o', Object.keys(BROWSER_ENVS))
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
@@ -754,7 +754,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       },
     }
 
-    debugVerbose(`creating session with capabilities %s`, JSON.stringify(newSessionCapabilities.capabilities))
+    debugVerbose(`creating session with capabilities %s`, JSON.stringify(newSessionCapabilities.capabilities, (key, value) => {
+      // geckodriver's spawn env holds the whole process.env
+      return key === 'env' ? undefined : value
+    }))
 
     const WD = WebDriver.getWebDriverPackage()
 
