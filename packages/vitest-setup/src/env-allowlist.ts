@@ -1,8 +1,8 @@
 const KEPT_VARS = new Set([
   'PATH',
   'TMPDIR',
-  // git reads safe.directory and other user config from it
-  'HOME',
+  // lets git run as root under sudo in a checkout owned by the sudo user
+  'SUDO_UID',
   // Windows names are case-insensitive, so they are matched uppercased
   'SYSTEMROOT',
   'TEMP',

@@ -6,6 +6,7 @@ describe('sanitizeEnv', () => {
     const env = {
       PATH: '/usr/local/bin:/usr/bin',
       TMPDIR: '/var/folders/k2/x7d1/T/',
+      SUDO_UID: '3434',
       HOME: '/home/jane-doe',
       CYPRESS_RECORD_KEY: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
       GITHUB_TOKEN: 'ghp_k3Jd9sLq0wXz7VbNm2RtYp5HcFgA8eUi4oZs',
@@ -18,7 +19,7 @@ describe('sanitizeEnv', () => {
     expect(env).toEqual({
       PATH: '/usr/local/bin:/usr/bin',
       TMPDIR: '/var/folders/k2/x7d1/T/',
-      HOME: '/home/jane-doe',
+      SUDO_UID: '3434',
     })
   })
 
