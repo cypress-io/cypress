@@ -23,8 +23,12 @@
   <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=for-the-badge&labelColor=1B1E2E&logo=github&color=181717" alt="GitHub stars"/></a>
   <br />
   <a href="https://skills.sh/cypress-io/ai-toolkit"><img src="https://skills.sh/b/cypress-io/ai-toolkit?style=for-the-badge" alt="skills.sh"/></a>
+  <a href="https://docs.cypress.io/app/tooling/cypress-tap"><img src="https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20Cursor%20%C2%B7%20Codex%20%C2%B7%20Copilot-00814D?style=for-the-badge&labelColor=1B1E2E" alt="Works with Claude Code, Cursor, Codex, and Copilot"/></a>
+  <a href="https://deepwiki.com/cypress-io/cypress"><img src="https://img.shields.io/badge/Ask-DeepWiki-3B82F6?style=for-the-badge&labelColor=1B1E2E" alt="Ask DeepWiki"/></a>
   <br />
   <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Fv10%2Finvites%2Fcypress%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&label=Discord&suffix=%20members&color=5865F2&style=for-the-badge&labelColor=1B1E2E&logo=discord&logoColor=white" alt="Discord members"/></a>
+  <a href="https://x.com/Cypress_io"><img src="https://img.shields.io/badge/X-%40Cypress__io-000000?style=for-the-badge&labelColor=1B1E2E&logo=x&logoColor=white" alt="Cypress on X"/></a>
+  <a href="https://youtube.com/@cypressio"><img src="https://img.shields.io/badge/YouTube-%40cypressio-FF0000?style=for-the-badge&labelColor=1B1E2E&logo=youtube&logoColor=white" alt="Cypress on YouTube"/></a>
 </p>
 
 ## What is Cypress?
