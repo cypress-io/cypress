@@ -1,3 +1,0 @@
-# Packherd Require
-
-@AGENTS.md

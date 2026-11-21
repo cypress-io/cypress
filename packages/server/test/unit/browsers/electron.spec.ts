@@ -14,6 +14,7 @@ import * as Windows from '../../../lib/gui/windows'
 import electron from '../../../lib/browsers/electron'
 import * as savedState from '../../../lib/saved_state'
 import type { BrowserLaunchOpts } from '@packages/types'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 vi.mock('electron', async () => {
   const { default: electronStub } = await import('../../support/helpers/electron_stub')
@@ -750,6 +751,17 @@ describe('lib/browsers/electron', () => {
       })
     })
 
+    it('does not show a headless browser window when requesting to be focused', async () => {
+      vi.spyOn(automation, 'use')
+      options.browser.isHeadless = true
+
+      await electron._launch(win, url, automation, options, undefined, undefined, { attachCDPClient: vi.fn() })
+
+      automation.use.mock.lastCall[0].onRequest('focus:browser:window')
+
+      expect(win.show).not.toHaveBeenCalled()
+    })
+
     it('registers onRequest automation middleware and calls destroy when requesting to close the browser tabs', () => {
       vi.spyOn(automation, 'use')
 
@@ -882,7 +894,7 @@ describe('lib/browsers/electron', () => {
             },
             {
               name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
+              value: getMetadataHeaderValue(),
             },
           ],
         })
@@ -1283,6 +1295,32 @@ describe('lib/browsers/electron', () => {
           })
         })
       })
+    })
+  })
+
+  describe('._launchChild window visibility', () => {
+    const childShow = async (isTextTerminal: boolean, isHeadless: boolean) => {
+      const parent = { getPosition: () => [4, 2] }
+      // Safe because only the options `create` was called with are read, never the window it returns
+      const create = vi.spyOn(Windows, 'create').mockReturnValue({} as any)
+
+      vi.spyOn(electron, '_launch').mockResolvedValue({} as any)
+
+      await electron._launchChild('http://child', parent, '/project', {}, { isTextTerminal, browser: { isHeadless } }, automation)
+
+      return create.mock.lastCall?.[1].show
+    }
+
+    it('shows a child window of a headed browser in open mode', async () => {
+      expect(await childShow(false, false)).toBe(true)
+    })
+
+    it('hides a child window of a headless browser in open mode', async () => {
+      expect(await childShow(false, true)).toBe(false)
+    })
+
+    it('hides a child window in run mode', async () => {
+      expect(await childShow(true, false)).toBe(false)
     })
   })
 

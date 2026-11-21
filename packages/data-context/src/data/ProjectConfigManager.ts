@@ -412,9 +412,19 @@ export class ProjectConfigManager {
         this.configFilePath,
         this.options.configFile,
         (cypressError: CypressError, title?: string | undefined) => {
+          // The plugins process dying after setup finished leaves a session that is running, not a
+          // configuration that failed to load. Recorded as a load error, it would make `cypress tap`
+          // refuse every command and blame the config file.
+          const crashedWhileRunning = this._state === 'ready'
+
           this._state = 'errored'
           this.options.ctx.onError(cypressError, title)
-          this.options.ctx.reportLoadErrorToTap(cypressError)
+
+          if (crashedWhileRunning) {
+            this.options.ctx.reportPluginsError(cypressError)
+          } else {
+            this.options.ctx.reportLoadError(cypressError)
+          }
         },
         this.options.ctx.onWarning,
         (debugData: DebugData) => {
@@ -551,7 +561,7 @@ export class ProjectConfigManager {
         configFile: path.basename(this.configFilePath),
       },
       configFile: this.options.ctx.lifecycleManager.configFile,
-    }, this.options.ctx.file.getFilesByGlob)
+    }, (...args: Parameters<DataContext['file']['getFilesByGlob']>) => this.options.ctx.file.getFilesByGlob(...args))
 
     if (withBrowsers) {
       const browsers = await this.options.ctx.browser.machineBrowsers()

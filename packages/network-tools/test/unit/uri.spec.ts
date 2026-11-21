@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { URL } from 'url'
 
-import { addDefaultPort, getPath, isLocalhost, origin, removeDefaultPort, stripProtocolAndDefaultPorts } from '../../lib'
+import { addDefaultPort, getPath, isLocalhost, isSecureUrl, origin, removeDefaultPort, stripProtocolAndDefaultPorts } from '../../lib'
 
 describe('lib/uri', () => {
   describe('.getPath', () => {
@@ -92,6 +92,20 @@ describe('lib/uri', () => {
 
     it('returns relative urls unchanged', () => {
       expect(addDefaultPort('/foo/bar?baz=quux')).toEqual('/foo/bar?baz=quux')
+    })
+  })
+
+  describe('.isSecureUrl', () => {
+    it('is true for an https url', () => {
+      expect(isSecureUrl(new URL('https://www.foobar.com'))).toBe(true)
+    })
+
+    it('is true for localhost over http', () => {
+      expect(isSecureUrl(new URL('http://localhost:3500'))).toBe(true)
+    })
+
+    it('is false for any other host over http', () => {
+      expect(isSecureUrl(new URL('http://www.foobar.com'))).toBe(false)
     })
   })
 

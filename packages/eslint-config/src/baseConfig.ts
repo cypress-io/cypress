@@ -1,6 +1,3 @@
-// Pulls the eslint-plugin-mocha declaration into every program that includes this file
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
-/// <reference path="./eslint-plugin-mocha.d.ts" />
 import js from '@eslint/js'
 import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
 import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
@@ -8,7 +5,6 @@ import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
 import cy from 'eslint-plugin-cypress'
 import chaiFriendly from 'eslint-plugin-chai-friendly'
 
-import mocha from 'eslint-plugin-mocha'
 import globals from 'globals'
 import vue from 'eslint-plugin-vue'
 import vueParser from 'vue-eslint-parser'
@@ -16,6 +12,7 @@ import stylistic from '@stylistic/eslint-plugin'
 
 import { flatConfigs as eslintPluginImportXFlatConfigs } from 'eslint-plugin-import-x'
 
+import { mochaConfig } from './mochaConfig'
 import { cypressDevPlugin } from './rules'
 
 const testFiles = [
@@ -51,7 +48,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   js.configs.recommended,
   ...tsConfigs.recommended,
   cy.configs.recommended,
-  mocha.configs?.recommended ?? {},
+  ...mochaConfig,
   ...vue.configs['flat/recommended'],
   // importing { config } from @stylistic/eslint-plugin causes errors
   stylistic.configs.customize({
@@ -253,22 +250,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
 
-      'mocha/no-exclusive-tests': 'error',
-      'mocha/no-mocha-arrows': 'off',
-      'mocha/no-setup-in-suite': 'off',
-      'mocha/max-top-level-suites': 'off',
-      'mocha/no-root-hooks': 'off',
-      'mocha/no-top-level-tests': 'off',
-      'mocha/no-pending-tests': 'off',
-      // no-async-in-sync-tests reads Cypress command chains as unawaited
-      // promises. The others report real bugs, so each is re-enabled once its
-      // own violations are fixed.
-      'mocha/no-async-in-sync-tests': 'off',
-      'mocha/handle-done-callback': 'off',
-      'mocha/no-conditional-tests': 'off',
-      'mocha/no-code-after-done': 'off',
-      'mocha/consistent-structure': 'off',
-
       'vue/multi-word-component-names': 'off',
       'vue/no-dupe-keys': 'off',
 
@@ -346,17 +327,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     },
   },
 
-  // eslint-plugin-mocha treats any file with a Mocha call, hooks included, as a
-  // test file, which takes in support files, test generators and plugin source
-  // whose exports are their purpose. The rule is there because importing a spec
-  // registers its tests in the importer, so only spec files are held to it.
-  {
-    ignores: ['**/*.cy.*', '**/*.spec.*', '**/*_spec.*', '**/*-spec.*', '**/*.test.*'],
-    rules: {
-      'mocha/no-exports': 'off',
-    },
-  },
-
   // common file patterns to ignore
   {
     ignores: [
@@ -395,24 +365,6 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
     files: ['webpack.config.js'],
     languageOptions: {
       globals: globals.node,
-    },
-  },
-
-  // v8 snapshot bundling fails on mixed inline type + value imports.
-  // Globs are package-relative: lint runs per package, not from the repo root.
-  {
-    files: [
-      'lib/**/*.{js,ts,tsx}',
-      'src/**/*.{js,ts,tsx}',
-    ],
-    ignores: [
-      '**/test/**',
-      '**/*.spec.*',
-      '**/cypress/**',
-      '**/__snapshots__/**',
-    ],
-    rules: {
-      'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
     },
   },
 

@@ -11,3 +11,7 @@ export { createProxyNetworkInterception } from './adapters/create-proxy-network-
 export type { CreateProxyNetworkInterceptionOptions } from './adapters/create-proxy-network-interception'
 
 export { defaultMiddleware } from './http'
+
+export { getMetadataHeaderValue } from './http/util/metadata-header-value'
+
+export { stripCypressCookies } from './http/util/cookies'

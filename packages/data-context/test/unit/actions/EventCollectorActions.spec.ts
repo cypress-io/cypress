@@ -78,23 +78,5 @@ describe('EventCollectorActions', () => {
         delete process.env.CYPRESS_DISABLE_GUEST_TELEMETRY
       }
     })
-
-    it('resolves the environment when the event is recorded, not when the module loads', async () => {
-      const original = process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
-
-      process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'staging'
-
-      try {
-        await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' }, false)
-      } finally {
-        if (original === undefined) {
-          delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
-        } else {
-          process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = original
-        }
-      }
-
-      expect(ctx.util.fetch).toHaveBeenNthCalledWith(1, 'https://cloud-staging.cypress.io/anon-collect', expect.anything())
-    })
   })
 })

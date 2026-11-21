@@ -781,14 +781,13 @@ export class Reporter {
 
     debug('trying to load reporter:', reporterName)
 
-    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    // Built-in reporters are required by name so the start bundle includes them
     if (reporterName === 'teamcity') {
       debug(`${reporterName} is built-in reporter`)
 
       return require('mocha-teamcity-reporter')
     }
 
-    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
     if (reporterName === 'junit') {
       debug(`${reporterName} is built-in reporter`)
 

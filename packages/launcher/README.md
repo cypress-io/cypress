@@ -4,7 +4,7 @@ This package finds and launches browsers for each operating system.
 
 ## Developing
 
-The TypeScript source files are in the [`lib`](/lib) folder.
+The TypeScript source files are in the [`lib`](./lib) folder.
 
 To see the browsers detected on your machine, run the following from the `packages/launcher` directory. The `@packages/ts` require hook transpiles the TypeScript on the fly:
 

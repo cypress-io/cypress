@@ -22,6 +22,8 @@ import { translateEgressPolicyToLaunchOpts } from './util/egress-policy'
 import { resolveTrustedCertificateFingerprints } from './util/spki'
 import { createMtlsBridge } from './mtls'
 import type { MtlsBridgeLaunchOpts } from './mtls'
+import { getCypressReservedPathPrefixes } from './adapters/internal-routes'
+import { getServiceWorkerInstrumentationExpression } from '@packages/proxy/lib/http/util/service-worker-injector'
 import * as appData from './util/app_data'
 
 const debug = Debug('cypress:server:open_project')
@@ -158,6 +160,7 @@ export class OpenProject extends EventEmitter {
         ...translateEgressPolicyToLaunchOpts(cfg.hosts, this._mtlsBridge?.origins),
         hosts: cfg.hosts,
         shouldClearPersistedServiceWorkers: cfg.testIsolation !== false,
+        serviceWorkerInstrumentation: getServiceWorkerInstrumentationExpression({ reservedPathPrefixes: getCypressReservedPathPrefixes(cfg) }),
         onPageCriClientReady: (client, isAUTFrame, onAUTFrameNavigated) => {
           return this.projectBase!.server.createCdpFetchNetworkRuntime(client, isAUTFrame, onAUTFrameNavigated)
         },
@@ -174,12 +177,12 @@ export class OpenProject extends EventEmitter {
     }
 
     // if we don't have the isHeaded property
-    // then we're in interactive mode and we
-    // can assume its a headed browser
+    // then we're in interactive mode, where
+    // it is headed unless `--headless` was passed
     // TODO: we should clean this up
     if (!_.has(browser, 'isHeaded')) {
-      browser.isHeaded = true
-      browser.isHeadless = false
+      browser.isHeadless = Boolean(this._ctx?.isHeadless)
+      browser.isHeaded = !browser.isHeadless
     }
 
     await this.projectBase.setCurrentSpecAndBrowser(spec, browser, useBrowserNetworkInterception)

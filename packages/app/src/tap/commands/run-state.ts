@@ -66,6 +66,9 @@ export const runStateCommand = defineCommand('run-state', async (): Promise<RunS
   const pinned = getPinnedView(runner)
   const { results, totalTests } = aggregateResults(runner)
   const state = !runner.isRunComplete() ? 'running' : results.failed > 0 ? 'failed' : 'passed'
+  // Unlike a build failure, a spec that threw while loading still has a run, with a failing
+  // test the runner generates for the error, so its counts stand beside the reason
+  const loadError = tapManagerDataSource.getSpecLoadError()
 
   return {
     spec,
@@ -74,6 +77,7 @@ export const runStateCommand = defineCommand('run-state', async (): Promise<RunS
     startedAt: runner.getStartTime(),
     totalTests,
     results,
+    ...(loadError ? { error: buildFailure(loadError) } : {}),
     ...(pinned ? { pinned } : {}),
   }
 })

@@ -1,7 +1,11 @@
-import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import fs from 'fs-extra'
+import os from 'os'
+import path from 'path'
 import { createTestDataContext } from '../helper'
 import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 import { EventRegistrar } from '../../../src/data/EventRegistrar'
+import * as FileDataSourceModule from '../../../src/sources/FileDataSource'
 
 let configManager: ProjectConfigManager
 let eventRegistrar: EventRegistrar
@@ -122,6 +126,71 @@ describe('ProjectConfigManager', () => {
       // @ts-expect-error - `_eventsIpc` is private
       configManager._eventsIpc = undefined
       expect(configManager.eventProcessPid).toEqual(undefined)
+    })
+  })
+
+  describe('#getFullInitialConfig', () => {
+    let projectRoot: string
+    let originalCypressInternalEnv: string | undefined
+
+    beforeEach(async () => {
+      originalCypressInternalEnv = process.env.CYPRESS_INTERNAL_ENV
+      process.env.CYPRESS_INTERNAL_ENV = 'test'
+      projectRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'project-config-manager-'))
+      await fs.outputFile(path.join(projectRoot, 'cypress', 'support', 'e2e.js'), '')
+    })
+
+    afterEach(async () => {
+      if (originalCypressInternalEnv === undefined) {
+        delete process.env.CYPRESS_INTERNAL_ENV
+      } else {
+        process.env.CYPRESS_INTERNAL_ENV = originalCypressInternalEnv
+      }
+
+      jest.restoreAllMocks()
+      await fs.remove(projectRoot)
+    })
+
+    it('finds the support file when the first glob search fails with a filesystem error', async () => {
+      const ctx = createTestDataContext('open')
+      const supportFile = path.join(projectRoot, 'cypress', 'support', 'e2e.js')
+
+      const projectConfigManager = new ProjectConfigManager({
+        ctx,
+        configFile: 'cypress.config.js',
+        projectRoot,
+        handlers: [],
+        hasCypressEnvFile: false,
+        eventRegistrar,
+        onError: (error) => {},
+        onInitialConfigLoaded: () => {},
+        onFinalConfigLoaded: () => Promise.resolve(),
+        refreshLifecycle: () => Promise.resolve(),
+      })
+
+      projectConfigManager.configFilePath = path.join(projectRoot, 'cypress.config.js')
+      projectConfigManager.setTestingType('e2e')
+      jest.spyOn(projectConfigManager, 'getConfigFileContents').mockResolvedValue({ e2e: { supportFile: 'cypress/support/**/e2e.js' } })
+      jest.spyOn(projectConfigManager, 'reloadCypressEnvFile').mockResolvedValue({})
+
+      // globby rejects like this when a `**` support file pattern walks into a directory it cannot read
+      const unreadableDir = path.join(projectRoot, 'cypress', 'support', 'private')
+      const eaccesError = Object.assign(new Error(`EACCES: permission denied, scandir '${unreadableDir}'`), {
+        errno: -13,
+        code: 'EACCES',
+        syscall: 'scandir',
+        path: unreadableDir,
+      })
+
+      jest.spyOn(FileDataSourceModule, 'matchGlobs')
+      .mockRejectedValueOnce(eaccesError)
+      .mockResolvedValueOnce([supportFile])
+
+      const config = await projectConfigManager.getFullInitialConfig({}, false)
+
+      expect(config.supportFile).toEqual(supportFile)
+      expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledTimes(2)
+      expect(FileDataSourceModule.matchGlobs).toHaveBeenNthCalledWith(2, expect.any(Array), expect.objectContaining({ suppressErrors: true }))
     })
   })
 })

@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import os from 'os'
 import path from 'path'
 import mockfs from 'mock-fs'
@@ -10,7 +11,9 @@ import utils from '../../../lib/browsers/utils'
 import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import * as protocol from '../../../lib/browsers/protocol'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
@@ -168,9 +171,9 @@ describe('lib/browsers/chrome', () => {
       }
 
       // mock launched browser child process object
-      launchedBrowser = {
+      launchedBrowser = Object.assign(new EventEmitter(), {
         kill: vi.fn(),
-      }
+      })
 
       onCriEvent = async (event, data, options) => {
         await chrome.open({ isHeadless: true } as any, 'http://', { ...openOpts, ...options } as any, automation)
@@ -288,6 +291,18 @@ describe('lib/browsers/chrome', () => {
       await chrome.open({ isHeadless: true } as any, 'http://', mitmOpts as any, automation)
 
       expect(browserCriClient.reenableChildTargetInterception).toBeUndefined()
+    })
+
+    it('hands the service worker instrumentation to the page client on the browser (CDP) network path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...openOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBe('(function __cypressInstrument () {})()')
+    })
+
+    it('does not hand the page client service worker instrumentation on the MITM path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBeUndefined()
     })
 
     it('executeBeforeBrowserLaunch is noop if before:browser:launch is not registered', async () => {
@@ -558,6 +573,36 @@ describe('lib/browsers/chrome', () => {
       expect(kill).toHaveBeenCalledOnce()
     })
 
+    it('reports a non-zero browser exit to the CDP connection while it is connecting', async () => {
+      let exitSeenWhileConnecting
+
+      vi.mocked(BrowserCriClient.create).mockImplementation(async ({ getBrowserExit }) => {
+        launchedBrowser.emit('exit', 21, null)
+        exitSeenWhileConnecting = getBrowserExit?.()
+
+        return browserCriClient
+      })
+
+      await chrome.open({ isHeadless: true } as any, 'http://', openOpts as any, automation)
+
+      expect(exitSeenWhileConnecting).toEqual({ code: 21, signal: null })
+    })
+
+    it('keeps connecting when the launched process exits with code 0', async () => {
+      let exitSeenWhileConnecting
+
+      vi.mocked(BrowserCriClient.create).mockImplementation(async ({ getBrowserExit }) => {
+        launchedBrowser.emit('exit', 0, null)
+        exitSeenWhileConnecting = getBrowserExit?.()
+
+        return browserCriClient
+      })
+
+      await chrome.open({ isHeadless: true } as any, 'http://', openOpts as any, automation)
+
+      expect(exitSeenWhileConnecting).toBeUndefined()
+    })
+
     it('sends after:browser:launch with debugger url', async () => {
       const args = []
       const browser = { isHeadless: true }
@@ -744,7 +789,7 @@ describe('lib/browsers/chrome', () => {
             },
             {
               name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
+              value: getMetadataHeaderValue(),
             },
           ],
         })
@@ -765,6 +810,31 @@ describe('lib/browsers/chrome', () => {
 
         expectCalledWith(pageCriClient.send, 'Page.getFrameTree')
       })
+    })
+  })
+
+  describe('#_setAutomation', () => {
+    const bringsPageToFront = async (isTextTerminal: boolean, isHeadless: boolean) => {
+      const create = vi.spyOn(CdpAutomation, 'create').mockResolvedValue({} as CdpAutomation)
+      const client = { send: vi.fn(), on: vi.fn(), off: vi.fn() }
+
+      // Safe because `_setAutomation` only passes these through to the stubbed `create`, and reads
+      // `isTextTerminal` and `isHeadless`, the one field each of the last two provides
+      await chrome._setAutomation(client as any, { use: vi.fn() } as any, vi.fn(), { isTextTerminal } as any, { isHeadless } as any)
+
+      return create.mock.lastCall?.[7]
+    }
+
+    it('brings the page to the front in run mode', async () => {
+      expect(await bringsPageToFront(true, false)).toBe(true)
+    })
+
+    it('brings the page to the front for a headless browser in open mode, which has no extension to ask', async () => {
+      expect(await bringsPageToFront(false, true)).toBe(true)
+    })
+
+    it('asks the extension to activate the tab for a headed browser in open mode', async () => {
+      expect(await bringsPageToFront(false, false)).toBe(false)
     })
   })
 
@@ -2210,9 +2280,9 @@ describe('lib/browsers/chrome', () => {
         onServiceWorkerClientEvent: vi.fn(),
       }
 
-      launchedBrowser = {
+      launchedBrowser = Object.assign(new EventEmitter(), {
         kill: vi.fn(),
-      }
+      })
 
       vi.spyOn(chrome, '_writeExtension').mockResolvedValue('/path/to/ext')
       vi.spyOn(BrowserCriClient, 'create').mockResolvedValue(browserCriClient)

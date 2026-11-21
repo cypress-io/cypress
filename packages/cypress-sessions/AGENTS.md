@@ -39,6 +39,18 @@ yarn workspace @packages/cypress-sessions test
   no `loadError`, and `isStartingRecord` tells the two apart. The CLI never probes
   one. `cypress tap status` reports its error, and the other commands report that the
   project could not load and point to `status`.
+- A running session whose configuration breaks keeps its record on disk unchanged. The
+  error goes on the live state instead, as `loadError` in the probe response, and
+  `cypress tap status` reports it until the configuration loads again. Cypress stops
+  watching the configuration file after a load error, so that takes a person
+  choosing Try again in the Cypress window, or a restart.
+- A running session whose plugins process exits after setup finished is not a load
+  error: the project is loaded and the browser can still be driven. The probe response
+  carries it as `pluginsError` instead, which no tap command refuses on. `cypress tap
+  status` reports it beside the session's stage, `sessions` marks the session
+  "plugins stopped", and `run` carries it in its result. Unlike after a load error,
+  Cypress keeps watching the configuration file, so saving it loads the configuration
+  again, restarts the process and withdraws `pluginsError`; a restart also clears it.
 
 **Gotchas / Notes**
 

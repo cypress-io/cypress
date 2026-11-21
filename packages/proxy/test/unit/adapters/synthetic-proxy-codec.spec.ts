@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
 import { createSyntheticExpressContext, createSyntheticIncomingResponse } from '../../../lib/adapters/synthetic-express-context'
 import RequestMiddleware from '../../../lib/http/request-middleware'
+import { getMetadataHeaderValue } from '../../../lib/http/util/metadata-header-value'
 import { testMiddleware } from '../http/helpers'
 
 async function readStream (stream: Readable): Promise<string> {
@@ -580,6 +581,30 @@ describe('createSyntheticProxyCodec', () => {
     expect(ctx.req.headers['accept-encoding']).to.equal('gzip,identity')
   })
 
+  it('carries a request handler\'s responseTimeout on the outbound request', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-3',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    expect(codec.decodeRequest(ctx).responseTimeout).to.equal(undefined)
+
+    ctx.req.responseTimeout = 45000
+
+    expect(codec.decodeRequest(ctx).responseTimeout).to.equal(45000)
+  })
+
   it('copies bodySkipped and captureStream onto the ctx as resBodySkipped and resCaptureStream', () => {
     const codec = createSyntheticProxyCodec({
       createMiddlewareContext: (req, res) => {
@@ -736,12 +761,12 @@ describe('createSyntheticProxyCodec', () => {
       url: 'https://example.test/download-basic-auth.csv',
       method: 'GET',
       headers: {
-        'x-cypress-is-from-extra-target': 'true',
+        'x-cypress-is-from-extra-target': getMetadataHeaderValue(),
         accept: '*/*',
       },
     })
 
-    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal('true')
+    expect(ctx.req.headers['x-cypress-is-from-extra-target']).to.equal(getMetadataHeaderValue())
     expect(ctx.req.isFromExtraTarget).to.equal(false)
 
     let maybeSetBasicAuthHeadersRan = false

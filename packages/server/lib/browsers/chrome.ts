@@ -15,6 +15,7 @@ import * as protocol from './protocol'
 import utils from './utils'
 import * as errors from '../errors'
 import { BrowserCriClient } from './browser-cri-client'
+import type { BrowserExit } from './browser-cri-client'
 import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import type { CriClient } from './cdp-protocol/cri-client'
 import type { Automation } from '../automation'
@@ -412,8 +413,11 @@ const _handleDownloads = async function (client, downloadsFolder: string, automa
 
 let onReconnect: (client: CriClient) => Promise<void> = async () => undefined
 
-const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts) => {
-  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, options.isTextTerminal, storageOrigins)
+const _setAutomation = async (client: CriClient, automation: Automation, resetBrowserTargets: (shouldKeepTabOpen: boolean) => Promise<void>, options: BrowserLaunchOpts, browser: Browser) => {
+  // A headless browser runs without the extension, so asking it to activate the tab only waits out a
+  // timeout before every screenshot. `cypress open --headless` is headless without being run mode.
+  const bringsPageToFront = options.isTextTerminal || browser.isHeadless
+  const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, bringsPageToFront, storageOrigins)
 
   automation.use(cdpAutomation)
 
@@ -695,7 +699,7 @@ export = {
 
     await cdpSocketServer?.attachCDPClient(pageCriClient)
 
-    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options, browser)
 
     // Cy-in-cy relaunches via connectToExisting (not attachListeners), so CDP
     // Fetch must be wired here on the browser (CDP) network path. The page is
@@ -748,7 +752,7 @@ export = {
 
     debug('attaching listeners to chrome %o', { url, options })
 
-    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options)
+    const cdpAutomation = await this._setAutomation(pageCriClient, automation, browserCriClient.resetBrowserTargets, options, browser)
 
     onReconnect = (client: CriClient) => {
       // if the client disconnects (e.g. due to a computer sleeping), update
@@ -791,6 +795,7 @@ export = {
       // new one before this runs again.
       browserCriClient.waitForChildTargetInterception = (targetId) => pageCriClient.whenChildTargetHandled(targetId)
       browserCriClient.reenableChildTargetInterception = (targetId) => pageCriClient.reenableChildTargetInterception(targetId)
+      pageCriClient.serviceWorkerInstrumentation = options.serviceWorkerInstrumentation
 
       // The runner document is served on the AUT's origin, so a root-scoped
       // worker the origin registered in an earlier session is entitled to
@@ -907,10 +912,18 @@ export = {
     // navigate to the actual url
     if (!options.onError) throw new Error('Missing onError in chrome#open')
 
+    let browserExit: BrowserExit | undefined
+
+    launchedBrowser.once('exit', (code: number | null, signal: NodeJS.Signals | null) => {
+      // a launcher that exits 0 may have left the browser running, so keep trying to connect
+      if (code !== 0) browserExit = { code, signal }
+    })
+
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
       port,
       browserName: browser.displayName,
+      getBrowserExit: () => browserExit,
       onAsynchronousError: options.onError,
       onReconnect,
       protocolManager: options.protocolManager,

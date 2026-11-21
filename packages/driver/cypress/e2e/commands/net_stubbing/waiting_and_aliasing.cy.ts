@@ -267,7 +267,42 @@ describe('network stubbing', { retries: 15 }, function () {
         cy.visit('fixtures/xhr-abort.html')
         cy.get('#btn').click()
         cy.get('pre').contains('delectus') // response body renders to page
-        cy.wait('@xhr')
+        cy.wait('@xhr').then(({ state, response }) => {
+          expect(state).to.eq('Complete')
+          expect(response?.statusCode).to.eq(200)
+        })
+      })
+
+      it('yields the re-sent request when an observed request is aborted', () => {
+        cy.visit('http://localhost:3500/fixtures/generic.html')
+
+        cy.intercept('GET', /users/, {
+          body: { name: 'Jane Doe' },
+          delay: 500,
+        }).as('getUser')
+
+        cy.window().then((win) => {
+          const first = new win.XMLHttpRequest()
+
+          first.open('GET', '/users/1')
+          first.send()
+
+          cy.wait('@getUser.request').then(() => {
+            first.abort()
+
+            const resent = new win.XMLHttpRequest()
+
+            resent.open('GET', '/users/1')
+            resent.send()
+          })
+        })
+
+        cy.wait('@getUser').then(({ state, response }) => {
+          expect(state).to.eq('Complete')
+          expect(response?.body).to.deep.eq({ name: 'Jane Doe' })
+        })
+
+        cy.get('@getUser.all').its('0.state').should('eq', 'Errored')
       })
 
       it('stops waiting when an xhr request is canceled', () => {

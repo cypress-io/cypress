@@ -14,6 +14,7 @@ import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
 import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../lib/http/util/disable-navigation-preload'
+import { CookieJar } from '@packages/server/lib/automation/cookie/jar'
 
 async function flushPromises () {
   return new Promise((resolve) => setTimeout(resolve, 0))
@@ -803,6 +804,9 @@ describe('http/response-middleware', function () {
 
     it('sets Origin-Agent-Cluster header to false when injection is expected', async function () {
       prepareContext({
+        req: {
+          isFileServerRequest: true,
+        },
         incomingRes: {
           headers: {
             // simplest way to make injection expected
@@ -813,6 +817,43 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([SetInjectionLevel], ctx)
       expect(ctx.res.setHeader).toHaveBeenCalledWith('Origin-Agent-Cluster', '?0')
+    })
+
+    it('injects partially for a file server error', async function () {
+      prepareContext({
+        req: {
+          isFileServerRequest: true,
+          cookies: {},
+        },
+        incomingRes: {
+          headers: {
+            'x-cypress-file-server-error': 'true',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+
+      expect(ctx.res.wantsInjection).toEqual('partial')
+      expect(ctx.incomingRes.headers['x-cypress-file-server-error']).toEqual('true')
+    })
+
+    it('ignores and removes the file server error header on other responses', async function () {
+      prepareContext({
+        req: {
+          cookies: {},
+        },
+        incomingRes: {
+          headers: {
+            'x-cypress-file-server-error': 'true',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+
+      expect(ctx.res.wantsInjection).toBe(false)
+      expect(ctx.incomingRes.headers['x-cypress-file-server-error']).toBeUndefined()
     })
 
     describe('CSP header nonce injection', () => {
@@ -1271,6 +1312,70 @@ describe('http/response-middleware', function () {
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
       expect(appendStub).not.toHaveBeenCalled()
+    })
+
+    it('blanks HttpOnly cookie values in the simulated cookies', async function () {
+      const cookieJar = new CookieJar()
+
+      cookieJar.setCookie('visible=1', 'http://www.foobar.com/', 'strict')
+      cookieJar.setCookie('hidden=1; HttpOnly', 'http://www.foobar.com/', 'strict')
+
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          wantsInjection: 'fullCrossOrigin',
+        },
+      })
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.simulatedCookies.map(({ name, value, httpOnly }) => ({ name, value, httpOnly }))).toEqual([
+        { name: 'visible', value: '1', httpOnly: false },
+        { name: 'hidden', value: '', httpOnly: true },
+      ])
+    })
+
+    it('blanks Secure cookie values in the simulated cookies of an insecure page', async function () {
+      const cookieJar = new CookieJar()
+
+      cookieJar.setCookie('visible=1', 'http://www.foobar.com/', 'strict')
+      cookieJar.setCookie('session=k3v9x2; Secure', 'https://www.foobar.com/', 'strict')
+
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          wantsInjection: 'fullCrossOrigin',
+        },
+      })
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.simulatedCookies.map(({ name, value, secure }) => ({ name, value, secure }))).toEqual([
+        { name: 'visible', value: '1', secure: false },
+        { name: 'session', value: '', secure: true },
+      ])
+    })
+
+    it('keeps Secure cookie values in the simulated cookies of a secure page', async function () {
+      const cookieJar = new CookieJar()
+
+      cookieJar.setCookie('session=k3v9x2; Secure', 'https://www.foobar.com/', 'strict')
+
+      const ctx = prepareContext({
+        cookieJar,
+        req: {
+          proxiedUrl: 'https://www.foobar.com/',
+        },
+        res: {
+          wantsInjection: 'fullCrossOrigin',
+        },
+      })
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.simulatedCookies.map(({ name, value, secure }) => ({ name, value, secure }))).toEqual([
+        { name: 'session', value: 'k3v9x2', secure: true },
+      ])
     })
 
     it('records cookie in jar but skips browser automation sync when top does not need simulating', async function () {
@@ -2708,84 +2813,33 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeInjectServiceWorker], ctx)
       expect(injectIntoServiceWorkerStub).toHaveBeenCalledOnce()
-
-      // toHaveBeenCalledWith/toEqual treat an `undefined`-valued property as
-      // equivalent to an absent key, so asserting the option key by name that
-      // way would pass even against a differently-named key. toStrictEqual
-      // does not make that elision, so it actually pins the key name.
-      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', { disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined }])
-    })
-
-    it('passes the reserved path prefixes when useBrowserNetworkInterception is set on ctx', async function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
-          headers: {
-            'service-worker': 'script',
-          },
-        },
-        reservedPathPrefixes: ['/__/', '/__cypress/'],
-        useBrowserNetworkInterception: true,
-      })
-
-      await testMiddleware([MaybeInjectServiceWorker], ctx)
-
-      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo', {
-        disableServiceWorkerNavigationPreload: true,
-        reservedPathPrefixes: ['/__/', '/__cypress/'],
-      }])
-    })
-
-    it('does not pass the reserved path prefixes when useBrowserNetworkInterception is unset on ctx', async function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
-          headers: {
-            'service-worker': 'script',
-          },
-        },
-        reservedPathPrefixes: ['/__/', '/__cypress/'],
-      })
-
-      await testMiddleware([MaybeInjectServiceWorker], ctx)
-
-      expect(injectIntoServiceWorkerStub.mock.calls[0][1]).toStrictEqual({ disableServiceWorkerNavigationPreload: undefined, reservedPathPrefixes: undefined })
-    })
-
-    it('prepends the navigation preload expression when useBrowserNetworkInterception is set on ctx', async function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
-          headers: {
-            'service-worker': 'script',
-          },
-        },
-        useBrowserNetworkInterception: true,
-      })
-
-      await testMiddleware([MaybeInjectServiceWorker], ctx)
-      expect(injectIntoServiceWorkerStub).toHaveBeenCalledWith('foo', expect.objectContaining({ disableServiceWorkerNavigationPreload: true }))
-
-      const rewritten = await streamToString(ctx.incomingResStream)
-
-      expect(rewritten).toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
-    })
-
-    it('does not prepend the navigation preload expression when useBrowserNetworkInterception is unset on ctx', async function () {
-      prepareContext({
-        req: {
-          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
-          headers: {
-            'service-worker': 'script',
-          },
-        },
-      })
-
-      await testMiddleware([MaybeInjectServiceWorker], ctx)
+      expect(injectIntoServiceWorkerStub.mock.calls[0]).toStrictEqual(['foo'])
 
       const rewritten = await streamToString(ctx.incomingResStream)
 
       expect(rewritten).not.toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
+    })
+
+    // Chrome's update check refetches the script outside interception, so the
+    // installed script must match what the origin serves.
+    it('leaves the service worker script unmodified when useBrowserNetworkInterception is set on ctx', async function () {
+      prepareContext({
+        req: {
+          proxiedUrl: 'http://www.foobar.com:3501/service-worker.js',
+          headers: {
+            'service-worker': 'script',
+          },
+        },
+        useBrowserNetworkInterception: true,
+      })
+
+      const originalStream = ctx.incomingResStream
+
+      await testMiddleware([MaybeInjectServiceWorker], ctx)
+
+      expect(injectIntoServiceWorkerStub).not.toHaveBeenCalled()
+      expect(ctx.incomingResStream).toBe(originalStream)
+      expect(await streamToString(ctx.incomingResStream)).toBe('foo')
     })
 
     function prepareContext (props) {
