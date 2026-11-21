@@ -257,6 +257,7 @@
     "proxyquire": "2.1.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "recheck": "4.6.2",
     "rimraf": "6.1.1",
     "semantic-release": "25.0.8",
     "semantic-release-monorepo": "8.0.2",

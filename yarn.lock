@@ -2837,6 +2837,11 @@
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.6.3.tgz#f13c7c205915eb91ae54c557f5e92bddd8be0e83"
   integrity sha512-4B4OijXeVNOPZlYA2oEwWOTkzyltLao+xbotHQeqN++Rv27Y6s818+n2Qkp8q+Fxhn0t/5lA5X1Mxktud8eayQ==
 
+"@dual-bundle/import-meta-resolve@^4.2.1":
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/@dual-bundle/import-meta-resolve/-/import-meta-resolve-4.2.1.tgz#cd0b25b3808cd9e684cd6cd549bbf8e1dcf05ee7"
+  integrity sha512-id+7YRUgoUX6CgV0DtuhirQWodeeA7Lf4i2x71JS/vtA5pRb/hIGWlw+G6MeXvsM+MXrz0VAydTGElX1rAfgPg==
+
 "@electron-internal/extract-zip@^1.0.1":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@electron-internal/extract-zip/-/extract-zip-1.0.6.tgz#fb229ea9567feeecbb84ec8dd5a56c21e29b65ec"
@@ -28023,6 +28028,50 @@ recast@0.23.11:
     tiny-invariant "^1.3.3"
     tslib "^2.0.1"
 
+recheck-jar@4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/recheck-jar/-/recheck-jar-4.6.2.tgz#c062312cd4d395135335c996e0702631ca7e8b24"
+  integrity sha512-mm0x9Vew58cUtW1zBbR3/qLFLrpwnn0agmQPjgLMFPWN5gykaw3UqmdoVCRSpmuT5T00eo5SaFfRwrE5uXYobA==
+
+recheck-linux-arm64@4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/recheck-linux-arm64/-/recheck-linux-arm64-4.6.2.tgz#99f9eef3dda071178327ad8812c20b701865465b"
+  integrity sha512-+RCQV4sCCQHNvOmyrWjYdDEExRZS0lzOvDWl0GLhkbXTWb2OBg2EhKtqkIwQPlc0ku1v0rqPmek9KZHtp6wvWQ==
+
+recheck-linux-x64@4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/recheck-linux-x64/-/recheck-linux-x64-4.6.2.tgz#4f783c4a15fa66d10bb01a67f721766f5b9baed4"
+  integrity sha512-jOUS5qrMh6aZilbaiPdzQf97/DdiI/ZBZcD1mLrtfaLhJKuLeTOXSqDsyKdhHc2ElZW3KVBhLKzTr7zipoBABQ==
+
+recheck-macos-arm64@4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/recheck-macos-arm64/-/recheck-macos-arm64-4.6.2.tgz#f1b92356212593a357b78c5a6f0719a7f7adbdcd"
+  integrity sha512-ngvCW6Uz581hKACiofmxzs5NynU5ntkp3yz4TpdXhUynEz0Ek8DfveYx8HvaCI1UEZ+eFD9M+cePsK5erTmc+w==
+
+recheck-macos-x64@4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/recheck-macos-x64/-/recheck-macos-x64-4.6.2.tgz#f17f72a001907091558f93dcaa7ce48d5728f86a"
+  integrity sha512-iEN67CpluJLbd2XkEcdjelDSi2+vgp55TVvjjlKybUhuIWza0DMNo2zwdEG4ZsvLpvYR5vV6Y06x69ywBsrXkw==
+
+recheck-windows-x64@4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/recheck-windows-x64/-/recheck-windows-x64-4.6.2.tgz#992244d6488a9042588693a42d0df2d287a3e365"
+  integrity sha512-HeREed9Ua++XDjqYavQO2/tWq7PO4wkRm70reVab//WNwzNu0ct0x3x3cj5sS+6sohd8N2XTWvcMKAHTZ5nAng==
+
+recheck@4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/recheck/-/recheck-4.6.2.tgz#160f6cc34b525a252979d43e41fccf2dde36d4b6"
+  integrity sha512-u4aJX9skFz5VLMwEGtNv4BavU4qo6dSds/NZiJhoJ0QP1OJ0/VLbztD4nC4mlRuVM+Tj9kssGky4ysrIzRTA2Q==
+  dependencies:
+    synckit "0.12.3"
+  optionalDependencies:
+    recheck-jar "4.6.2"
+    recheck-linux-arm64 "4.6.2"
+    recheck-linux-x64 "4.6.2"
+    recheck-macos-arm64 "4.6.2"
+    recheck-macos-x64 "4.6.2"
+    recheck-windows-x64 "4.6.2"
+
 rechoir@^0.6.2:
   version "0.6.2"
   resolved "https://registry.yarnpkg.com/rechoir/-/rechoir-0.6.2.tgz#85204b54dba82d5742e28c96756ef43af50e3384"
@@ -30861,6 +30910,14 @@ sync-fetch@0.7.1:
     node-fetch "^3.3.2"
     timeout-signal "^2.0.0"
     whatwg-mimetype "^5.0.0"
+
+synckit@0.12.3:
+  version "0.12.3"
+  resolved "https://registry.yarnpkg.com/synckit/-/synckit-0.12.3.tgz#6e30a3441d095ed04c311077350ce205465512d6"
+  integrity sha512-U+/AXT6LWsxnj2vz9HeUuPWBNgdWxjyIEjEPdbJARC9txmgPzo2VEdqnFo4hHaNyMPtycyVJrSaQYeQv/PoyyA==
+  dependencies:
+    "@dual-bundle/import-meta-resolve" "^4.2.1"
+    "@pkgr/core" "^0.3.6"
 
 synckit@^0.11.12, synckit@^0.11.8:
   version "0.11.13"

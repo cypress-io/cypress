@@ -21,13 +21,7 @@ Write down three things before you look at the pattern. They belong in the PR de
 
 ## 2. Run a static check
 
-[`recheck`](https://makenowjust-labs.github.io/recheck/) analyses a pattern and reports `safe`, `vulnerable` or `unknown`, along with its complexity and an attack string. It isn't a repo dependency, because it downloads a native binary for each platform. Install it once, outside the repo:
-
-```bash
-npm install --prefix "$HOME/.cache/cypress-check-regex" recheck@4.6.2
-```
-
-Then pass the script a regex literal, a bare source with `--flags`, or a `file:line`:
+[`recheck`](https://makenowjust-labs.github.io/recheck/) analyses a pattern and reports `safe`, `vulnerable` or `unknown`, along with its complexity and an attack string. It's a root devDependency, so a root `yarn` install is all you need. Pass the script a regex literal, a bare source with `--flags`, or a `file:line`:
 
 ```bash
 yarn check-regex '/^\s+\S[^\s:]*:/u'

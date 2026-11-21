@@ -4,13 +4,11 @@
 // recheck's attack string at growing sizes. See
 // guides/writing-performant-regular-expressions.md for the procedure.
 const fs = require('fs')
-const os = require('os')
 const path = require('path')
 const { Worker } = require('worker_threads')
+const recheck = require('recheck')
 const ts = require('typescript')
 
-const RECHECK_VERSION = '4.6.2'
-const RECHECK_DIR = process.env.CHECK_REGEX_RECHECK_DIR || path.join(os.homedir(), '.cache', 'cypress-check-regex')
 const DEFAULT_SIZES = [1_000, 10_000, 50_000]
 const DEFAULT_TIMEOUT_MS = 2_000
 
@@ -163,22 +161,6 @@ const timeRegex = (source, flags, input, timeoutMs) => {
   })
 }
 
-const loadRecheck = () => {
-  // Kept out of the repo's dependencies: it ships a native binary per platform
-  // that every install would download for a check run by hand
-  const name = 'recheck'
-
-  for (const from of [__dirname, RECHECK_DIR]) {
-    try {
-      return require(require.resolve(name, { paths: [from] }))
-    } catch {
-      // try the next location
-    }
-  }
-
-  return null
-}
-
 // `yarn check-regex` runs from the repo root, so relative paths are resolved
 // against the directory the command was typed in
 const fromCaller = (/** @type {string} */ file) => path.resolve(process.env.INIT_CWD || process.cwd(), file)
@@ -261,12 +243,11 @@ const readSamples = async (samplesFile, inputFiles) => {
 
 /**
  * @param {Target} target
- * @param {any} recheck
  * @param {{ name: string, input: string }[]} samples
  * @param {{ sizes: number[], timeout: number }} options
  * @param {{ label: string, attack: any } | null} borrowed attack string from --attack-from
  */
-const checkTarget = async (target, recheck, samples, options, borrowed) => {
+const checkTarget = async (target, samples, options, borrowed) => {
   let ok = true
 
   try {
@@ -284,7 +265,9 @@ const checkTarget = async (target, recheck, samples, options, borrowed) => {
   console.log(`  recheck:    ${diagnostics.status}${diagnostics.checker ? ` (${diagnostics.checker})` : ''}`)
 
   if (diagnostics.status === 'unknown') {
-    console.log(`  error:      ${diagnostics.error.kind}${diagnostics.error.message ? `: ${diagnostics.error.message}` : ''}`)
+    const { error } = diagnostics
+
+    console.log(`  error:      ${error.kind}${'message' in error ? `: ${error.message}` : ''}`)
   } else {
     console.log(`  complexity: ${diagnostics.complexity.summary}`)
   }
@@ -359,18 +342,6 @@ const main = async () => {
     return options.help ? 0 : 2
   }
 
-  const recheck = loadRecheck()
-
-  if (!recheck) {
-    console.error(`recheck is not installed. It stays out of the repo's dependencies, so install it once outside the repo:
-
-  npm install --prefix "${RECHECK_DIR}" recheck@${RECHECK_VERSION}
-
-Set CHECK_REGEX_RECHECK_DIR to use a different location.`)
-
-    return 2
-  }
-
   const targets = await resolveTargets(options.target, options.flags)
   const samples = await readSamples(options.samples, options.inputs)
   let borrowed = null
@@ -389,7 +360,7 @@ Set CHECK_REGEX_RECHECK_DIR to use a different location.`)
   let ok = true
 
   for (const target of targets) {
-    ok = (await checkTarget(target, recheck, samples, options, borrowed)) && ok
+    ok = (await checkTarget(target, samples, options, borrowed)) && ok
   }
 
   console.log('Timings are from this machine only. Compare them with each other, not with numbers measured elsewhere.')
