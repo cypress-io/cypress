@@ -86,6 +86,12 @@ describe('lib/automation/cookie/document-cookie', () => {
       expect(automation.setCookie.mock.calls.map(([cookie]) => cookie.domain)).toEqual(['app.test', 'app.localhost'])
     })
 
+    it('a parent Domain that has an IP address among its labels', async () => {
+      await write('foo=bar; Domain=10.0.0.1.nip.io', 'http://app.10.0.0.1.nip.io/')
+
+      expect(browserCookie()).toMatchObject({ domain: '10.0.0.1.nip.io', hostOnly: false })
+    })
+
     it('a __Host- cookie with Path=/ from a page at /', async () => {
       await write('__Host-foo=bar; Secure; Path=/', 'https://www.foobar.com/')
 
@@ -151,7 +157,12 @@ describe('lib/automation/cookie/document-cookie', () => {
 
     it('a name and value over 4096 bytes', () => expectIgnored(`foo=${'a'.repeat(4094)}`))
 
-    it('a cookie without a name whose value has a prefix', () => expectIgnored('=__Host-foo=bar; Secure; Path=/'))
+    it('a cookie without a name whose value has a prefix, in any case', async () => {
+      await expectIgnored('=__Host-foo=bar; Secure; Path=/')
+      await expectIgnored('=__Secure-foo=bar; Secure')
+      await expectIgnored('=__Http-foo=bar; Secure')
+      await expectIgnored('=__http-foo=bar; Secure')
+    })
 
     it('a prefix reserved for cookies set by a response, in any case', async () => {
       await expectIgnored('__Http-foo=bar; Secure')
@@ -195,6 +206,12 @@ describe('lib/automation/cookie/document-cookie', () => {
     it('a __Secure- cookie that is not Secure, in any case', async () => {
       await expectIgnored('__Secure-foo=bar')
       await expectIgnored('__SECURE-foo=bar')
+    })
+
+    it('a __Host- cookie that is not Secure, in any case', async () => {
+      await expectIgnored('__Host-foo=bar; Path=/')
+      await expectIgnored('__host-foo=bar; Path=/')
+      await expectIgnored('__HOST-foo=bar; Path=/', 'http://www.foobar.com/')
     })
 
     it('a __Host- cookie for a parent domain, in any case', async () => {
