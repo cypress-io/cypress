@@ -1,98 +1,31 @@
 // @ts-check
-// Measures a regular expression before it is added or changed: a static
-// ReDoS check with recheck, then timings against sample inputs and against
+// Checks a regex with recheck, then times it against sample inputs and against
 // recheck's attack string at growing sizes. See
 // guides/writing-performant-regular-expressions.md for the procedure.
 const fs = require('fs')
-const path = require('path')
+const { parseArgs } = require('util')
 const { Worker } = require('worker_threads')
 const recheck = require('recheck')
-const ts = require('typescript')
 
-const DEFAULT_SIZES = [1_000, 10_000, 50_000]
-const DEFAULT_TIMEOUT_MS = 2_000
+const SIZES = [1_000, 10_000, 50_000]
+const TIMEOUT_MS = 2_000
 
-const USAGE = `Usage:
-  yarn check-regex '/<source>/<flags>' [options]
-  yarn check-regex '<source>' --flags <flags> [options]
-  yarn check-regex <file>:<line> [options]
+const USAGE = `Usage: yarn check-regex '/<source>/<flags>' [--samples <file>] [--attack-from '/<source>/<flags>']
 
-Options:
-  --flags <flags>     Flags for a bare <source>
-  --samples <file>    Realistic inputs, one per line (or a JSON array of strings in a .json file)
-  --input <file>      Use the whole file as one realistic input (repeatable)
-  --attack-from <re>  Also time against another regex's attack string, such as the
-                      pattern this one replaces ('/<source>/<flags>')
-  --sizes <list>      Attack string lengths in characters (default: ${DEFAULT_SIZES.join(',')})
-  --timeout <ms>      Time cap per run (default: ${DEFAULT_TIMEOUT_MS})
-  --help              Show this message
+  --samples      Real inputs, one per line, or a JSON array of strings in a .json file
+  --attack-from  Also time against another regex's attack string, such as the one this replaces
 
-Exits 1 when recheck does not rate a regex safe or a run hits the time cap.`
+Exits 1 when recheck does not rate the regex safe or a run takes longer than ${TIMEOUT_MS} ms.`
 
 /**
- * @typedef {{ source: string, flags: string, label: string }} Target
- */
-
-/**
- * `'/a+b/gi'` becomes `{ source: 'a+b', flags: 'gi' }`. A string that does not
- * look like a regex literal is returned as the source with no flags.
+ * `'/a+b/gi'` becomes `{ source: 'a+b', flags: 'gi' }`. Anything else is
+ * treated as a source with no flags.
  * @param {string} arg
  */
 const parsePatternArg = (arg) => {
   const literal = /^\/([\s\S]+)\/([a-z]*)$/.exec(arg)
 
-  if (literal) {
-    return { source: literal[1], flags: literal[2] }
-  }
-
-  return { source: arg, flags: '' }
-}
-
-/**
- * Returns every regex that starts on `line` (1-based) of `code`: regex
- * literals, and `RegExp(...)` / `new RegExp(...)` calls whose arguments are
- * string literals. A `RegExp` built from a variable is skipped, since its
- * source is only known at runtime.
- * @param {string} code
- * @param {number} line
- * @param {string} fileName
- * @returns {Target[]}
- */
-const findRegexesOnLine = (code, line, fileName = 'input.ts') => {
-  const sourceFile = ts.createSourceFile(fileName, code, ts.ScriptTarget.Latest, true)
-  /** @type {Target[]} */
-  const found = []
-
-  /** @param {ts.Node} node */
-  const startLine = (node) => sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1
-
-  /** @param {ts.Node | undefined} node */
-  const isStringLiteral = (node) => !!node && (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
-
-  /** @param {ts.Node} node */
-  const visit = (node) => {
-    if (ts.isRegularExpressionLiteral(node) && startLine(node) === line) {
-      found.push({ ...parsePatternArg(node.text), label: node.text })
-    }
-
-    if ((ts.isNewExpression(node) || ts.isCallExpression(node)) &&
-      ts.isIdentifier(node.expression) && node.expression.text === 'RegExp' &&
-      startLine(node) === line) {
-      const [sourceArg, flagsArg] = node.arguments ?? []
-
-      if (sourceArg && ts.isStringLiteralLike(sourceArg) && (!flagsArg || isStringLiteral(flagsArg))) {
-        const flags = flagsArg && ts.isStringLiteralLike(flagsArg) ? flagsArg.text : ''
-
-        found.push({ source: sourceArg.text, flags, label: node.getText(sourceFile) })
-      }
-    }
-
-    ts.forEachChild(node, visit)
-  }
-
-  visit(sourceFile)
-
-  return found
+  return literal ? { source: literal[1], flags: literal[2] } : { source: arg, flags: '' }
 }
 
 /**
@@ -115,43 +48,26 @@ const buildAttackString = (attack, length) => {
 // backtracking regex blocks its own thread, so a timer there would not fire
 // until the regex returned.
 const WORKER_SOURCE = `
-const { parentPort, workerData } = require('worker_threads')
-const { performance } = require('perf_hooks')
-const { source, flags, input } = workerData
+const { parentPort, workerData: { source, flags, input } } = require('worker_threads')
 const re = new RegExp(source, flags)
-const run = () => re.global ? input.match(re) : re.exec(input)
-const times = []
-let result
-
-for (let i = 0; i < 5; i++) {
-  re.lastIndex = 0
-  const start = performance.now()
-  result = run()
-  times.push(performance.now() - start)
-  if (times.reduce((a, b) => a + b, 0) > 200) break
-}
-
-times.sort((a, b) => a - b)
-parentPort.postMessage({ ms: times[Math.floor(times.length / 2)], matched: result !== null })
+const start = performance.now()
+const matched = (re.global ? input.match(re) : re.exec(input)) !== null
+parentPort.postMessage({ ms: performance.now() - start, matched })
 `
 
 /**
- * @param {string} source
- * @param {string} flags
+ * @param {{ source: string, flags: string }} pattern
  * @param {string} input
- * @param {number} timeoutMs
- * @returns {Promise<{ ms: number, matched: boolean } | { timedOut: true }>}
+ * @returns {Promise<{ ms: number, matched: boolean } | null>} null when the run hit the time cap
  */
-const timeRegex = (source, flags, input, timeoutMs) => {
+const timeRegex = ({ source, flags }, input) => {
   return new Promise((resolve, reject) => {
     const worker = new Worker(WORKER_SOURCE, { eval: true, workerData: { source, flags, input } })
-    const timer = setTimeout(() => {
-      worker.terminate().then(() => resolve({ timedOut: true }), reject)
-    }, timeoutMs)
+    const timer = setTimeout(() => worker.terminate().then(() => resolve(null), reject), TIMEOUT_MS)
 
-    worker.once('message', (message) => {
+    worker.once('message', (result) => {
       clearTimeout(timer)
-      worker.terminate().then(() => resolve(message), reject)
+      worker.terminate().then(() => resolve(result), reject)
     })
 
     worker.once('error', (err) => {
@@ -161,214 +77,90 @@ const timeRegex = (source, flags, input, timeoutMs) => {
   })
 }
 
-// `yarn check-regex` runs from the repo root, so relative paths are resolved
-// against the directory the command was typed in
-const fromCaller = (/** @type {string} */ file) => path.resolve(process.env.INIT_CWD || process.cwd(), file)
-
 /**
- * @param {string[]} argv
+ * @param {string} file
+ * @returns {Promise<string[]>}
  */
-const parseArgs = (argv) => {
-  /** @type {{ target?: string, flags?: string, samples?: string, attackFrom?: string, inputs: string[], sizes: number[], timeout: number, help: boolean }} */
-  const options = { inputs: [], sizes: DEFAULT_SIZES, timeout: DEFAULT_TIMEOUT_MS, help: false }
+const readSamples = async (file) => {
+  const text = await fs.promises.readFile(file, 'utf8')
 
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i]
-    const next = () => {
-      const value = argv[++i]
-
-      if (value === undefined) throw new Error(`${arg} needs a value`)
-
-      return value
-    }
-
-    if (arg === '--help' || arg === '-h') options.help = true
-    else if (arg === '--flags') options.flags = next()
-    else if (arg === '--samples') options.samples = next()
-    else if (arg === '--input') options.inputs.push(next())
-    else if (arg === '--attack-from') options.attackFrom = next()
-    else if (arg === '--sizes') options.sizes = next().split(',').map(Number)
-    else if (arg === '--timeout') options.timeout = Number(next())
-    else if (options.target === undefined) options.target = arg
-    else throw new Error(`Unexpected argument: ${arg}`)
-  }
-
-  return options
+  return file.endsWith('.json') ? JSON.parse(text) : text.split(/\r?\n/).filter(Boolean)
 }
 
-/**
- * @param {string} target
- * @param {string | undefined} flags
- * @returns {Promise<Target[]>}
- */
-const resolveTargets = async (target, flags) => {
-  const fileLine = /^(.+):(\d+)$/.exec(target)
+const main = async () => {
+  const { values, positionals } = parseArgs({
+    allowPositionals: true,
+    options: {
+      'samples': { type: 'string' },
+      'attack-from': { type: 'string' },
+      'help': { type: 'boolean', short: 'h' },
+    },
+  })
 
-  if (fileLine && fs.existsSync(fromCaller(fileLine[1]))) {
-    const found = findRegexesOnLine(await fs.promises.readFile(fromCaller(fileLine[1]), 'utf8'), Number(fileLine[2]), fileLine[1])
+  if (values.help || positionals.length !== 1) {
+    console.log(USAGE)
 
-    if (!found.length) {
-      throw new Error(`No regex literal or RegExp() call with literal arguments starts on ${target}. Pass the pattern itself instead.`)
-    }
-
-    return found
+    return values.help ? 0 : 2
   }
 
-  const parsed = parsePatternArg(target)
+  const pattern = parsePatternArg(positionals[0])
 
-  return [{ source: parsed.source, flags: flags ?? parsed.flags, label: `/${parsed.source}/${flags ?? parsed.flags}` }]
-}
+  new RegExp(pattern.source, pattern.flags)
 
-/**
- * @param {string | undefined} samplesFile
- * @param {string[]} inputFiles
- */
-const readSamples = async (samplesFile, inputFiles) => {
-  /** @type {{ name: string, input: string }[]} */
-  const samples = []
+  const diagnostics = await recheck.check(pattern.source, pattern.flags)
 
-  if (samplesFile) {
-    const text = await fs.promises.readFile(fromCaller(samplesFile), 'utf8')
-    const values = samplesFile.endsWith('.json') ? JSON.parse(text) : text.split(/\r?\n/).filter((l) => l.length)
-
-    values.forEach((input, i) => samples.push({ name: `${path.basename(samplesFile)} #${i + 1}`, input: String(input) }))
-  }
-
-  for (const file of inputFiles) {
-    samples.push({ name: path.basename(file), input: await fs.promises.readFile(fromCaller(file), 'utf8') })
-  }
-
-  return samples
-}
-
-/**
- * @param {Target} target
- * @param {{ name: string, input: string }[]} samples
- * @param {{ sizes: number[], timeout: number }} options
- * @param {{ label: string, attack: any } | null} borrowed attack string from --attack-from
- */
-const checkTarget = async (target, samples, options, borrowed) => {
-  let ok = true
-
-  try {
-    new RegExp(target.source, target.flags)
-  } catch (err) {
-    console.log(`${target.label}\n  invalid: ${err instanceof Error ? err.message : err}\n`)
-
-    return false
-  }
-
-  console.log(target.label)
-
-  const diagnostics = await recheck.check(target.source, target.flags)
-
-  console.log(`  recheck:    ${diagnostics.status}${diagnostics.checker ? ` (${diagnostics.checker})` : ''}`)
+  console.log(`/${pattern.source}/${pattern.flags}`)
+  console.log(`  recheck:    ${diagnostics.status}`)
 
   if (diagnostics.status === 'unknown') {
-    const { error } = diagnostics
-
-    console.log(`  error:      ${error.kind}${'message' in error ? `: ${error.message}` : ''}`)
+    console.log(`  error:      ${diagnostics.error.kind}`)
   } else {
     console.log(`  complexity: ${diagnostics.complexity.summary}`)
   }
 
-  if (diagnostics.status !== 'safe') ok = false
+  const attacks = []
 
   if (diagnostics.status === 'vulnerable') {
-    const marks = Array.from({ length: target.source.length }, () => ' ')
-
-    for (const { start, end, temperature } of diagnostics.hotspot) {
-      for (let i = start; i < end; i++) marks[i] = temperature === 'heat' ? '^' : '~'
-    }
-
-    console.log(`  hotspot:    ${target.source}\n              ${marks.join('').trimEnd()}`)
     console.log(`  attack:     ${diagnostics.attack.pattern}`)
+    attacks.push({ name: 'attack', attack: diagnostics.attack })
   }
 
-  /** @type {{ name: string, input: string }[]} */
-  const runs = [...samples]
+  if (values['attack-from']) {
+    const from = parsePatternArg(values['attack-from'])
+    const fromDiagnostics = await recheck.check(from.source, from.flags)
 
-  const attacks = diagnostics.status === 'vulnerable' ? [{ prefix: 'attack', attack: diagnostics.attack }] : []
-
-  if (borrowed) {
-    console.log(`  borrowed:   attack string of ${borrowed.label}`)
-    attacks.push({ prefix: 'borrowed attack', attack: borrowed.attack })
-  }
-
-  for (const { prefix, attack } of attacks) {
-    for (const size of options.sizes) {
-      runs.push({ name: `${prefix} @ ${size.toLocaleString('en-US')}`, input: buildAttackString(attack, size) })
+    if (fromDiagnostics.status !== 'vulnerable') {
+      throw new Error(`--attack-from: recheck rates /${from.source}/${from.flags} ${fromDiagnostics.status}, so it has no attack string`)
     }
+
+    attacks.push({ name: 'borrowed attack', attack: fromDiagnostics.attack })
   }
 
-  if (!runs.length) {
-    console.log('  timings:    none (recheck found no attack string; pass --samples, --input or --attack-from)\n')
+  const inputs = values.samples ? (await readSamples(values.samples)).map((input, i) => ({ name: `sample ${i + 1}`, input })) : []
 
-    return ok
+  for (const { name, attack } of attacks) {
+    for (const size of SIZES) {
+      inputs.push({ name: `${name} @ ${size}`, input: buildAttackString(attack, size) })
+    }
   }
 
   const rows = []
 
-  for (const { name, input } of runs) {
-    const result = await timeRegex(target.source, target.flags, input, options.timeout)
+  for (const { name, input } of inputs) {
+    const result = await timeRegex(pattern, input)
 
-    if ('timedOut' in result) {
-      ok = false
-      rows.push([name, input.length.toLocaleString('en-US'), '-', `stopped at ${options.timeout} ms`])
-    } else {
-      rows.push([name, input.length.toLocaleString('en-US'), result.matched ? 'yes' : 'no', `${result.ms.toFixed(3)} ms`])
-    }
+    rows.push({ input: name, chars: input.length, match: result?.matched ?? '-', ms: result ? Number(result.ms.toFixed(3)) : `> ${TIMEOUT_MS}` })
   }
 
-  const header = ['input', 'chars', 'match', 'time']
-  const widths = header.map((h, i) => Math.max(h.length, ...rows.map((r) => r[i].length)))
-  const format = (/** @type {string[]} */ row) => `  ${row.map((cell, i) => (i === 1 || i === 3 ? cell.padStart(widths[i]) : cell.padEnd(widths[i]))).join('  ')}`
+  if (rows.length) {
+    console.table(rows)
+    console.log('Timings are from this machine only. Compare them with each other, not with numbers measured elsewhere.')
+  }
 
-  console.log('')
-  console.log(format(header))
-  console.log(format(widths.map((w) => '-'.repeat(w))))
-  rows.forEach((row) => console.log(format(row)))
-  console.log('')
-
-  return ok
+  return diagnostics.status === 'safe' && rows.every((row) => typeof row.ms === 'number') ? 0 : 1
 }
 
-const main = async () => {
-  const options = parseArgs(process.argv.slice(2))
-
-  if (options.help || options.target === undefined) {
-    console.log(USAGE)
-
-    return options.help ? 0 : 2
-  }
-
-  const targets = await resolveTargets(options.target, options.flags)
-  const samples = await readSamples(options.samples, options.inputs)
-  let borrowed = null
-
-  if (options.attackFrom) {
-    const [from] = await resolveTargets(options.attackFrom, undefined)
-    const fromDiagnostics = await recheck.check(from.source, from.flags)
-
-    if (fromDiagnostics.status !== 'vulnerable') {
-      throw new Error(`--attack-from: recheck rates ${from.label} ${fromDiagnostics.status}, so it has no attack string`)
-    }
-
-    borrowed = { label: from.label, attack: fromDiagnostics.attack }
-  }
-
-  let ok = true
-
-  for (const target of targets) {
-    ok = (await checkTarget(target, samples, options, borrowed)) && ok
-  }
-
-  console.log('Timings are from this machine only. Compare them with each other, not with numbers measured elsewhere.')
-
-  return ok ? 0 : 1
-}
-
-module.exports = { buildAttackString, findRegexesOnLine, parsePatternArg }
+module.exports = { buildAttackString, parsePatternArg }
 
 if (require.main === module) {
   main().then((code) => {

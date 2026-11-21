@@ -21,14 +21,10 @@ Write down three things before you look at the pattern. They belong in the PR de
 
 ## 2. Run a static check
 
-[`recheck`](https://makenowjust-labs.github.io/recheck/) analyses a pattern and reports `safe`, `vulnerable` or `unknown`, along with its complexity and an attack string. It's a root devDependency, so a root `yarn` install is all you need. Pass the script a regex literal, a bare source with `--flags`, or a `file:line`:
+[`recheck`](https://makenowjust-labs.github.io/recheck/) analyses a pattern and reports `safe`, `vulnerable` or `unknown`, along with its complexity and an attack string. It's a root devDependency, so a root `yarn` install is all you need. Pass the script the regex literal, in single quotes so the shell leaves it alone:
 
 ```bash
 yarn check-regex '/^\s+\S[^\s:]*:/u'
-```
-
-```bash
-yarn check-regex packages/errors/src/stackUtils.ts:36
 ```
 
 The result should be `safe`. If `recheck` says `vulnerable` and you're keeping the pattern, the PR has to say why that's acceptable. Two justifications hold up:
@@ -44,10 +40,10 @@ If `recheck` reports `unknown` (it timed out or doesn't support a feature such a
 
 Static analysis says whether a pattern *can* blow up. Timing tells you whether it does at the sizes your input really reaches. The script handles both halves:
 
-- **Real inputs at realistic size.** Pass captured output with `--samples <file>` (one input per line, or a JSON array in a `.json` file) or `--input <file>` (the whole file is one input). Capture it from the real tool or browser. Don't hand-write lines that only look plausible.
-- **The worst case.** When `recheck` finds an attack string, the script grows it to 1,000, 10,000 and 50,000 characters (change this with `--sizes`). To time a rewrite against the pattern it replaces, pass the old pattern with `--attack-from`.
+- **Real inputs at realistic size.** Pass captured output with `--samples <file>` (one input per line, or a JSON array in a `.json` file for inputs that span lines). Capture it from the real tool or browser. Don't hand-write lines that only look plausible.
+- **The worst case.** When `recheck` finds an attack string, the script grows it to 1,000, 10,000 and 50,000 characters. To time a rewrite against the pattern it replaces, pass the old pattern with `--attack-from`.
 
-Each run happens in a worker thread that the main thread stops after `--timeout` milliseconds (2,000 by default). That matters: a runaway regex blocks the thread it runs on, so a `setTimeout` in the same thread doesn't fire until the regex returns. A table row that says `stopped at 2000 ms` means the regex was still running when the cap hit.
+Each run happens in a worker thread that the main thread stops after 2,000 milliseconds. That matters: a runaway regex blocks the thread it runs on, so a `setTimeout` in the same thread doesn't fire until the regex returns. A row whose time reads `> 2000` means the regex was still running when the cap hit.
 
 Read the timings as relative, not absolute. They come from one machine, so compare rows against each other rather than with numbers measured somewhere else. The thing to look for is growth. Going from 1,000 to 10,000 characters, a linear regex takes roughly ten times as long, a quadratic one roughly a hundred times, and an exponential one never comes back.
 
