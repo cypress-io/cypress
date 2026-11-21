@@ -622,6 +622,7 @@ describe('src/cy/commands/agents', () => {
       cy.get('@Notification').should('have.been.calledWith', 'Hello')
     })
 
+    // https://github.com/cypress-io/cypress/issues/15005
     it('reports a failed calledWith on a spy called with a JSON string', (done) => {
       const events = Array.from({ length: 5 }, (_, i) => {
         return { type: 'ui', message: `Payment form shown at step ${i + 1}`, sessionId: 'c9f1e2a4-7b3d-4e8a-9c61-2f5d8a0b7e13' }
