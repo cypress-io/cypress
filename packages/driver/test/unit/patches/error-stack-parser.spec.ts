@@ -25,7 +25,7 @@ const extractLocation = (urlLike: string) => {
 }
 
 // What the unpatched parser returns for a Firefox or Safari frame. Like the
-// parser, it throws when it finds no location, as for `@\r`.
+// parser, it throws when it finds no location, as for `@:\r`.
 const unpatchedFrame = (line: string) => {
   const matches = line.match(functionNameRegex)
   const [fileName, lineNumber, columnNumber] = extractLocation(line.replace(functionNameRegex, ''))
