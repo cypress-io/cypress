@@ -26,6 +26,17 @@ export interface TapSessionSummary {
   /** Whether tap can drive the browser the session has open — tap supports only Chromium based browsers. */
   browserSupported: boolean
   /**
+   * Why the project stopped loading after the session started, when it did. Every command but
+   * `status` refuses the session until the project is fixed and Cypress is started again.
+   */
+  loadError?: string
+  /**
+   * Why the session's plugins process exited after it started, when it did. The session can still
+   * be driven, but `cy.task`, `setupNodeEvents`, the spec preprocessor and, in component testing,
+   * the dev server do not work until the configuration loads again.
+   */
+  pluginsError?: string
+  /**
    * Whether the runner page answered. `browserAttached` only says the browser
    * process is reachable, so this is what separates a healthy session from one
    * whose page is wedged — the state in which every other command fails. Absent
@@ -71,6 +82,8 @@ const listSessions = async (options: TapCliOptions): Promise<number> => {
       browserAttached: session.cdpBrowserWsUrl !== null,
       browserName: session.browserName,
       browserSupported: isTapSupportedBrowser(session.browserFamily),
+      ...(session.loadError ? { loadError: session.loadError.message } : {}),
+      ...(session.pluginsError ? { pluginsError: session.pluginsError.message } : {}),
       ...(responsive[index] === undefined ? {} : { rendererResponsive: responsive[index] }),
     }
   })
