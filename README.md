@@ -20,8 +20,8 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/v/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&label=npm&color=CB3837" alt="npm version"/></a>
   <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/dm/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&color=CB3837" alt="npm downloads"/></a>
-  <a href="https://hub.docker.com/r/cypress/browsers"><img src="https://img.shields.io/docker/pulls/cypress/browsers?style=for-the-badge&labelColor=1B1E2E&logo=docker&logoColor=white&color=2496ED" alt="Docker pulls"/></a>
   <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=for-the-badge&labelColor=1B1E2E&logo=github&color=181717" alt="GitHub stars"/></a>
+  <a href="https://hub.docker.com/r/cypress/browsers"><img src="https://img.shields.io/docker/pulls/cypress/browsers?style=for-the-badge&labelColor=1B1E2E&logo=docker&logoColor=white&color=2496ED" alt="Docker pulls"/></a>
 </p>
 
 <p align="center">
