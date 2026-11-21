@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import { EventEmitter, once } from 'events'
-import type { AddressInfo } from 'net'
+import type { AddressInfo, Socket } from 'net'
 import CDP from 'chrome-remote-interface'
 import WebSocket from 'ws'
 import { FRAGMENT_CHARS, MAX_QUEUED_BYTES, sendLargeMessagesInFragments } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
@@ -9,13 +9,13 @@ import { FRAGMENT_CHARS, MAX_QUEUED_BYTES, sendLargeMessagesInFragments } from '
 describe('sendLargeMessagesInFragments', () => {
   describe('with a stub socket', () => {
     let originalSend: Mock
-    let tcpSocket: EventEmitter & { writableLength: number, destroyed: boolean }
+    let tcpSocket: EventEmitter & { writableLength: number, writableHighWaterMark: number, destroyed: boolean }
     let client: { _ws: WebSocket }
 
     beforeEach(() => {
-      tcpSocket = Object.assign(new EventEmitter(), { writableLength: 0, destroyed: false })
+      tcpSocket = Object.assign(new EventEmitter(), { writableLength: 0, writableHighWaterMark: 16 * 1024, destroyed: false })
       // Each frame waits on the socket until the test drains it.
-      originalSend = vi.fn((chunk: string) => {
+      originalSend = vi.fn((chunk: string | Buffer) => {
         tcpSocket.writableLength += Buffer.byteLength(chunk)
       })
 
@@ -106,16 +106,68 @@ describe('sendLargeMessagesInFragments', () => {
       expect(chunks.slice(0, -1).join('')).toBe(large)
     })
 
-    it('sends the held frames once the socket closes, so their callbacks report the failure', () => {
-      const callback = vi.fn()
+    it('counts the next frame toward MAX_QUEUED_BYTES before sending it', () => {
+      // 3 bytes of UTF-8 each, so every fragment is 3 MiB.
+      client._ws.send('€'.repeat(FRAGMENT_CHARS * 3))
 
-      client._ws.send('a'.repeat(FRAGMENT_CHARS * 16), callback)
+      expect(originalSend).toHaveBeenCalledOnce()
+
+      let peak = tcpSocket.writableLength
+
+      while (tcpSocket.writableLength) {
+        drain()
+        peak = Math.max(peak, tcpSocket.writableLength)
+      }
+
+      expect(originalSend).toHaveBeenCalledTimes(3)
+      expect(peak).toBeLessThanOrEqual(MAX_QUEUED_BYTES)
+    })
+
+    it('sends a frame larger than MAX_QUEUED_BYTES while the socket is under its high water mark, since no drain would follow', () => {
+      const frame = Buffer.alloc(MAX_QUEUED_BYTES + 1)
+
+      tcpSocket.writableLength = tcpSocket.writableHighWaterMark - 1
+      client._ws.send(frame)
+
+      expect(originalSend).toHaveBeenCalledOnce()
+      expect(originalSend.mock.calls[0][0]).toBe(frame)
+    })
+
+    it('fails the held messages once the socket closes, calling each callback once without writing their frames', () => {
+      const large = vi.fn()
+      const small = vi.fn()
+
+      client._ws.send('a'.repeat(FRAGMENT_CHARS * 16), large)
+      client._ws.send('{"id":2}', small)
 
       tcpSocket.destroyed = true
       tcpSocket.emit('close')
 
-      expect(originalSend).toHaveBeenCalledTimes(16)
-      expect(originalSend.mock.calls.at(-1)?.[2]).toBe(callback)
+      expect(originalSend).toHaveBeenCalledTimes(MAX_QUEUED_BYTES / FRAGMENT_CHARS)
+
+      for (const callback of [large, small]) {
+        expect(callback).toHaveBeenCalledOnce()
+        expect(callback).toHaveBeenCalledWith(expect.objectContaining({ message: 'The CDP websocket closed before the message was sent' }))
+      }
+    })
+
+    it('fails a message whose held frame throws, and keeps sending the next one', () => {
+      const failing = vi.fn()
+      const next = vi.fn()
+      const sendError = new Error('WebSocket is not open: readyState 0 (CONNECTING)')
+
+      client._ws.send('a'.repeat(FRAGMENT_CHARS * 8), failing)
+      client._ws.send('{"id":2}', next)
+
+      originalSend.mockImplementationOnce(() => {
+        throw sendError
+      })
+
+      expect(drainAll).not.toThrow()
+
+      expect(failing).toHaveBeenCalledOnce()
+      expect(failing).toHaveBeenCalledWith(sendError)
+      expect(originalSend.mock.calls.at(-1)).toEqual(['{"id":2}', next, undefined])
     })
   })
 
@@ -142,12 +194,15 @@ describe('sendLargeMessagesInFragments', () => {
     let server: WebSocket.Server
     let received: { isText: boolean, message: { id: number, method: string, params: Record<string, unknown> } }[]
     let cdpClient: CDP.Client
+    let peers: { socket: WebSocket, tcpSocket: Socket }[]
 
     beforeEach(async () => {
       received = []
+      peers = []
       server = new WebSocket.Server({ host: '127.0.0.1', port: 0 })
 
-      server.on('connection', (socket) => {
+      server.on('connection', (socket, request) => {
+        peers.push({ socket, tcpSocket: request.socket })
         socket.on('message', (data, isBinary) => {
           const message = JSON.parse(String(data))
 
@@ -177,7 +232,7 @@ describe('sendLargeMessagesInFragments', () => {
       expect(socket, 'chrome-remote-interface socket on `_ws`').toBeDefined()
 
       // Safe because the next assertion fails the test if the field is gone.
-      const tcpSocket = (socket as unknown as { _socket?: import('net').Socket })._socket
+      const tcpSocket = (socket as unknown as { _socket?: Socket })._socket
 
       expect(tcpSocket, 'ws TCP socket on `_socket`').toBeDefined()
 
@@ -195,8 +250,8 @@ describe('sendLargeMessagesInFragments', () => {
       await cdpClient.send('Fetch.continueRequest', { requestId: 'small' })
 
       expect(frames.mock.calls.length).toBeGreaterThan(2)
-      // One frame can land on a queue just under the limit.
-      expect(peak).toBeLessThan(MAX_QUEUED_BYTES + 4 * FRAGMENT_CHARS)
+      // ws writes a header of a few bytes ahead of each frame's payload.
+      expect(peak).toBeLessThanOrEqual(MAX_QUEUED_BYTES + 1024)
       // CDP only accepts text messages.
       expect(received.map(({ isText, message }) => [message.method, message.params.requestId, isText])).toEqual([
         ['Fetch.fulfillRequest', 'large', true],
@@ -204,6 +259,19 @@ describe('sendLargeMessagesInFragments', () => {
       ])
 
       expect(received[0].message.params.body === body, 'received body equals the sent one').toBe(true)
+    }, 30_000)
+
+    it('rejects a command whose frames are still held when the connection closes', async () => {
+      // The server stops reading, so frames back up on the client until it closes.
+      peers[0].tcpSocket.pause()
+
+      sendLargeMessagesInFragments(cdpClient)
+
+      const sent = cdpClient.send('Fetch.fulfillRequest', { requestId: 'large', responseCode: 200, body: 'a'.repeat(FRAGMENT_CHARS * 64) })
+
+      peers[0].socket.terminate()
+
+      await expect(sent).rejects.toThrow('The CDP websocket closed before the message was sent')
     }, 30_000)
   })
 })

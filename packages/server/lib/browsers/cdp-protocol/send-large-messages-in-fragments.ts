@@ -10,11 +10,21 @@ const debug = Debug('cypress:server:browsers:cdp-protocol:send-large-messages-in
 export const FRAGMENT_CHARS = 1024 * 1024
 
 // Node joins every chunk waiting on a socket into one write, and Windows can
-// fail a write of tens of MB with ENOBUFS, which closes the connection. Frames
-// are held back while this much is waiting, so no write grows past a few MiB.
+// fail a write of tens of MB with ENOBUFS, which closes the connection. A frame
+// is held back while sending it would leave more than this waiting.
 export const MAX_QUEUED_BYTES = 4 * 1024 * 1024
 
 type SendCallback = (err?: Error) => void
+
+// Typed like the `ws.send` override's own parameters, which take either call shape.
+interface Frame {
+  data: any
+  options: any
+  callback?: SendCallback
+  bytes: number
+  // Shared by every fragment of one message.
+  message: { done?: SendCallback }
+}
 
 // A string stores a character above U+FFFF, such as most emoji, as two UTF-16
 // units, and this range is always the first of them. ws encodes each fragment
@@ -22,10 +32,12 @@ type SendCallback = (err?: Error) => void
 // and each half would encode as U+FFFD.
 const isHighSurrogate = (charCode: number) => charCode >= 0xd800 && charCode <= 0xdbff
 
+const byteLength = (data: unknown) => typeof data === 'string' ? Buffer.byteLength(data) : 0
+
 /**
  * Patches a chrome-remote-interface client to send messages longer than
- * FRAGMENT_CHARS as fragments, and to hold frames back while MAX_QUEUED_BYTES
- * are waiting to be written. Call once, right after connecting.
+ * FRAGMENT_CHARS as fragments, and to hold frames back so no more than
+ * MAX_QUEUED_BYTES wait to be written. Call once, right after connecting.
  */
 export function sendLargeMessagesInFragments (client: object): void {
   // Safe because chrome-remote-interface keeps its socket on the undeclared
@@ -47,28 +59,58 @@ export function sendLargeMessagesInFragments (client: object): void {
     debug('websocket has no TCP socket, so frames will not be held back')
   }
 
-  const frames: (() => void)[] = []
+  let frames: Frame[] = []
+
+  // Below the high water mark, Node emits `drain` only if a later write fills
+  // it, so a frame larger than the limit is sent then rather than held forever.
+  const fits = (bytes: number) => {
+    return !socket || socket.writableLength < socket.writableHighWaterMark || socket.writableLength + bytes <= MAX_QUEUED_BYTES
+  }
+
+  const failQueued = () => {
+    const messages = new Set(frames.map(({ message }) => message))
+
+    frames = []
+    messages.forEach(({ done }) => done?.(new Error('The CDP websocket closed before the message was sent')))
+  }
 
   const flush = () => {
-    while (frames.length && (!socket || socket.destroyed || socket.writableLength < MAX_QUEUED_BYTES)) {
-      frames.shift()!()
+    if (socket?.destroyed) {
+      return failQueued()
+    }
+
+    while (frames.length && fits(frames[0].bytes)) {
+      const frame = frames.shift()!
+
+      try {
+        send(frame.data, frame.options, frame.callback)
+      } catch (err: any) {
+        frames = frames.filter(({ message }) => message !== frame.message)
+        frame.message.done?.(err)
+      }
     }
   }
 
   socket?.on('drain', flush)
-  // Sending on a closed websocket calls back with an error, which rejects the
-  // CDP command instead of leaving it pending.
   socket?.on('close', flush)
 
   // `ws.send` takes `(data, callback)` or `(data, options, callback)`.
   ws.send = (data: any, optionsOrCallback?: any, callback?: SendCallback) => {
+    const done: SendCallback | undefined = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback
+
     if (typeof data !== 'string' || data.length <= FRAGMENT_CHARS) {
-      frames.push(() => send(data, optionsOrCallback, callback))
+      const bytes = byteLength(data)
+
+      if (!frames.length && fits(bytes)) {
+        return send(data, optionsOrCallback, callback)
+      }
+
+      frames.push({ data, options: optionsOrCallback, callback, bytes, message: { done } })
 
       return flush()
     }
 
-    const done: SendCallback | undefined = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback
+    const message = { done }
 
     // Slicing the string lets ws encode and mask each fragment in place,
     // without a copy of the whole message. Frames leave the queue in order, so
@@ -83,7 +125,7 @@ export function sendLargeMessagesInFragments (client: object): void {
       const fin = end === data.length
       const fragment = data.slice(start, end)
 
-      frames.push(() => send(fragment, { fin }, fin ? done : undefined))
+      frames.push({ data: fragment, options: { fin }, callback: fin ? done : undefined, bytes: byteLength(fragment), message })
       start = end
     }
 
