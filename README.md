@@ -10,30 +10,28 @@
 <p align="center">
   <a href="https://on.cypress.io">Documentation</a> |
   <a href="https://on.cypress.io/changelog">Changelog</a> |
-  <a href="https://on.cypress.io/roadmap">Roadmap</a>
+  <a href="https://www.cypress.io/roadmap">Roadmap</a>
 </p>
 
 <h3 align="center">
-  The web has evolved. Finally, testing has too.
+  AI writes the code. Cypress proves it works.
 </h3>
 
 <p align="center">
-  Fast, easy and reliable testing for anything that runs in a browser.
+  Run your suite in a real browser, rewind any failure, and see what your tests never reach.<br />
+  One quality platform wherever you work: your machine, CI, or your coding agent.
 </p>
 <p align="center">
   Join us, we're <a href="https://cypress.io/jobs">hiring</a>.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/cypress">
-    <img src="https://img.shields.io/npm/dm/cypress.svg" alt="npm"/>
-  </a>
-  <a href="https://on.cypress.io/discord">
-    <img src="https://img.shields.io/badge/chat-on%20Discord-brightgreen" alt="Discord chat"/>
-  </a>
-    <a href="https://stackshare.io/cypress">
-    <img src="https://img.stackshare.io/misc/follow-on-stackshare-badge.svg" alt="StackShare"/>
-  </a><br />
+  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/v/cypress?style=flat&logo=npm&label=npm&color=CB3837" alt="npm version"/></a>
+  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/dm/cypress?style=flat&logo=npm&color=CB3837" alt="npm downloads"/></a>
+  <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=flat&logo=github&color=181717" alt="GitHub stars"/></a>
+  <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/Discord-join%20chat-5865F2?style=flat&logo=discord&logoColor=white" alt="Discord chat"/></a>
+  <a href="https://skills.sh/cypress-io/ai-toolkit"><img src="https://img.shields.io/badge/skills.sh-official%20Cypress%20skills-69D3A7?style=flat&logo=cypress&logoColor=white" alt="Official Cypress skills on skills.sh"/></a>
+  <a href="https://github.com/cypress-io/cypress/blob/develop/LICENSE"><img src="https://img.shields.io/badge/license-MIT-04C38E?style=flat" alt="MIT license"/></a>
 </p>
 
 ## What is Cypress?
@@ -45,8 +43,6 @@
 </p>
 
 ## Installing
-
-[![npm version](https://badge.fury.io/js/cypress.svg)](https://badge.fury.io/js/cypress)
 
 Install Cypress for Mac, Linux, or Windows, then [get started](https://on.cypress.io/install).
 
@@ -60,6 +56,18 @@ yarn add cypress --dev
 or
 ```bash
 pnpm add cypress --save-dev
+```
+or
+```bash
+bun add cypress --dev
+```
+
+### Add Cypress skills to your coding agent
+
+Give your coding agent the [official Cypress skills](https://skills.sh/cypress-io/ai-toolkit) so it writes, runs, and debugs tests the Cypress way.
+
+```bash
+npx skills add cypress-io/ai-toolkit
 ```
 
 ![installing-cli e1693232](./assets/cypress-installation.gif)
