@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import os from 'os'
 import cp from 'child_process'
+import nodeFs from 'fs'
 import fs from 'fs-extra'
 import { PassThrough } from 'stream'
 import type { FoundBrowser } from '@packages/types'
@@ -32,6 +33,18 @@ vi.mock('fs-extra', async (importActual) => {
       // @ts-expect-error - importActual() returns unknown
       ...actual.default,
       readFile: vi.fn(),
+    },
+  }
+})
+
+vi.mock('fs', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error - importActual() returns unknown
+      ...actual.default,
+      existsSync: vi.fn(),
     },
   }
 })
@@ -115,6 +128,7 @@ describe('darwin browser detection', () => {
       vi.stubEnv('env2', 'false')
       vi.stubEnv('env3', 'true')
       vi.mocked(os.platform).mockReturnValue('darwin')
+      vi.mocked(nodeFs.existsSync).mockImplementation((path) => path === '/usr/bin/arch')
       vi.spyOn(utils, 'which').mockResolvedValue('/usr/local/bin/google-chrome')
       vi.mocked(cp.spawn).mockImplementation(() => {
         const mock: any = {
@@ -143,13 +157,13 @@ describe('darwin browser detection', () => {
     })
 
     describe('in version detection', () => {
-      it('uses arch and ARCHPREFERENCE on arm64', async () => {
+      it('uses /usr/bin/arch and ARCHPREFERENCE on arm64', async () => {
         vi.mocked(os.arch).mockReturnValue('arm64')
 
         // this will error since we aren't setting stdout
         await (darwinHelper.detect(knownBrowsers[0]).catch(() => {}))
 
-        expect(cp.spawn).toHaveBeenNthCalledWith(1, 'arch', [knownBrowsers[0].binary, '--version'], expect.objectContaining({
+        expect(cp.spawn).toHaveBeenNthCalledWith(1, '/usr/bin/arch', [knownBrowsers[0].binary, '--version'], expect.objectContaining({
           env: expect.objectContaining({
             ARCHPREFERENCE: 'arm64,x86_64',
             env2: 'false',
@@ -171,15 +185,25 @@ describe('darwin browser detection', () => {
           }),
         }))
       })
+
+      it('spawns the browser directly on arm64 when /usr/bin/arch is missing', async () => {
+        vi.mocked(os.arch).mockReturnValue('arm64')
+        vi.mocked(nodeFs.existsSync).mockReturnValue(false)
+
+        // this will error since we aren't setting stdout
+        await (darwinHelper.detect(knownBrowsers[0]).catch(() => {}))
+
+        expect(cp.spawn).toHaveBeenNthCalledWith(1, knownBrowsers[0].binary, ['--version'], expect.anything())
+      })
     })
 
     describe('in browser launching', () => {
-      it('uses arch and ARCHPREFERENCE on arm64', async () => {
+      it('uses /usr/bin/arch and ARCHPREFERENCE on arm64', async () => {
         vi.mocked(os.arch).mockReturnValue('arm64')
 
         await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', 123, ['arg1'], { env1: 'true', env2: 'true' })
 
-        expect(cp.spawn).toHaveBeenNthCalledWith(1, 'arch', ['chrome', 'url', 'arg1'], expect.objectContaining({
+        expect(cp.spawn).toHaveBeenNthCalledWith(1, '/usr/bin/arch', ['chrome', 'url', 'arg1'], expect.objectContaining({
           env: expect.objectContaining({
             ARCHPREFERENCE: 'arm64,x86_64',
             env1: 'true',
@@ -201,6 +225,18 @@ describe('darwin browser detection', () => {
             env3: 'true',
           }),
         }))
+
+        // @ts-expect-error - cp.spawn is typed as the real function, not a vi mock
+        expect(cp.spawn.mock.calls[0][2].env).not.toHaveProperty('ARCHPREFERENCE')
+      })
+
+      it('spawns the browser directly on arm64 when /usr/bin/arch is missing', async () => {
+        vi.mocked(os.arch).mockReturnValue('arm64')
+        vi.mocked(nodeFs.existsSync).mockReturnValue(false)
+
+        await launch({ path: 'chrome' } as unknown as FoundBrowser, 'url', 123, ['arg1'], { env1: 'true', env2: 'true' })
+
+        expect(cp.spawn).toHaveBeenNthCalledWith(1, 'chrome', ['url', 'arg1'], expect.anything())
 
         // @ts-expect-error - cp.spawn is typed as the real function, not a vi mock
         expect(cp.spawn.mock.calls[0][2].env).not.toHaveProperty('ARCHPREFERENCE')
