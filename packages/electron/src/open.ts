@@ -30,11 +30,12 @@ function getInspectFromOpts (argv: string[]): string | undefined {
   return undefined
 }
 
-// Puts a Linux app whose windows stay hidden (`cypress run` without `--headed`, or
-// `cypress open --headless`) on X11, unless ELECTRON_EXTRA_LAUNCH_ARGS names a platform.
-// The CLI does the same for the binary; the reason is in cli/lib/exec/spawn.ts.
+// As a native Wayland client a hidden window gets no frames, so screenshots never complete.
+// The CLI passes the same flag to the binary in `needsX11OzonePlatform`
+// (cli/lib/exec/spawn.ts), so a change to when it applies belongs in both.
 function getOzonePlatformArg (argv: string[]): string | undefined {
   const { runProject, headed, headless } = minimist(argv)
+  // Values arrive as strings, so `--headed=false` gives the truthy 'false'
   const hidesWindows = runProject ? String(headed) !== 'true' : String(headless) === 'true'
 
   if (os.platform() !== 'linux' || !hidesWindows || process.env.ELECTRON_EXTRA_LAUNCH_ARGS?.includes('--ozone-platform')) {

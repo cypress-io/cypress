@@ -113,7 +113,7 @@ function killApp (child: cp.ChildProcess, signal: NodeJS.Signals = 'SIGTERM'): v
 // no frames from the compositor, so CDP screenshots and the screencast that records video
 // never complete. On X11 (XWayland, or the Xvfb started when DISPLAY is unset) hidden
 // windows keep rendering. Electron picks the platform before the app's code runs, so this
-// has to be a launch argument. ELECTRON_EXTRA_LAUNCH_ARGS can still name another platform.
+// has to be a launch argument.
 // https://github.com/cypress-io/cypress/issues/35508
 function needsX11OzonePlatform (headless: boolean | undefined, env: NodeJS.ProcessEnv): boolean {
   return Boolean(headless)
