@@ -225,7 +225,7 @@ export class DataEmitterActions extends DataEmitterEvents {
    *
    * @param {keyof DataEmitterEvents} evt  name of the event to subscribe to
    * @param {Object} [opts] options for the subscription
-   * @param {boolean} [opts.sendInitial=false] if true, an `undefined` value will be emitted immediately before one polling cycle
+   * @param {boolean} [opts.sendInitial=true] if true, an `undefined` value will be emitted immediately before one polling cycle
    * @param {T} [opts.initialValue] this value will be emitted as the first value on the subscription immediately before one polling cycle
    * @param {(val: any) => boolean} [opts.filter] a predicate that will filter any values being passed through the subscription
    * @param {(listenerCount: number) => void} [opts.onUnsubscribe] a callback that is called each time a subscription is unsubscribed from

@@ -102,4 +102,104 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
     cy.findByTestId('sidebar').should('not.exist')
     cy.get('#spec-runner-header').should('not.exist')
   })
+
+  // https://github.com/cypress-io/cypress/issues/35236
+  it('does not rerun the spec when the GraphQL WebSocket reconnects', () => {
+    cy.scaffoldProject('cypress-in-cypress')
+    cy.findBrowsers()
+    cy.openProject('cypress-in-cypress')
+    cy.startAppServer()
+
+    interface TrackedSocket {
+      socket: WebSocket
+      // subscription id => operation name, from the `subscribe` messages sent
+      operations: Map<string, string>
+      // names of the operations the server has sent a value for
+      answered: Set<string>
+    }
+
+    const graphqlSockets: TrackedSocket[] = []
+
+    const readMessage = (data: unknown): { id?: string, type?: string, payload?: { query?: string } } => {
+      return typeof data === 'string' ? JSON.parse(data) : {}
+    }
+
+    cy.visitApp(`/specs/runner?file=cypress/e2e/dom-content.spec.js&${CY_IN_CY_SIMULATE_RUN_MODE}`, {
+      onBeforeLoad (win) {
+        const NativeWebSocket = win.WebSocket
+
+        win.WebSocket = class extends NativeWebSocket {
+          constructor (url: string | URL, protocols?: string | string[]) {
+            super(url, protocols)
+
+            if (!String(url).endsWith('/__socket-graphql')) {
+              return
+            }
+
+            const tracked: TrackedSocket = { socket: this, operations: new Map(), answered: new Set() }
+
+            graphqlSockets.push(tracked)
+
+            const send = this.send.bind(this)
+
+            this.send = (data) => {
+              const { id, type, payload } = readMessage(data)
+              const operationName = payload?.query?.match(/subscription (\w+)/)?.[1]
+
+              if (id && type === 'subscribe' && operationName) {
+                tracked.operations.set(id, operationName)
+              }
+
+              send(data)
+            }
+
+            this.addEventListener('message', (event) => {
+              const { id, type } = readMessage(event.data)
+              const operationName = id && tracked.operations.get(id)
+
+              if (operationName && (type === 'next' || type === 'error')) {
+                tracked.answered.add(operationName)
+              }
+            })
+          }
+        }
+      },
+    })
+
+    cy.waitForSpecToFinish({ passCount: 1 })
+
+    // Running the spec again always tears the current run down first
+    cy.window().then((win) => {
+      cy.spy(win.getEventManager(), 'teardown').as('teardown')
+    })
+
+    // Close the socket the way a dropped connection would, so graphql-ws
+    // opens a new one and subscribes again
+    cy.then(() => {
+      const openSockets = graphqlSockets.filter(({ socket }) => socket.readyState === WebSocket.OPEN)
+
+      expect(openSockets).to.have.length.greaterThan(0)
+      openSockets.forEach(({ socket }) => socket.close(1000, 'simulated drop'))
+
+      return openSockets
+    }).then((closedSockets) => {
+      const answeredBeforeDrop = new Set(closedSockets.flatMap(({ answered }) => [...answered]))
+
+      expect(answeredBeforeDrop.size).to.be.greaterThan(0)
+
+      // A rerun would start as soon as the server sends the resubscribed
+      // operations their current values, so wait for all of them
+      cy.wrap(graphqlSockets, { timeout: 10000 }).should((sockets) => {
+        const reconnected = sockets.filter((tracked) => {
+          return !closedSockets.includes(tracked) &&
+            [...answeredBeforeDrop].every((operationName) => tracked.answered.has(operationName))
+        })
+
+        expect(reconnected).to.have.length.greaterThan(0)
+      })
+    })
+
+    cy.get('@teardown').should('not.have.been.called')
+    cy.reporter().find('[aria-label="Stats"] .passed .num').should('have.text', '1')
+  })
 })

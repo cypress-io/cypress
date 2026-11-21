@@ -119,7 +119,10 @@ const configChangeHandler: SubscriptionHandlerArg<any, any> = (
   initialLoad = false
 }
 
-useSubscription({ query: Runner_ConfigChangeDocument }, configChangeHandler)
+// The config file is not watched in run mode, so a message here can only be the
+// current value the server sends to a new subscription, such as after the
+// GraphQL socket reconnects. Pausing keeps that from running the spec again.
+useSubscription({ query: Runner_ConfigChangeDocument, pause: isRunMode }, configChangeHandler)
 
 // because we are not using GraphQL in run mode, and we still need
 // way to get the specs, we simply attach them to window when
