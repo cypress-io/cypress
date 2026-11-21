@@ -744,16 +744,6 @@ describe('network stubbing', { retries: 15 }, function () {
       it('can timeout when retrieving upstream response', {
         responseTimeout: 25,
       }, function (done) {
-        if (usesBrowserNetworkPath) {
-          // NOTE: accepted MITM → CDP drift (#34611): responseTimeout bounds the
-          // upstream request Cypress makes itself. Proxy-off the browser owns that
-          // request, so there is no Cypress-side socket to time out and no error to
-          // assert — the response arrives normally instead.
-          this.skip()
-
-          return
-        }
-
         cy.once('fail', (err) => {
           expect(err.message).to.match(/^A callback was provided to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
           .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)

@@ -685,6 +685,7 @@ Below are guidelines to help during code review. If any of the following require
 
 - [ ] The code works and performs its intended function with the correct logic.
 - [ ] Performance has been factored in (for example, the code cleans up after itself to not cause memory leaks).
+- [ ] Every new or changed regex has been measured as described in [Writing performant regular expressions](./guides/writing-performant-regular-expressions.md), and the PR states where its input comes from and how large it gets.
 - [ ] The code guards against edge cases and invalid input and has tests to cover it.
 
 #### Maintainability

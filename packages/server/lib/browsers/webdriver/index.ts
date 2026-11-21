@@ -3,13 +3,8 @@ import type WebDriverPackage from 'webdriver'
 const webDriverPackageName = 'webdriver'
 
 export class WebDriver {
-  // We resolve this package in such a way to packherd can discover it.
+  // Required at runtime rather than bundled into the start bundle
   static getWebDriverPackage: () => typeof WebDriverPackage = () => {
-    /**
-     * NOTE: webdriver is an ESM package and does not play well with mksnapshot.
-     * Requiring the package in this way, dynamically, will
-     * make it undiscoverable by mksnapshot
-     */
     return require(require.resolve(webDriverPackageName, { paths: [__dirname] }))
   }
 }

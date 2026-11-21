@@ -280,6 +280,25 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         })
       })
 
+      it('works with a Domain attribute for a parent domain', () => {
+        cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+
+        cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+        cy.origin(`https://app.foobar.com:3503`, () => {
+          cy.window().then((win) => {
+            win.document.cookie = 'foo=bar; Domain=foobar.com'
+          })
+
+          cy.getCookie('foo').its('value').should('eq', 'bar')
+
+          cy.window().then((win) => {
+            win.document.cookie = 'foo=deleted; Domain=foobar.com; Max-Age=0'
+          })
+
+          cy.getCookie('foo').should('eq', null)
+        })
+      })
+
       it('expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0', () => {
         cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
 
@@ -301,13 +320,78 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  it('cy.clearCookie() clears a document.cookie write without a Path', () => {
+    cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+    cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+    cy.origin(`https://app.foobar.com:3503`, () => {
+      cy.document().then((doc) => {
+        doc.cookie = 'key=value'
+      })
+
+      cy.getCookie('key').its('path').should('eq', '/fixtures')
+      cy.clearCookie('key')
+      cy.document().its('cookie').should('not.include', 'key=value')
+      cy.getCookie('key').should('be.null')
+    })
+  })
+
+  it('cy.clearCookie() clears a document.cookie write for a parent domain', () => {
+    cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+    cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+    cy.origin(`https://app.foobar.com:3503`, () => {
+      cy.document().then((doc) => {
+        doc.cookie = 'parentKey=value; Domain=foobar.com; Path=/'
+      })
+
+      cy.getCookie('parentKey').its('domain').should('eq', '.foobar.com')
+      cy.clearCookie('parentKey')
+      cy.document().its('cookie').should('not.include', 'parentKey=value')
+      cy.getCookie('parentKey').should('be.null')
+      cy.reload()
+      cy.document().its('cookie').should('not.include', 'parentKey=value')
+    })
+  })
+
+  it('cy.clearCookie() leaves document.cookie with the cookies the browser still has at other paths', () => {
+    cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
+    cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
+    cy.origin(`https://app.foobar.com:3503`, () => {
+      // browsers differ on whether clearing by name clears the cookie at every path
+      const matchesBrowser = () => {
+        cy.getAllCookies().then((cookies) => {
+          const inBrowser = cookies.filter(({ name }) => name === 'pathKey').map(({ value }) => `pathKey=${value}`).sort()
+
+          cy.document().then((doc) => {
+            expect(doc.cookie.split('; ').filter((pair) => pair.startsWith('pathKey=')).sort()).to.deep.equal(inBrowser)
+          })
+        })
+      }
+
+      cy.document().then((doc) => {
+        doc.cookie = 'pathKey=root; Path=/'
+        doc.cookie = 'pathKey=deep; Path=/fixtures'
+      })
+
+      cy.getAllCookies().should((cookies) => {
+        expect(cookies.filter(({ name }) => name === 'pathKey')).to.have.length(2)
+      })
+
+      cy.clearCookie('pathKey')
+      matchesBrowser()
+      cy.reload()
+      matchesBrowser()
+    })
+  })
+
   describe('document.cookie with HttpOnly cookies', () => {
+    // Firefox can keep a deleted cookie in document.cookie for the rest of the session, so use a name no other test sets
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=2093197
     beforeEach(() => {
       cy.visit(`https://www.foobar.com:3502/fixtures/primary-origin.html`)
       cy.visit(`https://app.foobar.com:3503/fixtures/secondary-origin.html`)
       cy.origin(`https://app.foobar.com:3503`, () => {
         cy.window().then((win) => {
-          return cy.wrap(win.fetch(`/set-cookie?cookie=foo=bar; Path=/; HttpOnly`))
+          return cy.wrap(win.fetch(`/set-cookie?cookie=qux=quux; Path=/; HttpOnly`))
         })
 
         cy.reload()
@@ -316,12 +400,12 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
     it('does not read HttpOnly cookies', () => {
       cy.origin(`https://app.foobar.com:3503`, () => {
-        cy.document().its('cookie').should('not.include', 'foo=')
-        cy.getCookie('foo').its('value').should('eq', 'bar')
+        cy.document().its('cookie').should('not.include', 'qux=')
+        cy.getCookie('qux').its('value').should('eq', 'quux')
       })
     })
 
-    const writes = ['foo=changed; Path=/', 'foo=changed', 'foo=; Path=/; Max-Age=0', 'foo=; Max-Age=0']
+    const writes = ['qux=changed; Path=/', 'qux=changed', 'qux=; Path=/; Max-Age=0', 'qux=; Max-Age=0']
 
     writes.forEach((cookie) => {
       it(`does not replace or expire HttpOnly cookies with "${cookie}"`, () => {
@@ -334,7 +418,43 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
           cy.getCookie('sync').should('exist')
 
-          cy.getCookie('foo').should('include', { value: 'bar', httpOnly: true })
+          // a write without a Path is for /fixtures, so it can add a cookie there
+          cy.getAllCookies().then((cookies) => {
+            const atRoot = cookies.filter(({ name, path }) => name === 'qux' && path === '/')
+
+            expect(atRoot.map(({ value, httpOnly }) => ({ value, httpOnly }))).to.deep.equal([{ value: 'quux', httpOnly: true }])
+          })
+        })
+      })
+    })
+
+    const lifetimes = [
+      // the page loads partway through the Max-Age, and must not start it again
+      { attribute: 'Max-Age', loadsAfter: 1000, writesAfter: 1700 },
+      // Firefox can keep an Expires cookie a second longer than the date it was given
+      { attribute: 'Expires', loadsAfter: 0, writesAfter: 3200 },
+    ]
+
+    lifetimes.forEach((lifetime) => {
+      it(`writes over an HttpOnly cookie that has expired by its ${lifetime.attribute}`, () => {
+        cy.origin(`https://app.foobar.com:3503`, { args: lifetime }, ({ attribute, loadsAfter, writesAfter }) => {
+          cy.window().then((win) => {
+            // Expires only counts whole seconds
+            const expires = new Date(Math.ceil((Date.now() + 1000) / 1000) * 1000).toUTCString()
+
+            return cy.wrap(win.fetch(`/set-cookie?cookie=expiringCookie=bar; Path=/; HttpOnly; ${attribute === 'Max-Age' ? 'Max-Age=2' : `Expires=${expires}`}`))
+          })
+
+          cy.wait(loadsAfter)
+          cy.reload()
+          // the cookie has to expire, and reading document.cookie to find out would purge it
+          cy.wait(writesAfter)
+          cy.window().then((win) => {
+            win.document.cookie = 'expiringCookie=new; Path=/'
+          })
+
+          cy.document().its('cookie').should('include', 'expiringCookie=new')
+          cy.getCookie('expiringCookie').its('value').should('eq', 'new')
         })
       })
     })
@@ -342,14 +462,65 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     it('does not set cookies marked HttpOnly', () => {
       cy.origin(`https://app.foobar.com:3503`, () => {
         cy.window().then((win) => {
-          win.document.cookie = 'baz=qux; Path=/; HttpOnly'
+          win.document.cookie = 'corge=grault; Path=/; HttpOnly'
           win.document.cookie = 'sync=1; Path=/'
         })
 
         cy.getCookie('sync').should('exist')
 
-        cy.getCookie('baz').should('be.null')
-        cy.document().its('cookie').should('not.include', 'baz=')
+        cy.getCookie('corge').should('be.null')
+        cy.document().its('cookie').should('not.include', 'corge=')
+      })
+    })
+  })
+
+  describe('document.cookie from an http page', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+    })
+
+    const writes = ['foo=bar; Secure', 'foo=bar; SameSite=None', '__secure-foo=bar']
+
+    writes.forEach((cookie) => {
+      it(`does not keep "${cookie}"`, () => {
+        cy.origin('http://www.foobar.com:3500', { args: { cookie } }, ({ cookie }) => {
+          cy.window().then((win) => {
+            win.document.cookie = cookie
+            // the second write landing means the first has been handled
+            win.document.cookie = 'sync=1'
+          })
+
+          cy.getCookie('sync').should('exist')
+          cy.document().its('cookie').should('include', 'sync=1').and('not.match', /foo=/)
+          cy.getAllCookies().then((cookies) => {
+            expect(cookies.filter(({ name }) => name.endsWith('foo'))).to.be.empty
+          })
+        })
+      })
+    })
+
+    it('does not keep a write that shadows a Secure cookie set before the page loaded', () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cookie-https"]').click()
+
+      cy.origin('https://www.foobar.com:3502', () => {
+        cy.window().then((win) => {
+          return cy.wrap(win.fetch('/set-cookie?cookie=foo=bar; Secure; Domain=foobar.com')).then(() => {
+            win.location.href = 'http://www.foobar.com:3500/fixtures/secondary-origin.html'
+          })
+        })
+      })
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.window().then((win) => {
+          win.document.cookie = 'foo=baz'
+          win.document.cookie = 'sync=1'
+        })
+
+        cy.getCookie('sync').should('exist')
+        cy.document().its('cookie').should('equal', 'sync=1')
+        cy.getCookie('foo').its('value').should('equal', 'bar')
       })
     })
   })

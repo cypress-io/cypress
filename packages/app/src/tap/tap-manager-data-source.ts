@@ -109,6 +109,17 @@ export const tapManagerDataSource = {
     }
   },
 
+  // Why the spec threw while it was loading, such as a component spec that failed to
+  // compile. The runner still reports a run for it, with a failing test it generates
+  // for the error. Cleared at the start of every run, like the build failure.
+  getSpecLoadError (): string | undefined {
+    try {
+      return useAutStore().specLoadError ?? undefined
+    } catch {
+      return undefined
+    }
+  },
+
   pinSnapshot (props: PinSnapshotProps, index: number, testId: string, logId: string): void {
     eventManager()?.localBus.emit('pin:snapshot', props)
 

@@ -488,10 +488,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       verifyLocalhostNotLoggedIn()
     })
 
-    // expiring cookies set by automation don't seem to get unset appropriately
-    // in Firefox. this issue doesn't seem to be specific to cross-origin tests,
-    // as it happens even using cy.setCookie()
-    it('past max-age -> not accessible via cy.getCookie()', { browser: '!firefox' }, () => {
+    it('past max-age -> not accessible via cy.getCookie()', () => {
       cy.get('[data-cy="cookie-login"]').click()
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
@@ -505,10 +502,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       cy.getCookie('user').should('be.null')
     })
 
-    // expiring cookies set by automation don't seem to get unset appropriately
-    // in Firefox. this issue doesn't seem to be specific to cross-origin tests,
-    // as it happens even using cy.setCookie()
-    it('past max-age -> not accessible via document.cookie', { browser: '!firefox' }, () => {
+    it('past max-age -> not accessible via document.cookie', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       cy.origin('http://www.foobar.com:3500', { args: { username } }, ({ username }) => {
         cy.get('[data-cy="username"]').type(username)
@@ -743,11 +737,23 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       })
     })
 
-    it('does not set cookie when invalid', () => {
+    // Firefox rejects a cookie that starts with '=', but the patch follows the cookie spec
+    it('sets a cookie without a name', { browser: '!firefox' }, () => {
       cy.get('[data-cy="cross-origin-secondary-link"]').click()
       cy.origin('http://www.foobar.com:3500', () => {
         cy.document().then((doc) => {
           doc.cookie = '=value'
+        })
+
+        cy.document().its('cookie').should('equal', 'value')
+      })
+    })
+
+    it('does not set cookie when invalid', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.document().then((doc) => {
+          doc.cookie = '='
         })
 
         cy.document().its('cookie').should('equal', '')
@@ -862,7 +868,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
             httpOnly: false,
             hostOnly: true,
             name: 'name',
-            path: '/',
+            path: '/fixtures/auth',
             sameSite: 'lax',
             secure: false,
             value: 'value',

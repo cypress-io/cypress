@@ -101,7 +101,7 @@ const routesPath = requireCjs.resolve('../../../../lib/cloud/routes.ts')
 const actualRoutes = await vi.importActual<typeof import('../../../../lib/cloud/routes')>('../../../../lib/cloud/routes')
 
 requireCjs.cache[routesPath] = {
-  exports: { ...actualRoutes, getApiUrl: () => 'http://localhost:1234/' },
+  exports: { ...actualRoutes, apiUrl: 'http://localhost:1234/' },
 } as NodeModule
 
 // Helper to wait for next tick in event loop

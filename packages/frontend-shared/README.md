@@ -107,7 +107,7 @@ Now the icon is ready to be used in Vue SFC templates like this:
 <i-cy-path-to-icon_x16 />
 ```
 
-This is possible through the use of the [auto-importing feature of unplugin-icons](https://github.com/antfu/unplugin-icons#auto-importing), which is set up in [vite.config.ts](./vite.config.ts).
+This is possible through the use of the [auto-importing feature of unplugin-icons](https://github.com/antfu/unplugin-icons#auto-importing), which is set up in [vite.config.mjs](./vite.config.mjs).
 #### Importing Icons
 To use an icon in tests, or to refer to it in the `<script>` block of a component, import it this way:
 
@@ -142,7 +142,7 @@ Our GraphQL frontend client is [urql](https://formidable.com/open-source/urql/) 
 By convention, we use a prop named `gql` to represent the source of data, so it is common to see things like `props.gql.currentProject`.
 
 ### Use of GraphQL by shared components is limited to `src/gql-components`
-In the long run, files in the `src/components` directory are intended as the foundation of a design system. As such they may be used in many contexts other than the Cypress App and Launchpad. There are some components that are only intended to be shared between App and Launchpad and make use of GraphQL queries and mutations. These will only work correctly if placed within `src/gql-components` directory, because only that directory is specified in [graphql-codegen.yml](../graphql/graphql-codegen.yml). This is intended to maintain the separation between genuinely reusable components driven by props and events, and gql-driven components that are tightly bound to the implementation of App and Launchpad.
+In the long run, files in the `src/components` directory are intended as the foundation of a design system. As such they may be used in many contexts other than the Cypress App and Launchpad. There are some components that are only intended to be shared between App and Launchpad and make use of GraphQL queries and mutations. These will only work correctly if placed within `src/gql-components` directory, because only that directory is specified in [graphql-codegen.yml](../data-context/graphql/graphql-codegen.yml). This is intended to maintain the separation between genuinely reusable components driven by props and events, and gql-driven components that are tightly bound to the implementation of App and Launchpad.
 
 ## Generating Fixtures
 

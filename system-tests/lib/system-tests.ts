@@ -101,6 +101,11 @@ type ExecOptions = {
    */
   browser?: BrowserName | Array<BrowserName>
   /**
+   * Launch the browser from this path instead of by name. `browser` still names it,
+   * so the test only runs in the matching browser's job.
+   */
+  browserPath?: string
+  /**
    * Test timeout in milliseconds.
    */
   timeout?: number
@@ -520,8 +525,8 @@ function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) 
     args.push(`--reporter-options=${options.reporterOptions}`)
   }
 
-  if (options.browser) {
-    args.push(`--browser=${options.browser}`)
+  if (options.browserPath || options.browser) {
+    args.push(`--browser=${options.browserPath || options.browser}`)
   }
 
   if (options.config) {

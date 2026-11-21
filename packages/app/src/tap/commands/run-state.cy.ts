@@ -199,6 +199,27 @@ describe('tap/commands/run-state', () => {
     })
   })
 
+  it('reports a spec that threw while loading with the counts of its run, and the reason', async () => {
+    stubRunner(runnerFacade(TESTS_STATE, () => true))
+    stubActiveSpec('cypress/e2e/login.cy.ts')
+    cy.stub(tapManagerDataSource, 'getSpecLoadError').returns('Error: thrown at the top of the spec\n    at eval (/x/login.cy.ts:9:7)')
+
+    const manager = new TapManager(CYPRESS_VERSION)
+
+    expect(await manager.exec('run-state')).to.deep.eq({
+      result: {
+        spec: 'cypress/e2e/login.cy.ts',
+        totalSpecs: 2,
+        state: 'failed',
+        startedAt: STARTED_AT,
+        totalTests: 5,
+        // The run the runner reports for the spec still counts.
+        results: { passed: 1, failed: 1, pending: 1, skipped: 2 },
+        error: 'Error: thrown at the top of the spec',
+      },
+    })
+  })
+
   it('reports a settled run with no failures as passed', async () => {
     stubRunner(runnerFacade(ONE_PASSING, () => true))
     stubActiveSpec('cypress/e2e/login.cy.ts')

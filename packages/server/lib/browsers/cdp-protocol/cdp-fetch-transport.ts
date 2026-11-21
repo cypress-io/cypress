@@ -22,7 +22,7 @@ const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 type CdpFetchClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
 type CdpFetchRequest = Protocol.Fetch.RequestPausedEvent['request']
-const RESPONSE_PAUSE_TIMEOUT_MS = 30000
+const INVALID_INTERCEPTION_ID = /Invalid InterceptionId/
 
 const setCookieHeaders = (headers: Protocol.Fetch.HeaderEntry[]): string[] => {
   return headers
@@ -155,6 +155,7 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
   // Request-stage route-match result, threaded from the neutral request —
   // see the `next` callback in `interceptRequest`.
   hadMatchingRoutes?: boolean
+  responseTimeout?: number
 }
 
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
@@ -183,9 +184,9 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
 
 /**
  * `headersReady` settles once the response pause has arrived and its headers
- * are resolved. RESPONSE_PAUSE_TIMEOUT_MS is bounded on that rather than on the
- * whole response so the body transfer, which can legitimately outlast the time
- * the browser took to respond, is not charged against a pause that arrived.
+ * are resolved. A request's `responseTimeout` is bounded on that rather than on
+ * the whole response so the body transfer, which can legitimately outlast the
+ * time the browser took to respond, is not charged against a pause that arrived.
  */
 type ResponsePauseDeferred = PromiseWithResolvers<CdpFetchTransportResponse> & {
   headersReady: PromiseWithResolvers<void>
@@ -276,8 +277,8 @@ export class CdpFetchTransport {
    * enables. Enabling alongside `cdp_automation._handlePausedRequests` on one
    * session clobbers patterns and races `continueRequest` calls, which can
    * drop the `X-Cypress-Is-AUT-Frame` header or hang document requests until
-   * the response-pause timeout. Coordinating two owners is out of scope; do
-   * not enable both on one session.
+   * the response times out or the transport resets. Coordinating two owners
+   * is out of scope; do not enable both on one session.
    */
   private async enableFetch (sessionId?: string): Promise<void> {
     debug('enabling CDP Fetch on session %s', sessionId ?? '<own>')
@@ -656,21 +657,38 @@ export class CdpFetchTransport {
             ? { postData: (outbound.postDataBuffer ?? Buffer.from(outbound.postData ?? '', 'utf8')).toString('base64') }
             : {}),
           ...(headers ? { headers } : {}),
-        }, outbound.sessionId)
+        }, outbound.sessionId).catch((err: Error) => {
+          // The page aborting a paused request drops the pause, sometimes before Network.loadingFailed arrives
+          if (INVALID_INTERCEPTION_ID.test(err.message)) {
+            this.options.onRequestCanceled?.(request.id)
+          }
+
+          throw err
+        })
 
         requestContinued = true
 
+        // Like the MITM path, only a request handler's responseTimeout bounds
+        // the wait; otherwise the origin may take any time to send headers.
+        // Abandoned flows settle on a canceled Network.loadingFailed (not
+        // emitted for service workers or downloads) or on reset()/stop().
         let timeout: NodeJS.Timeout | undefined
 
         try {
-          await Promise.race([
-            responseDeferred.headersReady.promise,
-            new Promise<never>((_resolve, reject) => {
-              timeout = setTimeout(() => {
-                reject(new Error(`Timed out waiting for CDP Fetch response pause for ${event.request.url}`))
-              }, RESPONSE_PAUSE_TIMEOUT_MS)
-            }),
-          ])
+          if (outbound.responseTimeout) {
+            const responseTimeout = outbound.responseTimeout
+
+            await Promise.race([
+              responseDeferred.headersReady.promise,
+              new Promise<never>((_resolve, reject) => {
+                timeout = setTimeout(() => {
+                  // The code the MITM path's upstream request fails with, which
+                  // the driver reports as a responseTimeout error.
+                  reject(Object.assign(new Error(`ESOCKETTIMEDOUT waiting ${responseTimeout}ms for a response to ${event.request.url}`), { code: 'ESOCKETTIMEDOUT' }))
+                }, responseTimeout)
+              }),
+            ])
+          }
 
           const pausedResponse = await responseDeferred.promise
 
@@ -679,9 +697,7 @@ export class CdpFetchTransport {
 
           return pausedResponse
         } finally {
-          if (timeout) {
-            clearTimeout(timeout)
-          }
+          clearTimeout(timeout)
         }
       })
 

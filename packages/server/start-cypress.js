@@ -1,4 +1,16 @@
 const Debug = require('debug')
+const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
+
+// Set before the requires below: modules such as lib/cloud/routes read it when they load
+process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
+configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
+process.env['CYPRESS'] = 'true'
+
+// Store the user's value before lib/request sets it to '0', so the config process can restore it for their Node code.
+if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
+  process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED
+}
+
 const { isRunning: isElectronRunning } = require('./lib/util/electron-app')
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
@@ -9,19 +21,7 @@ const { NetProfiler } = require('./lib/util/net_profiler')
 const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 const { suppress } = require('./lib/util/suppress_warnings')
 
-const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
-
 const debug = Debug('cypress:server:start-cypress')
-
-process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
-configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
-process.env['CYPRESS'] = 'true'
-
-// Store the user's value so the config process can restore it for their Node code. This has to run here,
-// because the V8 snapshot can defer loading lib/request (which sets it to '0') until after that process is forked.
-if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined) {
-  process.env.CYPRESS_INTERNAL_ORIGINAL_NODE_TLS_REJECT_UNAUTHORIZED = process.env.NODE_TLS_REJECT_UNAUTHORIZED
-}
 
 // are we in the main node process or the electron process?
 const isRunningElectron = isElectronRunning()

@@ -434,6 +434,35 @@ describe('lib/exec/tap', () => {
       expect(withTapConnection).toHaveBeenCalledTimes(1)
     })
 
+    it('carries the load error of a session whose project stopped loading', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([
+        liveSession({ pid: 111, loadError: { message: 'Your configFile is invalid' } }),
+        liveSession({ pid: 222 }),
+      ])
+
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
+
+      const [broken, working] = JSON.parse(logger.print())
+
+      expect(broken.loadError).toBe('Your configFile is invalid')
+      expect(working).not.toHaveProperty('loadError')
+    })
+
+    it('carries the plugins error of a session whose plugins process stopped', async () => {
+      vi.mocked(listLiveSessions).mockResolvedValue([
+        liveSession({ pid: 111, pluginsError: { message: 'The plugins process exited unexpectedly' } }),
+        liveSession({ pid: 222 }),
+      ])
+
+      expect(await tap.start(['sessions'], { json: true })).toBe(0)
+
+      const [crashed, working] = JSON.parse(logger.print())
+
+      expect(crashed.pluginsError).toBe('The plugins process exited unexpectedly')
+      expect(crashed).not.toHaveProperty('loadError')
+      expect(working).not.toHaveProperty('pluginsError')
+    })
+
     it('bounds the renderer probe with --timeout', async () => {
       vi.mocked(listLiveSessions).mockResolvedValue([liveSession({ pid: 111 })])
 
@@ -677,6 +706,42 @@ describe('lib/exec/tap', () => {
       expect(output).not.toContain('not connected')
     })
 
+    describe('when the configuration broke after the session started', () => {
+      const broken = () => liveSession({ pid: 111, loadError: { message: 'Your configFile is invalid: /projects/app/cypress.config.js' } })
+
+      it('reports the error instead of the run the browser still shows', async () => {
+        mockLiveResolved(broken())
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print())).toEqual({
+          status: 'error',
+          pid: 111,
+          projectRoot: '/projects/app',
+          testingType: 'e2e',
+          error: 'Your configFile is invalid: /projects/app/cypress.config.js',
+        })
+
+        expect(withTapConnection).not.toHaveBeenCalled()
+        // Every other command is refused such a session, so status has to ask for it
+        expect(resolveLiveSession).toHaveBeenCalledWith(expect.anything(), { allowLoadError: true })
+      })
+
+      it('shows the error to a person reading the output', async () => {
+        mockLiveResolved(broken())
+
+        expect(await tap.start(['status'], {})).toBe(0)
+        expect(logger.print()).toContain('error')
+        expect(logger.print()).toContain('Your configFile is invalid')
+      })
+
+      it('reports it even when no browser is attached', async () => {
+        mockLiveResolved({ ...broken(), cdpBrowserWsUrl: null, browserName: null })
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print()).status).toBe('error')
+      })
+    })
+
     it('reports "browser not selected" without opening a connection when no browser is attached', async () => {
       mockLiveResolved(liveSession({ pid: 111, cdpBrowserWsUrl: null, browserName: null }))
 
@@ -692,6 +757,37 @@ describe('lib/exec/tap', () => {
 
       // The early lifecycle is reported from discovery alone.
       expect(withTapConnection).not.toHaveBeenCalled()
+    })
+
+    describe('when the plugins process exited after the session started', () => {
+      const crashed = (overrides: Partial<LiveSessionState> = {}) => liveSession({ pluginsError: { message: 'The plugins process exited unexpectedly' }, ...overrides })
+
+      it('reports the run the session is on, with the crash beside it', async () => {
+        mockLiveResolved(crashed())
+        mockConnection(schema, { result: { spec: null, totalSpecs: 3 } } satisfies TapExecResult)
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print())).toEqual({
+          status: 'spec not selected',
+          pid: 4242,
+          projectRoot: '/projects/app',
+          testingType: 'e2e',
+          browserAttached: true,
+          browserName: 'Chrome',
+          totalSpecs: 3,
+          pluginsError: 'The plugins process exited unexpectedly',
+        })
+      })
+
+      it('reports it before a browser is attached', async () => {
+        mockLiveResolved(crashed({ cdpBrowserWsUrl: null, browserName: null }))
+
+        expect(await tap.start(['status'], { json: true })).toBe(0)
+        expect(JSON.parse(logger.print())).toEqual(expect.objectContaining({
+          status: 'browser not selected',
+          pluginsError: 'The plugins process exited unexpectedly',
+        }))
+      })
     })
 
     it('reports "spec not selected" with totalSpecs when a browser is attached and on the spec list', async () => {
@@ -806,7 +902,7 @@ describe('lib/exec/tap', () => {
 
       await tap.start(['status'], { session: 1234 })
 
-      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() })
+      expect(resolveLiveSession).toHaveBeenCalledWith({ session: 1234, cwd: process.cwd() }, { allowLoadError: true })
     })
 
     it('exits 1 and renders the failure when the session is unreachable despite a browser', async () => {
@@ -1105,6 +1201,18 @@ describe('lib/exec/tap', () => {
       expect(JSON.parse(logger.print())).toEqual({
         spec: 'cypress/e2e/login.cy.ts',
         status: 'running',
+      })
+    })
+
+    it('carries the plugins error of a session whose plugins process stopped', async () => {
+      mockLiveResolved(liveSession({ pluginsError: { message: 'The plugins process exited unexpectedly' } }))
+      mockSessionGraphql()
+
+      expect(await tap.start(['run', 'cypress/e2e/login.cy.ts'], { json: true })).toBe(0)
+      expect(JSON.parse(logger.print())).toEqual({
+        spec: 'cypress/e2e/login.cy.ts',
+        status: 'running',
+        pluginsError: 'The plugins process exited unexpectedly',
       })
     })
 
