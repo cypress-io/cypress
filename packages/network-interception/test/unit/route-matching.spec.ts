@@ -4,6 +4,7 @@ import {
   getMatchableForRequest,
   getRoutesForRequest,
   matchesRoutePreflight,
+  matchRoutes,
   type RouteMatchableRequest,
 } from '../../lib/core/route-matching'
 
@@ -115,6 +116,84 @@ describe('core/route-matching', function () {
         proxiedUrl: 'https://google.com/foo',
       }, {
         url: /foo/,
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34973
+    describe('with a stateful (g or y) regexp matcher', function () {
+      const userIds = [1042, 1043, 1044, 1045]
+
+      const requestForUser = (id: number): Partial<RouteMatchableRequest> => {
+        return {
+          headers: {
+            authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.dXNlci0${id}.c2lnbmF0dXJl`,
+          },
+          proxiedUrl: `https://api.example.com/api/users/${id}?include=profile`,
+        }
+      }
+
+      const expectEveryRequestToMatch = (matcher: RouteMatcher) => {
+        const results = userIds.map((id) => {
+          return doesRouteMatch(matcher, { method: 'GET', headers: {}, ...requestForUser(id) } as RouteMatchableRequest)
+        })
+
+        expect(results).toEqual([true, true, true, true])
+      }
+
+      it('matches every request on pathname with the g flag', function () {
+        expectEveryRequestToMatch({ pathname: /^\/api\/users\/\d+$/g })
+      })
+
+      it('matches every request on pathname with the y flag', function () {
+        expectEveryRequestToMatch({ pathname: /\/api\/users\/\d+$/y })
+      })
+
+      it('matches every request on a header with the g flag', function () {
+        expectEveryRequestToMatch({ headers: { authorization: /^Bearer /g } })
+      })
+
+      it('matches every request on hostname, method and query with the g flag', function () {
+        expectEveryRequestToMatch({
+          hostname: /example\.com$/g,
+          method: /^GET$/g,
+          query: { include: /^profile$/g },
+        })
+      })
+
+      it('matches every request on url with the g flag', function () {
+        expectEveryRequestToMatch({ url: /\/api\/users\/\d+\?include=profile$/g })
+      })
+
+      it('matches every request when only the url fallback to path matches', function () {
+        expectEveryRequestToMatch({ url: /^\/api\/users\/\d+/g })
+      })
+
+      it('keeps the y flag anchored to the start of the value', function () {
+        const matcher = { pathname: /users\/\d+$/y }
+
+        for (const id of userIds) {
+          tryMatch(requestForUser(id), matcher, false)
+        }
+      })
+
+      it('keeps other flags working alongside g', function () {
+        expectEveryRequestToMatch({ headers: { authorization: /^bearer /gi } })
+      })
+
+      it('matches every request on auth and resourceType with the g flag', function () {
+        const matcher = { auth: { username: /^jane\.doe$/g }, resourceType: /^fetch$/g }
+        const credentials = Buffer.from('jane.doe:c0rrect-h0rse-battery').toString('base64')
+
+        const results = userIds.map((id) => {
+          return doesRouteMatch(matcher, {
+            method: 'GET',
+            headers: { authorization: `Basic ${credentials}` },
+            proxiedUrl: `https://api.example.com/api/users/${id}`,
+            resourceType: 'fetch',
+          })
+        })
+
+        expect(results).toEqual([true, true, true, true])
       })
     })
 
@@ -329,6 +408,29 @@ describe('core/route-matching', function () {
     })
   })
 
+  describe('.matchRoutes', function () {
+    // https://github.com/cypress-io/cypress/issues/34973
+    it('keeps a g-flag route in the matched set for every request', function () {
+      const routes = [
+        { id: 'spy', routeMatcher: { middleware: true, url: '**/api/**' } },
+        { id: 'users', routeMatcher: { pathname: /^\/api\/users\/\d+$/g } },
+        { id: 'orders', routeMatcher: { pathname: /^\/api\/orders\//g } },
+      ] as BackendRouteList
+
+      const matchedIds = ['users/1042', 'users/1043', 'orders/7731', 'users/1044', 'orders/7732'].map((path) => {
+        return matchRoutes(routes, { method: 'GET', headers: {}, proxiedUrl: `https://api.example.com/api/${path}` }).map(({ id }) => id)
+      })
+
+      expect(matchedIds).toEqual([
+        ['spy', 'users'],
+        ['spy', 'users'],
+        ['spy', 'orders'],
+        ['spy', 'users'],
+        ['spy', 'orders'],
+      ])
+    })
+  })
+
   describe('.matchesRoutePreflight', function () {
     const preflightReq = (overrides: Partial<RouteMatchableRequest> = {}): RouteMatchableRequest => {
       return {
@@ -402,6 +504,22 @@ describe('core/route-matching', function () {
         makeRoutes({ method: 'DELETE', url: '**/no-cors' }),
         preflightReq(),
       )).toBe(true)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34973
+    it('matches the request that follows each preflight with a g matcher', function () {
+      const routes = makeRoutes({ method: 'DELETE', pathname: /^\/api\/users\/\d+$/g })
+
+      const results = [1042, 1043].flatMap((id) => {
+        const proxiedUrl = `http://api.example.com/api/users/${id}`
+
+        return [
+          matchesRoutePreflight(routes, preflightReq({ proxiedUrl })),
+          matchRoutes(routes, { method: 'DELETE', headers: { origin: 'http://example.com' }, proxiedUrl }).length === 1,
+        ]
+      })
+
+      expect(results).toEqual([true, true, true, true])
     })
 
     it('ignores route header matchers for preflight requests', function () {
