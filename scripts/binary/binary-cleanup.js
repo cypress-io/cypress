@@ -174,7 +174,7 @@ const getDependencyPathsToKeep = async (buildAppDir, additionalEntryPoints = [])
 const removeBundledDependencies = async (buildAppDir, { bundledDependencies, loadedFromDisk }) => {
   // 1. Retrieve all dependencies that are loaded from disk and so must be kept in the binary
   const keptDependencies = new Set([
-    ...await getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(c?js|json)$/.test(target))),
+    ...await getDependencyPathsToKeep(buildAppDir, loadedFromDisk.filter((target) => /\.(?:c?js|json)$/.test(target))),
     ...loadedFromDisk,
   ])
 

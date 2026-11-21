@@ -16,7 +16,7 @@ const CONTROL_CHARACTER = /[\x00-\x08\x0a-\x1f\x7f]/
 
 const hasControlCharacter = (value: string) => CONTROL_CHARACTER.test(value)
 
-const isIpAddress = (domain: string) => domain.includes(':') || /^\d{1,3}(\.\d{1,3}){3}$/.test(domain)
+const isIpAddress = (domain: string) => domain.includes(':') || /^\d{1,3}(?:\.\d{1,3}){3}$/.test(domain)
 
 const hasRegistrableDomain = (domain: string) => {
   if (!domain.includes('.') || isIpAddress(domain)) return false
@@ -98,15 +98,15 @@ export const meetsDocumentCookieRules = (cookie: Pick<Cookie, 'key' | 'value' | 
   if (cookie.domain && cookie.domain !== canonicalDomain(hostname) && !hasRegistrableDomain(cookie.domain)) return false
 
   // a nameless cookie's value can't pass for a prefixed name
-  if (!cookie.key && /^__(secure|host|http)-/i.test(cookie.value)) return false
+  if (!cookie.key && /^__(?:secure|host|http)-/i.test(cookie.value)) return false
 
   const name = cookie.key
 
   // these prefixes are reserved for cookies set by a response
-  if (/^__(host-)?http-/i.test(name)) return false
+  if (/^__(?:host-)?http-/i.test(name)) return false
 
   if (!cookie.secure) {
-    return cookie.sameSite !== 'none' && !/^__(secure|host)-/i.test(name)
+    return cookie.sameSite !== 'none' && !/^__(?:secure|host)-/i.test(name)
   }
 
   return isSecure && (!/^__host-/i.test(name) || (!cookie.domain && cookie.path === '/' && !cookie.pathIsDefault))
