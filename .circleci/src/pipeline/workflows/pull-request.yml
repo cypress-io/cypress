@@ -24,9 +24,10 @@ when:
 
 jobs:
   # A docs-only PR (pipeline.parameters.docs-only) skips every job from install
-  # through test-kitchensink: none of them read Markdown or images, and their
-  # filters are explicit so none hangs on a dropped upstream. docs-check runs on
-  # every PR so all-jobs-passed always has a job to wait for.
+  # through test-kitchensink, since none of them read Markdown or images. Each
+  # carries its own filter rather than relying on CircleCI dropping a job whose
+  # upstreams are all filtered out. docs-check runs on every PR so
+  # all-jobs-passed always has a job to wait for.
   - docs-check:
       filters: not (pipeline.git.branch matches /^pull\/[0-9]+/)
   # A fork PR can change the script docs-check runs, so it waits for approval.

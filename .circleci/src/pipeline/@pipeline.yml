@@ -3456,8 +3456,6 @@ jobs:
           name: All jobs passed
           command: echo "✅ All required jobs passed"
 
-  # Runs on every PR, with no install or build, so all-jobs-passed still has a
-  # job to wait for when docs-only skips the rest.
   docs-check:
     executor: node-slim
     resource_class: small

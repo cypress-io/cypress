@@ -458,8 +458,8 @@ done <<< "$CHANGED"
 # ----- docs-only detection ----------------------------------------------------
 # Narrower than the documentation case above, which also covers config files
 # that lint and Knip do read (eslint.config.ts, knip.json). Markdown under a
-# src/, test/, fixtures or templates directory is code input (codegen
-# templates, test fixtures), so it doesn't count.
+# src/, test/, fixtures or templates directory can be read by code, such as a
+# codegen template, so it doesn't count.
 if [[ "$filtering_branch_push" == "false" ]]; then
   docs_only=true
   while IFS= read -r file; do

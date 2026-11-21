@@ -37,8 +37,8 @@ const grepMarkdown = (terms: string[], cwd: string): string[] => {
   }
 }
 
-// `see `[a](b)` and <!-- [c](d) -->` keeps only `see ` and ` and `, so
-// examples in code spans and comments aren't read as links.
+// ``Write `[a](b)` here`` becomes `Write  here`, so an example link in a code
+// span isn't read as a real one.
 const stripInlineCode = (line: string): string => line.replace(/`+[^`]*`+/g, '')
 
 const extractLinks = (markdown: string): Link[] => {
@@ -174,8 +174,8 @@ const main = () => {
     ...untracked,
   ].filter((file) => MARKDOWN_RE.test(file))
 
-  // Only links on added lines, or links to deleted files, are reported, so a
-  // broken link already in the repo doesn't fail an unrelated change.
+  // Unchanged files are read only for links to the deleted ones, so a broken
+  // link already in the repo doesn't fail an unrelated change.
   const mentionsDeleted = deleted.length ? grepMarkdown(deleted.map((file) => path.posix.basename(file)), root) : []
 
   // Lines the change adds, by file. `null` means every line (a new file).
