@@ -116,6 +116,11 @@ parameters:
   run-npm-schematic-tests:
     type: boolean
     default: true
+  # Set by generate-pipeline-parameters.sh when a PR changes only docs. Defaults
+  # to false so that a continuation that omits it runs everything.
+  docs-only:
+    type: boolean
+    default: false
 
 orbs:
   browser-tools: circleci/browser-tools@2.4.1
@@ -3450,6 +3455,21 @@ jobs:
       - run:
           name: All jobs passed
           command: echo "✅ All required jobs passed"
+
+  docs-check:
+    executor: node-slim
+    resource_class: small
+    working_directory: ~/cypress
+    steps:
+      - checkout
+      # Installs only the pinned checker, not the monorepo, so a docs-only PR
+      # skips the full install.
+      - run:
+          name: Install markdown-link-check
+          command: npm install --global "markdown-link-check@$(node -p "require('./package.json').devDependencies['markdown-link-check']")"
+      - run:
+          name: Check Markdown links 🔗
+          command: yarn check-markdown-links
 
   # Fan-in gate: build complete and contributor PR approved (when applicable).
   ready-to-test:
