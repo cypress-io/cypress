@@ -21,8 +21,6 @@ when:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
     - not:
         equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
-    - not:
-        equal: [ 'mschile/local-parallelization-62bd67', << pipeline.git.branch >> ]
 
 jobs:
   # Internal PRs — install and build run immediately, unless a bot pushed.

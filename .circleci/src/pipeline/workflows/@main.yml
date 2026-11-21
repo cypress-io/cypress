@@ -13,7 +13,6 @@ linux-x64:
           value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
-      - equal: [ 'mschile/local-parallelization-62bd67', << pipeline.git.branch >> ]
   jobs:
     # Bots can't join the GitHub teams that restrict our contexts, and jobs after
     # an approval run as the approver. The install runs the bot's dependency changes.
