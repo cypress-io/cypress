@@ -75,7 +75,7 @@ Extend Cypress with plugins built by the community and the Cypress team, coverin
 ## Contributing
 
 [![cypress](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/ypt4pf/develop&style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://cloud.cypress.io/projects/ypt4pf/runs)
-[![CircleCI](https://img.shields.io/circleci/build/github/cypress-io/cypress/develop?style=for-the-badge&labelColor=1B1E2E&logo=circleci)](https://circleci.com/gh/cypress-io/cypress/tree/develop) -  `develop` branch
+[![CircleCI](https://img.shields.io/circleci/build/github/cypress-io/cypress/develop?style=for-the-badge&labelColor=1B1E2E&logo=circleci)](https://circleci.com/gh/cypress-io/cypress/tree/develop)
 
 Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 
