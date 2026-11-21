@@ -287,8 +287,9 @@ const BLINK_SETTINGS = '--blink-settings='
 // `(pointer: fine)`, `(hover: hover)`, and the `any-` variants. Headless Chrome
 // on Linux has no input devices, so it otherwise matches `(pointer: none)` and
 // `(hover: none)` where the same browser headed matches a mouse, and the AUT
-// renders its touch layout only in headless runs. 4 is Blink's fine pointer,
-// 2 its hover.
+// renders its touch layout only in headless runs. It applies on every platform
+// so a headless run reports the same pointer whatever the host's devices are.
+// 4 is Blink's fine pointer, 2 its hover.
 // https://github.com/cypress-io/cypress/issues/34981
 const HEADLESS_BLINK_SETTINGS = `${BLINK_SETTINGS}primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2`
 
