@@ -30,6 +30,10 @@
   <a href="https://deepwiki.com/cypress-io/cypress"><img src="https://img.shields.io/badge/Ask-DeepWiki-3B82F6?style=for-the-badge&labelColor=1B1E2E" alt="Ask DeepWiki"/></a>
 </p>
 
+<p align="center">
+  <img alt="A tour of Cypress: end-to-end and component tests running in the Cypress App, rewinding a failed step with time-travel debugging, driving Cypress from the terminal with cypress tap, running tests in CI, and Cypress Cloud features" src="./assets/cypress-overview.gif" width="100%" />
+</p>
+
 ## What is Cypress?
 
 Cypress is a quality platform for teams shipping modern web applications. It tests anything that runs in a browser, on your machine and in CI.
@@ -38,10 +42,6 @@ Cypress is a quality platform for teams shipping modern web applications. It tes
 - **Time-travel debugging** that snapshots each step of a test, so you can go back and see exactly what happened.
 - **[Test Replay](https://docs.cypress.io/cloud/features/test-replay?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-test-replay)** in Cypress Cloud, to replay a failed CI run and inspect the DOM, network requests, and console logs as they happened.
 - **[Cypress Accessibility](https://docs.cypress.io/accessibility/get-started/introduction?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-accessibility)** and **[UI Coverage](https://docs.cypress.io/ui-coverage/get-started/introduction?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-ui-coverage)**, to catch accessibility barriers and see which parts of your app your tests never reach.
-
-<p align="center">
-  <img alt="A tour of Cypress: end-to-end and component tests running in the Cypress App, rewinding a failed step with time-travel debugging, driving Cypress from the terminal with cypress tap, running tests in CI, and Cypress Cloud features" src="./assets/cypress-overview.gif" width="100%" />
-</p>
 
 ## Installing
 
