@@ -37,7 +37,7 @@
     "@babel/plugin-transform-typescript": "^7.28.0",
     "@babel/traverse": "^7.28.0",
     "@babel/types": "^7.28.0",
-    "common-tags": "1.8.0",
+    "common-tags": "1.8.2",
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "fs-extra": "^9.1.0",
