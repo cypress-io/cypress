@@ -1,7 +1,5 @@
 // @ts-check
-// Checks a regex with recheck, then times it against sample inputs and against
-// recheck's attack string at growing sizes. See
-// guides/writing-performant-regular-expressions.md for the procedure.
+// The procedure this runs is in guides/writing-performant-regular-expressions.md
 const fs = require('fs')
 const { parseArgs } = require('util')
 const { Worker } = require('worker_threads')
