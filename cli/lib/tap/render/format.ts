@@ -85,6 +85,18 @@ export const quoted = (selector: string): string => `'${selector.split('\'').joi
 
 export const indent = (depth: number): string => '  '.repeat(depth)
 
+// `'1 | a\n2 | b\n\n'` becomes `'1 | a\n2 | b'`. A loop rather than `/\n+$/`,
+// which rescans every newline run that doesn't reach the end of the string.
+export const trimTrailingNewlines = (text: string): string => {
+  let end = text.length
+
+  while (end > 0 && text[end - 1] === '\n') {
+    end--
+  }
+
+  return text.slice(0, end)
+}
+
 // The column count to lay a row out against, falling back to a readable width
 // when the output is piped and the terminal reports none.
 export const terminalWidth = (): number => process.stdout.columns || 120

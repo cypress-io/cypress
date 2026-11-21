@@ -8,7 +8,11 @@ import combineProperties from 'combine-properties'
 
 dayjs.extend(relativeTime)
 
-templateSettings.interpolate = /{{([\s\S]+?)}}/g
+// `{{component}}` interpolates `component`. The body can't contain `{{`, so a
+// stray opener without a `}}` is scanned once instead of from every opener.
+export const TEMPLATE_INTERPOLATE = /{{((?:(?!{{)[\s\S])+?)}}/g
+
+templateSettings.interpolate = TEMPLATE_INTERPOLATE
 
 let jml
 const setupSeeds = () => {

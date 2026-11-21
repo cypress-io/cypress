@@ -71,6 +71,10 @@ function watchViteBuild (
   })
 }
 
+// Matches Vite's startup banner once ANSI codes are stripped, such as
+// `VITE v8.1.5  ready in 1139 ms`.
+export const VITE_READY = /VITE v\d+(?:\.\d+)* +ready in \d+/
+
 function spawnViteDevServer (
   prefix: AllSpawnableApps,
   command: string,
@@ -78,7 +82,7 @@ function spawnViteDevServer (
 ) {
   return spawnUntilMatch(prefix, {
     command,
-    match: /VITE v(\d+.)+ ready in \d+/,
+    match: VITE_READY,
     options,
   })
 }

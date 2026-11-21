@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 
 import type { TapReporterAgent, TapReporterCommand, TapReporterError, TapReporterSession, TapReporterSpecTest, TapReporterSpecView, TapReporterStats, TapReporterSuite, TapReporterView } from '@packages/cypress-sessions'
-import { color, countsLine, emptyState, heading, layout, startedAtLabel, stateBadge, table, titleLine } from './format'
+import { color, countsLine, emptyState, heading, layout, startedAtLabel, stateBadge, table, titleLine, trimTrailingNewlines } from './format'
 import { aliasSuffix, cleanedSuffix, commandLabel, formatMessage, networkDot, networkSuffix, sectionHeading } from './command-row'
 
 // The panel's status badge colors: red for a failed session, orange while one
@@ -190,7 +190,7 @@ const renderError = (error: TapReporterError): string[] => {
   }
 
   if (codeFrame?.frame) {
-    lines.push(...codeFrame.frame.replace(/\n+$/, '').split('\n').map((line) => {
+    lines.push(...trimTrailingNewlines(codeFrame.frame).split('\n').map((line) => {
       return `  ${line.startsWith('>') ? color.fail(line) : color.muted(line)}`
     }))
   }

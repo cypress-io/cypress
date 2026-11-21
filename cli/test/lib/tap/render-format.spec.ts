@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import stripAnsi from 'strip-ansi'
 
-import { countsLine, definitionList, emptyState, heading, indent, layout, quoted, stateBadge, table, titleLine } from '../../../lib/tap/render/format'
+import { countsLine, definitionList, emptyState, heading, indent, layout, quoted, stateBadge, table, titleLine, trimTrailingNewlines } from '../../../lib/tap/render/format'
 
 // chalk's color level depends on where the suite runs, so strip escape codes
 // before asserting — these target the shared layout, not the colors.
@@ -79,6 +79,36 @@ describe('lib/tap/render/format', () => {
   describe('layout', () => {
     it('separates blocks with a blank line and trims trailing whitespace', () => {
       expect(plain(layout([['a  ', 'b'], [emptyState('c')]]))).toBe('a\nb\n\nc')
+    })
+  })
+
+  describe('trimTrailingNewlines', () => {
+    // @babel/code-frame's output for the kitchensink's `actions.cy.js` line 54,
+    // which is what the driver reports. It never ends in a newline.
+    const codeFrame = `  52 |     // https://on.cypress.io/clear\n  53 |     cy.get('.action-clear').type('Clear this text')\n> 54 |     cy.get('.action-clear').should('have.value', 'Clear this text')\n     |                            ^\n  55 |     cy.get('.action-clear').clear()\n  56 |     cy.get('.action-clear').should('have.value', '')\n  57 |   })`
+
+    it.each([
+      ['a driver code frame', codeFrame, codeFrame],
+      ['a driver code frame at the end of a file', '  329 |   })\n> 330 | })\n      | ^\n  331 |', '  329 |   })\n> 330 | })\n      | ^\n  331 |'],
+      // Inputs below follow the code frame format rather than captured output.
+      ['one trailing newline', `${codeFrame}\n`, codeFrame],
+      ['several trailing newlines', `${codeFrame}\n\n\n`, codeFrame],
+      ['an empty string', '', ''],
+      ['only newlines', '\n\n\n', ''],
+      ['blank lines inside the frame', '  1 | a\n\n  2 | b\n', '  1 | a\n\n  2 | b'],
+      ['a Windows line ending, whose \\r stays', '  1 | a\r\n', '  1 | a\r'],
+      ['trailing spaces after the last newline', '  1 | a\n  ', '  1 | a\n  '],
+    ])('matches /\\n+$/ for %s', (_label, input, expected) => {
+      expect(trimTrailingNewlines(input)).toBe(expected)
+      expect(trimTrailingNewlines(input)).toBe(input.replace(/\n+$/, ''))
+    })
+
+    it('trims 50,000 newline runs that stop short of the end in linear time', () => {
+      const input = `${'\n'.repeat(50_000)}x`
+      const start = performance.now()
+
+      expect(trimTrailingNewlines(input)).toBe(input)
+      expect(performance.now() - start).toBeLessThan(200)
     })
   })
 })

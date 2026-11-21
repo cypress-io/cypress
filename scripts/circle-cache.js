@@ -58,6 +58,17 @@ async function cacheKey () {
   console.log(cacheKey)
 }
 
+// `<root>/npm/react/node_modules/` becomes `<root>/npm/react_node_modules/`, so
+// every package's node_modules can sit side by side in one cached directory.
+// Only the first occurrence is renamed: nested node_modules stay inside it.
+function flattenNodeModulesPath (src) {
+  return src.replace('/node_modules', '_node_modules')
+}
+
+function restoreNodeModulesPath (src) {
+  return src.replace('_node_modules', '/node_modules')
+}
+
 // Need to dynamically unpack and re-assemble all of the node_modules directories
 // https://discuss.circleci.com/t/dynamic-or-programmatic-caching-of-directories/1455
 async function prepareCircleCache () {
@@ -65,8 +76,7 @@ async function prepareCircleCache () {
 
   await Promise.all(
     paths.map(async (src) => {
-      const dest = src
-      .replace(/(.*?)\/node_modules/, '$1_node_modules')
+      const dest = flattenNodeModulesPath(src)
       .replace(BASE_DIR, CACHE_DIR)
 
       // self-hosted M1 doesn't always clear this directory between runs, so remove it
@@ -87,9 +97,7 @@ async function unpackCircleCache () {
 
   await Promise.all(
     paths.map(async (src) => {
-      const dest = src
-      .replace(CACHE_DIR, BASE_DIR)
-      .replace(/(.*?)_node_modules/, `$1/node_modules`)
+      const dest = restoreNodeModulesPath(src.replace(CACHE_DIR, BASE_DIR))
 
       // self-hosted M1 doesn't always clear this directory between runs, so remove it
       await fsExtra.remove(dest)
@@ -127,11 +135,18 @@ function hashString (s) {
   .digest('hex')
 }
 
-circleCache()
-.then(() => {
-  process.exit(0)
-})
-.catch((e) => {
-  console.error(e)
-  process.exit(1)
-})
+module.exports = {
+  flattenNodeModulesPath,
+  restoreNodeModulesPath,
+}
+
+if (require.main === module) {
+  circleCache()
+  .then(() => {
+    process.exit(0)
+  })
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+}

@@ -1,3 +1,5 @@
+import { removeFirstElement } from '../../src/utils/removeFirstElement'
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -19,12 +21,14 @@ function verifyBrowserIconSvg (
       actualSvgData += el.outerHTML
     })
 
-    const actualNormalizedSvgData = actualSvgData
-    .replaceAll('></path>', '/>')
-    .replaceAll('></circle>', '/>')
-    .replace(/<title>.*<\/title>/, '')
+    const actualNormalizedSvgData = removeFirstElement(
+      actualSvgData
+      .replaceAll('></path>', '/>')
+      .replaceAll('></circle>', '/>'),
+      'title',
+    )
 
-    const expectedNormalizedSvgData = expectedSvgData.replace(/<defs>.*<\/defs>/, '')
+    const expectedNormalizedSvgData = removeFirstElement(expectedSvgData, 'defs')
 
     expect(actualNormalizedSvgData).to.equal(expectedNormalizedSvgData)
 
