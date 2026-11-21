@@ -3,7 +3,8 @@ const sinonChai = require('sinon-chai')
 const sinon = require('sinon')
 const fs = require('fs')
 
-const { validateChangelog, _validateEntry, _getResolvedMessage } = require('../../semantic-commits/validate-changelog')
+const { validateChangelog, _validateEntry, _getResolvedMessage, _getRevertedPRNumber } = require('../../semantic-commits/validate-changelog')
+const revertMessages = require('../__fixtures__/revert-commit-messages')
 
 use(sinonChai)
 
@@ -40,6 +41,37 @@ describe('semantic-pull-request/validate-changelog', () => {
       expect(resolveData.links[0]).to.eq('[#20](https://github.com/cypress-io/cypress/issues/20)')
       expect(resolveData.links[1]).to.eq('[#30](https://github.com/cypress-io/cypress/issues/30)')
       expect(resolveData.links[2]).to.eq('[#39](https://github.com/cypress-io/cypress/issues/39)')
+    })
+  })
+
+  context('_getRevertedPRNumber', () => {
+    const OLD_REVERTED_PR = /revert.*\(#(\d+)\)"/i
+
+    ;[
+      ['a squashed conventional revert', revertMessages.squashedConventionalRevert, '33512'],
+      ['a squashed GitHub revert', revertMessages.squashedGitHubRevert, '32936'],
+      ['a GitHub revert of a PR-less commit title', revertMessages.gitHubRevert, undefined],
+      ['a GitHub revert without a PR', revertMessages.gitHubRevertWithoutPR, undefined],
+      ['a revert in a squash body with CRLF line endings', revertMessages.revertInSquashBodyCRLF, '29813'],
+      ['the last reference on the line', 'revert: "fix: a (#1)" and "fix: b (#2)" (#3)', '2'],
+      ['a reference right after revert', 'revert(#12)"', '12'],
+      ['a reference on a later line than revert', 'revert: "fix: a"\n(#12)"', undefined],
+      ['a later revert line', 'revert: nothing\nRevert "fix: b (#7)"', '7'],
+      ['a Unicode line separator', 'revert \u2028"fix: b (#7)"', undefined],
+      ['an empty message', '', undefined],
+    ].forEach(([label, message, expected]) => {
+      it(`finds the reverted PR in ${label}`, () => {
+        expect(_getRevertedPRNumber(message)).to.equal(expected)
+        expect(_getRevertedPRNumber(message)).to.equal(message.match(OLD_REVERTED_PR)?.[1])
+      })
+    })
+
+    it('scans 50,000 characters of repeated revert in linear time', () => {
+      const message = 'revert'.repeat(8_334)
+      const start = performance.now()
+
+      expect(_getRevertedPRNumber(message)).to.be.undefined
+      expect(performance.now() - start).to.be.lessThan(200)
     })
   })
 
