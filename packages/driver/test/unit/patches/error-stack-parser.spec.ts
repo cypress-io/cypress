@@ -95,4 +95,20 @@ describe('error-stack-parser patch', () => {
     expect(frame.functionName).toBeUndefined()
     expect(frame).toMatchObject({ lineNumber: 46, columnNumber: 10 })
   })
+
+  // recheck's worst case for the replaced regex, grown to 50,000 characters
+  // and ended with a frame location so the line reaches the split
+  const worstCase = `${'a'.repeat(10000)}${'"a'.repeat(10000)}${'"'.repeat(10000)}${'a'.repeat(9994)}`
+
+  it.each([
+    ['without an `@`', `${worstCase}:46:10`, undefined],
+    ['with an `@` before the quotes', `a@${worstCase}:46:10`, 'a'],
+  ])('splits a 50,000-character worst case %s in linear time', (_kind, line, functionName) => {
+    const start = performance.now()
+    const frame = parseLine(line)
+
+    expect(performance.now() - start).toBeLessThan(200)
+    expect(frame.functionName).toBe(functionName)
+    expect(frame).toMatchObject({ lineNumber: 46, columnNumber: 10 })
+  })
 })
