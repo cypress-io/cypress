@@ -1,8 +1,18 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import _ from '../../../../src/config/lodash'
 import { canSetSelectionRangeElement, getFirstFixedOrStickyPositionParent } from '../../../../src/dom/elements/complexElements'
 
 describe('dom/elements/complexElements', () => {
+  // jQuery's patched `matchesSelector` calls the `_` global, which Cypress sets in the browser
+  beforeAll(() => {
+    vi.stubGlobal('_', _)
+  })
+
+  afterAll(() => {
+    vi.unstubAllGlobals()
+  })
+
   describe('canSetSelectionRangeElement', () => {
     afterEach(() => {
       document.body.innerHTML = ''

@@ -1,13 +1,23 @@
 /**
  * @vitest-environment jsdom
  */
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import _ from '../../../src/config/lodash'
 import $visibility from '../../../src/dom/visibility'
 
 // jsdom has no layout, so every element has no width or height, which makes
 // an `overflow: hidden` parent hide its children unless one of them escapes it
 describe('dom/visibility', () => {
+  // jQuery's patched `matchesSelector` calls the `_` global, which Cypress sets in the browser
+  beforeAll(() => {
+    vi.stubGlobal('_', _)
+  })
+
+  afterAll(() => {
+    vi.unstubAllGlobals()
+  })
+
   describe('isHiddenByAncestors', () => {
     beforeEach(() => {
       document.body.innerHTML = '<div id="clipper" style="overflow: hidden"><div id="middle"><span id="child"></span></div></div>'
