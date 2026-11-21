@@ -13,6 +13,15 @@ export type RouteMatchableRequest = {
   resourceType?: string
 }
 
+// Tests `value` from its start every time, so a `g` or `y` matcher gives the same
+// result for every request instead of resuming at the `lastIndex` its previous
+// match left behind. One RegExp instance is reused for every request on a route.
+function regExpMatches (matcher: RegExp, value: string) {
+  matcher.lastIndex = 0
+
+  return matcher.test(value)
+}
+
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
@@ -45,7 +54,7 @@ export function doesRouteMatch (routeMatcher: RouteMatcherOptions, req: RouteMat
     }
 
     if (matcher.test) {
-      if (!matcher.test(value) && (!shouldTryMatchingPath || !matcher.test(matchable.path))) {
+      if (!regExpMatches(matcher, value) && (!shouldTryMatchingPath || !regExpMatches(matcher, matchable.path))) {
         return false
       }
 

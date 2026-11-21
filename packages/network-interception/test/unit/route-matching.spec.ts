@@ -118,6 +118,68 @@ describe('core/route-matching', function () {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/34973
+    describe('with a stateful (g or y) regexp matcher', function () {
+      const userIds = [1042, 1043, 1044, 1045]
+
+      const requestForUser = (id: number): Partial<RouteMatchableRequest> => {
+        return {
+          headers: {
+            authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.dXNlci0${id}.c2lnbmF0dXJl`,
+          },
+          proxiedUrl: `https://api.example.com/api/users/${id}?include=profile`,
+        }
+      }
+
+      const expectEveryRequestToMatch = (matcher: RouteMatcher) => {
+        const results = userIds.map((id) => {
+          return doesRouteMatch(matcher, { method: 'GET', headers: {}, ...requestForUser(id) } as RouteMatchableRequest)
+        })
+
+        expect(results).toEqual([true, true, true, true])
+      }
+
+      it('matches every request on pathname with the g flag', function () {
+        expectEveryRequestToMatch({ pathname: /^\/api\/users\/\d+$/g })
+      })
+
+      it('matches every request on pathname with the y flag', function () {
+        expectEveryRequestToMatch({ pathname: /\/api\/users\/\d+$/y })
+      })
+
+      it('matches every request on a header with the g flag', function () {
+        expectEveryRequestToMatch({ headers: { authorization: /^Bearer /g } })
+      })
+
+      it('matches every request on hostname, method and query with the g flag', function () {
+        expectEveryRequestToMatch({
+          hostname: /example\.com$/g,
+          method: /^GET$/g,
+          query: { include: /^profile$/g },
+        })
+      })
+
+      it('matches every request on url with the g flag', function () {
+        expectEveryRequestToMatch({ url: /\/api\/users\/\d+\?include=profile$/g })
+      })
+
+      it('matches every request when only the url fallback to path matches', function () {
+        expectEveryRequestToMatch({ url: /^\/api\/users\/\d+/g })
+      })
+
+      it('keeps the y flag anchored to the start of the value', function () {
+        const matcher = { pathname: /users\/\d+$/y }
+
+        for (const id of userIds) {
+          tryMatch(requestForUser(id), matcher, false)
+        }
+      })
+
+      it('keeps other flags working alongside g', function () {
+        expectEveryRequestToMatch({ headers: { authorization: /^bearer /gi } })
+      })
+    })
+
     it('matches on a null matcher', function () {
       tryMatch({
         proxiedUrl: 'https://google.com/asdf?1234=a',
