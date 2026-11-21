@@ -175,6 +175,7 @@ Orientation, not a registry — the directories under `packages/` and `npm/` are
 - **`@packages/ts`** — Shared TypeScript configuration and `ts-node` register helper.
 - **`@packages/eslint-config`** — Shared ESLint configuration preset used across packages.
 - **`@packages/resolve-dist`** — Resolves paths to compiled distribution artifacts.
+- **`@packages/vitest-setup`** — Global setup every `vitest.config` runs; strips the inherited environment to an allowlist so host secrets and settings stay out of unit tests.
 
 ### Component Testing Adapters (published via `npm/`)
 

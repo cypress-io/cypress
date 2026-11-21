@@ -47,6 +47,7 @@
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.26.0",
     "@packages/eslint-config": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@types/mocha": "9.0.0",
     "babel-loader": "^10.0.0",
     "chalk": "3.0.0",

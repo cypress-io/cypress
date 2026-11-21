@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
+    globalSetup: ['@packages/vitest-setup/sanitize-env'],
     env: {
       // disables SSL certificate verification for testing purposes
       // This is needed to allow self-signed certificates

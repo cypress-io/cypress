@@ -37,5 +37,6 @@ export const monorepoPaths = {
   pkgTelemetry: path.join(__dirname, '../../packages/telemetry'),
   pkgTs: path.join(__dirname, '../../packages/ts'),
   pkgTypes: path.join(__dirname, '../../packages/types'),
+  pkgVitestSetup: path.join(__dirname, '../../packages/vitest-setup'),
   pkgWebConfig: path.join(__dirname, '../../packages/web-config')
 } as const

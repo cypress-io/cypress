@@ -1,0 +1,25 @@
+{
+  "name": "@packages/vitest-setup",
+  "version": "0.0.0-development",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    "./sanitize-env": "./src/sanitize-env.ts"
+  },
+  "scripts": {
+    "check-ts": "tsc --noEmit",
+    "lint": "eslint",
+    "test": "vitest run"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "@types/node": "^22.18.7",
+    "eslint": "^10.14.0",
+    "jiti": "^2.4.2",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
+  }
+}

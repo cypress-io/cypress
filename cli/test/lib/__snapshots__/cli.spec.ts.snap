@@ -9,6 +9,7 @@ exports[`cli > CYPRESS_INTERNAL_ENV > allows and warns when staging environment 
   The environment variable "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
 
   Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.
+
   Usage: cypress <command> [options]
 
   Options:
@@ -143,7 +144,8 @@ Bundled Node version: not found"
 exports[`cli > cypress cache list > prints explanation when no cache 1`] = `"No cached binary versions were found."`;
 
 exports[`cli > cypress run > warns with space-separated --spec 1`] = `
-"⚠ Warning: It looks like you're passing --spec a space-separated list of arguments:
+"
+⚠ Warning: It looks like you're passing --spec a space-separated list of arguments:
 
 "a b c d e f g"
 
@@ -154,18 +156,21 @@ If you are trying to pass multiple arguments, separate them with commas instead:
   
 The most common cause of this warning is using an unescaped glob pattern. If you are
 trying to pass a glob pattern, escape it using quotes:
-  cypress run --spec "**/*.spec.js""
+  cypress run --spec "**/*.spec.js"
+"
 `;
 
 exports[`cli > cypress run > warns with space-separated --tag 1`] = `
-"⚠ Warning: It looks like you're passing --tag a space-separated list of arguments:
+"
+⚠ Warning: It looks like you're passing --tag a space-separated list of arguments:
 
 "a b c d e f g"
 
 This will work, but it's not recommended.
 
 If you are trying to pass multiple arguments, separate them with commas instead:
-  cypress run --tag arg1,arg2,arg3"
+  cypress run --tag arg1,arg2,arg3
+"
 `;
 
 exports[`cli > cypress version > individual package versions > handles non-existent binary 1`] = `
