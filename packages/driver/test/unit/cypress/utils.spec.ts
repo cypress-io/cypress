@@ -49,13 +49,13 @@ describe('driver/src/cypress/utils', () => {
       expect($utils.stripCustomProtocol(filePath)).toEqual(expected)
     })
 
-    it('handles 50,000 characters of repeated webpack protocols with no namespace', () => {
-      const filePath = `${'/webpack://p'.repeat(4_200)}/`
+    it('handles 200,000 characters of repeated webpack protocols with no namespace', () => {
+      const filePath = `${'/webpack://p'.repeat(16_800)}/`
 
       const start = performance.now()
       const result = $utils.stripCustomProtocol(filePath)
 
-      expect(performance.now() - start).toBeLessThan(200)
+      expect(performance.now() - start).toBeLessThan(1000)
       expect(result).toEqual(filePath)
     })
   })

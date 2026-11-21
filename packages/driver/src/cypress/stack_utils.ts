@@ -609,7 +609,7 @@ const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, origin
   const closingParen = originStackLine.endsWith(')') ? ')' : ''
   const newUserStackLine = `${originStackLine.slice(0, originLocation.index)}:${originLocation.line + userLocation.line - 1}:${userLocation.column}${closingParen}`
 
-  return userInvocationStack.replace(userStackLines[0], newUserStackLine)
+  return userInvocationStack.replace(userStackLines[0], () => newUserStackLine)
 }
 
 export default {

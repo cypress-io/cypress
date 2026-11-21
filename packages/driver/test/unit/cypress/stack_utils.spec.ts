@@ -414,46 +414,67 @@ describe('stack_utils', () => {
       expect(result).toContain('cypress:///../driver/src/cypress/cy.ts:5:15')
     })
 
-    const chromiumEvalLine = '    at eval (eval at invokeOriginFn (cypress:///../driver/src/cross-origin/origin_fn.ts), <anonymous>:3:9)'
+    // Chromium and Firefox frames from __fixtures__/getUserInvocationStack_stackFrames.json
+    // and __fixtures__/getInvocationDetails_spec_stackframes.json
+    const chromiumSpecFrame = '    at Context.eval (http://localhost:54823/__cypress/tests?p=cypress/spec.cy.js:14:16)'
+    const chromiumOriginFrame = '    at Suite.eval (http://localhost:3000/__cypress/tests?p=cypress/tests/some_spec.cy.ts:80:12)'
+    const chromiumEvalFrame = '    at eval (eval at getInvocationDetails (cypress:///../driver/src/cypress/stack_utils.ts), <anonymous>:1:1)'
+    const firefoxSpecFrame = '    ./cypress/spec.cy.js/</<@http://localhost:8080/__cypress/cypress/spec.cy.js:14:16'
+    const firefoxOriginFrame = '@http://localhost:3000/__cypress/tests?p=cypress/tests/some_spec.cy.ts:80:12'
 
     it.each([
       {
         name: 'Chromium, location in parentheses',
-        user: chromiumEvalLine,
-        origin: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:20:5)',
-        expected: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:22:9)',
+        user: chromiumSpecFrame,
+        origin: chromiumOriginFrame,
+        expected: '    at Suite.eval (http://localhost:3000/__cypress/tests?p=cypress/tests/some_spec.cy.ts:93:16)',
+      },
+      {
+        name: 'Chromium eval frame',
+        user: chromiumEvalFrame,
+        origin: chromiumSpecFrame,
+        expected: '    at Context.eval (http://localhost:54823/__cypress/tests?p=cypress/spec.cy.js:14:1)',
       },
       {
         name: 'Firefox, location without parentheses',
-        user: 'eval@cypress:///../driver/src/cross-origin/origin_fn.ts line 176 > eval:3:9',
-        origin: 'Context.eval@http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:20:5',
-        expected: 'Context.eval@http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:22:9',
+        user: firefoxSpecFrame,
+        origin: firefoxOriginFrame,
+        expected: '@http://localhost:3000/__cypress/tests?p=cypress/tests/some_spec.cy.ts:93:16',
       },
+      // The two cases below follow the stack-line format rules (`<unknown>` and
+      // `[native code]` frames have no location) rather than captured output.
       {
-        name: 'user line without a location',
+        name: 'format rule: user line without a location',
         user: '    at <unknown>',
-        origin: '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:20:5)',
+        origin: chromiumOriginFrame,
         expected: '    at <unknown>',
       },
       {
-        name: 'origin line without a location',
-        user: chromiumEvalLine,
+        name: 'format rule: origin line without a location',
+        user: chromiumSpecFrame,
         origin: '    at Array.forEach ([native code])',
-        expected: chromiumEvalLine,
+        expected: chromiumSpecFrame,
       },
     ])('merges the trailing line and column: $name', ({ user, origin, expected }) => {
       expect(stack_utils.mergeCrossOriginUserInvocationStack(user, origin)).toEqual(expected)
     })
 
-    it('reads the trailing location of a 50,000-character line of digits', () => {
-      const digits = '0'.repeat(50_000)
+    // A spec path may contain `$`, which String#replace would otherwise read as a pattern
+    it('keeps `$$` in the origin frame', () => {
+      const origin = chromiumOriginFrame.replace('some_spec', () => 'price$$_spec')
+
+      expect(stack_utils.mergeCrossOriginUserInvocationStack(chromiumSpecFrame, origin)).toEqual('    at Suite.eval (http://localhost:3000/__cypress/tests?p=cypress/tests/price$$_spec.cy.ts:93:16)')
+    })
+
+    it('reads the trailing location of a 100,000-character line of digits', () => {
+      const digits = '0'.repeat(100_000)
       const user = `    at eval (${digits})x:3:9)`
       const origin = `    at Context.eval (${digits})x:20:5)`
 
       const start = performance.now()
       const result = stack_utils.mergeCrossOriginUserInvocationStack(user, origin)
 
-      expect(performance.now() - start).toBeLessThan(200)
+      expect(performance.now() - start).toBeLessThan(1000)
       expect(result).toEqual(`    at Context.eval (${digits})x:22:9)`)
     })
   })

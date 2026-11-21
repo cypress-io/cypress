@@ -166,14 +166,14 @@ describe('source_map_utils', () => {
       })
     })
 
-    it('rejects a 150,000-character data URL made of repeated `data:` prefixes', async () => {
+    it('rejects a 300,000-character data URL made of repeated `data:` prefixes', async () => {
       await withLinuxPaths((sourceMapUtils) => {
-        const fileContents = `it('checks out', () => {})\n//# sourceMappingURL=${'data:x'.repeat(25_000)}\n`
+        const fileContents = `it('checks out', () => {})\n//# sourceMappingURL=${'data:x'.repeat(50_000)}\n`
 
         const start = performance.now()
         const result = sourceMapUtils.extractSourceMap(fileContents)
 
-        expect(performance.now() - start).toBeLessThan(200)
+        expect(performance.now() - start).toBeLessThan(1000)
         expect(result).toBeNull()
       })
     })

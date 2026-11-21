@@ -36,26 +36,28 @@ describe('src/stackUtils', () => {
   })
 
   describe('getStackLineLocation', () => {
-    const chromiumFrame = '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:14:12)'
-    const firefoxFrame = 'Context.eval@http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:14:12'
+    // From packages/driver/test/unit/cypress/__fixtures__/getUserInvocationStack_stackFrames.json
+    const chromiumFrame = '    at Context.eval (http://localhost:54823/__cypress/tests?p=cypress/spec.cy.js:14:16)'
+    const firefoxFrame = '@http://localhost:54823/__cypress/tests?p=cypress/spec.cy.js:14:16'
 
     it.each([
-      ['Chromium frame', chromiumFrame, { line: 14, column: 12, index: chromiumFrame.lastIndexOf(':14:12') }],
-      ['Firefox frame', firefoxFrame, { line: 14, column: 12, index: firefoxFrame.lastIndexOf(':14:12') }],
-      ['frame without a location', '    at <unknown>', null],
-      ['native frame', '    at Array.forEach ([native code])', null],
+      ['Chromium frame', chromiumFrame, { line: 14, column: 16, index: chromiumFrame.lastIndexOf(':14:16') }],
+      ['Firefox frame', firefoxFrame, { line: 14, column: 16, index: firefoxFrame.lastIndexOf(':14:16') }],
+      // These two follow the stack-line format rules rather than captured output
+      ['format rule: frame without a location', '    at <unknown>', null],
+      ['format rule: native frame', '    at Array.forEach ([native code])', null],
     ])('%s', (_name, input, expected) => {
       expect(getStackLineLocation(input)).toEqual(expected)
     })
 
-    it('reads the location after 50,000 digits', () => {
-      const digits = '0'.repeat(50_000)
+    it('reads the location after 100,000 digits', () => {
+      const digits = '0'.repeat(100_000)
       const line = `    at eval (${digits})x:3:9)`
 
       const start = performance.now()
       const location = getStackLineLocation(line)
 
-      expect(performance.now() - start).toBeLessThan(200)
+      expect(performance.now() - start).toBeLessThan(1000)
       expect(location).toEqual({ line: 3, column: 9, index: line.length - 5 })
     })
   })

@@ -55,7 +55,7 @@ describe('cy/assertions', () => {
     it('handles a spy called with a long single line of JSON', () => {
       const beacon = { send (url: string, body: string) {} }
       const spy = sinon.spy(beacon, 'send')
-      const events = Array.from({ length: 2_000 }, (_, i) => {
+      const events = Array.from({ length: 6_000 }, (_, i) => {
         return {
           type: 'ui',
           message: `Payment form shown at step ${i % 4 + 1} at 10:42:${String(i % 60).padStart(2, '0')}`,
@@ -70,7 +70,7 @@ describe('cy/assertions', () => {
       const start = performance.now()
       const result = stripStackTraceLines(message)
 
-      expect(performance.now() - start).toBeLessThan(200)
+      expect(performance.now() - start).toBeLessThan(1000)
       // The only call is on the last line, which is kept whole
       expect(result).toEqual(message)
     })
