@@ -59,6 +59,8 @@ or
 bun add cypress --dev
 ```
 
+![installing-cli e1693232](./assets/cypress-installation.gif)
+
 ### Add Cypress skills to your coding agent
 
 Give your coding agent the [official Cypress skills](https://skills.sh/cypress-io/ai-toolkit) so it writes, runs, and debugs tests the Cypress way.
@@ -66,8 +68,6 @@ Give your coding agent the [official Cypress skills](https://skills.sh/cypress-i
 ```bash
 npx skills add cypress-io/ai-toolkit
 ```
-
-![installing-cli e1693232](./assets/cypress-installation.gif)
 
 ## Community plugins
 
