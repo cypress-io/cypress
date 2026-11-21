@@ -4,6 +4,9 @@ import fs from 'fs'
 import os from 'os'
 import Bluebird from 'bluebird'
 import which from 'which'
+import Debug from 'debug'
+
+const debug = Debug('cypress:launcher:utils')
 
 // `arch -arm64` and `ARCHPREFERENCE` only exist in Apple's `arch`. A bare
 // `arch` resolves through PATH, where a GNU coreutils `arch` (shipped by Nix,
@@ -16,7 +19,9 @@ export const utils = {
   execa,
   which: (cmd: string): Promise<string | null> => which(cmd, { nothrow: true }),
   spawnWithArch: <T extends cp.SpawnOptionsWithStdioTuple<cp.StdioNull, cp.StdioPipe, cp.StdioPipe>>(cmd: string, args: string[], opts: T) => {
-    if (os.platform() === 'darwin' && os.arch() === 'arm64' && fs.existsSync(MACOS_ARCH_PATH)) {
+    const isDarwinArm64 = os.platform() === 'darwin' && os.arch() === 'arm64'
+
+    if (isDarwinArm64 && fs.existsSync(MACOS_ARCH_PATH)) {
       // On macOS, browsers are distributed as "universal apps" which have both arm64 and x86_64 binaries
       // in the same file. The OS decides which architecture to use based on heuristics. If Cypress was
       // launched from an x86_64 process on arm64 macOS (like if an x64 version of Node.js is being used),
@@ -38,8 +43,12 @@ export const utils = {
       )
     }
 
+    if (isDarwinArm64) {
+      // Without Apple's `arch`, spawning the browser directly is better than not launching it at all.
+      debug('%s not found, spawning %s without an architecture preference', MACOS_ARCH_PATH, cmd)
+    }
+
     // Outside of darwin-arm64, we can rely on the OS to launch the correct architecture of the browser.
-    // Without Apple's `arch`, spawning the browser directly is better than not launching it at all.
     return cp.spawn(cmd, args, opts)
   },
   getOutput: (cmd: string, args: string[]): Bluebird<{ stdout: string, stderr?: string }> => {

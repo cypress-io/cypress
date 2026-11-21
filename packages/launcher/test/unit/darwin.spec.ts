@@ -41,6 +41,8 @@ vi.mock('fs', async (importActual) => {
   const actual = await importActual()
 
   return {
+    // @ts-expect-error - importActual() returns unknown
+    ...actual,
     default: {
       // @ts-expect-error - importActual() returns unknown
       ...actual.default,
@@ -194,6 +196,9 @@ describe('darwin browser detection', () => {
         await (darwinHelper.detect(knownBrowsers[0]).catch(() => {}))
 
         expect(cp.spawn).toHaveBeenNthCalledWith(1, knownBrowsers[0].binary, ['--version'], expect.anything())
+
+        // @ts-expect-error - cp.spawn is typed as the real function, not a vi mock
+        expect(cp.spawn.mock.calls[0][2].env).not.toHaveProperty('ARCHPREFERENCE')
       })
     })
 
