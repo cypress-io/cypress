@@ -5,7 +5,7 @@
     "baseUrl": ".",
     "jsx": "react",
     "noEmit": true,
-    "rootDir": ".",
+    "rootDir": "..",
     "types": ["cypress", "@testing-library/cypress", "vite/client"],
     "paths": {
       "@cypress/react": ["../lib"]
