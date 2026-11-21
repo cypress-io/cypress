@@ -52,6 +52,7 @@
 - Fixed an issue where component testing setup did not offer installed third-party framework definitions, such as `cypress-ct-solid-js` or `@org/cypress-ct-qwik`, when the project's path contained `[`, `]`, `(` or `)`. Fixed in [#35493](https://github.com/cypress-io/cypress/pull/35493).
 - Requests from your application no longer carry Cypress's internal `__cypress.initial` and `__cypress.unload` cookies to your server or to [`cy.intercept()`](https://on.cypress.io/intercept) request handlers. For example, a request with no cookies of its own could arrive with `Cookie: __cypress.unload=true`, and now arrives without a `Cookie` header. Fixed in [#35470](https://github.com/cypress-io/cypress/pull/35470).
 - Fixed an issue where run mode durations of 24 hours or more dropped the whole days, so a run that took exactly 24 hours was reported as `0ms` and a run of 26 hours as `2:00:00`. Fixes [#34976](https://github.com/cypress-io/cypress/issues/34976).
+- Fixed an issue where the debug logs of [`cypress install`](https://on.cypress.io/command-line#cypress-install), shown with `DEBUG=cypress:cli`, reported an `expected file size` of only a few bytes, such as `expected file size 81`, before the download started. They now report only the size of the Cypress binary. Fixes [#30243](https://github.com/cypress-io/cypress/issues/30243).
 
 **Misc:**
 

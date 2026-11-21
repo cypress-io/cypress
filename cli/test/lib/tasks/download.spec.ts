@@ -1,6 +1,6 @@
 import type { Mock } from 'vitest'
 import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
-import { stripVTControlCharacters as stripAnsi } from 'util'
+import { format, stripVTControlCharacters as stripAnsi } from 'util'
 import { Writable } from 'stream'
 import os from 'os'
 import type { Systeminformation } from 'systeminformation'
@@ -296,6 +296,56 @@ describe('lib/tasks/download', function () {
     expect(responseVersion).to.eq('0.11.1')
 
     await fs.stat(downloadDestination)
+  })
+
+  describe('debug output', function () {
+    let previousNamespaces: string
+    let debugLines: string[]
+
+    beforeEach(function () {
+      debugLines = []
+      previousNamespaces = createDebug.disable()
+      createDebug.enable('cypress:cli')
+      vi.spyOn(createDebug, 'log').mockImplementation((...args: unknown[]) => {
+        debugLines.push(format(...args))
+      })
+    })
+
+    afterEach(function () {
+      createDebug.enable(previousNamespaces)
+    })
+
+    it('logs the binary size from the redirect target, not the redirect response', async function () {
+      const expectedChecksum = hasha.fromFileSync(examplePath)
+      const expectedFileSize = fs.statSync(examplePath).size
+      const redirectUrl = 'https://cdn.cypress.io/desktop/16.3.0/linux-x64/cypress.zip'
+      const redirectBody = `Found. Redirecting to ${redirectUrl}`
+
+      nock('https://download.cypress.io')
+      .get('/desktop/1.2.3')
+      .query(true)
+      .reply(302, redirectBody, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Content-Length': String(redirectBody.length),
+        Location: redirectUrl,
+        'x-version': '16.3.0',
+      })
+
+      nock('https://cdn.cypress.io')
+      .get('/desktop/16.3.0/linux-x64/cypress.zip')
+      .reply(200, () => fs.createReadStream(examplePath), {
+        'x-amz-meta-checksum': expectedChecksum,
+        'x-amz-meta-size': String(expectedFileSize),
+      })
+
+      await download.start({ ...options, progress: { onProgress: vi.fn() } })
+
+      const sizeLines = debugLines.filter((line) => line.includes('expected file size'))
+
+      expect(redirectBody).toHaveLength(81)
+      expect(sizeLines).toHaveLength(1)
+      expect(sizeLines[0]).toContain(`expected file size ${expectedFileSize}`)
+    })
   })
 
   describe('verify downloaded file', function () {
