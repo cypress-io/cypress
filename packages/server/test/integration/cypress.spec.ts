@@ -994,8 +994,9 @@ describe('lib/cypress', () => {
         ])
         .then(() => {
           // includes folder name + path to the spec
-          expectExitWithErr('NO_SPECS_FOUND', `/path/to/spec`)
-          expect(calledWithMatch(errors.log, todosPath)).toBe(false)
+          const err = expectExitWithErr('NO_SPECS_FOUND', `/path/to/spec`)
+
+          expect(stripAnsi(err.message)).not.toContain(todosPath)
         })
       })
 

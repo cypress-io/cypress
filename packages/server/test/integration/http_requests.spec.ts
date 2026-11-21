@@ -142,6 +142,7 @@ describe('Routes', () => {
     vi.spyOn(ServerBase.prototype, 'reset').mockImplementation(() => {})
     vi.spyOn(pluginsModule, 'has').mockReturnValue(false)
 
+    // nock judges a proxied request by its target host, though it only reaches the local proxy
     nock.enableNetConnect()
 
     Fixtures.scaffold()

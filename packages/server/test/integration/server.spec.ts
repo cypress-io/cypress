@@ -103,6 +103,7 @@ describe('Server', () => {
     beforeEach(() => {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
+      // nock judges a proxied request by its target host, though it only reaches the local proxy
       nock.enableNetConnect()
 
       automationRequest = vi.fn((message) => {
