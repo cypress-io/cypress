@@ -176,6 +176,8 @@ describe('cypress run --workers --record', () => {
       browser: 'electron',
       outputPath: recordedOutputPath,
       expectedExitCode: 0,
+      // on CircleCI the provider's build id would stand in for the generated one
+      processEnv: { CIRCLECI: undefined },
     })
 
     const requests = getRequests()

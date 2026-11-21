@@ -1,7 +1,4 @@
-import path from 'path'
-import { fs } from '@packages/server/lib/util/fs'
 import systemTests from '../lib/system-tests'
-import Fixtures from '../lib/fixtures'
 
 describe('e2e binary --workers', () => {
   systemTests.it('reads the container memory limit and runs every spec across workers', {
@@ -16,17 +13,13 @@ describe('e2e binary --workers', () => {
     snapshot: false,
     timeout: 240000,
     async onRun (exec) {
-      const outputPath = path.join(Fixtures.projectPath('run-workers'), 'output.json')
-      const { stdout } = await exec({ outputPath })
+      const { stdout } = await exec()
 
       expect(stdout).to.include('Running 2 workers may run out of memory')
       expect(stdout).to.include('Running 6 specs on 2 workers')
       expect(stdout).not.to.include('exited early')
-
-      const results = await fs.readJsonAsync(outputPath)
-
-      expect(results.totalTests).to.eq(6)
-      expect(results.totalFailed).to.eq(1)
+      // tests, passing, failing
+      expect(stdout).to.match(/1 of 6 failed \(17%\)\s+\S+\s+6\s+5\s+1\s/)
     },
   })
 })
