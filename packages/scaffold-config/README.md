@@ -24,7 +24,7 @@ We will also attempt to scaffold a configuration file for projects using React a
 The process for adding a new library/framework/bundler is as follows:
 
 1. Add your framework in [`src/frameworks.ts`](./src/frameworks.ts).
-2. Any new dependencies are declared in [`src/constants.ts`](./src/constants.ts). Don't forget to add a description.
+2. Any new dependencies are declared in [`src/dependencies.ts`](./src/dependencies.ts). Don't forget to add a description.
 3. Ensure your project has the correct library and bundler detected with a test in [`test/unit/detect.spec.ts`](./test/detect.spec.ts).
 3. Add a new project with the correct `cypress.config.js` and `package.json` to [system-tests/projects](../../system-tests/projects). It should be `<name>-configured`, which is a working example with some specs. Ensure it will run on CI by adding it to [`component_testing_spec.ts`](../../system-tests/test/component_testing_spec.ts).
 4. Add another project called `<name>-unconfigured`, which represents the project prior to having Cypress added. This will be used in step 5.

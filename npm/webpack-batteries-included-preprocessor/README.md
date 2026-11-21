@@ -64,7 +64,7 @@ module.exports = (on) => {
 }
 ```
 
-Please see [resolve.fallback](see https://webpack.js.org/configuration/resolve/#resolvefallback) for more information on what built-ins can be shimmed.
+Please see [resolve.fallback](https://webpack.js.org/configuration/resolve/#resolvefallback) for more information on what built-ins can be shimmed.
 
 Other than the `typescript` option, this preprocessor supports the same options as [@cypress/webpack-preprocessor](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme), so see its [README](https://github.com/cypress-io/cypress/tree/develop/npm/webpack-preprocessor#readme) for more information.
 
@@ -84,7 +84,7 @@ yarn test
 
 ## License
 
-This project is licensed under the terms of the [MIT license](/LICENSE.md).
+This project is licensed under the terms of the [MIT license](./LICENSE.md).
 
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
