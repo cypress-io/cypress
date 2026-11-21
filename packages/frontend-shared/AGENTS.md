@@ -42,6 +42,7 @@ src/
 
 ## Gotchas / Notes
 
+- The file name picks the JSX compiler in `app`, `launchpad` and `frontend-shared`: `*.vue.tsx`, `*.vue.cy.tsx`, `*.vue.spec.tsx` and `<script lang="tsx">` in a `.vue` file are Vue JSX, and every other `.tsx` is React. `.jsx` files aren't compiled at all, so write JSX in TypeScript. A Vue JSX file without the `.vue` infix compiles as React and fails at runtime with `Objects are not valid as a React child (found: object with keys {__v_isVNode, ...})`. `makeConfig` in `vite.config.mjs` sets this up.
 - There are **no E2E tests** in this package — only component tests. E2E coverage comes from `app` and `launchpad` which consume these components.
 - The `build` target depends on `generate-shiki-theme` (declared in `nx.targets`) — run that first if the generated theme file is missing.
 - `patch-package` is applied via `postinstall` to patch a local dependency; it is nohoisted to prevent conflicts.

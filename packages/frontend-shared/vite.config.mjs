@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+import react from '@vitejs/plugin-react'
 import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 import VueSvgLoader from 'vite-svg-loader'
 import Components from 'unplugin-vue-components/vite'
@@ -24,10 +25,21 @@ const alias = {
   '@cy/gql-components': path.resolve(__dirname, './src/gql-components'),
 }
 
+const vueJsxIds = [
+  /\.vue(?:\.(?:cy|spec))?\.tsx$/,
+  // The `<script lang="tsx">` block of a `.vue` file, which Vite requests as
+  // `Foo.vue?vue&type=script&setup=true&lang.tsx`
+  /\.vue\?[^?]*lang\.tsx$/,
+]
+
 const makePlugins = (plugins) => {
   return ([
     vue(),
-    vueJsx(), // Used mostly for testing in *.(t|j)sx files.
+    // `built-in` compiles only the JSX and leaves TypeScript to Vite's Oxc
+    // transform. Without it, plugin-vue-jsx limits Oxc to `.ts`, so React
+    // `.tsx` files would never have their JSX compiled.
+    vueJsx({ include: vueJsxIds, tsTransform: 'built-in' }),
+    react({ include: /\.tsx$/, exclude: [/\/node_modules\//, ...vueJsxIds] }),
     vueI18n({
       include: path.resolve(__dirname, './src/locales/**/*.json'),
       ...plugins.vueI18nOptions,
