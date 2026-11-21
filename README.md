@@ -40,8 +40,9 @@ Cypress is a quality platform for teams shipping modern web applications. It tes
 
 - **End-to-end and component testing** in a real browser, re-running your tests every time you save.
 - **Time-travel debugging** that snapshots each step of a test, so you can go back and see exactly what happened.
-- **[Test Replay](https://docs.cypress.io/cloud/features/test-replay?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-test-replay)** in Cypress Cloud, to replay a failed CI run and inspect the DOM, network requests, and console logs as they happened.
-- **[Cypress Accessibility](https://docs.cypress.io/accessibility/get-started/introduction?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-accessibility)** and **[UI Coverage](https://docs.cypress.io/ui-coverage/get-started/introduction?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-ui-coverage)**, to catch accessibility barriers and see which parts of your app your tests never reach.
+- **[`cypress tap`](https://docs.cypress.io/app/tooling/cypress-tap?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-cypress-tap)** to drive Cypress with an AI agent from your terminal, so it can run specs, read failures, and fix them as it codes.
+- **[Continuous runs in CI](https://docs.cypress.io/app/continuous-integration/overview?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-ci)** with GitHub Actions, GitLab, CircleCI, Jenkins, and other CI providers.
+- **[Cypress Cloud](https://www.cypress.io/cloud?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=feature-cypress-cloud)** to replay failed CI runs with Test Replay, catch accessibility barriers, and see what your tests never reach with UI Coverage. Connect it to your agent and tools with Cloud MCP, the Cloud CLI, and webhooks.
 
 ## Installing
 
