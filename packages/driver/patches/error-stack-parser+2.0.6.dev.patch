@@ -1,0 +1,44 @@
+diff --git a/node_modules/error-stack-parser/error-stack-parser.js b/node_modules/error-stack-parser/error-stack-parser.js
+index 9de504a..e1bfc00 100644
+--- a/node_modules/error-stack-parser/error-stack-parser.js
++++ b/node_modules/error-stack-parser/error-stack-parser.js
+@@ -100,10 +100,35 @@
+                         functionName: line
+                     });
+                 } else {
+-                    var functionNameRegex = /((.*".+"[^@]*)?[^@]*)(?:@)/;
+-                    var matches = line.match(functionNameRegex);
+-                    var functionName = matches && matches[1] ? matches[1] : undefined;
+-                    var locationParts = this.extractLocation(line.replace(functionNameRegex, ''));
++                    // Splits `name@location` at the first `@`, or, when the name holds a
++                    // quoted string such as `fn/"a@b"@location`, at the first `@` after
++                    // the last closing quote. This is the split that the function-name
++                    // regex quoted in the issue below made, but in linear time: that
++                    // regex backtracks catastrophically on long lines with quotes, such
++                    // as a sinon call list that prints a JSON argument.
++                    // Remove once https://github.com/stacktracejs/error-stack-parser/issues/57 is fixed.
++                    var functionName;
++                    var location = line;
++                    var lastAt = line.lastIndexOf('@');
++
++                    if (lastAt > -1) {
++                        var nameEnd = line.indexOf('@');
++                        // `.` in the regex stops at a line terminator, so a quoted part
++                        // has to close before the first one
++                        var lineTerminator = line.search(/[\n\r\u2028\u2029]/);
++                        var quoteLimit = lineTerminator > -1 && lineTerminator < lastAt ? lineTerminator : lastAt;
++                        var closingQuote = quoteLimit > 0 ? line.lastIndexOf('"', quoteLimit - 1) : -1;
++
++                        // the quoted part needs an opening quote with at least one character before the closing one
++                        if (closingQuote >= 2 && line.lastIndexOf('"', closingQuote - 2) > -1) {
++                            nameEnd = line.indexOf('@', closingQuote);
++                        }
++
++                        functionName = line.slice(0, nameEnd) || undefined;
++                        location = line.slice(nameEnd + 1);
++                    }
++
++                    var locationParts = this.extractLocation(location);
+ 
+                     return new StackFrame({
+                         functionName: functionName,

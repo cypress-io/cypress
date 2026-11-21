@@ -22,6 +22,10 @@ const testStaticAssets = async (buildResourcePath) => {
         'react.production.min.js',
         'react-dom.production.min.js',
         '__mobxInstanceCount',
+        // error-stack-parser's function-name regex, which hangs on long lines
+        // with quotes. Present only if patches/error-stack-parser+2.0.6.dev.patch
+        // in @packages/driver was not applied.
+        '[^@]*)?[^@]*)(?:@)',
       ],
       // each host module must be read through its webpack external, not bundled
       goodStrings: [

@@ -1,0 +1,18 @@
+{
+  "browser": "webkit",
+  "version": "26.5",
+  "scenarios": [
+    {
+      "name": "named",
+      "stack": "captureStack@http://localhost:3500/__cypress/tests:10:19\n@http://localhost:3500/__cypress/tests:15:31\n@http://localhost:3500/__cypress/tests:15:34\nmap@[native code]\nnestedAnonymous@http://localhost:3500/__cypress/tests:14:17\nonRunnableRun@http://localhost:3500/__cypress/tests:25:25\nglobal code@http://localhost:3500/__cypress/tests:24:45"
+    },
+    {
+      "name": "eval",
+      "stack": "captureStack@http://localhost:3500/__cypress/tests:10:19\neval code@\neval@[native code]\nviaEval@http://localhost:3500/__cypress/tests:21:14\nglobal code@http://localhost:3500/__cypress/tests:28:33"
+    },
+    {
+      "name": "getter",
+      "stack": "captureStack@http://localhost:3500/__cypress/tests:10:19\nvalue@http://localhost:3500/__cypress/tests:32:24\nglobal code@http://localhost:3500/__cypress/tests:34:3"
+    }
+  ]
+}

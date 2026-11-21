@@ -2,10 +2,13 @@
  * @vitest-environment jsdom
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest'
+import sinon from 'sinon'
 
 import source_map_utils from '../../../src/cypress/source_map_utils'
 import stack_utils from '../../../src/cypress/stack_utils'
 import stackFrameFixture from './__fixtures__/getInvocationDetails_spec_stackframes.json'
+import userInvocationStackFixture from './__fixtures__/getUserInvocationStack_stackFrames.json'
+import webkitStackFixture from './__fixtures__/webkit_stackframes.json'
 import type { Browser } from '@packages/types'
 
 vi.mock('../../../src/cypress/source_map_utils', () => {
@@ -329,6 +332,69 @@ describe('stack_utils', () => {
       const { parsed } = stack_utils.getSourceStack(`    at Context.eval (${location})`)
 
       expect(parsed?.[0]).toHaveProperty('function', 'Context.eval')
+    })
+
+    describe('on captured stacks', () => {
+      const capturedStacks: [string, string][] = [
+        ...stackFrameFixture.scenarios.map(({ browser, build, stack }): [string, string] => [`${browser} ${build} invocation`, stack]),
+        ...userInvocationStackFixture.scenarios.map(({ browser, build, testingType, stack }): [string, string] => [`${browser} ${build} ${testingType} user invocation`, stack]),
+        ...webkitStackFixture.scenarios.map(({ name, stack }): [string, string] => [`webkit ${webkitStackFixture.version} ${name}`, stack]),
+      ]
+
+      // these are frames real browsers produce, so the snapshot fails if a
+      // change to the stack parser moves any of them
+      it.each(capturedStacks)('parses every frame of the %s stack as before', (_name, stack) => {
+        const { parsed } = stack_utils.getSourceStack(stack)
+
+        expect(parsed?.map((frame) => {
+          return 'message' in frame
+            ? { message: frame.message }
+            : { function: frame.function, file: frame.fileUrl, line: frame.line, column: frame.column }
+        })).toMatchSnapshot()
+      })
+    })
+
+    describe('on failed spy assertions', () => {
+      // the message @cypress/sinon-chai builds for a failed `calledWith`
+      const calledWithFailure = (arg: string) => {
+        const beacon = { send (_url: string, _body: string) {} }
+        const spy = sinon.spy(beacon, 'send')
+
+        const flushLogs = () => beacon.send('/log', arg)
+
+        flushLogs()
+
+        return spy.printf('expected %n to have been called with arguments %*\n\n    The following calls were made:\n%C', '/log', 'flush')
+      }
+
+      const events = (count: number) => {
+        return Array.from({ length: count }, (_, i) => {
+          return { type: 'ui', message: `Payment form shown at step ${i + 1}`, sessionId: 'c9f1e2a4-7b3d-4e8a-9c61-2f5d8a0b7e13' }
+        })
+      }
+      const cartItems = Array.from({ length: 6 }, (_, i) => `<li class="cart-item" data-sku="sku-${1042 + i}">Item ${i + 1}</li>`).join('')
+
+      // The call list prints each call with the frame it came from, so a call
+      // line ends in `:line:column` and is parsed like a stack frame. Each
+      // argument is just long enough that a backtracking parser takes seconds:
+      // longer ones would hang the run instead of failing it.
+      it.each([
+        ['JSON', JSON.stringify(events(3))],
+        ['HTML', cartItems],
+        ['JSON with an email address', JSON.stringify(events(12).map((event, i) => i === 0 ? { ...event, user: 'jane.doe@example.com' } : event))],
+      ])('parses a stack whose message lists a call with a %s argument quickly', (_kind, arg) => {
+        const message = calledWithFailure(arg)
+        const stack = `AssertionError: ${message}\n    at Context.eval (http://localhost:54823/__cypress/tests?p=cypress/spec.cy.js:14:16)`
+
+        expect(message).toContain(`send(/log, ${arg}) at `)
+
+        const start = performance.now()
+        const { parsed } = stack_utils.getSourceStack(stack)
+
+        expect(performance.now() - start).toBeLessThan(200)
+        expect(parsed?.[0]).toHaveProperty('message', 'AssertionError: expected send to have been called with arguments /log, flush')
+        expect(parsed?.[parsed.length - 1]).toMatchObject({ function: 'Context.eval', line: 14, column: 16 })
+      })
     })
 
     it('names a Firefox frame with a long run of markers in linear time', () => {
