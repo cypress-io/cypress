@@ -3,7 +3,7 @@
     <picture>
       <source media="(prefers-color-scheme: dark)"  srcset="./assets/cypress-logo-dark.png">
       <source media="(prefers-color-scheme: light)" srcset="./assets/cypress-logo-light.png">
-      <img alt="Cypress Logo" src="./assets/cypress-logo-light.png">
+      <img alt="Cypress" src="./assets/cypress-logo-light.png">
     </picture>
   </a>
 </p>
@@ -35,35 +35,41 @@
 
 ## What is Cypress?
 
+Cypress is a quality platform for teams shipping modern web applications. It tests anything that runs in a browser, on your machine and in CI.
+
+- **End-to-end and component testing** in a real browser, re-running your tests every time you save.
+- **Time-travel debugging** that snapshots each step of a test, so you can go back and see exactly what happened.
+- **[Test Replay](https://docs.cypress.io/cloud/features/test-replay)** in Cypress Cloud, to replay a failed CI run and inspect the DOM, network requests, and console logs as they happened.
+- **[Cypress Accessibility](https://docs.cypress.io/accessibility/get-started/introduction)** and **[UI Coverage](https://docs.cypress.io/ui-coverage/get-started/introduction)**, to catch accessibility barriers and see which parts of your app your tests never reach.
+
 <p align="center">
   <a href="https://player.vimeo.com/video/237527670">
-    <img alt="Why Cypress Video" src="https://user-images.githubusercontent.com/1271364/31739717-dbdff0ee-b41c-11e7-9b16-bfa1b6ac1814.png" width="75%" height="75%" />
+    <img alt="Watch the “Why Cypress” video" src="https://user-images.githubusercontent.com/1271364/31739717-dbdff0ee-b41c-11e7-9b16-bfa1b6ac1814.png" width="75%" height="75%" />
   </a>
 </p>
 
 ## Installing
 
-Install Cypress for Mac, Linux, or Windows, then [get started](https://on.cypress.io/install).
+Install Cypress for Mac, Linux, or Windows with your package manager of choice, then [get started](https://on.cypress.io/install).
 
 ```bash
-npm install cypress --save-dev
-```
-or
-```bash
-yarn add cypress --dev
-```
-or
-```bash
-pnpm add cypress --save-dev
-```
-or
-```bash
-bun add cypress --dev
+npm install cypress --save-dev   # npm
+yarn add cypress --dev           # Yarn
+pnpm add cypress --save-dev      # pnpm
+bun add cypress --dev            # Bun
 ```
 
-![installing-cli e1693232](./assets/cypress-installation.gif)
+### Quick start
 
-### Add Cypress skills to your coding agent
+Open Cypress from your project root:
+
+```bash
+npx cypress open
+```
+
+The Launchpad sets up your project's configuration and folders for you. Pick a testing type and a browser, and you're running your first test. Using another package manager? Run `yarn cypress open`, `pnpm cypress open`, or `bunx cypress open`.
+
+### Add Cypress to your coding agent
 
 Give your coding agent the [official Cypress skills](https://skills.sh/cypress-io/ai-toolkit) so it writes, runs, and debugs tests the Cypress way.
 
@@ -71,9 +77,18 @@ Give your coding agent the [official Cypress skills](https://skills.sh/cypress-i
 npx skills add cypress-io/ai-toolkit
 ```
 
+Then connect it to Cypress Cloud with [Cloud MCP](https://docs.cypress.io/cloud/integrations/cloud-mcp), so it can check run status, find flaky tests, and pull failure details, including Test Replay links.
+
 ## Community plugins
 
 Extend Cypress with plugins built by the community and the Cypress team, covering everything from visual testing and accessibility to authentication and reporting. Browse the full list in the [plugins directory](https://docs.cypress.io/app/plugins/plugins-list).
+
+## Community & support
+
+- **[Discord](https://on.cypress.io/discord)**: chat with other Cypress users.
+- **[GitHub Discussions](https://github.com/cypress-io/cypress/discussions)**: ask questions and share ideas.
+- **[GitHub Issues](https://github.com/cypress-io/cypress/issues)**: report bugs and request features.
+- **[Documentation](https://on.cypress.io)**: guides, API reference, and examples.
 
 ## Contributing
 
@@ -82,11 +97,17 @@ Extend Cypress with plugins built by the community and the Cypress team, coverin
 
 Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 
+Thank you to everyone who has contributed to Cypress!
+
+<a href="https://github.com/cypress-io/cypress/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=cypress-io/cypress" alt="Avatars of Cypress contributors" />
+</a>
+
 ## License
 
-[![MIT license](https://img.shields.io/badge/license-MIT-00814D?style=for-the-badge&labelColor=1B1E2E)](https://github.com/cypress-io/cypress/blob/develop/LICENSE)
+[![MIT license](https://img.shields.io/badge/license-MIT-00814D?style=for-the-badge&labelColor=1B1E2E)](./LICENSE)
 
-This project is licensed under the terms of the [MIT license](/LICENSE).
+This project is licensed under the terms of the [MIT license](./LICENSE).
 
 ## Badges
 
@@ -101,3 +122,12 @@ Or let the world know your project is using Cypress with the badge below.
 ```
 [![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-00814D?style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://www.cypress.io/)
 ```
+
+## Star history
+
+<a href="https://star-history.com/#cypress-io/cypress&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=cypress-io/cypress&type=Date&theme=dark" />
+    <img alt="Star history chart for cypress-io/cypress" src="https://api.star-history.com/svg?repos=cypress-io/cypress&type=Date" width="600" />
+  </picture>
+</a>
