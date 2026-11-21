@@ -11,8 +11,10 @@ export const wrap = (
   const [options] = args
   const devServerEvents = new EE()
 
-  ipc.on('dev-server:specs:changed', (specsAndOptions) => {
+  ipc.on('dev-server:specs:changed', ({ id, ...specsAndOptions }) => {
+    // the dev server's listener marks its build out of date before emit returns
     devServerEvents.emit('dev-server:specs:changed', specsAndOptions)
+    ipc.send('dev-server:specs:delivered', { id })
   })
 
   devServerEvents.on('dev-server:compile:success', ({ specFile }: { specFile?: string } = {}) => {

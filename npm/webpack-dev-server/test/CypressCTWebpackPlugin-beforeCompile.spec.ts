@@ -23,7 +23,7 @@ const spec = (name: string): Cypress.Spec => {
   }
 }
 
-const createPlugin = (files: Cypress.Spec[]) => {
+const createPlugin = (files: Cypress.Spec[], { watching }: { watching?: { invalidate: () => void } } = {}) => {
   const devServerEvents = new EventEmitter()
   let beforeCompile!: (params: object, callback: () => void) => Promise<void>
   let onCompilation!: (compilation: object) => void
@@ -42,7 +42,10 @@ const createPlugin = (files: Cypress.Spec[]) => {
     indexHtmlFile: 'index.html',
   })
 
+  const utimesSync = vi.fn()
+
   plugin.apply({
+    watching,
     hooks: {
       beforeCompile: { tapAsync: (_name: string, cb: typeof beforeCompile) => beforeCompile = cb },
       compilation: { tap: (_name: string, cb: typeof onCompilation) => onCompilation = cb },
@@ -51,10 +54,11 @@ const createPlugin = (files: Cypress.Spec[]) => {
   })
 
   // beforeCompile skips filtering until webpack has created its first compilation
-  onCompilation({ inputFileSystem: { utimesSync: vi.fn() } })
+  onCompilation({ inputFileSystem: { utimesSync } })
 
   return {
     devServerEvents,
+    utimesSync,
     runBeforeCompile: () => new Promise<void>((resolve) => beforeCompile({}, resolve)),
     loadedFiles: () => {
       const loaderContext: Partial<CypressCTWebpackContext> = {}
@@ -113,5 +117,35 @@ describe('CypressCTWebpackPlugin beforeCompile', () => {
 
       expect(loadedFiles()).toEqual([newSpec])
     })
+  })
+})
+
+describe('CypressCTWebpackPlugin spec changes', () => {
+  it('marks the watched build out of date before the spec change event returns', () => {
+    const watching = { invalidate: vi.fn() }
+    const { devServerEvents, utimesSync, loadedFiles } = createPlugin([spec('Old.cy.js')], { watching })
+
+    devServerEvents.emit('dev-server:specs:changed', { specs: [spec('New.cy.js')], options: { neededForJustInTimeCompile: true } })
+
+    expect(watching.invalidate).toHaveBeenCalledOnce()
+    expect(utimesSync).not.toHaveBeenCalled()
+    expect(loadedFiles()).toEqual([spec('New.cy.js')])
+  })
+
+  it('touches the component index file when webpack is not watching', () => {
+    const { devServerEvents, utimesSync } = createPlugin([spec('Old.cy.js')])
+
+    devServerEvents.emit('dev-server:specs:changed', { specs: [spec('New.cy.js')] })
+
+    expect(utimesSync).toHaveBeenCalledWith('/project/index.html', expect.any(Date), expect.any(Date))
+  })
+
+  it('leaves the build alone when the spec list is unchanged', () => {
+    const watching = { invalidate: vi.fn() }
+    const { devServerEvents } = createPlugin([spec('Same.cy.js')], { watching })
+
+    devServerEvents.emit('dev-server:specs:changed', { specs: [spec('Same.cy.js')] })
+
+    expect(watching.invalidate).not.toHaveBeenCalled()
   })
 })

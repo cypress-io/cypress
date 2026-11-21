@@ -2,6 +2,7 @@ import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 import path from 'path'
 import globby from 'globby'
+import fs from 'fs-extra'
 import { escapeRegExp } from 'lodash'
 
 describe('@cypress/webpack-dev-server', function () {
@@ -42,6 +43,24 @@ describe('@cypress/webpack-dev-server', function () {
 
         expect(stdout).to.match(expectedPattern)
       })
+    },
+  })
+
+  systemTests.it('runs each spec\'s tests when the webpack watcher notices changes late', {
+    project: 'webpack-dev-server-polling',
+    testingType: 'component',
+    browser: ['electron', 'chrome'],
+    snapshot: false,
+    expectedExitCode: 0,
+    onRun: async (exec) => {
+      const outputPath = path.join(Fixtures.projectPath('webpack-dev-server-polling'), 'output.json')
+
+      await exec({ outputPath })
+
+      const { runs } = await fs.readJson(outputPath)
+
+      expect(runs).to.have.length(6)
+      runs.forEach((run) => expect(run.stats.tests, `tests in ${run.spec.relative}`).to.eq(1))
     },
   })
 

@@ -190,7 +190,7 @@ describe('#devServer', { timeout: 5000 }, () => {
     await closeServer(close)
   })
 
-  it('touches component index when a spec file is added and recompile', async function () {
+  it('recompiles when a spec file is added', async function () {
     // File watching only enabled when running in `open` mode
     cypressConfig.isTextTerminal = false
     const devServerEvents = new EventEmitter()
@@ -207,17 +207,12 @@ describe('#devServer', { timeout: 5000 }, () => {
       absolute: `${root}/test/fixtures/bar.spec.js`,
     }
 
-    const oldmtime = fs.statSync(cypressConfig.indexHtmlFile).mtimeMs
-
     await once(devServerEvents, 'dev-server:compile:success')
     devServerEvents.emit('dev-server:specs:changed', {
       specs: [newSpec],
     })
 
     await once(devServerEvents, 'dev-server:compile:success')
-    const updatedmtime = fs.statSync(cypressConfig.indexHtmlFile).mtimeMs
-
-    expect(oldmtime).not.toEqual(updatedmtime)
 
     await closeServer(close)
   })

@@ -29,6 +29,7 @@ export class CypressCTWebpackPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string | false
   private compilation: Compilation | null = null
+  private compiler: Compiler | null = null
   private webpack: typeof webpack
   private indexHtmlFile: string
 
@@ -89,7 +90,11 @@ export class CypressCTWebpackPlugin {
   /*
    * `webpack --watch` watches the existing specs and their dependencies for changes.
    * When new specs are created, we need to trigger a recompilation to add the new specs
-   * as dependencies. This hook informs webpack that `component-index.html` has been "updated on disk",
+   * as dependencies. Invalidating the watcher marks the build out of date before this returns,
+   * so webpack-dev-middleware holds the next spec request until the rebuild. A touched file only
+   * does that once the watcher notices it, and until then the bundle without the spec is served.
+   *
+   * Without a watcher, this informs webpack that `component-index.html` has been "updated on disk",
    * causing a recompilation (and pulling the new specs in as dependencies). We use the component
    * index file because we know that it will be there since the project is using Component Testing.
    *
@@ -104,6 +109,13 @@ export class CypressCTWebpackPlugin {
     }
 
     this.files = specs
+
+    if (this.compiler?.watching) {
+      this.compiler.watching.invalidate()
+
+      return
+    }
+
     const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here
     // eslint-disable-next-line no-restricted-syntax
@@ -133,6 +145,7 @@ export class CypressCTWebpackPlugin {
   apply (compiler: unknown): void {
     const _compiler = compiler as Compiler
 
+    this.compiler = _compiler
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
     _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation))
