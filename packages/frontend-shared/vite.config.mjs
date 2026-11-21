@@ -25,7 +25,12 @@ const alias = {
   '@cy/gql-components': path.resolve(__dirname, './src/gql-components'),
 }
 
-const vueJsxFile = /\.vue(?:\.(?:cy|spec))?\.tsx$/
+const vueJsxIds = [
+  /\.vue(?:\.(?:cy|spec))?\.tsx$/,
+  // The `<script lang="tsx">` block of a `.vue` file, which Vite requests as
+  // `Foo.vue?vue&type=script&setup=true&lang.tsx`
+  /\.vue\?[^?]*lang\.tsx$/,
+]
 
 const makePlugins = (plugins) => {
   return ([
@@ -33,8 +38,8 @@ const makePlugins = (plugins) => {
     // `built-in` compiles only the JSX and leaves TypeScript to Vite's Oxc
     // transform. Without it, plugin-vue-jsx limits Oxc to `.ts`, so React
     // `.tsx` files would never have their JSX compiled.
-    vueJsx({ include: vueJsxFile, tsTransform: 'built-in' }),
-    react({ include: /\.tsx$/, exclude: [/\/node_modules\//, vueJsxFile] }),
+    vueJsx({ include: vueJsxIds, tsTransform: 'built-in' }),
+    react({ include: /\.tsx$/, exclude: [/\/node_modules\//, ...vueJsxIds] }),
     vueI18n({
       include: path.resolve(__dirname, './src/locales/**/*.json'),
       ...plugins.vueI18nOptions,
