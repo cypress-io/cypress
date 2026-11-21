@@ -3464,9 +3464,7 @@ jobs:
       - checkout
       - run:
           name: Check Markdown links 🔗
-          command: |
-            git fetch --quiet "https://github.com/${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}.git" +refs/heads/develop:refs/upstream/develop
-            yarn check-markdown-links --base refs/upstream/develop
+          command: yarn check-markdown-links
 
   # Fan-in gate: build complete and contributor PR approved (when applicable).
   ready-to-test:

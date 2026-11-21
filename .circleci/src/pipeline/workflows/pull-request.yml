@@ -30,7 +30,7 @@ jobs:
   # all-jobs-passed always has a job to wait for.
   - docs-check:
       filters: not (pipeline.git.branch matches /^pull\/[0-9]+/)
-  # A fork PR can change the script docs-check runs, so it waits for approval.
+  # A fork PR can change the command docs-check runs, so it waits for approval.
   - docs-check:
       name: contributor-docs-check
       requires:

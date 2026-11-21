@@ -63,7 +63,7 @@
     "check-binary-on-cdn": "node ./scripts/binary/check-binary-on-cdn.js",
     "check-lockfile": "yarn dedupe-lockfile --list --fail",
     "check-lockfile-drift": "./scripts/check-lockfile-drift.sh",
-    "check-markdown-links": "node scripts/check-markdown-links.mts",
+    "check-markdown-links": "git ls-files -z '*.md' '*.mdx' | xargs -0 npx --yes markdown-link-check@3.15.0 --quiet --config scripts/markdown-link-check.json",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "check-ts": "yarn lerna run check-ts",
