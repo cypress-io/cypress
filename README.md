@@ -122,12 +122,3 @@ Or let the world know your project is using Cypress with the badge below.
 ```
 [![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-00814D?style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://www.cypress.io/)
 ```
-
-## Star history
-
-<a href="https://star-history.com/#cypress-io/cypress&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=cypress-io/cypress&type=Date&theme=dark" />
-    <img alt="Star history chart for cypress-io/cypress" src="https://api.star-history.com/svg?repos=cypress-io/cypress&type=Date" width="600" />
-  </picture>
-</a>
