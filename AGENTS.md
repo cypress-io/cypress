@@ -218,6 +218,7 @@ Orientation, not a registry — the directories under `packages/` and `npm/` are
 - **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why. In a workspace that spreads `vitestConfig`, a skip that has to stay also needs `eslint-disable-next-line vitest/no-disabled-tests` below that comment.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
+- **Regex performance** — Before adding or changing a regex, follow [Writing performant regular expressions](./guides/writing-performant-regular-expressions.md) and measure it with `yarn check-regex`.
 
 ### Code Comments
 
