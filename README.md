@@ -30,7 +30,7 @@
   <br />
   <a href="https://skills.sh/cypress-io/ai-toolkit"><img src="https://skills.sh/b/cypress-io/ai-toolkit?style=for-the-badge" alt="skills.sh"/></a>
   <br />
-  <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/Discord-join%20chat-5865F2?style=for-the-badge&labelColor=1B1E2E&logo=discord&logoColor=white" alt="Discord chat"/></a>
+  <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Fv10%2Finvites%2Fcypress%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&label=Discord&suffix=%20members&color=5865F2&style=for-the-badge&labelColor=1B1E2E&logo=discord&logoColor=white" alt="Discord members"/></a>
 </p>
 
 ## What is Cypress?
