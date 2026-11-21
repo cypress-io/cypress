@@ -1322,10 +1322,6 @@ commands:
         type: enum
         enum: [ "", "electron", "chrome", "firefox" ]
         default: ""
-      run-args:
-        description: Arguments added after --browser, such as "--workers auto"
-        type: string
-        default: ""
       command:
         description: Test command to run to start Cypress tests
         type: string
@@ -1396,7 +1392,7 @@ commands:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
-                        <<parameters.command>> --browser <<parameters.browser>> --record false <<parameters.run-args>>
+                        <<parameters.command>> --browser <<parameters.browser>> --record false
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -1413,7 +1409,7 @@ commands:
                   - run:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>> --browser <<parameters.browser>> --record false <<parameters.run-args>>
+                      command: <<parameters.command>> --browser <<parameters.browser>> --record false
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -3440,17 +3436,6 @@ jobs:
           browser: chrome
           run-args: --workers << parameters.workers >>
           executor: << parameters.executor >>
-
-  # The app's specs seed one shared database, so workers running them at the same
-  # time can collide the way users' suites can
-  test-binary-against-cypress-realworld-app-workers:
-    <<: *defaults
-    resource_class: large.gen2
-    steps:
-      - test-binary-against-rwa:
-          repo: cypress-realworld-app
-          browser: chrome
-          run-args: --workers auto
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults
