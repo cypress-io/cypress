@@ -17,6 +17,7 @@ import {
   mergeDefaults,
   shouldHonorNumTestsKeptInMemory,
 } from './utils'
+import { setUrls } from '../utils'
 import type { GetFilesByGlob } from './types'
 
 export type { GetFilesByGlob }
@@ -149,5 +150,6 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
 
   debug('merged plugins config %o', merged)
 
-  return merged
+  // mergeDefaults derived browserUrl before setupNodeEvents could change baseUrl or port
+  return merged.port ? setUrls(merged) : merged
 }
