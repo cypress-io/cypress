@@ -1,9 +1,8 @@
-require('../spec_helper')
-
-const _ = require('lodash')
-const pkg = require('../../package.json')
-const execa = require('execa')
-const semver = require('semver')
+import _ from 'lodash'
+import execa from 'execa'
+import semver from 'semver'
+import { beforeEach, describe, expect, it } from 'vitest'
+import pkg from '../../package.json'
 
 const anyLineWithCaret = (str) => {
   return str[0] === '>'
@@ -24,17 +23,12 @@ const clean = (str) => {
 
 const env = _.omit(process.env, 'CYPRESS_DEBUG')
 
-describe('CLI Interface', () => {
-  beforeEach(function () {
-    // set the timeout high due to
-    // spawning child processes
-    return this.currentTest.timeout(20000)
-  })
-
+// spawning child processes takes a while
+describe('CLI Interface', { timeout: 20_000 }, () => {
   it('writes out ping value and exits', async () => {
     const { stdout } = await execa('npm', ['run', 'dev', '--', '--cwd=/foo/bar', '--smoke-test', '--ping=12345'], { env, extendEnv: false })
 
-    expect(clean(stdout)).to.eq('12345')
+    expect(clean(stdout)).toBe('12345')
   })
 
   // This fails on MacOS due to an apparent limit on the buffer size of stdout
@@ -42,8 +36,8 @@ describe('CLI Interface', () => {
     const { stdout } = await execa('npm', ['run', 'dev', '--', '--return-pkg'], { env, extendEnv: false })
     const json = JSON.parse(clean(stdout))
 
-    expect(json.name).to.eq('cypress')
-    expect(json.productName).to.eq('Cypress', stdout)
+    expect(json.name).toBe('cypress')
+    expect(json.productName, stdout).toBe('Cypress')
   })
 
   // this tests that our exit codes are correct.
@@ -52,23 +46,23 @@ describe('CLI Interface', () => {
   // up their exit codes to the calling process. this
   // caused false-positives in CI because tests were failing
   // but the exit code was always zero
-  context('exit codes', () => {
+  describe('exit codes', () => {
     describe('from start script command', () => {
       it('exits with code 22', async () => {
         const { exitCode, message } = await execa(`${pkg.scripts.dev} --exit-with-code=22`, { shell: true, reject: false })
 
-        expect(exitCode, message).to.eq(22)
+        expect(exitCode, message).toBe(22)
       })
 
       it('exits with code 0', async () => {
         const { exitCode, message } = await execa(`${pkg.scripts.dev} --exit-with-code=0`, { shell: true, reject: false })
 
-        expect(exitCode, message).to.eq(0)
+        expect(exitCode, message).toBe(0)
       })
     })
 
     describe('through NPM script', () => {
-      let npmVersion = null
+      let npmVersion: string | null = null
 
       /**
        * In certain versions of npm, code with an exit code of 10 (Internal Runtime Javascript Failure)
@@ -76,10 +70,8 @@ describe('CLI Interface', () => {
        * This seems to occur before Node 7 / NPM 4 and between Node 14/ NPM 7 and Node 16 / NPM 8.
        * Please see https://github.com/arzzen/all-exit-error-codes/blob/master/programming-languages/javascript/nodejs.md
        * for more details.
-       *
-       * @returns {boolean}
        */
-      const doesNpmObscureInternalExitCode = () => {
+      const doesNpmObscureInternalExitCode = (): boolean => {
         return semver.lt(npmVersion, '4.0.0') || (semver.gt(npmVersion, '6.0.0') && semver.lt(npmVersion, '8.0.0'))
       }
 
@@ -89,7 +81,7 @@ describe('CLI Interface', () => {
         .then((version) => {
           npmVersion = version
 
-          expect(npmVersion).to.be.a('string')
+          expect(npmVersion).toBeTypeOf('string')
         })
       })
 
@@ -97,13 +89,13 @@ describe('CLI Interface', () => {
         const expectedCode = doesNpmObscureInternalExitCode() ? 1 : 10
         const { exitCode, message } = await execa('npm', ['run', 'dev', '--', '--exit-with-code=10'], { reject: false })
 
-        expect(exitCode, message).to.eq(expectedCode)
+        expect(exitCode, message).toBe(expectedCode)
       })
 
       it('npm passes on 0 exit code', async () => {
         const { exitCode, message } = await execa('npm', ['run', 'dev', '--', '--exit-with-code=0'], { reject: false })
 
-        expect(exitCode, message).to.eq(0)
+        expect(exitCode, message).toBe(0)
       })
     })
   })

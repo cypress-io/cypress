@@ -37,7 +37,7 @@ yarn workspace @packages/server build-prod
 ```
 
 * `yarn test-unit` executes unit tests in [`test/unit`](./test/unit) with vitest
-* `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
+* `yarn test-integration` executes integration tests in [`test/integration`](./test/integration) with vitest
 * `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
 
 You can also use the `test-watch` command to rerun a test file whenever there is a change:
@@ -57,10 +57,9 @@ yarn test-unit routes ## filters spec files by substring
 ### Running individual integration tests
 
 ```bash
-yarn test <path/to/test>
-yarn test test/integration/cli_spec.js
+yarn test-integration test/integration/cli.spec.ts
 ## or
-yarn test-integration cli_spec ## shorthand, uses globbing to find spec
+yarn test-integration cli ## filters spec files by substring
 ```
 
 ### Running e2e/system tests
@@ -69,9 +68,9 @@ yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 
 ### Updating snapshots
 
-For integration tests, prepend `SNAPSHOT_UPDATE=1` to the test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info. For unit tests, pass vitest's `-u` flag.
+Pass vitest's `-u` flag.
 
 ```bash
-SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
 yarn test-unit test/unit/reporter.spec.ts -u
+yarn test-integration test/integration/cypress.spec.ts -u
 ```

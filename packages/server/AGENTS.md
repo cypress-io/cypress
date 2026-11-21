@@ -8,7 +8,7 @@ yarn workspace @packages/server start
 
 # NOTE: Full suite is slow (hundreds of tests); always target a specific file or grep pattern
 
-# Unit tests (test/unit/**/*.spec.ts) run on vitest; integration and performance tests run on mocha
+# Unit (test/unit/**/*.spec.ts) and integration (test/integration/**/*.spec.ts) tests run on vitest; performance tests run on mocha
 
 # Run a specific unit test file
 yarn workspace @packages/server test-unit -- <path-to-spec>
@@ -20,13 +20,13 @@ yarn workspace @packages/server test-unit -- -t "handles request"
 yarn workspace @packages/server test-integration -- <path-to-spec>
 
 # Filter integration tests by name pattern
-yarn workspace @packages/server test-integration -- --grep "video capture"
+yarn workspace @packages/server test-integration -- -t "video capture"
 
 # Build TypeScript to JS (production)
 yarn workspace @packages/server build-prod
 ```
 
-**Migrating a unit spec from mocha to vitest**
+**Migrating a spec from mocha to vitest**
 
 Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/server-mocha-to-vitest/SKILL.md) first. It covers the runner contract and the conversions that pass while silently proving less than the mocha original. The migration is tracked in [cypress-io/cypress#34846](https://github.com/cypress-io/cypress/issues/34846).
 
@@ -50,7 +50,7 @@ Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/ser
 **Gotchas / Notes**
 
 - Do not build `.js` files manually during development; `@packages/ts` provides require-time transpilation.
-- To update test snapshots, prepend `SNAPSHOT_UPDATE=1` to any test command.
+- To update test snapshots, pass vitest's `-u` flag.
 - E2E/system tests have moved to `system-tests/`; only unit and integration tests live in `test/unit` and `test/integration`.
 - `better-sqlite3` requires native compilation; run `yarn workspace @packages/server rebuild-better-sqlite3` after an Electron version upgrade.
 - Several dependencies (e.g., `axios`, `devtools-protocol`, `geckodriver`) are nohoisted to avoid version conflicts.
