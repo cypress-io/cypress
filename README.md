@@ -67,8 +67,6 @@ Open Cypress from your project root:
 npx cypress open
 ```
 
-The Launchpad sets up your project's configuration and folders for you. Pick a testing type and a browser, and you're running your first test. Using another package manager? Run `yarn cypress open`, `pnpm cypress open`, or `bunx cypress open`.
-
 Coding with an AI agent? Leave Cypress open and let the agent drive it from another terminal with [`cypress tap`](https://docs.cypress.io/app/tooling/cypress-tap). It can run a spec, check its status, and read the failing test's Command Log, error, and DOM, so it can fix its own failures as it codes.
 
 ### Add Cypress to your coding agent
