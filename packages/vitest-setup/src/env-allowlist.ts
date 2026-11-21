@@ -1,6 +1,8 @@
 const KEPT_VARS = new Set([
   'PATH',
   'TMPDIR',
+  // git reads safe.directory and other user config from it
+  'HOME',
   // Windows names are case-insensitive, so they are matched uppercased
   'SYSTEMROOT',
   'TEMP',

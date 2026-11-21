@@ -18,6 +18,7 @@ describe('sanitizeEnv', () => {
     expect(env).toEqual({
       PATH: '/usr/local/bin:/usr/bin',
       TMPDIR: '/var/folders/k2/x7d1/T/',
+      HOME: '/home/jane-doe',
     })
   })
 
