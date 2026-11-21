@@ -57,7 +57,7 @@ const REQUIRE_RESOLVE_LITERAL = /\brequire\.resolve\(\s*(['"`])([^'"`]+)\1/g
 // `require.resolve` as a value, so aliases and `require.resolve.paths` are covered too, but not `x.require.resolve`
 const REQUIRE_RESOLVE = /(?<![\w$.])require\.resolve\b/g
 // a shebang and a directive prologue such as "use strict" must stay ahead of the header to keep their meaning
-// eslint-disable-next-line regexp/no-super-linear-backtracking -- the pattern is optional after `^`, so it never fails and never backtracks into earlier iterations; `yarn check-regex` rates it safe and its time stays flat to 50,000 characters
+// eslint-disable-next-line regexp/no-super-linear-backtracking -- the pattern is optional after `^`, so it never fails and never backtracks into earlier iterations, and `yarn check-regex` rates it safe
 const FILE_PROLOGUE = /^(#!.*\n)?(?:\s*(?:\/\/.*\n|\/\*[\s\S]*?\*\/)|\s*(['"])use strict\2\s*;?)*/
 
 // Every module keeps its original __filename/__dirname and require.resolve base, so code that reads
