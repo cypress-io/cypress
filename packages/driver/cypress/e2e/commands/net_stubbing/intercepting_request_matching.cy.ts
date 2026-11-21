@@ -56,7 +56,7 @@ describe('network stubbing', { retries: 15 }, function () {
         .wait('@foo')
       })
 
-      // @see https://github.com/cypress-io/cypress/issues/34973
+      // https://github.com/cypress-io/cypress/issues/34973
       context('matches every request with a stateful regexp matcher', function () {
         const fetchUsers = () => {
           return Promise.mapSeries([1042, 1043, 1044, 1045], (id) => {
