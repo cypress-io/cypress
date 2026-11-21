@@ -281,6 +281,54 @@ const _normalizeHostResolverRules = function (args: string[]): string[] {
   return rest.concat(`${HOST_RESOLVER_RULES}${values.reverse().join(',')}`)
 }
 
+const BLINK_SETTINGS = '--blink-settings='
+
+// Reports a desktop mouse to `(pointer)` and `(hover)` media queries:
+// `(pointer: fine)`, `(hover: hover)`, and the `any-` variants. Headless Chrome
+// on Linux has no input devices, so it otherwise matches `(pointer: none)` and
+// `(hover: none)` where the same browser headed matches a mouse, and the AUT
+// renders its touch layout only in CI. 4 is Blink's fine pointer, 2 its hover.
+// https://github.com/cypress-io/cypress/issues/34981
+const HEADLESS_BLINK_SETTINGS = `${BLINK_SETTINGS}primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2`
+
+/**
+ * Merge multiple `--blink-settings` arguments into one.
+ *
+ * `--blink-settings=a=1` and `--blink-settings=a=2,b=3` become
+ * `--blink-settings=a=2,b=3`.
+ *
+ * Chromium only honors the last occurrence of the switch, so a user-supplied
+ * argument would otherwise drop every key in Cypress's headless default, or
+ * lose its own keys to it. Cypress's default is merged first wherever it sits,
+ * so a key the user sets wins.
+ */
+const _normalizeBlinkSettings = function (args: string[]): string[] {
+  const settingArgs = args.filter((arg) => arg.startsWith(BLINK_SETTINGS))
+
+  if (settingArgs.length <= 1) {
+    return args
+  }
+
+  const ordered = _.sortBy(settingArgs, (arg) => (arg === HEADLESS_BLINK_SETTINGS ? 0 : 1))
+  const settings = new Map<string, string>()
+
+  for (const arg of ordered) {
+    for (const setting of arg.slice(BLINK_SETTINGS.length).split(',')) {
+      if (setting) {
+        settings.set(setting.split('=')[0], setting)
+      }
+    }
+  }
+
+  const rest = args.filter((arg) => !arg.startsWith(BLINK_SETTINGS))
+
+  if (!settings.size) {
+    return rest
+  }
+
+  return rest.concat(`${BLINK_SETTINGS}${[...settings.values()].join(',')}`)
+}
+
 const PERSISTED_SERVICE_WORKERS_SNAPSHOT_TIMEOUT_MS = 5000
 
 /**
@@ -437,6 +485,8 @@ export = {
 
   _normalizeDisableFeatures,
 
+  _normalizeBlinkSettings,
+
   _removeRootExtension,
 
   _recordVideo,
@@ -573,6 +623,8 @@ export = {
       // set default headless DPR to 1
       // https://github.com/cypress-io/cypress/issues/17375
       args.push('--force-device-scale-factor=1')
+
+      args.push(HEADLESS_BLINK_SETTINGS)
     }
 
     // force ipv4
@@ -891,6 +943,7 @@ export = {
 
     args = _normalizeHostResolverRules(args)
     args = _normalizeDisableFeatures(args)
+    args = _normalizeBlinkSettings(args)
 
     // this overrides any previous user-data-dir args
     // by being the last one

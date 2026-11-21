@@ -93,4 +93,14 @@ describe('e2e headless', function () {
     project: 'screen-size',
     spec: 'device_pixel_ratio.cy.js',
   })
+
+  // https://github.com/cypress-io/cypress/issues/34981
+  ;[false, true].forEach((headed) => {
+    systemTests.it(`reports a desktop mouse to pointer and hover media queries when ${headed ? 'headed' : 'headless'}`, {
+      headed,
+      project: 'screen-size',
+      spec: 'pointer_and_hover.cy.ts',
+      browser: ['chrome', 'electron'],
+    })
+  })
 })

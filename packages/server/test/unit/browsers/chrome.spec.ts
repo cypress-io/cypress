@@ -340,6 +340,46 @@ describe('lib/browsers/chrome', () => {
       ]))
     })
 
+    // https://github.com/cypress-io/cypress/issues/34981
+    it('reports a fine pointer that can hover in headless mode', async () => {
+      await chrome.open({ isHeadless: true, majorVersion: 112 } as any, 'http://', openOpts as any, automation)
+
+      const args: string[] = launchSpy.mock.calls[0][3]
+
+      expect(args.filter((arg) => arg.startsWith('--blink-settings='))).toStrictEqual([
+        '--blink-settings=primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2',
+      ])
+    })
+
+    it('leaves pointer and hover detection to the browser when headed', async () => {
+      await chrome.open({ isHeadless: false, majorVersion: 112 } as any, 'http://', openOpts as any, automation)
+
+      const args: string[] = launchSpy.mock.calls[0][3]
+
+      expect(args.find((arg) => arg.startsWith('--blink-settings='))).toBeUndefined()
+    })
+
+    it('merges a --blink-settings arg added in before:browser:launch with its own, letting the user\'s keys win', async () => {
+      vi.spyOn(plugins, 'has').mockReturnValue(true)
+      execute.mockImplementation((event, browser, launchOptions) => {
+        if (event !== 'before:browser:launch') {
+          return Promise.resolve(null)
+        }
+
+        launchOptions.args.push('--blink-settings=primaryPointerType=2,imagesEnabled=false')
+
+        return Promise.resolve(launchOptions)
+      })
+
+      await chrome.open({ isHeadless: true, majorVersion: 112 } as any, 'http://', openOpts as any, automation)
+
+      const args: string[] = launchSpy.mock.calls[0][3]
+
+      expect(args.filter((arg) => arg.startsWith('--blink-settings='))).toStrictEqual([
+        '--blink-settings=primaryPointerType=2,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2,imagesEnabled=false',
+      ])
+    })
+
     it('does not load extension in headless mode', async () => {
       writeExtension.mockRestore()
 
@@ -1787,6 +1827,48 @@ describe('lib/browsers/chrome', () => {
       ]
 
       expect(chrome._normalizeDisableFeatures(args)).toStrictEqual(['--foo'])
+    })
+  })
+
+  describe('#_normalizeBlinkSettings', () => {
+    const cypressDefault = '--blink-settings=primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2'
+
+    it('returns args unchanged when a single blink settings arg is present', () => {
+      const args = ['--foo', '--blink-settings=primaryPointerType=2']
+
+      expect(chrome._normalizeBlinkSettings(args)).toStrictEqual(args)
+    })
+
+    it('lets a later arg override keys from an earlier one and keeps the rest', () => {
+      const args = [
+        '--blink-settings=imagesEnabled=false,primaryHoverType=2',
+        '--foo',
+        '--blink-settings=primaryHoverType=1',
+      ]
+
+      expect(chrome._normalizeBlinkSettings(args)).toStrictEqual([
+        '--foo',
+        '--blink-settings=imagesEnabled=false,primaryHoverType=1',
+      ])
+    })
+
+    it('lets user keys win over the Cypress default even when the user arg comes first', () => {
+      const args = [
+        '--blink-settings=availablePointerTypes=6',
+        cypressDefault,
+      ]
+
+      expect(chrome._normalizeBlinkSettings(args)).toStrictEqual([
+        '--blink-settings=primaryPointerType=4,availablePointerTypes=6,primaryHoverType=2,availableHoverTypes=2',
+      ])
+    })
+
+    it('does not let a trailing empty arg clobber the merged settings', () => {
+      expect(chrome._normalizeBlinkSettings([cypressDefault, '--blink-settings='])).toStrictEqual([cypressDefault])
+    })
+
+    it('drops the switch entirely when every value is empty', () => {
+      expect(chrome._normalizeBlinkSettings(['--foo', '--blink-settings=', '--blink-settings='])).toStrictEqual(['--foo'])
     })
   })
 
