@@ -42,6 +42,7 @@
 ## Working Constraints
 
 - Worktrees must use a full `yarn` install in the worktree. Do not symlink `node_modules` or packages back to another checkout.
+- Never run `git config user.name` or `git config user.email` in this repo or any of its worktrees. A linked worktree shares the main checkout's `.git/config`, so an identity set there for throwaway test commits authors every real commit too, and the CLA check rejects them. For a scratch commit, pass the identity to that one command (`git -c user.name=… -c user.email=… commit`), or set it inside a separate repo created with `git init`. Before pushing, check that `git log --format='%an <%ae>' origin/develop..HEAD` shows only the expected author.
 - Packaged-binary integration tests (`system-tests/test-binary`) need Docker and a built binary, so they do not run in the sandbox. When they are needed, provide the exact commands and ask the user to run them.
 - System tests under `system-tests/test` do run in cloud containers once the monorepo is built. Run them yourself rather than handing them off; see [Running system tests](./AGENTS.md#running-system-tests).
 - Keep follow-up work from the same task, such as review fixes and related instruction updates, on that task's branch. Create a separate branch only when the user asks for one.
