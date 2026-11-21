@@ -4,6 +4,7 @@ import { createRequire } from 'module'
 import debug from 'debug'
 import os from 'os'
 import path from 'path'
+import { format } from 'util'
 import fsExtra from 'fs-extra'
 import mockfs from 'mock-fs'
 import FirefoxProfile from 'firefox-profile'
@@ -443,6 +444,37 @@ describe('lib/browsers/firefox', () => {
         await firefox.open(browser as any, 'http://', options as any, automation as any)
 
         expectCalledWith(vi.mocked(webdriver.newSession), (getExpectedCapabilities({ isDebugEnabled: true })))
+      })
+
+      it('writes the capabilities and the names of the browser env vars to the debug log, but no env var values', async () => {
+        const recordKey = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d'
+        const apiToken = 'tok_7Hq2LmR9vXc4NpZ8sWd3'
+        const lines: string[] = []
+        const { log } = debug
+
+        browser.family = 'firefox'
+        browser.majorVersion = '135'
+        vi.stubEnv('CYPRESS_RECORD_KEY', recordKey)
+        vi.spyOn(utils, 'executeBeforeBrowserLaunch').mockImplementation(async (_browser, launchOptions) => {
+          return { ...launchOptions, env: { MY_API_TOKEN: apiToken } }
+        })
+
+        debug.enable('cypress:server:browsers:firefox,cypress-verbose:server:browsers:firefox')
+        debug.log = (...args: unknown[]) => lines.push(format(...args))
+
+        try {
+          await firefox.open(browser as any, 'http://', options as any, automation as any)
+        } finally {
+          debug.log = log
+          vi.unstubAllEnvs()
+        }
+
+        const output = lines.join('\n')
+
+        expect(output).toContain('creating session with capabilities')
+        expect(output).toContain('MY_API_TOKEN')
+        expect(output).not.toContain(recordKey)
+        expect(output).not.toContain(apiToken)
       })
     })
 

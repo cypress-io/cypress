@@ -39,6 +39,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@types/which": "3.0.4",
     "eslint": "^10.14.0",
     "jiti": "^2.4.2",

@@ -64,6 +64,7 @@
   "devDependencies": {
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@packages/eslint-config": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@types/mocha": "^8.0.2",
     "@types/webpack": "^5.28.1",
     "eslint": "^10.14.0",

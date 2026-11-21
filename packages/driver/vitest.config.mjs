@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
+    globalSetup: ['@packages/vitest-setup/sanitize-env'],
     include: ['test/unit/**/*.spec.ts'],
     environment: 'jsdom',
     exclude: ['**/__fixtures__/**/*'],

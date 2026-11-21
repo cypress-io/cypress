@@ -56,6 +56,7 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/eslint-config** — Monorepo-wide ESLint flat-config with rules for TypeScript, Vue, React, Cypress tests, and imports.
 - **@packages/resolve-dist** — Centralizes path resolution for compiled/static assets referenced from server-side code.
 - **@packages/root** — Bundles the monorepo root `package.json` as an installable package so any package can reference root metadata without absolute paths.
+- **@packages/vitest-setup** — Global setup every vitest config runs; strips the inherited environment to an allowlist before tests start.
 - **@packages/runner** — (see App & Frontend above)
 
 ## Workspace Commands
