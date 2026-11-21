@@ -112,10 +112,8 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
 
     interface TrackedSocket {
       socket: WebSocket
-      // subscription id => operation name, from the `subscribe` messages sent
-      operations: Map<string, string>
-      // names of the operations the server has sent a value for
-      answered: Set<string>
+      operationNameBySubscriptionId: Map<string, string>
+      answeredOperationNames: Set<string>
     }
 
     const graphqlSockets: TrackedSocket[] = []
@@ -136,7 +134,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
               return
             }
 
-            const tracked: TrackedSocket = { socket: this, operations: new Map(), answered: new Set() }
+            const tracked: TrackedSocket = { socket: this, operationNameBySubscriptionId: new Map(), answeredOperationNames: new Set() }
 
             graphqlSockets.push(tracked)
 
@@ -147,7 +145,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
               const operationName = payload?.query?.match(/subscription (\w+)/)?.[1]
 
               if (id && type === 'subscribe' && operationName) {
-                tracked.operations.set(id, operationName)
+                tracked.operationNameBySubscriptionId.set(id, operationName)
               }
 
               send(data)
@@ -155,10 +153,10 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
 
             this.addEventListener('message', (event) => {
               const { id, type } = readMessage(event.data)
-              const operationName = id && tracked.operations.get(id)
+              const operationName = id && tracked.operationNameBySubscriptionId.get(id)
 
               if (operationName && (type === 'next' || type === 'error')) {
-                tracked.answered.add(operationName)
+                tracked.answeredOperationNames.add(operationName)
               }
             })
           }
@@ -183,7 +181,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
 
       return openSockets
     }).then((closedSockets) => {
-      const answeredBeforeDrop = new Set(closedSockets.flatMap(({ answered }) => [...answered]))
+      const answeredBeforeDrop = new Set(closedSockets.flatMap(({ answeredOperationNames }) => [...answeredOperationNames]))
 
       expect(answeredBeforeDrop.size).to.be.greaterThan(0)
 
@@ -192,7 +190,7 @@ describe('Cypress In Cypress - run mode', { viewportWidth: 1200 }, () => {
       cy.wrap(graphqlSockets, { timeout: 10000 }).should((sockets) => {
         const reconnected = sockets.filter((tracked) => {
           return !closedSockets.includes(tracked) &&
-            [...answeredBeforeDrop].every((operationName) => tracked.answered.has(operationName))
+            [...answeredBeforeDrop].every((operationName) => tracked.answeredOperationNames.has(operationName))
         })
 
         expect(reconnected).to.have.length.greaterThan(0)
