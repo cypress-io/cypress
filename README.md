@@ -23,10 +23,10 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/v/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&label=npm&color=00814D" alt="npm version"/></a>
-  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/dm/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&color=00814D" alt="npm downloads"/></a>
-  <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=for-the-badge&labelColor=1B1E2E&logo=github&color=00814D" alt="GitHub stars"/></a>
-  <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/Discord-join%20chat-00814D?style=for-the-badge&labelColor=1B1E2E&logo=discord&logoColor=white" alt="Discord chat"/></a>
+  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/v/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&label=npm&color=CB3837" alt="npm version"/></a>
+  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/dm/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&color=CB3837" alt="npm downloads"/></a>
+  <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=for-the-badge&labelColor=1B1E2E&logo=github&color=181717" alt="GitHub stars"/></a>
+  <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/Discord-join%20chat-5865F2?style=for-the-badge&labelColor=1B1E2E&logo=discord&logoColor=white" alt="Discord chat"/></a>
   <a href="https://skills.sh/cypress-io/ai-toolkit"><img src="https://skills.sh/b/cypress-io/ai-toolkit?style=for-the-badge" alt="skills.sh"/></a>
 </p>
 
