@@ -27,7 +27,7 @@
   <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/dm/cypress?style=flat&logo=npm&color=CB3837" alt="npm downloads"/></a>
   <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=flat&logo=github&color=181717" alt="GitHub stars"/></a>
   <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/Discord-join%20chat-5865F2?style=flat&logo=discord&logoColor=white" alt="Discord chat"/></a>
-  <a href="https://skills.sh/cypress-io/ai-toolkit"><img src="https://img.shields.io/badge/skills.sh-official%20Cypress%20skills-69D3A7?style=flat&logo=cypress&logoColor=white" alt="Official Cypress skills on skills.sh"/></a>
+  <a href="https://skills.sh/cypress-io/ai-toolkit"><img src="https://skills.sh/b/cypress-io/ai-toolkit" alt="skills.sh"/></a>
   <a href="https://github.com/cypress-io/cypress/blob/develop/LICENSE"><img src="https://img.shields.io/badge/license-MIT-04C38E?style=flat" alt="MIT license"/></a>
 </p>
 
