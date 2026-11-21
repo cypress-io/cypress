@@ -1321,6 +1321,22 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/34303
+    it('finds the same element with a global or sticky regexp as without the flag', () => {
+      $(`
+        <div id="greetings">
+          <div id="greeting-jane">Hello Jane Doe</div>
+          <div id="greeting-john">Hello John Smith</div>
+          <div id="greeting-maria">Hello Maria Garcia</div>
+        </div>
+      `).appendTo(cy.$$('body'))
+
+      cy.contains('#greetings div', /Hello/).should('have.id', 'greeting-jane')
+      cy.contains('#greetings div', /Hello/g).should('have.id', 'greeting-jane')
+      cy.contains('#greetings div', /Hello/y).should('have.id', 'greeting-jane')
+      cy.contains('#greetings div', /hello/g, { matchCase: false }).should('have.id', 'greeting-jane')
+    })
+
     it('returns elements found first when multiple siblings found', () => {
       cy.contains('li', 'asdf').then(($li) => {
         expect($li).to.have.text('asdf 1')
