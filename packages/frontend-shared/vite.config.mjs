@@ -25,7 +25,7 @@ const alias = {
   '@cy/gql-components': path.resolve(__dirname, './src/gql-components'),
 }
 
-const vueJsxFile = /\.vue\.tsx$/
+const vueJsxFile = /\.vue(?:\.(?:cy|spec))?\.tsx$/
 
 const makePlugins = (plugins) => {
   return ([
