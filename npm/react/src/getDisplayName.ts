@@ -2,6 +2,33 @@ import type { ReactNode } from 'react'
 
 type JSX = { displayName?: unknown, name?: string }
 
+const MODULE_SUFFIX_START = ' [from '
+
+const LINE_TERMINATOR = /[\n\r\u2028\u2029]/
+
+/**
+ * Splits `Image [from Image.react]` into `Image` and `Image.react`, splitting
+ * at the last ` [from ` like a greedy `/^(.*) \[from (.*)\]$/` would. The
+ * regex is quadratic on names with many ` [from ` and no closing `]`, and its
+ * `.` refuses line terminators, so a name containing one never splits.
+ */
+export function splitModuleSuffix (displayName: string): { componentName: string, moduleName: string } | null {
+  if (!displayName.endsWith(']') || LINE_TERMINATOR.test(displayName)) {
+    return null
+  }
+
+  const start = displayName.lastIndexOf(MODULE_SUFFIX_START)
+
+  if (start === -1) {
+    return null
+  }
+
+  return {
+    componentName: displayName.slice(0, start),
+    moduleName: displayName.slice(start + MODULE_SUFFIX_START.length, -1),
+  }
+}
+
 /**
  * Gets the display name of the component when possible.
  * @param type {JSX} The type object returned from creating the react element.
@@ -33,11 +60,10 @@ export default function getDisplayName (
 
   // Facebook-specific hack to turn "Image [from Image.react]" into just "Image".
   // We need displayName with module name for error reports but it clutters the DevTools.
-  const match = displayName.match(/^(.*) \[from (.*)\]$/)
+  const match = splitModuleSuffix(displayName)
 
   if (match) {
-    const componentName = match[1]
-    const moduleName = match[2]
+    const { componentName, moduleName } = match
 
     if (componentName && moduleName) {
       if (

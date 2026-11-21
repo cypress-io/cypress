@@ -9,6 +9,7 @@ import webpack from 'webpack'
 import utils from './lib/utils'
 import { getResolvedTypescriptVersion } from './lib/get-typescript'
 import { overrideSourceMaps } from './lib/typescript-overrides'
+import { cleanseError } from './lib/cleanse-error'
 
 const getTsLoaderIfExists = (rules) => {
   let tsLoaderRule
@@ -534,12 +535,6 @@ preprocessor.__reset = () => {
 // @ts-expect-error - `__bundles` is deliberately left off `WebpackPreprocessor`
 preprocessor.__bundles = () => {
   return bundles
-}
-
-function cleanseError (err: string | webpack.StatsError) {
-  const msg = typeof err === 'string' ? err : err.message
-
-  return msg.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
 // NOTE: needs to be changed to support ESM when the time comes, but will be considered a breaking change.
