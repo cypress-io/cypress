@@ -18,12 +18,6 @@
 </p>
 
 <p align="center">
-  <a href="https://on.cypress.io">Documentation</a> |
-  <a href="https://on.cypress.io/changelog">Changelog</a> |
-  <a href="https://www.cypress.io/roadmap">Roadmap</a>
-</p>
-
-<p align="center">
   <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/v/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&label=npm&color=CB3837" alt="npm version"/></a>
   <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/dm/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&color=CB3837" alt="npm downloads"/></a>
   <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=for-the-badge&labelColor=1B1E2E&logo=github&color=181717" alt="GitHub stars"/></a>
@@ -83,12 +77,14 @@ Then connect it to Cypress Cloud with [Cloud MCP](https://docs.cypress.io/cloud/
 
 Extend Cypress with plugins built by the community and the Cypress team, covering everything from visual testing and accessibility to authentication and reporting. Browse the full list in the [plugins directory](https://docs.cypress.io/app/plugins/plugins-list).
 
-## Community & support
+## Community & resources
 
 - **[Discord](https://on.cypress.io/discord)**: chat with other Cypress users.
 - **[GitHub Discussions](https://github.com/cypress-io/cypress/discussions)**: ask questions and share ideas.
 - **[GitHub Issues](https://github.com/cypress-io/cypress/issues)**: report bugs and request features.
 - **[Documentation](https://on.cypress.io)**: guides, API reference, and examples.
+- **[Changelog](https://on.cypress.io/changelog)**: see what's new in each release.
+- **[Roadmap](https://www.cypress.io/roadmap)**: see what we're working on next.
 
 ## Contributing
 
