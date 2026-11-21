@@ -1129,10 +1129,15 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
-      - install-browsers:
-          install-chrome: true
-          install-chrome-for-testing: true
-          install-firefox: true
+      # WebKit runs only launch the WebKit from playwright-webkit (tap_open_spec, which opens Chrome itself, is skipped below)
+      - unless:
+          condition:
+            equal: [ webkit, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-chrome: true
+                install-chrome-for-testing: true
+                install-firefox: true
       - restore_cache:
           name: Restore Bun install cache
           keys:
@@ -1154,6 +1159,11 @@ commands:
               command -v bun
               bun --version
               exit 0
+            fi
+
+            # Bun's installer needs unzip, which the image only gets from install-browsers on non-WebKit jobs
+            if ! command -v unzip >/dev/null 2>&1; then
+              apt-get update && apt-get install -y unzip
             fi
 
             curl -fsSL https://bun.sh/install | bash -s "${BUN_RELEASE}"
@@ -1184,6 +1194,11 @@ commands:
               for file in $ALL_SPECS; do
                 # filter out non_root tests, they have their own stage
                 if [[ "$file" == *"non_root"* ]]; then
+                  echo "Skipping $file"
+                  continue
+                fi
+                # tap_open_spec always opens Chrome, which the WebKit job does not install
+                if [[ "<< parameters.browser >>" == "webkit" && "$file" == *"tap_open_spec"* ]]; then
                   echo "Skipping $file"
                   continue
                 fi
