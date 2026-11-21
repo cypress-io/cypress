@@ -12,7 +12,9 @@ export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<a
 
           if (value) {
             return _.keys(value).map((key) => {
-              return `${field}.${key}`
+              // array path: keys like `filter[status]` or `a.b` must pass through
+              // literally, not be re-parsed as lodash dotted-path syntax (#34974)
+              return [field, key]
             })
           }
 
