@@ -71,7 +71,7 @@ npx cypress open
 
 ### Add Cypress to your coding agent
 
-Give your coding agent the [official Cypress skills](https://skills.sh/cypress-io/ai-toolkit) so it writes, runs, and debugs tests the Cypress way. They include `cypress-tap`, which teaches your agent to drive `cypress tap` correctly.
+Give your coding agent the [official Cypress skills](https://skills.sh/cypress-io/ai-toolkit) so it writes, runs, and debugs tests the Cypress way.
 
 ```bash
 npx skills add cypress-io/ai-toolkit
