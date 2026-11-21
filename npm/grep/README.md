@@ -478,4 +478,4 @@ const { plugin: cypressGrepPlugin } = require('@cypress/grep/plugin')
 
 ## License
 
-MIT - See [LICENSE](LICENSE) file for details.
+MIT - See [LICENSE](../../LICENSE) file for details.

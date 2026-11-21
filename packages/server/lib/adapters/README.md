@@ -2,7 +2,7 @@
 
 **Adapters** for `@packages/network-interception` ports owned by the server composition root.
 
-See [`packages/network-interception/README.md`](../../network-interception/README.md).
+See [`packages/network-interception/README.md`](../../../network-interception/README.md).
 
 ---
 
