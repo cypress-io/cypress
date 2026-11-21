@@ -21,6 +21,8 @@ when:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
     - not:
         equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
+    - not:
+        equal: [ 'mschile/local-parallelization-62bd67', << pipeline.git.branch >> ]
 
 jobs:
   # Internal PRs — install and build run immediately, unless a bot pushed.
@@ -155,6 +157,16 @@ jobs:
   - driver-integration-tests-chrome:
       context: test-runner:cypress-record-key
       filters: &runDriverTests pipeline.parameters.run-driver-tests == true
+      requires:
+        - ready-to-test
+  - driver-integration-tests-chrome:
+      name: driver-integration-tests-chrome-workers
+      context: test-runner:cypress-record-key
+      filters: *runDriverTests
+      parallelism: 1
+      resource_class: large.gen2
+      workers: auto
+      record-group-suffix: -workers
       requires:
         - ready-to-test
   - h2-dual-stack-tests:
@@ -318,6 +330,10 @@ jobs:
         - ready-to-test
   - npm-react:
       filters: &runNpmReactTests pipeline.parameters.run-npm-react-tests == true
+      requires:
+        - ready-to-test
+  - npm-react-workers:
+      filters: *runNpmReactTests
       requires:
         - ready-to-test
   - npm-angular:

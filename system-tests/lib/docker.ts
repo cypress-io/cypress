@@ -55,6 +55,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
     cmd: string
     args: string[]
     env: Record<string, string>
+    memoryMb?: number
   }) {
     const containerCreateEnv = []
 
@@ -87,6 +88,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
         Tty: false, // so we can use stdout and stderr
         Env: containerCreateEnv,
         Privileged: true,
+        ...(opts.memoryMb ? { Memory: opts.memoryMb * 1024 * 1024 } : {}),
         Binds: [
           [path.join(__dirname, '..', '..'), '/cypress'],
           // map tmpDir to the same absolute path on the container to make it easier to reason about paths in tests
@@ -174,6 +176,7 @@ export const dockerSpawner: Spawner = async (cmd, args, env, options) => {
     cmd,
     args,
     env,
+    memoryMb: options.dockerMemoryMb,
   })
 
   return proc

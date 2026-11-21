@@ -19,12 +19,12 @@ describe('cypress run --workers', () => {
 
   systemTests.it('runs every spec once across workers and reports one combined result', {
     project: 'run-workers',
-    // in Chrome, the spawned workers run as plain Node rather than Electron
-    browser: ['electron', 'chrome'],
+    // in every browser but Electron, the spawned workers run as plain Node rather than Electron
+    browser: ['electron', 'chrome', 'firefox', 'webkit'],
     workers: 3,
     outputPath,
     expectedExitCode: 1,
-    async onRun (exec) {
+    async onRun (exec, browser) {
       const { stdout } = await exec()
 
       // the worker that ran failing.cy.ts exits with its failure count, which is not an early exit
@@ -57,10 +57,13 @@ describe('cypress run --workers', () => {
       expect(specWorkers.size).to.eq(6)
       expect(new Set(specWorkers.values()).size, 'specs ran on more than one worker').to.be.greaterThan(1)
 
-      const downloadWorker = specWorkers.get('cypress/e2e/download.cy.ts')
-      const downloadsFolder = downloadWorker === '0' ? 'downloads' : path.join('downloads', `worker-${downloadWorker}`)
+      // TODO(webkit): check the download once Cypress supports downloads in WebKit
+      if (browser !== 'webkit') {
+        const downloadWorker = specWorkers.get('cypress/e2e/download.cy.ts')
+        const downloadsFolder = downloadWorker === '0' ? 'downloads' : path.join('downloads', `worker-${downloadWorker}`)
 
-      expect(await fs.pathExistsAsync(path.join(projectPath, 'cypress', downloadsFolder, 'hello.txt'))).to.be.true
+        expect(await fs.pathExistsAsync(path.join(projectPath, 'cypress', downloadsFolder, 'hello.txt'))).to.be.true
+      }
 
       const webpackLoaded = new Map((await readLines('webpack')).map((line) => line.split(' ') as [string, string]))
 
@@ -70,7 +73,11 @@ describe('cypress run --workers', () => {
       const renderers = await readLines('renderers')
 
       expect(new Set(renderers.map((line) => line.split(' ')[0])).size, 'renderers came from more than one worker').to.be.greaterThan(1)
-      renderers.forEach((line) => expect(line, 'WebGL renders in software').to.include('SwiftShader'))
+
+      // only Chromium-based browsers render in software with --workers
+      if (browser === 'electron' || browser === 'chrome') {
+        renderers.forEach((line) => expect(line, 'WebGL renders in software').to.include('SwiftShader'))
+      }
     },
   })
 

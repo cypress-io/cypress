@@ -821,6 +821,10 @@ commands:
         description: optional Cypress Cloud group name suffix (after -force-http1 when set)
         type: string
         default: ''
+      workers:
+        description: optional --workers value; empty runs one Cypress process per container
+        type: string
+        default: ''
       guard:
         description: set to false to skip this job (not relevant to changed files)
         type: boolean
@@ -898,13 +902,19 @@ commands:
               SPEC_ARGS=(--spec "$SPEC")
             fi
 
+            WORKERS="<< parameters.workers >>"
+            WORKER_ARGS=()
+            if [[ -n "$WORKERS" ]]; then
+              WORKER_ARGS=(--workers "$WORKERS")
+            fi
+
             PARALLEL="--parallel --group ${GROUP}"
 
             if [[ -v MAIN_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$MAIN_RECORD_KEY \
               CYPRESS_INTERNAL_ENABLE_TELEMETRY="true" \
-              yarn $YARN_CMD --record $PARALLEL --browser <<parameters.browser>> --runner-ui "${SPEC_ARGS[@]}"
+              yarn $YARN_CMD --record $PARALLEL --browser <<parameters.browser>> --runner-ui "${SPEC_ARGS[@]}" "${WORKER_ARGS[@]}"
             else
               # external PR
               if [[ -n "$SPEC" ]]; then
@@ -917,7 +927,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn $YARN_CMD --browser <<parameters.browser>> --spec $TESTFILES --runner-ui
+              yarn $YARN_CMD --browser <<parameters.browser>> --spec $TESTFILES --runner-ui "${WORKER_ARGS[@]}"
             fi
           working_directory: packages/driver
       - sanitize-verify-and-store-mocha-results
@@ -1312,6 +1322,10 @@ commands:
         type: enum
         enum: [ "", "electron", "chrome", "firefox" ]
         default: ""
+      run-args:
+        description: Arguments added after --browser, such as "--workers auto"
+        type: string
+        default: ""
       command:
         description: Test command to run to start Cypress tests
         type: string
@@ -1382,7 +1396,7 @@ commands:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
-                        <<parameters.command>> --browser <<parameters.browser>> --record false
+                        <<parameters.command>> --browser <<parameters.browser>> --record false <<parameters.run-args>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -1399,7 +1413,7 @@ commands:
                   - run:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
-                      command: <<parameters.command>> --browser <<parameters.browser>> --record false
+                      command: <<parameters.command>> --browser <<parameters.browser>> --record false <<parameters.run-args>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -1425,6 +1439,10 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "npm run e2e"
+      run-args:
+        description: Arguments added after --browser, such as "--workers auto"
+        type: string
+        default: ""
       build-project:
         description: Should the project build script be executed
         type: boolean
@@ -1546,7 +1564,7 @@ commands:
                       name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
-                        <<parameters.command>> -- --browser <<parameters.browser>>
+                        <<parameters.command>> -- --browser <<parameters.browser>> <<parameters.run-args>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -1565,7 +1583,7 @@ commands:
                       working_directory: /tmp/<<parameters.repo>>
                       command: |
                         source ./ci-ensure-node.sh
-                        <<parameters.command>> -- --browser <<parameters.browser>>
+                        <<parameters.command>> -- --browser <<parameters.browser>> <<parameters.run-args>>
             - unless:
                 condition: <<parameters.browser>>
                 steps:
@@ -2604,8 +2622,15 @@ jobs:
       parallelism:
         type: integer
         default: 5
+      workers:
+        description: optional --workers value
+        type: string
+        default: ''
+      resource_class:
+        type: string
+        default: medium+.gen2
     parallelism: << parameters.parallelism >>
-    resource_class: medium+.gen2
+    resource_class: << parameters.resource_class >>
     steps:
       - run-driver-integration-tests:
           browser: chrome
@@ -2613,6 +2638,7 @@ jobs:
           force-http1: << parameters.force-http1 >>
           spec: << parameters.spec >>
           record-group-suffix: << parameters.record-group-suffix >>
+          workers: << parameters.workers >>
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-chrome-inject-document-domain:
@@ -2898,6 +2924,23 @@ jobs:
       - run:
           name: Run tests
           command: yarn test
+          working_directory: npm/react
+      - sanitize-verify-and-store-mocha-results:
+          testResultsPath: npm/react/test_results
+
+  npm-react-workers:
+    <<: *defaults
+    resource_class: large.gen2
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-react-tests >>
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: node scripts/lerna-build.js --scope=@cypress/react
+      - run:
+          name: Run tests with --workers
+          command: yarn cy:run --workers auto
           working_directory: npm/react
       - sanitize-verify-and-store-mocha-results:
           testResultsPath: npm/react/test_results
@@ -3377,6 +3420,37 @@ jobs:
           repo: cypress-example-kitchensink
           browser: chrome
           executor: << parameters.executor >>
+
+  # `--workers` against real projects with the built binary. In Chrome, the spawned
+  # workers run as plain Node, which only the built binary exercises.
+  test-binary-against-kitchensink-chrome-workers:
+    <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      resource_class:
+        type: string
+        default: large.gen2
+      workers:
+        type: string
+        default: auto
+    resource_class: << parameters.resource_class >>
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: chrome
+          run-args: --workers << parameters.workers >>
+          executor: << parameters.executor >>
+
+  # The app's specs seed one shared database, so workers running them at the same
+  # time can collide the way users' suites can
+  test-binary-against-cypress-realworld-app-workers:
+    <<: *defaults
+    resource_class: large.gen2
+    steps:
+      - test-binary-against-rwa:
+          repo: cypress-realworld-app
+          browser: chrome
+          run-args: --workers auto
 
   test-binary-against-cypress-realworld-app:
     <<: *defaults

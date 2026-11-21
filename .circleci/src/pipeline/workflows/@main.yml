@@ -13,6 +13,7 @@ linux-x64:
           value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
+      - equal: [ 'mschile/local-parallelization-62bd67', << pipeline.git.branch >> ]
   jobs:
     # Bots can't join the GitHub teams that restrict our contexts, and jobs after
     # an approval run as the approver. The install runs the bot's dependency changes.
@@ -132,6 +133,15 @@ linux-x64:
         name: driver-integration-tests-chrome-force-http1
         context: test-runner:cypress-record-key
         force-http1: true
+        requires:
+          - build
+    - driver-integration-tests-chrome:
+        name: driver-integration-tests-chrome-workers
+        context: test-runner:cypress-record-key
+        parallelism: 1
+        resource_class: large.gen2
+        workers: auto
+        record-group-suffix: -workers
         requires:
           - build
     - driver-integration-tests-chrome-inject-document-domain:
@@ -281,6 +291,9 @@ linux-x64:
     - npm-react:
         requires:
           - build
+    - npm-react-workers:
+        requires:
+          - build
     - npm-angular:
         requires:
           - build
@@ -427,6 +440,13 @@ linux-x64:
     - test-binary-against-cypress-realworld-app:
         context: test-runner:cypress-record-key
         filters: *mainBuildFilters
+        requires:
+          - create-build-artifacts
+    - test-binary-against-kitchensink-chrome-workers:
+        requires:
+          - create-build-artifacts
+    - test-binary-against-cypress-realworld-app-workers:
+        context: test-runner:cypress-record-key
         requires:
           - create-build-artifacts
     - test-binary-as-specific-user:
@@ -757,6 +777,13 @@ windows:
     - test-binary-against-kitchensink-chrome:
         name: windows-test-binary-against-kitchensink-chrome
         executor: windows
+        requires:
+          - windows-create-build-artifacts
+    - test-binary-against-kitchensink-chrome-workers:
+        name: windows-test-binary-against-kitchensink-chrome-workers
+        executor: windows
+        resource_class: windows.large
+        workers: '2'
         requires:
           - windows-create-build-artifacts
 

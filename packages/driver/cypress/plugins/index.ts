@@ -1,10 +1,15 @@
-import './server'
 import _ from 'lodash'
 import path from 'path'
 import fs from 'fs-extra'
 import Promise from 'bluebird'
 import wp from '@cypress/webpack-preprocessor'
 import { Jimp } from 'jimp'
+
+// with `cypress run --workers`, every worker loads this file, and only the coordinator (worker 0)
+// can listen on the test servers' fixed ports; the other workers use its servers
+if ((process.env.CYPRESS_WORKER_INDEX ?? '0') === '0') {
+  require('./server')
+}
 
 // required rather than imported: @packages/runner's check-ts is tslint only, so importing
 // its webpack config would make this package's tsc run the only gate on that file and on

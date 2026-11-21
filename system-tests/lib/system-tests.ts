@@ -88,6 +88,10 @@ type ExecOptions = {
    * If set, `docker exec` will be used to run this test. Requires Docker.
    */
   dockerImage?: string
+  /**
+   * Limits the Docker container's memory, in megabytes. Requires `dockerImage`.
+   */
+  dockerMemoryMb?: number
   /*
    * If set, test using the built Cypress CLI and binary. Expects a built CLI in `/cli/build` and packed binary in `/cypress.zip`.
    */
