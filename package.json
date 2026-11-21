@@ -63,6 +63,7 @@
     "check-binary-on-cdn": "node ./scripts/binary/check-binary-on-cdn.js",
     "check-lockfile": "yarn dedupe-lockfile --list --fail",
     "check-lockfile-drift": "./scripts/check-lockfile-drift.sh",
+    "check-markdown-links": "node scripts/check-markdown-links.mts",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "check-ts": "yarn lerna run check-ts",
