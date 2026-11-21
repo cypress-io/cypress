@@ -118,6 +118,34 @@ const _handleErrors = (errors) => {
   throw new Error('There was one or more errors when validating the changelog. See above for details.')
 }
 
+const REVERT = /revert/i
+const QUOTED_PR_REFERENCE = /\(#(\d+)\)"/g
+const LINE_TERMINATOR = /[\n\r\u2028\u2029]/
+
+/**
+ * `revert: "fix: something (#33512)" (#33611)` gives `'33512'`: the last
+ * `(#n)"` after the first `revert` on a line, matched case-insensitively.
+ * Working line by line reads each line once, where an unanchored regex
+ * rescans the rest of the line from every `revert` in it.
+ */
+function _getRevertedPRNumber (commitMessage) {
+  for (const line of commitMessage.split(LINE_TERMINATOR)) {
+    const start = line.search(REVERT)
+
+    if (start === -1) {
+      continue
+    }
+
+    const references = [...line.slice(start + 'revert'.length).matchAll(QUOTED_PR_REFERENCE)]
+
+    if (references.length) {
+      return references[references.length - 1][1]
+    }
+  }
+
+  return undefined
+}
+
 /**
  * Determines if the Cypress changelog has the correct next version and changelog entries given the provided
  * list of commits.
@@ -144,10 +172,10 @@ async function validateChangelog ({ changedFiles, nextVersion, commits, changelo
 
   commits.forEach(({ commitMessage }) => {
     // Revert messages look like: revert: "fix: something (#33512)" (#33611)
-    const match = commitMessage && commitMessage.match(/revert.*\(#(\d+)\)"/i)
+    const prNumber = commitMessage && _getRevertedPRNumber(commitMessage)
 
-    if (match) {
-      revertedPRNumbers.add(String(match[1]))
+    if (prNumber) {
+      revertedPRNumbers.add(prNumber)
     }
   })
 
@@ -217,4 +245,5 @@ module.exports = {
   validateChangelog,
   _validateEntry,
   _getResolvedMessage,
+  _getRevertedPRNumber,
 }

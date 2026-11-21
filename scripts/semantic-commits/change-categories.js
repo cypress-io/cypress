@@ -96,14 +96,22 @@ const releaseRules = Object.entries(changeCatagories).map(([type, attrs]) => {
 
 // https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-changelog-angular/parser-opts.js
 const parserOpts = {
-  headerPattern: /^(\w*)(?:\((.*)\))?: (.*)$/,
+  // `fix(server): handle foo` gives type `fix`, scope `server` and subject
+  // `handle foo`. The parser hands over the header line alone, so the subject
+  // runs to its end without a `$`, which would make a stray line terminator
+  // retry the scope at every earlier `): `.
+  headerPattern: /^(\w*)(?:\((.*)\))?: (.*)/,
   headerCorrespondence: [
     'type',
     'scope',
     'subject',
   ],
   noteKeywords: ['BREAKING CHANGE'],
-  revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
+  // `Revert "fix: foo (#123)"\n\nThis reverts commit abc123.` gives header
+  // `fix: foo (#123)` and hash `abc123`. After its first character the header
+  // takes each whitespace run whole, so the `\s*` that follows it isn't
+  // rescanned from every position inside a long run.
+  revertPattern: /^(?:Revert|revert:)\s"?([\s\S](?:\S|\s+(?!\s))*?)"?\s*This reverts commit (\w*)\./i,
   revertCorrespondence: ['header', 'hash'],
 }
 
