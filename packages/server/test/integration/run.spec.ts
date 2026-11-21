@@ -20,18 +20,8 @@ import { EarlyExitTerminator } from '../../lib/util/graceful_crash_handling'
 import { GracefulExit } from '../../lib/util/graceful-exit'
 import { cache } from '../../lib/cache'
 
-// Building the real schemas in this worker loads a second `graphql` realm, which
-// `graphql` rejects. A run with no browser never queries either schema.
-vi.mock('@packages/data-context/graphql/schema', () => {
-  return { graphqlSchema: {} }
-})
-
-vi.mock('@packages/data-context/graphql/stitching/remoteSchemaWrapped', () => {
-  return { remoteSchemaWrapped: {} }
-})
-
-// Its `ws` import has no `Server` under vite, and its handlers read a second data-context
-// instance that never sees `setCtx`. No test here drives GraphQL over HTTP or a socket.
+// Its handlers read a second data-context instance that never sees `setCtx`.
+// No test here drives GraphQL over HTTP or a socket.
 vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
   return {
     makeGraphQLServer: async () => 4444,

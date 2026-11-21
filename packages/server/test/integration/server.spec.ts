@@ -15,24 +15,6 @@ import { clearCtx, getCtx, makeDataContext, setCtx } from '../../lib/makeDataCon
 import { GracefulExit } from '../../lib/util/graceful-exit'
 import { configureLongStackTraces } from '../../lib/environment'
 
-// Vite resolves `graphql` in workspace TypeScript to its ESM build, while node
-// hands externalized packages the CJS build; `graphql` rejects types shared
-// across the two realms when the schema is built.
-vi.mock('graphql', async () => {
-  const { createRequire } = await import('module')
-
-  return createRequire(import.meta.url)('graphql')
-})
-
-// The same split gives data-context's `import { Server } from 'ws'` the ESM
-// wrapper of the root `ws`, which has no `Server` export.
-vi.mock('../../../../node_modules/ws/wrapper.mjs', async () => {
-  const { createRequire } = await import('module')
-  const rootWs = createRequire(import.meta.url)('../../../../node_modules/ws/index.js')
-
-  return { ...rootWs, default: rootWs }
-})
-
 // `_onResolveUrl` cancels the in-flight request through Bluebird cancellation.
 configureLongStackTraces(undefined)
 
@@ -861,13 +843,12 @@ describe('Server', () => {
         })
       })
 
-      it('gracefully handles http errors', () => {
-        return server._onResolveUrl('http://localhost:64646', {}, automationRequest)
-        .catch((err) => {
-          expect(err.message).toBe('connect ECONNREFUSED 127.0.0.1:64646')
-          expect(err.port).toBe(64646)
-
-          expect(err.code).toBe('ECONNREFUSED')
+      // `localhost` can resolve to both ::1 and 127.0.0.1, which turns the refusal into an AggregateError
+      it('gracefully handles http errors', async () => {
+        await expect(server._onResolveUrl('http://127.0.0.1:64646', {}, automationRequest)).rejects.toMatchObject({
+          message: 'connect ECONNREFUSED 127.0.0.1:64646',
+          port: 64646,
+          code: 'ECONNREFUSED',
         })
       })
 

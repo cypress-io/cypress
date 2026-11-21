@@ -8,6 +8,16 @@ const image1Path = path.join(__dirname, '..', '..', '..', 'icons', 'assets', 'cy
 const image2Path = path.join(__dirname, '..', '..', '..', 'icons', 'assets', 'cypress.iconset', 'icon_32x32.png')
 const image3Path = path.join(__dirname, '..', '..', '..', 'icons', 'assets', 'cypress.iconset', 'icon_128x128.png')
 
+const tmpDirs: string[] = []
+
+function makeTmpVideoPath () {
+  const dir = fse.mkdtempSync(path.join(os.tmpdir(), 'cy-video-'))
+
+  tmpDirs.push(dir)
+
+  return path.join(dir, 'video.mp4')
+}
+
 async function startSpiedVideoCapture (videoName, options = {}) {
   const props = await videoCapture.start({ videoName, ...options })
 
@@ -33,15 +43,17 @@ Output file #0 does not contain any stream\n`
 }
 
 describe('Video Capture', () => {
-  afterEach(() => {
+  afterEach(async () => {
     vi.restoreAllMocks()
+
+    await Promise.all(tmpDirs.splice(0).map((dir) => fse.remove(dir)))
   })
 
   describe('#start.writeVideoFrame', () => {
     let tmpFilename
 
     beforeEach(() => {
-      tmpFilename = path.join(fse.mkdtempSync(path.join(os.tmpdir(), 'cy-video-')), 'video.mp4')
+      tmpFilename = makeTmpVideoPath()
     })
 
     it('writes video frames to passthru stream', async () => {
@@ -99,7 +111,7 @@ describe('Video Capture', () => {
     let tmpFilename
 
     beforeEach(() => {
-      tmpFilename = path.join(fse.mkdtempSync(path.join(os.tmpdir(), 'cy-video-')), 'video.mp4')
+      tmpFilename = makeTmpVideoPath()
     })
 
     it('is the time the first frame was written, not when ffmpeg started', async () => {
@@ -138,7 +150,7 @@ describe('Video Capture', () => {
     let tmpFilename
 
     beforeEach(() => {
-      tmpFilename = path.join(fse.mkdtempSync(path.join(os.tmpdir(), 'cy-video-')), 'video.mp4')
+      tmpFilename = makeTmpVideoPath()
     })
 
     it('ends immediately if more than two frames written', async () => {

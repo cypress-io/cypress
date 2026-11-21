@@ -35,24 +35,6 @@ import { GracefulExit } from '../../lib/util/graceful-exit'
 import { createRoutes } from '../../lib/routes'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../lib/makeDataContext'
 
-// Building the real schemas in this worker loads a second `graphql` realm, which
-// `graphql` rejects. No test here issues a GraphQL request.
-vi.mock('@packages/data-context/graphql/makeGraphQLServer', () => {
-  return {
-    graphqlWS: vi.fn(),
-    tapGraphQLHTTP: vi.fn(),
-    handleRunnerGraphQLSocketRequest: vi.fn(),
-  }
-})
-
-vi.mock('@packages/data-context/graphql/schema', () => {
-  return { graphqlSchema: {} }
-})
-
-vi.mock('@packages/data-context/graphql', () => {
-  return { remoteSchemaWrapped: {} }
-})
-
 const zlib = Promise.promisifyAll(zlibModule)
 
 // `GracefulExit.resetForTesting` refuses to clear its singleton without this.
