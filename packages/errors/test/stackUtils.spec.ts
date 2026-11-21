@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseStackLine, splitStack, stackLineRegex } from '../src/stackUtils'
+import { getStackLineLocation, parseStackLine, splitStack, stackLineRegex } from '../src/stackUtils'
 
 describe('src/stackUtils', () => {
   describe('stackLineRegex', () => {
@@ -32,6 +32,31 @@ describe('src/stackUtils', () => {
 
       expect(stackLineRegex.test(line)).toBe(false)
       expect(performance.now() - start).toBeLessThan(1000)
+    })
+  })
+
+  describe('getStackLineLocation', () => {
+    const chromiumFrame = '    at Context.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:14:12)'
+    const firefoxFrame = 'Context.eval@http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts:14:12'
+
+    it.each([
+      ['Chromium frame', chromiumFrame, { line: 14, column: 12, index: chromiumFrame.lastIndexOf(':14:12') }],
+      ['Firefox frame', firefoxFrame, { line: 14, column: 12, index: firefoxFrame.lastIndexOf(':14:12') }],
+      ['frame without a location', '    at <unknown>', null],
+      ['native frame', '    at Array.forEach ([native code])', null],
+    ])('%s', (_name, input, expected) => {
+      expect(getStackLineLocation(input)).toEqual(expected)
+    })
+
+    it('reads the location after 50,000 digits', () => {
+      const digits = '0'.repeat(50_000)
+      const line = `    at eval (${digits})x:3:9)`
+
+      const start = performance.now()
+      const location = getStackLineLocation(line)
+
+      expect(performance.now() - start).toBeLessThan(200)
+      expect(location).toEqual({ line: 3, column: 9, index: line.length - 5 })
     })
   })
 

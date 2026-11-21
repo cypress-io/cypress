@@ -17,7 +17,7 @@ import $utils from './utils'
 import $sourceMapUtils from './source_map_utils'
 import { toPosix } from './util/to_posix'
 // Intentionally deep-importing from @packages/errors so as to not bundle the entire @packages/errors in the client unnecessarily
-import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack, stackLineRegex } from '@packages/errors/src/stackUtils'
+import { getStackLineLocation, getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack, stackLineRegex } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
@@ -585,42 +585,6 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   return normalizeStackIndentation(nonCypressStackLines)
 }
 
-const isAsciiDigitAt = (str: string, index: number) => {
-  const code = str.charCodeAt(index)
-
-  return code >= 48 && code <= 57
-}
-
-// Reads the `line:column` that ends a stack line, e.g. `at eval (spec.cy.ts:14:12)`
-// gives line 14 and column 12, with `start` and `end` bounding `14:12`. Chromium
-// wraps the location in parentheses and Firefox does not, so one trailing `)` is
-// allowed. Only the trailing `line:column` is read, so the length of the rest of
-// the line doesn't matter.
-const getTrailingLineAndColumn = (stackLine: string) => {
-  const end = stackLine.endsWith(')') ? stackLine.length - 1 : stackLine.length
-
-  let columnStart = end
-
-  while (columnStart > 0 && isAsciiDigitAt(stackLine, columnStart - 1)) columnStart--
-
-  const colonIndex = columnStart - 1
-
-  if (columnStart === end || stackLine[colonIndex] !== ':') return null
-
-  let start = colonIndex
-
-  while (start > 0 && isAsciiDigitAt(stackLine, start - 1)) start--
-
-  if (start === colonIndex) return null
-
-  return {
-    line: Number(stackLine.slice(start, colonIndex)),
-    column: Number(stackLine.slice(columnStart, end)),
-    start,
-    end,
-  }
-}
-
 const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, originUserInvocationStack: string) => {
   // The method here is:
   // 1. Grab the line/column from the first line of the origin user invocation stack
@@ -633,16 +597,17 @@ const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, origin
 
   if (userStackLines.length === 0 || originStackLines.length === 0) return userInvocationStack
 
-  const userLocation = getTrailingLineAndColumn(userStackLines[0])
+  const userLocation = getStackLineLocation(userStackLines[0])
 
   if (!userLocation) return userInvocationStack
 
   const originStackLine = originStackLines[0]
-  const originLocation = getTrailingLineAndColumn(originStackLine)
+  const originLocation = getStackLineLocation(originStackLine)
 
   if (!originLocation) return userInvocationStack
 
-  const newUserStackLine = `${originStackLine.slice(0, originLocation.start)}${originLocation.line + userLocation.line - 1}:${userLocation.column}${originStackLine.slice(originLocation.end)}`
+  const closingParen = originStackLine.endsWith(')') ? ')' : ''
+  const newUserStackLine = `${originStackLine.slice(0, originLocation.index)}:${originLocation.line + userLocation.line - 1}:${userLocation.column}${closingParen}`
 
   return userInvocationStack.replace(userStackLines[0], newUserStackLine)
 }

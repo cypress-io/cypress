@@ -37,6 +37,21 @@ const stackLineLocationRegex = /:(\d+):(\d+)\)?$/
 const lineTerminatorRegex = /[\n\r\u2028\u2029]/
 
 /**
+ * Reads the `:line:column` that ends a stack frame, with or without the
+ * closing `)` Chromium adds, e.g. `at eval (spec.cy.ts:14:12)` gives line 14,
+ * column 12 and the index of the `:` before 14.
+ */
+export const getStackLineLocation = (line: string): null | { line: number, column: number, index: number } => {
+  const location = stackLineLocationRegex.exec(line)
+
+  if (!location) {
+    return null
+  }
+
+  return { line: Number(location[1]), column: Number(location[2]), index: location.index }
+}
+
+/**
  * Captures & returns the absolute path, line, and column from a stack trace line.
  * The path is whatever sits between the last `(` and the trailing `:line:column`.
  */
@@ -47,7 +62,7 @@ export const parseStackLine = (line: string): null | { absolute: string, line: n
     return null
   }
 
-  const location = stackLineLocationRegex.exec(frame)
+  const location = getStackLineLocation(frame)
 
   if (!location) {
     return null
@@ -60,7 +75,7 @@ export const parseStackLine = (line: string): null | { absolute: string, line: n
     return null
   }
 
-  return { absolute, line: Number(location[1]), column: Number(location[2]) }
+  return { absolute, line: location.line, column: location.column }
 }
 
 /**
