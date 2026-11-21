@@ -313,12 +313,11 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         fail(err)
         // status codes here are all 2xx
       } else {
-        // Read only from the response that carries the binary: a redirect's
-        // Content-Length is the size of its own short text body.
-        // We have computed checksum and filesize during test runner binary build
-        // and have set it on the S3 object as user meta data, available via
-        // these custom headers "x-amz-meta-..."
-        // see https://github.com/cypress-io/cypress/pull/4092
+        // Read these only from the response that carries the binary, since a
+        // redirect's Content-Length is the length of its own short text body.
+        // The binary build stores the checksum and size on the S3 object as
+        // user metadata, which comes back as `x-amz-meta-*` headers.
+        // See https://github.com/cypress-io/cypress/pull/4092
         expectedSize = response.headers['x-amz-meta-size'] ||
           response.headers['content-length']
 
@@ -329,7 +328,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress, ca, version, redi
         }
 
         if (expectedSize) {
-          // convert from string (all Amazon custom headers are strings)
+          // header values are strings
           expectedSize = Number(expectedSize)
           debug('expected file size %d', expectedSize)
         }
