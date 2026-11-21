@@ -91,6 +91,15 @@ describe('network stubbing', { retries: 15 }, function () {
           .then(fetchUsers)
           .should('deep.eq', [true, true, true, true])
         })
+
+        it('waits on every request through an alias with no stubbed response', function () {
+          cy.intercept({ pathname: new RegExp(`^${usersRoute}/\\d+$`, 'g') }).as('getUser')
+          .then(fetchUsers)
+
+          cy.wait(['@getUser', '@getUser', '@getUser', '@getUser']).then((interceptions) => {
+            expect(interceptions.map(({ request }) => new URL(request.url).pathname)).to.deep.eq([1042, 1043, 1044, 1045].map((id) => `${usersRoute}/${id}`))
+          })
+        })
       })
 
       // @see https://github.com/cypress-io/cypress/issues/9379
