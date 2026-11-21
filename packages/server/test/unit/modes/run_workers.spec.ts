@@ -9,7 +9,6 @@ import {
   availableMemoryMb,
   BlockPrinter,
   bundleFromCoordinator,
-  DevServerSpecs,
   devServerSpecsToCoordinator,
   holdStdout,
   reportWorkerFinished,
@@ -422,37 +421,17 @@ describe('lib/modes/run-workers', () => {
     })
   })
 
-  describe('DevServerSpecs', () => {
-    const jit = { neededForJustInTimeCompile: true }
+  describe('compileDevServerSpecs', () => {
+    it('compiles every spec in the run once, whichever spec a worker asks for', async () => {
+      const updateSpecs = vi.fn()
+      const specs = [spec('a.cy.tsx'), spec('b.cy.tsx'), spec('c.cy.tsx')]
+      const coordinator = startCoordinator({ specs, workers: 1, downloadsFolder: '/downloads', bundle: vi.fn(), devServer: { port: 8080, updateSpecs }, write: () => {} })
 
-    it('compiles every worker\'s current spec, so one worker\'s next spec keeps the others', () => {
-      const update = vi.fn()
-      const specs = new DevServerSpecs(update)
+      await coordinator.compileDevServerSpecs()
+      await coordinator.compileDevServerSpecs()
 
-      specs.set(0, [spec('a.cy.tsx')], jit)
-      specs.set(2, [spec('b.cy.tsx')], jit)
-      specs.set(0, [spec('c.cy.tsx')], jit)
-
-      expect(update.mock.calls.map(([specs]) => specs.map((s) => s.relative))).toEqual([
-        ['a.cy.tsx'],
-        ['a.cy.tsx', 'b.cy.tsx'],
-        ['c.cy.tsx', 'b.cy.tsx'],
-      ])
-
-      expect(update).toHaveBeenLastCalledWith(expect.anything(), jit)
-    })
-
-    it('lists a spec two workers need once and drops the specs of a worker that exited', () => {
-      const update = vi.fn()
-      const specs = new DevServerSpecs(update)
-
-      specs.set(1, [spec('a.cy.tsx')], jit)
-      specs.set(2, [spec('a.cy.tsx')], jit)
-      specs.remove(1)
-      specs.set(0, [spec('b.cy.tsx')], jit)
-
-      expect(update.mock.calls[1][0].map((s) => s.relative)).toEqual(['a.cy.tsx'])
-      expect(update.mock.calls[2][0].map((s) => s.relative)).toEqual(['b.cy.tsx', 'a.cy.tsx'])
+      expect(updateSpecs).toHaveBeenCalledOnce()
+      expect(updateSpecs).toHaveBeenCalledWith(specs, { neededForJustInTimeCompile: true })
     })
   })
 
@@ -465,12 +444,12 @@ describe('lib/modes/run-workers', () => {
       channel = Object.assign(new EventEmitter(), { send: (message: any) => sent.push(message) > 0 })
     })
 
-    it('sends just-in-time compile requests and resolves when the coordinator has passed them on', async () => {
+    it('sends just-in-time compile requests and resolves when the coordinator\'s dev server has compiled', async () => {
       const updateSpecs = devServerSpecsToCoordinator(channel as any)
       let updated = false
       const request = updateSpecs([spec('a.cy.tsx')], { neededForJustInTimeCompile: true }).then(() => updated = true)
 
-      expect(sent).toEqual([{ type: 'devServerSpecs', id: 0, specs: [spec('a.cy.tsx')], options: { neededForJustInTimeCompile: true } }])
+      expect(sent).toEqual([{ type: 'devServerSpecs', id: 0 }])
 
       channel.emit('message', { type: 'bundled', id: 0, outputPath: '/bundles/a.js' })
       await Promise.resolve()

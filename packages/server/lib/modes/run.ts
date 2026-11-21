@@ -1282,7 +1282,7 @@ async function ready (options: ReadyOptions) {
 
   if (coordinator && testingType === 'component') {
     routeSpecUpdates((specs, options) => {
-      return options?.neededForJustInTimeCompile ? coordinator.updateDevServerSpecs(specs, options) : emitSpecsChanged(specs, options)
+      return options?.neededForJustInTimeCompile ? coordinator.compileDevServerSpecs() : emitSpecsChanged(specs, options)
     })
   }
 

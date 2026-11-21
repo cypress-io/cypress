@@ -34,7 +34,7 @@ type WorkerMessage =
   | { type: 'started', spec: string }
   | { type: 'specResult', results: RunResult }
   | { type: 'bundle', id: number, filePath: string }
-  | { type: 'devServerSpecs', id: number, specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions }
+  | { type: 'devServerSpecs', id: number }
   | { type: 'finished' }
 
 // the IPC channel's structured clone drops an Error's own properties, which the spec controller reads
@@ -407,38 +407,8 @@ export interface Coordinator {
     /** Resolves with every worker's runs, in spec order, once all workers have exited. */
     collectRuns: (ownRuns: RunResult[]) => Promise<RunResult[]>
   }
-  /** Sets the specs the coordinator's own runs need from the shared component testing dev server. */
-  updateDevServerSpecs: (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) => void | Promise<void>
-}
-
-/**
- * The specs the shared component testing dev server compiles: each worker's current spec, so that
- * compiling one worker's next spec doesn't drop the spec another worker is running.
- */
-export class DevServerSpecs {
-  private byWorker = new Map<number, SpecWithRelativeRoot[]>()
-
-  constructor (private update: (specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) => void | Promise<void>) {}
-
-  set (workerIndex: number, specs: SpecWithRelativeRoot[], options?: SpecsChangedOptions) {
-    this.byWorker.set(workerIndex, specs)
-
-    return this.update(this.all(), options)
-  }
-
-  remove (workerIndex: number) {
-    this.byWorker.delete(workerIndex)
-  }
-
-  private all () {
-    const byPath = new Map<string, SpecWithRelativeRoot>()
-
-    for (const index of [...this.byWorker.keys()].sort((a, b) => a - b)) {
-      for (const spec of this.byWorker.get(index)!) byPath.set(spec.absolute, spec)
-    }
-
-    return [...byPath.values()]
-  }
+  /** Resolves once the shared component testing dev server has compiled every spec in the run. */
+  compileDevServerSpecs: () => void | Promise<void>
 }
 
 /**
@@ -473,7 +443,13 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
   write?: (s: string) => void
 }): Coordinator {
   const queue = new SpecQueue(specs, durations)
-  const devServerSpecs = devServer ? new DevServerSpecs(devServer.updateSpecs) : undefined
+  // webpack names chunks after the specs it compiles, so rebuilding for each worker's next spec would rename chunks other workers' pages are still loading
+  let devServerCompile: Promise<void> | undefined
+  const compileDevServerSpecs = () => {
+    if (!devServer) return
+
+    return devServerCompile ??= Promise.resolve(devServer.updateSpecs(specs, { neededForJustInTimeCompile: true }))
+  }
   const spawnCount = Math.min(workers, specs.length) - 1
   const exits: Promise<void>[] = []
   const children: ChildProcess[] = []
@@ -551,7 +527,7 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
       } else if (message.type === 'finished') {
         finished = true
       } else if (message.type === 'devServerSpecs') {
-        const { id, specs, options } = message
+        const { id } = message
 
         const reply = (err?: Error) => {
           if (err) debug('could not update the dev server specs for worker %d: %o', index, err)
@@ -561,14 +537,13 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
           if (child.connected) child.send(updated)
         }
 
-        Promise.resolve(devServerSpecs?.set(index, specs, options)).then(() => reply(), reply)
+        Promise.resolve(compileDevServerSpecs()).then(() => reply(), reply)
       }
     })
 
     exits.push(new Promise((resolve) => {
       child.once('exit', (code, signal) => {
         output.flush()
-        devServerSpecs?.remove(index)
         debug('worker %d exited %o', index, { code, signal })
 
         const abandoned = queue.abandon(index, new Error(`The Cypress worker process running this spec exited unexpectedly (${signal ?? `code ${code}`}).`))
@@ -582,9 +557,7 @@ export function startCoordinator ({ specs, workers, downloadsFolder, durations, 
   }
 
   return {
-    updateDevServerSpecs (specs, options) {
-      return devServerSpecs?.set(0, specs, options)
-    },
+    compileDevServerSpecs,
     hooks (cloud = {}) {
       return {
         async beforeSpecRun () {
@@ -728,9 +701,8 @@ export function bundleFromCoordinator (channel: Pick<NodeJS.Process, 'send' | 'o
 }
 
 /**
- * Spec updates for a spawned worker's dev server, which is the coordinator's: just-in-time compile
- * requests go to the coordinator, and resolve once it has passed them on. A worker has no dev server
- * of its own for the full spec list to reach.
+ * Spec updates for a spawned worker's dev server, which is the coordinator's: a just-in-time compile
+ * request resolves once the coordinator's dev server has compiled every spec in the run.
  */
 export function devServerSpecsToCoordinator (channel: Pick<NodeJS.Process, 'send' | 'on'> = process) {
   if (typeof channel.send !== 'function') {
@@ -753,7 +725,7 @@ export function devServerSpecsToCoordinator (channel: Pick<NodeJS.Process, 'send
 
     return new Promise((resolve) => {
       const id = nextId++
-      const request: WorkerMessage = { type: 'devServerSpecs', id, specs, options }
+      const request: WorkerMessage = { type: 'devServerSpecs', id }
 
       pending.set(id, resolve)
       send(request)

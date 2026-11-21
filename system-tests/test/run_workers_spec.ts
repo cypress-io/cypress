@@ -135,6 +135,33 @@ describe('cypress run --component --workers', () => {
       },
     })
   }
+
+  // each spec imports a different set of shared modules, so webpack names the chunks holding them after the specs it compiles
+  systemTests.it('keeps the shared webpack dev server\'s chunks while workers load specs', {
+    project: 'run-workers-ct-webpack-chunks',
+    testingType: 'component',
+    browser: ['electron', 'chrome'],
+    workers: 3,
+    snapshot: false,
+    expectedExitCode: 0,
+    async onRun (exec) {
+      const projectPath = Fixtures.projectPath('run-workers-ct-webpack-chunks')
+      const outputPath = path.join(projectPath, 'output.json')
+      const { stdout, stderr } = await exec({ outputPath })
+
+      expect(stdout + stderr).not.to.include('exited early')
+
+      const results = await fs.readJsonAsync(outputPath)
+
+      expect(results.runs).to.have.length(12)
+      expect(results.totalPassed).to.eq(12)
+
+      const builds = (await fs.readFileAsync(path.join(projectPath, 'chunks.jsonl'), 'utf8')).trim().split('\n')
+      const withSpecs = builds.filter((build) => build.includes('spec-'))
+
+      expect(new Set(withSpecs), 'chunk files of each build that compiled specs').to.have.length(1)
+    },
+  })
 })
 
 describe('cypress run --workers --record', () => {
