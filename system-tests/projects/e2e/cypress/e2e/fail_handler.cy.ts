@@ -7,6 +7,8 @@ describe('fail handlers', () => {
   })
 
   it('skips the commands after a failure a handler swallowed', () => {
+    // The handler would also swallow an error from the command after the
+    // failure, so rethrow that one to make the test fail if the command runs.
     cy.on('fail', (err) => {
       if (err.message === 'a command after the failure ran') {
         throw err
