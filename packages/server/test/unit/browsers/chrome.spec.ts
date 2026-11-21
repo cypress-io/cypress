@@ -340,7 +340,6 @@ describe('lib/browsers/chrome', () => {
       ]))
     })
 
-    // https://github.com/cypress-io/cypress/issues/34981
     it('reports a fine pointer that can hover in headless mode', async () => {
       await chrome.open({ isHeadless: true, majorVersion: 112 } as any, 'http://', openOpts as any, automation)
 

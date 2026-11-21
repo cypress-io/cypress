@@ -287,20 +287,20 @@ const BLINK_SETTINGS = '--blink-settings='
 // `(pointer: fine)`, `(hover: hover)`, and the `any-` variants. Headless Chrome
 // on Linux has no input devices, so it otherwise matches `(pointer: none)` and
 // `(hover: none)` where the same browser headed matches a mouse, and the AUT
-// renders its touch layout only in CI. 4 is Blink's fine pointer, 2 its hover.
+// renders its touch layout only in headless runs. 4 is Blink's fine pointer,
+// 2 its hover.
 // https://github.com/cypress-io/cypress/issues/34981
 const HEADLESS_BLINK_SETTINGS = `${BLINK_SETTINGS}primaryPointerType=4,availablePointerTypes=4,primaryHoverType=2,availableHoverTypes=2`
 
 /**
  * Merge multiple `--blink-settings` arguments into one.
  *
- * `--blink-settings=a=1` and `--blink-settings=a=2,b=3` become
- * `--blink-settings=a=2,b=3`.
+ * A user's `--blink-settings=primaryHoverType=1` placed before Cypress's
+ * headless default becomes `--blink-settings=primaryPointerType=4,availablePointerTypes=4,primaryHoverType=1,availableHoverTypes=2`.
  *
- * Chromium only honors the last occurrence of the switch, so a user-supplied
- * argument would otherwise drop every key in Cypress's headless default, or
- * lose its own keys to it. Cypress's default is merged first wherever it sits,
- * so a key the user sets wins.
+ * Chromium only honors the last occurrence of the switch, so without the merge
+ * whichever argument comes last discards every key in the other. Cypress's
+ * default is merged first wherever it sits, so a key the user sets wins.
  */
 const _normalizeBlinkSettings = function (args: string[]): string[] {
   const settingArgs = args.filter((arg) => arg.startsWith(BLINK_SETTINGS))
