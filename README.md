@@ -87,16 +87,14 @@ This project is licensed under the terms of the [MIT license](/LICENSE).
 
 ## Badges
 
-Configure a badge for your project's README to show your test status or test count in the [Cypress Cloud](https://www.cypress.io/cloud).
+Configure a badge for your project's README to show your test status in the [Cypress Cloud](https://www.cypress.io/cloud).
 
 [![cypress](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/ypt4pf/develop&style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://cloud.cypress.io/projects/ypt4pf/runs)
 
-[![cypress](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/count/ypt4pf/develop&style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://cloud.cypress.io/projects/ypt4pf/runs)
-
 Or let the world know your project is using Cypress with the badge below.
 
-[![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E?style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://www.cypress.io/)
+[![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-00814D?style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://www.cypress.io/)
 
 ```
-[![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E?style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://www.cypress.io/)
+[![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-00814D?style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://www.cypress.io/)
 ```
