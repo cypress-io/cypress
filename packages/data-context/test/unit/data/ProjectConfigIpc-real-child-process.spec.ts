@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeAll, beforeEach, afterEach, jest } from '@jest/globals'
+import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
 import { scaffoldCommonNodeModules } from '@tooling/system-tests/lib/dep-installer'
@@ -63,6 +64,17 @@ describe('ProjectConfigIpc', () => {
     })
 
     it('reports a SIGKILLed child once and rejects an in-flight node event', async () => {
+      // the handler never settles, so the event can only end with the child's exit
+      await fs.writeFile(path.join(projectRoot, 'cypress.config.js'), `module.exports = {
+  e2e: {
+    supportFile: false,
+    setupNodeEvents (on) {
+      on('after:spec', () => new Promise(() => {}))
+    },
+  },
+}
+`)
+
       const onError = jest.fn()
       const ipc = new ProjectConfigIpc(undefined, projectRoot, path.join(projectRoot, 'cypress.config.js'), 'cypress.config.js', onError, () => {}, () => {})
       const eventRegistrar = new EventRegistrar()
@@ -87,7 +99,7 @@ describe('ProjectConfigIpc', () => {
         const loadConfigReply = await ipc.loadConfig()
         const reply = await ipc.callSetupNodeEventsWithConfig('e2e', {} as any, [])
 
-        await manager.handleSetupTestingTypeReply(ipc, loadConfigReply, { ...reply, registrations: [{ event: 'after:spec', eventId: 'unknown' }] })
+        await manager.handleSetupTestingTypeReply(ipc, loadConfigReply, reply)
 
         const inFlight = eventRegistrar.executeNodeEvent('after:spec', [])
 
