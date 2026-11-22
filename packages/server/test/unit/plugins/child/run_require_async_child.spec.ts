@@ -65,5 +65,28 @@ describe('lib/plugins/child/run_require_async_child', () => {
 
       expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', err)
     })
+
+    // A watch-mode preprocessor that leaves `Promise.reject(formattedMessages)` unhandled
+    it('keeps the content of a non-Error rejection reason on process unhandledRejection', () => {
+      const messages = ['✘ [ERROR] Unexpected "}"\n\n    helper.js:3:0:\n      3 │ }\n        ╵ ^\n\n']
+
+      yieldTo('unhandledRejection', messages)
+
+      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', {
+        name: 'Error',
+        message: messages[0],
+        stack: `Error: ${messages[0]}`,
+      })
+    })
+
+    it('keeps the content of a thrown non-Error value on process uncaughtException', () => {
+      yieldTo('uncaughtException', 'Session expired for jane.doe@example.com')
+
+      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', {
+        name: 'Error',
+        message: 'Session expired for jane.doe@example.com',
+        stack: 'Error: Session expired for jane.doe@example.com',
+      })
+    })
   })
 })

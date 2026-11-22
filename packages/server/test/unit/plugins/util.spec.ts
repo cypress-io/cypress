@@ -180,6 +180,54 @@ describe('lib/plugins/util', () => {
     })
   })
 
+  describe('#serializeUnhandledError', () => {
+    // Captured from esbuild.formatMessages(errors, { kind: 'error', color: false }), which
+    // @bahmutov/cypress-esbuild-preprocessor rejects with after a failed watch rebuild
+    const esbuildSyntaxError = '✘ [ERROR] Unexpected "}"\n\n    helper.js:3:0:\n      3 │ }\n        ╵ ^\n\n'
+    const esbuildMissingImport = '✘ [ERROR] Could not resolve "./helper"\n\n    spec.cy.js:1:20:\n      1 │ import { add } from \'./helper\'\n        ╵                     ~~~~~~~~~~\n\n'
+
+    it('serializes an Error like serializeError does', () => {
+      const err = new TypeError('Cannot read properties of undefined (reading \'map\')')
+
+      expect(util.serializeUnhandledError(err)).toStrictEqual(util.serializeError(err))
+    })
+
+    it('defaults the name of an object that only has a message', () => {
+      expect(util.serializeUnhandledError({ message: 'Request failed with status code 503' })).toStrictEqual({
+        name: 'Error',
+        message: 'Request failed with status code 503',
+      })
+    })
+
+    it('keeps the text of an array of esbuild messages', () => {
+      const message = `${esbuildSyntaxError}\n${esbuildMissingImport}`
+
+      expect(util.serializeUnhandledError([esbuildSyntaxError, esbuildMissingImport])).toStrictEqual({
+        name: 'Error',
+        message,
+        stack: `Error: ${message}`,
+      })
+    })
+
+    it('keeps a string as the message', () => {
+      expect(util.serializeUnhandledError('Session expired for jane.doe@example.com')).toStrictEqual({
+        name: 'Error',
+        message: 'Session expired for jane.doe@example.com',
+        stack: 'Error: Session expired for jane.doe@example.com',
+      })
+    })
+
+    it('inspects any other value', () => {
+      expect(util.serializeUnhandledError({ status: 503, retryAfter: 30 })).toMatchObject({
+        name: 'Error',
+        message: '{ status: 503, retryAfter: 30 }',
+      })
+
+      expect(util.serializeUnhandledError(undefined)).toMatchObject({ name: 'Error', message: 'undefined' })
+      expect(util.serializeUnhandledError([])).toMatchObject({ name: 'Error', message: '[]' })
+    })
+  })
+
   describe('#buildErrorLocationFromTransformError', () => {
     it('correctly calculates the compiler error location to correctly display the code frame in the Cypress app', () => {
       const err = {

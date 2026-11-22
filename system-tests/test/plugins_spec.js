@@ -36,6 +36,20 @@ describe('e2e plugins', function () {
     })
   })
 
+  systemTests.it('shows the value of an unhandled rejection that is not an Error', {
+    browser: 'electron',
+    spec: 'app.cy.ts',
+    project: 'plugins-unhandled-non-error-rejection',
+    expectedExitCode: 1,
+    onRun (exec) {
+      return exec().then(({ stdout }) => {
+        expect(stdout).to.include('We stopped running your tests because your config file crashed.')
+        expect(stdout).to.include('Error: ✘ [ERROR] Unexpected "}"')
+        expect(stdout).to.include('helper.js:3:0:')
+      })
+    },
+  })
+
   it('can modify config from plugins', function () {
     return systemTests.exec(this, {
       spec: 'app.cy.js',

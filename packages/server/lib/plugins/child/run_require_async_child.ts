@@ -30,8 +30,8 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
   }
 
   process.on('uncaughtException', (err) => {
-    debug('uncaught exception:', util.serializeError(err))
-    ipc.send('childProcess:unhandledError', util.serializeError(err))
+    debug('uncaught exception:', err)
+    ipc.send('childProcess:unhandledError', util.serializeUnhandledError(err))
   })
 
   process.on('unhandledRejection', (event: BluebirdRejectionEvent | unknown) => {
@@ -45,7 +45,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string, sho
       err = (event as BluebirdRejectionEvent).reason
     }
 
-    ipc.send('childProcess:unhandledError', util.serializeError(err as Error))
+    ipc.send('childProcess:unhandledError', util.serializeUnhandledError(err))
   })
 
   const isValidSetupNodeEvents = (config: ConfigFileExport, testingType: TestingType): boolean => {

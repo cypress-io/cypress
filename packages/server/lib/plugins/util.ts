@@ -4,6 +4,7 @@ import Bluebird from 'bluebird'
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { inspect } from 'util'
 import Debug from 'debug'
 import type { CompilerErrorLocation, ProcessIpcWrapper, TransformError } from '@packages/types'
 import { stackUtils } from '@packages/errors'
@@ -141,6 +142,42 @@ export const serializeError = (err: Error & Partial<SerializedError>): Serialize
   }
 
   return obj
+}
+
+const hasErrorMessage = (value: unknown): value is Error => {
+  return value instanceof Error || (typeof value === 'object' && value !== null && 'message' in value && typeof value.message === 'string')
+}
+
+const describeNonError = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value
+  }
+
+  if (Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === 'string')) {
+    return value.join('\n')
+  }
+
+  return inspect(value, { depth: 5 })
+}
+
+/**
+ * Serializes a value that reached `uncaughtException` or `unhandledRejection` so its content
+ * survives, e.g. `Promise.reject(['✘ [ERROR] Unexpected "}"'])` becomes an error
+ * whose message is that line. `serializeError` only copies Error fields, which leaves `{}` for a
+ * string, an array or a plain object.
+ */
+export const serializeUnhandledError = (value: unknown): SerializedError => {
+  if (hasErrorMessage(value)) {
+    const serialized = serializeError(value)
+
+    // `_.pick` leaves out `name` for a plain object that only has a `message`
+    return { ...serialized, name: serialized.name || 'Error' }
+  }
+
+  const message = describeNonError(value)
+
+  // The value carries no stack of its own; the parent prints `stack` as the error's body
+  return { name: 'Error', message, stack: `Error: ${message}` }
 }
 
 export const nonNodeRequires = (): string[] => {
