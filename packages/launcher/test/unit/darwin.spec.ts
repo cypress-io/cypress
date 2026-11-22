@@ -126,11 +126,18 @@ describe('darwin browser detection', () => {
     const thirdPartyApp = '/Applications/3rdParty/Google Chrome.app'
     // managed/user install, outside of /Applications
     const userApp = '/Users/someone/Applications/Google Chrome.app'
+    // stale download, outside of /Applications
+    const downloadsApp = '/Users/someone/Downloads/Google Chrome.app'
+
+    // copies that are not installs the user can launch
+    const trashApp = '/Users/someone/.Trash/Google Chrome.app'
+    const volumeApp = '/Volumes/Google Chrome/Google Chrome.app'
+    const cacheApp = '/Users/someone/Library/Caches/x/Google Chrome.app'
 
     const plistPath = (appPath: string) => `${appPath}/Contents/Info.plist`
 
     const stubMdFind = (stdout: string) => {
-      // execa resolves with a child process: the code only reads stdout
+      // Safe because findApp only reads `stdout` from the execa result
       vi.spyOn(utils, 'execa').mockResolvedValue({ stdout } as any)
     }
 
@@ -160,7 +167,7 @@ describe('darwin browser detection', () => {
 
       await findApp(chrome)
 
-      expect(utils.execa).toHaveBeenCalledWith('mdfind', ['kMDItemCFBundleIdentifier=="com.google.Chrome"'])
+      expect(utils.execa).toHaveBeenCalledWith('mdfind', ['kMDItemCFBundleIdentifier=="com.google.Chrome"'], { timeout: 3000 })
     })
 
     it('detects a single app that is not directly in /Applications', async () => {
@@ -191,23 +198,40 @@ describe('darwin browser detection', () => {
       await expect(findApp(chrome)).resolves.toEqual(expectedApp(userApp, '99.0.0'))
     })
 
-    it('tries the next mdfind result when the first one has no readable Info.plist', async () => {
-      stubMdFind([userApp, thirdPartyApp].join('\n'))
-      // only the second result has a readable Info.plist
-      stubPlists({ [plistPath(thirdPartyApp)]: '100.0.1' })
+    it('orders copies outside /Applications alphabetically, whatever mdfind returns', async () => {
+      // mdfind lists the Downloads copy first, the sorted order puts the Applications copy first
+      stubMdFind([downloadsApp, userApp].join('\n'))
+      stubPlists({
+        [plistPath(downloadsApp)]: '98.0.0',
+        [plistPath(userApp)]: '99.0.0',
+      })
 
-      await expect(findApp(chrome)).resolves.toEqual(expectedApp(thirdPartyApp, '100.0.1'))
+      await expect(findApp(chrome)).resolves.toEqual(expectedApp(userApp, '99.0.0'))
 
-      expect(fs.readFile).toHaveBeenNthCalledWith(1, plistPath(userApp), 'utf8')
-      expect(fs.readFile).toHaveBeenNthCalledWith(2, plistPath(thirdPartyApp), 'utf8')
+      expect(fs.readFile).toHaveBeenNthCalledWith(2, plistPath(userApp), 'utf8')
+      expect(fs.readFile).not.toHaveBeenCalledWith(plistPath(downloadsApp), 'utf8')
     })
 
-    it('tries the next mdfind result when the first Info.plist has no version', async () => {
+    it('tries /Applications before a copy mdfind found when Spotlight misses it', async () => {
+      // a stale Spotlight index only knows about the Downloads copy
+      stubMdFind(`${downloadsApp}\n`)
+      stubPlists({
+        [plistPath(downloadsApp)]: '98.0.0',
+        [plistPath(applicationsApp)]: '101.0.2',
+      })
+
+      await expect(findApp(chrome)).resolves.toEqual(expectedApp(applicationsApp, '101.0.2'))
+
+      expect(fs.readFile).toHaveBeenCalledTimes(1)
+      expect(fs.readFile).toHaveBeenCalledWith(plistPath(applicationsApp), 'utf8')
+    })
+
+    it('skips an unreadable Info.plist and tries the next mdfind result', async () => {
       stubMdFind([userApp, thirdPartyApp].join('\n'))
       // @ts-expect-error - mock implementation doesn't match fs.readFile's overloads
       vi.mocked(fs.readFile).mockImplementation((file: string): Promise<string> => {
-        if (file === plistPath(userApp)) {
-          return Promise.resolve(generatePlist('CFBundleName', 'Google Chrome'))
+        if (file === plistPath(applicationsApp)) {
+          return Promise.reject(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }))
         }
 
         if (file === plistPath(thirdPartyApp)) {
@@ -218,6 +242,90 @@ describe('darwin browser detection', () => {
       })
 
       await expect(findApp(chrome)).resolves.toEqual(expectedApp(thirdPartyApp, '100.0.1'))
+
+      expect(fs.readFile).toHaveBeenNthCalledWith(1, plistPath(applicationsApp), 'utf8')
+      expect(fs.readFile).toHaveBeenNthCalledWith(2, plistPath(thirdPartyApp), 'utf8')
+    })
+
+    it('skips a copy outside /Applications that has no version key', async () => {
+      stubMdFind([userApp, thirdPartyApp].join('\n'))
+      // @ts-expect-error - mock implementation doesn't match fs.readFile's overloads
+      vi.mocked(fs.readFile).mockImplementation((file: string): Promise<string> => {
+        if (file === plistPath(applicationsApp)) {
+          return Promise.reject(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }))
+        }
+
+        if (file === plistPath(thirdPartyApp)) {
+          return Promise.resolve(generatePlist('CFBundleName', 'Google Chrome'))
+        }
+
+        if (file === plistPath(userApp)) {
+          return Promise.resolve(generatePlist(chrome.versionProperty, '99.0.0'))
+        }
+
+        return Promise.reject(new Error('File not found'))
+      })
+
+      await expect(findApp(chrome)).resolves.toEqual(expectedApp(userApp, '99.0.0'))
+
+      expect(fs.readFile).toHaveBeenNthCalledWith(2, plistPath(thirdPartyApp), 'utf8')
+      expect(fs.readFile).toHaveBeenNthCalledWith(3, plistPath(userApp), 'utf8')
+    })
+
+    it('lists a copy directly in /Applications even when its plist has no version key', async () => {
+      stubMdFind('')
+      // @ts-expect-error - mock implementation doesn't match fs.readFile's overloads
+      vi.mocked(fs.readFile).mockImplementation((file: string): Promise<string> => {
+        if (file === plistPath(applicationsApp)) {
+          return Promise.resolve(generatePlist('CFBundleName', 'Google Chrome'))
+        }
+
+        return Promise.reject(new Error('File not found'))
+      })
+
+      await expect(findApp(chrome)).resolves.toEqual(expectedApp(applicationsApp, 'undefined'))
+    })
+
+    it('never reads copies in the Trash, on a mounted volume or in a cache', async () => {
+      stubMdFind([trashApp, volumeApp, cacheApp, userApp].join('\n'))
+      stubPlists({
+        [plistPath(trashApp)]: '1.0.0',
+        [plistPath(volumeApp)]: '2.0.0',
+        [plistPath(cacheApp)]: '3.0.0',
+        [plistPath(userApp)]: '99.0.0',
+      })
+
+      await expect(findApp(chrome)).resolves.toEqual(expectedApp(userApp, '99.0.0'))
+
+      expect(fs.readFile).not.toHaveBeenCalledWith(plistPath(trashApp), 'utf8')
+      expect(fs.readFile).not.toHaveBeenCalledWith(plistPath(volumeApp), 'utf8')
+      expect(fs.readFile).not.toHaveBeenCalledWith(plistPath(cacheApp), 'utf8')
+      expect(fs.readFile).toHaveBeenCalledWith(plistPath(userApp), 'utf8')
+    })
+
+    it('rejects when mdfind only finds ignored copies and /Applications has no plist', async () => {
+      stubMdFind([trashApp, volumeApp, cacheApp].join('\n'))
+
+      await expect(findApp(chrome)).rejects.toThrow('Info.plist not found')
+
+      expect(fs.readFile).toHaveBeenCalledTimes(1)
+      expect(fs.readFile).toHaveBeenCalledWith(plistPath(applicationsApp), 'utf8')
+    })
+
+    it('skips a copy outside /Applications without the version key and rejects with the /Applications error', async () => {
+      stubMdFind(`${userApp}\n`)
+      // @ts-expect-error - mock implementation doesn't match fs.readFile's overloads
+      vi.mocked(fs.readFile).mockImplementation((file: string): Promise<string> => {
+        if (file === plistPath(userApp)) {
+          return Promise.resolve(generatePlist('CFBundleName', 'Google Chrome'))
+        }
+
+        return Promise.reject(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }))
+      })
+
+      // the missing-property error of the user copy is skipped, the /Applications attempt errors last
+      await expect(findApp(chrome)).rejects.toThrow(`Info.plist not found: ${plistPath(applicationsApp)}`)
+      expect(fs.readFile).toHaveBeenCalledWith(plistPath(userApp), 'utf8')
     })
 
     it('falls back to /Applications when mdfind returns nothing', async () => {

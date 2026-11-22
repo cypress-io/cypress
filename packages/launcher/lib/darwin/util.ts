@@ -7,8 +7,11 @@ import plist from 'plist'
 
 const debugVerbose = Debug('cypress-verbose:launcher:darwin:util')
 
-/** parses Info.plist file from given application and returns a property */
-function parsePlist (p: string, property: string): Promise<string> {
+// a stuck Spotlight index must not block browser detection
+const MDFIND_TIMEOUT_MS = 3000
+
+/** parses Info.plist file from given application and returns a property, or undefined when the plist lacks it */
+function parsePlist (p: string, property: string): Promise<string | undefined> {
   const pl = path.join(p, 'Contents', 'Info.plist')
 
   debugVerbose('reading property file "%s"', pl)
@@ -24,49 +27,38 @@ function parsePlist (p: string, property: string): Promise<string> {
   return fs
   .readFile(pl, 'utf8')
   .then(plist.parse)
+  .catch(failed)
   .then((val) => {
     if (val[property] === undefined || val[property] === null) {
-      throw new Error(`property "${property}" not found`)
+      return undefined
     }
 
     return String(val[property]) // explicitly convert value to String type
   })
-  .catch(failed) // to make TS compiler happy
 }
 
-/** uses mdfind to find apps using a Mac app id like 'com.google.Chrome.canary' */
+/** uses mdfind to find apps using a Mac app id like 'com.google.Chrome.canary', resolving to [] when it finds none */
 function mdfind (id: string): Promise<string[]> {
-  // pass the query as an argument: execa does not use a shell, so a piped
-  // command string would be treated as a program name and never run
+  // execa does not use a shell, so the query is passed as one argument
   const args = [`kMDItemCFBundleIdentifier=="${id}"`]
 
   debugVerbose('looking for bundle id %s using command: mdfind %o', id, args)
 
-  const logFound = (paths: string[]) => {
-    debugVerbose('found %s at %o', id, paths)
-
-    return paths
-  }
-
-  const failedToFind = () => {
-    debugVerbose('could not find %s', id)
-    throw notInstalledErr(id)
-  }
-
-  return utils.execa('mdfind', args)
+  return utils.execa('mdfind', args, { timeout: MDFIND_TIMEOUT_MS })
   .then((val) => {
     const paths = val.stdout
     .split('\n')
     .map((p) => p.trim())
     .filter((p) => p.length > 0)
 
-    if (paths.length === 0) {
-      return failedToFind()
-    }
+    debugVerbose('found %s at %o', id, paths)
 
-    return logFound(paths)
+    return paths
+  }, (err) => {
+    debugVerbose('could not find %s %o', id, err)
+
+    return []
   })
-  .catch(failedToFind)
 }
 
 type AppInfo = {
@@ -89,56 +81,56 @@ function formApplicationPath (appName: string) {
   return path.join('/Applications', appName)
 }
 
+const isInApplications = (p: string) => path.dirname(p) === '/Applications'
+
+// copies in the Trash, on mounted disk images or in caches are not installs the user can launch
+const isIgnoredPath = (p: string) => {
+  return p.includes('/.Trash/') || p.startsWith('/Volumes/') || p.includes('/Library/Caches/')
+}
+
 /** finds an application and its version */
-export function findApp ({ appName, executable, bundleId, versionProperty }: FindAppParams): Promise<AppInfo> {
+export async function findApp ({ appName, executable, bundleId, versionProperty }: FindAppParams): Promise<AppInfo> {
   debugVerbose('looking for app %s bundle id %s', executable, bundleId)
 
-  const findVersion = (foundPath: string) => {
-    return parsePlist(foundPath, versionProperty).then((version) => {
-      debugVerbose('got plist: %o', { foundPath, version })
+  const findVersion = async (foundPath: string): Promise<AppInfo> => {
+    const version = await parsePlist(foundPath, versionProperty)
 
-      return {
-        path: path.join(foundPath, executable),
-        version,
+    debugVerbose('got plist: %o', { foundPath, version })
+
+    // a copy elsewhere without a version is skipped, but one in /Applications is still listed
+    if (version === undefined && !isInApplications(foundPath)) {
+      throw notInstalledErr('', `property "${versionProperty}" not found in ${path.join(foundPath, 'Contents', 'Info.plist')}`)
+    }
+
+    return {
+      path: path.join(foundPath, executable),
+      version: String(version),
+    }
+  }
+
+  const applicationPath = formApplicationPath(appName)
+  const foundPaths = (await mdfind(bundleId)).filter((p) => !isIgnoredPath(p))
+
+  // try copies directly in /Applications first, then the elsewhere copies in a stable order
+  const candidates = Array.from(new Set([
+    ...foundPaths.filter(isInApplications),
+    applicationPath,
+    ...foundPaths.filter((p) => !isInApplications(p)).sort(),
+  ]))
+
+  let applicationPathError: unknown
+
+  for (const candidate of candidates) {
+    try {
+      return await findVersion(candidate)
+    } catch (err) {
+      debugVerbose('could not use %s for %s %o', candidate, bundleId, err)
+
+      if (candidate === applicationPath) {
+        applicationPathError = err
       }
-    })
+    }
   }
 
-  const tryMdFind = () => {
-    return mdfind(bundleId)
-    .then((paths) => {
-      // prefer applications installed directly in /Applications, then keep the
-      // remaining results in the order mdfind returned them
-      const sortedPaths = [
-        ...paths.filter((p) => path.dirname(p) === '/Applications'),
-        ...paths.filter((p) => path.dirname(p) !== '/Applications'),
-      ]
-
-      const tryNextPath = (index: number): Promise<AppInfo> => {
-        if (index >= sortedPaths.length) {
-          debugVerbose('could not find %s in any of %o', bundleId, sortedPaths)
-
-          return Promise.reject(notInstalledErr(bundleId))
-        }
-
-        return findVersion(sortedPaths[index]).catch((err) => {
-          debugVerbose('could not get plist for %s at %s, trying next result %o', bundleId, sortedPaths[index], err)
-
-          return tryNextPath(index + 1)
-        })
-      }
-
-      return tryNextPath(0)
-    })
-  }
-
-  const tryFullApplicationFind = () => {
-    const applicationPath = formApplicationPath(appName)
-
-    debugVerbose('looking for application %s', applicationPath)
-
-    return findVersion(applicationPath)
-  }
-
-  return tryMdFind().catch(tryFullApplicationFind)
+  throw applicationPathError
 }
