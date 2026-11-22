@@ -29,13 +29,16 @@ function getSpecsPathsSet (specs: Spec[]) {
 }
 
 /**
- * Used as `oxc.jsxRefreshInclude` when no plugin set one. With only `jsxRefreshExclude` set, Vite builds
- * `createFilter(undefined, exclude)`, which matches every other path, so CSS would reach `transformWithOxc` and fail.
+ * Matches script paths such as `src/App.cy.tsx` and not assets such as `style.css`. It is the
+ * `oxc.jsxRefreshInclude` when no plugin set one: with only `jsxRefreshExclude` set, Vite's filter
+ * matches every path that isn't excluded, so CSS would reach `transformWithOxc` and fail.
  */
 export const JSX_REFRESH_SCRIPT_RE = /\.(?:[cm]?js|[cm]?ts|[jt]sx)$/
 
 /**
  * Adds the specs to `oxc.jsxRefreshExclude` when React Fast Refresh is on, and leaves `oxc` alone otherwise.
+ * `{ jsx: { refresh: true } }` gets `jsxRefreshExclude: ['/project/src/App.cy.jsx']`, while
+ * `{ include: /\.ts$/ }` gets nothing.
  *
  * With refresh on, `@vitejs/plugin-react` wraps JSX specs in `import.meta.hot.accept`, so headed mode
  * re-evaluates a spec and registers its tests twice (https://github.com/cypress-io/cypress/issues/33750).
@@ -90,7 +93,8 @@ export const Cypress = (
     name: 'cypress:main',
     enforce: 'pre',
     config: {
-      // Runs after plugins' own `config` hooks, so `oxc.jsx.refresh` is final.
+      // `@vitejs/plugin-react` turns `oxc.jsx.refresh` on and off in `config` hooks without an order,
+      // which run before this one.
       order: 'post',
       handler (config) {
         return excludeSpecsFromJsxRefresh(config.oxc, specs)

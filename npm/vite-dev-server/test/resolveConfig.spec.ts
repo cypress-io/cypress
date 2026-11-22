@@ -135,6 +135,7 @@ describe('resolveConfig', function () {
     }
 
     // Stands in for `@vitejs/plugin-vue-jsx`: it narrows `oxc.include` and compiles `.jsx` itself.
+    // Vite's oxc plugin runs first, so `transform` sees raw JSX only when oxc left the file alone.
     // `load` serves the support file so the test needs no file on disk.
     const vueJsx: vite8.Plugin = {
       name: 'vue-jsx-stand-in',
