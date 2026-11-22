@@ -1161,6 +1161,24 @@ describe('config/src/project/utils', () => {
       expect(cfg.resolved.isInteractive).toEqual({ value: false, from: 'default' })
     })
 
+    it('sets workerIndex to null without --workers', async function () {
+      const cfg = await defaults('workerIndex', null, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+
+      expect(cfg.workerIndex).toBeNull()
+    })
+
+    it('sets workerIndex to 0 in the --workers coordinator', async function () {
+      const cfg = await defaults('workerIndex', 0, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true, workers: 3 })
+
+      expect(cfg.workerIndex).toBe(0)
+    })
+
+    it('sets workerIndex to a spawned worker\'s index', async function () {
+      const cfg = await defaults('workerIndex', 2, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true, workerIndex: 2 })
+
+      expect(cfg.workerIndex).toBe(2)
+    })
+
     it('can override socketId in options', async function () {
       const cfg = await defaults('socketId', '1234', { projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' })
 

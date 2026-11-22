@@ -3738,6 +3738,11 @@ declare namespace Cypress {
      */
     isInteractive: boolean
     /**
+     * With `--workers`, the index of the worker this process runs specs in, starting at 0. `null` without `--workers`.
+     * Plugins that write files shared across specs can use it to keep each worker's output apart.
+     */
+    workerIndex: number | null
+    /**
      * The platform Cypress is running on.
      */
     platform: 'linux' | 'darwin' | 'win32'

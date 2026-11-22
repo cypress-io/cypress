@@ -573,6 +573,13 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: (options: Record<string, any> = {}) => !options.isTextTerminal,
     validation: validate.isBoolean,
   }, {
+    // under --workers, plugins that write shared files use this to keep each worker's output apart
+    name: 'workerIndex',
+    defaultValue: (options: Record<string, any> = {}): number | null => options.workerIndex ?? (options.workers != null ? 0 : null),
+    validation: validate.isNumber,
+    // set by Cypress, not by users; listing it as public would make --worker-index a config override
+    isInternal: true,
+  }, {
     name: 'isTextTerminal',
     defaultValue: false,
     validation: validate.isBoolean,

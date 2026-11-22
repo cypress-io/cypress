@@ -26,6 +26,8 @@ export interface RunModeOptions extends CommonModeOptions {
   tag?: (string)[] | null
   isBrowserGivenByCli: boolean
   posixExitCodes?: boolean | null
+  workers?: number | 'auto' | null
+  workerIndex?: number | null
 }
 
 export type TestingType = 'e2e' | 'component'

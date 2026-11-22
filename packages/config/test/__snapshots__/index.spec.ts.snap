@@ -112,6 +112,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "visibilityStrategy": "modern",
   "waitForAnimations": true,
   "watchForFileChanges": true,
+  "workerIndex": null,
 }
 `;
 
@@ -209,6 +210,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "visibilityStrategy": "modern",
   "waitForAnimations": true,
   "watchForFileChanges": true,
+  "workerIndex": null,
 }
 `;
 
