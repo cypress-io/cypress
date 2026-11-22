@@ -69,22 +69,34 @@ const RENEWAL_INTERVAL_MS = 1000
 // APIs like `requestFullscreen()` and `showPicker()` need when the app calls them
 // from an event handler, including after awaiting something there. A real click or
 // key press always starts a fresh activation, so a command renews it before it
-// fires its first events, and again once a second has passed.
+// fires its first events, and again once a second has passed or `autWindow` has
+// used it up.
 //
 // Returns the function to call before each attempt or key. It returns nothing when
 // there is nothing to renew, so the caller can stay synchronous. After a renewal
 // fails, it stops trying for the rest of the command, which would otherwise wait on
 // the browser before every retry.
-export const createTransientActivationRenewer = (Cypress: ActivationHost, { justRenewed = false } = {}) => {
+// only what renewing reads from the AUT window, so a unit test can supply it
+type ActivationWindow = { navigator: { userActivation?: { isActive: boolean } } }
+
+export const createTransientActivationRenewer = (Cypress: ActivationHost, autWindow: ActivationWindow | undefined, { justRenewed = false } = {}) => {
   let renewedAt = justRenewed ? Date.now() : undefined
   let failed = false
+
+  const isUsedUp = () => {
+    try {
+      return autWindow?.navigator.userActivation?.isActive === false
+    } catch {
+      return false
+    }
+  }
 
   return (): Promise<void> | undefined => {
     if (failed || !isEnabled(Cypress)) {
       return
     }
 
-    if (renewedAt !== undefined && Date.now() - renewedAt < RENEWAL_INTERVAL_MS) {
+    if (renewedAt !== undefined && Date.now() - renewedAt < RENEWAL_INTERVAL_MS && !isUsedUp()) {
       return
     }
 
@@ -132,9 +144,10 @@ export const activateAutLoadedEarly = async (Cypress: ICypress, autWindow: Windo
   }
 }
 
-export const logBeforeUnloadDialogAccepted = (Cypress: ICypress, cy: $Cy, data: BeforeUnloadDialogAcceptedParams) => {
-  // The AUT is navigated to about:blank between tests, when there is no test to log to.
-  if (!cy.state('runnable') || !cy.state('duringUserTestExecution')) {
+export const logBeforeUnloadDialogAccepted = (Cypress: ICypress, cy: $Cy | null, data: BeforeUnloadDialogAcceptedParams) => {
+  // The AUT is navigated to about:blank between tests, when there is no test to log
+  // to, and a spec that is still loading has no `cy` yet.
+  if (!cy || !cy.state('runnable') || !cy.state('duringUserTestExecution')) {
     return
   }
 

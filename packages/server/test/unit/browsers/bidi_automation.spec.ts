@@ -123,18 +123,16 @@ describe('lib/browsers/bidi_automation', () => {
           expectCalledWith(mockAutomationClient.push, 'beforeunload:dialog:accepted', { message: prompt.message, url: '' })
         })
 
-        it('reports the prompt with the AUT url', async () => {
+        it('reports the prompt with the url of the AUT page that asked', async () => {
           const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
 
-          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({ contexts: [{ context: 'aut', url: 'http://localhost:3500/editor' }] })
-          // @ts-expect-error - autContextId is private
-          bidiAutomationInstance.autContextId = 'aut'
+          // @ts-expect-error - autDocumentUrl is private
+          bidiAutomationInstance.autDocumentUrl = 'http://localhost:3500/editor'
 
           mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'beforeunload', handler: 'accept' })
 
           await flushPromises()
 
-          expectCalledWith(mockWebdriverClient.browsingContextGetTree, { root: 'aut' })
           expectCalledWith(mockAutomationClient.push, 'beforeunload:dialog:accepted', { message: prompt.message, url: 'http://localhost:3500/editor' })
         })
 
@@ -377,6 +375,26 @@ describe('lib/browsers/bidi_automation', () => {
               type: 'preflight',
             },
           }
+        })
+
+        it('remembers the url of the AUT page it last requested, for reporting its beforeunload prompts', async () => {
+          const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+          // @ts-expect-error - autContextId is private
+          bidiAutomationInstance.autContextId = '123'
+
+          mockRequest.request.url = 'http://localhost:3500/editor'
+          mockRequest.request.initiatorType = 'iframe'
+          mockWebdriverClient.emit('network.beforeRequestSent', mockRequest)
+
+          mockRequest.request.url = 'http://localhost:3500/editor.js'
+          mockRequest.request.initiatorType = 'script'
+          mockWebdriverClient.emit('network.beforeRequestSent', mockRequest)
+
+          await flushPromises()
+
+          // @ts-expect-error - autDocumentUrl is private
+          expect(bidiAutomationInstance.autDocumentUrl).toBe('http://localhost:3500/editor')
         })
 
         it('correctly pauses the AUT frame to add the X-Cypress-Is-AUT-Frame header (which is later stripped out in the middleware)', async () => {

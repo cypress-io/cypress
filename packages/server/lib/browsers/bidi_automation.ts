@@ -126,6 +126,7 @@ export class BidiAutomation {
   private webDriverClient: WebDriverClient
   private automation: Automation
   private autContextId: string | undefined = undefined
+  private autDocumentUrl: string | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
@@ -186,16 +187,8 @@ export class BidiAutomation {
 
     // The prompt belongs to the top-level context, whose URL is the runner's. The
     // dialogs Cypress accepts during a test come from the AUT, so the dialog is
-    // reported with the AUT's URL.
-    let url = ''
-
-    try {
-      url = this.autContextId ? await bidiGetUrl(this.webDriverClient, this.autContextId) : ''
-    } catch (err) {
-      debug('failed to get the AUT url for an accepted beforeunload prompt: %s', err?.message)
-    }
-
-    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url }).catch((err) => {
+    // reported with the URL of the AUT page that asked.
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: this.autDocumentUrl ?? '' }).catch((err) => {
       debug('failed to report accepted beforeunload prompt: %s', err?.message)
     })
   }
@@ -473,6 +466,12 @@ export class BidiAutomation {
     })
 
     const resourceType = normalizeResourceType(params.request.initiatorType)
+
+    // A page's `beforeunload` runs before the next page is requested, so this is
+    // the page that asks to confirm leaving.
+    if (params.context === this.autContextId && resourceType === 'document') {
+      this.autDocumentUrl = url
+    }
 
     const urlWithoutHash = url.includes('#') ? url.substring(0, url.indexOf('#')) : url
 

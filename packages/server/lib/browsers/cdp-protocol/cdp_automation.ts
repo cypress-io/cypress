@@ -84,6 +84,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private gettingFrameTree: Promise<void> | undefined | null
   private autFrameId: string | undefined
   private topFrameId: string | undefined
+  // Electron accepts `beforeunload` dialogs itself, through `will-prevent-unload`,
+  // before they could be accepted here, so they are only reported
+  browserAcceptsBeforeUnloadDialogs = false
   private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
@@ -353,12 +356,10 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     debug('accepting beforeunload dialog %o', { url: params.url, frameId: params.frameId })
 
-    try {
-      await this.sendDebuggerCommandFn('Page.handleJavaScriptDialog', { accept: true })
-    } catch (err) {
-      // Electron answers the dialog itself, through `will-prevent-unload`, before it
-      // can be accepted here. It is reported all the same, since the page unloads.
-      if (!err?.message?.includes('No dialog is showing')) {
+    if (!this.browserAcceptsBeforeUnloadDialogs) {
+      try {
+        await this.sendDebuggerCommandFn('Page.handleJavaScriptDialog', { accept: true })
+      } catch (err) {
         debug('failed to accept beforeunload dialog: %s', err?.message)
 
         return

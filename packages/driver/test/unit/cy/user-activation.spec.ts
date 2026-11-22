@@ -21,7 +21,7 @@ describe('src/cy/user-activation', () => {
 
     it('renews before the first attempt, then at most once a second', async () => {
       const Cypress = createCypress()
-      const renew = createTransientActivationRenewer(Cypress)
+      const renew = createTransientActivationRenewer(Cypress, undefined)
 
       await renew()
       expect(renew()).toBeUndefined()
@@ -36,9 +36,23 @@ describe('src/cy/user-activation', () => {
       expect(Cypress.automation).toHaveBeenCalledWith('activate:aut:frame', {})
     })
 
+    it('renews within the second once the AUT has used the activation up', async () => {
+      const Cypress = createCypress()
+      const userActivation = { isActive: true }
+      const renew = createTransientActivationRenewer(Cypress, { navigator: { userActivation } })
+
+      await renew()
+      expect(renew()).toBeUndefined()
+
+      userActivation.isActive = false
+      await renew()
+
+      expect(Cypress.automation).toHaveBeenCalledTimes(2)
+    })
+
     it('waits a second before renewing an activation the caller just gave', async () => {
       const Cypress = createCypress()
-      const renew = createTransientActivationRenewer(Cypress, { justRenewed: true })
+      const renew = createTransientActivationRenewer(Cypress, undefined, { justRenewed: true })
 
       expect(renew()).toBeUndefined()
 
@@ -50,7 +64,7 @@ describe('src/cy/user-activation', () => {
 
     it('stops renewing for the command once a renewal fails', async () => {
       const Cypress = createCypress({ automation: vi.fn().mockRejectedValue(new Error('Cannot activate AUT frame: no AUT context initialized')) })
-      const renew = createTransientActivationRenewer(Cypress)
+      const renew = createTransientActivationRenewer(Cypress, undefined)
 
       await renew()
       vi.advanceTimersByTime(5000)
@@ -61,7 +75,7 @@ describe('src/cy/user-activation', () => {
 
     it('stops renewing for the command once the browser doesn\'t answer in time', async () => {
       const Cypress = createCypress({ automation: vi.fn().mockReturnValue(new Promise(() => {})) })
-      const renew = createTransientActivationRenewer(Cypress)
+      const renew = createTransientActivationRenewer(Cypress, undefined)
 
       const renewing = renew()
 
@@ -77,14 +91,14 @@ describe('src/cy/user-activation', () => {
     it('does nothing with userActivation: false', () => {
       const Cypress = createCypress({ userActivation: false })
 
-      expect(createTransientActivationRenewer(Cypress)()).toBeUndefined()
+      expect(createTransientActivationRenewer(Cypress, undefined)()).toBeUndefined()
       expect(Cypress.automation).not.toHaveBeenCalled()
     })
 
     it('does nothing in WebKit', () => {
       const Cypress = createCypress({ browser: 'webkit' })
 
-      expect(createTransientActivationRenewer(Cypress)()).toBeUndefined()
+      expect(createTransientActivationRenewer(Cypress, undefined)()).toBeUndefined()
       expect(Cypress.automation).not.toHaveBeenCalled()
     })
   })

@@ -1332,13 +1332,14 @@ describe('lib/browsers/cdp_automation', () => {
         expect(automation.push).not.toHaveBeenCalled()
       })
 
-      it('reports a dialog that Electron already answered', async () => {
-        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').rejects(new Error('No dialog is showing'))
+      it('only reports a dialog the browser accepts itself', async () => {
+        cdpAutomation.browserAcceptsBeforeUnloadDialogs = true
 
         onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'beforeunload' })
 
         await flush()
 
+        expectNotCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog')
         expectCalledWith(automation.push, 'beforeunload:dialog:accepted', { message: '', url: dialog.url })
       })
 
@@ -1352,7 +1353,7 @@ describe('lib/browsers/cdp_automation', () => {
       })
 
       it('does not report a dialog it failed to accept', async () => {
-        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').rejects(new Error('Target closed'))
+        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').rejects(new Error('No dialog is showing'))
 
         onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'beforeunload' })
 

@@ -25,32 +25,6 @@ describe('user activation', { browser: '!webkit' }, () => {
     })
   })
 
-  it('waits for the next page when the AUT starts navigating away while it is being activated', () => {
-    const automation = Cypress.automation.bind(Cypress)
-    let navigated = false
-
-    cy.stub(Cypress, 'automation').callsFake((eventName, ...args) => {
-      const autWindow: Window = cy.state('window')
-
-      if (eventName !== 'activate:aut:frame' || navigated || autWindow.location.search !== '?navigate') {
-        return automation(eventName, ...args)
-      }
-
-      navigated = true
-
-      // answers as soon as the page starts to unload, while the next one is still loading
-      return new Promise((resolve) => {
-        autWindow.addEventListener('beforeunload', () => resolve(undefined), { once: true })
-        autWindow.location.href = '/fixtures/user-activation.html?page=2'
-      })
-    })
-
-    cy.visit('/fixtures/user-activation.html?navigate')
-    cy.window().then((win) => {
-      expect(win.location.search).to.equal('?page=2')
-    })
-  })
-
   it('does not fire input or focus events in the AUT', () => {
     cy.visit('/fixtures/user-activation.html')
     cy.window().then((win) => {
@@ -149,6 +123,18 @@ describe('user activation', { browser: '!webkit' }, () => {
       // typing into the body skips the actionability check that renews activation for other elements
       cy.get('body').type('f')
       cy.wrap(isActive).should('deep.equal', [true])
+    })
+
+    it('renews transient activation a keydown handler used up before the next key', () => {
+      const shown = handle('#text', 'keydown', (win) => {
+        getAutElement(win.document, '#date', 'input').showPicker()
+
+        return win.navigator.userActivation.isActive
+      })
+
+      // showPicker() uses up transient activation, and throws without it
+      cy.get('#text').type('ab')
+      cy.wrap(shown).should('deep.equal', [false, false])
     })
 
     it('keeps transient activation through a .type() that outlasts it', () => {

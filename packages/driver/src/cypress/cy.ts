@@ -232,6 +232,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
   private testConfigOverride: TestConfigOverride
+  private autActivation: { document: Document, activating: PromiseLike<void> } | undefined
   private commandFns: Record<string, (...args: any[]) => any> = {}
   private queryFns: Record<string, (...args: any[]) => any> = {}
 
@@ -583,13 +584,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         }
 
         // before window:load, so its handlers and the next command see an activated page
-        const unloadsBeforeActivation = this.state('autUnloadCount')
-
-        await activateAut(this.Cypress, autWindow)
-
-        // A page that started navigating away while it was being activated isn't
-        // ready. The next page's load marks the AUT stable instead.
-        const startedUnloading = this.state('autUnloadCount') !== unloadsBeforeActivation
+        await this.finishActivatingAut(autWindow)
 
         // stability is signalled after the window:load event to give event
         // listeners time to be invoked prior to moving on, but not if
@@ -614,9 +609,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
           throw err
         } finally {
-          if (!startedUnloading) {
-            this.isStable(true, 'load')
-          }
+          this.isStable(true, 'load')
         }
       } catch (err: any) {
         if (err.isFromWindowLoadEvent) {
@@ -932,6 +925,30 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.overrides.wrapNativeMethods(contentWindow)
 
     this.onBeforeWindowLoad()
+
+    // Started as the document begins to load, so the activation has usually
+    // finished by the time the load handler waits on it, and doesn't hold up
+    // marking the page stable.
+    this.autActivation = { document: contentWindow.document, activating: activateAut(this.Cypress, contentWindow) }
+  }
+
+  // Waits for the activation started when `autWindow`'s document began to load. A
+  // document Cypress didn't see begin to load, such as a cross-origin one, is
+  // activated now.
+  private async finishActivatingAut (autWindow: Window) {
+    const activation = this.autActivation
+
+    this.autActivation = undefined
+
+    let isSameDocument = false
+
+    try {
+      isSameDocument = !!activation && autWindow.document === activation.document
+    } catch {
+      // a cross-origin AUT can't be read from here, so it isn't the document that began loading
+    }
+
+    await (isSameDocument ? activation!.activating : activateAut(this.Cypress, autWindow))
   }
 
   onUncaughtException ({ handlerType, frameType, err, promise }) {
@@ -1195,7 +1212,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       onLoad: () => { },
       onBeforeUnload: (e) => {
         this.isStable(false, 'beforeunload')
-        this.state('autUnloadCount', (this.state('autUnloadCount') ?? 0) + 1)
 
         this.Cookies.setInitial()
 

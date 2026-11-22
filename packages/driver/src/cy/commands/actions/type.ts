@@ -291,7 +291,7 @@ export default function (Commands, Cypress, cy, state, config) {
         delay: options.delay,
         // renews the activation between keys once it may have run low, as every real
         // keydown does, so the last keys of a long string still have it
-        onBeforeKey: createTransientActivationRenewer(Cypress, { justRenewed: activationRenewed }),
+        onBeforeKey: createTransientActivationRenewer(Cypress, cy.state('window'), { justRenewed: activationRenewed }),
         release: options.release,
         parseSpecialCharSequences: options.parseSpecialCharSequences,
         window: win,
@@ -509,6 +509,8 @@ export default function (Commands, Cypress, cy, state, config) {
             log: false,
             verify: false,
             _log: options._log,
+            // the actionability attempt above has just renewed it
+            _activationRenewed: true,
             force: true, // force the click, avoid waiting
             timeout: options.timeout,
             interval: options.interval,
@@ -638,9 +640,8 @@ export default function (Commands, Cypress, cy, state, config) {
           notReadonly: true,
         }
 
+        // `.type()` renews the activation before it types, so this check doesn't
         return $actionability.verify(cy, $el, config, options, {
-          activatesUser: true,
-
           onScroll ($el, type) {
             return Cypress.action('cy:scrolled', $el, type)
           },

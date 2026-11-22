@@ -197,7 +197,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
       return $actionability.verify(cy, $el, config, individualOptions, {
         subjectFn: options.subjectFn || (() => cy.getSubjectFromChain(subjectChain).eq(index)),
 
-        activatesUser: true,
+        activatesUser: !options._activationRenewed,
 
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
