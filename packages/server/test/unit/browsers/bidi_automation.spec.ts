@@ -76,6 +76,7 @@ describe('lib/browsers/bidi_automation', () => {
       expectCalledWith(mockWebdriverClient.on, 'network.fetchError')
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextCreated')
       expectCalledWith(mockWebdriverClient.on, 'browsingContext.contextDestroyed')
+      expectCalledWith(mockWebdriverClient.on, 'browsingContext.userPromptOpened')
     })
 
     it('unbinds BIDI_EVENTS when close() is called', () => {
@@ -91,9 +92,56 @@ describe('lib/browsers/bidi_automation', () => {
       expectCalledWith(mockWebdriverClient.off, 'network.fetchError')
       expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextCreated')
       expectCalledWith(mockWebdriverClient.off, 'browsingContext.contextDestroyed')
+      expectCalledWith(mockWebdriverClient.off, 'browsingContext.userPromptOpened')
     })
 
     describe('BrowsingContext', () => {
+      describe('userPromptOpened', () => {
+        const prompt = { context: 'top', message: 'This page is asking you to confirm that you want to leave', userContext: 'default' }
+
+        beforeEach(() => {
+          mockAutomationClient.push = vi.fn().mockResolvedValue(undefined)
+          mockWebdriverClient.browsingContextHandleUserPrompt = vi.fn().mockResolvedValue(undefined)
+          BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+        })
+
+        it('reports a beforeunload prompt that the session already accepts', async () => {
+          mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'beforeunload', handler: 'accept' })
+
+          await flushPromises()
+
+          expect(mockWebdriverClient.browsingContextHandleUserPrompt).not.toHaveBeenCalled()
+          expectCalledWith(mockAutomationClient.push, 'beforeunload:dialog:accepted', { message: prompt.message, url: '' })
+        })
+
+        it('accepts and reports a beforeunload prompt that the session ignores', async () => {
+          mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'beforeunload', handler: 'ignore' })
+
+          await flushPromises()
+
+          expectCalledWith(mockWebdriverClient.browsingContextHandleUserPrompt, { context: 'top', accept: true })
+          expectCalledWith(mockAutomationClient.push, 'beforeunload:dialog:accepted', { message: prompt.message, url: '' })
+        })
+
+        it('does not report a beforeunload prompt the session dismisses', async () => {
+          mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'beforeunload', handler: 'dismiss' })
+
+          await flushPromises()
+
+          expect(mockWebdriverClient.browsingContextHandleUserPrompt).not.toHaveBeenCalled()
+          expect(mockAutomationClient.push).not.toHaveBeenCalled()
+        })
+
+        it('leaves other prompt types alone', async () => {
+          mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'confirm', handler: 'ignore' })
+
+          await flushPromises()
+
+          expect(mockWebdriverClient.browsingContextHandleUserPrompt).not.toHaveBeenCalled()
+          expect(mockAutomationClient.push).not.toHaveBeenCalled()
+        })
+      })
+
       describe('contextCreated / contextDestroyed', () => {
         beforeEach(() => {
           mockWebdriverClient.networkAddIntercept = vi.fn().mockResolvedValue({ intercept: 'mockInterceptId' })
@@ -2381,6 +2429,48 @@ describe('lib/browsers/bidi_automation', () => {
           bidiAutomationInstance.setTopLevelContextId(undefined)
 
           await expect(bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})).rejects.toThrow('Cannot perform user gesture: no top-level context initialized')
+        })
+      })
+
+      describe('activate:aut:frame', () => {
+        it('evaluates a no-op with user activation in a sandbox of the AUT context, without dispatching input', async () => {
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ type: 'success', realm: 'realm-1', result: { type: 'undefined' } })
+          mockWebdriverClient.inputPerformActions = vi.fn()
+
+          // @ts-expect-error - autContextId is private
+          bidiAutomationInstance.autContextId = '123'
+
+          const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('activate:aut:frame', {})
+
+          expect(returnValue).toBeUndefined()
+          expectCalledWith(mockWebdriverClient.scriptEvaluate, {
+            expression: 'void 0',
+            target: { context: '123', sandbox: '__cypress_user_activation__' },
+            awaitPromise: false,
+            userActivation: true,
+          })
+
+          expect(mockWebdriverClient.inputPerformActions).not.toHaveBeenCalled()
+        })
+
+        it('rejects if the evaluation throws', async () => {
+          mockWebdriverClient.scriptEvaluate = vi.fn().mockResolvedValue({ type: 'exception', realm: 'realm-1', exceptionDetails: { text: 'Error: no such frame' } })
+
+          // @ts-expect-error - autContextId is private
+          bidiAutomationInstance.autContextId = '123'
+
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('activate:aut:frame', {})).rejects.toThrow('Unable to activate the AUT frame: Error: no such frame')
+        })
+
+        it('fails gracefully if no AUT context is initialized', async () => {
+          // @ts-expect-error - autContextResolveTimeoutMs is private
+          bidiAutomationInstance.autContextResolveTimeoutMs = 0
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({ contexts: [] })
+
+          // @ts-expect-error - autContextId is private
+          bidiAutomationInstance.autContextId = undefined
+
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('activate:aut:frame', {})).rejects.toThrow('Cannot activate AUT frame: no AUT context initialized')
         })
       })
 

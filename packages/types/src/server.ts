@@ -187,6 +187,11 @@ export interface KeyPressParams {
   key: SupportedKey
 }
 
+export interface BeforeUnloadDialogAcceptedParams {
+  message: string
+  url: string
+}
+
 export interface AutomationCommands {
   'take:screenshot': CommandSignature
   'get:cookies': CommandSignature
@@ -210,6 +215,8 @@ export interface AutomationCommands {
   'response:received': CommandSignature
   'key:press': CommandSignature<KeyPressParams, void>
   'perform:user:gesture': CommandSignature<Record<string, never>, void>
+  'activate:aut:frame': CommandSignature<Record<string, never>, void>
+  'beforeunload:dialog:accepted': CommandSignature<BeforeUnloadDialogAcceptedParams, BeforeUnloadDialogAcceptedParams>
   'get:aut:url': CommandSignature<void, string>
   'reload:aut:frame': CommandSignature<{ forceReload: boolean }, void>
   'navigate:aut:history': CommandSignature<{ historyNumber: number }, void>

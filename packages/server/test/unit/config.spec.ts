@@ -790,6 +790,20 @@ describe('lib/config', () => {
         })
       })
 
+      describe('userActivation', () => {
+        it('passes if a boolean', () => {
+          setup({ userActivation: false })
+
+          return expectValidationPasses()
+        })
+
+        it('fails if not a boolean', () => {
+          setup({ userActivation: 'yes' })
+
+          return expectValidationFails('be a boolean')
+        })
+      })
+
       describe('waitForAnimations', () => {
         it('passes if a boolean', () => {
           setup({ waitForAnimations: false })

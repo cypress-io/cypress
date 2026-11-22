@@ -1187,6 +1187,112 @@ describe('lib/browsers/cdp_automation', () => {
       })
     })
 
+    describe('activate:aut:frame', () => {
+      beforeEach(() => {
+        sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree: {
+            frame: { id: 'top' },
+            childFrames: [{
+              frame: { id: 'aut', name: 'Your project: Fixture Project', url: 'http://localhost:3500/fixtures/dom.html' },
+            }],
+          },
+        })
+
+        sendDebuggerCommand.withArgs('Page.createIsolatedWorld').resolves({ executionContextId: 456 })
+      })
+
+      it('evaluates a no-op with a user gesture in an isolated world of the AUT frame, without dispatching input', async () => {
+        sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({ result: { type: 'undefined' } })
+
+        await onRequest('activate:aut:frame', {})
+
+        expectCalledWith(sendDebuggerCommand, 'Page.createIsolatedWorld', {
+          frameId: 'aut',
+          worldName: '__cypress_user_activation__',
+        })
+
+        expectCalledWith(sendDebuggerCommand, 'Runtime.evaluate', {
+          expression: 'void 0',
+          contextId: 456,
+          userGesture: true,
+        })
+
+        expectNotCalledWith(sendDebuggerCommand, 'Input.dispatchMouseEvent')
+        expectNotCalledWith(sendDebuggerCommand, 'Input.dispatchKeyEvent')
+      })
+
+      it('rejects if the evaluation throws', async () => {
+        sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({ result: { type: 'object' }, exceptionDetails: { text: 'Uncaught' } })
+
+        await expect(onRequest('activate:aut:frame', {})).rejects.toThrow('Unable to activate the AUT frame: Uncaught')
+      })
+    })
+
+    describe('.onJavascriptDialogOpening', () => {
+      const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
+      const dialog = { url: 'http://localhost:3500/fixtures/dom.html', message: '', hasBrowserHandler: true }
+
+      beforeEach(() => {
+        automation.push = vi.fn().mockResolvedValue(undefined)
+
+        sendDebuggerCommand.withArgs('Page.getFrameTree').resolves({
+          frameTree: { frame: { id: 'top' }, childFrames: [{ frame: { id: 'aut', name: 'Your project: Fixture Project' } }] },
+        })
+
+        sendDebuggerCommand.withArgs('Page.createIsolatedWorld').resolves({ executionContextId: 456 })
+        sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({ result: { type: 'undefined' } })
+        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').resolves()
+      })
+
+      it('accepts and reports a beforeunload dialog from the AUT', async () => {
+        onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'beforeunload' })
+
+        await flush()
+
+        expectCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog', { accept: true })
+        expectCalledWith(automation.push, 'beforeunload:dialog:accepted', { message: '', url: dialog.url })
+      })
+
+      // an open dialog blocks Page.getFrameTree until it is answered
+      it('does not query the frame tree while the dialog is open', async () => {
+        onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'beforeunload' })
+
+        await flush()
+
+        expectNotCalledWith(sendDebuggerCommand, 'Page.getFrameTree')
+      })
+
+      it('leaves a beforeunload dialog from the top frame for the user', async () => {
+        await onRequest('activate:aut:frame', {})
+
+        onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'top', type: 'beforeunload' })
+
+        await flush()
+
+        expectNotCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog')
+        expect(automation.push).not.toHaveBeenCalled()
+      })
+
+      it('leaves other dialog types alone', async () => {
+        onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'confirm' })
+
+        await flush()
+
+        expectNotCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog')
+        expect(automation.push).not.toHaveBeenCalled()
+      })
+
+      it('does not report a dialog it failed to accept', async () => {
+        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').rejects(new Error('No dialog is showing'))
+
+        onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'beforeunload' })
+
+        await flush()
+
+        expect(automation.push).not.toHaveBeenCalled()
+      })
+    })
+
     describe('isAUTFrame', () => {
       afterEach(() => {
         delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF

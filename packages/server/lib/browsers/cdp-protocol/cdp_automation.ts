@@ -27,6 +27,7 @@ import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
+import { cdpActivateFrame } from '../../automation/commands/user_activation'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -82,6 +83,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
   private autFrameId: string | undefined
+  private topFrameId: string | undefined
   private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
@@ -96,6 +98,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     onFn('Runtime.executionContextCreated', this.onExecutionContextCreated)
     onFn('Runtime.executionContextDestroyed', this.onExecutionContextDestroyed)
+
+    onFn('Page.javascriptDialogOpening', this.onJavascriptDialogOpening)
 
     this.on = onFn
     this.off = offFn
@@ -323,6 +327,37 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
   }
 
+  // A page with sticky user activation can open a "Leave site?" dialog from a `beforeunload`
+  // handler. Nobody answers it during a run, so navigation would wait on it forever. Accept
+  // the dialog so the navigation goes ahead, as it would if the page had no handler.
+  // Other dialog types come from the AUT's alert/confirm/prompt, which the driver stubs.
+  // A dialog from the top frame is the runner's own, such as Studio's unsaved changes
+  // warning, and is left for the user to answer. The top frame is looked up ahead of
+  // time because an open dialog blocks Page.getFrameTree until it is answered.
+  private onJavascriptDialogOpening = async (params: Protocol.Page.JavascriptDialogOpeningEvent) => {
+    if (params.type !== 'beforeunload') {
+      return
+    }
+
+    if (params.frameId === (this.topFrameId ?? this.frameTree?.frame.id)) {
+      debug('leaving beforeunload dialog from the top frame %o', { url: params.url })
+
+      return
+    }
+
+    debug('accepting beforeunload dialog %o', { url: params.url, frameId: params.frameId })
+
+    try {
+      await this.sendDebuggerCommandFn('Page.handleJavaScriptDialog', { accept: true })
+    } catch (err) {
+      debug('failed to accept beforeunload dialog: %s', err?.message)
+
+      return
+    }
+
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: params.url })
+  }
+
   private getAllCookies = async (filter: CyCookieFilter) => {
     const result: Protocol.Network.GetAllCookiesResponse = await this.sendDebuggerCommandFn('Network.getAllCookies')
 
@@ -495,6 +530,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       }
 
       const frameTree = (await this.send('Page.getFrameTree')).frameTree
+
+      this.topFrameId = frameTree?.frame?.id ?? this.topFrameId
 
       let frame = this._findAutFrame(frameTree)
 
@@ -686,6 +723,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return cdpNavigateHistory(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame(), data.historyNumber)
       case 'get:aut:title':
         return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
+      case 'activate:aut:frame':
+        return cdpActivateFrame(this.sendDebuggerCommandFn, await this._getAutFrame())
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

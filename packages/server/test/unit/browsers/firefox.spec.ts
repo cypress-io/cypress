@@ -416,6 +416,7 @@ describe('lib/browsers/firefox', () => {
           'network.fetchError',
           'browsingContext.contextCreated',
           'browsingContext.contextDestroyed',
+          'browsingContext.userPromptOpened',
         ] })
 
         expectCalledWith(wdInstance.browsingContextGetTree, {})

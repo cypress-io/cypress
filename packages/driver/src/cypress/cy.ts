@@ -38,6 +38,7 @@ import { create as createSnapshots } from '../cy/snapshots'
 import { $Command } from './command'
 import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
+import { activateAut } from '../cy/user-activation'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
 import type { IOverrides } from '../cy/overrides'
 import { create as createOverrides } from '../cy/overrides'
@@ -576,6 +577,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           // we may need to update the url now
           this.urlNavigationEvent('load')
         }
+
+        // before window:load, so its handlers and the next command see an activated page
+        await activateAut(this.Cypress, autWindow)
 
         // stability is signalled after the window:load event to give event
         // listeners time to be invoked prior to moving on, but not if

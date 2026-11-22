@@ -473,6 +473,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isValidTrustedCertificates,
     requireRestartOnChange: 'browser',
   }, {
+    name: 'userActivation',
+    defaultValue: true,
+    validation: validate.isBoolean,
+    overrideLevel: 'any',
+  }, {
     name: 'userAgent',
     defaultValue: null,
     validation: validate.isString,

@@ -17,6 +17,7 @@ import type {
   NetworkResponseCompletedParameters,
   NetworkFetchErrorParameters,
   BrowsingContextInfo,
+  BrowsingContextUserPromptOpenedParameters,
 } from 'webdriver/build/bidi/localTypes'
 import type { CyCookie as CyBaseCookie } from '../automation/cookie/util'
 import type { BidiCyCookie as CyCookie, StoragePartialCookie } from '../automation/cookie/converters/bidi'
@@ -25,6 +26,7 @@ import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
+import { bidiActivateContext } from '../automation/commands/user_activation'
 import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -118,6 +120,7 @@ export class BidiAutomation {
     'network.fetchError',
     'browsingContext.contextCreated',
     'browsingContext.contextDestroyed',
+    'browsingContext.userPromptOpened',
   ]
 
   private webDriverClient: WebDriverClient
@@ -154,6 +157,34 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+    this.webDriverClient.on('browsingContext.userPromptOpened', this.onUserPromptOpened)
+  }
+
+  // A page with sticky user activation can open a "Leave site?" dialog from a `beforeunload`
+  // handler. Nobody answers it during a run, so navigation would wait on it forever. Accept
+  // the dialog so the navigation goes ahead, as it would if the page had no handler.
+  // `handler` is what the session's prompt handler already does with it: Firefox accepts
+  // `beforeunload` prompts on its own unless that handler is `ignore`.
+  private onUserPromptOpened = async (params: BrowsingContextUserPromptOpenedParameters) => {
+    if (params.type !== 'beforeunload') {
+      return
+    }
+
+    debug('received beforeunload prompt %o', params)
+
+    if (params.handler === 'ignore') {
+      try {
+        await this.webDriverClient.browsingContextHandleUserPrompt({ context: params.context, accept: true })
+      } catch (err) {
+        debug('failed to accept beforeunload prompt: %s', err?.message)
+
+        return
+      }
+    } else if (params.handler !== 'accept') {
+      return
+    }
+
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: '' })
   }
 
   setTopLevelContextId = (contextId?: string) => {
@@ -649,6 +680,7 @@ export class BidiAutomation {
     this.webDriverClient.off('network.fetchError', this.onFetchError)
     this.webDriverClient.off('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.off('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+    this.webDriverClient.off('browsingContext.userPromptOpened', this.onUserPromptOpened)
   }
 
   static create (webdriverClient: WebDriverClient, automation: Automation) {
@@ -820,6 +852,14 @@ export class BidiAutomation {
           }
 
           return
+        case 'activate:aut:frame':
+        {
+          const autContextId = await this.ensureAutContextId('Cannot activate AUT frame: no AUT context initialized')
+
+          await bidiActivateContext(this.webDriverClient, autContextId)
+
+          return
+        }
         case 'get:aut:url':
         {
           const autContextId = await this.ensureAutContextId('Cannot get AUT url: no AUT context initialized')

@@ -323,6 +323,10 @@ export = {
     // @see https://github.com/cypress-io/cypress/issues/2118
     win.webContents.on('will-prevent-unload', (event) => {
       event.preventDefault()
+
+      automation.push('beforeunload:dialog:accepted', { message: '', url: '' }).catch((err) => {
+        debug('failed to report accepted beforeunload dialog: %s', err?.message)
+      })
     })
 
     let cdpAutomation
