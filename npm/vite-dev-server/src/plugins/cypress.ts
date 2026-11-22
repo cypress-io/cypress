@@ -1,5 +1,5 @@
 import debugFn from 'debug'
-import type { ModuleNode, PluginOption, ViteDevServer } from 'vite-8'
+import type { ModuleNode, PluginOption, UserConfig, ViteDevServer } from 'vite-8'
 import type { Vite } from '../getVite.js'
 import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'
@@ -26,6 +26,36 @@ function getSpecsPathsSet (specs: Spec[]) {
   return new Set<string>(
     specs.map((spec) => spec.absolute),
   )
+}
+
+/**
+ * Used as `oxc.jsxRefreshInclude` when no plugin set one. With only `jsxRefreshExclude` set, Vite builds
+ * `createFilter(undefined, exclude)`, which matches every other path, so CSS would reach `transformWithOxc` and fail.
+ */
+export const JSX_REFRESH_SCRIPT_RE = /\.(?:[cm]?js|[cm]?ts|[jt]sx)$/
+
+/**
+ * Adds the specs to `oxc.jsxRefreshExclude` when React Fast Refresh is on, and leaves `oxc` alone otherwise.
+ *
+ * With refresh on, `@vitejs/plugin-react` wraps JSX specs in `import.meta.hot.accept`, so headed mode
+ * re-evaluates a spec and registers its tests twice (https://github.com/cypress-io/cypress/issues/33750).
+ *
+ * Vite's oxc plugin compiles every file that `jsxRefreshInclude` matches, even one that `oxc.include`
+ * leaves out, and with React JSX. `@vitejs/plugin-vue-jsx` narrows `oxc.include` to `.ts` so that it can
+ * compile `.jsx` and `.tsx` itself, so setting these filters without refresh compiles a Vue project's
+ * non-spec JSX, such as a `.jsx` support file, as React.
+ */
+function excludeSpecsFromJsxRefresh (oxc: UserConfig['oxc'], specs: Spec[]): UserConfig | undefined {
+  if (!oxc || typeof oxc.jsx !== 'object' || !oxc.jsx.refresh) {
+    return undefined
+  }
+
+  return {
+    oxc: {
+      ...(oxc.jsxRefreshInclude ? {} : { jsxRefreshInclude: JSX_REFRESH_SCRIPT_RE }),
+      jsxRefreshExclude: specs.map((spec) => spec.absolute),
+    },
+  }
 }
 
 export const Cypress = (
@@ -59,6 +89,13 @@ export const Cypress = (
   return {
     name: 'cypress:main',
     enforce: 'pre',
+    config: {
+      // Runs after plugins' own `config` hooks, so `oxc.jsx.refresh` is final.
+      order: 'post',
+      handler (config) {
+        return excludeSpecsFromJsxRefresh(config.oxc, specs)
+      },
+    },
     configResolved (config) {
       base = config.base
     },

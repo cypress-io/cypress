@@ -153,6 +153,14 @@ describe('Vue major versions with Vite', () => {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  systemTests.it('vue 3 with a .jsx support file compiled by @vitejs/plugin-vue-jsx', {
+    project: 'vue3-vite-jsx-support-file',
+    testingType: 'component',
+    spec: 'src/Greeting.cy.ts',
+    browser: 'electron',
+    expectedExitCode: 0,
+  })
 })
 
 describe('experimentalSingleTabRunMode', function () {

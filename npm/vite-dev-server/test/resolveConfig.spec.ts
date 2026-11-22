@@ -4,7 +4,8 @@ import { vi, describe, it, beforeEach, expect } from 'vitest'
 import { EventEmitter } from 'events'
 import * as vite8 from 'vite-8'
 import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
-import { createViteDevServerConfig, JSX_REFRESH_SCRIPT_RE } from '../src/resolveConfig'
+import { createViteDevServerConfig } from '../src/resolveConfig'
+import { JSX_REFRESH_SCRIPT_RE } from '../src/plugins/cypress'
 import type { ViteDevServerConfig } from '../src/devServer'
 
 const getViteDevServerConfig = (projectRoot: string) => {
@@ -105,15 +106,18 @@ describe('resolveConfig', function () {
   describe('Vite JSX refresh excludes component specs', () => {
     // Real package root so createRequire can resolve `vite` like a consumer project; inline viteConfig skips fixture scaffolding.
     const viteDevServerPackageRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
+    const specAbsolutes = [
+      path.join(viteDevServerPackageRoot, 'src', 'Hello.cy.tsx'),
+      path.join(viteDevServerPackageRoot, 'src', 'Other.cy.tsx'),
+    ]
+    const supportFile = path.join(viteDevServerPackageRoot, 'cypress', 'support', 'component.jsx')
 
-    it('sets oxc.jsxRefreshInclude and jsxRefreshExclude from Cypress specs', async () => {
-      const specAbsolutes = [
-        path.join(viteDevServerPackageRoot, 'src', 'Hello.cy.tsx'),
-        path.join(viteDevServerPackageRoot, 'src', 'Other.cy.tsx'),
-      ]
+    const resolveOxc = async (plugins: vite8.PluginOption[]) => {
+      const baseConfig = getViteDevServerConfig(viteDevServerPackageRoot)
       const viteDevServerConfig = {
-        ...getViteDevServerConfig(viteDevServerPackageRoot),
-        viteConfig: {},
+        ...baseConfig,
+        cypressConfig: { ...baseConfig.cypressConfig, cypressBinaryRoot: viteDevServerPackageRoot },
+        viteConfig: { plugins },
         specs: [
           { absolute: specAbsolutes[0], relative: 'src/Hello.cy.tsx' },
           { absolute: specAbsolutes[1], relative: 'src/Other.cy.tsx' },
@@ -122,8 +126,68 @@ describe('resolveConfig', function () {
 
       const viteConfig = await createViteDevServerConfig(viteDevServerConfig, vite8)
 
-      expect(viteConfig.oxc?.jsxRefreshInclude).to.equal(JSX_REFRESH_SCRIPT_RE)
-      expect(viteConfig.oxc?.jsxRefreshExclude).to.eql(specAbsolutes)
+      return viteConfig
+    }
+
+    // Stands in for `@vitejs/plugin-react`'s `config` hook.
+    const reactRefresh = (oxc: vite8.UserConfig['oxc'] = { jsx: { runtime: 'automatic', refresh: true } }): vite8.Plugin => {
+      return { name: 'react-refresh-stand-in', enforce: 'pre', config: () => ({ oxc }) }
+    }
+
+    // Stands in for `@vitejs/plugin-vue-jsx`: it narrows `oxc.include` and compiles `.jsx` itself.
+    // `load` serves the support file so the test needs no file on disk.
+    const vueJsx: vite8.Plugin = {
+      name: 'vue-jsx-stand-in',
+      config: () => ({ oxc: { include: /\.ts$/ } }),
+      resolveId: (id) => id === '/cypress/support/component.jsx' ? supportFile : undefined,
+      load: (id) => id === supportFile ? 'export const el = <div class="wrap" />' : undefined,
+      transform: (code, id) => {
+        if (id === supportFile) {
+          return `export const compiledBy = ${JSON.stringify(code.includes('<div') ? 'vue-jsx' : 'oxc')}`
+        }
+      },
+    }
+
+    it('excludes Cypress specs from JSX refresh when React Fast Refresh is on', async () => {
+      const viteConfig = await resolveOxc([reactRefresh()])
+      const resolved = await vite8.resolveConfig(viteConfig, 'serve')
+
+      expect(resolved.oxc && resolved.oxc.jsxRefreshInclude).to.equal(JSX_REFRESH_SCRIPT_RE)
+      expect(resolved.oxc && resolved.oxc.jsxRefreshExclude).to.eql(specAbsolutes)
+    })
+
+    it('keeps the JSX refresh filters a plugin already set', async () => {
+      const viteConfig = await resolveOxc([reactRefresh({
+        jsx: { runtime: 'automatic', refresh: true },
+        jsxRefreshInclude: /\.[tj]sx?$/,
+        jsxRefreshExclude: /\/node_modules\//,
+      })])
+      const resolved = await vite8.resolveConfig(viteConfig, 'serve')
+
+      expect(resolved.oxc && resolved.oxc.jsxRefreshInclude).to.eql(/\.[tj]sx?$/)
+      expect(resolved.oxc && resolved.oxc.jsxRefreshExclude).to.eql([/\/node_modules\//, ...specAbsolutes])
+    })
+
+    it('leaves oxc alone when JSX refresh is off', async () => {
+      const viteConfig = await resolveOxc([vueJsx])
+      const resolved = await vite8.resolveConfig(viteConfig, 'serve')
+
+      expect(viteConfig.oxc).toBeUndefined()
+      expect(resolved.oxc && resolved.oxc.jsxRefreshInclude).toBeUndefined()
+      expect(resolved.oxc && resolved.oxc.jsxRefreshExclude).toBeUndefined()
+    })
+
+    it('leaves a Vue project\'s non-spec .jsx files to its JSX plugin instead of compiling them as React', async () => {
+      const viteConfig = await resolveOxc([vueJsx])
+      const server = await vite8.createServer({ ...viteConfig, logLevel: 'silent', server: { ...viteConfig.server, middlewareMode: true, hmr: false } })
+
+      try {
+        const result = await server.transformRequest('/cypress/support/component.jsx')
+
+        expect(result?.code).to.contain('compiledBy = "vue-jsx"')
+      } finally {
+        await server.close()
+      }
     })
 
     it('matches only script-like paths so imported CSS (e.g. support files) is not run through transformWithOxc', () => {

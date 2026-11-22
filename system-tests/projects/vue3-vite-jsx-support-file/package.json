@@ -1,0 +1,13 @@
+{
+  "name": "vue3-vite-jsx-support-file",
+  "version": "0.0.0-test",
+  "dependencies": {
+    "vue": "^3.5.33"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vitejs/plugin-vue-jsx": "^5.1.6",
+    "vite": "^8.0.9"
+  },
+  "type": "module"
+}

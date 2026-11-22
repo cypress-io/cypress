@@ -3,15 +3,18 @@ import { baseConfig, chaiFriendlyConfig, jsonConfig, mochaConfig, nodeConfig, re
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
-// Every JSX file under the fixtures belongs to a React or Next.js project. The
-// Next.js projects also write pages as JSX in `.js` files
+// Every JSX file under the fixtures belongs to a React or Next.js project,
+// except in the Vue JSX projects below. The Next.js projects also write pages
+// as JSX in `.js` files
 const fixtureReactFiles = [
   ...fixtureDirs.map((dir) => `${dir}/*.{jsx,tsx}`),
   'project-fixtures/next/**/*.js',
   'projects/nextjs-*/**/*.js',
 ]
+// Vue JSX takes `class` and other DOM attribute names that React's rules reject
+const fixtureVueJsxDirs = ['projects/vue3-vite-jsx-support-file/**']
 
-const fixtureReactConfig = reactConfig(fixtureReactFiles)
+const fixtureReactConfig = { ...reactConfig(fixtureReactFiles), ignores: fixtureVueJsxDirs }
 
 const plugins = Object.assign({}, ...[...baseConfig, fixtureReactConfig].map((config) => config.plugins ?? {}))
 
@@ -126,6 +129,7 @@ export default [
   fixtureReactConfig,
   {
     files: fixtureReactFiles,
+    ignores: fixtureVueJsxDirs,
     rules: {
       // the fixture block above turns off baseConfig's layout rules, but the
       // React plugin is only loaded for these files
