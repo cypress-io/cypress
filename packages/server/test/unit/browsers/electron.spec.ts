@@ -1097,12 +1097,26 @@ describe('lib/browsers/electron', () => {
       expect(captureScreenshot.mock.invocationCallOrder[0]).toBeLessThan(pageCriClient.send.mock.invocationCallOrder[1])
     })
 
-    it('leaves the run-mode screencast running when video is disabled', async () => {
+    it('swaps the run-mode no-op screencast for a real one around the screenshot and restores it when video is disabled', async () => {
       const result = await takeScreenshot({ isTextTerminal: true })
 
       expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
-      expectNotCalledWith(pageCriClient.send, 'Page.startScreencast', anyArg)
-      expectNotCalledWith(pageCriClient.send, 'Page.stopScreencast')
+      expect(pageCriClient.send.mock.calls).toStrictEqual([
+        ['Page.stopScreencast'],
+        ['Page.startScreencast', screencastOpts()],
+        ['Page.stopScreencast'],
+        ['Page.startScreencast', { format: 'jpeg', everyNthFrame: 2 ** 31 - 1, quality: 0 }],
+      ])
+
+      expect(pageCriClient.send.mock.invocationCallOrder[1]).toBeLessThan(captureScreenshot.mock.invocationCallOrder[0])
+      expect(captureScreenshot.mock.invocationCallOrder[0]).toBeLessThan(pageCriClient.send.mock.invocationCallOrder[2])
+    })
+
+    it('restores the run-mode no-op screencast when the screenshot fails', async () => {
+      captureScreenshot.mockRejectedValue(new Error('The browser responded with an error when Cypress attempted to take a screenshot.'))
+
+      await expect(takeScreenshot({ isTextTerminal: true })).rejects.toThrow('attempted to take a screenshot')
+      expect(pageCriClient.send.mock.calls.at(-1)).toStrictEqual(['Page.startScreencast', { format: 'jpeg', everyNthFrame: 2 ** 31 - 1, quality: 0 }])
     })
 
     it('leaves the video screencast running when video is enabled', async () => {
