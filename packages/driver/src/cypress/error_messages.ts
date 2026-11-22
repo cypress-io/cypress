@@ -1418,11 +1418,17 @@ export default {
 
       Please restart the app to get the latest version.
     `,
-    promptProxyError: {
-      message: stripIndent`\
-      \`cy.prompt\` requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.
+    promptCertError (obj) {
+      return {
+        message: stripIndent`\
+        \`cy.prompt\` could not verify the certificate for its connection to Cypress Cloud:
+
+        - ${obj.error.code}: ${obj.error.message}
+
+        If your network inspects HTTPS traffic, trust your organization's certificate authority with \`NODE_EXTRA_CA_CERTS\`. If you connect through a proxy, configure Cypress with your proxy settings.
       `,
-      docsUrl: 'https://on.cypress.io/proxy-configuration',
+        docsUrl: 'https://on.cypress.io/proxy-configuration',
+      }
     },
   },
 

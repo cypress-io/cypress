@@ -35,10 +35,12 @@ describe('src/cy/commands/prompt', () => {
     cy.prompt(['Hello, world!'])
   })
 
-  it('errors with a proxy error', (done) => {
+  // https://github.com/cypress-io/cypress/issues/33105
+  it('errors with a certificate error that names the code and points to trusting a custom CA', (done) => {
     const backendStub = cy.stub(Cypress, 'backend').log(false)
 
-    const error = new Error('UNABLE_TO_VERIFY_LEAF_SIGNATURE')
+    // Node's message for this code, as raised by its TLS socket
+    const error = new Error('unable to verify the first certificate')
 
     ;(error as any).code = 'UNABLE_TO_VERIFY_LEAF_SIGNATURE'
 
@@ -46,7 +48,10 @@ describe('src/cy/commands/prompt', () => {
     backendStub.withArgs('wait:for:prompt:ready').resolves({ success: false, error })
 
     cy.on('fail', (err) => {
-      expect(err.message).to.include('`cy.prompt` requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.')
+      expect(err.message).to.include('`cy.prompt` could not verify the certificate for its connection to Cypress Cloud')
+      expect(err.message).to.include('UNABLE_TO_VERIFY_LEAF_SIGNATURE: unable to verify the first certificate')
+      expect(err.message).to.include('trust your organization\'s certificate authority with `NODE_EXTRA_CA_CERTS`')
+      expect(err.message).to.include('If you connect through a proxy, configure Cypress with your proxy settings.')
       done()
     })
 

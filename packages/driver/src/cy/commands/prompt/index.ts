@@ -41,7 +41,7 @@ const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDrive
 
   if (error) {
     if ('code' in error && isNonRetriableCertErrorCode(error.code as string)) {
-      $errUtils.throwErrByPath('prompt.promptProxyError', {
+      $errUtils.throwErrByPath('prompt.promptCertError', {
         args: {
           error,
         },

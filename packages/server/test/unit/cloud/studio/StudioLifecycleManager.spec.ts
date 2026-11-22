@@ -1026,6 +1026,55 @@ describe('StudioLifecycleManager', () => {
     })
   })
 
+  describe('getCertErrorCode', () => {
+    it('returns undefined when no error code is stored', () => {
+      expect(studioLifecycleManager.getCertErrorCode()).toBeUndefined()
+    })
+
+    it('returns undefined when error code is not a cert error', () => {
+      const error = new Error('connect ECONNREFUSED 127.0.0.1:443') as any
+
+      error.code = 'ECONNREFUSED'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+      expect(studioLifecycleManager.getCertErrorCode()).toBeUndefined()
+    })
+
+    it('returns the code for a cert error', () => {
+      const error = new Error('self-signed certificate in certificate chain') as any
+
+      error.code = 'SELF_SIGNED_CERT_IN_CHAIN'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+      expect(studioLifecycleManager.getCertErrorCode()).toBe('SELF_SIGNED_CERT_IN_CHAIN')
+    })
+
+    it('returns the code of the last error in an AggregateError', () => {
+      const error1 = new Error('connect ECONNREFUSED 127.0.0.1:443') as any
+
+      error1.code = 'ECONNREFUSED'
+      const error2 = new Error('unable to get local issuer certificate') as any
+
+      error2.code = 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', new AggregateError([error1, error2], 'Multiple errors'))
+
+      expect(studioLifecycleManager.getCertErrorCode()).toBe('UNABLE_TO_GET_ISSUER_CERT_LOCALLY')
+    })
+
+    it('returns undefined when status is not IN_ERROR', () => {
+      const error = new Error('certificate has expired') as any
+
+      error.code = 'CERT_HAS_EXPIRED'
+
+      studioLifecycleManager.updateStatus('INITIALIZING', error)
+
+      expect(studioLifecycleManager.getCertErrorCode()).toBeUndefined()
+    })
+  })
+
   describe('retry', () => {
     it('clears state and re-initializes studio manager', async () => {
       // Cloud studio is enabled

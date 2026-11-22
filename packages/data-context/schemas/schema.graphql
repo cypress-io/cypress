@@ -2290,6 +2290,11 @@ enum SpecType {
 type StudioStatusPayload {
   canAccessStudioAI: Boolean!
 
+  """
+  The Node.js TLS error code, such as SELF_SIGNED_CERT_IN_CHAIN, when isCertError is true
+  """
+  certErrorCode: String
+
   """Whether the studio status is an IN_ERROR due to a certificate error"""
   isCertError: Boolean
   status: StudioStatusType!

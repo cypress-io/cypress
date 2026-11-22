@@ -15,6 +15,10 @@ export const StudioStatusPayload = objectType({
       description: 'Whether the studio status is an IN_ERROR due to a certificate error',
     })
 
+    t.string('certErrorCode', {
+      description: 'The Node.js TLS error code, such as SELF_SIGNED_CERT_IN_CHAIN, when isCertError is true',
+    })
+
     t.nonNull.boolean('canAccessStudioAI')
   },
 })
@@ -75,6 +79,7 @@ export const Subscription = subscriptionType({
           return {
             status: 'IN_ERROR' as const,
             isCertError: ctx.coreData.studioLifecycleManager?.getIsCertError(),
+            certErrorCode: ctx.coreData.studioLifecycleManager?.getCertErrorCode(),
             canAccessStudioAI: false,
           }
         }

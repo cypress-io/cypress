@@ -423,8 +423,16 @@ export class StudioLifecycleManager {
     return this.lastStatus
   }
 
+  public getCertErrorCode (): string | undefined {
+    if (this.lastStatus === 'IN_ERROR' && this.lastErrorCode && isNonRetriableCertErrorCode(this.lastErrorCode)) {
+      return this.lastErrorCode
+    }
+
+    return undefined
+  }
+
   public getIsCertError (): boolean {
-    return !!(this.lastStatus === 'IN_ERROR' && this.lastErrorCode && isNonRetriableCertErrorCode(this.lastErrorCode))
+    return !!this.getCertErrorCode()
   }
 
   public async retry (): Promise<void> {

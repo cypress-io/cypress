@@ -110,6 +110,7 @@
             :event-manager="eventManager"
             :studio-status="studioStatus"
             :is-cert-error="isCertError"
+            :cert-error-code="certErrorCode"
             :aut-url-selector="autUrlSelector"
             :user-project-status-store="userProjectStatusStore"
             :has-requested-project-access="hasRequestedProjectAccess"
@@ -261,6 +262,7 @@ subscription StudioStatus_Change {
   studioStatusChange {
     status
     isCertError
+    certErrorCode
     canAccessStudioAI
   }
 }
@@ -330,11 +332,13 @@ const isSpecsListOpenPreferences = computed(() => {
 // Initialize and wait for subscription to update
 const studioStatus = ref<string | null>(null)
 const isCertError = ref<boolean | null>(null)
+const certErrorCode = ref<string | null>(null)
 
 useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
   if (data?.studioStatusChange) {
     studioStatus.value = data.studioStatusChange.status
     isCertError.value = data.studioStatusChange.isCertError
+    certErrorCode.value = data.studioStatusChange.certErrorCode ?? null
     studioStore.setCanAccessStudioAI(data.studioStatusChange.canAccessStudioAI)
   }
 

@@ -66,6 +66,7 @@ const props = defineProps<{
   eventManager: EventManager
   studioStatus: string | null
   isCertError?: boolean | null
+  certErrorCode?: string | null
   cloudStudioSessionId?: string
   autUrlSelector: string
   userProjectStatusStore: UserProjectStatusStore
@@ -107,8 +108,8 @@ const onCloseSelectorPlayground = () => {
 const errorPanelProps = computed(() => {
   if (props.isCertError) {
     return {
-      title: 'Configure your proxy to use Cypress Studio',
-      message: 'Cypress Studio requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.',
+      title: 'Cypress Studio can\'t verify the Cypress Cloud certificate',
+      message: `Cypress Studio loads from Cypress Cloud, but the certificate for that connection could not be verified${props.certErrorCode ? ` (${props.certErrorCode})` : ''}. If your network inspects HTTPS traffic, trust your organization's certificate authority with NODE_EXTRA_CA_CERTS. If you connect through a proxy, configure Cypress with your proxy settings.`,
       icon: () => {
         return h(IconCypressStudio, {
           size: '48',
