@@ -48,7 +48,8 @@ export const utils = {
       debug('%s not found, spawning %s without an architecture preference', MACOS_ARCH_PATH, cmd)
     }
 
-    // Outside of darwin-arm64, we can rely on the OS to launch the correct architecture of the browser.
+    // Outside of darwin-arm64, the OS launches the correct architecture of the browser. In the
+    // darwin-arm64 fallback above, macOS may launch the x86_64 version under Rosetta instead.
     return cp.spawn(cmd, args, opts)
   },
   getOutput: (cmd: string, args: string[]): Bluebird<{ stdout: string, stderr?: string }> => {
