@@ -35,9 +35,10 @@ const productionBundleConfig: webpack.Configuration = process.env.NODE_ENV === '
         // frames by those names, so nothing is renamed or inlined
         mangle: false,
         compress: false,
-        format: { ascii_only: true, comments: 'some' },
+        format: { ascii_only: true },
       },
-      extractComments: false,
+      // ascii_only doesn't escape comments, and license headers such as jQuery.scrollTo's aren't ASCII
+      extractComments: true,
     })],
   },
 } : {}
