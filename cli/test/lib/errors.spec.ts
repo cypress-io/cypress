@@ -233,5 +233,22 @@ describe('errors', function () {
       expect(text).toContain(`did not persist: ${cacheFolder}`)
       expect(text).not.toContain(util.getCacheDir())
     })
+
+    it('names blocked install scripts as a reason and links to the package manager setup', async () => {
+      const text: string = await formErrorText(errors.notInstalledCI('/home/jane/.cache/Cypress/16.4.0/Cypress/Cypress'))
+
+      expect(text).toContain('Your package manager blocks install scripts, so it skipped the postinstall script that downloads the binary')
+      expect(text).toContain('https://on.cypress.io/app/get-started/install-cypress#Package-Manager')
+    })
+  })
+
+  describe('.errors.missingApp', function () {
+    it('suggests allowing the install script and links to the package manager setup', async () => {
+      const text: string = await formErrorText(errors.missingApp('/home/jane/.cache/Cypress/16.4.0/Cypress'))
+
+      expect(text).toContain('cypress install')
+      expect(text).toContain('If your package manager blocks install scripts, it skipped the postinstall script that downloads the Cypress binary')
+      expect(text).toContain('https://on.cypress.io/app/get-started/install-cypress#Package-Manager')
+    })
   })
 })
