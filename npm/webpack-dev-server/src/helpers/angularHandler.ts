@@ -141,16 +141,23 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
 
   const types = ['cypress']
 
+  const outDir = getProjectFilePath(projectRoot, 'out-tsc/cy')
+
   const tsConfigContent = JSON.stringify({
     extends: getProjectFilePath(projectRoot, buildOptions.tsConfig ?? 'tsconfig.json'),
     compilerOptions: {
-      outDir: getProjectFilePath(projectRoot, 'out-tsc/cy'),
+      outDir,
       allowSyntheticDefaultImports: true,
       skipLibCheck: true,
       types,
       typeRoots,
     },
     include: includePaths,
+    // The extended tsconfig is usually the app build's, whose `exclude` keeps test files out of
+    // `ng build` (for example `src/**/*.cy.ts`). `include` is replaced here but `exclude` would
+    // be inherited, filtering out the very specs Cypress needs to compile. Listing `outDir` keeps
+    // the one default TypeScript applies when `exclude` is unset that `**` doesn't already skip.
+    exclude: [outDir],
   }, null, 2)
 
   const tsConfigPath = path.join(await getTempDir(path.basename(projectRoot), projectRoot), 'tsconfig.json')
