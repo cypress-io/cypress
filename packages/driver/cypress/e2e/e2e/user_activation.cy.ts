@@ -43,7 +43,7 @@ describe('user activation', { browser: '!webkit' }, () => {
   it('activates a document the AUT navigates to', () => {
     cy.visit('/fixtures/user-activation.html')
     cy.window().then((win) => {
-      // a document's activation ends with it, so this property doesn't survive the navigation
+      // marks this document, so the check below is sure to run on the one the AUT navigates to
       win.isFirstPage = true
     })
 
@@ -290,8 +290,8 @@ describe('user activation', { browser: '!webkit' }, () => {
       cy.wrap(beforeUnloadLogs).should('have.length', 1)
     })
 
-    // the next test's navigation to about:blank answers this page's dialog, so a hang
-    // here shows up as the next test timing out
+    // the next test's navigation to about:blank opens this page's dialog, so if
+    // Cypress didn't answer it, the next test would time out
     it('leaves a page with a beforeunload handler for the next test', () => {
       cy.visit('/fixtures/user-activation.html?beforeunload')
     })

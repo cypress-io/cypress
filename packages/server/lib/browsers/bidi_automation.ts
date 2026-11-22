@@ -184,9 +184,9 @@ export class BidiAutomation {
       return
     }
 
-    // The prompt belongs to the top-level context, so its URL is the runner's. The
-    // handlers Cypress answers for come from the AUT, so the dialog is reported with
-    // the AUT's URL.
+    // The prompt belongs to the top-level context, whose URL is the runner's. The
+    // dialogs Cypress accepts during a test come from the AUT, so the dialog is
+    // reported with the AUT's URL.
     let url = ''
 
     try {

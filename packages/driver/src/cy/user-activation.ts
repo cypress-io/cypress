@@ -9,7 +9,7 @@ const debug = Debug('cypress:driver:user-activation')
 // must not wait on it any longer.
 const ACTIVATION_TIMEOUT_MS = 2000
 
-// what activating the AUT needs from Cypress
+// only the parts of Cypress that activating the AUT uses, so a unit test can supply them
 interface ActivationHost {
   config: (key: 'userActivation') => unknown
   isBrowser: (matcher: 'webkit') => boolean

@@ -288,8 +288,8 @@ export default function (Commands, Cypress, cy, state, config) {
         $el: options.$el,
         chars,
         delay: options.delay,
-        // a real key press gives fresh activation on every keydown, so a long string
-        // keeps the activation the command's actionability attempt gave it
+        // renews the activation between keys once it may have run low, as every real
+        // keydown does, so the last keys of a long string still have it
         onBeforeKey: createTransientActivationRenewer(Cypress, { justRenewed: true }),
         release: options.release,
         parseSpecialCharSequences: options.parseSpecialCharSequences,

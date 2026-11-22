@@ -20,8 +20,8 @@ const USER_ACTIVATION_WORLD_NAME = '__cypress_user_activation__'
 // `userGesture` flag. Chromium notifies activation for the frame the script runs in, its
 // ancestors and its same-origin descendants, exactly as it would for a real gesture.
 //
-// Action commands activate the page before each click or key press, so the world made
-// for a document is kept and used again until that document goes away.
+// Action commands activate the page again for every command, so the world made for a
+// document is kept and used again until that document goes away.
 export async function cdpActivateFrame (
   send: SendDebuggerCommand,
   contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,

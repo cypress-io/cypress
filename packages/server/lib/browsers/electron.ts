@@ -325,8 +325,8 @@ export = {
     win.webContents.on('will-prevent-unload', (event) => {
       event.preventDefault()
 
-      // The event doesn't say which frame's handler asked, so the dialog is reported
-      // with the AUT's URL, where the handlers Cypress answers for come from.
+      // The event doesn't say which frame's handler asked. The dialogs Cypress accepts
+      // during a test come from the AUT, so the dialog is reported with the AUT's URL.
       let url = ''
 
       try {
