@@ -134,6 +134,13 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
 
+    // known before any dialog can open, since an open dialog blocks Page.getFrameTree
+    try {
+      cdpAutomation.topFrameId = (await sendDebuggerCommandFn('Page.getFrameTree')).frameTree.frame.id
+    } catch (err) {
+      debug('failed to get the top frame id: %s', err?.message)
+    }
+
     return cdpAutomation
   }
 
@@ -332,8 +339,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   // the dialog so the navigation goes ahead, as it would if the page had no handler.
   // Other dialog types come from the AUT's alert/confirm/prompt, which the driver stubs.
   // A dialog from the top frame is the runner's own, such as Studio's unsaved changes
-  // warning, and is left for the user to answer. The top frame is looked up ahead of
-  // time because an open dialog blocks Page.getFrameTree until it is answered.
+  // warning, and is left for the user to answer.
   private onJavascriptDialogOpening = async (params: Protocol.Page.JavascriptDialogOpeningEvent) => {
     if (params.type !== 'beforeunload') {
       return
@@ -350,12 +356,18 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     try {
       await this.sendDebuggerCommandFn('Page.handleJavaScriptDialog', { accept: true })
     } catch (err) {
-      debug('failed to accept beforeunload dialog: %s', err?.message)
+      // Electron answers the dialog itself, through `will-prevent-unload`, before it
+      // can be accepted here. It is reported all the same, since the page unloads.
+      if (!err?.message?.includes('No dialog is showing')) {
+        debug('failed to accept beforeunload dialog: %s', err?.message)
 
-      return
+        return
+      }
     }
 
-    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: params.url })
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: params.url }).catch((err) => {
+      debug('failed to report accepted beforeunload dialog: %s', err?.message)
+    })
   }
 
   private getAllCookies = async (filter: CyCookieFilter) => {

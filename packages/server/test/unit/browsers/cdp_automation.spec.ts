@@ -1294,11 +1294,13 @@ describe('lib/browsers/cdp_automation', () => {
 
       // an open dialog blocks Page.getFrameTree until it is answered
       it('does not query the frame tree while the dialog is open', async () => {
+        const frameTreeQueries = sendDebuggerCommand.withArgs('Page.getFrameTree').calls.length
+
         onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'beforeunload' })
 
         await flush()
 
-        expectNotCalledWith(sendDebuggerCommand, 'Page.getFrameTree')
+        expect(sendDebuggerCommand.withArgs('Page.getFrameTree').calls).toHaveLength(frameTreeQueries)
       })
 
       it('leaves a beforeunload dialog from the top frame for the user', async () => {
@@ -1312,6 +1314,34 @@ describe('lib/browsers/cdp_automation', () => {
         expect(automation.push).not.toHaveBeenCalled()
       })
 
+      it('knows the top frame from when it attached, before anything looked up the AUT frame', async () => {
+        const send = createStub()
+
+        send.withArgs('Page.getFrameTree').resolves({ frameTree: { frame: { id: 'top' }, childFrames: [] } })
+        send.withArgs('Page.handleJavaScriptDialog').resolves()
+
+        const on = createStub()
+
+        await CdpAutomation.create(send, on, vi.fn(), vi.fn(), automation)
+
+        on.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'top', type: 'beforeunload' })
+
+        await flush()
+
+        expectNotCalledWith(send, 'Page.handleJavaScriptDialog')
+        expect(automation.push).not.toHaveBeenCalled()
+      })
+
+      it('reports a dialog that Electron already answered', async () => {
+        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').rejects(new Error('No dialog is showing'))
+
+        onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'beforeunload' })
+
+        await flush()
+
+        expectCalledWith(automation.push, 'beforeunload:dialog:accepted', { message: '', url: dialog.url })
+      })
+
       it('leaves other dialog types alone', async () => {
         onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'confirm' })
 
@@ -1322,7 +1352,7 @@ describe('lib/browsers/cdp_automation', () => {
       })
 
       it('does not report a dialog it failed to accept', async () => {
-        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').rejects(new Error('No dialog is showing'))
+        sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').rejects(new Error('Target closed'))
 
         onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: 'aut', type: 'beforeunload' })
 

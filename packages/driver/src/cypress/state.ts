@@ -18,6 +18,8 @@ export interface StateFunc {
   (k: 'routes', v?: RouteMap): RouteMap
   (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]
   (k: 'document', v?: Document): Document | undefined
+  // counts the AUT's beforeunload events, so code waiting on something can tell the AUT started navigating away meanwhile
+  (k: 'autUnloadCount', v?: number): number | undefined
   (k: 'window', v?: Window): Window
   (k: 'logGroupIds', v?: Array<Cypress.InternalLogConfig['id']>): Array<Cypress.InternalLogConfig['id']>
   (k: 'autLocation', v?: LocationObject): LocationObject

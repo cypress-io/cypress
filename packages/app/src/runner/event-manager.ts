@@ -803,6 +803,7 @@ export class EventManager {
       if (Cypress.state('autLocation')?.origin === origin) {
         // We specifically don't call 'cy.isStable' here because we don't want to inject another load event.
         cy.state('isStable', false)
+        cy.state('autUnloadCount', (cy.state('autUnloadCount') ?? 0) + 1)
       }
 
       // Re-broadcast to any other specBridges.

@@ -195,7 +195,9 @@ export class BidiAutomation {
       debug('failed to get the AUT url for an accepted beforeunload prompt: %s', err?.message)
     }
 
-    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url })
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url }).catch((err) => {
+      debug('failed to report accepted beforeunload prompt: %s', err?.message)
+    })
   }
 
   setTopLevelContextId = (contextId?: string) => {

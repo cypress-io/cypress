@@ -25,6 +25,32 @@ describe('user activation', { browser: '!webkit' }, () => {
     })
   })
 
+  it('waits for the next page when the AUT starts navigating away while it is being activated', () => {
+    const automation = Cypress.automation.bind(Cypress)
+    let navigated = false
+
+    cy.stub(Cypress, 'automation').callsFake((eventName, ...args) => {
+      const autWindow: Window = cy.state('window')
+
+      if (eventName !== 'activate:aut:frame' || navigated || autWindow.location.search !== '?navigate') {
+        return automation(eventName, ...args)
+      }
+
+      navigated = true
+
+      // answers once the page has started to unload, while the next one is still loading
+      return new Promise((resolve) => {
+        autWindow.addEventListener('beforeunload', () => resolve(automation(eventName, ...args)), { once: true })
+        autWindow.location.href = '/fixtures/user-activation.html?page=2'
+      })
+    })
+
+    cy.visit('/fixtures/user-activation.html?navigate')
+    cy.window().then((win) => {
+      expect(win.location.search).to.equal('?page=2')
+    })
+  })
+
   it('does not fire input or focus events in the AUT', () => {
     cy.visit('/fixtures/user-activation.html')
     cy.window().then((win) => {
@@ -114,6 +140,14 @@ describe('user activation', { browser: '!webkit' }, () => {
       const isActive = handle('#text', 'keydown', (win) => win.navigator.userActivation.isActive)
 
       cy.get('#text').type('a')
+      cy.wrap(isActive).should('deep.equal', [true])
+    })
+
+    it('gives a keydown handler transient activation when typing into the body', () => {
+      const isActive = handle('body', 'keydown', (win) => win.navigator.userActivation.isActive)
+
+      // typing into the body skips the actionability check that renews activation for other elements
+      cy.get('body').type('f')
       cy.wrap(isActive).should('deep.equal', [true])
     })
 

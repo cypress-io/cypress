@@ -215,8 +215,9 @@ describe('lib/browsers/chrome', () => {
 
       expect(utils.getPort).toHaveBeenCalledOnce() // to get remote interface port
 
-      expect(pageCriClient.send).toHaveBeenCalledTimes(7)
+      expect(pageCriClient.send).toHaveBeenCalledTimes(8)
       expectCalledWith(pageCriClient.send, 'Page.bringToFront')
+      expectCalledWith(pageCriClient.send, 'Page.getFrameTree')
       expectCalledWith(pageCriClient.send, 'Page.navigate')
       expectCalledWith(pageCriClient.send, 'Page.enable')
       expectCalledWith(pageCriClient.send, 'Page.setDownloadBehavior')

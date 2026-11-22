@@ -589,26 +589,6 @@ describe('lib/browsers/electron', () => {
       })
     })
 
-    it('reports the accepted beforeunload dialog with the AUT url', () => {
-      vi.spyOn(automation, 'push').mockResolvedValue(undefined)
-
-      win.webContents.mainFrame = {
-        framesInSubtree: [
-          { name: '', url: 'http://localhost:3500/__/#/specs/runner?file=cypress/e2e/editor.cy.ts' },
-          { name: 'Your project: Fixture Project', url: 'http://localhost:3500/editor' },
-        ],
-      }
-
-      return electron._launch(win, url, automation, options, undefined, undefined, { attachCDPClient: vi.fn() })
-      .then(() => {
-        const call = win.webContents.on.mock.calls.find((c) => c[0] === 'will-prevent-unload')
-
-        call[1]({ preventDefault: vi.fn() })
-
-        expectCalledWith(automation.push, 'beforeunload:dialog:accepted', { message: '', url: 'http://localhost:3500/editor' })
-      })
-    })
-
     it('pushes create:download when download begins', () => {
       const downloadItem = {
         getETag: () => '1',

@@ -583,7 +583,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         }
 
         // before window:load, so its handlers and the next command see an activated page
+        const unloadsBeforeActivation = this.state('autUnloadCount')
+
         await activateAut(this.Cypress, autWindow)
+
+        // A page that started navigating away while it was being activated isn't
+        // ready. The next page's load marks the AUT stable instead.
+        const startedUnloading = this.state('autUnloadCount') !== unloadsBeforeActivation
 
         // stability is signalled after the window:load event to give event
         // listeners time to be invoked prior to moving on, but not if
@@ -608,7 +614,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
           throw err
         } finally {
-          this.isStable(true, 'load')
+          if (!startedUnloading) {
+            this.isStable(true, 'load')
+          }
         }
       } catch (err: any) {
         if (err.isFromWindowLoadEvent) {
@@ -1187,6 +1195,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       onLoad: () => { },
       onBeforeUnload: (e) => {
         this.isStable(false, 'beforeunload')
+        this.state('autUnloadCount', (this.state('autUnloadCount') ?? 0) + 1)
 
         this.Cookies.setInitial()
 

@@ -175,7 +175,8 @@ export default function (Commands, Cypress, cy, state, config) {
       })
     }
 
-    const type = function () {
+    // `activationRenewed` is false when no actionability check ran first to renew it
+    const type = function ({ activationRenewed = true } = {}) {
       const simulateSubmitHandler = function () {
         const form = options.$el.parents('form')
 
@@ -290,7 +291,7 @@ export default function (Commands, Cypress, cy, state, config) {
         delay: options.delay,
         // renews the activation between keys once it may have run low, as every real
         // keydown does, so the last keys of a long string still have it
-        onBeforeKey: createTransientActivationRenewer(Cypress, { justRenewed: true }),
+        onBeforeKey: createTransientActivationRenewer(Cypress, { justRenewed: activationRenewed }),
         release: options.release,
         parseSpecialCharSequences: options.parseSpecialCharSequences,
         window: win,
@@ -458,7 +459,7 @@ export default function (Commands, Cypress, cy, state, config) {
       if (isBody) {
         debug('typing into body')
 
-        return type()
+        return type({ activationRenewed: false })
       }
 
       options.ensure = {
