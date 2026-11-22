@@ -336,6 +336,12 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     if (this.executionContexts.has(event.executionContextId)) {
       this.executionContexts.delete(event.executionContextId)
     }
+
+    for (const [frameId, contextId] of this.activationWorlds) {
+      if (contextId === event.executionContextId) {
+        this.activationWorlds.delete(frameId)
+      }
+    }
   }
 
   // A page with sticky user activation can open a "Leave site?" dialog from a `beforeunload`
@@ -373,19 +379,19 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   }
 
   private isFromTopFrame (params: Protocol.Page.JavascriptDialogOpeningEvent) {
-    // Chromium versions whose event has no `frameId` give the frame's url, and the
-    // runner is served under Cypress's `/__/` route.
-    if (params.frameId === undefined) {
-      try {
-        return new URL(params.url).pathname.startsWith('/__/')
-      } catch {
-        return false
-      }
-    }
-
     const topFrameId = this.topFrameId ?? this.frameTree?.frame.id
 
-    return topFrameId !== undefined && params.frameId === topFrameId
+    if (params.frameId !== undefined && topFrameId !== undefined) {
+      return params.frameId === topFrameId
+    }
+
+    // Without both frame ids, the frame's url tells: the runner is served under
+    // Cypress's `/__/` route.
+    try {
+      return new URL(params.url).pathname.startsWith('/__/')
+    } catch {
+      return false
+    }
   }
 
   private getAllCookies = async (filter: CyCookieFilter) => {

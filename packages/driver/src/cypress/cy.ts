@@ -929,8 +929,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // Started as the document begins to load, so the activation has usually
     // finished by the time the load handler waits on it. A component testing
     // spec's page is activated when a test starts instead, once that test's
-    // `userActivation` applies.
-    if (this.Cypress.testingType !== 'component') {
+    // `userActivation` applies. A spec bridge leaves its cross-origin AUT to the
+    // primary origin's load handler, which activates it.
+    if (this.Cypress.testingType !== 'component' && !this.Cypress.isCrossOriginSpecBridge) {
       this.autActivation = { document: contentWindow.document, activating: activateAut(this.Cypress, contentWindow) }
     }
   }
@@ -941,22 +942,22 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   // is activated once one does.
   private async finishActivatingAut (autWindow: Window) {
     if (this.Cypress.testingType === 'component' && !this.state('runnable')) {
-      return deferActivationOfLoadedAut(autWindow)
+      return deferActivationOfLoadedAut(this.Cypress, autWindow)
     }
 
     const activation = this.autActivation
 
     this.autActivation = undefined
 
-    let isSameDocument = false
+    let activating: PromiseLike<void> | undefined
 
     try {
-      isSameDocument = !!activation && autWindow.document === activation.document
+      activating = activation && autWindow.document === activation.document ? activation.activating : undefined
     } catch {
       // a cross-origin AUT can't be read from here, so it isn't the document that began loading
     }
 
-    await (isSameDocument ? activation!.activating : activateAut(this.Cypress, autWindow))
+    await (activating ?? activateAut(this.Cypress, autWindow))
   }
 
   onUncaughtException ({ handlerType, frameType, err, promise }) {

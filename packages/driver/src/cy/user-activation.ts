@@ -22,10 +22,12 @@ interface ActivationHost {
 const isEnabled = (Cypress: ActivationHost) => !!Cypress.config('userActivation') && !Cypress.isBrowser('webkit')
 
 // What Cypress knows about activating the AUT during a spec: when it last asked
-// the browser to, and whether the browser stopped answering.
+// the browser to, and whether the browser stopped answering. `lastRequest` lets a
+// request that answers after a newer one leave the newer one's state alone.
 interface ActivationRecord {
   requestedAt?: number
   unresponsive: boolean
+  lastRequest: number
 }
 
 const records = new WeakMap<ActivationHost, ActivationRecord>()
@@ -34,7 +36,7 @@ const recordFor = (Cypress: ActivationHost) => {
   let record = records.get(Cypress)
 
   if (!record) {
-    record = { unresponsive: false }
+    record = { unresponsive: false, lastRequest: 0 }
     records.set(Cypress, record)
   }
 
@@ -55,6 +57,9 @@ const activate = async (Cypress: ActivationHost, timeoutMs = ACTIVATION_TIMEOUT_
     return false
   }
 
+  const request = ++record.lastRequest
+  const isLatest = () => record.lastRequest === request
+
   record.requestedAt = Date.now()
 
   let timeout: ReturnType<typeof setTimeout> | undefined
@@ -71,14 +76,19 @@ const activate = async (Cypress: ActivationHost, timeoutMs = ACTIVATION_TIMEOUT_
 
     if (result === TIMED_OUT) {
       debug('the browser did not activate the AUT in time, so it is not asked again until it answers')
-      record.unresponsive = true
-      activating.then(() => {
-        record.unresponsive = false
-      }, () => {
-        record.unresponsive = false
-      })
 
-      record.requestedAt = undefined
+      if (isLatest()) {
+        record.unresponsive = true
+        record.requestedAt = undefined
+      }
+
+      const answered = () => {
+        if (isLatest()) {
+          record.unresponsive = false
+        }
+      }
+
+      activating.then(answered, answered)
 
       return false
     }
@@ -86,7 +96,10 @@ const activate = async (Cypress: ActivationHost, timeoutMs = ACTIVATION_TIMEOUT_
     return true
   } catch (err) {
     debug('failed to activate the AUT: %o', err)
-    record.requestedAt = undefined
+
+    if (isLatest()) {
+      record.requestedAt = undefined
+    }
 
     return false
   } finally {
@@ -161,20 +174,25 @@ export const createTransientActivationRenewer = (Cypress: ActivationHost, autWin
 }
 
 // A component testing spec's page that loaded before a test started, when a test's
-// `userActivation` doesn't apply yet, so it is activated once a test starts.
-let documentLoadedEarly: Document | undefined
+// `userActivation` doesn't apply yet, so it is activated once a test starts. Kept per
+// Cypress instance, so it goes away with the spec.
+const documentsLoadedEarly = new WeakMap<ActivationHost, Document>()
 
-export const deferActivationOfLoadedAut = (autWindow: Window | undefined) => {
+export const deferActivationOfLoadedAut = (Cypress: ActivationHost, autWindow: Window | undefined) => {
   try {
-    documentLoadedEarly = autWindow?.document
+    if (autWindow) {
+      documentsLoadedEarly.set(Cypress, autWindow.document)
+    }
   } catch {
-    documentLoadedEarly = undefined
+    documentsLoadedEarly.delete(Cypress)
   }
 }
 
 // Activates the deferred document once a test that wants activation starts, because
 // a suite's or test's `userActivation` only applies from then on.
 export const activateAutLoadedEarly = async (Cypress: ICypress, autWindow: Window | undefined) => {
+  const documentLoadedEarly = documentsLoadedEarly.get(Cypress)
+
   if (!documentLoadedEarly || !isEnabled(Cypress)) {
     return
   }
@@ -187,7 +205,7 @@ export const activateAutLoadedEarly = async (Cypress: ICypress, autWindow: Windo
     // a cross-origin AUT is a different document from the one that loaded early
   }
 
-  documentLoadedEarly = undefined
+  documentsLoadedEarly.delete(Cypress)
 
   if (isSameDocument) {
     await activateAut(Cypress, autWindow)
@@ -205,6 +223,7 @@ export const logBeforeUnloadDialogAccepted = (Cypress: ICypress, cy: $Cy | null,
     name: 'beforeunload',
     message: 'accepted the "Leave site?" dialog',
     event: true,
+    end: true,
     snapshot: false,
     consoleProps () {
       return {

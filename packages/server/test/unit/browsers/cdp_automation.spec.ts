@@ -1241,6 +1241,17 @@ describe('lib/browsers/cdp_automation', () => {
           expect(sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true }).calls).toHaveLength(2)
         })
 
+        it('makes another once Chromium reports the world destroyed', async () => {
+          sendDebuggerCommand.withArgs('Page.createIsolatedWorld').resolves({ executionContextId: 789 })
+
+          onFn.withArgs('Runtime.executionContextDestroyed').yield({ executionContextId: 456, executionContextUniqueId: 'unique-456' })
+
+          await onRequest('activate:aut:frame', {})
+
+          expect(sendDebuggerCommand.withArgs('Page.createIsolatedWorld').calls).toHaveLength(2)
+          expectCalledWith(sendDebuggerCommand, 'Runtime.evaluate', { expression: 'void 0', contextId: 789, userGesture: true })
+        })
+
         it('makes another once the frame\'s document has gone and taken the world with it', async () => {
           sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true }).rejects(new Error('Cannot find context with specified id'))
           sendDebuggerCommand.withArgs('Page.createIsolatedWorld').resolves({ executionContextId: 789 })
@@ -1317,6 +1328,23 @@ describe('lib/browsers/cdp_automation', () => {
 
         expectNotCalledWith(send, 'Page.handleJavaScriptDialog')
         expect(automation.push).not.toHaveBeenCalled()
+      })
+
+      it('tells the runner\'s dialog by its url when it doesn\'t know the top frame', async () => {
+        const send = createStub()
+
+        send.withArgs('Page.getFrameTree').rejects(new Error('Target closed'))
+        send.withArgs('Page.handleJavaScriptDialog').resolves()
+
+        const on = createStub()
+
+        await CdpAutomation.create(send, on, vi.fn(), vi.fn(), automation)
+
+        on.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, url: 'http://localhost:3500/__/#/specs/runner?file=cypress/e2e/editor.cy.ts', frameId: 'top', type: 'beforeunload' })
+
+        await flush()
+
+        expectNotCalledWith(send, 'Page.handleJavaScriptDialog')
       })
 
       it('only reports a dialog the browser accepts itself', async () => {

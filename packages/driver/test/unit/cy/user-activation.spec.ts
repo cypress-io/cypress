@@ -120,6 +120,30 @@ describe('src/cy/user-activation', () => {
       expect(automation).toHaveBeenCalledTimes(2)
     })
 
+    it('leaves a newer request\'s state alone when an older request fails afterwards', async () => {
+      let fail: (err: Error) => void = () => {}
+      const automation = vi.fn()
+      .mockReturnValueOnce(new Promise((resolve, reject) => {
+        fail = reject
+      }))
+      .mockResolvedValue(undefined)
+      const Cypress = createCypress({ automation })
+      const autWindow = createAutWindow(false)
+
+      const older = createTransientActivationRenewer(Cypress, autWindow)()
+
+      await createTransientActivationRenewer(Cypress, autWindow)()
+
+      fail(new Error('Cannot activate AUT frame: no AUT context initialized'))
+      await older
+
+      autWindow.navigator.userActivation.isActive = true
+
+      // the newer request's activation still counts, so this command doesn't renew
+      expect(createTransientActivationRenewer(Cypress, autWindow)()).toBeUndefined()
+      expect(automation).toHaveBeenCalledTimes(2)
+    })
+
     it('does nothing with userActivation: false', () => {
       const Cypress = createCypress({ userActivation: false })
 

@@ -211,6 +211,7 @@ export class BidiAutomation {
 
   private setAndResolveAutContextId (contextId: string) {
     this.autContextId = contextId
+    this.autDocumentUrl = undefined
     this.autContextDeferred?.resolve(contextId)
     this.autContextDeferred = undefined
   }
@@ -425,6 +426,7 @@ export class BidiAutomation {
       debug(`top level browsing context ${params.context} destroyed`)
       // if the top level context is destroyed, we can imply that the AUT context is destroyed along with it
       this.autContextId = undefined
+      this.autDocumentUrl = undefined
       // Fail any requests still waiting on an AUT context: the tab they belong
       // to is gone, and the AUT of a subsequently created tab must not satisfy
       // them.
@@ -451,6 +453,7 @@ export class BidiAutomation {
       debug(`AUT browsing context ${params.context} destroyed within top-level parent context ${params.parent}.`)
 
       this.autContextId = undefined
+      this.autDocumentUrl = undefined
     }
   }
 

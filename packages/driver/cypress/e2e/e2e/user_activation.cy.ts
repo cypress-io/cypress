@@ -300,6 +300,7 @@ describe('user activation', { browser: '!webkit' }, () => {
       cy.wrap(beforeUnloadLogs).should('have.length', 1).then(([log]) => {
         expect(log.get('message')).to.equal('accepted the "Leave site?" dialog')
         expect(log.get('event')).to.be.true
+        expect(log.get('state')).to.equal('passed')
       })
     })
 

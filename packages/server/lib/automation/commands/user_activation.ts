@@ -36,11 +36,8 @@ export async function cdpActivateFrame (
     try {
       return await evaluateWithUserGesture(send, existing)
     } catch (err) {
-      if (!err?.message?.includes('Cannot find context with specified id')) {
-        throw err
-      }
-
-      debug('isolated world %d is gone, creating another', existing)
+      // most likely the document went away and took the world with it
+      debug('failed to evaluate in isolated world %d, creating another: %s', existing, err?.message)
       worlds.delete(frame.id)
     }
   }

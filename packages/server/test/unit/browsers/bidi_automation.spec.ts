@@ -392,6 +392,13 @@ describe('lib/browsers/bidi_automation', () => {
 
           // @ts-expect-error - autDocumentUrl is private
           expect(bidiAutomationInstance.autDocumentUrl).toBe('http://localhost:3500/editor')
+
+          mockWebdriverClient.emit('browsingContext.contextDestroyed', { context: '123', parent: 'top', url: 'http://localhost:3500/editor', userContext: '', children: [] })
+
+          await flushPromises()
+
+          // @ts-expect-error - autDocumentUrl is private
+          expect(bidiAutomationInstance.autDocumentUrl).toBeUndefined()
         })
 
         it('correctly pauses the AUT frame to add the X-Cypress-Is-AUT-Frame header (which is later stripped out in the middleware)', async () => {
