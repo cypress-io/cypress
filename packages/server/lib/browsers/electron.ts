@@ -87,6 +87,33 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, undefined, false, false, storageOrigins)
 
+  const startCaptureScreencast = async () => {
+    if (options.isTextTerminal) {
+      await pageCriClient.send('Page.stopScreencast')
+    }
+
+    await pageCriClient.send('Page.startScreencast', screencastOpts())
+  }
+
+  const endCaptureScreencast = async () => {
+    await pageCriClient.send('Page.stopScreencast')
+
+    if (options.isTextTerminal) {
+      await startNoopScreencast(pageCriClient)
+    }
+  }
+
+  // A capture that outlives its cy.screenshot() timeout overlaps the failure screenshot, so the
+  // screencast is swapped once for all captures in flight rather than per capture.
+  let capturesInFlight = 0
+  let screencastSwap: Promise<unknown> = Promise.resolve()
+
+  const swapScreencast = (swap: () => Promise<void>) => {
+    screencastSwap = screencastSwap.catch(_.noop).then(swap)
+
+    return screencastSwap
+  }
+
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
       case 'take:screenshot': {
@@ -96,19 +123,17 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
         // Page.captureScreenshot waits for a new frame, and on a page that isn't changing only a
         // screencast with a real frame rate makes Electron produce one. The no-op screencast doesn't.
-        if (options.isTextTerminal) {
-          await pageCriClient.send('Page.stopScreencast')
+        if (capturesInFlight++ === 0) {
+          swapScreencast(startCaptureScreencast).catch(_.noop)
         }
 
-        await pageCriClient.send('Page.startScreencast', screencastOpts())
-
         try {
+          await screencastSwap
+
           return await fn(message, data)
         } finally {
-          await pageCriClient.send('Page.stopScreencast')
-
-          if (options.isTextTerminal) {
-            await startNoopScreencast(pageCriClient)
+          if (--capturesInFlight === 0) {
+            await swapScreencast(endCaptureScreencast)
           }
         }
       }
