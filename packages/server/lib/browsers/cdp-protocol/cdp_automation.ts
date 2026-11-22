@@ -90,6 +90,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
+  private activationWorlds: Map<Protocol.Page.FrameId, Protocol.Runtime.ExecutionContextId> = new Map()
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private bringsPageToFront: boolean = false, private storageOrigins: Set<string> = new Set()) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -348,7 +349,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       return
     }
 
-    if (params.frameId === (this.topFrameId ?? this.frameTree?.frame.id)) {
+    if (this.isFromTopFrame(params)) {
       debug('leaving beforeunload dialog from the top frame %o', { url: params.url })
 
       return
@@ -369,6 +370,22 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: params.url }).catch((err) => {
       debug('failed to report accepted beforeunload dialog: %s', err?.message)
     })
+  }
+
+  private isFromTopFrame (params: Protocol.Page.JavascriptDialogOpeningEvent) {
+    // Chromium versions whose event has no `frameId` give the frame's url, and the
+    // runner is served under Cypress's `/__/` route.
+    if (params.frameId === undefined) {
+      try {
+        return new URL(params.url).pathname.startsWith('/__/')
+      } catch {
+        return false
+      }
+    }
+
+    const topFrameId = this.topFrameId ?? this.frameTree?.frame.id
+
+    return topFrameId !== undefined && params.frameId === topFrameId
   }
 
   private getAllCookies = async (filter: CyCookieFilter) => {
@@ -737,7 +754,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       case 'get:aut:title':
         return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
       case 'activate:aut:frame':
-        return cdpActivateFrame(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
+        return cdpActivateFrame(this.sendDebuggerCommandFn, this.activationWorlds, await this._getAutFrame())
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

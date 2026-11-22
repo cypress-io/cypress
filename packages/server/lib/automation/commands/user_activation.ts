@@ -20,29 +20,28 @@ const USER_ACTIVATION_WORLD_NAME = '__cypress_user_activation__'
 // `userGesture` flag. Chromium notifies activation for the frame the script runs in, its
 // ancestors and its same-origin descendants, exactly as it would for a real gesture.
 //
-// Action commands activate the page again for every command, so the world made for a
-// document is kept and used again until that document goes away.
+// Action commands activate the page again and again, so the world made for a frame's
+// document is kept in `worlds`, by frame id, and used again until that document goes
+// away and takes the world with it.
 export async function cdpActivateFrame (
   send: SendDebuggerCommand,
-  contexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription>,
+  worlds: Map<Protocol.Page.FrameId, Protocol.Runtime.ExecutionContextId>,
   frame: Protocol.Page.Frame,
 ): Promise<void> {
   debug('activating frame %s', frame.id)
 
-  const existing = [...contexts.values()].find((context) => {
-    return context.name === USER_ACTIVATION_WORLD_NAME && context.auxData?.frameId === frame.id
-  })
+  const existing = worlds.get(frame.id)
 
-  if (existing) {
+  if (existing !== undefined) {
     try {
-      return await evaluateWithUserGesture(send, existing.id)
+      return await evaluateWithUserGesture(send, existing)
     } catch (err) {
       if (!err?.message?.includes('Cannot find context with specified id')) {
         throw err
       }
 
-      debug('isolated world %d is gone, creating another', existing.id)
-      contexts.delete(existing.id)
+      debug('isolated world %d is gone, creating another', existing)
+      worlds.delete(frame.id)
     }
   }
 
@@ -50,6 +49,8 @@ export async function cdpActivateFrame (
     frameId: frame.id,
     worldName: USER_ACTIVATION_WORLD_NAME,
   })
+
+  worlds.set(frame.id, executionContextId)
 
   await evaluateWithUserGesture(send, executionContextId)
 }

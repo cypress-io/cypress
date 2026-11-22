@@ -9,6 +9,9 @@ const debug = Debug('cypress:driver:user-activation')
 // must not wait on it any longer.
 const ACTIVATION_TIMEOUT_MS = 2000
 
+// A command's activation counts against the command's timeout, so it gets less time.
+const RENEWAL_TIMEOUT_MS = 500
+
 // only the parts of Cypress that activating the AUT uses, so a unit test can supply them
 interface ActivationHost {
   config: (key: 'userActivation') => unknown
@@ -43,9 +46,9 @@ const TIMED_OUT = Symbol('timed out')
 // The browser notifies activation as a real user's click or key press would: the
 // AUT gains sticky activation and, for a few seconds, transient activation. No
 // input event reaches the application. Resolves `false` when the browser didn't
-// activate the AUT. A browser that doesn't answer in time isn't asked again during
-// the spec, so it can't hold up every page load and command.
-const activate = async (Cypress: ActivationHost): Promise<boolean> => {
+// activate the AUT. A browser that doesn't answer in time isn't asked again until
+// that request answers, so it can't hold up every page load and command meanwhile.
+const activate = async (Cypress: ActivationHost, timeoutMs = ACTIVATION_TIMEOUT_MS): Promise<boolean> => {
   const record = recordFor(Cypress)
 
   if (record.unresponsive) {
@@ -56,17 +59,25 @@ const activate = async (Cypress: ActivationHost): Promise<boolean> => {
 
   let timeout: ReturnType<typeof setTimeout> | undefined
 
+  const activating = Cypress.automation('activate:aut:frame', {})
+
   try {
     const result = await Promise.race([
-      Cypress.automation('activate:aut:frame', {}),
+      activating,
       new Promise<typeof TIMED_OUT>((resolve) => {
-        timeout = setTimeout(() => resolve(TIMED_OUT), ACTIVATION_TIMEOUT_MS)
+        timeout = setTimeout(() => resolve(TIMED_OUT), timeoutMs)
       }),
     ])
 
     if (result === TIMED_OUT) {
-      debug('the browser did not activate the AUT in time, so it is not asked again during this spec')
+      debug('the browser did not activate the AUT in time, so it is not asked again until it answers')
       record.unresponsive = true
+      activating.then(() => {
+        record.unresponsive = false
+      }, () => {
+        record.unresponsive = false
+      })
+
       record.requestedAt = undefined
 
       return false
@@ -143,14 +154,14 @@ export const createTransientActivationRenewer = (Cypress: ActivationHost, autWin
       return
     }
 
-    return activate(Cypress).then((activated) => {
+    return activate(Cypress, RENEWAL_TIMEOUT_MS).then((activated) => {
       failed = !activated
     })
   }
 }
 
-// A component testing spec's page, which loads before a test's `userActivation`
-// applies, so it is activated once a test starts instead.
+// A component testing spec's page that loaded before a test started, when a test's
+// `userActivation` doesn't apply yet, so it is activated once a test starts.
 let documentLoadedEarly: Document | undefined
 
 export const deferActivationOfLoadedAut = (autWindow: Window | undefined) => {

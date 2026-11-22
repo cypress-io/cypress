@@ -1227,42 +1227,29 @@ describe('lib/browsers/cdp_automation', () => {
         await expect(onRequest('activate:aut:frame', {})).rejects.toThrow('Unable to activate the AUT frame: Uncaught')
       })
 
-      describe('when the frame already has the isolated world', () => {
-        beforeEach(() => {
-          onFn.withArgs('Runtime.executionContextCreated').yield({
-            context: { id: 789, origin: 'http://localhost:3500', name: '__cypress_user_activation__', auxData: { frameId: 'aut', isDefault: false } },
-          })
-        })
-
-        it('evaluates in it instead of creating another', async () => {
+      describe('when the frame was activated before', () => {
+        beforeEach(async () => {
           sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({ result: { type: 'undefined' } })
 
           await onRequest('activate:aut:frame', {})
+        })
 
+        it('evaluates in the world it made instead of making another', async () => {
+          await onRequest('activate:aut:frame', {})
+
+          expect(sendDebuggerCommand.withArgs('Page.createIsolatedWorld').calls).toHaveLength(1)
+          expect(sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true }).calls).toHaveLength(2)
+        })
+
+        it('makes another once the frame\'s document has gone and taken the world with it', async () => {
+          sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true }).rejects(new Error('Cannot find context with specified id'))
+          sendDebuggerCommand.withArgs('Page.createIsolatedWorld').resolves({ executionContextId: 789 })
+          sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 789, userGesture: true }).resolves({ result: { type: 'undefined' } })
+
+          await onRequest('activate:aut:frame', {})
+
+          expect(sendDebuggerCommand.withArgs('Page.createIsolatedWorld').calls).toHaveLength(2)
           expectCalledWith(sendDebuggerCommand, 'Runtime.evaluate', { expression: 'void 0', contextId: 789, userGesture: true })
-          expectNotCalledWith(sendDebuggerCommand, 'Page.createIsolatedWorld')
-        })
-
-        it('creates another once the world is gone', async () => {
-          sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 789, userGesture: true }).rejects(new Error('Cannot find context with specified id'))
-          sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true }).resolves({ result: { type: 'undefined' } })
-
-          await onRequest('activate:aut:frame', {})
-
-          expectCalledWith(sendDebuggerCommand, 'Page.createIsolatedWorld', { frameId: 'aut', worldName: '__cypress_user_activation__' })
-          expectCalledWith(sendDebuggerCommand, 'Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true })
-        })
-
-        it('does not use a world of another frame', async () => {
-          onFn.withArgs('Runtime.executionContextCreated').yield({
-            context: { id: 790, origin: 'http://localhost:3500', name: '__cypress_user_activation__', auxData: { frameId: 'top', isDefault: false } },
-          })
-
-          sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({ result: { type: 'undefined' } })
-
-          await onRequest('activate:aut:frame', {})
-
-          expectNotCalledWith(sendDebuggerCommand, 'Runtime.evaluate', { expression: 'void 0', contextId: 790, userGesture: true })
         })
       })
     })
@@ -1340,6 +1327,16 @@ describe('lib/browsers/cdp_automation', () => {
         await flush()
 
         expectNotCalledWith(sendDebuggerCommand, 'Page.handleJavaScriptDialog')
+        expectCalledWith(automation.push, 'beforeunload:dialog:accepted', { message: '', url: dialog.url })
+      })
+
+      it('tells the runner\'s dialog by its url when the event has no frame id', async () => {
+        onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, url: 'http://localhost:3500/__/#/specs/runner?file=cypress/e2e/editor.cy.ts', frameId: undefined, type: 'beforeunload' })
+        onFn.withArgs('Page.javascriptDialogOpening').yield({ ...dialog, frameId: undefined, type: 'beforeunload' })
+
+        await flush()
+
+        expect(sendDebuggerCommand.withArgs('Page.handleJavaScriptDialog').calls).toHaveLength(1)
         expectCalledWith(automation.push, 'beforeunload:dialog:accepted', { message: '', url: dialog.url })
       })
 

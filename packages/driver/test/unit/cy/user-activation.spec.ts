@@ -97,6 +97,29 @@ describe('src/cy/user-activation', () => {
       expect(Cypress.automation).toHaveBeenCalledTimes(1)
     })
 
+    it('asks again once the browser answers the request that timed out', async () => {
+      let answer: (value?: unknown) => void = () => {}
+      const automation = vi.fn()
+      .mockReturnValueOnce(new Promise((resolve) => {
+        answer = resolve
+      }))
+      .mockResolvedValue(undefined)
+      const Cypress = createCypress({ automation })
+      const autWindow = createAutWindow(false)
+      const renewing = createTransientActivationRenewer(Cypress, autWindow)()
+
+      await vi.advanceTimersByTimeAsync(500)
+      await renewing
+
+      expect(createTransientActivationRenewer(Cypress, autWindow)()).toBeUndefined()
+
+      answer()
+      await vi.advanceTimersByTimeAsync(0)
+      await createTransientActivationRenewer(Cypress, autWindow)()
+
+      expect(automation).toHaveBeenCalledTimes(2)
+    })
+
     it('does nothing with userActivation: false', () => {
       const Cypress = createCypress({ userActivation: false })
 

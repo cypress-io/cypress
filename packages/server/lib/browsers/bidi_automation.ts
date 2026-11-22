@@ -469,7 +469,7 @@ export class BidiAutomation {
 
     // A page's `beforeunload` runs before the next page is requested, so this is
     // the page that asks to confirm leaving.
-    if (params.context === this.autContextId && resourceType === 'document') {
+    if (params.context === this.autContextId && params.navigation !== null) {
       this.autDocumentUrl = url
     }
 

@@ -927,9 +927,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.onBeforeWindowLoad()
 
     // Started as the document begins to load, so the activation has usually
-    // finished by the time the load handler waits on it, and doesn't hold up
-    // marking the page stable. A component testing spec's page is activated when
-    // a test starts instead, once that test's `userActivation` applies.
+    // finished by the time the load handler waits on it. A component testing
+    // spec's page is activated when a test starts instead, once that test's
+    // `userActivation` applies.
     if (this.Cypress.testingType !== 'component') {
       this.autActivation = { document: contentWindow.document, activating: activateAut(this.Cypress, contentWindow) }
     }
@@ -937,9 +937,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   // Waits for the activation started when `autWindow`'s document began to load. A
   // document Cypress didn't see begin to load, such as a cross-origin one, is
-  // activated now.
+  // activated now. A component testing spec's page that loads before a test starts
+  // is activated once one does.
   private async finishActivatingAut (autWindow: Window) {
-    if (this.Cypress.testingType === 'component') {
+    if (this.Cypress.testingType === 'component' && !this.state('runnable')) {
       return deferActivationOfLoadedAut(autWindow)
     }
 
