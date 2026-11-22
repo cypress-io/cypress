@@ -771,6 +771,90 @@ describe('lib/browsers/browser-cri-client', function () {
       // error is caught or else the test would fail
     })
 
+    // A paused popup also blocks its opener's window.open(), so a step that
+    // never settles here would freeze the Cypress tab between tests.
+    describe('when connecting to an extra target stalls (#32956)', () => {
+      const never = () => new Promise<never>(() => {})
+
+      beforeEach(() => {
+        options.extraTargetConnectTimeoutMs = 5
+        options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+      })
+
+      it('releases the popup when the CDP connection to it never resolves', async () => {
+        options.CriConstructor.mockReturnValue(never())
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expect(options.CriConstructor).toHaveBeenCalled()
+        expect(options.browserCriClient.addExtraTargetClient).not.toHaveBeenCalled()
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      it('releases the popup when onExtraTargetCriClientReady never resolves', async () => {
+        const criClient = { send: stub(), on: vi.fn() }
+
+        options.CriConstructor.mockResolvedValue(criClient)
+        options.browserCriClient.onExtraTargetCriClientReady = vi.fn(never)
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expectCalledOnceWith(options.browserCriClient.onExtraTargetCriClientReady, criClient)
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      it('releases the popup when the fallback Fetch.enable never resolves', async () => {
+        const criClient = { send: stub(), on: vi.fn() }
+
+        criClient.send.withArgs('Fetch.enable').callsFake(never)
+        options.CriConstructor.mockResolvedValue(criClient)
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expectCalledWith(criClient.send, 'Fetch.enable')
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+      })
+
+      it('still hands the popup to the Fetch runtime when it connects after the timeout', async () => {
+        const criClient = { send: stub(), on: vi.fn() }
+        const connected = Promise.withResolvers<typeof criClient>()
+        const detach = vi.fn(async () => {})
+        const tracked: any = { client: criClient, targetInfo: options.event.targetInfo }
+
+        options.CriConstructor.mockReturnValue(connected.promise)
+        options.browserCriClient.onExtraTargetCriClientReady = vi.fn(async () => detach)
+        options.browserCriClient.getExtraTargetClient.mockReturnValue(tracked)
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expect(options.browserCriClient.onExtraTargetCriClientReady).not.toHaveBeenCalled()
+
+        connected.resolve(criClient)
+
+        await vi.waitFor(() => expect(tracked.detach).toBe(detach))
+        expectCalledWith(options.browserCriClient.addExtraTargetClient, options.event.targetInfo, criClient)
+        expectCalledOnceWith(options.browserCriClient.onExtraTargetCriClientReady, criClient)
+      })
+
+      it('keeps the popup paused until Fetch interception is set up when it connects in time', async () => {
+        const criClient = { send: stub(), on: vi.fn() }
+
+        options.extraTargetConnectTimeoutMs = 60_000
+        criClient.send.withArgs('Fetch.enable').resolves()
+        options.CriConstructor.mockResolvedValue(criClient)
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        const fetchEnabled = criClient.send.mock.invocationCallOrder[0]
+        const released = options.browserClient.send.mock.invocationCallOrder.at(-1)
+
+        expectCalledWith(criClient.send, 'Fetch.enable')
+        expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        expect(fetchEnabled).toBeLessThan(released)
+      })
+    })
+
     // Recorded so a later crash-and-reload on this session (which carries no
     // TargetInfo of its own - see Inspector.targetReloadedAfterCrash) can
     // still be told apart as a service worker (or not) and routed through

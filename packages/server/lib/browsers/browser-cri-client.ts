@@ -55,6 +55,8 @@ interface ManageTabsOptions {
   protocolManager?: ProtocolManagerShape
   // Overrides CHILD_TARGET_INTERCEPTION_TIMEOUT_MS. Exposed for tests only.
   childTargetInterceptionTimeoutMs?: number
+  // Overrides EXTRA_TARGET_CONNECT_TIMEOUT_MS. Exposed for tests only.
+  extraTargetConnectTimeoutMs?: number
 }
 
 interface AttachedToTargetOptions {
@@ -67,6 +69,16 @@ interface AttachedToTargetOptions {
   protocolManager?: ProtocolManagerShape
   // Overrides CHILD_TARGET_INTERCEPTION_TIMEOUT_MS. Exposed for tests only.
   childTargetInterceptionTimeoutMs?: number
+  // Overrides EXTRA_TARGET_CONNECT_TIMEOUT_MS. Exposed for tests only.
+  extraTargetConnectTimeoutMs?: number
+}
+
+interface ConnectExtraTargetOptions {
+  browserCriClient: BrowserCriClient
+  CreateCRI: typeof CRI
+  host: string
+  port: number
+  targetInfo: Protocol.Target.TargetInfo
 }
 
 interface TargetDestroyedOptions {
@@ -83,6 +95,14 @@ interface TargetDestroyedOptions {
 // handling land up to ~2s after the browser connection's; this leaves
 // headroom without wedging a worker indefinitely if that never arrives.
 const CHILD_TARGET_INTERCEPTION_TIMEOUT_MS = 4000
+
+// How long a new tab or popup stays paused while Cypress connects to it and
+// sets up Fetch interception (#32956). The opener's `window.open()` does not
+// return until the popup is released, so while it is paused the Cypress tab
+// that opened it cannot run either. Connecting normally takes milliseconds;
+// if it stalls, the popup is released without interception rather than
+// freezing the run.
+const EXTRA_TARGET_CONNECT_TIMEOUT_MS = 5000
 
 const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string, getBrowserExit?: () => BrowserExit | undefined): Promise<string> => {
   // since we may be attempting to connect to multiple hosts, 'connected'
@@ -372,14 +392,14 @@ export class BrowserCriClient {
   }
 
   static async _manageTabs (options: ManageTabsOptions) {
-    const { browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager, childTargetInterceptionTimeoutMs = CHILD_TARGET_INTERCEPTION_TIMEOUT_MS } = options
+    const { browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager, childTargetInterceptionTimeoutMs = CHILD_TARGET_INTERCEPTION_TIMEOUT_MS, extraTargetConnectTimeoutMs } = options
     const promises = [
       browserClient.send('Target.setDiscoverTargets', { discover: true }),
       browserClient.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }),
     ]
 
     browserClient.on('Target.attachedToTarget', async (event: Protocol.Target.AttachedToTargetEvent) => {
-      await this._onAttachToTarget({ browserClient, browserCriClient, event, host, port, protocolManager, childTargetInterceptionTimeoutMs })
+      await this._onAttachToTarget({ browserClient, browserCriClient, event, host, port, protocolManager, childTargetInterceptionTimeoutMs, extraTargetConnectTimeoutMs })
     })
 
     browserClient.on('Target.targetDestroyed', (event: Protocol.Target.TargetDestroyedEvent) => {
@@ -487,7 +507,17 @@ export class BrowserCriClient {
   }
 
   static async _onAttachToTarget (options: AttachedToTargetOptions) {
-    const { browserClient, browserCriClient, CriConstructor, event, host, port, protocolManager, childTargetInterceptionTimeoutMs = CHILD_TARGET_INTERCEPTION_TIMEOUT_MS } = options
+    const {
+      browserClient,
+      browserCriClient,
+      CriConstructor,
+      event,
+      host,
+      port,
+      protocolManager,
+      childTargetInterceptionTimeoutMs = CHILD_TARGET_INTERCEPTION_TIMEOUT_MS,
+      extraTargetConnectTimeoutMs = EXTRA_TARGET_CONNECT_TIMEOUT_MS,
+    } = options
     const CreateCRI = CriConstructor || CRI
     const { sessionId, targetInfo, waitingForDebugger } = event
     const { targetId } = targetInfo
@@ -621,6 +651,44 @@ export class BrowserCriClient {
 
     debug('Connect as extra target (id: %s)', targetId)
 
+    await this._connectExtraTargetWithinTimeout(targetId, extraTargetConnectTimeoutMs, () => {
+      return this._connectExtraTarget({ browserCriClient, CreateCRI, host, port, targetInfo })
+    })
+
+    await run()
+  }
+
+  // Races connecting to an extra target against timeoutMs and returns either
+  // way, so the caller can always release the paused target. A connect that
+  // loses the race keeps going in the background, so a slow popup still gets
+  // its Fetch interception once it connects.
+  private static async _connectExtraTargetWithinTimeout (targetId: string, timeoutMs: number, connect: () => Promise<void>): Promise<void> {
+    const timedOut = Symbol('extraTargetConnectTimedOut')
+    let timeoutHandle: NodeJS.Timeout | undefined
+
+    const connecting = connect().catch((err) => {
+      debug('error connecting to extra target %s: %s', targetId, err?.stack || err)
+    })
+
+    try {
+      const outcome = await Promise.race([
+        connecting,
+        new Promise((resolve) => {
+          timeoutHandle = setTimeout(() => resolve(timedOut), timeoutMs)
+        }),
+      ])
+
+      if (outcome === timedOut) {
+        debug('extra target %s not connected after %dms, releasing it without waiting further', targetId, timeoutMs)
+      }
+    } finally {
+      clearTimeout(timeoutHandle)
+    }
+  }
+
+  private static async _connectExtraTarget ({ browserCriClient, CreateCRI, host, port, targetInfo }: ConnectExtraTargetOptions): Promise<void> {
+    const { targetId } = targetInfo
+
     let extraTargetCriClient
 
     try {
@@ -634,7 +702,7 @@ export class BrowserCriClient {
     } catch (err: any) {
       debug('Errored connecting to target (id: %s): %s', targetId, err?.stack || err)
 
-      return await run()
+      return
     }
 
     sendLargeMessagesInFragments(extraTargetCriClient)
@@ -702,8 +770,6 @@ export class BrowserCriClient {
       // keep requests flowing without shared middleware.
       await fallbackToHeaderOnlyContinue()
     }
-
-    await run()
   }
 
   static _onTargetDestroyed ({ browserClient, browserCriClient, browserName, event, onAsynchronousError }: TargetDestroyedOptions) {
