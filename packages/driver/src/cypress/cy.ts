@@ -928,8 +928,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // Started as the document begins to load, so the activation has usually
     // finished by the time the load handler waits on it, and doesn't hold up
-    // marking the page stable.
-    this.autActivation = { document: contentWindow.document, activating: activateAut(this.Cypress, contentWindow) }
+    // marking the page stable. A component testing spec's page is activated when
+    // a test starts instead, once that test's `userActivation` applies.
+    if (this.Cypress.testingType !== 'component') {
+      this.autActivation = { document: contentWindow.document, activating: activateAut(this.Cypress, contentWindow) }
+    }
   }
 
   // Waits for the activation started when `autWindow`'s document began to load. A
