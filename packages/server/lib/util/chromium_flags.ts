@@ -19,6 +19,15 @@ const disabledFeatures = [
   // https://github.com/cypress-io/cypress/issues/34508
   'HttpsUpgrades',
 
+  // Chrome's HTTPS-First "Balanced" mode (default-on in recent Chrome) is a
+  // second path to the same silent http://->https:// main-frame upgrade that
+  // disabling HttpsUpgrades (above) addresses; HttpsUpgrades alone does not
+  // cover it. Left on, cy.visit('http://host') strands the runner on the
+  // upgraded origin and re-switches origins forever, so the visit never settles
+  // and pageLoadTimeout never fires.
+  // https://github.com/cypress-io/cypress/issues/35520
+  'HttpsFirstBalancedMode',
+
   // Disables the Interest Feed Content Suggestions,
   // which is a feature that shows content suggestions based on the user's interests.
   // https://www.google.com/interests/saved
