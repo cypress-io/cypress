@@ -51,25 +51,42 @@ export const activateAut = async (Cypress: ICypress, autWindow: Window | undefin
   await activate(Cypress)
 }
 
+// Renewing at least this often leaves an app most of the few seconds that transient
+// activation lasts, even when actionability retries for a while before the events fire.
+const RENEWAL_INTERVAL_MS = 1000
+
 // Gives the AUT the transient activation a real click or key press gives it, which
 // APIs like `requestFullscreen()` and `showPicker()` need when the app calls them
-// from the event handler. Transient activation lasts a few seconds and some APIs use
-// it up, so action commands renew it just before they fire their events. Returns
-// nothing when there is nothing to renew, so the caller can stay synchronous.
-export const renewTransientActivation = (Cypress: ICypress, win: Window | null | undefined): Promise<void> | undefined => {
-  if (!isEnabled(Cypress)) {
-    return
+// from an event handler, including after awaiting something there. A real click
+// or key press always starts a fresh activation, so this renews it on the command's
+// first attempt, and on a retry once it may have run low or been used up.
+//
+// Returns the function to call before each attempt. It returns nothing when there
+// is nothing to renew, so the caller can stay synchronous.
+export const createTransientActivationRenewer = (Cypress: ICypress, win: Window | null | undefined) => {
+  let renewedAt: number | undefined
+
+  const isActive = () => {
+    try {
+      return !!win?.navigator.userActivation?.isActive
+    } catch {
+      return false
+    }
   }
 
-  try {
-    if (win?.navigator.userActivation?.isActive) {
+  return (): Promise<void> | undefined => {
+    if (!isEnabled(Cypress)) {
       return
     }
-  } catch {
-    // a window that can't be read is renewed all the same
-  }
 
-  return activate(Cypress)
+    if (renewedAt !== undefined && Date.now() - renewedAt < RENEWAL_INTERVAL_MS && isActive()) {
+      return
+    }
+
+    renewedAt = Date.now()
+
+    return activate(Cypress)
+  }
 }
 
 // Activates an AUT document that loaded before Cypress began listening for its

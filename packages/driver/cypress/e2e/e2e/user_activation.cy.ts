@@ -132,6 +132,23 @@ describe('user activation', { browser: '!webkit' }, () => {
       cy.wrap(shown).should('deep.equal', [false, false])
     })
 
+    it('gives a click a fresh transient activation for a handler that awaits something', () => {
+      const isActive = handle('#button', 'click', async (win) => {
+        // stands in for an app that awaits a request before calling an API that needs activation
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+
+        return win.navigator.userActivation.isActive
+      })
+
+      // an earlier click activated the page, but too long ago to last through the handler
+      cy.get('#text').click()
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(3000)
+
+      cy.get('#button').click()
+      cy.wrap(isActive, { timeout: 5000 }).should('deep.equal', [true])
+    })
+
     it('lets a click handler call HTMLInputElement.showPicker()', () => {
       const errors = handle('#date', 'click', (win, el) => {
         try {

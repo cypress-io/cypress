@@ -9,7 +9,7 @@ import type { ElWindowPosition, ElViewportPosition, ElementPositioning } from '.
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
 import { callNativeMethod, getNativeProp } from '../dom/elements/nativeProps'
-import { renewTransientActivation } from './user-activation'
+import { createTransientActivationRenewer } from './user-activation'
 const debug = debugFn('cypress:driver:actionability')
 // for logs emitted on every retry iteration of an actionability check
 const debugVerbose = debugFn('cypress-verbose:driver:actionability')
@@ -657,10 +657,12 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
       }
     }
 
+    const renewActivation = callbacks.activatesUser ? createTransientActivationRenewer(cy.Cypress, win) : undefined
+
     // The activation is renewed before an attempt rather than between its checks and
     // its events, which have to run synchronously.
     const attempt = () => {
-      const renewing = callbacks.activatesUser ? renewTransientActivation(cy.Cypress, win) : undefined
+      const renewing = renewActivation?.()
 
       return renewing ? renewing.then(retryActionability) : retryActionability()
     }
