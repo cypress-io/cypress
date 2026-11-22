@@ -27,6 +27,26 @@ describe('user activation with userActivation: false', { browser: '!webkit', use
     })
   })
 
+  it('gives a click handler no transient activation', () => {
+    const results: unknown[] = []
+
+    cy.visit('/fixtures/user-activation.html')
+    cy.window().then((win) => {
+      win.document.querySelector('#button')!.addEventListener('click', () => {
+        results.push(win.navigator.userActivation.isActive)
+
+        try {
+          (win.document.querySelector('#date') as HTMLInputElement).showPicker()
+        } catch (err) {
+          results.push(err.name)
+        }
+      })
+    })
+
+    cy.get('#button').click()
+    cy.wrap(results).should('deep.equal', [false, 'NotAllowedError'])
+  })
+
   it('can be turned back on for one test', { userActivation: true }, () => {
     cy.visit('/fixtures/user-activation.html')
     cy.window().then((win) => expectActivation(win, true))

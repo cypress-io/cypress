@@ -9,23 +9,12 @@ const debug = Debug('cypress:driver:user-activation')
 // must not wait on it any longer.
 const ACTIVATION_TIMEOUT_MS = 2000
 
-// Gives the AUT document sticky user activation, so it behaves as it would once a
-// real user had interacted with it. Activation belongs to a document, so this runs
-// after every AUT page load. No input event reaches the application.
-export const activateAut = async (Cypress: ICypress, autWindow: Window | undefined) => {
-  if (!Cypress.config('userActivation') || Cypress.isBrowser('webkit')) {
-    return
-  }
+const isEnabled = (Cypress: ICypress) => Cypress.config('userActivation') && !Cypress.isBrowser('webkit')
 
-  try {
-    // about:blank is what the AUT shows between tests, not the application
-    if (autWindow?.location.href === 'about:blank') {
-      return
-    }
-  } catch {
-    // a cross-origin AUT can't be read from here, and still needs activating
-  }
-
+// The browser notifies activation as a real user's click or key press would: the
+// AUT gains sticky activation and, for a few seconds, transient activation. No
+// input event reaches the application.
+const activate = async (Cypress: ICypress) => {
   let timeout: ReturnType<typeof setTimeout> | undefined
 
   try {
@@ -40,6 +29,47 @@ export const activateAut = async (Cypress: ICypress, autWindow: Window | undefin
   } finally {
     clearTimeout(timeout)
   }
+}
+
+// Gives the AUT document sticky user activation, so it behaves as it would once a
+// real user had interacted with it. Activation belongs to a document, so this runs
+// after every AUT page load.
+export const activateAut = async (Cypress: ICypress, autWindow: Window | undefined) => {
+  if (!isEnabled(Cypress)) {
+    return
+  }
+
+  try {
+    // about:blank is what the AUT shows between tests, not the application
+    if (autWindow?.location.href === 'about:blank') {
+      return
+    }
+  } catch {
+    // a cross-origin AUT can't be read from here, and still needs activating
+  }
+
+  await activate(Cypress)
+}
+
+// Gives the AUT the transient activation a real click or key press gives it, which
+// APIs like `requestFullscreen()` and `showPicker()` need when the app calls them
+// from the event handler. Transient activation lasts a few seconds and some APIs use
+// it up, so action commands renew it just before they fire their events. Returns
+// nothing when there is nothing to renew, so the caller can stay synchronous.
+export const renewTransientActivation = (Cypress: ICypress, win: Window | null | undefined): Promise<void> | undefined => {
+  if (!isEnabled(Cypress)) {
+    return
+  }
+
+  try {
+    if (win?.navigator.userActivation?.isActive) {
+      return
+    }
+  } catch {
+    // a window that can't be read is renewed all the same
+  }
+
+  return activate(Cypress)
 }
 
 // Activates an AUT document that loaded before Cypress began listening for its

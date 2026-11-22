@@ -74,6 +74,145 @@ describe('user activation', { browser: '!webkit' }, () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/1213
+  // https://github.com/cypress-io/cypress/issues/8618
+  describe('transient activation', () => {
+    // runs `handler` from the element's own event listener, where an application calls
+    // the APIs that need transient activation, and collects what it returns or resolves to
+    const handle = <T>(selector: string, eventName: string, handler: (win: Window, el: HTMLElement) => T | Promise<T>) => {
+      const results: T[] = []
+
+      cy.window().then((win) => {
+        win.document.querySelector(selector)!.addEventListener(eventName, async (e) => {
+          results.push(await handler(win, e.currentTarget as HTMLElement))
+        })
+      })
+
+      return results
+    }
+
+    const settle = (promise: Promise<unknown>) => promise.then(() => 'resolved', (err) => `${err.name}: ${err.message}`)
+
+    beforeEach(() => {
+      cy.visit('/fixtures/user-activation.html')
+
+      // uses up the transient activation the page load gave, so only the command
+      // under test can give it
+      cy.window().then((win) => {
+        (win.document.querySelector('#date') as HTMLInputElement).showPicker()
+        expect(win.navigator.userActivation.isActive, 'navigator.userActivation.isActive').to.be.false
+      })
+    })
+
+    it('gives a click handler transient activation', () => {
+      const isActive = handle('#button', 'click', (win) => win.navigator.userActivation.isActive)
+
+      cy.get('#button').click()
+      cy.wrap(isActive).should('deep.equal', [true])
+    })
+
+    it('gives a keydown handler transient activation', () => {
+      const isActive = handle('#text', 'keydown', (win) => win.navigator.userActivation.isActive)
+
+      cy.get('#text').type('a')
+      cy.wrap(isActive).should('deep.equal', [true])
+    })
+
+    it('renews transient activation an earlier click used up', () => {
+      const shown = handle('#button', 'click', (win) => {
+        (win.document.querySelector('#date') as HTMLInputElement).showPicker()
+
+        return win.navigator.userActivation.isActive
+      })
+
+      cy.get('#button').click()
+      cy.get('#button').click()
+
+      // showPicker() uses up transient activation, and throws without it
+      cy.wrap(shown).should('deep.equal', [false, false])
+    })
+
+    it('lets a click handler call HTMLInputElement.showPicker()', () => {
+      const errors = handle('#date', 'click', (win, el) => {
+        try {
+          (el as HTMLInputElement).showPicker()
+        } catch (err) {
+          return err.message
+        }
+
+        return null
+      })
+
+      cy.get('#date').click()
+      cy.wrap(errors).should('deep.equal', [null])
+    })
+
+    it('lets a click handler enter fullscreen', { browser: { family: 'chromium' } }, () => {
+      const requests = handle('#button', 'click', (win) => settle(win.document.documentElement.requestFullscreen()))
+
+      cy.get('#button').click()
+      cy.wrap(requests).its(0).should('equal', 'resolved')
+      cy.document().then((doc) => doc.exitFullscreen())
+    })
+
+    it('lets a click handler write to the clipboard', { browser: { family: 'chromium' } }, () => {
+      const writes = handle('#button', 'click', (win) => settle(win.navigator.clipboard.writeText('Jordan Avery')))
+
+      cy.get('#button').click()
+      cy.wrap(writes).its(0).should('equal', 'resolved')
+    })
+
+    it('lets a click handler lock the pointer', { browser: ['chrome', 'chrome-for-testing', 'edge'] }, () => {
+      const locks = handle('#button', 'click', (win) => settle(Promise.resolve(win.document.body.requestPointerLock())))
+
+      cy.get('#button').click()
+      cy.wrap(locks).its(0).should('equal', 'resolved')
+      cy.document().then((doc) => doc.exitPointerLock())
+    })
+
+    it('lets a click handler open Picture-in-Picture', { browser: { family: 'chromium' } }, () => {
+      cy.document().then((doc) => {
+        const canvas = doc.createElement('canvas')
+        const video = doc.createElement('video')
+
+        canvas.getContext('2d')!.fillRect(0, 0, 10, 10)
+        video.id = 'video'
+        video.muted = true
+        video.srcObject = canvas.captureStream()
+        doc.body.append(video)
+
+        return video.play()
+      })
+
+      const requests = handle('#button', 'click', (win) => settle((win.document.querySelector('#video') as HTMLVideoElement).requestPictureInPicture()))
+
+      cy.get('#button').click()
+      cy.wrap(requests).its(0).should('equal', 'resolved')
+      cy.document().then((doc) => doc.exitPictureInPicture())
+    })
+
+    it('gives a click handler in a cross-origin AUT transient activation', () => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        const isActive: boolean[] = []
+
+        // Lets the transient activation from the page load run out, so only the click
+        // can give it. showPicker(), which would use it up sooner, throws in a
+        // cross-origin frame.
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(5500)
+        cy.window().then((win) => {
+          win.document.body.addEventListener('click', () => isActive.push(win.navigator.userActivation.isActive))
+        })
+
+        cy.get('body').click()
+        cy.wrap(isActive).should('deep.equal', [true])
+      })
+    })
+  })
+
   describe('beforeunload dialogs', () => {
     const beforeUnloadLogs: Cypress.Log[] = []
 

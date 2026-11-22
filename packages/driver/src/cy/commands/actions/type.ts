@@ -481,6 +481,8 @@ export default function (Commands, Cypress, cy, state, config) {
       return $actionability.verify(cy, options.$el, config, options, {
         subjectFn: () => cy.getSubjectFromChain(subjectChain),
 
+        activatesUser: true,
+
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
@@ -632,6 +634,8 @@ export default function (Commands, Cypress, cy, state, config) {
         }
 
         return $actionability.verify(cy, $el, config, options, {
+          activatesUser: true,
+
           onScroll ($el, type) {
             return Cypress.action('cy:scrolled', $el, type)
           },

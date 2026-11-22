@@ -352,6 +352,8 @@ export default (Commands, Cypress, cy, state, config) => {
       // Similarly, this is why we implement something similar, but not identical to,
       // cy.trigger() to dispatch our events.
       await $actionability.verify(cy, subject, config, options, {
+        activatesUser: true,
+
         subjectFn () {
           subject = cy.getSubjectFromChain(subjectChain)
           options.eventTarget = getEventTargetFromSubject(subject)

@@ -3543,7 +3543,7 @@ declare namespace Cypress {
      */
     waitForAnimations: boolean
     /**
-     * Whether Cypress gives the application under test sticky [user activation](https://developer.mozilla.org/en-US/docs/Web/Security/User_activation) after each page load, the state a page is in once a real user has interacted with it. APIs that depend on it, like `navigator.vibrate()` and `beforeunload` confirmation dialogs, then behave as they would for a real user. Cypress accepts any `beforeunload` dialog this enables. Set to `false` to test what a page does before anyone interacts with it.
+     * Whether Cypress gives the application under test the [user activation](https://developer.mozilla.org/en-US/docs/Web/Security/User_activation) that a real user's interactions give a page. After each page load, the page behaves as if someone had already interacted with it, so APIs like `navigator.vibrate()` and `beforeunload` confirmation dialogs work. Action commands such as `.click()` and `.type()` also give the event handlers they run the activation a real click or key press gives, so a handler can call APIs like `requestFullscreen()` and `showPicker()`. Cypress accepts any `beforeunload` dialog this enables. Set to `false` to test what a page does before anyone interacts with it.
      *
      * Chromium-based browsers keep a page's activation when it navigates to another page on the same origin, so turn this off in your config or for the outermost suite of a spec, before any test activates the page. Not supported in WebKit.
      * @default true

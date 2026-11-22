@@ -724,7 +724,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       case 'get:aut:title':
         return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
       case 'activate:aut:frame':
-        return cdpActivateFrame(this.sendDebuggerCommandFn, await this._getAutFrame())
+        return cdpActivateFrame(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

@@ -1226,6 +1226,45 @@ describe('lib/browsers/cdp_automation', () => {
 
         await expect(onRequest('activate:aut:frame', {})).rejects.toThrow('Unable to activate the AUT frame: Uncaught')
       })
+
+      describe('when the frame already has the isolated world', () => {
+        beforeEach(() => {
+          onFn.withArgs('Runtime.executionContextCreated').yield({
+            context: { id: 789, origin: 'http://localhost:3500', name: '__cypress_user_activation__', auxData: { frameId: 'aut', isDefault: false } },
+          })
+        })
+
+        it('evaluates in it instead of creating another', async () => {
+          sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({ result: { type: 'undefined' } })
+
+          await onRequest('activate:aut:frame', {})
+
+          expectCalledWith(sendDebuggerCommand, 'Runtime.evaluate', { expression: 'void 0', contextId: 789, userGesture: true })
+          expectNotCalledWith(sendDebuggerCommand, 'Page.createIsolatedWorld')
+        })
+
+        it('creates another once the world is gone', async () => {
+          sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 789, userGesture: true }).rejects(new Error('Cannot find context with specified id'))
+          sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true }).resolves({ result: { type: 'undefined' } })
+
+          await onRequest('activate:aut:frame', {})
+
+          expectCalledWith(sendDebuggerCommand, 'Page.createIsolatedWorld', { frameId: 'aut', worldName: '__cypress_user_activation__' })
+          expectCalledWith(sendDebuggerCommand, 'Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true })
+        })
+
+        it('does not use a world of another frame', async () => {
+          onFn.withArgs('Runtime.executionContextCreated').yield({
+            context: { id: 790, origin: 'http://localhost:3500', name: '__cypress_user_activation__', auxData: { frameId: 'top', isDefault: false } },
+          })
+
+          sendDebuggerCommand.withArgs('Runtime.evaluate').resolves({ result: { type: 'undefined' } })
+
+          await onRequest('activate:aut:frame', {})
+
+          expectNotCalledWith(sendDebuggerCommand, 'Runtime.evaluate', { expression: 'void 0', contextId: 790, userGesture: true })
+        })
+      })
     })
 
     describe('.onJavascriptDialogOpening', () => {
