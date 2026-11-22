@@ -474,7 +474,10 @@ class $Cypress {
 
         // A component testing spec runs in the AUT document, which has usually
         // finished loading by now, so its load event has already passed.
-        deferActivationOfLoadedAut(this.$autIframe.prop('contentWindow'))
+        if (this.testingType === 'component') {
+          deferActivationOfLoadedAut(this.$autIframe.prop('contentWindow'))
+        }
+
         this.onSpecReady()
       })
     }

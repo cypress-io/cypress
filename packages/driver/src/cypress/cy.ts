@@ -38,7 +38,7 @@ import { create as createSnapshots } from '../cy/snapshots'
 import { $Command } from './command'
 import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
-import { activateAut, activateAutLoadedEarly } from '../cy/user-activation'
+import { activateAut, activateAutLoadedEarly, deferActivationOfLoadedAut } from '../cy/user-activation'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
 import type { IOverrides } from '../cy/overrides'
 import { create as createOverrides } from '../cy/overrides'
@@ -939,6 +939,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   // document Cypress didn't see begin to load, such as a cross-origin one, is
   // activated now.
   private async finishActivatingAut (autWindow: Window) {
+    if (this.Cypress.testingType === 'component') {
+      return deferActivationOfLoadedAut(autWindow)
+    }
+
     const activation = this.autActivation
 
     this.autActivation = undefined

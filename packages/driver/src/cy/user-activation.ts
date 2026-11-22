@@ -18,22 +18,64 @@ interface ActivationHost {
 
 const isEnabled = (Cypress: ActivationHost) => !!Cypress.config('userActivation') && !Cypress.isBrowser('webkit')
 
+// What Cypress knows about activating the AUT during a spec: when it last asked
+// the browser to, and whether the browser stopped answering.
+interface ActivationRecord {
+  requestedAt?: number
+  unresponsive: boolean
+}
+
+const records = new WeakMap<ActivationHost, ActivationRecord>()
+
+const recordFor = (Cypress: ActivationHost) => {
+  let record = records.get(Cypress)
+
+  if (!record) {
+    record = { unresponsive: false }
+    records.set(Cypress, record)
+  }
+
+  return record
+}
+
+const TIMED_OUT = Symbol('timed out')
+
 // The browser notifies activation as a real user's click or key press would: the
 // AUT gains sticky activation and, for a few seconds, transient activation. No
 // input event reaches the application. Resolves `false` when the browser didn't
-// activate the AUT in time.
+// activate the AUT. A browser that doesn't answer in time isn't asked again during
+// the spec, so it can't hold up every page load and command.
 const activate = async (Cypress: ActivationHost): Promise<boolean> => {
+  const record = recordFor(Cypress)
+
+  if (record.unresponsive) {
+    return false
+  }
+
+  record.requestedAt = Date.now()
+
   let timeout: ReturnType<typeof setTimeout> | undefined
 
   try {
-    return await Promise.race([
-      Cypress.automation('activate:aut:frame', {}).then(() => true),
-      new Promise<boolean>((resolve) => {
-        timeout = setTimeout(() => resolve(false), ACTIVATION_TIMEOUT_MS)
+    const result = await Promise.race([
+      Cypress.automation('activate:aut:frame', {}),
+      new Promise<typeof TIMED_OUT>((resolve) => {
+        timeout = setTimeout(() => resolve(TIMED_OUT), ACTIVATION_TIMEOUT_MS)
       }),
     ])
+
+    if (result === TIMED_OUT) {
+      debug('the browser did not activate the AUT in time, so it is not asked again during this spec')
+      record.unresponsive = true
+      record.requestedAt = undefined
+
+      return false
+    }
+
+    return true
   } catch (err) {
     debug('failed to activate the AUT: %o', err)
+    record.requestedAt = undefined
 
     return false
   } finally {
@@ -44,7 +86,7 @@ const activate = async (Cypress: ActivationHost): Promise<boolean> => {
 // Gives the AUT document sticky user activation, so it behaves as it would once a
 // real user had interacted with it. Activation belongs to a document, so this runs
 // after every AUT page load.
-export const activateAut = async (Cypress: ICypress, autWindow: Window | undefined) => {
+export const activateAut = async (Cypress: ActivationHost, autWindow: { location: { href: string } } | undefined) => {
   if (!isEnabled(Cypress)) {
     return
   }
@@ -65,22 +107,21 @@ export const activateAut = async (Cypress: ICypress, autWindow: Window | undefin
 // activation lasts, even when actionability retries or typing go on for a while.
 const RENEWAL_INTERVAL_MS = 1000
 
+// only what renewing reads from the AUT window, so a unit test can supply it
+type ActivationWindow = { navigator: { userActivation?: { isActive: boolean } } }
+
 // Gives the AUT the transient activation a real click or key press gives it, which
 // APIs like `requestFullscreen()` and `showPicker()` need when the app calls them
 // from an event handler, including after awaiting something there. A real click or
 // key press always starts a fresh activation, so a command renews it before it
-// fires its first events, and again once a second has passed or `autWindow` has
-// used it up.
+// fires its events, unless Cypress activated the AUT less than a second ago and
+// `autWindow` hasn't used that activation up.
 //
 // Returns the function to call before each attempt or key. It returns nothing when
 // there is nothing to renew, so the caller can stay synchronous. After a renewal
 // fails, it stops trying for the rest of the command, which would otherwise wait on
 // the browser before every retry.
-// only what renewing reads from the AUT window, so a unit test can supply it
-type ActivationWindow = { navigator: { userActivation?: { isActive: boolean } } }
-
-export const createTransientActivationRenewer = (Cypress: ActivationHost, autWindow: ActivationWindow | undefined, { justRenewed = false } = {}) => {
-  let renewedAt = justRenewed ? Date.now() : undefined
+export const createTransientActivationRenewer = (Cypress: ActivationHost, autWindow: ActivationWindow | undefined) => {
   let failed = false
 
   const isUsedUp = () => {
@@ -92,15 +133,15 @@ export const createTransientActivationRenewer = (Cypress: ActivationHost, autWin
   }
 
   return (): Promise<void> | undefined => {
-    if (failed || !isEnabled(Cypress)) {
+    const { requestedAt, unresponsive } = recordFor(Cypress)
+
+    if (failed || unresponsive || !isEnabled(Cypress)) {
       return
     }
 
-    if (renewedAt !== undefined && Date.now() - renewedAt < RENEWAL_INTERVAL_MS && !isUsedUp()) {
+    if (requestedAt !== undefined && Date.now() - requestedAt < RENEWAL_INTERVAL_MS && !isUsedUp()) {
       return
     }
-
-    renewedAt = Date.now()
 
     return activate(Cypress).then((activated) => {
       failed = !activated
@@ -108,22 +149,20 @@ export const createTransientActivationRenewer = (Cypress: ActivationHost, autWin
   }
 }
 
-// An AUT document that loaded before Cypress began listening for its load event,
-// which is how a component testing spec's page usually loads. One that is still
-// loading is activated when its load event fires instead.
+// A component testing spec's page, which loads before a test's `userActivation`
+// applies, so it is activated once a test starts instead.
 let documentLoadedEarly: Document | undefined
 
 export const deferActivationOfLoadedAut = (autWindow: Window | undefined) => {
   try {
-    documentLoadedEarly = autWindow?.document.readyState === 'complete' ? autWindow.document : undefined
+    documentLoadedEarly = autWindow?.document
   } catch {
     documentLoadedEarly = undefined
   }
 }
 
-// Activates the document that loaded early once a test that wants activation starts,
-// because a suite's or test's `userActivation` only applies from then on. Once the
-// AUT has moved to another document, that document's load event activates it.
+// Activates the deferred document once a test that wants activation starts, because
+// a suite's or test's `userActivation` only applies from then on.
 export const activateAutLoadedEarly = async (Cypress: ICypress, autWindow: Window | undefined) => {
   if (!documentLoadedEarly || !isEnabled(Cypress)) {
     return
