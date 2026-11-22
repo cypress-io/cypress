@@ -467,6 +467,28 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
+    it('loads only the Cypress extension when no other extensions are provided', async () => {
+      await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
+
+      const args: string[] = launchSpy.mock.calls[0][3]
+
+      expect(args.filter((arg) => arg.startsWith('--load-extension='))).toEqual(['--load-extension=/path/to/ext'])
+    })
+
+    it('loads launchOptions.extensions before the Cypress extension', async () => {
+      plugins.registerEvent('before:browser:launch', (browser, config) => {
+        return Promise.resolve({ args: ['--foo=bar'], extensions: ['/extensions/react-devtools', '/extensions/axe-devtools'] })
+      })
+
+      await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
+
+      const args: string[] = launchSpy.mock.calls[0][3]
+
+      expect(args.filter((arg) => arg.startsWith('--load-extension='))).toEqual([
+        '--load-extension=/extensions/react-devtools,/extensions/axe-devtools,/path/to/ext',
+      ])
+    })
+
     it('normalizes --load-extension if provided in plugin', async () => {
       plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({
@@ -474,15 +496,13 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
-      const pathToTheme = extension.getPathToTheme()
-
       await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
 
       const args = launchSpy.mock.calls[0][3]
 
       expect(args).toEqual(expect.arrayContaining([
         '--foo=bar',
-        `--load-extension=/foo/bar/baz.js,/path/to/ext,${pathToTheme}`,
+        '--load-extension=/foo/bar/baz.js,/path/to/ext',
         '--user-data-dir=/profile/dir',
         '--disk-cache-dir=/profile/dir/CypressCache',
       ]))
@@ -493,8 +513,6 @@ describe('lib/browsers/chrome', () => {
         return Promise.resolve({ args: ['--foo=bar', '--load-extension=/foo/bar/baz.js,/quux.js'] })
       })
 
-      const pathToTheme = extension.getPathToTheme()
-
       const onWarning = vi.fn()
 
       await chrome.open({ isHeaded: true } as any, 'http://', { onWarning, onError: () => {} } as any, automation)
@@ -503,7 +521,7 @@ describe('lib/browsers/chrome', () => {
 
       expect(args).toEqual(expect.arrayContaining([
         '--foo=bar',
-        `--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,${pathToTheme}`,
+        '--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext',
         '--user-data-dir=/profile/dir',
         '--disk-cache-dir=/profile/dir/CypressCache',
       ]))
