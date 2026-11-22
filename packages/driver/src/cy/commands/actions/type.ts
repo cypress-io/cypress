@@ -8,6 +8,7 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
+import { createTransientActivationRenewer } from '../../user-activation'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
@@ -287,6 +288,9 @@ export default function (Commands, Cypress, cy, state, config) {
         $el: options.$el,
         chars,
         delay: options.delay,
+        // a real key press gives fresh activation on every keydown, so a long string
+        // keeps the activation the command's actionability attempt gave it
+        onBeforeKey: createTransientActivationRenewer(Cypress, { justRenewed: true }),
         release: options.release,
         parseSpecialCharSequences: options.parseSpecialCharSequences,
         window: win,

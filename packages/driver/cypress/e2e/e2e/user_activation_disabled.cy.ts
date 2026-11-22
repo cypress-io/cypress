@@ -1,5 +1,4 @@
-// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
-export {}
+import { getAutElement } from '../../support/utils'
 
 // Its own spec, so the AUT frame starts out unactivated: Chromium keeps a frame's
 // activation across same-origin navigations, so an earlier test would leave it on.
@@ -36,7 +35,7 @@ describe('user activation with userActivation: false', { browser: '!webkit', use
         results.push(win.navigator.userActivation.isActive)
 
         try {
-          (win.document.querySelector('#date') as HTMLInputElement).showPicker()
+          getAutElement(win.document, '#date', 'input').showPicker()
         } catch (err) {
           results.push(err.name)
         }

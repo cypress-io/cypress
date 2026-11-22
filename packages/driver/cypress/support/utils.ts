@@ -226,3 +226,19 @@ Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
 const chaiSubset = require('chai-subset')
 
 chai.use(chaiSubset)
+
+// Finds the AUT element `selector` matches and checks it is a `localName` element.
+// AUT elements come from another realm, so `instanceof` can't narrow them.
+export const getAutElement = <K extends keyof HTMLElementTagNameMap>(doc: Document, selector: string, localName: K): HTMLElementTagNameMap[K] => {
+  const el = doc.querySelector(selector)
+
+  if (!isAutElement(el, localName)) {
+    throw new Error(`Expected \`${selector}\` to match a <${localName}> element`)
+  }
+
+  return el
+}
+
+const isAutElement = <K extends keyof HTMLElementTagNameMap>(el: Element | null, localName: K): el is HTMLElementTagNameMap[K] => {
+  return el?.localName === localName
+}

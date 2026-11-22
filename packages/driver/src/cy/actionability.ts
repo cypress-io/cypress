@@ -657,7 +657,7 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
       }
     }
 
-    const renewActivation = callbacks.activatesUser ? createTransientActivationRenewer(cy.Cypress, win) : undefined
+    const renewActivation = callbacks.activatesUser ? createTransientActivationRenewer(cy.Cypress) : undefined
 
     // The activation is renewed before an attempt rather than between its checks and
     // its events, which have to run synchronously. The wait goes through Bluebird so

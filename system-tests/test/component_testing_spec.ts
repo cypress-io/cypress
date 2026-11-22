@@ -24,6 +24,15 @@ describe('component testing projects', function () {
     expectedExitCode: 0,
   })
 
+  // https://github.com/cypress-io/cypress/issues/34993
+  systemTests.it('lets a component spec turn user activation off for its outermost suite', {
+    project: 'react-vite-ts-configured',
+    testingType: 'component',
+    spec: 'src/UserActivationDisabled.cy.tsx',
+    browser: ['chrome', 'electron'],
+    expectedExitCode: 0,
+  })
+
   systemTests.it('vue3-webpack-ts-configured', {
     project: 'vue3-webpack-ts-configured',
     testingType: 'component',

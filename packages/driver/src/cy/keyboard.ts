@@ -707,6 +707,8 @@ interface typeOptions {
   onEnterPressed?: (el: HTMLElement) => unknown
   onNoMatchingSpecialChars?: (chars: string, allChars: string) => unknown
   onBeforeSpecialCharAction?: (...args: any[]) => unknown
+  // runs before each key, and holds the key back until a promise it returns resolves
+  onBeforeKey?: () => PromiseLike<unknown> | undefined
   prevValue?: string
 }
 
@@ -855,14 +857,14 @@ export class Keyboard {
 
     return Promise
     .each(typeKeyFns, (fn) => {
+      const beforeKey = options.onBeforeKey?.()
+      const typed = beforeKey ? Promise.resolve(beforeKey).then(fn) : Promise.try(fn)
+
       if (options.delay) {
-        return Promise
-        .try(fn)
-        .delay(options.delay)
+        return typed.delay(options.delay)
       }
 
-      return Promise
-      .try(fn)
+      return typed
     })
     .then(() => {
       if (options.release !== false) {

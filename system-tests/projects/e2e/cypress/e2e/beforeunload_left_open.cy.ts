@@ -3,8 +3,8 @@
 // `cy.press` dispatches a trusted key event, which gives the page sticky
 // activation, so its `beforeunload` handler can open a "Leave site?" dialog.
 // Automatic user activation is turned off to show that the dialog is answered
-// however the page was activated. A dialog nobody answered used to hang the
-// run when Cypress navigated away between tests, and after the last test.
+// however the page was activated. Cypress accepts the dialog, so navigating
+// away between tests and after the last test doesn't wait on it.
 describe('a page left open with a beforeunload dialog', { userActivation: false }, () => {
   it('leaves an activated page with a beforeunload handler for the next test', () => {
     cy.visit('/blocking_beforeunload_event.html')

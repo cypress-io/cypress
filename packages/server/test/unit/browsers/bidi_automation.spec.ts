@@ -123,6 +123,21 @@ describe('lib/browsers/bidi_automation', () => {
           expectCalledWith(mockAutomationClient.push, 'beforeunload:dialog:accepted', { message: prompt.message, url: '' })
         })
 
+        it('reports the prompt with the AUT url', async () => {
+          const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+          mockWebdriverClient.browsingContextGetTree = vi.fn().mockResolvedValue({ contexts: [{ context: 'aut', url: 'http://localhost:3500/editor' }] })
+          // @ts-expect-error - autContextId is private
+          bidiAutomationInstance.autContextId = 'aut'
+
+          mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'beforeunload', handler: 'accept' })
+
+          await flushPromises()
+
+          expectCalledWith(mockWebdriverClient.browsingContextGetTree, { root: 'aut' })
+          expectCalledWith(mockAutomationClient.push, 'beforeunload:dialog:accepted', { message: prompt.message, url: 'http://localhost:3500/editor' })
+        })
+
         it('does not report a beforeunload prompt the session dismisses', async () => {
           mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'beforeunload', handler: 'dismiss' })
 

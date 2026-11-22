@@ -184,7 +184,18 @@ export class BidiAutomation {
       return
     }
 
-    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: '' })
+    // The prompt belongs to the top-level context, so its URL is the runner's. The
+    // handlers Cypress answers for come from the AUT, so the dialog is reported with
+    // the AUT's URL.
+    let url = ''
+
+    try {
+      url = this.autContextId ? await bidiGetUrl(this.webDriverClient, this.autContextId) : ''
+    } catch (err) {
+      debug('failed to get the AUT url for an accepted beforeunload prompt: %s', err?.message)
+    }
+
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url })
   }
 
   setTopLevelContextId = (contextId?: string) => {

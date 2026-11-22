@@ -13,6 +13,7 @@ import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
+import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
@@ -324,7 +325,17 @@ export = {
     win.webContents.on('will-prevent-unload', (event) => {
       event.preventDefault()
 
-      automation.push('beforeunload:dialog:accepted', { message: '', url: '' }).catch((err) => {
+      // The event doesn't say which frame's handler asked, so the dialog is reported
+      // with the AUT's URL, where the handlers Cypress answers for come from.
+      let url = ''
+
+      try {
+        url = win.webContents.mainFrame.framesInSubtree.find((frame) => frame.name.startsWith(AUT_FRAME_NAME_IDENTIFIER))?.url ?? ''
+      } catch (err) {
+        debug('failed to find the AUT frame for an accepted beforeunload dialog: %s', err?.message)
+      }
+
+      automation.push('beforeunload:dialog:accepted', { message: '', url }).catch((err) => {
         debug('failed to report accepted beforeunload dialog: %s', err?.message)
       })
     })

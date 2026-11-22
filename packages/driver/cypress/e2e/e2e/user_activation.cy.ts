@@ -1,5 +1,4 @@
-// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
-export {}
+import { getAutElement } from '../../support/utils'
 
 declare global {
   interface Window {
@@ -79,12 +78,12 @@ describe('user activation', { browser: '!webkit' }, () => {
   describe('transient activation', () => {
     // runs `handler` from the element's own event listener, where an application calls
     // the APIs that need transient activation, and collects what it returns or resolves to
-    const handle = <T>(selector: string, eventName: string, handler: (win: Window, el: HTMLElement) => T | Promise<T>) => {
+    const handle = <T>(selector: string, eventName: string, handler: (win: Window) => T | Promise<T>) => {
       const results: T[] = []
 
       cy.window().then((win) => {
-        win.document.querySelector(selector)!.addEventListener(eventName, async (e) => {
-          results.push(await handler(win, e.currentTarget as HTMLElement))
+        win.document.querySelector(selector)!.addEventListener(eventName, async () => {
+          results.push(await handler(win))
         })
       })
 
@@ -99,7 +98,7 @@ describe('user activation', { browser: '!webkit' }, () => {
       // uses up the transient activation the page load gave, so only the command
       // under test can give it
       cy.window().then((win) => {
-        (win.document.querySelector('#date') as HTMLInputElement).showPicker()
+        getAutElement(win.document, '#date', 'input').showPicker()
         expect(win.navigator.userActivation.isActive, 'navigator.userActivation.isActive').to.be.false
       })
     })
@@ -118,9 +117,17 @@ describe('user activation', { browser: '!webkit' }, () => {
       cy.wrap(isActive).should('deep.equal', [true])
     })
 
+    it('keeps transient activation through a .type() that outlasts it', () => {
+      const isActive = handle('#text', 'keydown', (win) => win.navigator.userActivation.isActive)
+
+      // takes longer than the few seconds one activation lasts
+      cy.get('#text').type('a'.repeat(300), { delay: 20 })
+      cy.wrap(isActive).should('have.length', 300).and('not.include', false)
+    })
+
     it('renews transient activation an earlier click used up', () => {
       const shown = handle('#button', 'click', (win) => {
-        (win.document.querySelector('#date') as HTMLInputElement).showPicker()
+        getAutElement(win.document, '#date', 'input').showPicker()
 
         return win.navigator.userActivation.isActive
       })
@@ -150,9 +157,9 @@ describe('user activation', { browser: '!webkit' }, () => {
     })
 
     it('lets a click handler call HTMLInputElement.showPicker()', () => {
-      const errors = handle('#date', 'click', (win, el) => {
+      const errors = handle('#date', 'click', (win) => {
         try {
-          (el as HTMLInputElement).showPicker()
+          getAutElement(win.document, '#date', 'input').showPicker()
         } catch (err) {
           return err.message
         }
@@ -201,7 +208,7 @@ describe('user activation', { browser: '!webkit' }, () => {
         return video.play()
       })
 
-      const requests = handle('#button', 'click', (win) => settle((win.document.querySelector('#video') as HTMLVideoElement).requestPictureInPicture()))
+      const requests = handle('#button', 'click', (win) => settle(getAutElement(win.document, '#video', 'video').requestPictureInPicture()))
 
       cy.get('#button').click()
       cy.wrap(requests).its(0).should('equal', 'resolved')
