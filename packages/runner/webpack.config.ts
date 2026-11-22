@@ -3,9 +3,7 @@ import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@package
 import { HOST_MODULES_GLOBAL, HOST_MODULE_SPECIFIERS } from '@packages/types/src/host-modules'
 import path from 'path'
 import TerserPlugin from 'terser-webpack-plugin'
-import type { TransformOptions } from 'esbuild'
 import type webpack from 'webpack'
-import { asciiEsbuildMinify } from './ascii-minify'
 
 const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()
@@ -31,18 +29,15 @@ const productionBundleConfig: webpack.Configuration = process.env.NODE_ENV === '
   optimization: {
     ...commonConfig.optimization,
     minimize: true,
-    minimizer: [new TerserPlugin<TransformOptions>({
-      minify: asciiEsbuildMinify,
-      // workers receive the minify function as source text, without the module it closes over
-      parallel: false,
+    minimizer: [new TerserPlugin({
       terserOptions: {
-        // function and class names appear in stack traces and some error messages
-        keepNames: true,
-        charset: 'ascii',
-        legalComments: 'eof',
-        // Babel's target in web-config; keeps esbuild from rewriting the output into newer syntax
-        target: 'chrome64',
+        // stack frames name functions after their source identifiers, and the driver drops its own
+        // frames by those names, so nothing is renamed or inlined
+        mangle: false,
+        compress: false,
+        format: { ascii_only: true, comments: 'some' },
       },
+      extractComments: false,
     })],
   },
 } : {}

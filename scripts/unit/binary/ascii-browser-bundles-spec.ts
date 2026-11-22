@@ -4,11 +4,8 @@ import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import vm from 'vm'
-import { transformSync } from 'esbuild'
-import { decode } from '@jridgewell/sourcemap-codec'
 
 const { toAscii, writeBrowserBundlesAsAscii } = require('../../binary/ascii-browser-bundles')
-const { escapeNonAscii } = require('../../binary/escape-non-ascii')
 
 const evaluate = (source: string) => vm.runInNewContext(source)
 const isAscii = (source: string) => !/[\u0080-\uffff]/.test(source)
@@ -55,25 +52,6 @@ describe('ascii-browser-bundles', () => {
 
       expect(isAscii(escaped)).to.be.true
       expect(escaped).to.include('export')
-    })
-  })
-
-  context('escapeNonAscii', () => {
-    it('escapes regular expressions and comments, which esbuild leaves as written', () => {
-      const source = `/*! © */\n[/ẞ/.test('ẞ'), /\\ẞ/.test('ẞ'), /^[🙂]$/u.test('🙂')]`
-      const { code } = escapeNonAscii(source)
-
-      expect(isAscii(code)).to.be.true
-      expect(evaluate(code)).to.deep.equal(evaluate(source))
-    })
-
-    it('moves the source map columns that follow an escape on the same line', () => {
-      const source = `function normalize (text) {\n  return text.replace(/ẞ/g, 'ss').replace(/…/g, '...') + window.afterTheRegex(text)\n}\nwindow.normalize = normalize\n`
-      const minified = transformSync(source, { minify: true, charset: 'ascii', sourcemap: true, sourcefile: 'normalize.js' })
-      const { code, map } = escapeNonAscii(minified.code, JSON.parse(minified.map))
-      const segment = decode(map.mappings)[0].find(([column]) => column === code.indexOf('afterTheRegex'))
-
-      expect(segment?.slice(2)).to.deep.equal([1, source.split('\n')[1].indexOf('afterTheRegex')])
     })
   })
 

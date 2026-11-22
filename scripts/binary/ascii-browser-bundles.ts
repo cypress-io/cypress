@@ -3,11 +3,13 @@ import path from 'path'
 import { transformSync } from 'esbuild'
 import { parse, tokTypes } from 'acorn'
 import type { Options, Token } from 'acorn'
-import { NON_ASCII_AFTER_BACKSLASHES, unitEscape } from './escape-non-ascii'
 
 // Browsers keep a script with any character above U+00FF as UTF-16, at two bytes per character,
 // in both the page's resource cache and V8
 const NON_ASCII = /[\u0080-\uffff]/
+const NON_ASCII_AFTER_BACKSLASHES = /(\\*)([\u0080-\uffff])/g
+
+const unitEscape = (unit: number) => `\\u${unit.toString(16).toUpperCase().padStart(4, '0')}`
 
 type Range = { start: number, end: number, kind: 'comment' | 'regex' }
 
@@ -105,7 +107,7 @@ export async function writeBrowserBundlesAsAscii (appDir: string) {
       if (!NON_ASCII.test(source)) continue
 
       if (/\/\/# sourceMappingURL=(?!data:)/.test(source)) {
-        throw new Error(`${path.join(dir, name)} has a source map, which rewriting it would invalidate; escape it with escapeNonAscii where it is built`)
+        throw new Error(`${path.join(dir, name)} has a source map, which rewriting it would invalidate; make it ASCII where it is built`)
       }
 
       try {

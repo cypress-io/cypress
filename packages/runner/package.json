@@ -37,7 +37,6 @@
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
     "cross-env": "7.0.3",
-    "esbuild": "^0.28.1",
     "eslint": "^10.14.0",
     "jiti": "^2.4.2",
     "lodash": "^4.17.21",

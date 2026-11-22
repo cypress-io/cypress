@@ -132,7 +132,7 @@ describe('driver/src/cypress/cy', () => {
       .then(() => {
         const userInvocationStack = cy.queue.find({ name: 'get' }).get('userInvocationStack')
 
-        expect(userInvocationStack).to.include('.cy.ts')
+        expect(userInvocationStack.split('\n')[0]).to.include('.cy.ts')
       })
     })
 
@@ -144,7 +144,7 @@ describe('driver/src/cypress/cy', () => {
       .then(() => {
         const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
 
-        expect(userInvocationStack).to.include('.cy.ts')
+        expect(userInvocationStack.split('\n')[0]).to.include('.cy.ts')
       })
     })
 
