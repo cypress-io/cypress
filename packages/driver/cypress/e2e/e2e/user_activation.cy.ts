@@ -38,9 +38,9 @@ describe('user activation', { browser: '!webkit' }, () => {
 
       navigated = true
 
-      // answers once the page has started to unload, while the next one is still loading
+      // answers as soon as the page starts to unload, while the next one is still loading
       return new Promise((resolve) => {
-        autWindow.addEventListener('beforeunload', () => resolve(automation(eventName, ...args)), { once: true })
+        autWindow.addEventListener('beforeunload', () => resolve(undefined), { once: true })
         autWindow.location.href = '/fixtures/user-activation.html?page=2'
       })
     })
