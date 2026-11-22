@@ -25,10 +25,10 @@ const testStaticAssets = async (buildResourcePath) => {
       ],
       // each host module must be read through its webpack external, not bundled
       goodStrings: [
-        'window.__CYPRESS_HOST_MODULES__.react}',
-        'window.__CYPRESS_HOST_MODULES__["react-dom"]}',
-        'window.__CYPRESS_HOST_MODULES__["react-dom/client"]}',
-        'window.__CYPRESS_HOST_MODULES__.mobx}',
+        'window["__CYPRESS_HOST_MODULES__"]["react"]',
+        'window["__CYPRESS_HOST_MODULES__"]["react-dom"]',
+        'window["__CYPRESS_HOST_MODULES__"]["react-dom/client"]',
+        'window["__CYPRESS_HOST_MODULES__"]["mobx"]',
       ],
       testAssetStrings: [
         [
