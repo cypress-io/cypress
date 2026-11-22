@@ -3,6 +3,7 @@ import {
   NetworkInterceptionCore,
   planSubscriptions,
   mergeIncomingRequestChanges,
+  mergeWithPreservedBuffers,
 } from '../../lib'
 import type { BackendRoute } from '../../lib/types/backend-route'
 
@@ -124,8 +125,48 @@ describe('core/merge-handler-result', () => {
     expect(before.headers.foo).toBe('original')
     expect(before.headers.bar).toBeUndefined()
   })
-})
 
+  // https://github.com/cypress-io/cypress/issues/35257
+  it('replaces a shortened header array from the handler instead of merging index by index', () => {
+    const before = {
+      headers: { 'set-cookie': ['kept=origin; Path=/', 'dropped=origin; Path=/'] },
+      body: '',
+    } as any
+
+    const after = {
+      headers: { 'set-cookie': ['dropped=rewritten; Path=/'] },
+      body: '',
+    } as any
+
+    mergeWithPreservedBuffers(before, after)
+
+    expect(before.headers['set-cookie']).toEqual(['dropped=rewritten; Path=/'])
+  })
+
+  // https://github.com/cypress-io/cypress/issues/35257
+  it('replaces a shortened header array on incoming request changes', () => {
+    const before = {
+      url: 'http://example.com/',
+      headers: { 'set-cookie': ['kept=origin; Path=/', 'dropped=origin; Path=/'] },
+      body: '',
+      method: 'GET',
+    } as any
+
+    const after = {
+      url: 'http://example.com/',
+      headers: { 'set-cookie': ['dropped=rewritten; Path=/'] },
+      body: '',
+      method: 'GET',
+    } as any
+
+    mergeIncomingRequestChanges(before, after, {
+      baseUrl: 'http://example.com/',
+      resolveUrl: (_base, relative) => relative,
+    })
+
+    expect(before.headers['set-cookie']).toEqual(['dropped=rewritten; Path=/'])
+  })
+})
 describe('NetworkInterceptionCore', () => {
   it('delegates matchRoutes and handleRequest to supplied runner', async () => {
     const core = new NetworkInterceptionCore()
