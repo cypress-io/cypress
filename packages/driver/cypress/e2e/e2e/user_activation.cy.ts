@@ -186,6 +186,26 @@ describe('user activation', { browser: '!webkit' }, () => {
       cy.wrap(writes).its(0).should('equal', 'resolved')
     })
 
+    // https://github.com/cypress-io/cypress/issues/2851
+    it('lets a click handler copy and cut with document.execCommand()', { browser: { family: 'chromium' } }, () => {
+      const results = handle('#button', 'click', (win) => {
+        const text = getAutElement(win.document, '#text', 'input')
+
+        text.select()
+        const copied = win.document.execCommand('copy')
+
+        text.setSelectionRange(0, 7)
+        const cut = win.document.execCommand('cut')
+
+        return { copied, cut, value: text.value }
+      })
+
+      // not an action command, so only the click gives the page activation
+      cy.get('#text').invoke('val', 'Jordan Avery')
+      cy.get('#button').click()
+      cy.wrap(results).should('deep.equal', [{ copied: true, cut: true, value: 'Avery' }])
+    })
+
     it('lets a click handler lock the pointer', { browser: ['chrome', 'chrome-for-testing', 'edge'] }, () => {
       const locks = handle('#button', 'click', (win) => settle(Promise.resolve(win.document.body.requestPointerLock())))
 

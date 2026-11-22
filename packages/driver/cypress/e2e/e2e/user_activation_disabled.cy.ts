@@ -46,6 +46,23 @@ describe('user activation with userActivation: false', { browser: '!webkit', use
     cy.wrap(results).should('deep.equal', [false, 'NotAllowedError'])
   })
 
+  // https://github.com/cypress-io/cypress/issues/2851
+  it('leaves document.execCommand(\'copy\') blocked in a click handler', { browser: { family: 'chromium' } }, () => {
+    const copied: boolean[] = []
+
+    cy.visit('/fixtures/user-activation.html')
+    cy.get('#text').invoke('val', 'Jordan Avery')
+    cy.window().then((win) => {
+      win.document.querySelector('#button')!.addEventListener('click', () => {
+        getAutElement(win.document, '#text', 'input').select()
+        copied.push(win.document.execCommand('copy'))
+      })
+    })
+
+    cy.get('#button').click()
+    cy.wrap(copied).should('deep.equal', [false])
+  })
+
   it('can be turned back on for one test', { userActivation: true }, () => {
     cy.visit('/fixtures/user-activation.html')
     cy.window().then((win) => expectActivation(win, true))
