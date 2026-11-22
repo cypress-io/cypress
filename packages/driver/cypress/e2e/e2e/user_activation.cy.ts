@@ -210,8 +210,11 @@ describe('user activation', { browser: '!webkit' }, () => {
 
       const requests = handle('#button', 'click', (win) => settle(getAutElement(win.document, '#video', 'video').requestPictureInPicture()))
 
+      cy.document().then((doc) => expect(doc.pictureInPictureElement, 'pictureInPictureElement').to.be.null)
       cy.get('#button').click()
       cy.wrap(requests).its(0).should('equal', 'resolved')
+      // the AUT's own document holds the element, as it would for a real user
+      cy.document().its('pictureInPictureElement').should('have.id', 'video')
       cy.document().then((doc) => doc.exitPictureInPicture())
     })
 
