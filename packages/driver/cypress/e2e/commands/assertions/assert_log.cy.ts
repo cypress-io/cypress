@@ -651,6 +651,22 @@ describe('src/cy/commands/assertions', () => {
 
         expect(err.message).to.eq('expected { document: [Getter] } to equal 1')
       })
+
+      // https://github.com/cypress-io/cypress/issues/30662
+      it('renders a value with its Symbol.for(nodejs.util.inspect.custom) method, not its inspect method', () => {
+        const err = getAssertionError(() => {
+          expect({
+            inspect () {
+              throw new Error('inspect() should not be called')
+            },
+            [Symbol.for('nodejs.util.inspect.custom')] () {
+              return 'User<jane.doe@example.com>'
+            },
+          }).to.equal(1)
+        })
+
+        expect(err.message).to.eq('expected User<jane.doe@example.com> to equal 1')
+      })
     })
   })
 })

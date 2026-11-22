@@ -1294,6 +1294,26 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/30662
+      it('does not call an inspect method on the yielded property', () => {
+        const mw = {
+          inspect: cy.stub().as('mwInspect').throws(new Error('mw.inspect() should not be called')),
+          propertyToCheckFor: true,
+        }
+
+        cy.window().then((win) => {
+          Object.assign(win, { mw })
+        })
+
+        cy.window().its('mw')
+        cy.window().its('mw').should('have.property', 'propertyToCheckFor')
+        cy.window().then(() => {
+          expect(mw).to.have.property('propertyToCheckFor')
+        })
+
+        cy.get('@mwInspect').should('not.have.been.called')
+      })
+
       it('handles string subjects', () => {
         const str = 'foobarbaz'
 

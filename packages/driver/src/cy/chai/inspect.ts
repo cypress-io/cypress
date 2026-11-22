@@ -29,7 +29,7 @@ export function create (chai) {
    * @namespace Utils
    * @name inspect
    */
-  function inspect (obj, showHidden, depth, colors) {
+  function inspect (obj, showHidden?, depth?, colors?) {
     const ctx = {
       showHidden,
       seen: [],
@@ -66,6 +66,11 @@ export function create (chai) {
     return object.defaultView && object.defaultView === object.defaultView.window
   }
 
+  const customInspectSymbols = [
+    Symbol.for('chai/inspect'),
+    Symbol.for('nodejs.util.inspect.custom'),
+  ]
+
   let formatValueHook
 
   const setFormatValueHook = (fn) => formatValueHook = fn
@@ -80,16 +85,10 @@ export function create (chai) {
       return hookRet
     }
 
-    if (value && typeof value.inspect === 'function' &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)) {
-      let ret = value.inspect(recurseTimes, ctx)
+    const customInspected = formatCustomInspect(ctx, value, recurseTimes)
 
-      if (typeof ret !== 'string') {
-        ret = formatValue(ctx, ret, recurseTimes)
-      }
-
-      return ret
+    if (customInspected !== undefined) {
+      return customInspected
     }
 
     // Primitive types cannot have properties
@@ -245,6 +244,40 @@ export function create (chai) {
     ctx.seen.pop()
 
     return reduceToSingleString(output, base, braces)
+  }
+
+  // Only methods keyed by these symbols are called, never a plain `inspect`
+  // method: that name is too common, so an app object such as MediaWiki's
+  // `window.mw` would have its unrelated `inspect()` run by every assertion.
+  // A custom inspector that throws falls back to the default formatting so
+  // building the message can't fail the assertion.
+  function formatCustomInspect (ctx, value, recurseTimes): string | undefined {
+    if (!value || (typeof value !== 'object' && typeof value !== 'function')) {
+      return
+    }
+
+    try {
+      // Skip prototype objects, whose inspector expects an instance.
+      if (value.constructor && value.constructor.prototype === value) {
+        return
+      }
+
+      for (const symbol of customInspectSymbols) {
+        const customInspect = value[symbol]
+
+        if (typeof customInspect !== 'function') {
+          continue
+        }
+
+        const ret = customInspect.call(value, recurseTimes, ctx)
+
+        return typeof ret === 'string' ? ret : formatValue(ctx, ret, recurseTimes)
+      }
+    } catch (err) {
+      return
+    }
+
+    return
   }
 
   function formatPrimitive (ctx, value) {
