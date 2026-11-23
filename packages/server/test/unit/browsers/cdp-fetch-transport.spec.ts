@@ -1562,6 +1562,57 @@ describe('CdpFetchTransport', () => {
 
       expectNotCalledWith(client.send, 'Fetch.continueResponse')
     })
+
+    it('releases the body it read when the browser cancels the request during the read', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => true })
+      const read = Promise.withResolvers<{ data: string, base64Encoded: boolean, eof: boolean }>()
+
+      // The proxy's error stage runs on Bluebird, which schedules with
+      // setImmediate, so the rejection reaches the transport's catch a turn later.
+      httpIntercept.use(async (req, next) => {
+        try {
+          return await next(req)
+        } catch (err) {
+          await new Promise((resolve) => setImmediate(resolve))
+
+          throw err
+        }
+      })
+
+      client.sendWithArgs('Fetch.takeResponseBodyAsStream').resolves({ stream: 'stream-1' })
+      client.sendWithArgs('IO.read').returns(read.promise)
+
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'Script' }))
+
+      await tick()
+
+      const responseEvent = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'Script', responseStatusCode: 200 })
+
+      responseEvent.responseHeaders = [{ name: 'Content-Type', value: 'application/javascript' }]
+
+      const responseHandled = onRequestPaused(responseEvent)
+
+      await vi.waitFor(() => expectCalledWith(client.send, 'IO.read'))
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+      read.resolve({ data: scriptBody, base64Encoded: false, eof: true })
+
+      await responseHandled
+      await handled
+
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responsePhrase: 'OK',
+        responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }],
+        body: Buffer.from(scriptBody).toString('base64'),
+      })
+
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+    })
   })
 
   describe('request pause handling', () => {

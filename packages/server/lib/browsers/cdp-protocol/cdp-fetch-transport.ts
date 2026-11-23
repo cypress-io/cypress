@@ -961,10 +961,15 @@ export class CdpFetchTransport {
       }
     }
 
-    // reset() may have rejected this flow while the awaits above were pending.
-    // The resolve below would be a no-op and nothing else owns this pause —
-    // release it, or the browser stays paused (reset keeps Fetch enabled).
-    if (this.inFlightRequests.get(fetchRequestId) !== deferred) {
+    // reset() or a browser cancel may have rejected this flow while the awaits
+    // above were pending. The resolve below would be a no-op and nothing else
+    // owns this pause — release it, or the browser stays paused (reset keeps
+    // Fetch enabled) and a taken body stays in takenBodies. A cancel only drops
+    // the network key, and the fetch-id entry lingers until the proxy's error
+    // stage finishes. `.has` rather than `!== deferred`, because redirect hops
+    // share a network id and a newer hop's entry replaces an older hop's.
+    if (this.inFlightRequests.get(fetchRequestId) !== deferred ||
+      (deferred.networkKey !== undefined && !this.inFlightByNetworkId.has(deferred.networkKey))) {
       debug('releasing response pause rejected while awaiting CDP: %s', event.request.url)
       await this.releaseResponseUnchanged(event.requestId, sessionId)
 
