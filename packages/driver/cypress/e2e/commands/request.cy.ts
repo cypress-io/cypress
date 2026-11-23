@@ -597,6 +597,20 @@ describe('src/cy/commands/request', () => {
       })
     })
 
+    describe('redirects', () => {
+      // https://github.com/cypress-io/cypress/issues/31890
+      it('requests an absolute Location without its dot segments', () => {
+        const href = encodeURIComponent('http://localhost:3500/./dump-method')
+
+        cy.request(`http://localhost:3500/redirect?code=302&href=${href}`)
+        .then((res) => {
+          expect(res.status).to.eq(200)
+          expect(res.body).to.contain('GET')
+          expect(res.redirects).to.deep.eq(['302: http://localhost:3500/dump-method'])
+        })
+      })
+    })
+
     describe('binary data', () => {
       // https://github.com/cypress-io/cypress/issues/6178
       it('can send Blob', () => {

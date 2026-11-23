@@ -271,6 +271,15 @@ describe('src/cy/commands/navigation', () => {
       .should('contain', 'three')
     })
 
+    // https://github.com/cypress-io/cypress/issues/31890
+    it('requests an absolute Location without its dot segments', () => {
+      const href = encodeURIComponent('http://localhost:3500/./custom-headers')
+
+      cy.visit(`http://localhost:3500/redirect?code=302&href=${href}`)
+      cy.contains('hello there')
+      cy.location('pathname').should('eq', '/custom-headers')
+    })
+
     // https://github.com/cypress-io/cypress/issues/3975
     describe('page that redirects from an XHR onload handler', () => {
       it('lands on the redirected URL', () => {
