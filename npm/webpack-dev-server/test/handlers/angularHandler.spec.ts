@@ -141,6 +141,40 @@ describe('angularHandler', { timeout: 60000 }, function () {
   })
 })
 
+describe('generateTsConfig', () => {
+  const projectRoot = path.join(path.sep, 'home', 'jordan', 'projects', 'storefront')
+
+  const readInclude = async (specPattern: string | string[]) => {
+    const devServerConfig = {
+      framework: 'angular',
+      cypressConfig: {
+        projectRoot,
+        specPattern,
+      } as Cypress.PluginConfigOptions,
+    } as AngularWebpackDevServerConfig
+
+    const tsConfigPath = await generateTsConfig(devServerConfig, { tsConfig: 'tsconfig.app.json' })
+
+    return JSON.parse(await fs.readFile(tsConfigPath, 'utf8')).include
+  }
+
+  it('expands the braces in the default specPattern, which TypeScript include does not support', async () => {
+    expect(await readInclude('**/*.cy.{js,jsx,ts,tsx}')).toEqual([
+      toPosix(path.join(projectRoot, '**/*.cy.js')),
+      toPosix(path.join(projectRoot, '**/*.cy.jsx')),
+      toPosix(path.join(projectRoot, '**/*.cy.ts')),
+      toPosix(path.join(projectRoot, '**/*.cy.tsx')),
+    ])
+  })
+
+  it('expands braces in each entry of a specPattern array and drops duplicates', async () => {
+    expect(await readInclude(['{src,projects}/**/*.cy.ts', 'src/**/*.cy.ts'])).toEqual([
+      toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
+      toPosix(path.join(projectRoot, 'projects/**/*.cy.ts')),
+    ])
+  })
+})
+
 describe('getTempDir', () => {
   it('returns a directory keyed on the project name when no projectRoot is provided', async () => {
     const tempDir = await getTempDir('my-project')

@@ -6,6 +6,7 @@ import type { Configuration, RuleSetRule } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 import debugLib from 'debug'
+import micromatch from 'micromatch'
 import type { logging as AngularLogging } from '@angular-devkit/core'
 
 const debugPrefix = 'cypress:webpack-dev-server:angularHandler'
@@ -121,7 +122,12 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
 
   const getProjectFilePath = (...fileParts: string[]): string => toPosix(path.join(...fileParts))
 
-  const includePaths = [...specPattern.map((pattern) => getProjectFilePath(projectRoot, pattern))]
+  // `**/*.cy.{ts,tsx}` becomes `**/*.cy.ts` and `**/*.cy.tsx`. TypeScript's
+  // `include` only understands `*`, `?` and `**/`, so a brace pattern (such as
+  // the default specPattern) would match no files.
+  const expandedSpecPatterns = new Set(specPattern.flatMap((pattern) => micromatch.braces(pattern, { expand: true })))
+
+  const includePaths = [...expandedSpecPatterns].map((pattern) => getProjectFilePath(projectRoot, pattern))
 
   if (cypressConfig.supportFile) {
     includePaths.push(toPosix(cypressConfig.supportFile))
