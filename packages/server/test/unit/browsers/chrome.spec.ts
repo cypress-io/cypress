@@ -575,6 +575,45 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
+    describe('when the profile has a browser theme saved', () => {
+      const openWithTheme = async (pack: string) => {
+        readJsonByPath['/profile/dir/Default/Preferences'] = () => {
+          return Promise.resolve({
+            extensions: {
+              alerts: { initialized: true },
+              theme: { id: 'pcmgedibbghfeopppnoaogaeancdcnjo', pack },
+            },
+          })
+        }
+
+        await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
+
+        const written = callsWith(outputJson, '/profile/dir/Default/Preferences', expect.anything())
+
+        return written.length ? written[written.length - 1][1] : undefined
+      }
+
+      it('removes the theme Cypress loaded on Linux and keeps other extension settings', async () => {
+        const prefs = await openWithTheme('/home/jordan.rivera/.cache/Cypress/16.3.0/Cypress/resources/app/packages/extension/theme')
+
+        expect(prefs.extensions).toEqual({ alerts: { initialized: true } })
+      })
+
+      it('removes the theme Cypress loaded on Windows', async () => {
+        const prefs = await openWithTheme('C:\\Users\\jordan.rivera\\AppData\\Local\\Cypress\\Cache\\16.3.0\\Cypress\\resources\\app\\packages\\extension\\theme')
+
+        expect(prefs.extensions).toEqual({ alerts: { initialized: true } })
+      })
+
+      it('keeps a theme that Cypress did not load', async () => {
+        const pack = '/home/jordan.rivera/.config/chromium/Default/Extensions/iiihlpikmpijkgmkmmnjpkbnmcjeijeh/1.2_0'
+
+        const prefs = await openWithTheme(pack)
+
+        expect(prefs.extensions.theme).toEqual({ id: 'pcmgedibbghfeopppnoaogaeancdcnjo', pack })
+      })
+    })
+
     it('calls cri client close on kill', async () => {
       // need a reference here since the stub will be monkey-patched
       const {

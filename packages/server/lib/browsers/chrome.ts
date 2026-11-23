@@ -141,6 +141,29 @@ const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: Chr
   })
 }
 
+/**
+ * Removes `extensions.theme` from a profile when it points at the browser theme
+ * that Cypress 16.3.0 and earlier loaded, so the browser draws its default frame.
+ * The `cypress open` profile is reused across Cypress versions, and the browser
+ * keeps drawing a saved theme for as long as its folder exists, such as in an
+ * older Cypress version still in the cache.
+ */
+const _removeCypressTheme = (prefs: ChromePreferences): ChromePreferences => {
+  const pack = _.get(prefs, ['default', 'extensions', 'theme', 'pack'])
+
+  if (typeof pack !== 'string' || !pack.replaceAll('\\', '/').endsWith('/packages/extension/theme')) {
+    return prefs
+  }
+
+  debug('removing the Cypress browser theme from the profile: %s', pack)
+
+  return _mergeChromePreferences(prefs, {
+    default: { extensions: { theme: null } },
+    defaultSecure: {},
+    localState: {},
+  })
+}
+
 const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferences, newPrefs: ChromePreferences): Promise<void> => {
   // skip writing the preferences if requested by the user,
   // typically used when the AUT encrypts the user data dir, causing relaunches of the browser not to work
@@ -869,6 +892,9 @@ export = {
     if (launchOptions.preferences) {
       finalPreferences = _mergeChromePreferences(finalPreferences, launchOptions.preferences as ChromePreferences)
     }
+
+    // launchOptions.preferences starts as the profile's own preferences, so this runs after merging them
+    finalPreferences = _removeCypressTheme(finalPreferences)
 
     debug('final Chrome preferences to be written: %o', finalPreferences)
 
