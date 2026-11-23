@@ -56,6 +56,7 @@
 
 **Misc:**
 
+- Chromium-based browsers launched by Cypress, such as Chromium, Chrome for Testing and Edge, no longer use a dark Cypress theme for the browser frame and tabs, so they look the same as Google Chrome 137 and later, which ignores the theme. Addresses [#31704](https://github.com/cypress-io/cypress/issues/31704).
 - Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#35284](https://github.com/cypress-io/cypress/pull/35284).
 - The IntelliSense description of the [`fail`](https://on.cypress.io/catalog-of-events#App-Events) event now says that a handler bound to it keeps the test from failing unless the handler throws an error, that Cypress skips the test's remaining commands, and that a test with a `done` callback still times out unless the handler calls `done`. It previously said a test could only be kept from failing by calling an async `done` callback. Addresses [#26605](https://github.com/cypress-io/cypress/issues/26605).
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).

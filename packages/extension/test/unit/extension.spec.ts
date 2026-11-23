@@ -48,15 +48,6 @@ describe('Extension', () => {
     })
   })
 
-  describe('.getPathToTheme', () => {
-    it('returns path to theme', () => {
-      const result = extension.getPathToTheme()
-      const expected = path.join(cwd, 'theme')
-
-      expect(path.normalize(result)).toEqual(path.normalize(expected))
-    })
-  })
-
   describe('.setHostAndPath', () => {
     let src: string
 
