@@ -15,24 +15,40 @@ interface InternalSelectOptions extends Partial<Cypress.SelectOptions> {
   error?: any
 }
 
+type SelectMatcher = string | number | RegExp
+
+// Tests `str` from its start every time, so a pattern with the `g` or `y` flag
+// matches the same options no matter how many options were tested before it.
+const testPattern = (pattern: RegExp, str: string) => {
+  pattern.lastIndex = 0
+
+  return pattern.test(str)
+}
+
+const matchesValueOrIndex = (matchers: SelectMatcher[], value: string, index: number) => {
+  return _.some(matchers, (m) => _.isRegExp(m) ? testPattern(m, value) : m === value || m === index)
+}
+
+const matchesText = (matchers: SelectMatcher[], text: string) => {
+  return _.some(matchers, (m) => _.isRegExp(m) ? testPattern(m, text) : m === text)
+}
+
+const isSelectMatcher = (val) => _.isNumber(val) || _.isString(val) || _.isRegExp(val)
+
 // every option's selected state, since a multiple select can change without its selectedIndex changing
 const getSelection = (select: HTMLSelectElement) => _.map(select.options, 'selected')
 
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     select (subject, valueOrTextOrIndex, userOptions: Partial<Cypress.SelectOptions> = {}) {
-      if (
-        !_.isNumber(valueOrTextOrIndex)
-        && !_.isString(valueOrTextOrIndex)
-        && !_.isArray(valueOrTextOrIndex)
-      ) {
+      if (!isSelectMatcher(valueOrTextOrIndex) && !_.isArray(valueOrTextOrIndex)) {
         $errUtils.throwErrByPath('select.invalid_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
 
       if (
         _.isArray(valueOrTextOrIndex)
         && valueOrTextOrIndex.length > 0
-        && !_.some(valueOrTextOrIndex, (val) => _.isNumber(val) || _.isString(val))
+        && !_.some(valueOrTextOrIndex, isSelectMatcher)
       ) {
         $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
@@ -87,22 +103,35 @@ export default (Commands, Cypress, cy) => {
       }
 
       // normalize valueOrTextOrIndex if its not an array
-      valueOrTextOrIndex = [].concat(valueOrTextOrIndex).map((v: any) => {
+      const matchers: SelectMatcher[] = [].concat(valueOrTextOrIndex).map((v: any) => {
         if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) {
           $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
+        }
+
+        if (_.isNumber(v)) {
+          return v
+        }
+
+        // copy the pattern so resetting its lastIndex never touches the user's RegExp
+        if (_.isRegExp(v)) {
+          return new RegExp(v.source, v.flags)
         }
 
         // https://github.com/cypress-io/cypress/issues/16045
         // replace `&nbsp;` in the text to `\us00a0` to find match.
         // @see https://stackoverflow.com/a/53306311/1038927
-        return _.isNumber(v) ? v : v.replace(/&nbsp;/g, '\u00a0')
+        return v.replace(/&nbsp;/g, '\u00a0')
       })
 
       const multiple = options.$el.prop('multiple')
 
+      // a pattern can match several options, so like cy.contains(), a pattern
+      // passed to a select without `multiple` picks the first option it matches
+      const selectFirstMatch = !multiple && matchers.length === 1 && _.isRegExp(matchers[0])
+
       // throw if we're not a multiple select and we've
       // passed an array of values
-      if (!multiple && valueOrTextOrIndex.length > 1) {
+      if (!multiple && matchers.length > 1) {
         $errUtils.throwErrByPath('select.invalid_multiple')
       }
 
@@ -126,7 +155,7 @@ export default (Commands, Cypress, cy) => {
           const value = $elements.getNativeProp(el, 'value')
           const optEl = $dom.wrap(el)
 
-          if (valueOrTextOrIndex.includes(value) || valueOrTextOrIndex.includes(index)) {
+          if (matchesValueOrIndex(matchers, value, index)) {
             optionEls.push(optEl)
             values.push(value)
 
@@ -159,7 +188,7 @@ export default (Commands, Cypress, cy) => {
           notAllUniqueValues = uniqueValues.length !== optionsObjects.length
 
           _.each(optionsObjects, (obj) => {
-            if (valueOrTextOrIndex.includes(obj.text)) {
+            if (matchesText(matchers, obj.text)) {
               optionEls.push(obj.$el)
               const objValue = obj.value
 
@@ -168,17 +197,22 @@ export default (Commands, Cypress, cy) => {
           })
         }
 
+        if (selectFirstMatch) {
+          optionEls.splice(1)
+          values.splice(1)
+        }
+
         // if we didnt set multiple to true and
         // we have more than 1 option to set then blow up
         if (!multiple && (values.length > 1)) {
           $errUtils.throwErrByPath('select.multiple_matches', {
-            args: { value: valueOrTextOrIndex.join(', ') },
+            args: { value: matchers.join(', ') },
           })
         }
 
-        if (!values.length && !(_.isArray(valueOrTextOrIndex) && valueOrTextOrIndex.length === 0)) {
+        if (!values.length && matchers.length > 0) {
           $errUtils.throwErrByPath('select.no_matches', {
-            args: { value: valueOrTextOrIndex.join(', ') },
+            args: { value: matchers.join(', ') },
           })
         }
 

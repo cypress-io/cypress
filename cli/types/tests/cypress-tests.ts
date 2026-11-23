@@ -1575,6 +1575,16 @@ cy
   cy.scrollTo(0, 500, { ensureScrollable: false })
 }
 
+// CypressSelectTests
+{
+  cy.get('select').select('Beta') // $ExpectType Chainable<JQuery<HTMLSelectElement>>
+  cy.get('select').select(1)
+  cy.get('select').select(/^Beta/)
+  cy.get('select').select(['alpha', 2, /^Beta/i], { force: true })
+  cy.get('select').select(true) // $ExpectError
+  cy.get('select').select([{}]) // $ExpectError
+}
+
 // CypressRequireTests
 {
   Cypress.require('lodash')

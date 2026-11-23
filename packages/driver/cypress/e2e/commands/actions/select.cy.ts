@@ -308,6 +308,78 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('select[name=movies]').select('gone&nbsp;with&nbsp;the&nbsp;wind')
     })
 
+    // https://github.com/cypress-io/cypress/issues/31552
+    describe('with a regular expression', () => {
+      it('selects by value', () => {
+        cy.get('select[name=maps]').select(/^de_nu/).should('have.value', 'de_nuke')
+      })
+
+      it('selects by trimmed text', () => {
+        cy.get('select[name=maps]').select(/^ital/).should('have.value', 'cs_italy')
+      })
+
+      it('prioritizes value over text', () => {
+        // matches the value `cs_italy` and the text `train`
+        cy.get('select[name=maps]').select(/^(cs_|train)/).should('have.value', 'cs_italy')
+      })
+
+      it('selects the first matching option in a single select', () => {
+        cy.get('select[name=starwars]').select(/^(Leia|Vader|Rey)$/).should('have.value', 'leia')
+      })
+
+      it('selects the first matching option among options with the same value', () => {
+        cy.get('select[name=startrek-same]').select(/u/).then(($select) => {
+          expect(($select[0] as HTMLSelectElement).selectedOptions[0].text).to.eq('Uhura')
+        })
+      })
+
+      it('selects every matching option in a multiple select', () => {
+        cy.get('select[name=movies]').select(/^The/).invoke('val').should('deep.eq', ['thc', 'twbb'])
+      })
+
+      it('can mix patterns with strings and indexes in a multiple select', () => {
+        cy.get('select[name=movies]').select([0, 'br', /^20/]).invoke('val').should('deep.eq', ['apoc', 'br', '2001'])
+      })
+
+      it('does not match indexes', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `/^1$/`')
+
+          done()
+        })
+
+        cy.get('select[name=maps]').select(/^1$/, { timeout: 100 })
+      })
+
+      it('supports flags such as `i`', () => {
+        cy.get('select[name=foods]').select(/^japanese$/i).should('have.value', 'Japanese')
+      })
+
+      it('matches every option with a `g` pattern regardless of earlier tests', () => {
+        const pattern = /^The/g
+
+        pattern.lastIndex = 5
+
+        cy.get('select[name=movies]').select(pattern).invoke('val').should('deep.eq', ['thc', 'twbb'])
+        .then(() => {
+          expect(pattern.lastIndex, 'does not change the passed pattern').to.eq(5)
+        })
+      })
+
+      it('matches a `y` pattern from the start of each value and text', () => {
+        cy.get('select[name=maps]').select(/nuke/y).should('have.value', 'de_nuke')
+        cy.get('select[name=maps]').select(/de_tr/y).should('have.value', 'de_train')
+      })
+
+      it('retries until an option matches', () => {
+        cy.on('command:retry', _.once(() => {
+          cy.$$('select[name=foods]').append('<option value="udon">Kake Udon</option>')
+        }))
+
+        cy.get('select[name=foods]').select(/Udon$/).should('have.value', 'udon')
+      })
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
@@ -485,7 +557,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when called with no arguments', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed a string, number, or array as its 1st argument. You passed: `undefined`.')
+          expect(err.message).to.include('`cy.select()` must be passed a string, number, regular expression, or array as its 1st argument. You passed: `undefined`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -497,7 +569,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when called with null', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed a string, number, or array as its 1st argument. You passed: `null`.')
+          expect(err.message).to.include('`cy.select()` must be passed a string, number, regular expression, or array as its 1st argument. You passed: `null`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -509,7 +581,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when called with invalid type', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed a string, number, or array as its 1st argument. You passed: `true`.')
+          expect(err.message).to.include('`cy.select()` must be passed a string, number, regular expression, or array as its 1st argument. You passed: `true`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -621,7 +693,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws invalid array argument error when called with invalid array', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings and/or numbers. You passed: `[true,false]`')
+          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings, numbers, and/or regular expressions. You passed: `[true,false]`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -629,6 +701,37 @@ describe('src/cy/commands/actions/select', () => {
 
         // @ts-expect-error - testing invalid arguments
         cy.get('select[name=foods]').select([true, false])
+      })
+
+      it('throws when called with an array of patterns on a non multiple select', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` was called with an array of arguments but does not have a `multiple` attribute set.')
+
+          done()
+        })
+
+        cy.get('select[name=names]').select([/^b/, /^s/])
+      })
+
+      it('throws when a pattern matches no option', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `/^udon$/i`')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
+
+          done()
+        })
+
+        cy.get('select[name=foods]').select(/^udon$/i)
+      })
+
+      it('throws when a pattern matches a disabled option first', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because this `<option>` you are trying to select is currently disabled')
+
+          done()
+        })
+
+        cy.get('select[name=opt-disabled]').select(/^ba/)
       })
 
       it('throws when the <select> itself is disabled', (done) => {

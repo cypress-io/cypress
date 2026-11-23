@@ -2270,10 +2270,12 @@ declare namespace Cypress {
 
     /**
      * Select an `<option>` with specific text, value, or index within a `<select>`.
+     * A regular expression is matched against each option's value, then its text.
+     * Within a single `<select>`, it selects the first option it matches.
      *
      * @see https://on.cypress.io/select
      */
-    select(valueOrTextOrIndex: string | number | Array<string | number>, options?: Partial<SelectOptions>): Chainable<Subject>
+    select(valueOrTextOrIndex: string | number | RegExp | Array<string | number | RegExp>, options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
      * Select a file with the given <input> element, or drag and drop a file over any DOM subject.
