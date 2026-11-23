@@ -35,6 +35,30 @@ describe('src/cy/commands/prompt', () => {
     cy.prompt(['Hello, world!'])
   })
 
+  it('errors with a network error that names the code and points to the network', (done) => {
+    const backendStub = cy.stub(Cypress, 'backend').log(false)
+
+    // node-fetch's message for a DNS lookup failure
+    const error = new Error('request to https://api.cypress.io/cy-prompt/session failed, reason: getaddrinfo ENOTFOUND api.cypress.io')
+
+    ;(error as any).code = 'ENOTFOUND'
+
+    backendStub.callThrough()
+    backendStub.withArgs('wait:for:prompt:ready').resolves({ success: false, error })
+
+    cy.on('fail', (err) => {
+      expect(err.message).to.include('`cy.prompt` could not connect to Cypress Cloud')
+      expect(err.message).to.include('ENOTFOUND: request to https://api.cypress.io/cy-prompt/session failed, reason: getaddrinfo ENOTFOUND api.cypress.io')
+      expect(err.message).to.include('Check your internet connection and that your network allows Cypress Cloud.')
+      done()
+    })
+
+    cy.visit('http://www.foobar.com:3500/fixtures/dom.html')
+
+    cy['commandFns']['prompt'].__resetPrompt()
+    cy.prompt(['Hello, world!'])
+  })
+
   // https://github.com/cypress-io/cypress/issues/33105
   it('errors with a certificate error that names the code and points to trusting a custom CA', (done) => {
     const backendStub = cy.stub(Cypress, 'backend').log(false)

@@ -21,6 +21,7 @@ export interface StudioLifecycleManagerShape {
   updateStatus: (status: StudioStatus) => void
   getCurrentStatus: () => StudioStatus | undefined
   getIsCertError: () => boolean
-  getCertErrorCode: () => string | undefined
+  getIsNetworkError: () => boolean
+  getConnectionErrorCode: () => string | undefined
   retry: () => void
 }

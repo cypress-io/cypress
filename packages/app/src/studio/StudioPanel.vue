@@ -66,7 +66,8 @@ const props = defineProps<{
   eventManager: EventManager
   studioStatus: string | null
   isCertError?: boolean | null
-  certErrorCode?: string | null
+  isNetworkError?: boolean | null
+  connectionErrorCode?: string | null
   cloudStudioSessionId?: string
   autUrlSelector: string
   userProjectStatusStore: UserProjectStatusStore
@@ -105,18 +106,32 @@ const onCloseSelectorPlayground = () => {
   }
 }
 
+const studioIcon = () => {
+  return h(IconCypressStudio, {
+    size: '48',
+    'fill-color': 'gray-500',
+  })
+}
+
 const errorPanelProps = computed(() => {
+  const errorCode = props.connectionErrorCode ? ` Error: ${props.connectionErrorCode}` : ''
+
   if (props.isCertError) {
     return {
       title: 'Can\'t verify the Cypress Cloud certificate',
-      message: `Cypress Studio requires a trusted connection to Cypress Cloud. Trust your organization's certificate authority or configure your proxy settings.${props.certErrorCode ? ` Error: ${props.certErrorCode}` : ''}`,
-      icon: () => {
-        return h(IconCypressStudio, {
-          size: '48',
-          'fill-color': 'gray-500',
-        })
-      },
+      message: `Cypress Studio requires a trusted connection to Cypress Cloud. Trust your organization's certificate authority or configure your proxy settings.${errorCode}`,
+      icon: studioIcon,
       learnMoreUrl: 'https://on.cypress.io/proxy-configuration',
+      onRetry: handleRetry,
+    }
+  }
+
+  if (props.isNetworkError) {
+    return {
+      title: 'Can\'t connect to Cypress Cloud',
+      message: `Cypress Studio requires a connection to Cypress Cloud. Check your internet connection and that your network allows Cypress Cloud.${errorCode}`,
+      icon: studioIcon,
+      learnMoreUrl: 'https://on.cypress.io/faq#Im-working-with-a-restrictive-VPN-Which-subdomains-do-I-have-to-allow-on-my-VPN-for-Cypress-Cloud-to-work-properly',
       onRetry: handleRetry,
     }
   }

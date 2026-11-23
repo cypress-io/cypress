@@ -1430,6 +1430,18 @@ export default {
         docsUrl: 'https://on.cypress.io/proxy-configuration',
       }
     },
+    promptNetworkError (obj) {
+      return {
+        message: stripIndent`\
+        \`cy.prompt\` could not connect to Cypress Cloud:
+
+        - ${obj.error.code}: ${obj.error.message}
+
+        Check your internet connection and that your network allows Cypress Cloud.
+      `,
+        docsUrl: 'https://on.cypress.io/faq#Im-working-with-a-restrictive-VPN-Which-subdomains-do-I-have-to-allow-on-my-VPN-for-Cypress-Cloud-to-work-properly',
+      }
+    },
   },
 
   reload: {

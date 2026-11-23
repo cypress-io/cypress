@@ -2291,12 +2291,17 @@ type StudioStatusPayload {
   canAccessStudioAI: Boolean!
 
   """
-  The Node.js TLS error code, such as SELF_SIGNED_CERT_IN_CHAIN, when isCertError is true
+  The Node.js error code, such as SELF_SIGNED_CERT_IN_CHAIN or ENOTFOUND, when isCertError or isNetworkError is true
   """
-  certErrorCode: String
+  connectionErrorCode: String
 
   """Whether the studio status is an IN_ERROR due to a certificate error"""
   isCertError: Boolean
+
+  """
+  Whether the studio status is an IN_ERROR because the connection to Cypress Cloud failed, such as with no internet or a blocked host
+  """
+  isNetworkError: Boolean
   status: StudioStatusType!
 }
 

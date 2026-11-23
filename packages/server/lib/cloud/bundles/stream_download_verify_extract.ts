@@ -12,6 +12,7 @@ import { asyncRetry, linearDelay } from '../../util/async_retry'
 import { isRetryableError } from '../network/is_retryable_error'
 import { HttpError } from '../network/http_error'
 import { SystemError } from '../network/system_error'
+import { isNetworkErrorCode } from '../network/network_error_codes'
 import { PUBLIC_KEY_VERSION } from '../constants'
 import { createStreamingSignatureVerifier } from '../encryption'
 import type { BundleErrorStage, BundleKind } from './bundle_error'
@@ -55,30 +56,10 @@ const isPosixSyscallError = (err: any): boolean => {
   return /^E[A-Z]/.test(code)
 }
 
-// Network-class POSIX codes that can surface mid-pipeline from the response
-// body stream (TCP drop, DNS flake, etc.). Everything else syscall-y during
-// extract (ENOSPC, EACCES, EROFS, EIO, ...) is a filesystem error from the
-// tar-entry write — non-transient, must not be retried.
-const NETWORK_SYSCALL_CODES = new Set([
-  'ECONNRESET',
-  'ECONNREFUSED',
-  'ECONNABORTED',
-  'ETIMEDOUT',
-  'EAI_AGAIN',
-  'EHOSTUNREACH',
-  'EHOSTDOWN',
-  'ENETUNREACH',
-  'ENETDOWN',
-  'ENOTFOUND',
-  'EPIPE',
-  'EAGAIN',
-])
-
-const isNetworkSyscallError = (err: any): boolean => {
-  const code = err?.code
-
-  return typeof code === 'string' && NETWORK_SYSCALL_CODES.has(code)
-}
+// Network codes can surface mid-pipeline from the response body stream (TCP
+// drop, DNS flake). Any other syscall error during extract (ENOSPC, EACCES,
+// EROFS, EIO, ...) comes from the tar-entry write and must not be retried.
+const isNetworkSyscallError = (err: any): boolean => isNetworkErrorCode(err?.code)
 
 // Wraps fetch/pipeline errors as BundleError. `cause` carries the underlying
 // HttpError/SystemError so asyncRetry's shouldRetry can classify via

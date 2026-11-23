@@ -4,6 +4,7 @@ import type Emitter from 'component-emitter'
 import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
 import { isNonRetriableCertErrorCode } from '@packages/server/lib/cloud/network/non_retriable_cert_error_codes'
+import { isNetworkErrorCode } from '@packages/server/lib/cloud/network/network_error_codes'
 
 interface CyPromptDriver { default: CyPromptDriverDefaultShape }
 
@@ -42,6 +43,14 @@ const initializeModule = async (Cypress: Cypress.Cypress): Promise<CyPromptDrive
   if (error) {
     if ('code' in error && isNonRetriableCertErrorCode(error.code as string)) {
       $errUtils.throwErrByPath('prompt.promptCertError', {
+        args: {
+          error,
+        },
+      })
+    }
+
+    if ('code' in error && isNetworkErrorCode(error.code)) {
+      $errUtils.throwErrByPath('prompt.promptNetworkError', {
         args: {
           error,
         },

@@ -15,8 +15,12 @@ export const StudioStatusPayload = objectType({
       description: 'Whether the studio status is an IN_ERROR due to a certificate error',
     })
 
-    t.string('certErrorCode', {
-      description: 'The Node.js TLS error code, such as SELF_SIGNED_CERT_IN_CHAIN, when isCertError is true',
+    t.boolean('isNetworkError', {
+      description: 'Whether the studio status is an IN_ERROR because the connection to Cypress Cloud failed, such as with no internet or a blocked host',
+    })
+
+    t.string('connectionErrorCode', {
+      description: 'The Node.js error code, such as SELF_SIGNED_CERT_IN_CHAIN or ENOTFOUND, when isCertError or isNetworkError is true',
     })
 
     t.nonNull.boolean('canAccessStudioAI')
@@ -79,7 +83,8 @@ export const Subscription = subscriptionType({
           return {
             status: 'IN_ERROR' as const,
             isCertError: ctx.coreData.studioLifecycleManager?.getIsCertError(),
-            certErrorCode: ctx.coreData.studioLifecycleManager?.getCertErrorCode(),
+            isNetworkError: ctx.coreData.studioLifecycleManager?.getIsNetworkError(),
+            connectionErrorCode: ctx.coreData.studioLifecycleManager?.getConnectionErrorCode(),
             canAccessStudioAI: false,
           }
         }

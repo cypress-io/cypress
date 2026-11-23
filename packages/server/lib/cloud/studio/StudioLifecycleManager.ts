@@ -25,6 +25,7 @@ import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/init
 import crypto from 'crypto'
 import { logError } from '@packages/stderr-filtering'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
+import { isNetworkErrorCode } from '../network/network_error_codes'
 import type { DebugData } from '@packages/types'
 import { GracefulExit } from '../../util/graceful-exit'
 import type { ExitStepKey } from '../../util/graceful-exit'
@@ -423,16 +424,24 @@ export class StudioLifecycleManager {
     return this.lastStatus
   }
 
-  public getCertErrorCode (): string | undefined {
-    if (this.lastStatus === 'IN_ERROR' && this.lastErrorCode && isNonRetriableCertErrorCode(this.lastErrorCode)) {
-      return this.lastErrorCode
-    }
-
-    return undefined
+  private getInErrorCode (): string | undefined {
+    return this.lastStatus === 'IN_ERROR' ? this.lastErrorCode : undefined
   }
 
   public getIsCertError (): boolean {
-    return !!this.getCertErrorCode()
+    const code = this.getInErrorCode()
+
+    return !!code && isNonRetriableCertErrorCode(code)
+  }
+
+  public getIsNetworkError (): boolean {
+    return isNetworkErrorCode(this.getInErrorCode())
+  }
+
+  // Only connection errors expose their code, since those are the ones the
+  // Studio panel explains to the user.
+  public getConnectionErrorCode (): string | undefined {
+    return this.getIsCertError() || this.getIsNetworkError() ? this.getInErrorCode() : undefined
   }
 
   public async retry (): Promise<void> {

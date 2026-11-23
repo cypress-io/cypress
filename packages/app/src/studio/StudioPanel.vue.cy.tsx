@@ -6,7 +6,7 @@ import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
 import type { SnapshotStore } from '../runner/snapshot-store'
 
 describe('StudioPanel', () => {
-  const mountCertErrorPanel = (certErrorCode?: string) => {
+  const mountErrorPanel = (errorProps: { isCertError?: boolean, isNetworkError?: boolean, connectionErrorCode?: string }) => {
     const mockEventManager = {} as unknown as EventManager
     const mockUserProjectStatusStore = {} as unknown as UserProjectStatusStore
     const mockRequestProjectAccessMutation = {} as unknown as UseMutationResponse<any, any>
@@ -14,8 +14,7 @@ describe('StudioPanel', () => {
     const mockAutSnapshotStore = {} as unknown as SnapshotStore
 
     cy.mount(<StudioPanel
-      isCertError={true}
-      certErrorCode={certErrorCode}
+      {...errorProps}
       eventManager={mockEventManager}
       studioStatus="IN_ERROR"
       onStudioPanelClose={() => {}}
@@ -30,7 +29,7 @@ describe('StudioPanel', () => {
   }
 
   it('renders the error panel with a certificate error', () => {
-    mountCertErrorPanel('SELF_SIGNED_CERT_IN_CHAIN')
+    mountErrorPanel({ isCertError: true, connectionErrorCode: 'SELF_SIGNED_CERT_IN_CHAIN' })
 
     cy.findByTestId('studio-error-panel').should('be.visible')
     cy.findByTestId('studio-error-icon').should('be.visible')
@@ -43,8 +42,27 @@ describe('StudioPanel', () => {
   })
 
   it('omits the error code from the certificate error when none is provided', () => {
-    mountCertErrorPanel()
+    mountErrorPanel({ isCertError: true })
 
     cy.findByTestId('studio-error-message').should('have.text', 'Cypress Studio requires a trusted connection to Cypress Cloud. Trust your organization\'s certificate authority or configure your proxy settings.')
+  })
+
+  it('renders the error panel with a network error', () => {
+    mountErrorPanel({ isNetworkError: true, connectionErrorCode: 'ENOTFOUND' })
+
+    cy.findByTestId('studio-error-panel').should('be.visible')
+    cy.findByTestId('studio-error-title').should('have.text', 'Can\'t connect to Cypress Cloud')
+    cy.findByTestId('studio-error-message').should('have.text', 'Cypress Studio requires a connection to Cypress Cloud. Check your internet connection and that your network allows Cypress Cloud. Error: ENOTFOUND')
+    cy.findByTestId('studio-error-learn-more-button').should('have.text', ' Learn more ')
+    cy.findByTestId('studio-error-retry-button').should('have.text', ' Retry ')
+
+    cy.percySnapshot()
+  })
+
+  it('renders the generic error panel for other errors', () => {
+    mountErrorPanel({})
+
+    cy.findByTestId('studio-error-title').should('have.text', 'Something went wrong')
+    cy.findByTestId('studio-error-learn-more-button').should('not.exist')
   })
 })

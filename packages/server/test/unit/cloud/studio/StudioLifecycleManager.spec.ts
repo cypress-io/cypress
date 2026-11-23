@@ -1026,19 +1026,55 @@ describe('StudioLifecycleManager', () => {
     })
   })
 
-  describe('getCertErrorCode', () => {
-    it('returns undefined when no error code is stored', () => {
-      expect(studioLifecycleManager.getCertErrorCode()).toBeUndefined()
-    })
+  describe('getIsNetworkError', () => {
+    it('returns true when the connection to Cypress Cloud failed', () => {
+      const error = new Error('request to https://api.cypress.io/studio/session failed, reason: getaddrinfo ENOTFOUND api.cypress.io') as any
 
-    it('returns undefined when error code is not a cert error', () => {
-      const error = new Error('connect ECONNREFUSED 127.0.0.1:443') as any
-
-      error.code = 'ECONNREFUSED'
+      error.code = 'ENOTFOUND'
 
       studioLifecycleManager.updateStatus('IN_ERROR', error)
 
-      expect(studioLifecycleManager.getCertErrorCode()).toBeUndefined()
+      expect(studioLifecycleManager.getIsNetworkError()).toBe(true)
+      expect(studioLifecycleManager.getIsCertError()).toBe(false)
+    })
+
+    it('returns true for a network error from AggregateError', () => {
+      const error1 = new Error('request to https://api.cypress.io/studio/session failed, reason: read ECONNRESET') as any
+
+      error1.code = 'ECONNRESET'
+      const error2 = new Error('request to https://api.cypress.io/studio/session failed, reason: connect ETIMEDOUT 104.18.2.34:443') as any
+
+      error2.code = 'ETIMEDOUT'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', new AggregateError([error1, error2], 'Multiple errors'))
+
+      expect(studioLifecycleManager.getIsNetworkError()).toBe(true)
+    })
+
+    it('returns false for a filesystem error', () => {
+      const error = new Error('ENOSPC: no space left on device, write') as any
+
+      error.code = 'ENOSPC'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+      expect(studioLifecycleManager.getIsNetworkError()).toBe(false)
+    })
+
+    it('returns false when status is not IN_ERROR', () => {
+      const error = new Error('request to https://api.cypress.io/studio/session failed, reason: getaddrinfo ENOTFOUND api.cypress.io') as any
+
+      error.code = 'ENOTFOUND'
+
+      studioLifecycleManager.updateStatus('INITIALIZING', error)
+
+      expect(studioLifecycleManager.getIsNetworkError()).toBe(false)
+    })
+  })
+
+  describe('getConnectionErrorCode', () => {
+    it('returns undefined when no error code is stored', () => {
+      expect(studioLifecycleManager.getConnectionErrorCode()).toBeUndefined()
     })
 
     it('returns the code for a cert error', () => {
@@ -1048,20 +1084,40 @@ describe('StudioLifecycleManager', () => {
 
       studioLifecycleManager.updateStatus('IN_ERROR', error)
 
-      expect(studioLifecycleManager.getCertErrorCode()).toBe('SELF_SIGNED_CERT_IN_CHAIN')
+      expect(studioLifecycleManager.getConnectionErrorCode()).toBe('SELF_SIGNED_CERT_IN_CHAIN')
     })
 
     it('returns the code of the last error in an AggregateError', () => {
-      const error1 = new Error('connect ECONNREFUSED 127.0.0.1:443') as any
+      const error1 = new Error('request to https://api.cypress.io/studio/session failed, reason: read ECONNRESET') as any
 
-      error1.code = 'ECONNREFUSED'
+      error1.code = 'ECONNRESET'
       const error2 = new Error('unable to get local issuer certificate') as any
 
       error2.code = 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY'
 
       studioLifecycleManager.updateStatus('IN_ERROR', new AggregateError([error1, error2], 'Multiple errors'))
 
-      expect(studioLifecycleManager.getCertErrorCode()).toBe('UNABLE_TO_GET_ISSUER_CERT_LOCALLY')
+      expect(studioLifecycleManager.getConnectionErrorCode()).toBe('UNABLE_TO_GET_ISSUER_CERT_LOCALLY')
+    })
+
+    it('returns the code for a network error', () => {
+      const error = new Error('request to https://api.cypress.io/studio/session failed, reason: connect ECONNREFUSED 104.18.2.34:443') as any
+
+      error.code = 'ECONNREFUSED'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+      expect(studioLifecycleManager.getConnectionErrorCode()).toBe('ECONNREFUSED')
+    })
+
+    it('returns undefined for an error that is not a connection error', () => {
+      const error = new Error('ENOSPC: no space left on device, write') as any
+
+      error.code = 'ENOSPC'
+
+      studioLifecycleManager.updateStatus('IN_ERROR', error)
+
+      expect(studioLifecycleManager.getConnectionErrorCode()).toBeUndefined()
     })
 
     it('returns undefined when status is not IN_ERROR', () => {
@@ -1071,7 +1127,7 @@ describe('StudioLifecycleManager', () => {
 
       studioLifecycleManager.updateStatus('INITIALIZING', error)
 
-      expect(studioLifecycleManager.getCertErrorCode()).toBeUndefined()
+      expect(studioLifecycleManager.getConnectionErrorCode()).toBeUndefined()
     })
   })
 
