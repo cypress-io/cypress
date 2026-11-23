@@ -51,6 +51,7 @@ src/
 - Tests use a **cypress-in-cypress** self-testing pattern (canonical description; other packages point here): the app itself is the AUT. Two env vars are involved and they are not the same one. The outer process is started by the `cypress:run-cypress-in-cypress` script with `CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1`; the inner, unprefixed `INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true` is handed to the child Cypress process via `--expose`. `@packages/launchpad`, `@cypress/vite-dev-server`, and `@cypress/webpack-dev-server` all use the same pair.
 - The `test` script is a no-op (`echo 'ok'`) — use `cypress:run:ct` or `cypress:run:e2e` directly.
 - Module Federation (`@module-federation/runtime`) is used to load the runner and reporter bundles at runtime.
+- The Studio panel opens at 340px wide (`defaultStudioWidth` in `src/runner/runner-constants.ts`). Keep its messages short, leave detail to the docs link, and check new copy at that width before committing.
 - `CYPRESS_SNAPSHOT_UPDATE=1` triggers mocha event snapshot updates during the dedicated snapshot E2E run.
 
 ## Integration Points
