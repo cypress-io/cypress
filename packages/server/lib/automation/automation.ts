@@ -5,9 +5,10 @@ import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
 import type { AutomationCommands, AutomationMiddleware, OnRequestEvent, OnServiceWorkerClientSideRegistrationUpdated, OnServiceWorkerRegistrationUpdated, OnServiceWorkerVersionUpdated } from '@packages/types'
 import type { SerializableAutomationCookie } from './cookie/jar'
-import { automationCookieToToughCookie, cookieJar } from './cookie/jar'
+import { automationCookieToToughCookie, cookieJar, writtenToJar } from './cookie/jar'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
 import Debug from 'debug'
+import { canonicalDomain } from 'tough-cookie'
 import { AutomationNotImplemented } from './automation_not_implemented'
 
 const debug = Debug('cypress:server:automation')
@@ -211,7 +212,8 @@ export class Automation {
           .then((automationCookie) => {
             // the sync runs only once the automation resolves, so a namespaced or
             // browser-rejected cookie never reaches the jar
-            syncSetCookieToJar(data)
+            // a newer write may own the jar entry by now, and a sync would put this one back
+            if (!writtenToJar.has(data)) syncSetCookieToJar(data)
 
             return automationCookie
           })
@@ -226,11 +228,33 @@ export class Automation {
           ])
           .spread((automationResult) => automationResult)
         case 'clear:cookie':
-          return Bluebird.all([
-            this.cookies.clearCookie(data, automate),
-            cookieJar.removeCookie(data),
-          ])
-          .spread((automationResult) => automationResult)
+          return this.cookies.clearCookie(data, automate)
+          .then(async (cleared) => {
+            // the browser clears one cookie, which may be one set for a parent domain
+            const domain = canonicalDomain(cleared?.domain?.replace(/^\./, '') || data.domain)
+            const inJar = cookieJar.getAllCookies().filter((cookie) => cookie.key === data.name && cookie.domain === domain)
+
+            if (!cleared?.path || inJar.every((cookie) => cookie.path === cleared.path)) {
+              cookieJar.removeCookie({ name: data.name, domain })
+
+              return cleared
+            }
+
+            // Chromium clears the cookie at every path, other browsers only the one they return
+            const remaining = await this.cookies.getCookies({ domain }, automate).catch(() => undefined)
+            const isRemaining = (path: string) => {
+              // without the browser's answer, only the cookie it returned is known to be cleared
+              if (!remaining) return path !== cleared.path
+
+              return remaining.some((cookie) => cookie && cookie.name === data.name && cookie.path === path && canonicalDomain(cookie.domain.replace(/^\./, '')) === domain)
+            }
+
+            inJar.forEach(({ path }) => {
+              if (path && !isRemaining(path)) cookieJar.removeCookie({ name: data.name, domain, path })
+            })
+
+            return cleared
+          })
         case 'change:cookie':
           return this.cookies.changeCookie(data)
         case 'create:download':

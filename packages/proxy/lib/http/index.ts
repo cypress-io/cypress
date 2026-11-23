@@ -460,11 +460,15 @@ export class Http {
             }
           } catch (err) {
             span?.end()
-            await onError(err as Error)
+
+            // A browser cancel aborts the exchange; whatever next() rejected with is a side effect of that.
+            const error = ctx.res.destroyed && !ctx.res.writableFinished ? createBrowserConnectionClosedError() : err as Error
+
+            await onError(error)
 
             // Re-throw so transports (e.g. CDP Fetch) fail the pause instead of
             // encoding a synthetic empty success body via decodeResponse.
-            throw err
+            throw error
           }
         }
 

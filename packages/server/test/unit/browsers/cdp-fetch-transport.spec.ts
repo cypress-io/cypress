@@ -2381,10 +2381,10 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('does not let a timed out redirect hop reject a newer hop with a distinct fetch request id', async () => {
-      vi.useFakeTimers()
+    it('keeps a newer redirect hop cancelable after an older hop sharing its network id finishes', async () => {
       const client = createClient()
-      const { transport } = createTransport(client)
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { onRequestCanceled })
       const onRequestPaused = await startTransport(transport, client)
 
       const firstHandled = onRequestPaused(createPausedRequest({
@@ -2394,7 +2394,6 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      await vi.advanceTimersByTimeAsync(1)
 
       const secondHandled = onRequestPaused(createPausedRequest({
         requestId: 'second-request-pause-id',
@@ -2403,20 +2402,91 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      await vi.advanceTimersByTimeAsync(29999)
-      await firstHandled
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'second-request-pause-id',
+        requestId: 'first-request-pause-id',
         networkId: 'shared-network-id',
-        url: 'https://example.test/final',
-        responseStatusCode: 200,
+        url: 'https://example.test/redirect',
+        responseStatusCode: 301,
       }))
+
+      await firstHandled
+
+      onLoadingFailed(client, { requestId: 'shared-network-id', canceled: true })
 
       await secondHandled
 
+      expectCalledOnceWith(onRequestCanceled, 'shared-network-id')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse', { requestId: 'second-request-pause-id' })
+    })
+
+    it('fails the flow with ESOCKETTIMEDOUT when a request handler\'s responseTimeout elapses before headers arrive', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      let upstreamError: (Error & { code?: string }) | undefined
+
+      httpIntercept.use(async (req, next) => {
+        try {
+          return await next({ ...req, responseTimeout: 45000 })
+        } catch (err) {
+          upstreamError = err as Error
+
+          throw err
+        }
+      })
+
+      vi.useFakeTimers({ shouldAdvanceTime: false })
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          resourceType: 'XHR',
+        }))
+
+        await vi.advanceTimersByTimeAsync(44999)
+
+        expect(upstreamError).toBeUndefined()
+
+        await vi.advanceTimersByTimeAsync(1)
+        await handled
+      } finally {
+        vi.useRealTimers()
+      }
+
+      expect(upstreamError?.code).toBe('ESOCKETTIMEDOUT')
+      expect(transport['inFlightRequests'].size).toBe(0)
+    })
+
+    it('waits for a response pause however long the origin takes to send headers when no responseTimeout is set', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: false })
+      const client = createClient()
+      const { transport } = createTransport(client)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'XHR',
+      }))
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000)
+
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'XHR',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
       expectCalledWith(client.send, 'Fetch.continueResponse', {
-        requestId: 'second-request-pause-id',
+        requestId: 'fetch-request',
         responseCode: 200,
       })
     })
@@ -3957,7 +4027,7 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('does not charge the response body transfer against the response pause timeout', async () => {
+    it('does not charge the response body transfer against the responseTimeout', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
@@ -3966,7 +4036,7 @@ describe('CdpFetchTransport', () => {
 
       client.sendWithArgs('Fetch.getResponseBody').returns(slowBody.promise)
 
-      httpIntercept.use(async (req, next) => next(req))
+      httpIntercept.use(async (req, next) => next({ ...req, responseTimeout: 30000 }))
 
       vi.useFakeTimers({ shouldAdvanceTime: false })
 
@@ -3984,8 +4054,6 @@ describe('CdpFetchTransport', () => {
           responseStatusCode: 200,
         }))
 
-        // the pause already arrived, so a body slower than the 30s pause
-        // timeout must not fail the flow
         await vi.advanceTimersByTimeAsync(31000)
 
         slowBody.resolve({ body: '', base64Encoded: false })
@@ -4851,6 +4919,38 @@ describe('CdpFetchTransport', () => {
       // to release — sending one would target a request id CDP no longer knows
       expectNotCalledWith(client.send, 'Fetch.continueResponse')
       expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+    })
+
+    it('cancels the flow when the browser dropped the pause before it was continued', async () => {
+      const client = createClient()
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { httpIntercept: new HttpIntercept(createCdpFetchCodec()), onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.sendWithArgs('Fetch.continueRequest').rejects(new Error('Invalid InterceptionId.'))
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expectCalledOnceWith(onRequestCanceled, 'network-1')
+    })
+
+    it('does not cancel the flow for other continueRequest failures', async () => {
+      const client = createClient()
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { httpIntercept: new HttpIntercept(createCdpFetchCodec()), onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.sendWithArgs('Fetch.continueRequest').rejects(new Error('Invalid header: x-cypress-is-aut-frame'))
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expect(onRequestCanceled).not.toHaveBeenCalled()
     })
 
     it('leaves a genuine network failure to the response error pause', async () => {
