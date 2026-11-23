@@ -157,7 +157,6 @@ describe('generateTsConfig', () => {
     const tsConfig = JSON.parse(await fs.readFile(tsConfigPath, 'utf8'))
 
     expect(tsConfig.extends).toEqual(toPosix(path.join(projectRoot, 'tsconfig.app.json')))
-    // Without its own `exclude`, the extended tsconfig.app.json's `exclude` (e.g. `src/**/*.cy.ts`) applies.
     expect(tsConfig.exclude).toEqual([toPosix(path.join(projectRoot, 'out-tsc/cy'))])
   })
 })
