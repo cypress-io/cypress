@@ -67,7 +67,7 @@ describe('lib/plugins/child/run_require_async_child', () => {
     })
 
     // A watch-mode preprocessor that leaves `Promise.reject(formattedMessages)` unhandled
-    it('keeps the content of a non-Error rejection reason on process unhandledRejection', () => {
+    it('sends an error with the rejected strings as its message via ipc on process unhandledRejection', () => {
       const messages = ['✘ [ERROR] Unexpected "}"\n\n    helper.js:3:0:\n      3 │ }\n        ╵ ^\n\n']
 
       yieldTo('unhandledRejection', messages)
@@ -79,7 +79,7 @@ describe('lib/plugins/child/run_require_async_child', () => {
       })
     })
 
-    it('keeps the content of a thrown non-Error value on process uncaughtException', () => {
+    it('sends an error with the thrown string as its message via ipc on process uncaughtException', () => {
       yieldTo('uncaughtException', 'Session expired for jane.doe@example.com')
 
       expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', {

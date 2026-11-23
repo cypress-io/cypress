@@ -181,25 +181,24 @@ describe('lib/plugins/util', () => {
   })
 
   describe('#serializeUnhandledError', () => {
-    // Captured from esbuild.formatMessages(errors, { kind: 'error', color: false }), which
-    // @bahmutov/cypress-esbuild-preprocessor rejects with after a failed watch rebuild
+    // Captured from esbuild.formatMessages(errors, { kind: 'error', color: false })
     const esbuildSyntaxError = '✘ [ERROR] Unexpected "}"\n\n    helper.js:3:0:\n      3 │ }\n        ╵ ^\n\n'
     const esbuildMissingImport = '✘ [ERROR] Could not resolve "./helper"\n\n    spec.cy.js:1:20:\n      1 │ import { add } from \'./helper\'\n        ╵                     ~~~~~~~~~~\n\n'
 
-    it('serializes an Error like serializeError does', () => {
+    it('serializes an Error the same way as serializeError', () => {
       const err = new TypeError('Cannot read properties of undefined (reading \'map\')')
 
       expect(util.serializeUnhandledError(err)).toStrictEqual(util.serializeError(err))
     })
 
-    it('defaults the name of an object that only has a message', () => {
+    it('gives an object that only has a message the name Error', () => {
       expect(util.serializeUnhandledError({ message: 'Request failed with status code 503' })).toStrictEqual({
         name: 'Error',
         message: 'Request failed with status code 503',
       })
     })
 
-    it('keeps the text of an array of esbuild messages', () => {
+    it('joins an array of strings with newlines as the message', () => {
       const message = `${esbuildSyntaxError}\n${esbuildMissingImport}`
 
       expect(util.serializeUnhandledError([esbuildSyntaxError, esbuildMissingImport])).toStrictEqual({
@@ -209,7 +208,7 @@ describe('lib/plugins/util', () => {
       })
     })
 
-    it('keeps a string as the message', () => {
+    it('uses a string as the message', () => {
       expect(util.serializeUnhandledError('Session expired for jane.doe@example.com')).toStrictEqual({
         name: 'Error',
         message: 'Session expired for jane.doe@example.com',
@@ -217,7 +216,7 @@ describe('lib/plugins/util', () => {
       })
     })
 
-    it('inspects any other value', () => {
+    it('uses util.inspect output as the message for any other value', () => {
       expect(util.serializeUnhandledError({ status: 503, retryAfter: 30 })).toMatchObject({
         name: 'Error',
         message: '{ status: 503, retryAfter: 30 }',

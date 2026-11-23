@@ -37,7 +37,7 @@ describe('e2e plugins', function () {
   })
 
   systemTests.it('shows the value of an unhandled rejection that is not an Error', {
-    browser: 'electron',
+    browser: 'chrome',
     spec: 'app.cy.ts',
     project: 'plugins-unhandled-non-error-rejection',
     expectedExitCode: 1,
