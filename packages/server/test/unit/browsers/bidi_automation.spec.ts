@@ -97,6 +97,8 @@ describe('lib/browsers/bidi_automation', () => {
 
     describe('BrowsingContext', () => {
       describe('userPromptOpened', () => {
+        // Follows the event's format only, not captured from Firefox: the handler
+        // passes `message` on unchanged, whatever it says.
         const prompt = { context: 'top', message: 'This page is asking you to confirm that you want to leave', userContext: 'default' }
 
         beforeEach(() => {

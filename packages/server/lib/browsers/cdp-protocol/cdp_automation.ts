@@ -102,6 +102,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     onFn('Runtime.executionContextCreated', this.onExecutionContextCreated)
     onFn('Runtime.executionContextDestroyed', this.onExecutionContextDestroyed)
+    onFn('Runtime.executionContextsCleared', this.onExecutionContextsCleared)
 
     onFn('Page.javascriptDialogOpening', this.onJavascriptDialogOpening)
 
@@ -342,6 +343,12 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         this.activationWorlds.delete(frameId)
       }
     }
+  }
+
+  // Chromium clears every context when the top frame navigates, taking the isolated
+  // worlds with them
+  private onExecutionContextsCleared = () => {
+    this.activationWorlds.clear()
   }
 
   // A page with sticky user activation can open a "Leave site?" dialog from a `beforeunload`

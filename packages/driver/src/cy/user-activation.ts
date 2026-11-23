@@ -48,9 +48,11 @@ const TIMED_OUT = Symbol('timed out')
 // The browser notifies activation as a real user's click or key press would: the
 // AUT gains sticky activation and, for a few seconds, transient activation. No
 // input event reaches the application. Resolves `false` when the browser didn't
-// activate the AUT. A browser that doesn't answer in time isn't asked again until
-// that request answers, so it can't hold up every page load and command meanwhile.
-const activate = async (Cypress: ActivationHost, timeoutMs = ACTIVATION_TIMEOUT_MS): Promise<boolean> => {
+// activate the AUT. A browser that doesn't answer a page load's activation in time
+// isn't asked again until that request answers, so it can't hold up every page load
+// and command meanwhile. A command's renewal has less time, so running out of it only
+// stops that command from renewing.
+const activate = async (Cypress: ActivationHost, { isRenewal = false } = {}): Promise<boolean> => {
   const record = recordFor(Cypress)
 
   if (record.unresponsive) {
@@ -70,16 +72,25 @@ const activate = async (Cypress: ActivationHost, timeoutMs = ACTIVATION_TIMEOUT_
     const result = await Promise.race([
       activating,
       new Promise<typeof TIMED_OUT>((resolve) => {
-        timeout = setTimeout(() => resolve(TIMED_OUT), timeoutMs)
+        timeout = setTimeout(() => resolve(TIMED_OUT), isRenewal ? RENEWAL_TIMEOUT_MS : ACTIVATION_TIMEOUT_MS)
       }),
     ])
 
     if (result === TIMED_OUT) {
+      if (isLatest()) {
+        record.requestedAt = undefined
+      }
+
+      if (isRenewal) {
+        debug('the browser did not renew the activation in time')
+
+        return false
+      }
+
       debug('the browser did not activate the AUT in time, so it is not asked again until it answers')
 
       if (isLatest()) {
         record.unresponsive = true
-        record.requestedAt = undefined
       }
 
       const answered = () => {
@@ -167,7 +178,7 @@ export const createTransientActivationRenewer = (Cypress: ActivationHost, autWin
       return
     }
 
-    return activate(Cypress, RENEWAL_TIMEOUT_MS).then((activated) => {
+    return activate(Cypress, { isRenewal: true }).then((activated) => {
       failed = !activated
     })
   }

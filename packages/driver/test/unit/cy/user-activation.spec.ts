@@ -79,25 +79,44 @@ describe('src/cy/user-activation', () => {
       expect(Cypress.automation).toHaveBeenCalledTimes(2)
     })
 
-    it('stops activating for the spec once the browser doesn\'t answer in time', async () => {
+    it('stops activating for the spec once the browser doesn\'t answer a page load\'s activation in time', async () => {
       const Cypress = createCypress({ automation: vi.fn().mockReturnValue(new Promise(() => {})) })
       const autWindow = createAutWindow(false)
-      const renewing = createTransientActivationRenewer(Cypress, autWindow)()
+      const activating = activateAut(Cypress, autWindow)
 
       await vi.advanceTimersByTimeAsync(2000)
-      await renewing
+      await activating
 
       vi.advanceTimersByTime(5000)
 
       expect(createTransientActivationRenewer(Cypress, autWindow)()).toBeUndefined()
 
-      // a page load doesn't wait on it either
       await activateAut(Cypress, autWindow)
 
       expect(Cypress.automation).toHaveBeenCalledTimes(1)
     })
 
-    it('asks again once the browser answers the request that timed out', async () => {
+    it('only stops the command whose renewal the browser doesn\'t answer in time', async () => {
+      const automation = vi.fn()
+      .mockReturnValueOnce(new Promise(() => {}))
+      .mockResolvedValue(undefined)
+      const Cypress = createCypress({ automation })
+      const autWindow = createAutWindow(false)
+      const renew = createTransientActivationRenewer(Cypress, autWindow)
+      const renewing = renew()
+
+      await vi.advanceTimersByTimeAsync(500)
+      await renewing
+
+      expect(renew()).toBeUndefined()
+
+      await createTransientActivationRenewer(Cypress, autWindow)()
+      await activateAut(Cypress, autWindow)
+
+      expect(automation).toHaveBeenCalledTimes(3)
+    })
+
+    it('asks again once the browser answers the page load\'s activation that timed out', async () => {
       let answer: (value?: unknown) => void = () => {}
       const automation = vi.fn()
       .mockReturnValueOnce(new Promise((resolve) => {
@@ -106,10 +125,10 @@ describe('src/cy/user-activation', () => {
       .mockResolvedValue(undefined)
       const Cypress = createCypress({ automation })
       const autWindow = createAutWindow(false)
-      const renewing = createTransientActivationRenewer(Cypress, autWindow)()
+      const activating = activateAut(Cypress, autWindow)
 
-      await vi.advanceTimersByTimeAsync(500)
-      await renewing
+      await vi.advanceTimersByTimeAsync(2000)
+      await activating
 
       expect(createTransientActivationRenewer(Cypress, autWindow)()).toBeUndefined()
 

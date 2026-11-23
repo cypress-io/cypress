@@ -1241,6 +1241,16 @@ describe('lib/browsers/cdp_automation', () => {
           expect(sendDebuggerCommand.withArgs('Runtime.evaluate', { expression: 'void 0', contextId: 456, userGesture: true }).calls).toHaveLength(2)
         })
 
+        it('makes another once Chromium clears every context', async () => {
+          sendDebuggerCommand.withArgs('Page.createIsolatedWorld').resolves({ executionContextId: 789 })
+
+          onFn.withArgs('Runtime.executionContextsCleared').yield()
+
+          await onRequest('activate:aut:frame', {})
+
+          expect(sendDebuggerCommand.withArgs('Page.createIsolatedWorld').calls).toHaveLength(2)
+        })
+
         it('makes another once Chromium reports the world destroyed', async () => {
           sendDebuggerCommand.withArgs('Page.createIsolatedWorld').resolves({ executionContextId: 789 })
 
