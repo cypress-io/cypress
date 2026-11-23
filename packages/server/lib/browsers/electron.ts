@@ -91,23 +91,55 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
     await automation.addRemoteAutScript(options.remoteAutScript)
   }
 
+  const startCaptureScreencast = async () => {
+    if (options.isTextTerminal) {
+      await pageCriClient.send('Page.stopScreencast')
+    }
+
+    await pageCriClient.send('Page.startScreencast', screencastOpts())
+  }
+
+  const endCaptureScreencast = async () => {
+    await pageCriClient.send('Page.stopScreencast')
+
+    if (options.isTextTerminal) {
+      await startNoopScreencast(pageCriClient)
+    }
+  }
+
+  // A capture that outlives its cy.screenshot() timeout overlaps the failure screenshot, so the
+  // screencast is swapped once for all captures in flight rather than per capture.
+  let capturesInFlight = 0
+  let screencastSwap: Promise<unknown> = Promise.resolve()
+
+  const swapScreencast = (swap: () => Promise<void>) => {
+    screencastSwap = screencastSwap.catch(_.noop).then(swap)
+
+    return screencastSwap
+  }
+
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
       case 'take:screenshot': {
-        // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
-        // workaround: start and stop screencasts between screenshots
-        // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-        // Run mode always has a screencast running (see handleVideo), and stopping it here would end that one.
-        if (!options.videoApi && !options.isTextTerminal) {
-          await pageCriClient.send('Page.startScreencast', screencastOpts())
-          const ret = await fn(message, data)
-
-          await pageCriClient.send('Page.stopScreencast')
-
-          return ret
+        if (options.videoApi) {
+          return fn(message, data)
         }
 
-        return fn(message, data)
+        // Page.captureScreenshot waits for a new frame, and on a page that isn't changing only a
+        // screencast with a real frame rate makes Electron produce one. The no-op screencast doesn't.
+        if (capturesInFlight++ === 0) {
+          swapScreencast(startCaptureScreencast).catch(_.noop)
+        }
+
+        try {
+          await screencastSwap
+
+          return await fn(message, data)
+        } finally {
+          if (--capturesInFlight === 0) {
+            await swapScreencast(endCaptureScreencast)
+          }
+        }
       }
       case 'focus:browser:window': {
         // A headless browser window is hidden on purpose
@@ -152,15 +184,19 @@ async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpA
   if (videoApi) {
     await recordVideo(cdpAutomation, videoApi)
   } else if (options.isTextTerminal) {
-    // To prevent https://github.com/electron/electron/issues/45398, we start a dummy screen cast with a quality of 0
-    // and only capture every 2^32 - 1 frames without listening to any frames. This is effectively a no-op, but it
-    // prevents the issue from occurring.
-    await pageCriClient.send('Page.startScreencast', {
-      format: 'jpeg',
-      everyNthFrame: 2 ** 31 - 1,
-      quality: 0,
-    })
+    await startNoopScreencast(pageCriClient)
   }
+}
+
+// To prevent https://github.com/electron/electron/issues/45398, we start a dummy screen cast with a quality of 0
+// and only capture every 2^32 - 1 frames without listening to any frames. This is effectively a no-op, but it
+// prevents the issue from occurring.
+function startNoopScreencast (pageCriClient: CriClient) {
+  return pageCriClient.send('Page.startScreencast', {
+    format: 'jpeg',
+    everyNthFrame: 2 ** 31 - 1,
+    quality: 0,
+  })
 }
 
 export = {
