@@ -142,7 +142,7 @@ describe('angularHandler', { timeout: 60000 }, function () {
 })
 
 describe('generateTsConfig', () => {
-  const projectRoot = path.join(path.sep, 'home', 'jordan', 'projects', 'storefront')
+  const projectRoot = path.join(path.sep, 'home', 'mara.lindqvist', 'projects', 'storefront')
 
   const readInclude = async (specPattern: string | string[]) => {
     const devServerConfig = {
