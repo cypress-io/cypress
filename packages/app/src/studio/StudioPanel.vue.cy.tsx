@@ -34,8 +34,8 @@ describe('StudioPanel', () => {
 
     cy.findByTestId('studio-error-panel').should('be.visible')
     cy.findByTestId('studio-error-icon').should('be.visible')
-    cy.findByTestId('studio-error-title').should('have.text', 'Cypress Studio can\'t verify the Cypress Cloud certificate')
-    cy.findByTestId('studio-error-message').should('have.text', 'Cypress Studio loads from Cypress Cloud, but the certificate for that connection could not be verified (SELF_SIGNED_CERT_IN_CHAIN). If your network inspects HTTPS traffic, trust your organization\'s certificate authority with NODE_EXTRA_CA_CERTS. If you connect through a proxy, configure Cypress with your proxy settings.')
+    cy.findByTestId('studio-error-title').should('have.text', 'Can\'t verify the Cypress Cloud certificate')
+    cy.findByTestId('studio-error-message').should('have.text', 'Cypress Studio requires a trusted connection to Cypress Cloud. Trust your organization\'s certificate authority or configure your proxy settings. Error: SELF_SIGNED_CERT_IN_CHAIN')
     cy.findByTestId('studio-error-learn-more-button').should('have.text', ' Learn more ')
     cy.findByTestId('studio-error-retry-button').should('have.text', ' Retry ')
 
@@ -45,6 +45,6 @@ describe('StudioPanel', () => {
   it('omits the error code from the certificate error when none is provided', () => {
     mountCertErrorPanel()
 
-    cy.findByTestId('studio-error-message').should('have.text', 'Cypress Studio loads from Cypress Cloud, but the certificate for that connection could not be verified. If your network inspects HTTPS traffic, trust your organization\'s certificate authority with NODE_EXTRA_CA_CERTS. If you connect through a proxy, configure Cypress with your proxy settings.')
+    cy.findByTestId('studio-error-message').should('have.text', 'Cypress Studio requires a trusted connection to Cypress Cloud. Trust your organization\'s certificate authority or configure your proxy settings.')
   })
 })

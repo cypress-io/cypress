@@ -108,8 +108,8 @@ const onCloseSelectorPlayground = () => {
 const errorPanelProps = computed(() => {
   if (props.isCertError) {
     return {
-      title: 'Cypress Studio can\'t verify the Cypress Cloud certificate',
-      message: `Cypress Studio loads from Cypress Cloud, but the certificate for that connection could not be verified${props.certErrorCode ? ` (${props.certErrorCode})` : ''}. If your network inspects HTTPS traffic, trust your organization's certificate authority with NODE_EXTRA_CA_CERTS. If you connect through a proxy, configure Cypress with your proxy settings.`,
+      title: 'Can\'t verify the Cypress Cloud certificate',
+      message: `Cypress Studio requires a trusted connection to Cypress Cloud. Trust your organization's certificate authority or configure your proxy settings.${props.certErrorCode ? ` Error: ${props.certErrorCode}` : ''}`,
       icon: () => {
         return h(IconCypressStudio, {
           size: '48',
