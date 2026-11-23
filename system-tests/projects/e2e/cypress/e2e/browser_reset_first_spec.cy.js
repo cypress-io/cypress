@@ -17,8 +17,8 @@ const req = (win) => {
   })
 }
 
-// IndexedDB writes its files to disk on open, which can take seconds on a
-// loaded CI machine, so these steps get more than the default command timeout.
+// Opening a database writes its files to disk, which slows down sharply on a
+// busy CI machine, so these steps get a longer timeout than the default.
 const indexedDBTimeout = 15000
 
 const indexedDB = (win) => {

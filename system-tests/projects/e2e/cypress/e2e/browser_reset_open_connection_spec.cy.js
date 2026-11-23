@@ -6,8 +6,8 @@
 // still open, a write still in flight, and an upgrade queued behind that
 // connection. The next spec's open must not wait on any of them.
 
-// IndexedDB writes its files to disk on open, which can take seconds on a
-// loaded CI machine, so these steps get more than the default command timeout.
+// Opening a database writes its files to disk, which slows down sharply on a
+// busy CI machine, so these steps get a longer timeout than the default.
 const indexedDBTimeout = 15000
 
 const openAndKeepConnection = (win) => {
@@ -33,8 +33,9 @@ const openAndKeepConnection = (win) => {
   })
 }
 
-// An upgrade rather than a deleteDatabase, which would remove the database by
-// itself once the connection closes and so pass without any reset.
+// Queues an upgrade rather than a deleteDatabase: a queued delete runs on its
+// own once the page closes the connection, so the next spec would find the
+// database gone even if the reset never cleared it.
 const queueBlockedUpgrade = (win) => {
   return new Promise((resolve, reject) => {
     const DBOpenRequest = win.indexedDB.open('toDoList', 2)
