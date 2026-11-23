@@ -16,4 +16,16 @@ describe('lib/tap/render/run', () => {
       'use tap status to check progress',
     ].join('\n'))
   })
+
+  it('warns that the plugins process has stopped between the acknowledgement and the pointer', () => {
+    const output = render({ spec: 'cypress/e2e/login.cy.ts', status: 'running', pluginsError: 'The plugins process exited unexpectedly' })
+
+    expect(output).toBe([
+      '● cypress/e2e/login.cy.ts is running',
+      '',
+      'The plugins process exited unexpectedly',
+      '',
+      'use tap status to check progress',
+    ].join('\n'))
+  })
 })

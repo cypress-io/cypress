@@ -50,6 +50,8 @@ The `run-*` guards live in the shared job definitions in `@pipeline.yml` (via `h
 - **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-build-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs and system tests are guarded, so a webhook push to `develop` or a `vN` maintenance branch runs only the ones its changed paths select.
 - **`windows` / `linux-arm64` / `darwin-*`**: none of these four run on a plain `develop`, `release/*`, or `vN` push — see "Scheduled platform CI" below for when they do. Inside them, `driver-integration-memory-tests` and (Windows) selected integration/unit jobs are still guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside these workflows is actually path-filtered once one runs.
 
+- **`pull-request`**: on a PR that changes only docs (`docs-only`, set by `generate-pipeline-parameters.sh`), install, build, lint, type checks, Knip and `test-kitchensink` are filtered out, and `docs-check` (`yarn check-markdown-links`, with only the pinned `markdown-link-check` installed) is what `all-jobs-passed` waits for. `docs-check` runs on every PR. When adding an always-run job, give it the `*codeJobs` filter unless it reads Markdown or images.
+
 `linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop`, `release/*`, and `vN` they run only from a scheduled pipeline or a manual trigger. On `electron/*` or an allowlisted branch, `&full-workflow-filters` alone is enough.
 
 `npm-release` still runs only on `develop`, not on allowlisted feature branches.

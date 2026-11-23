@@ -73,15 +73,6 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   private crossOriginDriverWindows: { [key: string]: Window } = {}
   userInvocationStack?: string
 
-  /**
-   * Clears all cached spec-bridge windows. The runner calls this after
-   * `test:before:after:run:async` (e.g. about:blank) so `window:load` can still
-   * use `toAllSpecBridges('window:load', ...)` before references are dropped.
-   */
-  clearCrossOriginDriverWindows () {
-    this.crossOriginDriverWindows = {}
-  }
-
   override removeAllListeners (eventName?: string | symbol): this {
     if (arguments.length === 0) {
       super.removeAllListeners()

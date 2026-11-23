@@ -10,8 +10,7 @@ import { mergeScreenshotDetails } from './plugins/merge_plugin_results'
 import { fs, getPath } from './util/fs'
 import type { Data, ScreenshotsFolder } from './util/fs'
 
-// jimp does not work in the V8 snapshot, so it is required in a way mksnapshot
-// cannot follow, like webdriver in browsers/webdriver.
+// Required at runtime rather than bundled into the start bundle
 const getJimp = (): { Jimp: typeof Jimp, intToRGBA: typeof jimpIntToRGBA } => require(require.resolve('jimp', { paths: [__dirname] }))
 
 let debug = Debug('cypress:server:screenshot')
