@@ -17,6 +17,10 @@ const req = (win) => {
   })
 }
 
+// IndexedDB writes its files to disk on open, which can take seconds on a
+// loaded CI machine, so these steps get more than the default command timeout.
+const indexedDBTimeout = 15000
+
 const indexedDB = (win) => {
   return new Promise((resolve, reject) => {
     const DBOpenRequest = win.indexedDB.open('toDoList', 1)
@@ -62,8 +66,8 @@ const iframeIndexedDB = (query) => {
 it('makes cached request', () => {
   cy.visit('http://localhost:1515/browser_reset.html')
   .then(req) // this creates the disk cache
-  .then(indexedDB) // this creates the indexedDB
+  .then({ timeout: indexedDBTimeout }, indexedDB) // this creates the indexedDB
   .then(swReq) // this creates the service worker
-  .then(iframeIndexedDB('?write')) // this creates an indexedDB on an origin that is never visited
+  .then({ timeout: indexedDBTimeout }, iframeIndexedDB('?write')) // this creates an indexedDB on an origin that is never visited
   .should('be.true')
 })
