@@ -1,6 +1,7 @@
 // Changes made: added 'formatValueHook' to process value before being formatted.
 // For example the hook can be used to turn `window` objects into the string '[window]'
-// to avoid deep recursion.
+// to avoid deep recursion. Custom inspectors are only found by symbol, never
+// by a plain `inspect` method (see `customInspectSymbols`).
 
 // This is (almost) directly from chai/lib/util (which is based on nodejs utils)
 // https://github.com/joyent/node/blob/f8c335d0caf47f16d31413f89aa28eda3878e3aa/lib/util.js
@@ -66,6 +67,11 @@ export function create (chai) {
     return object.defaultView && object.defaultView === object.defaultView.window
   }
 
+  // A value controls its own text with a method under one of these symbols,
+  // as in chai and Node.js. A plain `inspect()` method is never called, so
+  // `{ inspect () {} }` renders as `{ inspect: [Function: inspect] }`. The name
+  // is common enough that an unrelated method, such as MediaWiki's
+  // `window.mw.inspect`, would otherwise run on every assertion.
   const customInspectSymbols = [
     Symbol.for('chai/inspect'),
     Symbol.for('nodejs.util.inspect.custom'),
@@ -76,9 +82,6 @@ export function create (chai) {
   const setFormatValueHook = (fn) => formatValueHook = fn
 
   function formatValue (ctx, value, recurseTimes) {
-    // Provide a hook for user-specified inspect functions.
-    // Check that value is an object with an inspect function on it
-
     const hookRet = formatValueHook && formatValueHook(ctx, value)
 
     if (hookRet) {
@@ -246,11 +249,9 @@ export function create (chai) {
     return reduceToSingleString(output, base, braces)
   }
 
-  // Only methods keyed by these symbols are called, never a plain `inspect`
-  // method: that name is too common, so an app object such as MediaWiki's
-  // `window.mw` would have its unrelated `inspect()` run by every assertion.
-  // A custom inspector that throws falls back to the default formatting so
-  // building the message can't fail the assertion.
+  // Returns undefined when the value has no custom inspector or it throws, so
+  // the value gets the default formatting and building the message can't fail
+  // the assertion.
   function formatCustomInspect (ctx, value, recurseTimes): string | undefined {
     if (!value || (typeof value !== 'object' && typeof value !== 'function')) {
       return
