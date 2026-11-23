@@ -406,16 +406,20 @@ describe('lib/browsers/browser-cri-client', function () {
         browserClient: {
           send: stub(),
           on: vi.fn(),
+          removeSessionEnablements: vi.fn(),
         },
         browserCriClient: {
           addExtraTargetClient: vi.fn(),
           addServiceWorkerBinding: vi.fn(),
+          removeServiceWorkerBinding: vi.fn(),
           getExtraTargetClient: vi.fn(() => undefined),
+          hasExtraTargetClient: vi.fn(() => false),
           currentlyAttachedTarget: {
             targetId: 'main-target-id',
           },
           resettingBrowserTargets: false,
           sessionTargetInfo: new Map(),
+          pendingExtraTargets: new Set(),
         },
         CriConstructor: vi.fn(),
         event: {
@@ -835,6 +839,49 @@ describe('lib/browsers/browser-cri-client', function () {
         await vi.waitFor(() => expect(tracked.detach).toBe(detach))
         expectCalledWith(options.browserCriClient.addExtraTargetClient, options.event.targetInfo, criClient)
         expectCalledOnceWith(options.browserCriClient.onExtraTargetCriClientReady, criClient)
+        expect(options.browserCriClient.pendingExtraTargets.has('target-id')).toBe(false)
+      })
+
+      it('closes a connection that lands after the popup was destroyed instead of tracking it', async () => {
+        const criClient = { send: stub(), on: vi.fn(), close: vi.fn(async () => {}) }
+        const connected = Promise.withResolvers<typeof criClient>()
+
+        options.CriConstructor.mockReturnValue(connected.promise)
+        options.browserCriClient.onExtraTargetCriClientReady = vi.fn(async () => vi.fn())
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        BrowserCriClient._onTargetDestroyed({
+          browserName: 'chrome',
+          browserClient: options.browserClient,
+          browserCriClient: options.browserCriClient,
+          event: { targetId: 'target-id' },
+          onAsynchronousError: vi.fn(),
+        })
+
+        connected.resolve(criClient)
+
+        await vi.waitFor(() => expect(criClient.close).toHaveBeenCalled())
+        expect(options.browserCriClient.addExtraTargetClient).not.toHaveBeenCalled()
+        expect(options.browserCriClient.onExtraTargetCriClientReady).not.toHaveBeenCalled()
+        expectNotCalledWith(criClient.send, 'Fetch.enable')
+      })
+
+      it('closes a connection that lands after the browser client started closing', async () => {
+        const criClient = { send: stub(), on: vi.fn(), close: vi.fn(async () => {}) }
+        const connected = Promise.withResolvers<typeof criClient>()
+
+        options.CriConstructor.mockReturnValue(connected.promise)
+        options.browserCriClient.onExtraTargetCriClientReady = vi.fn(async () => vi.fn())
+
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        options.browserCriClient.closing = true
+        connected.resolve(criClient)
+
+        await vi.waitFor(() => expect(criClient.close).toHaveBeenCalled())
+        expect(options.browserCriClient.addExtraTargetClient).not.toHaveBeenCalled()
+        expect(options.browserCriClient.onExtraTargetCriClientReady).not.toHaveBeenCalled()
       })
 
       it('keeps the popup paused until Fetch interception is set up when it connects in time', async () => {
@@ -1541,6 +1588,7 @@ describe('lib/browsers/browser-cri-client', function () {
             },
             resettingBrowserTargets: false,
             sessionTargetInfo: new Map(),
+            pendingExtraTargets: new Set(),
             removeServiceWorkerBinding: vi.fn(),
           },
           browserClient: {
@@ -1550,6 +1598,16 @@ describe('lib/browsers/browser-cri-client', function () {
             targetId: 'target-id',
           },
         }
+      })
+
+      it('forgets the target if it was an extra target still connecting', () => {
+        options.browserCriClient.hasExtraTargetClient.mockReturnValue(false)
+        options.browserCriClient.pendingExtraTargets.add('target-id')
+        options.browserCriClient.pendingExtraTargets.add('other-target-id')
+
+        BrowserCriClient._onTargetDestroyed(options as any)
+
+        expect([...options.browserCriClient.pendingExtraTargets]).toEqual(['other-target-id'])
       })
 
       it('releases the per-session state of the destroyed target', () => {
@@ -1941,6 +1999,42 @@ describe('lib/browsers/browser-cri-client', function () {
   })
 
   describe('#closeExtraTargets', () => {
+    // The popup was released by the connect timeout, so it is running even
+    // though Cypress never got a client for it (#32956).
+    it('closes a popup whose connection never landed, and closes that connection if it lands later', async () => {
+      const browserCriClient = await getClient() as any
+      const criClient = { send: stub(), on: vi.fn(), close: vi.fn(async () => {}) }
+      const connected = Promise.withResolvers<typeof criClient>()
+
+      browserCriClient.browserClient.send = vi.fn(async () => {})
+
+      await BrowserCriClient._onAttachToTarget({
+        browserClient: browserCriClient.browserClient,
+        browserCriClient,
+        CriConstructor: vi.fn(() => connected.promise) as any,
+        event: {
+          sessionId: 'popup-session-id',
+          targetInfo: { targetId: 'popup-target-id', type: 'page', url: 'http://www.example.com/popup' },
+          waitingForDebugger: true,
+        } as Protocol.Target.AttachedToTargetEvent,
+        host: HOST,
+        port: PORT,
+        extraTargetConnectTimeoutMs: 5,
+      })
+
+      expectCalledWith(browserCriClient.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'popup-session-id')
+
+      await browserCriClient.closeExtraTargets()
+
+      expectCalledWith(browserCriClient.browserClient.send, 'Target.closeTarget', { targetId: 'popup-target-id' })
+      expect(browserCriClient.pendingExtraTargets.size).toBe(0)
+
+      connected.resolve(criClient)
+
+      await vi.waitFor(() => expect(criClient.close).toHaveBeenCalled())
+      expect(browserCriClient.hasExtraTargetClient('popup-target-id')).toBe(false)
+    })
+
     it('closes any extra tracked targets', async () => {
       const browserClient = await getClient() as any
 

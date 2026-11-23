@@ -100,8 +100,10 @@ const CHILD_TARGET_INTERCEPTION_TIMEOUT_MS = 4000
 // sets up Fetch interception (#32956). The opener's `window.open()` does not
 // return until the popup is released, so while it is paused the Cypress tab
 // that opened it cannot run either. Connecting normally takes milliseconds;
-// if it stalls, the popup is released without interception rather than
-// freezing the run.
+// if it stalls, the popup is released rather than freezing the run. Until
+// the connection lands, the popup's requests reach the proxy without the
+// extra-target header, so they get the full AUT middleware instead of the
+// minimal popup handling.
 const EXTRA_TARGET_CONNECT_TIMEOUT_MS = 5000
 
 const ensureLiveBrowser = async (hosts: string[], port: number, browserName: string, getBrowserExit?: () => BrowserExit | undefined): Promise<string> => {
@@ -258,6 +260,14 @@ export class BrowserCriClient {
   resettingBrowserTargets = false
   gracefulShutdown?: boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
+  /**
+   * Extra targets (new tabs and popups) that have attached but have no client
+   * in extraTargetClients: still connecting, or the connection failed. They
+   * are already running, so closeExtraTargets closes them too, and a
+   * connection that lands after the target is gone sees it missing here and
+   * closes itself instead of being tracked (#32956).
+   */
+  pendingExtraTargets: Set<TargetId> = new Set()
   serviceWorkerBindings: Map<SessionId, ServiceWorkerBindingListener> = new Map()
   onClose: ((gracefulShutdown?: boolean) => void) | null = null
   /**
@@ -651,6 +661,8 @@ export class BrowserCriClient {
 
     debug('Connect as extra target (id: %s)', targetId)
 
+    browserCriClient.pendingExtraTargets.add(targetId)
+
     await this._connectExtraTargetWithinTimeout(targetId, extraTargetConnectTimeoutMs, () => {
       return this._connectExtraTarget({ browserCriClient, CreateCRI, host, port, targetInfo })
     })
@@ -704,6 +716,18 @@ export class BrowserCriClient {
 
       return
     }
+
+    if (!browserCriClient.pendingExtraTargets.has(targetId) || browserCriClient.closing || browserCriClient.closed) {
+      debug('extra target %s was destroyed or the browser client closed while connecting, closing its client', targetId)
+
+      extraTargetCriClient.close().catch((err) => {
+        debug('error closing client of departed extra target %s: %o', targetId, err)
+      })
+
+      return
+    }
+
+    browserCriClient.pendingExtraTargets.delete(targetId)
 
     sendLargeMessagesInFragments(extraTargetCriClient)
 
@@ -781,6 +805,8 @@ export class BrowserCriClient {
     })
 
     const { targetId } = event
+
+    browserCriClient.pendingExtraTargets.delete(targetId)
 
     // Target.targetDestroyed carries no sessionId, unlike detachedFromTarget
     // - sweep for any session(s) recorded against this targetId instead
@@ -1101,7 +1127,13 @@ export class BrowserCriClient {
   // renderer can go unanswered. This runs before every test, so waiting on
   // detach here would risk hanging teardown on a dead popup.
   async closeExtraTargets () {
-    await Promise.all(Array.from(this.extraTargetClients).map(async ([targetId]) => {
+    const pendingTargetIds = Array.from(this.pendingExtraTargets)
+
+    // Forgotten up front: a connection still in flight for one of these then
+    // closes itself when it lands instead of tracking a closed target.
+    this.pendingExtraTargets.clear()
+
+    await Promise.all([...this.extraTargetClients.keys(), ...pendingTargetIds].map(async (targetId) => {
       debug('Close extra target (id: %s)', targetId)
 
       try {
