@@ -163,6 +163,16 @@ type ICySnapshots = Omit<
   'onCssModified' | 'onBeforeWindowLoad'
 >
 
+// `begun` settles once the AUT document begins unloading
+const createUnloadSignal = () => {
+  let begin = () => {}
+  const begun = new Promise<void>((resolve) => {
+    begin = resolve
+  })
+
+  return { begun, begin }
+}
+
 // How many times each runnable has started. Hooks are reused across tests and retries,
 // so this tells a completion from an earlier run apart from one for the current run.
 const runnableRuns = new WeakMap<object, number>()
@@ -234,7 +244,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private testConfigOverride: TestConfigOverride
   private autActivation: { document: Document, activating: PromiseLike<void> } | undefined
   private autLoadsHandled = 0
-  private autUnloadsBegun = 0
+  private autLoadSettled = 0
+  private autUnload = createUnloadSignal()
   private commandFns: Record<string, (...args: any[]) => any> = {}
   private queryFns: Record<string, (...args: any[]) => any> = {}
 
@@ -586,10 +597,11 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         }
 
         const load = ++this.autLoadsHandled
-        const unloadsBegun = this.autUnloadsBegun
+        const unload = this.autUnload
 
-        // before window:load, so its handlers and the next command see an activated page
-        await this.finishActivatingAut(autWindow)
+        // before window:load, so its handlers and the next command see an activated
+        // page, unless the page begins unloading first and no longer needs it
+        await Promise.race([this.finishActivatingAut(autWindow), unload.begun])
 
         // stability is signalled after the window:load event to give event
         // listeners time to be invoked prior to moving on, but not if
@@ -615,19 +627,21 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           throw err
         } finally {
           // A page that redirects as soon as it loads, such as with
-          // `<meta http-equiv="refresh" content="0">`, can begin unloading while
-          // its activation is awaited. Its beforeunload found the page already
+          // `<meta http-equiv="refresh" content="0">`, begins unloading before
+          // this load is signalled. Its beforeunload found the page still
           // unstable and signalled nothing, so it's signalled in a task of its
           // own, as the browser would have, once the command waiting on this load
           // has moved on. Otherwise that command would take the redirect as its
-          // own and leave it out of the Command Log. A later page's own load
-          // handler settles stability.
-          if (load === this.autLoadsHandled) {
+          // own and leave it out of the Command Log. A later page that has already
+          // settled stability, such as one a cross-origin page navigated to while
+          // it waited, is left alone.
+          if (this.autLoadSettled < load) {
+            this.autLoadSettled = load
             this.isStable(true, 'load')
 
-            if (this.autUnloadsBegun !== unloadsBegun) {
+            if (this.autUnload !== unload) {
               setTimeout(() => {
-                if (load === this.autLoadsHandled) {
+                if (this.autLoadSettled === load) {
                   this.isStable(false, 'beforeunload')
                 }
               })
@@ -1242,7 +1256,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       },
       onLoad: () => { },
       onBeforeUnload: (e) => {
-        this.autUnloadsBegun++
+        this.autUnload.begin()
+        this.autUnload = createUnloadSignal()
         this.isStable(false, 'beforeunload')
 
         this.Cookies.setInitial()

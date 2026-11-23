@@ -66,6 +66,30 @@ describe('user activation', { browser: '!webkit' }, () => {
     })
   })
 
+  it('logs a redirect the page makes while its activation is still pending', () => {
+    const logNames: string[] = []
+    const automation = Cypress.automation.bind(Cypress)
+
+    cy.on('log:added', (attrs) => {
+      logNames.push(attrs.name)
+    })
+
+    // stands in for a browser slow to activate the page, so the redirected-to page
+    // starts loading before the first page's activation answers
+    cy.stub(Cypress, 'automation').callsFake((eventName: string, ...args) => {
+      const answer = automation(eventName, ...args)
+
+      return eventName === 'activate:aut:frame' ? Cypress.Promise.delay(500).then(() => answer) : answer
+    })
+
+    cy.visit('/fixtures/meta-redirect.html')
+    cy.contains('Some generic content')
+    cy.then(() => {
+      expect(logNames).to.include('page load')
+      expect(logNames.indexOf('visit')).to.be.lessThan(logNames.indexOf('page load'))
+    })
+  })
+
   it('lets activation-gated APIs work', { browser: { family: 'chromium' } }, () => {
     cy.visit('/fixtures/user-activation.html')
     cy.window().then((win) => {
