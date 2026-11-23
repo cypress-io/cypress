@@ -161,16 +161,15 @@ const describeNonError = (value: unknown): string => {
 }
 
 /**
- * Serializes a value that reached `uncaughtException` or `unhandledRejection` so its content
- * survives, e.g. `Promise.reject(['✘ [ERROR] Unexpected "}"'])` becomes an error
- * whose message is that line. `serializeError` only copies Error fields, which leaves `{}` for a
- * string, an array or a plain object.
+ * `['✘ [ERROR] Unexpected "}"']` becomes `{ name: 'Error', message: '✘ [ERROR] Unexpected "}"', stack: … }`,
+ * where `serializeError` would give `{}` because it copies only Error fields. Values that reach
+ * `uncaughtException` or `unhandledRejection` need not be Errors.
  */
 export const serializeUnhandledError = (value: unknown): SerializedError => {
   if (hasErrorMessage(value)) {
     const serialized = serializeError(value)
 
-    // `_.pick` leaves out `name` for a plain object that only has a `message`
+    // The parent only treats a value with both `name` and `message` as an error
     return { ...serialized, name: serialized.name || 'Error' }
   }
 
