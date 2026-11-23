@@ -1596,13 +1596,27 @@ commands:
                         source ./ci-ensure-node.sh
                         <<parameters.command>>
 
+  # A second pipeline on an already-built commit (a rerun, or one triggered
+  # through the API) downloads that commit's binary and npm package instead of
+  # rebuilding them, and hands them to the jobs that test them in the same
+  # workspace paths a build would.
   check-if-binary-exists:
     steps:
       - run:
-          name: Check if binary exists, exit if it does
+          name: Download the binary if this commit already has one
           command: |
             source ./scripts/ensure-node.sh
-            yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
+            yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --out ~/cdn-reuse/cypress
+      - persist_to_workspace:
+          root: ~/cdn-reuse
+          paths:
+            - cypress
+      - run:
+          name: Skip the build if the binary was downloaded
+          command: |
+            if [[ -f ~/cdn-reuse/cypress/cypress.zip ]]; then
+              circleci-agent step halt
+            fi
 
   build-and-package-binary:
     steps:
