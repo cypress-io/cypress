@@ -1365,7 +1365,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'sw-fetch-request',
-        responseCode: 200,
       }, 'sw-session')
     })
   })
@@ -1391,7 +1390,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
     })
 
@@ -1851,7 +1849,9 @@ describe('CdpFetchTransport', () => {
     // Middleware never touched these headers, so continueResponse omits the
     // field entirely rather than resending a lowercased, re-folded copy of
     // the same wire-encoding headers CDP already has on the paused request.
-    it('omits responseHeaders on pass-through continueResponse when middleware left them unchanged', async () => {
+    // Chrome rejects a continueResponse that overrides the status without the
+    // headers, so an unchanged response must override neither.
+    it('overrides neither status nor headers on pass-through continueResponse when middleware left the response unchanged', async () => {
       const client = createClient()
       const { transport } = createTransport(client)
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
@@ -1871,7 +1871,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
 
       expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
@@ -2074,7 +2073,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'shared.0',
-        responseCode: 200,
       })
     })
 
@@ -2118,7 +2116,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'download-pause-id',
-        responseCode: 200,
       })
     })
 
@@ -2178,12 +2175,10 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'first-request-pause-id',
-        responseCode: 200,
       })
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'second-request-pause-id',
-        responseCode: 201,
       })
     })
 
@@ -2293,7 +2288,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
     })
 
@@ -2352,8 +2346,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'shared.0',
-        responseCode: 0,
-        responsePhrase: 'unknown',
       })
     })
 
@@ -2405,7 +2397,6 @@ describe('CdpFetchTransport', () => {
       // Middleware left the response untouched, so continueResponse omits responseHeaders.
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       }, 'session-1')
     })
 
@@ -2875,7 +2866,6 @@ describe('CdpFetchTransport', () => {
       // Nothing changed the headers, so continueResponse omits the field.
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
     })
 
@@ -3144,11 +3134,21 @@ describe('CdpFetchTransport', () => {
 
     it('continues the response pause when continueResponse fails after handle', async () => {
       const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
 
-      client.sendWithArgs('Fetch.continueResponse', { requestId: 'fetch-request', responseCode: 200 }).rejects(new Error('continueResponse failed'))
-      const { transport } = createTransport(client)
+      httpIntercept.use(async (req, next) => {
+        return { ...await next(req), statusCode: 500 }
+      })
+
+      const responseHeaders = [{ name: 'content-type', value: 'text/plain' }]
+
+      client.sendWithArgs('Fetch.continueResponse', { requestId: 'fetch-request', responseCode: 500, responseHeaders }).rejects(new Error('continueResponse failed'))
+      const { transport } = createTransport(client, { httpIntercept })
       const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
       const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+
+      response.responseHeaders = responseHeaders
+
       const onRequestPaused = await startTransport(transport, client)
 
       const handled = onRequestPaused(request)
@@ -3159,7 +3159,8 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
+        responseCode: 500,
+        responseHeaders,
       })
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
@@ -3422,7 +3423,6 @@ describe('CdpFetchTransport', () => {
       // omits the field and CDP keeps the browser's original location header.
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 302,
       })
     })
 
@@ -3503,7 +3503,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
 
       expectCalledWith(middlewareSawResponse, {
@@ -3681,7 +3680,6 @@ describe('CdpFetchTransport', () => {
 
         expectCalledWith(client.send, 'Fetch.continueResponse', {
           requestId: 'fetch-request',
-          responseCode: 200,
         })
       })
 
@@ -3872,7 +3870,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
     })
 
@@ -4266,7 +4263,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
 
       expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
@@ -4462,20 +4458,61 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      await onRequestPaused(createPausedRequest({
+      const responsePause = createPausedRequest({
         requestId: 'fetch-request',
         networkId: 'network-1',
         responseStatusCode: 200,
-      }))
+      })
+
+      responsePause.responseHeaders = [
+        { name: 'Content-Type', value: 'text/plain' },
+        { name: 'ETag', value: 'W/"6-2c26b46b68ffc68ff99b453c1d304134"' },
+      ]
+
+      await onRequestPaused(responsePause)
 
       await handled
 
+      // Chrome rejects a status override that carries no headers, so the
+      // pause's own headers go with it.
+      expect(callsMatching(client.send, ['Fetch.continueResponse'])).toHaveLength(1)
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 418,
+        responseHeaders: responsePause.responseHeaders,
       })
 
       expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+    })
+
+    it('continues with the unknown phrase and the pause headers when middleware sets a status Chrome has no phrase for', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+
+      httpIntercept.use(async (req, next) => {
+        return { ...await next(req), statusCode: 599 }
+      })
+
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' }))
+
+      await tick()
+
+      const responsePause = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200 })
+
+      responsePause.responseHeaders = [{ name: 'Content-Type', value: 'application/json' }]
+
+      await onRequestPaused(responsePause)
+      await handled
+
+      expect(callsMatching(client.send, ['Fetch.continueResponse'])).toHaveLength(1)
+      expectCalledWith(client.send, 'Fetch.continueResponse', {
+        requestId: 'fetch-request',
+        responseCode: 599,
+        responsePhrase: 'unknown',
+        responseHeaders: responsePause.responseHeaders,
+      })
     })
 
     it('omits responseHeaders on continueResponse when middleware headers match the pause headers', async () => {
@@ -4502,7 +4539,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
     })
 
@@ -4571,7 +4607,6 @@ describe('CdpFetchTransport', () => {
 
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
-        responseCode: 200,
       })
     })
 

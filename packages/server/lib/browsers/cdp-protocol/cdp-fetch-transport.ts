@@ -558,6 +558,7 @@ export class CdpFetchTransport {
 
     let requestContinued = false
     let response: CdpFetchTransportResponse | undefined
+    let pausedResponse: CdpFetchTransportResponse | undefined
     let responseRequestId: string | undefined
     let responseSessionId: string | undefined
     let deferred: ResponsePauseDeferred | undefined
@@ -690,7 +691,7 @@ export class CdpFetchTransport {
             ])
           }
 
-          const pausedResponse = await responseDeferred.promise
+          pausedResponse = await responseDeferred.promise
 
           responseRequestId = pausedResponse.requestId
           responseSessionId = pausedResponse.sessionId
@@ -720,16 +721,25 @@ export class CdpFetchTransport {
           ...(response.body !== undefined ? { body: response.body } : {}),
         }, response.sessionId)
       } else {
-        debug('continuing response %s: status %s', event.request.url, response.responseCode)
+        // Chrome rejects a status override sent without headers, and headers
+        // sent without a status ("Cannot override only status or headers, both
+        // should be provided"). So an unchanged response overrides neither, and
+        // a status-only change sends the pause's own headers along with it.
+        const statusChanged = pausedResponse !== undefined && response.responseCode !== pausedResponse.responseCode
+        const responseHeaders = response.responseHeaders ?? (statusChanged ? pausedResponse?.responseHeaders ?? [] : undefined)
+
+        debug('continuing response %s: status %s, headers overridden %s', event.request.url, response.responseCode, !!responseHeaders)
 
         await this.client.send('Fetch.continueResponse', {
           requestId: response.requestId,
-          responseCode: response.responseCode,
-          // Chrome rejects a code it has no built-in phrase for; for every
-          // known code, omit the phrase so the origin's own phrase survives
-          // the pass-through untouched.
-          ...(STATUS_CODES[response.responseCode] ? {} : { responsePhrase: 'unknown' }),
-          ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
+          ...(responseHeaders ? {
+            responseCode: response.responseCode,
+            // Chrome rejects a code it has no built-in phrase for; for every
+            // known code, omit the phrase so the origin's own phrase survives
+            // the pass-through untouched.
+            ...(STATUS_CODES[response.responseCode] ? {} : { responsePhrase: 'unknown' }),
+            responseHeaders,
+          } : {}),
         }, response.sessionId)
       }
 

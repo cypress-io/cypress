@@ -542,9 +542,8 @@ describe('lib/network-runtime', () => {
     const fulfillCall = findCall(client.send, 'Fetch.fulfillRequest')
 
     expect(continueResponseCall, 'expected Fetch.continueResponse for unmodified response').toBeDefined()
-    expect(continueResponseCall![1]).toMatchObject({
+    expect(continueResponseCall![1]).toEqual({
       requestId: 'fetch-request',
-      responseCode: 200,
     })
 
     expect(fulfillCall, 'expected no Fetch.fulfillRequest for unmodified response').toBeUndefined()
@@ -598,9 +597,8 @@ describe('lib/network-runtime', () => {
     const fulfillCall = findCall(client.send, 'Fetch.fulfillRequest')
 
     expect(continueResponseCall, 'expected Fetch.continueResponse for an unrewritten asset').toBeDefined()
-    expect(continueResponseCall![1]).toMatchObject({
+    expect(continueResponseCall![1]).toEqual({
       requestId: 'asset-request',
-      responseCode: 200,
     })
 
     // The pipeline left the headers alone, so the origin's own content-length
@@ -1091,9 +1089,8 @@ describe('lib/network-runtime', () => {
     const fulfillCall = findCall(client.send, 'Fetch.fulfillRequest')
 
     expect(continueResponseCall, 'expected Fetch.continueResponse for http-strategy response').toBeDefined()
-    expect(continueResponseCall![1]).toMatchObject({
+    expect(continueResponseCall![1]).toEqual({
       requestId: 'http-request',
-      responseCode: 200,
     })
 
     expect(fulfillCall, 'expected no Fetch.fulfillRequest for http-strategy response').toBeUndefined()
