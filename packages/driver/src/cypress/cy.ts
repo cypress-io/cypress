@@ -928,9 +928,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     // Started as the document begins to load, so the activation has usually
     // finished by the time the load handler waits on it. A component testing
-    // spec's page is activated when a test starts instead, once that test's
-    // `userActivation` applies. A spec bridge leaves its cross-origin AUT to the
-    // primary origin's load handler, which activates it.
+    // spec's page is left to the load handler, since no test's `userActivation`
+    // may apply yet, and a spec bridge's cross-origin AUT to the primary origin's.
     if (this.Cypress.testingType !== 'component' && !this.Cypress.isCrossOriginSpecBridge) {
       this.autActivation = { document: contentWindow.document, activating: activateAut(this.Cypress, contentWindow) }
     }

@@ -1,4 +1,4 @@
-import { getAutElement } from '../../support/utils'
+import { getAutInput } from '../../support/utils'
 
 // Its own spec, so the AUT frame starts out unactivated: Chromium keeps a frame's
 // activation across same-origin navigations, so an earlier test would leave it on.
@@ -35,7 +35,7 @@ describe('user activation with userActivation: false', { browser: '!webkit', use
         results.push(win.navigator.userActivation.isActive)
 
         try {
-          getAutElement(win.document, '#date', 'input').showPicker()
+          getAutInput(win.document, '#date').showPicker()
         } catch (err) {
           results.push(err.name)
         }
@@ -54,7 +54,7 @@ describe('user activation with userActivation: false', { browser: '!webkit', use
     cy.get('#text').invoke('val', 'Jordan Avery')
     cy.window().then((win) => {
       win.document.querySelector('#button')!.addEventListener('click', () => {
-        getAutElement(win.document, '#text', 'input').select()
+        getAutInput(win.document, '#text').select()
         copied.push(win.document.execCommand('copy'))
       })
     })

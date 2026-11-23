@@ -36,7 +36,6 @@ export async function cdpActivateFrame (
     try {
       return await evaluateWithUserGesture(send, existing)
     } catch (err) {
-      // most likely the document went away and took the world with it
       debug('failed to evaluate in isolated world %d, creating another: %s', existing, err?.message)
       worlds.delete(frame.id)
     }

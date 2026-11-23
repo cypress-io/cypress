@@ -385,7 +385,7 @@ describe('lib/browsers/bidi_automation', () => {
           // @ts-expect-error - autContextId is private
           bidiAutomationInstance.autContextId = '123'
 
-          // a navigation the page starts itself has no initiator type
+          // recorded for being a navigation, whatever its initiator type
           mockWebdriverClient.emit('network.beforeRequestSent', { ...mockRequest, request: { ...mockRequest.request, url: 'http://localhost:3500/editor', initiatorType: null } })
 
           mockWebdriverClient.emit('network.beforeRequestSent', { ...mockRequest, navigation: null, request: { ...mockRequest.request, url: 'http://localhost:3500/editor.js', initiatorType: 'script' } })

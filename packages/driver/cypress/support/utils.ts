@@ -1,3 +1,5 @@
+import $elements from '../../src/dom/elements'
+
 const { $, _, Promise } = Cypress
 
 // the reporter renders inside a same-origin iframe in the runner UI, so
@@ -227,18 +229,14 @@ const chaiSubset = require('chai-subset')
 
 chai.use(chaiSubset)
 
-// Finds the AUT element `selector` matches and checks it is a `localName` element.
-// AUT elements come from another realm, so `instanceof` can't narrow them.
-export const getAutElement = <K extends keyof HTMLElementTagNameMap>(doc: Document, selector: string, localName: K): HTMLElementTagNameMap[K] => {
+// Checks the tag name rather than `instanceof`, which AUT elements fail because they
+// come from another realm.
+export const getAutInput = (doc: Document, selector: string): HTMLInputElement => {
   const el = doc.querySelector(selector)
 
-  if (!isAutElement(el, localName)) {
-    throw new Error(`Expected \`${selector}\` to match a <${localName}> element`)
+  if (!$elements.isInput(el)) {
+    throw new Error(`Expected \`${selector}\` to match an <input> element`)
   }
 
   return el
-}
-
-const isAutElement = <K extends keyof HTMLElementTagNameMap>(el: Element | null, localName: K): el is HTMLElementTagNameMap[K] => {
-  return el?.localName === localName
 }

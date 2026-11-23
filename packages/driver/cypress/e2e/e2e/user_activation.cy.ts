@@ -1,4 +1,4 @@
-import { getAutElement } from '../../support/utils'
+import { getAutInput } from '../../support/utils'
 
 declare global {
   interface Window {
@@ -98,7 +98,7 @@ describe('user activation', { browser: '!webkit' }, () => {
       // uses up the transient activation the page load gave, so only the command
       // under test can give it
       cy.window().then((win) => {
-        getAutElement(win.document, '#date', 'input').showPicker()
+        getAutInput(win.document, '#date').showPicker()
         expect(win.navigator.userActivation.isActive, 'navigator.userActivation.isActive').to.be.false
       })
     })
@@ -127,12 +127,11 @@ describe('user activation', { browser: '!webkit' }, () => {
 
     it('renews transient activation a keydown handler used up before the next key', () => {
       const shown = handle('#text', 'keydown', (win) => {
-        getAutElement(win.document, '#date', 'input').showPicker()
+        getAutInput(win.document, '#date').showPicker()
 
         return win.navigator.userActivation.isActive
       })
 
-      // showPicker() uses up transient activation, and throws without it
       cy.get('#text').type('ab')
       cy.wrap(shown).should('deep.equal', [false, false])
     })
@@ -147,7 +146,7 @@ describe('user activation', { browser: '!webkit' }, () => {
 
     it('renews transient activation an earlier click used up', () => {
       const shown = handle('#button', 'click', (win) => {
-        getAutElement(win.document, '#date', 'input').showPicker()
+        getAutInput(win.document, '#date').showPicker()
 
         return win.navigator.userActivation.isActive
       })
@@ -179,7 +178,7 @@ describe('user activation', { browser: '!webkit' }, () => {
     it('lets a click handler call HTMLInputElement.showPicker()', () => {
       const errors = handle('#date', 'click', (win) => {
         try {
-          getAutElement(win.document, '#date', 'input').showPicker()
+          getAutInput(win.document, '#date').showPicker()
         } catch (err) {
           return err.message
         }
@@ -209,7 +208,7 @@ describe('user activation', { browser: '!webkit' }, () => {
     // https://github.com/cypress-io/cypress/issues/2851
     it('lets a click handler copy and cut with document.execCommand()', { browser: { family: 'chromium' } }, () => {
       const results = handle('#button', 'click', (win) => {
-        const text = getAutElement(win.document, '#text', 'input')
+        const text = getAutInput(win.document, '#text')
 
         text.select()
         const copied = win.document.execCommand('copy')
@@ -235,9 +234,12 @@ describe('user activation', { browser: '!webkit' }, () => {
     })
 
     it('lets a click handler open Picture-in-Picture', { browser: { family: 'chromium' } }, () => {
+      let video: HTMLVideoElement
+
       cy.document().then((doc) => {
         const canvas = doc.createElement('canvas')
-        const video = doc.createElement('video')
+
+        video = doc.createElement('video')
 
         canvas.getContext('2d')!.fillRect(0, 0, 10, 10)
         video.id = 'video'
@@ -248,7 +250,7 @@ describe('user activation', { browser: '!webkit' }, () => {
         return video.play()
       })
 
-      const requests = handle('#button', 'click', (win) => settle(getAutElement(win.document, '#video', 'video').requestPictureInPicture()))
+      const requests = handle('#button', 'click', () => settle(video.requestPictureInPicture()))
 
       cy.document().then((doc) => expect(doc.pictureInPictureElement, 'pictureInPictureElement').to.be.null)
       cy.get('#button').click()
