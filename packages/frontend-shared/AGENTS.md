@@ -47,6 +47,7 @@ src/
 - The `build` target depends on `generate-shiki-theme` (declared in `nx.targets`) — run that first if the generated theme file is missing.
 - `patch-package` is applied via `postinstall` to patch a local dependency; it is nohoisted to prevent conflicts.
 - The `generated/schema-for-tests.gen.json` is an nx output artifact and must exist before component tests can run type-checking correctly.
+- Don't write component tests that assert computed color values for a styling-only change, such as a global rule in `src/styles/`. Pinning RGB strings from the design tokens breaks on any palette change without catching anything a reviewer wouldn't see. Check the change visually instead, with before-and-after screenshots for the pull request.
 
 ## Integration Points
 
