@@ -29,6 +29,7 @@
 - Fixed a regression in [16.0.0](#16-0-0) where a [`cy.intercept()`](https://on.cypress.io/intercept) response handler that changed the `Location` or `Referrer-Policy` header of a redirect had no effect in Chromium-based browsers. The browser followed the redirect as the server sent it, to the server's URL and with the server's referrer policy. Fixes [#34704](https://github.com/cypress-io/cypress/issues/34704).
 - Fixed a regression in [16.0.0](#16-0-0) where a [`cy.intercept()`](https://on.cypress.io/intercept) response handler that changed the `Content-Type` header of a streamed response, such as `text/event-stream` or an `EventSource`, replaced the stream with an empty body in Chromium-based browsers. The stream now reaches the page with the new `Content-Type`. A handler that sets `res.body` still replaces the stream. Fixes [#35256](https://github.com/cypress-io/cypress/issues/35256).
 - Fixed a regression in [16.0.0](#16-0-0) where [`cy.wait()`](https://on.cypress.io/wait) on a [`cy.intercept()`](https://on.cypress.io/intercept) alias could yield an `Errored` interception in Chromium-based browsers when the application aborted a request and sent it again, as React StrictMode and data-fetching libraries do. `cy.wait()` now yields the request that was sent again. Fixes [#35444](https://github.com/cypress-io/cypress/issues/35444).
+- Fixed an issue where a [`cy.intercept()`](https://on.cypress.io/intercept) route matcher that was a regular expression with the `g` or `y` flag could fail to match some requests, often every other identical request. Those requests were not intercepted, so [`cy.wait()`](https://on.cypress.io/wait) on the route's alias could time out. Fixes [#34973](https://github.com/cypress-io/cypress/issues/34973).
 - Fixed a regression in [16.0.0](#16-0-0) where `<video>` and `<audio>` elements in Chromium-based browsers could not load their metadata or start playing until the whole media file had downloaded. With a large file, such as a progressive MP4 served from a CDN, the element stayed at `readyState` 0 and tests that waited on it timed out. Setting `forceHttp1: true` worked around the issue. Fixed in [#35389](https://github.com/cypress-io/cypress/pull/35389).
 - Fixed a regression in [16.0.0](#16-0-0) where, in Chromium-based browsers, a registered service worker was replaced by a new version every time the browser checked it for updates, even when its script had not changed. A service worker that calls `skipWaiting()` and `clients.claim()`, such as the one Mock Service Worker (MSW) uses, then took over the page in the middle of a test without the previous worker's state, so mocked requests reached the network. A service worker that kept a request open, such as a server-sent events stream, could also make [`cy.visit()`](https://on.cypress.io/visit) fail with a `pageLoadTimeout` error while the new version waited to take over. Setting `forceHttp1: true` worked around the issue. Fixes [#34943](https://github.com/cypress-io/cypress/issues/34943) and [#35204](https://github.com/cypress-io/cypress/issues/35204).
 - [`.type()`](https://on.cypress.io/type) now moves the caret of a `url` input as it types, and starts typing at a caret position your app set with `setSelectionRange()`. For example, after `.type('{leftArrow}{leftArrow}{leftArrow}')` on a `url` input holding `https://www.example.com`, the input's `selectionStart` is now `20` instead of staying at `23`. Fixed in [#35465](https://github.com/cypress-io/cypress/pull/35465).
@@ -56,6 +57,7 @@
 **Misc:**
 
 - Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#35284](https://github.com/cypress-io/cypress/pull/35284).
+- The IntelliSense description of the [`fail`](https://on.cypress.io/catalog-of-events#App-Events) event now says that a handler bound to it keeps the test from failing unless the handler throws an error, that Cypress skips the test's remaining commands, and that a test with a `done` callback still times out unless the handler calls `done`. It previously said a test could only be kept from failing by calling an async `done` callback. Addresses [#26605](https://github.com/cypress-io/cypress/issues/26605).
 - The error [`cy.type()`](https://on.cypress.io/type) shows for an invalid week now gives the valid week range as 01-53. It previously said 00-53, but week 00 was never accepted. Addressed in [#35350](https://github.com/cypress-io/cypress/pull/35350).
 
 **Dependency Updates:**
@@ -1999,7 +2001,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 - The [`videoCompression`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option now defaults to `false`. Addresses [#26160](https://github.com/cypress-io/cypress/issues/26160).
 - The [`videoUploadOnPasses`](https://docs.cypress.io/guides/references/configuration#Videos) configuration option has been removed. Please see our [screenshots & videos guide](https://docs.cypress.io/guides/guides/screenshots-and-videos#Delete-videos-for-specs-without-failing-or-retried-tests) on how to accomplish similar functionality. Addresses [#26899](https://github.com/cypress-io/cypress/issues/26899).
 - Requests for assets at relative paths for component testing are now correctly forwarded to the dev server. Fixes [#26725](https://github.com/cypress-io/cypress/issues/26725).
-- The [`cy.readFile()`](/api/commands/readfile) command is now retry-able as a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using [`Cypress.Commands.overwrite()`](/api/cypress-api/custom-commands#Overwrite-Existing-Commands). Addressed in [#25595](https://github.com/cypress-io/cypress/pull/25595).
+- The [`cy.readFile()`](https://on.cypress.io/readfile) command is now retry-able as a [query command](https://on.cypress.io/retry-ability). This should not affect any tests using it; the functionality is unchanged. However, it can no longer be overwritten using [`Cypress.Commands.overwrite()`](https://on.cypress.io/custom-commands#Overwrite-Existing-Commands). Addressed in [#25595](https://github.com/cypress-io/cypress/pull/25595).
 - The current spec path is now passed from the AUT iframe using a query parameter rather than a path segment. This allows for requests for assets at relative paths to be correctly forwarded to the dev server. Fixes [#26725](https://github.com/cypress-io/cypress/issues/26725).
 - The deprecated configuration option `nodeVersion` has been removed. Addresses [#27016](https://github.com/cypress-io/cypress/issues/27016).
 - The properties and values returned by the [Module API](https://docs.cypress.io/guides/guides/module-api) and included in the arguments of handlers for the [`after:run`](https://docs.cypress.io/api/plugins/after-run-api) and  [`after:spec`](https://docs.cypress.io/api/plugins/after-spec-api) have been changed to be more consistent. Addresses [#23805](https://github.com/cypress-io/cypress/issues/23805).
@@ -2372,38 +2374,38 @@ during Component Testing onboarding. Addresses [#26852](https://github.com/cypre
 - Added official support for Vite 4 in component testing. Addresses
   [#24969](https://github.com/cypress-io/cypress/issues/24969).
 - Added new
-  [`experimentalMemoryManagement`](/guides/references/experiments#Configuration)
+  [`experimentalMemoryManagement`](https://on.cypress.io/experiments#Configuration)
   configuration option to improve memory management in Chromium-based browsers.
   Enable this option with `experimentalMemoryManagement=true` if you have
   experienced "Out of Memory" issues. Addresses
   [#23391](https://github.com/cypress-io/cypress/issues/23391).
 - Added new
-  [`experimentalSkipDomainInjection`](/guides/references/experiments#Experimental-Skip-Domain-Injection)
+  [`experimentalSkipDomainInjection`](https://on.cypress.io/migration-guide#Changes-to-cyorigin)
   configuration option to disable Cypress from setting `document.domain` on
   injection, allowing users to test Salesforce domains. If you believe you are
   having `document.domain` issues, please see the
-  [`experimentalSkipDomainInjection`](/guides/references/experiments#Experimental-Skip-Domain-Injection)
+  [`experimentalSkipDomainInjection`](https://on.cypress.io/migration-guide#Changes-to-cyorigin)
   guide. This config option is end-to-end only. Addresses
   [#2367](https://github.com/cypress-io/cypress/issues/2367),
   [#23958](https://github.com/cypress-io/cypress/issues/23958),
   [#24290](https://github.com/cypress-io/cypress/issues/24290), and
   [#24418](https://github.com/cypress-io/cypress/issues/24418).
-- The [`.as`](/api/commands/as) command now accepts an options argument,
+- The [`.as`](https://on.cypress.io/as) command now accepts an options argument,
   allowing an alias to be stored as type "query" or "static" value. This is
   stored as "query" by default. Addresses
   [#25173](https://github.com/cypress-io/cypress/issues/25173).
 - The `cy.log()` command will now display a line break where the `\n` character
   is used. Addresses
   [#24964](https://github.com/cypress-io/cypress/issues/24964).
-- [`component.specPattern`](/guides/references/configuration#component) now
+- [`component.specPattern`](https://on.cypress.io/configuration#component) now
   utilizes a JSX/TSX file extension when generating a new empty spec file if
   project contains at least one file with those extensions. This applies only to
   component testing and is skipped if
-  [`component.specPattern`](/guides/references/configuration#component) has been
+  [`component.specPattern`](https://on.cypress.io/configuration#component) has been
   configured to exclude files with those extensions. Addresses
   [#24495](https://github.com/cypress-io/cypress/issues/24495).
 - Added support for the `data-qa` selector in the
-  [Selector Playground](guides/core-concepts/cypress-app#Selector-Playground) in
+  [Selector Playground](https://on.cypress.io/selector-playground) in
   addition to `data-cy`, `data-test` and `data-testid`. Addresses
   [#25305](https://github.com/cypress-io/cypress/issues/25305).
 
