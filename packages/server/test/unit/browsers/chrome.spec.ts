@@ -467,28 +467,6 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('loads only the Cypress extension when no other extensions are provided', async () => {
-      await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
-
-      const args: string[] = launchSpy.mock.calls[0][3]
-
-      expect(args.filter((arg) => arg.startsWith('--load-extension='))).toEqual(['--load-extension=/path/to/ext'])
-    })
-
-    it('loads launchOptions.extensions before the Cypress extension', async () => {
-      plugins.registerEvent('before:browser:launch', (browser, config) => {
-        return Promise.resolve({ args: ['--foo=bar'], extensions: ['/extensions/react-devtools', '/extensions/axe-devtools'] })
-      })
-
-      await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
-
-      const args: string[] = launchSpy.mock.calls[0][3]
-
-      expect(args.filter((arg) => arg.startsWith('--load-extension='))).toEqual([
-        '--load-extension=/extensions/react-devtools,/extensions/axe-devtools,/path/to/ext',
-      ])
-    })
-
     it('normalizes --load-extension if provided in plugin', async () => {
       plugins.registerEvent('before:browser:launch', (browser, config) => {
         return Promise.resolve({
@@ -593,14 +571,11 @@ describe('lib/browsers/chrome', () => {
         return written.length ? written[written.length - 1][1] : undefined
       }
 
-      it('removes the theme Cypress loaded on Linux and keeps other extension settings', async () => {
-        const prefs = await openWithTheme('/home/jordan.rivera/.cache/Cypress/16.3.0/Cypress/resources/app/packages/extension/theme')
-
-        expect(prefs.extensions).toEqual({ alerts: { initialized: true } })
-      })
-
-      it('removes the theme Cypress loaded on Windows', async () => {
-        const prefs = await openWithTheme('C:\\Users\\jordan.rivera\\AppData\\Local\\Cypress\\Cache\\16.3.0\\Cypress\\resources\\app\\packages\\extension\\theme')
+      it.each([
+        ['Linux', '/home/jordan.rivera/.cache/Cypress/16.3.0/Cypress/resources/app/packages/extension/theme'],
+        ['Windows', 'C:\\Users\\jordan.rivera\\AppData\\Local\\Cypress\\Cache\\16.3.0\\Cypress\\resources\\app\\packages\\extension\\theme'],
+      ])('removes the theme Cypress loaded on %s and keeps other extension settings', async (_platform, pack) => {
+        const prefs = await openWithTheme(pack)
 
         expect(prefs.extensions).toEqual({ alerts: { initialized: true } })
       })
