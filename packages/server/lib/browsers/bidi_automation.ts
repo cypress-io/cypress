@@ -173,6 +173,12 @@ export class BidiAutomation {
 
     debug('received beforeunload prompt %o', params)
 
+    // The prompt belongs to the top-level context, whose URL is the runner's. The
+    // dialogs Cypress accepts during a test come from the AUT, so the dialog is
+    // reported with the URL of the AUT page that asked. It's read now, since
+    // accepting lets the navigation go ahead and request the next page.
+    const url = this.autDocumentUrl ?? ''
+
     if (params.handler === 'ignore') {
       try {
         await this.webDriverClient.browsingContextHandleUserPrompt({ context: params.context, accept: true })
@@ -185,10 +191,7 @@ export class BidiAutomation {
       return
     }
 
-    // The prompt belongs to the top-level context, whose URL is the runner's. The
-    // dialogs Cypress accepts during a test come from the AUT, so the dialog is
-    // reported with the URL of the AUT page that asked.
-    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: this.autDocumentUrl ?? '' }).catch((err) => {
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url }).catch((err) => {
       debug('failed to report accepted beforeunload prompt: %s', err?.message)
     })
   }

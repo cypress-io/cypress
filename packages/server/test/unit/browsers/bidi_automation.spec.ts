@@ -138,6 +138,27 @@ describe('lib/browsers/bidi_automation', () => {
           expectCalledWith(mockAutomationClient.push, 'beforeunload:dialog:accepted', { message: prompt.message, url: 'http://localhost:3500/editor' })
         })
 
+        it('reports the prompt with the url of the page that asked, not the page accepting it navigates to', async () => {
+          const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+          // @ts-expect-error - autDocumentUrl is private
+          bidiAutomationInstance.autDocumentUrl = 'http://localhost:3500/editor'
+
+          // accepting lets the navigation go ahead, so the next page is requested before the accept answers
+          mockWebdriverClient.browsingContextHandleUserPrompt = vi.fn(async () => {
+            await Promise.resolve()
+            // @ts-expect-error - autDocumentUrl is private
+            bidiAutomationInstance.autDocumentUrl = 'http://localhost:3500/dashboard'
+          })
+
+          mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'beforeunload', handler: 'ignore' })
+
+          await flushPromises()
+
+          expectCalledWith(mockAutomationClient.push, 'beforeunload:dialog:accepted', { message: prompt.message, url: 'http://localhost:3500/editor' })
+          expect(mockAutomationClient.push).not.toHaveBeenCalledWith('beforeunload:dialog:accepted', { message: prompt.message, url: 'http://localhost:3500/dashboard' })
+        })
+
         it('does not report a beforeunload prompt the session dismisses', async () => {
           mockWebdriverClient.emit('browsingContext.userPromptOpened', { ...prompt, type: 'beforeunload', handler: 'dismiss' })
 
