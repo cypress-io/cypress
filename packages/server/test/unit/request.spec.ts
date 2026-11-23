@@ -42,8 +42,7 @@ const makeAutomationFn = () => {
   return Object.assign(fn, { resolves })
 }
 
-// Answers `/start` with a 302 to `location(origin)`, `/hello` with 200, and every other
-// path with 404, as a server that routes by exact path does
+// Routes by exact path, so a request for `/./hello` gets a 404 instead of `/hello`
 const startRedirectServer = async (location: (origin: string) => string) => {
   const requests: { path: string, headers: http.IncomingHttpHeaders }[] = []
 
@@ -1075,10 +1074,10 @@ describe('lib/request', () => {
           await server?.close()
         })
 
-        // the query and fragment keep their dots, as in a browser
         it.each([
           { location: '{origin}/./hello', path: '/hello', redirect: '{origin}/hello' },
           { location: '{origin}/redirect/../hello', path: '/hello', redirect: '{origin}/hello' },
+          // the query and fragment keep their dots, as in a browser
           { location: '{origin}/./hello?next=./account#./top', path: '/hello?next=./account', redirect: '{origin}/hello?next=./account#./top' },
           { location: '/./hello', path: '/hello', redirect: '{origin}/hello' },
         ])('follows `Location: $location` to $path', async ({ location, path, redirect }) => {
