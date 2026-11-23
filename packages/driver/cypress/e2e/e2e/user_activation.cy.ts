@@ -75,7 +75,9 @@ describe('user activation', { browser: '!webkit' }, () => {
 
   // https://github.com/cypress-io/cypress/issues/1213
   // https://github.com/cypress-io/cypress/issues/8618
-  describe('transient activation', () => {
+  // Firefox only gets the transient activation a page load gives, which the
+  // beforeEach below uses up.
+  describe('transient activation', { browser: { family: 'chromium' } }, () => {
     // runs `handler` from the element's own event listener, where an application calls
     // the APIs that need transient activation, and collects what it returns or resolves to
     const handle = <T>(selector: string, eventName: string, handler: (win: Window) => T | Promise<T>) => {

@@ -15,7 +15,7 @@ const RENEWAL_TIMEOUT_MS = 500
 // only the parts of Cypress that activating the AUT uses, so a unit test can supply them
 interface ActivationHost {
   config: (key: 'userActivation') => unknown
-  isBrowser: (matcher: 'webkit') => boolean
+  isBrowser: (matcher: 'webkit' | 'firefox') => boolean
   automation: (eventName: 'activate:aut:frame', data: Record<string, never>) => Promise<unknown>
 }
 
@@ -156,6 +156,10 @@ type ActivationWindow = { navigator: { userActivation?: { isActive: boolean } } 
 // there is nothing to renew, so the caller can stay synchronous. After a renewal
 // fails, it stops trying for the rest of the command, which would otherwise wait on
 // the browser before every retry.
+//
+// Firefox isn't asked: activating the page there again before a command's events
+// leaves the app's handlers without transient activation, so it would only make
+// every action command wait on the browser.
 export const createTransientActivationRenewer = (Cypress: ActivationHost, autWindow: ActivationWindow | undefined) => {
   let failed = false
 
@@ -170,7 +174,7 @@ export const createTransientActivationRenewer = (Cypress: ActivationHost, autWin
   return (): Promise<void> | undefined => {
     const { requestedAt, unresponsive } = recordFor(Cypress)
 
-    if (failed || unresponsive || !isEnabled(Cypress)) {
+    if (failed || unresponsive || !isEnabled(Cypress) || Cypress.isBrowser('firefox')) {
       return
     }
 

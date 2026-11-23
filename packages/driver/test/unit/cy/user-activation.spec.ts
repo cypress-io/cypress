@@ -4,7 +4,7 @@ import { activateAut, createTransientActivationRenewer } from '../../../src/cy/u
 const createCypress = ({ userActivation = true, browser = 'chrome', automation = vi.fn().mockResolvedValue(undefined) } = {}) => {
   return {
     config: (key: 'userActivation') => key === 'userActivation' && userActivation,
-    isBrowser: (matcher: 'webkit') => matcher === browser,
+    isBrowser: (matcher: 'webkit' | 'firefox') => matcher === browser,
     automation,
   }
 }
@@ -175,6 +175,17 @@ describe('src/cy/user-activation', () => {
 
       expect(createTransientActivationRenewer(Cypress, createAutWindow(false))()).toBeUndefined()
       expect(Cypress.automation).not.toHaveBeenCalled()
+    })
+
+    it('does nothing in Firefox, which still gets the activation a page load gives', async () => {
+      const Cypress = createCypress({ browser: 'firefox' })
+      const autWindow = createAutWindow(false)
+
+      expect(createTransientActivationRenewer(Cypress, autWindow)()).toBeUndefined()
+
+      await activateAut(Cypress, autWindow)
+
+      expect(Cypress.automation).toHaveBeenCalledTimes(1)
     })
   })
 })
