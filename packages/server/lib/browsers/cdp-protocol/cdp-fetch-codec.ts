@@ -120,20 +120,20 @@ function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protoc
 }
 
 /**
- * Middleware headers describe the body the pipeline produced — including any
- * re-encoding by CompressBody — so keep their content-encoding and only drop
- * stale length headers. The pause-header fallback describes the wire body, not
- * the decoded body we fulfill with, so its encoding headers are stripped too.
- */
-/**
  * The origin's headers for fulfilling it with its decoded body:
- * `Content-Encoding: gzip`, `Content-Length` and `Transfer-Encoding` are
- * dropped, since they describe the wire body, not the one being sent.
+ * `Content-Encoding` (such as `gzip`), `Content-Length` and `Transfer-Encoding`
+ * are dropped, since they describe the wire body, not the one being sent.
  */
 export function toUnchangedFulfilledHeaders (headers: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] {
   return stripHeaderEntries(headers, WIRE_ENCODING_HEADERS)
 }
 
+/**
+ * Middleware headers describe the body the pipeline produced — including any
+ * re-encoding by CompressBody — so keep their content-encoding and only drop
+ * stale length headers. The pause-header fallback describes the wire body, not
+ * the decoded body we fulfill with, so its encoding headers are stripped too.
+ */
 function toFulfilledHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
   if (middlewareHeaders) {
     return stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
