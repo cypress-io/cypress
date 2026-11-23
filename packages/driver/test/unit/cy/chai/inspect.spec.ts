@@ -50,17 +50,25 @@ describe('src/cy/chai/inspect', () => {
       expect(inspect(user)).toBe(`{ name: 'Jane Doe' }`)
     })
 
-    it('calls the custom inspector with the value as this, the depth and the context', () => {
-      const customInspect = vi.fn(function (this: unknown) {
-        return 'User<Jane Doe>'
-      })
+    it('calls the custom inspector with the value as this', () => {
+      const customInspect = vi.fn(() => 'User<Jane Doe>')
       const user = { [symbol]: customInspect }
 
       inspect(user)
 
       expect(customInspect).toHaveBeenCalledTimes(1)
       expect(customInspect.mock.contexts[0]).toBe(user)
-      expect(customInspect.mock.calls[0]).toEqual([2, expect.objectContaining({ stylize: expect.any(Function) })])
+    })
+
+    it('falls back to default formatting when the custom inspector returns the value itself', () => {
+      const user = {
+        name: 'Jane Doe',
+        [symbol] () {
+          return this
+        },
+      }
+
+      expect(inspect(user)).toBe(`{ name: 'Jane Doe' }`)
     })
 
     it('uses a custom inspector on a nested value', () => {
@@ -111,6 +119,61 @@ describe('src/cy/chai/inspect', () => {
 
       expect(inspect(user)).toBe(`{ name: 'Jane Doe' }`)
     })
+  })
+
+  it('calls a Symbol.for(chai/inspect) method with options, as chai does', () => {
+    const price = {
+      cents: 500,
+      [Symbol.for('chai/inspect')] (options) {
+        return options.stylize(`$${this.cents / 100} (depth ${options.depth})`, 'number')
+      },
+    }
+
+    expect(inspect(price)).toBe('$5 (depth 2)')
+  })
+
+  it('calls a Symbol.for(nodejs.util.inspect.custom) method with depth, options and inspect, as Node.js does', () => {
+    const box = {
+      contents: { name: 'Jane Doe' },
+      [Symbol.for('nodejs.util.inspect.custom')] (depth, options, inspectValue) {
+        return `Box<${depth}, ${options.depth}, ${inspectValue(this.contents, options)}>`
+      },
+    }
+
+    expect(inspect(box)).toBe(`Box<2, 2, { name: 'Jane Doe' }>`)
+  })
+
+  it('formats a nested value with the depth a custom inspector passes', () => {
+    const box = {
+      contents: { user: { name: 'Jane Doe' } },
+      [Symbol.for('nodejs.util.inspect.custom')] (depth, options, inspectValue) {
+        return `Box<${inspectValue(this.contents, { ...options, depth: 0 })}>`
+      },
+    }
+
+    expect(inspect(box)).toBe('Box<{ user: [Object] }>')
+  })
+
+  it('does not mark a value as circular after a custom inspector fails part-way through', () => {
+    let failNextRead = true
+    const address = new Proxy({ city: 'Springfield' }, {
+      get (target, key, receiver) {
+        if (failNextRead && key === 'city') {
+          failNextRead = false
+          throw new Error('address is not loaded yet')
+        }
+
+        return Reflect.get(target, key, receiver)
+      },
+    })
+    const user = {
+      address,
+      [Symbol.for('nodejs.util.inspect.custom')] (depth, options, inspectValue) {
+        return inspectValue(this.address, options)
+      },
+    }
+
+    expect(inspect(user)).toBe(`{ address: { city: 'Springfield' } }`)
   })
 
   it('prefers Symbol.for(chai/inspect) over Symbol.for(nodejs.util.inspect.custom)', () => {

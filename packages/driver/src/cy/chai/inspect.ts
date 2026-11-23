@@ -1,7 +1,7 @@
 // Changes made: added 'formatValueHook' to process value before being formatted.
 // For example the hook can be used to turn `window` objects into the string '[window]'
 // to avoid deep recursion. Custom inspectors are only found by symbol, never
-// by a plain `inspect` method (see `customInspectSymbols`).
+// by a plain `inspect` method (see `formatCustomInspect`).
 
 // This is (almost) directly from chai/lib/util (which is based on nodejs utils)
 // https://github.com/joyent/node/blob/f8c335d0caf47f16d31413f89aa28eda3878e3aa/lib/util.js
@@ -67,15 +67,8 @@ export function create (chai) {
     return object.defaultView && object.defaultView === object.defaultView.window
   }
 
-  // A value controls its own text with a method under one of these symbols,
-  // as in chai and Node.js. A plain `inspect()` method is never called, so
-  // `{ inspect () {} }` renders as `{ inspect: [Function: inspect] }`. The name
-  // is common enough that an unrelated method, such as MediaWiki's
-  // `window.mw.inspect`, would otherwise run on every assertion.
-  const customInspectSymbols = [
-    Symbol.for('chai/inspect'),
-    Symbol.for('nodejs.util.inspect.custom'),
-  ]
+  const chaiInspectSymbol = Symbol.for('chai/inspect')
+  const nodeInspectSymbol = Symbol.for('nodejs.util.inspect.custom')
 
   let formatValueHook
 
@@ -249,13 +242,23 @@ export function create (chai) {
     return reduceToSingleString(output, base, braces)
   }
 
-  // Returns undefined when the value has no custom inspector or it throws, so
-  // the value gets the default formatting and building the message can't fail
-  // the assertion.
+  // A value controls its own text with a `Symbol.for('chai/inspect')` or
+  // `Symbol.for('nodejs.util.inspect.custom')` method, called with the
+  // arguments chai's loupe and Node.js pass. Unlike loupe, a plain `inspect()`
+  // method is never called, so `{ inspect () {} }` renders as
+  // `{ inspect: [Function: inspect] }`: the name is common enough that an
+  // unrelated method, such as MediaWiki's `window.mw.inspect`, would otherwise
+  // run on every assertion.
+  //
+  // Returns undefined when there is no custom inspector, it throws or it
+  // returns the value itself, so the value gets the default formatting and
+  // building the message can't fail the assertion.
   function formatCustomInspect (ctx, value, recurseTimes): string | undefined {
     if (!value || (typeof value !== 'object' && typeof value !== 'function')) {
       return
     }
+
+    const seenLength = ctx.seen.length
 
     try {
       // Skip prototype objects, whose inspector expects an instance.
@@ -263,22 +266,33 @@ export function create (chai) {
         return
       }
 
-      for (const symbol of customInspectSymbols) {
-        const customInspect = value[symbol]
-
-        if (typeof customInspect !== 'function') {
-          continue
-        }
-
-        const ret = customInspect.call(value, recurseTimes, ctx)
-
-        return typeof ret === 'string' ? ret : formatValue(ctx, ret, recurseTimes)
+      const options = {
+        depth: recurseTimes,
+        showHidden: ctx.showHidden,
+        stylize: ctx.stylize,
+        inspect: (inner, innerOptions?) => formatValue(ctx, inner, innerOptions?.depth ?? recurseTimes),
       }
+
+      let ret
+
+      if (typeof value[chaiInspectSymbol] === 'function') {
+        ret = value[chaiInspectSymbol](options)
+      } else if (typeof value[nodeInspectSymbol] === 'function') {
+        ret = value[nodeInspectSymbol](recurseTimes, options, options.inspect)
+      } else {
+        return
+      }
+
+      if (ret === value) {
+        return
+      }
+
+      return typeof ret === 'string' ? ret : formatValue(ctx, ret, recurseTimes)
     } catch (err) {
+      ctx.seen.length = seenLength
+
       return
     }
-
-    return
   }
 
   function formatPrimitive (ctx, value) {

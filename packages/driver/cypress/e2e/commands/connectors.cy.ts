@@ -1312,6 +1312,9 @@ describe('src/cy/commands/connectors', () => {
         })
 
         cy.get('@mwInspect').should('not.have.been.called')
+        cy.window().then((win) => {
+          Reflect.deleteProperty(win, 'mw')
+        })
       })
 
       it('handles string subjects', () => {

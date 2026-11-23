@@ -95,10 +95,8 @@ chai.use((chai, u) => {
     // Firefox returns [object Window] but Chrome returns [object Object]
     // So, we try throwing an error and check the error message.
     try {
-      /* eslint-disable @typescript-eslint/no-unused-expressions -- the reads are the probe */
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- the read is the probe
       val && val.document
-      val && val.inspect
-      /* eslint-enable @typescript-eslint/no-unused-expressions */
     } catch (e: any) {
       // A getter can throw any value, not only an Error
       if ((typeof e?.stack === 'string' && e.stack.includes('cross-origin')) || // chrome
