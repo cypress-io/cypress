@@ -74,7 +74,7 @@ const missingApp = (binaryDir: string): any => {
     solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
 
-    If your package manager blocks install scripts, it skipped the postinstall script that downloads the Cypress binary. Allow the cypress package to run its install script so that future installs download the binary:
+    If your package manager blocks install scripts, it may have skipped the postinstall script that downloads the Cypress binary. Allow the cypress package to run its install script so that future installs download the binary:
 
       ${chalk.blue(packageManagerConfigUrl)}
   `,

@@ -247,7 +247,7 @@ describe('errors', function () {
       const text: string = await formErrorText(errors.missingApp('/home/jane/.cache/Cypress/16.4.0/Cypress'))
 
       expect(text).toContain('cypress install')
-      expect(text).toContain('If your package manager blocks install scripts, it skipped the postinstall script that downloads the Cypress binary')
+      expect(text).toContain('If your package manager blocks install scripts, it may have skipped the postinstall script that downloads the Cypress binary')
       expect(text).toContain('https://on.cypress.io/app/get-started/install-cypress#Package-Manager')
     })
   })
