@@ -10,7 +10,7 @@ import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
 import { createCdpFetchCodec } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
-import { CdpBodyCapture } from './cdp-body-capture'
+import { CdpBodyCapture, isProvablyFinite } from './cdp-body-capture'
 import { toNetworkError } from './cdp-network-error'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER, getMetadataHeaderValue } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
@@ -883,7 +883,7 @@ export class CdpFetchTransport {
       // Redirect pauses never arm: their hop emits no loadingFinished, so an
       // armed entry would sit unread until the transport resets.
       if (event.networkId && !redirectPause && this.options.shouldCaptureBody?.()) {
-        captureStream = await this.bodyCapture.arm(event.networkId, sessionId)
+        captureStream = await this.bodyCapture.arm(event.networkId, sessionId, { capped: !isProvablyFinite(event) })
 
         // The flow may have been rejected while arming awaited CDP, by
         // reset()/stop() or by a browser cancel. Those leave different traces:
