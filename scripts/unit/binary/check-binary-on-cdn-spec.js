@@ -40,6 +40,10 @@ describe('check-binary-on-cdn', () => {
         return new Response(null, { status: 404 })
       }
 
+      if (method === 'HEAD' && file.headError) {
+        throw file.headError
+      }
+
       if (method !== 'HEAD' && file.downloadError) {
         throw file.downloadError
       }
@@ -87,6 +91,16 @@ describe('check-binary-on-cdn', () => {
   it('falls back to building when a download does not match its recorded checksum', async () => {
     cdn[binaryUrl] = { served: zip, checksum: sha512(zip) }
     cdn[npmUrl] = { served: Buffer.from('\u001f\u008b truncated'), checksum: sha512(tgz) }
+
+    expect(await run()).to.be.false
+
+    expect(await fs.readdir(out)).to.deep.eq(['binary-reuse.json'])
+    expect(await fs.readJson(path.join(out, 'binary-reuse.json'))).to.deep.eq({ reused: false })
+  })
+
+  it('falls back to building when checking the CDN fails', async () => {
+    cdn[binaryUrl] = { served: zip, checksum: sha512(zip) }
+    cdn[npmUrl] = { served: tgz, checksum: sha512(tgz), headError: new TypeError('fetch failed') }
 
     expect(await run()).to.be.false
 

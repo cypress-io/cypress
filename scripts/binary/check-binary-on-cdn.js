@@ -18,7 +18,15 @@ const artifacts = [
 ]
 
 const getChecksum = async (url) => {
-  const res = await fetch(url, { method: 'HEAD' })
+  let res
+
+  try {
+    res = await fetch(url, { method: 'HEAD' })
+  } catch (err) {
+    console.error(`Checking ${url} failed, so the binary will be built`, err)
+
+    return
+  }
 
   if (!res.ok) {
     return
