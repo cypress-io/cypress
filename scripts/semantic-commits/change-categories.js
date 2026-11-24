@@ -103,6 +103,7 @@ const parserOpts = {
     'subject',
   ],
   noteKeywords: ['BREAKING CHANGE'],
+  // eslint-disable-next-line regexp/no-super-linear-backtracking -- runs once per commit message of this repo in CI; anchored, so the worst case is quadratic in one whitespace run
   revertPattern: /^(?:Revert|revert:)\s"?([\s\S]+?)"?\s*This reverts commit (\w*)\./i,
   revertCorrespondence: ['header', 'hash'],
 }
