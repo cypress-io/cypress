@@ -60,6 +60,7 @@
 
 **Misc:**
 
+- When a command's timeout is `0`, such as when [`defaultCommandTimeout`](https://on.cypress.io/configuration#Timeouts) is set to `0`, its error message no longer begins with `Timed out retrying after 0ms:`. Addresses [#28720](https://github.com/cypress-io/cypress/issues/28720). Addressed in [#35152](https://github.com/cypress-io/cypress/pull/35152).
 - Chromium-based browsers launched by Cypress, such as Chromium, Chrome for Testing and Edge, no longer use a dark Cypress theme for the browser frame and tabs, so they look the same as Google Chrome 137 and later, which ignores the theme. Addresses [#31704](https://github.com/cypress-io/cypress/issues/31704).
 - Firefox launched by Cypress no longer starts its remote debugging server. Addressed in [#35284](https://github.com/cypress-io/cypress/pull/35284).
 - The IntelliSense description of the [`fail`](https://on.cypress.io/catalog-of-events#App-Events) event now says that a handler bound to it keeps the test from failing unless the handler throws an error, that Cypress skips the test's remaining commands, and that a test with a `done` callback still times out unless the handler calls `done`. It previously said a test could only be kept from failing by calling an async `done` callback. Addresses [#26605](https://github.com/cypress-io/cypress/issues/26605).
@@ -137,7 +138,6 @@
 
 **Misc:**
 
-- When a command's timeout is `0`, such as when [`defaultCommandTimeout`](https://on.cypress.io/configuration#Timeouts) is set to `0`, its error message no longer begins with `Timed out retrying after 0ms:`. Addresses [#28720](https://github.com/cypress-io/cypress/issues/28720). Addressed in [#35152](https://github.com/cypress-io/cypress/pull/35152).
 - The TypeScript types for [`.scrollIntoView()`](https://on.cypress.io/scrollintoview) no longer accept the `ensureScrollable` option, which only [`cy.scrollTo()`](https://on.cypress.io/scrollto) uses. `.scrollIntoView()` always ignored it, so TypeScript code that passes `ensureScrollable` to `.scrollIntoView()` now fails to compile. Remove the option to fix the error; scrolling behaves the same without it. Addressed in [#35331](https://github.com/cypress-io/cypress/pull/35331).
 - The error shown when [`cy.session()`](https://on.cypress.io/session) is passed an unknown option now lists every valid option, `cacheAcrossSpecs` and `validate`. Previously it listed only `validate`, suggesting that `cacheAcrossSpecs` was not a valid option. Addressed in [#35233](https://github.com/cypress-io/cypress/pull/35233).
 - The editor chooser now lists only the editors Cypress detects, and the **Custom** option has been removed. To use an editor that isn't listed, set the `LAUNCH_EDITOR` environment variable before starting Cypress. Addressed in [#35208](https://github.com/cypress-io/cypress/pull/35208).
