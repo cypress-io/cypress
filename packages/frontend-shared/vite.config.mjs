@@ -26,7 +26,7 @@ const alias = [
   // `require('vue')` in a CommonJS-only dependency (vue3-file-selector) becomes
   // the runtime build `import 'vue'` already resolves to. The require condition
   // would pick vue/index.js, Vue's full CJS build, which bundles the template
-  // compiler and a second copy of the runtime.
+  // compiler that the app's precompiled templates never use.
   { find: /^vue$/, replacement: 'vue/dist/vue.runtime.esm-bundler.js' },
 ]
 
