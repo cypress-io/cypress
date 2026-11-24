@@ -20,7 +20,7 @@ Please check our [system requirements](https://on.cypress.io/installing-cypress)
 npm install --save-dev cypress
 ```
 
-Cypress downloads its binary in a `postinstall` script. Package managers that block install scripts by default, as npm does from version 12, Yarn from 4.14 and pnpm from 10, skip that download until you allow the `cypress` package to run its install script. See [package manager configuration](https://on.cypress.io/app/get-started/install-cypress#Package-Manager) for how to set this up with each package manager.
+Cypress downloads its binary in a `postinstall` script. Package managers that block install scripts by default skip that download until you allow the `cypress` package to run its install script. See [package manager configuration](https://on.cypress.io/app/get-started/install-cypress#Package-Manager) for how to set this up with each package manager.
 
 ## Documentation
 
