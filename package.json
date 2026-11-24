@@ -44,7 +44,8 @@
       "**/webpack-batteries-included-preprocessor/ts-loader",
       "**/jest",
       "**/jest*",
-      "**/expect"
+      "**/expect",
+      "**/@cypress/vue/@vue/test-utils"
     ]
   },
   "scripts": {
