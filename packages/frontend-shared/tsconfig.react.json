@@ -8,7 +8,8 @@
   ],
   "exclude": [
     "**/*.vue.tsx",
-    "**/*.vue.*.tsx"
+    "**/*.vue.cy.tsx",
+    "**/*.vue.spec.tsx"
   ],
   "compilerOptions": {
     "jsx": "react-jsx",

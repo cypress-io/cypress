@@ -37,11 +37,8 @@ declare global {
       /**
        * The app's own React and React DOM, which the runner bundle reads from
        * the host modules and re-exports here. The reporter, Studio and cy.prompt
-       * mount through them.
-       *
-       * Unfortunately, attempting to have React in a project
-       * using Vue causes mad conflicts because React'S JSX type
-       * is ambient, so we cannot actually type it.
+       * mount through them. The app never calls them itself, so they stay
+       * untyped.
        */
       React: any
       ReactDOM: any

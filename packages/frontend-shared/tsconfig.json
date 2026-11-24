@@ -5,10 +5,12 @@
     "src/**/*.ts",
     "src/**/*.vue",
     "src/**/*.vue.tsx",
-    "src/**/*.vue.*.tsx",
+    "src/**/*.vue.cy.tsx",
+    "src/**/*.vue.spec.tsx",
     "cypress/**/*.ts",
     "cypress/**/*.vue.tsx",
-    "cypress/**/*.vue.*.tsx",
+    "cypress/**/*.vue.cy.tsx",
+    "cypress/**/*.vue.spec.tsx",
     "*.d.ts"
   ],
   "exclude": [

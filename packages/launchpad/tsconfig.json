@@ -4,14 +4,17 @@
   "include": [
     "src/**/*.vue",
     "src/**/*.vue.tsx",
-    "src/**/*.vue.*.tsx",
+    "src/**/*.vue.cy.tsx",
+    "src/**/*.vue.spec.tsx",
     "*.d.ts",
     "cypress/**/*.ts",
     "cypress/**/*.vue.tsx",
-    "cypress/**/*.vue.*.tsx",
+    "cypress/**/*.vue.cy.tsx",
+    "cypress/**/*.vue.spec.tsx",
     "../frontend-shared/src/**/*.vue",
     "../frontend-shared/src/**/*.vue.tsx",
-    "../frontend-shared/src/**/*.vue.*.tsx",
+    "../frontend-shared/src/**/*.vue.cy.tsx",
+    "../frontend-shared/src/**/*.vue.spec.tsx",
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
