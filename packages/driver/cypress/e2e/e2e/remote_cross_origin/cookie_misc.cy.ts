@@ -187,11 +187,11 @@ describe('experimental driver: misc cookie tests in a cross-origin AUT', () => {
       }
 
       it('works with Max-Age=0', () => {
-        expireCookieFromPage('foo=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=0;')
+        expireCookieFromPage('foo=deleted; Max-Age=0')
       })
 
       it('works with expires=Thu, 01-Jan-1970 00:00:01 GMT', () => {
-        expireCookieFromPage('foo=deleted; Max-Age=0')
+        expireCookieFromPage('foo=deleted; expires=Thu, 01-Jan-1970 00:00:01 GMT')
       })
 
       it('works with expires=Tues, 01-Jan-1980 00:00:01 GMT', () => {
