@@ -1,6 +1,7 @@
 export {
   SESSIONS_DIRNAME,
   isCompatibleRecord,
+  isLoadError,
   isStartingRecord,
   isTapSupportedBrowser,
   parseRecordPid,

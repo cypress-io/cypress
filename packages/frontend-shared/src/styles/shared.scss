@@ -58,6 +58,9 @@ body {
  * -------------------------
  */
 
+// The highlight sets its own text color because light text, such as on the
+// dark sidebars and in the reporter, is unreadable on indigo-100.
 ::selection {
-  @apply bg-gray-200 bg-opacity-30;
+  background-color: theme('colors.indigo.100');
+  color: theme('colors.gray.900');
 }

@@ -23,6 +23,20 @@ when:
         equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
 
 jobs:
+  # A docs-only PR (pipeline.parameters.docs-only) skips every job from install
+  # through test-kitchensink, since none of them read Markdown or images. Each
+  # carries its own filter rather than relying on CircleCI dropping a job whose
+  # upstreams are all filtered out. docs-check runs on every PR so
+  # all-jobs-passed always has a job to wait for.
+  - docs-check:
+      filters: not (pipeline.git.branch matches /^pull\/[0-9]+/)
+  # A fork PR can change the command docs-check runs, so it waits for approval.
+  - docs-check:
+      name: contributor-docs-check
+      requires:
+        - approve-contributor-pr
+      filters: pipeline.git.branch matches /^pull\/[0-9]+/
+
   # Internal PRs — install and build run immediately, unless a bot pushed.
   # Bots can't join the GitHub teams that restrict our contexts, and jobs after
   # an approval run as the approver. The install runs the bot's dependency changes.
@@ -30,25 +44,23 @@ jobs:
   # requires are all filtered out.
   - node_modules_install:
       build-better-sqlite3: true
-      filters: pipeline.parameters.bot-approval-required == false and not (pipeline.git.branch matches /^pull\/[0-9]+/)
+      filters: pipeline.parameters.docs-only == false and pipeline.parameters.bot-approval-required == false and not (pipeline.git.branch matches /^pull\/[0-9]+/)
   - approve-bot-pr:
       type: approval
-      filters: pipeline.parameters.bot-approval-required == true
+      filters: pipeline.parameters.docs-only == false and pipeline.parameters.bot-approval-required == true
   - node_modules_install:
       name: bot-node-modules-install
       build-better-sqlite3: true
       requires:
         - approve-bot-pr
-      filters: pipeline.parameters.bot-approval-required == true
+      filters: pipeline.parameters.docs-only == false and pipeline.parameters.bot-approval-required == true
   - build:
       name: internal-pr-build
       context: test-runner:env-canary
       requires:
         - node_modules_install
         - bot-node-modules-install
-      filters:
-        branches:
-          ignore: /^pull\/[0-9]+/
+      filters: pipeline.parameters.docs-only == false and not (pipeline.git.branch matches /^pull\/[0-9]+/)
 
   # External (contributor) PRs — everything gates behind manual approval
   - approve-contributor-pr:
@@ -61,39 +73,41 @@ jobs:
       build-better-sqlite3: true
       requires:
         - approve-contributor-pr
-      filters:
-        branches:
-          only: /^pull\/[0-9]+/
+      filters: &contributorCodeJobs pipeline.parameters.docs-only == false and pipeline.git.branch matches /^pull\/[0-9]+/
   - build:
       name: external-pr-build
       requires:
         - contributor-node-modules-install
-      filters:
-        branches:
-          only: /^pull\/[0-9]+/
+      filters: *contributorCodeJobs
   - ready-to-test:
+      filters: &codeJobs pipeline.parameters.docs-only == false
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - check-lockfile:
+      filters: *codeJobs
       requires:
         - internal-pr-build
         - external-pr-build
   - check-ts:
+      filters: *codeJobs
       requires:
         - internal-pr-build
         - external-pr-build
   - health-check:
+      filters: *codeJobs
       requires:
         - internal-pr-build
         - external-pr-build
   - lint:
       name: linux-lint
+      filters: *codeJobs
       requires:
         - internal-pr-build
         - external-pr-build
   - lint-types:
+      filters: *codeJobs
       requires:
         - internal-pr-build
         - external-pr-build
@@ -420,6 +434,7 @@ jobs:
         - ready-to-test
 
   - test-kitchensink:
+      filters: *codeJobs
       requires:
         - ready-to-test
 
@@ -446,6 +461,9 @@ jobs:
   - all-jobs-passed:
       requires:
         # Always-run jobs
+        - docs-check
+        - contributor-docs-check
+        # Skipped on docs-only PRs
         - linux-lint
         - check-lockfile
         - check-ts

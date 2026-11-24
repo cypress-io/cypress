@@ -123,6 +123,27 @@ describe('lib/tap/render/status', () => {
     expect(output).toContain('Your configFile is invalid')
   })
 
+  it('renders a plugins process crash beneath the phase of a session that keeps running', () => {
+    const output = render({
+      status: 'browser not selected',
+      pid: 111,
+      projectRoot: '/projects/app',
+      testingType: 'e2e',
+      browserAttached: false,
+      browserName: null,
+      pluginsError: 'The plugins process exited unexpectedly',
+    })
+
+    expect(output).toBe([
+      'PID  PROJECT                          TYPE  BROWSER',
+      '111  /projects/app (plugins stopped)  e2e   —',
+      '',
+      '● browser not selected',
+      '',
+      'The plugins process exited unexpectedly',
+    ].join('\n'))
+  })
+
   it('renders the minimal not-connected phase as a single line', () => {
     expect(render({ status: 'not connected' })).toBe('● not connected')
   })
