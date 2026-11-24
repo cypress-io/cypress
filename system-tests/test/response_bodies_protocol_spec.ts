@@ -155,7 +155,11 @@ describe('capture-protocol', () => {
 
   // Chrome only: Electron's requests don't take the CDP Fetch path, so its
   // bodies never reach the capture pump this spec exists to check.
-  describe('response bodies', () => {
+  // NOTE: forceHttp1 puts Chrome on the MITM proxy; this block exercises the
+  // CDP capture pump only (see service_worker_protocol_spec.js).
+  const describeResponseBodies = process.env.CYPRESS_forceHttp1 === 'true' ? describe.skip : describe
+
+  describeResponseBodies('response bodies', () => {
     it('records the body of every streamed response - chrome', function () {
       return systemTests.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
