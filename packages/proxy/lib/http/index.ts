@@ -192,8 +192,8 @@ export function _runStage (type: HttpStages, ctx: any, onError: (error: Error) =
     return new Bluebird((resolve) => {
       let ended = false
 
-      // Runs twice for every middleware of every request, so it compares keys
-      // in place rather than copying the ctx first.
+      // Runs up to twice for every middleware of every request, so it compares
+      // keys in place rather than copying the ctx first.
       function copyChangedCtx () {
         for (const key in fullCtx) {
           if (!READONLY_MIDDLEWARE_KEYS.has(key) && ctx[key] !== fullCtx[key]) {

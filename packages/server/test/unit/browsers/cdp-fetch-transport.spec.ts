@@ -63,6 +63,21 @@ const expectCalledOnceWith = (mock: Mock, ...expected: unknown[]) => {
 
 type SendRule = { args: unknown[], respond: () => unknown }
 
+// Every client a test creates, so afterEach can check what each was sent.
+const createdClients: Array<{ send: Mock }> = []
+
+// Chrome rejects a Fetch.continueResponse that overrides the status without
+// the headers, or the headers without the status ("Cannot override only
+// status or headers, both should be provided"). The fake client answers every
+// command, so this finds the ones Chrome would have refused.
+function continueResponsesChromeRejects (send: Mock) {
+  return callsMatching(send, ['Fetch.continueResponse']).filter(([, params]) => {
+    const { responseCode, responseHeaders, binaryResponseHeaders } = params
+
+    return (responseCode !== undefined) !== (responseHeaders !== undefined || binaryResponseHeaders !== undefined)
+  })
+}
+
 function createClient () {
   const rules: SendRule[] = []
 
@@ -90,6 +105,8 @@ function createClient () {
   // give it a decodable default so tests that don't care about body content
   // don't have to stub it themselves
   sendWithArgs('Fetch.getResponseBody').resolves({ body: '', base64Encoded: false })
+
+  createdClients.push({ send })
 
   return {
     send,
@@ -235,6 +252,10 @@ function captureRawResponseIntercept () {
 describe('CdpFetchTransport', () => {
   afterEach(() => {
     vi.useRealTimers()
+
+    for (const { send } of createdClients.splice(0)) {
+      expect(continueResponsesChromeRejects(send), 'Fetch.continueResponse calls Chrome rejects').toEqual([])
+    }
   })
 
   describe('toNetworkError', () => {

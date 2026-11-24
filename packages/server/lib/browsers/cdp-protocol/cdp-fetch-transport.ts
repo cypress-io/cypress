@@ -734,9 +734,9 @@ export class CdpFetchTransport {
           requestId: response.requestId,
           ...(responseHeaders ? {
             responseCode: response.responseCode,
-            // Chrome rejects a code it has no built-in phrase for; for every
-            // known code, omit the phrase so the origin's own phrase survives
-            // the pass-through untouched.
+            // Chrome rejects a code it has no built-in phrase for, so an
+            // unknown code carries the phrase "unknown", as Node sends it on
+            // the HTTP proxy path.
             ...(STATUS_CODES[response.responseCode] ? {} : { responsePhrase: 'unknown' }),
             responseHeaders,
           } : {}),
