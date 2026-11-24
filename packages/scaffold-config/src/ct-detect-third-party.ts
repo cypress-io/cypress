@@ -1,5 +1,5 @@
 import path from 'path'
-import globby from 'globby'
+import { glob } from 'tinyglobby'
 import { z } from 'zod'
 import fs from 'fs-extra'
 import Debug from 'debug'
@@ -96,8 +96,10 @@ const ThirdPartyComponentFrameworkSchema = z.object({
   componentIndexHtml: z.optional(z.function()),
 })
 
-const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
-const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
+const CT_FRAMEWORK_GLOBS = [
+  'node_modules/cypress-ct-*/package.json',
+  'node_modules/@*?/cypress-ct-*?/package.json',
+]
 
 export interface ErroredFramework {
   path: string
@@ -115,14 +117,14 @@ export async function detectThirdPartyCTFrameworks (
     // Start at the project root and check each directory above it until we see
     // an indication that the current directory is the root of the repository.
     for (const directory of directoryAndAncestors(projectRoot)) {
-      const fullPathGlobs = [
-        path.join(directory, CT_FRAMEWORK_GLOBAL_GLOB),
-        path.join(directory, CT_FRAMEWORK_NAMESPACED_GLOB),
-      ].map((x) => x.replaceAll('\\', '/'))
+      debug('searching for third-party dependencies in %s', directory)
 
-      debug('searching for third-party dependencies with globs %o', fullPathGlobs)
-
-      const newPackagePaths = await globby(fullPathGlobs)
+      // Keep the directory in `cwd`, not the pattern: glob syntax would read the
+      // brackets and parentheses in a path like `my-app (v2) [beta]` and match nothing
+      const newPackagePaths = (await glob(CT_FRAMEWORK_GLOBS, {
+        cwd: directory,
+        absolute: true,
+      })).sort()
 
       if (newPackagePaths.length > 0) {
         debug('found third-party dependencies %o', newPackagePaths)

@@ -19,8 +19,8 @@ const { ELECTRON_VERSION, packager, downloadArtifact } = vi.hoisted(() => {
   }
 })
 
-// `install.ts` requires `@electron/packager` and `@electron/get` dynamically so
-// mksnapshot cannot discover them, which also puts them out of reach of
+// `install.ts` requires `@electron/packager` and `@electron/get` dynamically to
+// keep them out of the binary's start bundle, which also puts them out of reach of
 // `vi.mock`. Seeding node's own module cache is what keeps a unit test from
 // downloading Electron or packaging a real binary.
 const installRequire = createRequire(new URL('../src/install.ts', import.meta.url))
@@ -102,14 +102,6 @@ vi.mock('systeminformation', () => {
     default: {
       cpu: vi.fn(),
     },
-  }
-})
-
-vi.mock('@electron/fuses', () => {
-  return {
-    flipFuses: vi.fn(),
-    FuseVersion: { V1: 'v1' },
-    FuseV1Options: { LoadBrowserProcessSpecificV8Snapshot: 'LoadBrowserProcessSpecificV8Snapshot' },
   }
 })
 

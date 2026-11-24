@@ -378,6 +378,8 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         transportRequest.hadMatchingRoutes = httpRequest.hadMatchingRoutes
       }
 
+      transportRequest.responseTimeout = httpRequest.responseTimeout
+
       return transportRequest
     },
 

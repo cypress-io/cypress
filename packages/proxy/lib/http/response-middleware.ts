@@ -610,8 +610,10 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 
   span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
 
-  // skip if we don't have the header or we're not in chromium
-  if (!hasHeader || this.getCurrentBrowser().family !== 'chromium') {
+  // skip if we don't have the header or we're not in chromium. On the browser
+  // network path the worker is instrumented over its CDP session instead, so the
+  // script keeps the origin's bytes (see getServiceWorkerInstrumentationExpression).
+  if (!hasHeader || this.getCurrentBrowser().family !== 'chromium' || this.useBrowserNetworkInterception) {
     span?.end()
 
     return this.next()
@@ -622,10 +624,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   this.incomingResStream.setEncoding('utf8')
 
   this.incomingResStream.pipe(concatStream(async (body) => {
-    const updatedBody = injectIntoServiceWorker(body, {
-      disableServiceWorkerNavigationPreload: this.useBrowserNetworkInterception,
-      reservedPathPrefixes: this.useBrowserNetworkInterception ? this.reservedPathPrefixes : undefined,
-    })
+    const updatedBody = injectIntoServiceWorker(body)
 
     const pt = new PassThrough
 

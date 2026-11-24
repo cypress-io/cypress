@@ -51,6 +51,7 @@ describe('http/request-middleware', () => {
       'CalculateCredentialLevelIfApplicable',
       'FormatCookiesIfApplicable',
       'MaybeAttachCrossOriginCookies',
+      'StripCypressCookies',
       'MaybeEndRequestWithBufferedResponse',
       'SetMatchingRoutes',
       'SendToDriver',
@@ -119,11 +120,16 @@ describe('http/request-middleware', () => {
         const ctx = prepareContext({
           'x-cypress-is-from-extra-target': getMetadataHeaderValue(),
         })
+        let stripCypressCookiesRan = false
         let maybeSetBasicAuthHeadersRan = false
         let skippedMiddlewareRan = false
 
         await testMiddleware({
           ExtractCypressMetadataHeaders,
+          StripCypressCookies () {
+            stripCypressCookiesRan = true
+            this.next()
+          },
           MaybeSetBasicAuthHeaders () {
             maybeSetBasicAuthHeadersRan = true
             this.next()
@@ -136,6 +142,7 @@ describe('http/request-middleware', () => {
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(true)
+        expect(stripCypressCookiesRan).toBe(true)
         expect(maybeSetBasicAuthHeadersRan).toBe(true)
         expect(skippedMiddlewareRan).toBe(false)
       })
@@ -458,6 +465,44 @@ describe('http/request-middleware', () => {
     })
   })
 
+  describe('StripCypressCookies', () => {
+    const { StripCypressCookies } = RequestMiddleware
+
+    const stripFrom = async (cookie?: string) => {
+      const ctx = {
+        req: {
+          headers: cookie === undefined ? {} : { cookie },
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+
+      await testMiddleware([StripCypressCookies], ctx)
+
+      return ctx.req
+    }
+
+    it('removes the header when it only holds Cypress cookies', async () => {
+      const req = await stripFrom('__cypress.unload=true; __cypress.initial=true')
+
+      expect(req.headers).not.toHaveProperty('cookie')
+    })
+
+    it('keeps the application\'s cookies', async () => {
+      const req = await stripFrom('session_id=8f2c1e9a40b7; __cypress.unload=true; theme=dark')
+
+      expect(req.headers.cookie).toEqual('session_id=8f2c1e9a40b7; theme=dark')
+    })
+
+    it('passes through a request without cookies', async () => {
+      const req = await stripFrom()
+
+      expect(req.headers).not.toHaveProperty('cookie')
+    })
+  })
+
   describe('MaybeAttachCrossOriginCookies', () => {
     const { MaybeAttachCrossOriginCookies } = RequestMiddleware
 
@@ -480,6 +525,28 @@ describe('http/request-middleware', () => {
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
 
       expect(ctx.req.headers['cookie']).toEqual('request=cookie')
+    })
+
+    it('is a noop if the AUT frame navigates within the primary origin', async () => {
+      const ctx = await getContext(['request=cookie'], ['jar=cookie'], 'http://localhost:8080/dashboard', 'http://localhost:8080/settings')
+
+      ctx.req.headers['sec-fetch-site'] = 'same-origin'
+      ctx.remoteStates.isPrimarySuperDomainOrigin.mockReturnValue(true)
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).toEqual('request=cookie')
+    })
+
+    it('attaches cookie jar cookies if the AUT frame was redirected back to the primary origin through another origin', async () => {
+      const ctx = await getContext([], ['jar=cookie'], 'http://localhost:8080/dashboard', 'http://localhost:8080/callback')
+
+      ctx.req.headers['sec-fetch-site'] = 'cross-site'
+      ctx.remoteStates.isPrimarySuperDomainOrigin.mockReturnValue(true)
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).toEqual('jar=cookie')
     })
 
     it('is a noop if cookies do NOT need to be attached to request', async () => {
@@ -592,6 +659,22 @@ describe('http/request-middleware', () => {
               expect(ctx.req.headers['cookie']).toEqual('jar=cookie1; jar=cookie2; request=cookie')
             })
 
+            it('attaches a Secure cookie to an http localhost request', async () => {
+              const ctx = await getContext([], ['jar=cookie; Secure'], 'http://app.localhost:3500/generic', 'http://app.localhost:3500/generic')
+
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+              expect(ctx.req.headers['cookie']).toEqual('jar=cookie')
+            })
+
+            it('does not attach a Secure cookie to an http request', async () => {
+              const ctx = await getContext([], ['jar=cookie; Secure'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
+
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+              expect(ctx.req.headers['cookie']).toBeUndefined()
+            })
+
             it('matches hierarchy and gives order to the cookie that was created first', async () => {
               const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 
@@ -676,6 +759,7 @@ describe('http/request-middleware', () => {
 
       return {
         getAUTUrl: () => autUrl,
+        getCurrentBrowser: () => ({ family: 'firefox' }),
         getCookieJar: () => cookieJar,
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),

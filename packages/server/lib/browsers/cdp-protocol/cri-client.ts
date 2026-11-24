@@ -98,6 +98,11 @@ export interface ICriClient {
    */
   onChildTargetAttached?: (sessionId: string) => Promise<void>
   /**
+   * Evaluated in each service worker immediately before its own script runs.
+   * Set on the browser network path only.
+   */
+  serviceWorkerInstrumentation?: string
+  /**
    * Resolves once session-scoped interception is confirmed in place for
    * targetId on this connection, or was never needed for it - see
    * CriClient's own doc comment on this method for the full contract. A
@@ -171,6 +176,13 @@ export class CriClient implements ICriClient {
   private cdpConnection: CDPConnection
 
   public onChildTargetAttached?: (sessionId: string) => Promise<void>
+
+  /**
+   * Evaluated in each service worker immediately before its own script runs,
+   * on the browser network path (see getServiceWorkerInstrumentationExpression
+   * and _sendServiceWorkerInstrumentation).
+   */
+  public serviceWorkerInstrumentation?: string
 
   // Targets whose session-scoped interception this connection has confirmed
   // in place, via a fresh attach, a crash-reload re-arm, or a
@@ -457,6 +469,10 @@ export class CriClient implements ICriClient {
     const token = {}
 
     this._inFlightAttaches.set(targetId, token)
+
+    if (this._sessionTargets.get(sessionId)?.type === 'service_worker') {
+      this._sendServiceWorkerInstrumentation(sessionId)
+    }
 
     try {
       await this.onChildTargetAttached(sessionId)
@@ -844,6 +860,10 @@ export class CriClient implements ICriClient {
     // bridge:ready).
     let childTargetInterceptionFailed = false
 
+    if (event.targetInfo.type === 'service_worker' && event.waitingForDebugger) {
+      this._sendServiceWorkerInstrumentation(event.sessionId)
+    }
+
     if ((event.targetInfo.type === 'service_worker' || event.targetInfo.type === 'iframe') && this.onChildTargetAttached) {
       try {
         // Must complete while the target is still paused — releasing the
@@ -938,6 +958,10 @@ export class CriClient implements ICriClient {
 
     let childTargetInterceptionFailed = false
 
+    if (target.type === 'service_worker') {
+      this._sendServiceWorkerInstrumentation(sessionId)
+    }
+
     try {
       await this.onChildTargetAttached(sessionId)
     } catch (error) {
@@ -946,6 +970,37 @@ export class CriClient implements ICriClient {
     }
 
     this._commitChildTargetAttach(targetId, token, childTargetInterceptionFailed)
+  }
+
+  /**
+   * Sends serviceWorkerInstrumentation to a service worker that is still
+   * waiting for the debugger, so it runs ahead of the worker's own script.
+   *
+   * It is sent, not awaited, before this connection releases the worker: Chrome
+   * holds a renderer-side command to a waiting service worker until the worker
+   * is released, then delivers it before the worker evaluates its script.
+   * Awaiting it here would deadlock, since the release waits on this. Sent from
+   * this connection because it is the one that releases the worker; a command
+   * sent after the release, as the browser-level connection's would be, can
+   * arrive after the script has already run.
+   */
+  private _sendServiceWorkerInstrumentation = (sessionId: string): void => {
+    const expression = this.serviceWorkerInstrumentation
+
+    if (!expression) {
+      return
+    }
+
+    this.cdpConnection.send('Runtime.evaluate', { expression }, sessionId).then((result) => {
+      if (result?.exceptionDetails) {
+        debug('service worker instrumentation threw (session: %s): %o', sessionId, result.exceptionDetails)
+      } else {
+        debug('instrumented service worker (session: %s)', sessionId)
+      }
+    }, (error) => {
+      // the worker can be torn down before it runs; nothing waits on this
+      debug('error instrumenting service worker (session: %s): %o', sessionId, error)
+    })
   }
 
   private _enqueueCommand <TCmd extends CdpCommand> (

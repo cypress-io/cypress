@@ -20,7 +20,7 @@ This package provides a unified ESLint configuration that combines multiple popu
 - **Base ESLint**: `@eslint/js` recommended rules
 - **TypeScript**: `typescript-eslint` recommended rules with project service
 - **Cypress**: `eslint-plugin-cypress` recommended rules
-- **Mocha**: `eslint-plugin-mocha` recommended rules for testing
+- **Mocha**: `eslint-plugin-mocha` recommended rules for Cypress specs, and for Node-side mocha suites via `mochaConfig`. See [`mochaConfig`](./AGENTS.md#mochaconfig)
 - **Vue**: `eslint-plugin-vue` recommended rules
 - **React**: `@eslint-react/eslint-plugin`'s `recommended-typescript` rules with a few changes (React 18), opt-in via `reactConfig`. See [`reactConfig`](./AGENTS.md#reactconfig)
 - **Stylistic**: `@stylistic/eslint-plugin` with custom formatting rules
@@ -46,7 +46,7 @@ This package provides a unified ESLint configuration that combines multiple popu
 Some recommended rules are turned off because the codebase still has many violations. They are the rules set to `off` in the "gold standard, but have many violations" block of [`src/baseConfig.ts`](./src/baseConfig.ts):
 - Core rules: `prefer-rest-params`, `no-async-promise-executor`
 - TypeScript-specific rules (`@typescript-eslint/*`)
-- Mocha testing rules (`mocha/no-exclusive-tests` stays an error)
+- Mocha testing rules, set in [`src/mochaConfig.ts`](./src/mochaConfig.ts) (`mocha/no-exclusive-tests` stays an error)
 - Vue component rules
 - Cypress-specific rules
 

@@ -125,17 +125,14 @@ export type ServerCtx = Readonly<{
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
-  // See disable-navigation-preload.ts (#34652). Named to match the launch
+  // Leaves service worker scripts unmodified when set, see
+  // getServiceWorkerInstrumentationExpression. Named to match the launch
   // option (BrowserLaunchOpts.useBrowserNetworkInterception), not
   // network-mode.ts's isBrowserNetworkMode() - same concept, but that name
   // is already an established function/method elsewhere in this codebase
   // (network-mode.ts, ServerBase), and a plain boolean field of the same
   // name here would read as callable.
   useBrowserNetworkInterception?: boolean
-  // Path prefixes Cypress reserves on every origin under test. This package
-  // cannot import from @packages/server, which owns the routes, so the server
-  // supplies the list (adapters/internal-routes.ts) at construction time.
-  reservedPathPrefixes?: string[]
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<unknown>)[] = [
@@ -357,7 +354,6 @@ export class Http {
   protocolManager?: ProtocolManagerShape
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
   useBrowserNetworkInterception?: boolean
-  reservedPathPrefixes?: string[]
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -375,7 +371,6 @@ export class Http {
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
     this.useBrowserNetworkInterception = opts.useBrowserNetworkInterception
-    this.reservedPathPrefixes = opts.reservedPathPrefixes
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -465,11 +460,15 @@ export class Http {
             }
           } catch (err) {
             span?.end()
-            await onError(err as Error)
+
+            // A browser cancel aborts the exchange; whatever next() rejected with is a side effect of that.
+            const error = ctx.res.destroyed && !ctx.res.writableFinished ? createBrowserConnectionClosedError() : err as Error
+
+            await onError(error)
 
             // Re-throw so transports (e.g. CDP Fetch) fail the pause instead of
             // encoding a synthetic empty success body via decodeResponse.
-            throw err
+            throw error
           }
         }
 
@@ -562,7 +561,6 @@ export class Http {
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
       useBrowserNetworkInterception: this.useBrowserNetworkInterception,
-      reservedPathPrefixes: this.reservedPathPrefixes,
     }
 
     return ctx

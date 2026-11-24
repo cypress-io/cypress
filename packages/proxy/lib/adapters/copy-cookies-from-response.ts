@@ -1,5 +1,6 @@
 import { URL } from 'url'
 import { telemetry } from '@packages/telemetry'
+import { isSecureUrl } from '@packages/network-tools'
 import { toughCookieToAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import { CookiesHelper } from '../http/util/cookies'
 import { doesTopNeedToBeSimulated } from '../http/util/top-simulation'
@@ -12,13 +13,17 @@ const CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS = 5000
 function setSimulatedCookies (mw: ResponseInterceptionMiddlewareCtx) {
   if (mw.res.wantsInjection !== 'fullCrossOrigin') return
 
-  const defaultDomain = (new URL(mw.req.proxiedUrl)).hostname
+  const url = new URL(mw.req.proxiedUrl)
+  const defaultDomain = url.hostname
+
+  const isSecure = isSecureUrl(url)
 
   mw.simulatedCookies = mw.getCookieJar()
-  .getCookies(mw.req.proxiedUrl)
+  .getCookies(mw.req.proxiedUrl, undefined, { secure: true })
   .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
-  // document.cookie never reads HttpOnly values; it only needs to know they exist so it can't replace them
-  .map((cookie) => (cookie.httpOnly ? { ...cookie, value: '' } : cookie))
+  // document.cookie never reads an HttpOnly cookie, or a Secure one on an insecure page;
+  // it only needs to know they exist so it can't replace or shadow them
+  .map((cookie) => (cookie.httpOnly || (cookie.secure && !isSecure) ? { ...cookie, value: '' } : cookie))
 }
 
 /**

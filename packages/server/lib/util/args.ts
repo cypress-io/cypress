@@ -33,6 +33,7 @@ const allowList = [
   'global',
   'group',
   'headed',
+  'headless',
   'inspectBrk',
   'key',
   'mode',

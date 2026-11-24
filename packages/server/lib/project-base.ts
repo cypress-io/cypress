@@ -10,7 +10,6 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import { Reporter } from './reporter'
 import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
@@ -362,6 +361,9 @@ export class ProjectBase extends EE {
     if (!report) {
       return
     }
+
+    // the reporter loads mocha, which open mode only needs once a spec runs
+    const { Reporter }: typeof import('./reporter') = require('./reporter')
 
     try {
       Reporter.loadReporter(reporter, projectRoot)

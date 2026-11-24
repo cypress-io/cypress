@@ -58,6 +58,7 @@ import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/ser
 import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookie/automation'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
+import { stripCypressCookies } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
@@ -1070,6 +1071,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const host = req.headers.host
 
     if (host) {
+      const appCookies = stripCypressCookies(req.headers.cookie)
+
+      if (appCookies) {
+        req.headers.cookie = appCookies
+      } else {
+        delete req.headers.cookie
+      }
+
       // get the protocol using req.connection.encrypted
       // get the port & hostname from host header
       const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`

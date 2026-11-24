@@ -22,6 +22,7 @@ src/
   graphqlConfig.ts      `graphqlConfig()`: opt-in linting of `gql` templates against data-context's schema, for app, launchpad, frontend-shared and data-context. Requires graphqlBlocks on call
   graphqlBlocks.ts      The blocks and processors behind `graphqlConfig()`, built on @graphql-eslint/eslint-plugin. Never import it statically: that loads the plugin for every consumer
   jsonConfig.ts         Opt-in JSON linting (eslint-plugin-jsonc, eslint-plugin-package-json), including package.json ordering
+  mochaConfig.ts        eslint-plugin-mocha's rules, which `baseConfig` applies to Cypress specs and mocha workspaces add for their Node-side suites
   nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
   reactConfig.ts        `reactConfig(files)`: opt-in React rules (@eslint-react/eslint-plugin), scoped to the React files given. Requires the plugin on call
   typeAwareConfig.ts    `noFloatingPromisesConfig(files)`: opt-in `@typescript-eslint/no-floating-promises` with a project service, scoped to the files given
@@ -45,7 +46,7 @@ src/
 
 A new workspace lints itself with its own config:
 
-1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), or `compatConfig` if it is one that ships to the supported browsers (see [`compatConfig`](#compatconfig)), and `vitestConfig` if its unit tests run on Vitest:
+1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), or `compatConfig` if it is one that ships to the supported browsers (see [`compatConfig`](#compatconfig)), `vitestConfig` if its unit tests run on Vitest, and `mochaConfig` narrowed to its specs if they run on mocha (see [`mochaConfig`](#mochaconfig)):
 
    ```ts
    import { baseConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
@@ -158,7 +159,7 @@ These workspaces opt in, for their shipped source only:
 - `launcher`: `index.ts` and `lib/**/*.ts`
 - `driver`: `index.ts` and `src/**/*.ts`
 - `data-context`: `src/**/*.ts` and `graphql/**/*.ts`
-- `scaffold-config`, `v8-snapshot-require`: `src/**/*.ts`
+- `scaffold-config`: `src/**/*.ts`
 - `config`: `src/**/*.ts` and `test/**/*.ts`
 - `reporter`: `src/**/*.{ts,tsx}` and `cypress/**/*.ts`
 - `icons`: `index.ts` and `index.mts`
@@ -196,6 +197,33 @@ The plugin brings its own hooks rules (`rules-of-hooks`, `exhaustive-deps`) and 
 
 The plugin has no counterpart for `eslint-plugin-react`'s `no-string-refs`, `no-unescaped-entities`, `no-is-mounted`, `require-render-return` or `jsx-no-duplicate-props`. The parser still rejects an unescaped `>` or `}` in JSX text, and `tsc` reports duplicate props in `.tsx` files, but a duplicate prop in a `.js` or `.jsx` file now goes unreported (see [Known gaps](#known-gaps)). `jsx-uses-vars`, `react-in-jsx-scope` and `jsx-uses-react` have no counterpart either, and need none: ESLint 10 marks variables used in JSX itself, and React 18's JSX transform doesn't need `React` in scope.
 
+## `mochaConfig`
+
+`mochaConfig` holds eslint-plugin-mocha's `recommended` preset (rules and the mocha globals) and this repo's settings for its rules. It applies only to files whose tests run on mocha. Vitest specs get their counterparts, such as `vitest/no-focused-tests`, from [`vitestConfig`](#vitestconfig).
+
+- `baseConfig` spreads it for Cypress specs and support files, `**/*.cy.*` and `**/cypress/**`, in every workspace.
+- A workspace whose Node-side suites run on mocha spreads it again after `baseConfig`, narrowing `files` to those suites:
+
+  ```ts
+  ...mochaConfig.map((block) => ({ ...block, files: ['test/**'] })),
+  ```
+
+  Keep any `ignores` the blocks already have, as `server` does when it leaves out its Vitest specs: `ignores: [...(block.ignores ?? []), 'test/unit/**']`.
+
+These opt in:
+
+- `server`: `test/**` except `test/unit/**`, which runs on Vitest.
+- `system-tests`: `test/**`, `test-binary/**` and `lib/**` (the mocha harness), plus `projects/**` and `project-fixtures/**`, whose Cypress specs sit wherever each project's `specPattern` points.
+- `tooling/packherd`, `tooling/v8-snapshot`, `tooling/electron-mksnapshot`: `test/**`.
+- `scripts`: `unit/**`, which the root `test-scripts` script runs.
+- `app`: `src/**/*.spec.*`, which its component `specPattern` includes.
+
+A workspace whose specs move to another runner drops its opt-in. A new mocha suite outside these globs needs adding, or `mocha/no-exclusive-tests` won't see a `.only` in it.
+
+`mocha/no-exclusive-tests` is an error. The other rule settings follow the same "gold standard, but many violations" policy as `baseConfig`'s, tracked in [#35250](https://github.com/cypress-io/cypress/issues/35250). `mocha/no-exports` applies only to spec files (`*.cy.*`, `*.spec.*`, `*_spec.*`, `*-spec.*`, `*.test.*`): the plugin treats any file with a mocha call, hooks included, as a test file, which takes in support files and test generators whose exports are their purpose.
+
+A file outside `mochaConfig` doesn't load the plugin, so an `eslint-disable` comment naming a `mocha/` rule fails there with `Definition for rule ... was not found`.
+
 ## `vitestConfig`
 
 Every workspace with `vitest` in its `package.json` spreads `vitestConfig` after `baseConfig`. The repo root is the exception: its `vitest.config.ts` only lists the workspace projects, and its ESLint config lints no specs. It applies `@vitest/eslint-plugin`'s `recommended` rules to `**/*.{test,spec}.{ts,tsx,js}` and `test/**`, skipping `fixtures/` and `__fixtures__/` directories. A workspace whose Vitest specs are only part of those globs narrows `files` when it spreads the config. `@packages/server`, whose `test/integration` and `test/performance` specs run on mocha, is the example:
@@ -206,10 +234,11 @@ Every workspace with `vitest` in its `package.json` spreads `vitestConfig` after
 
 On top of `recommended`:
 
-- `no-focused-tests`, `no-disabled-tests` and `hoisted-apis-on-top` are errors. A skipped test that has to stay needs an `eslint-disable-next-line vitest/no-disabled-tests` below its `NOTE:`, `TODO:` or `FIXME:` comment, which `@cypress/dev/skip-comment` already requires. An intentional `.only` needs `eslint-disable-next-line vitest/no-focused-tests`. In a spec that uses Vitest's globals rather than importing `it` from `vitest`, `mocha/no-exclusive-tests` reports it as well, so list both rules in the directive.
+- `no-focused-tests`, `no-disabled-tests` and `hoisted-apis-on-top` are errors. A skipped test that has to stay needs an `eslint-disable-next-line vitest/no-disabled-tests` below its `NOTE:`, `TODO:` or `FIXME:` comment, which `@cypress/dev/skip-comment` already requires. An intentional `.only` needs `eslint-disable-next-line vitest/no-focused-tests`. Mocha's rules don't apply to Vitest specs (see [`mochaConfig`](#mochaconfig)), so the directive names no `mocha/` rule.
 - `valid-expect` allows a second argument to `expect`, which Vitest takes as the failure message. It reports a chai property assertion such as `.to.be.true` as a matcher that was never called, so write those with a called matcher (`.toBe(true)`, `.toBeUndefined()`, `.toEqual(expect.anything())` for `.to.exist`).
 - `no-standalone-expect` accepts assertions in `beforeAll`, `beforeEach`, `afterEach` and `afterAll`, where a failure fails the tests the hook belongs to.
-- `expect-expect`, `no-conditional-expect`, `prefer-called-exactly-once-with`, `no-identical-title` and `valid-title` are off. `vitestConfig.ts` gives the reason for each.
+- `expect-expect`, `no-conditional-expect`, `prefer-called-exactly-once-with`, `no-identical-title` and `valid-title` are off. `vitestConfig.ts` gives the reason for each. `no-identical-title` reports existing duplicate titles that `mocha/no-identical-title` misses, so turning it on means renaming them first.
+- The block declares the globals Vitest injects under `globals: true` (`describe`, `it`, `vi` and the rest), read-only, so JS specs that use them pass `no-undef`.
 - `vitest/unbound-method`, the plugin's one rule that needs type information, is not enabled.
 
 ## Vue packages
@@ -253,10 +282,12 @@ graphql-eslint's processor refuses `.vue` files under flat config, and its docum
 - **`graphql` is left out of lockfile deduplication.** `@types/graphql-resolve-batch` depends on `graphql@>=14`, so `yarn-deduplicate --strategy=highest` would move it to graphql 16 types while `data-context` passes it graphql 15 values. `yarn dedupe-lockfile`, which `yarn check-lockfile`, the local postinstall and CI all use, passes `--exclude graphql`. A root resolution cannot fix this instead, because yarn keeps the `graphql@>=14` request in the lockfile either way.
 - **`@vue/compiler-sfc@3.5`, nested.** graphql-tag-pluck v8 needs `registerTS`, added in 3.3. Against the repo's 3.2.47 it silently drops every `.vue` document. The app packages keep 3.2.47.
 - **`@vitest/eslint-plugin` 1.6.** It declares peers of TypeScript 6 and `@typescript-eslint/eslint-plugin`, both optional: they only serve its type-aware rules, which `vitestConfig` leaves out, so its other rules run on the repo's TypeScript 5.4.5. Its `@typescript-eslint/utils` and `scope-manager` `^8.71` ranges share the lockfile entries of the `typescript-eslint` version above. A fresh resolve can pick a newer patch for them instead, and `yarn dedupe-lockfile` then moves other `@typescript-eslint` ranges to that patch while `typescript-eslint` keeps its exact pins, leaving two copies. Point the plugin's ranges back at the existing entry with `npx yarn-deduplicate --strategy=fewer --packages @typescript-eslint/utils @typescript-eslint/scope-manager` before running `yarn check-lockfile`. Don't use `eslint-plugin-vitest`, its archived predecessor.
-- **`eslint-plugin-mocha` 12, typed through `src/eslint-plugin-mocha.d.ts`.** The plugin is ESM-only, needs `eslint` ≥ 10.2, and only exposes its types through `exports`. `@packages/ts`, `proxy`, `driver` and `cli` type-check this package's source on `node` (node10) resolution, which ignores `exports`, so `check-ts` there would fail with `Cannot find module 'eslint-plugin-mocha'`. `baseConfig.ts` pulls in an ambient declaration with a `/// <reference path>`, which TypeScript prefers over `node_modules` under every resolution, typing the plugin as `ESLint.Plugin`. It can't be loaded with `require` the way `nodeConfig` loads `eslint-plugin-n`, because it uses top-level `await`. v12 renamed `no-global-tests` to `no-top-level-tests`, `no-setup-in-describe` to `no-setup-in-suite`, `no-top-level-hooks` to `no-root-hooks` and `no-return-and-callback` to `no-return-and-done` and `no-hooks-for-single-case` to `no-hooks-for-single-child`, and folded `no-sibling-hooks` into `consistent-structure` (`disallowDuplicateHooks`). ESLint accepts an unknown rule name set to `off` without complaint, so a rule still turned off under its old name is silently back on under its new one, from `recommended`.
+- **`eslint-plugin-mocha` 12, typed through `src/eslint-plugin-mocha.d.ts`.** The plugin is ESM-only, needs `eslint` ≥ 10.2, and only exposes its types through `exports`. `@packages/ts`, `proxy`, `driver` and `cli` type-check this package's source on `node` (node10) resolution, which ignores `exports`, so `check-ts` there would fail with `Cannot find module 'eslint-plugin-mocha'`. `mochaConfig.ts` pulls in an ambient declaration with a `/// <reference path>`, which TypeScript prefers over `node_modules` under every resolution, typing the plugin as `ESLint.Plugin` with a flat `configs.recommended`. It can't be loaded with `require` the way `nodeConfig` loads `eslint-plugin-n`, because it uses top-level `await`. v12 renamed `no-global-tests` to `no-top-level-tests`, `no-setup-in-describe` to `no-setup-in-suite`, `no-top-level-hooks` to `no-root-hooks` and `no-return-and-callback` to `no-return-and-done` and `no-hooks-for-single-case` to `no-hooks-for-single-child`, and folded `no-sibling-hooks` into `consistent-structure` (`disallowDuplicateHooks`). ESLint accepts an unknown rule name set to `off` without complaint, so a rule still turned off under its old name is silently back on under its new one, from `recommended`.
 - **`@graphql-tools/delegate`.** The root `**/@graphql-tools/delegate` resolution also reaches the plugin's tree, under `@graphql-tools/wrap` 11. Only `graphql-config`'s URL loader reaches that code, and the schema here is a file.
 
 ## Known gaps
 
 - No rule reports a duplicate JSX prop, such as two `className`s, in `.js` or `.jsx` files. `eslint-plugin-react`'s `jsx-no-duplicate-props` did; `@eslint-react/eslint-plugin` has no counterpart, and TypeScript only checks `.tsx`.
+- Nothing reports a committed `.only` in `data-context`'s Jest specs. They import `describe`, `it` and `test` from `@jest/globals`, which `mocha/no-exclusive-tests` doesn't recognise, and no Jest lint plugin is installed.
+- Vitest specs get no check for duplicate test titles, exported helpers, nested tests or empty titles. `vitest/no-identical-title` covers the first once the existing duplicates are renamed; `@vitest/eslint-plugin` has no counterpart for `mocha/no-exports` or `mocha/no-nested-tests`, and `vitest/valid-title`, which reports empty titles, is off.
 - `jsonConfig` does not collapse `{ }` to `{}`. `jsonc/object-curly-spacing` skips empty objects, and no off-the-shelf rule covers them.

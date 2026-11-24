@@ -8,9 +8,7 @@
         "scripts/after-sign-hook.js",
         "scripts/gulp/tasks/gulpGraphql.ts",
         "scripts/add-install-comment.js",
-        "scripts/semantic-commits/get-binary-release-data.js",
-        "scripts/binary/binary-entry-point-source.js",
-        "scripts/binary/binary-byte-node-entry-point-source.js"
+        "scripts/semantic-commits/get-binary-release-data.js"
       ],
       "ignoreDependencies": [
         "@electron/fuses",
@@ -29,7 +27,6 @@
         "@octokit/auth-app",
         "@octokit/core",
         "@percy/cli",
-        "bytenode",
         "chai-as-promised",
         "mobx",
         "mocha-banner",
@@ -364,14 +361,6 @@
         "test/**/*.{ts,tsx,js,jsx}"
       ]
     },
-    "packages/v8-snapshot-require": {
-      "entry": [
-        "src/constants.ts"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
     "packages/scaffold-config": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
@@ -402,15 +391,6 @@
         "engine.io",
         "engine.io-client",
         "flatted"
-      ]
-    },
-    "packages/packherd-require": {
-      "entry": [
-        "src/sourcemap-support.ts",
-        "src/transpile-ts.ts"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
       ]
     },
     "packages/stderr-filtering": {
@@ -626,44 +606,6 @@
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "lib/**/*.{ts,tsx,js,jsx}",
-        "*.{ts,tsx,js,jsx}"
-      ]
-    },
-    "tooling/v8-snapshot": {
-      "entry": [
-        "src/v8-snapshot.ts",
-        "src/setup/index.ts",
-        "src/generator/blueprint.ts",
-        "src/blueprint/**/*.js",
-        "src/doctor/process-script.worker.ts"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "cpr",
-        "stealthy-require",
-        "tslib"
-      ]
-    },
-    "tooling/electron-mksnapshot": {
-      "entry": [
-        "src/mksnapshot-bin.ts"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
-    "tooling/packherd": {
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
-    "tooling/*": {
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}",
-        "lib/**/*.{ts,tsx,js,jsx}",
-        "scripts/**/*.{ts,js}",
         "*.{ts,tsx,js,jsx}"
       ]
     },

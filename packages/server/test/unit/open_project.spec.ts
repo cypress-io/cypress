@@ -11,6 +11,7 @@ import runEvents from '../../lib/plugins/run_events'
 import Fixtures from '@tooling/system-tests'
 import { GracefulExit } from '../../lib/util/graceful-exit'
 import delay from 'lodash/delay'
+import { getCypressReservedPathPrefixes } from '../../lib/adapters/internal-routes'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
 // `graphql` rejects. Opening a project never queries either schema.
@@ -161,6 +162,14 @@ describe('lib/open_project', () => {
       })
     })
 
+    it('launches the browser headless with --headless', async () => {
+      vi.spyOn(getCtx(), 'isHeadless', 'get').mockReturnValue(true)
+
+      await openProject.launch(browser, spec)
+
+      expect(browsersOpen().mock.lastCall![0]).toEqual(expect.objectContaining({ isHeaded: false, isHeadless: true }))
+    })
+
     describe('spec events', () => {
       beforeEach(() => {
         vi.spyOn(runEvents, 'execute').mockResolvedValue(undefined)
@@ -290,6 +299,21 @@ describe('lib/open_project', () => {
           await openProject.launch({ name: 'firefox', family: 'firefox' }, spec)
 
           expect(browsersOpen().mock.lastCall![1].shouldClearPersistedServiceWorkers).toBeUndefined()
+        })
+
+        it('passes the service worker instrumentation, declining the reserved paths, on the browser network path', async () => {
+          await openProject.launch(browser, spec)
+
+          const { serviceWorkerInstrumentation } = browsersOpen().mock.lastCall![1]
+
+          expect(serviceWorkerInstrumentation).toContain('__cypressInjectIntoServiceWorker')
+          expect(serviceWorkerInstrumentation).toContain(JSON.stringify(getCypressReservedPathPrefixes(config)))
+        })
+
+        it('does not pass service worker instrumentation on the MITM path', async () => {
+          await openProject.launch({ name: 'firefox', family: 'firefox' }, spec)
+
+          expect(browsersOpen().mock.lastCall![1].serviceWorkerInstrumentation).toBeUndefined()
         })
 
         it('passes the MITM path to the launcher when forceHttp1 is set', async () => {

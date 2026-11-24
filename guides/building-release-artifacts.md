@@ -25,7 +25,7 @@ The steps above:
 
 - Build the `cypress` npm package
 - Transpile the code into ES5 to be compatible with the common Node versions
-- Put the result into the [`cli/build`](../cli/build) folder.
+- Put the result into the `cli/build` folder.
 
 ## Building the binary
 
@@ -40,7 +40,5 @@ If you're on macOS and building locally, you'll need a code-signing certificate 
 `yarn binary-zip` can be used to zip the built binary together.
 
 ### Tips
-
-If you want to speed up the time it takes to package the binary, set `V8_SNAPSHOT_DISABLE_MINIFY=1`
 
 If you are on an M1, you need to set `RESET_ADHOC_SIGNATURE=1` in order to be able to actually run the binary after packaging it.

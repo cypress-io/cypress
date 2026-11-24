@@ -740,6 +740,40 @@ describe('http', function () {
       expect(next, 'origin fetch').not.toHaveBeenCalled()
     })
 
+    it('reports a cancel while awaiting the response as a closed connection', async function () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => false,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {},
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+
+      const next = vi.fn(() => {
+        codec.abortRequest('network-1')
+
+        return Promise.reject(new Error('CDP Fetch request canceled by the browser: root:network-1'))
+      })
+
+      const handled = http.createLegacyProxyPipeline(codec)(request, next)
+
+      await expect(handled).rejects.toMatchObject({
+        code: 'ERR_BROWSER_CONNECTION_CLOSED',
+        message: 'The browser closed the connection before the response completed.',
+      })
+    })
+
     it('keeps waiting on the pre-request while the request is not aborted', async function () {
       const { http, pipeline } = createSyntheticPipeline()
 

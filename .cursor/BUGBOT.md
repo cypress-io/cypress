@@ -122,12 +122,6 @@ These rules mirror "Code Review of Dependency Updates" in `CONTRIBUTING.md`, whi
 - **@packages/socket**: WebSocket communication
   - Focus: Socket security, message handling, real-time communication
 
-### Code Processing (Medium Priority)
-- **@packages/v8-snapshot-require**: V8 snapshot support
-  - Focus: Snapshot compatibility, performance impact, Electron integration
-- **@packages/packherd-require**: Dependency packing
-  - Focus: Bundle optimization, dependency management, module resolution
-
 ### UI & Frontend (Medium Priority)
 - **@packages/frontend-shared**: Shared frontend utilities
   - Focus: Component reusability, utility functions, shared UI components
@@ -151,12 +145,3 @@ These rules mirror "Code Review of Dependency Updates" in `CONTRIBUTING.md`, whi
   - Focus: Example accuracy, documentation quality, test examples
 - **@packages/resolve-dist**: Path resolution
   - Focus: Asset resolution, path handling, build artifact management
-
-### Tooling Packages (Lower Priority)
-- **@tooling/electron-mksnapshot**: Electron snapshot tool
-  - Focus: Snapshot generation logic, Electron integration, performance optimization
-- **@tooling/packherd**: Dependency packing tool
-  - Focus: Bundle optimization, dependency resolution, module bundling
-- **@tooling/v8-snapshot**: V8 snapshot tooling
-  - Focus: Snapshot management, performance optimization, V8 integration
-

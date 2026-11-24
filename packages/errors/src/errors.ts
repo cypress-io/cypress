@@ -1297,6 +1297,26 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
+  CDP_BROWSER_EXITED_BEFORE_CONNECT: (browserName: string, code: number | null, signal: string | null, err: Error) => {
+    const exitStatus = code === null ? `signal ${signal}` : `code ${code}`
+
+    // 21 is Chromium's PROFILE_IN_USE: the browser handed its launch to a running instance on the same profile, which refused it
+    if (code === 21) {
+      return errTemplate`\
+          Cypress could not connect to ${fmt.off(_.capitalize(browserName))} because the browser exited with ${fmt.highlight(exitStatus)} before the Chrome DevTools Protocol connection was established.
+
+          This exit code means the browser found another ${fmt.off(_.capitalize(browserName))} window already running on the same profile. This usually happens when the ${fmt.highlightSecondary('UserDataDir')} enterprise or group policy is set, because the policy overrides the profile directory Cypress launches the browser with. You can review the applied policies by visiting ${fmt.url('chrome://policy')} (or ${fmt.url('edge://policy')} for Edge).
+
+          Close every ${fmt.off(_.capitalize(browserName))} window and try again, or run your tests in a different browser.
+
+          ${fmt.stackTrace(err)}`
+    }
+
+    return errTemplate`\
+        Cypress could not connect to ${fmt.off(_.capitalize(browserName))} because the browser exited with ${fmt.highlight(exitStatus)} before the Chrome DevTools Protocol connection was established.
+
+        ${fmt.stackTrace(err)}`
+  },
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
     return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
   },

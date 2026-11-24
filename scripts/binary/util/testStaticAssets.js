@@ -22,6 +22,10 @@ const testStaticAssets = async (buildResourcePath) => {
         'react.production.min.js',
         'react-dom.production.min.js',
         '__mobxInstanceCount',
+        // error-stack-parser's function-name regex, which hangs on long lines
+        // with quotes. Present only if patches/error-stack-parser+2.0.6.dev.patch
+        // in @packages/driver was not applied.
+        '[^@]*)?[^@]*)(?:@)',
       ],
       // each host module must be read through its webpack external, not bundled
       goodStrings: [
@@ -53,6 +57,11 @@ const testStaticAssets = async (buildResourcePath) => {
         // only React's development builds carry the full message text
         'Invalid hook call',
       ],
+    }),
+    testPackageStaticAssets({
+      // launchpad ships minified
+      assetGlob: `${buildResourcePath}/packages/launchpad/dist/assets/*.js`,
+      maxLineCount: 10000,
     }),
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/runner/dist/injection.js`,
@@ -134,6 +143,7 @@ const testPackageStaticAssets = async (options = {}) => {
     badStrings: [],
     testAssetStrings: [],
     minLineCount: 0,
+    maxLineCount: 0,
   })
 
   const foundAssets = await globAsync(opts.assetGlob)
@@ -162,12 +172,19 @@ const testPackageStaticAssets = async (options = {}) => {
       la(testFn(fileStr), `Error in ${path}: ${errorMsg}`)
     })
 
-    if (opts.minLineCount) {
-      const lineCount = (fileStr.match(/\n/g) || '').length + 1
+    const lineCount = (fileStr.match(/\n/g) || '').length + 1
 
+    if (opts.minLineCount) {
       la(lineCount > opts.minLineCount, stripIndent`
       Error in ${chalk.red(path)}: Detected this file was minified, having fewer than ${opts.minLineCount} lines of code.
       Minified code takes longer to inspect in browser Devtools, so we should leave it un-minified.
+      `)
+    }
+
+    if (opts.maxLineCount) {
+      la(lineCount <= opts.maxLineCount, stripIndent`
+      Error in ${chalk.red(path)}: Detected this file was not minified, having more than ${opts.maxLineCount} lines of code.
+      Check that build.minify is set in makeConfig in packages/frontend-shared/vite.config.mjs.
       `)
     }
 

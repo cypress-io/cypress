@@ -74,9 +74,6 @@ parameters:
   run-system-tests:
     type: boolean
     default: true
-  run-v8-tests:
-    type: boolean
-    default: true
   run-cli-tests:
     type: boolean
     default: true
@@ -119,6 +116,11 @@ parameters:
   run-npm-schematic-tests:
     type: boolean
     default: true
+  # Set by generate-pipeline-parameters.sh when a PR changes only docs. Defaults
+  # to false so that a continuation that omits it runs everything.
+  docs-only:
+    type: boolean
+    default: false
 
 orbs:
   browser-tools: circleci/browser-tools@2.4.1
@@ -210,8 +212,6 @@ executors:
     resource_class: arm.medium
     environment:
       PLATFORM: linux
-      # TODO: Disabling snapshots for now on Linux Arm 64 architectures. Will revisit with https://github.com/cypress-io/cypress/issues/23557
-      DISABLE_SNAPSHOT_REQUIRE: 1
 
   linux-x64: &linux-x64-executor
     machine:
@@ -360,12 +360,6 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             yarn gulp syncCloudValidations
-      - run:
-          name: Generate v8 snapshot
-          command: |
-            source ./scripts/ensure-node.sh
-            # Minification takes some time. We only really need to do that for the binary (and we regenerate snapshots separately there)
-            V8_UPDATE_METAFILE=1 V8_SNAPSHOT_DISABLE_MINIFY=1 yarn build-v8-snapshot-prod
       - prepare-modules-cache # So we don't throw these in the workspace cache
       - persist_to_workspace:
           root: ~/
@@ -1098,11 +1092,11 @@ commands:
             fi
       - run:
           command: |
-            if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy" ]]; then
+            if [[ <<parameters.package>> == 'app' && <<parameters.percy>> == 'true' && -d "packages/app/cypress/screenshots/runner/screenshot/screenshot.vue.cy.tsx/percy" ]]; then
               PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_WORKSPACE_ID \
               PERCY_ENABLE=$([[ '<< pipeline.parameters.percy-enabled >>' == 'true' ]] && echo "${PERCY_TOKEN:-0}" || echo 0) \
               PERCY_PARALLEL_TOTAL=-1 \
-              yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.cy.tsx/percy
+              yarn percy upload packages/app/cypress/screenshots/runner/screenshot/screenshot.vue.cy.tsx/percy
             else
               echo "skipping percy screenshots uploading"
             fi
@@ -1140,10 +1134,15 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
-      - install-browsers:
-          install-chrome: true
-          install-chrome-for-testing: true
-          install-firefox: true
+      # WebKit runs only launch the WebKit from playwright-webkit (tap_open_spec, which opens Chrome itself, is skipped below)
+      - unless:
+          condition:
+            equal: [ webkit, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-chrome: true
+                install-chrome-for-testing: true
+                install-firefox: true
       - restore_cache:
           name: Restore Bun install cache
           keys:
@@ -1165,6 +1164,11 @@ commands:
               command -v bun
               bun --version
               exit 0
+            fi
+
+            # Bun's installer needs unzip, which the image only gets from install-browsers on non-WebKit jobs
+            if ! command -v unzip >/dev/null 2>&1; then
+              apt-get update && apt-get install -y unzip
             fi
 
             curl -fsSL https://bun.sh/install | bash -s "${BUN_RELEASE}"
@@ -1195,6 +1199,11 @@ commands:
               for file in $ALL_SPECS; do
                 # filter out non_root tests, they have their own stage
                 if [[ "$file" == *"non_root"* ]]; then
+                  echo "Skipping $file"
+                  continue
+                fi
+                # tap_open_spec always opens Chrome, which the WebKit job does not install
+                if [[ "<< parameters.browser >>" == "webkit" && "$file" == *"tap_open_spec"* ]]; then
                   echo "Skipping $file"
                   continue
                 fi
@@ -1661,10 +1670,8 @@ commands:
               # these are missing on Circle and there is no way to pre-install them on Arm
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-build --version $(node ./scripts/get-next-version.js)
-            else
-              yarn binary-build --version $(node ./scripts/get-next-version.js)
             fi
+            yarn binary-build --version $(node ./scripts/get-next-version.js)
       - run:
           name: Package the Cypress binary
           environment:
@@ -1678,10 +1685,8 @@ commands:
               # these are missing on Circle and there is no way to pre-install them on Arm
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-              DISABLE_SNAPSHOT_REQUIRE=1 yarn binary-package --version $(node ./scripts/get-next-version.js)
-            else
-              yarn binary-package --version $(node ./scripts/get-next-version.js)
             fi
+            yarn binary-package --version $(node ./scripts/get-next-version.js)
       - run:
           name: Smoke Test the Cypress binary
           command: |
@@ -2011,59 +2016,6 @@ jobs:
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
-  v8-integration-tests:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      resource_class:
-        type: string
-        default: medium.gen2
-    resource_class: << parameters.resource_class >>
-    parallelism: 1
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-v8-tests >>
-      - restore_cached_workspace
-      - restore_cached_system_tests_deps
-      # this is a temporary work around while we wait for circle to resolve issues with packages
-      # with an @ character in windows during save_cache.
-      # @see https://github.com/cypress-io/cypress/issues/30343 for more details.
-      - when:
-          condition:
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - windows_reinstall_deps
-      # TODO: Remove this once we switch off self-hosted M1 runners
-      - when:
-          condition:
-            equal: [ *darwin-arm64-executor, << parameters.executor >> ]
-          steps:
-            - run: rm -f /tmp/cypress/junit/*
-      - unless:
-          condition:
-            or:
-              - equal: [ *linux-arm64-executor, << parameters.executor >> ] # TODO: Figure out how to support linux-arm64 when we get to linux arm64 build: https://github.com/cypress-io/cypress/issues/23557
-          steps:
-            - run:
-                name: Run v8 integration tests
-                command: |
-                  source ./scripts/ensure-node.sh
-                  yarn test-integration --scope=@tooling/{packherd,v8-snapshot,electron-mksnapshot}
-            - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 3
-      - when:
-          condition:
-            or:
-              - equal: [ *linux-arm64-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: Run v8 integration tests
-                command: |
-                  source ./scripts/ensure-node.sh
-                  yarn test-integration --scope=@tooling/packherd
-            - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 1
-
   driver-integration-memory-tests:
     <<: *defaults
     parameters:
@@ -2164,7 +2116,7 @@ jobs:
                   source ./scripts/ensure-node.sh
                   yarn lerna run types
             - sanitize-verify-and-store-mocha-results:
-                expectedResultCount: 3
+                expectedResultCount: 1
 
   # Unguarded: a release gate rather than a test group, and the only check on
   # either release train. `test-npm-package-release-script` is the dry run of
@@ -2382,7 +2334,6 @@ jobs:
                 - << pipeline.parameters.run-system-tests >>
                 - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
                 - << pipeline.parameters.run-npm-vite-dev-server-tests >>
-                - << pipeline.parameters.run-v8-tests >>
           steps:
             - run:
                 name: Skipping job — not relevant to changed files
@@ -3504,6 +3455,21 @@ jobs:
       - run:
           name: All jobs passed
           command: echo "✅ All required jobs passed"
+
+  docs-check:
+    executor: node-slim
+    resource_class: small
+    working_directory: ~/cypress
+    steps:
+      - checkout
+      # Installs only the pinned checker, not the monorepo, so a docs-only PR
+      # skips the full install.
+      - run:
+          name: Install markdown-link-check
+          command: npm install --global "markdown-link-check@$(node -p "require('./package.json').devDependencies['markdown-link-check']")"
+      - run:
+          name: Check Markdown links 🔗
+          command: yarn check-markdown-links
 
   # Fan-in gate: build complete and contributor PR approved (when applicable).
   ready-to-test:

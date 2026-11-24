@@ -10,8 +10,7 @@
     "hook-require.js",
     "lib",
     "patches",
-    "start-cypress.js",
-    "v8-snapshot-entry.js"
+    "start-cypress.js"
   ],
   "workspaces": {
     "nohoist": [
@@ -80,7 +79,6 @@
     "data-uri-to-buffer": "2.0.1",
     "dayjs": "^1.11.23",
     "debug": "^4.3.4",
-    "dirt-simple-file-cache": "^0.4.0",
     "duplexify": "4.1.3",
     "edgedriver": "6.3.0",
     "electron-context-menu": "3.6.1",

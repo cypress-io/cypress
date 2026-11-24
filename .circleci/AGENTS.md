@@ -10,8 +10,7 @@ Most PR branches run the **pull-request workflow** with path-based job filtering
 
 Add a branch when the change affects behavior that is only validated by main-branch CI — in particular:
 
-- **Windows jobs** — the `windows` workflow (`windows-v8-integration-tests`, `windows-create-build-artifacts`, etc.)
-- **V8 snapshot / packaging tooling** — `v8-integration-tests` on Linux, macOS, and Windows; snapshot cache updates in `tooling/v8-snapshot/cache/`
+- **Windows jobs** — the `windows` workflow (`windows-create-build-artifacts`, etc.)
 - **Full binary tests** — kitchensink, staging, and npm-module verification jobs (see optional gates below). These no longer run on pull requests at all, so an allowlisted branch is the only way to exercise them before merge.
 
 If only unit/integration tests scoped to changed packages are sufficient, do **not** add the branch — use a normal PR branch instead.
@@ -29,7 +28,7 @@ If only unit/integration tests scoped to changed packages are sufficient, do **n
 
 Push your work to the branch name you add — do not repurpose an existing allowlisted branch.
 
-This gate turns on the main/multi-platform workflow graph, including `windows-v8-integration-tests` and `v8-integration-tests` on Linux/macOS.
+This gate turns on the main/multi-platform workflow graph.
 
 This gate does not turn on `windows`, `linux-arm64`, `darwin-x64`, or `darwin-arm64` for plain `develop` or `release/*` pushes. On those two, all four run from a scheduled pipeline instead — see "Scheduled platform CI" below. Any other branch you add here turns all five on per-push.
 
@@ -48,8 +47,10 @@ After editing `.circleci/src/`, run `yarn pack-ci --validate` before committing.
 
 The `run-*` guards live in the shared job definitions in `@pipeline.yml` (via `halt-if-skipped`), not in the workflow files, so they apply to every workflow below — not just the PR one.
 
-- **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-build-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs, system tests, and `v8-integration-tests` are guarded, so a webhook push to `develop` or a `vN` maintenance branch runs only the ones its changed paths select.
-- **`windows` / `linux-arm64` / `darwin-*`**: none of these four run on a plain `develop`, `release/*`, or `vN` push — see "Scheduled platform CI" below for when they do. Inside them, `v8-integration-tests`, `driver-integration-memory-tests`, and (Windows) selected integration/unit jobs are still guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside these workflows is actually path-filtered once one runs.
+- **`linux-x64`**: `build`, lint, and type checks always run, as do the binary/packaging chain and release gating (`create-build-artifacts`, `test-binary-*`, `verify-release-readiness`, `ready-to-release`, `npm-release`). Per-package integration/unit jobs and system tests are guarded, so a webhook push to `develop` or a `vN` maintenance branch runs only the ones its changed paths select.
+- **`windows` / `linux-arm64` / `darwin-*`**: none of these four run on a plain `develop`, `release/*`, or `vN` push — see "Scheduled platform CI" below for when they do. Inside them, `driver-integration-memory-tests` and (Windows) selected integration/unit jobs are still guarded by `run-*` parameters, but a scheduled run gets all-true from `generate-pipeline-parameters.sh`'s trigger-source check, so nothing inside these workflows is actually path-filtered once one runs.
+
+- **`pull-request`**: on a PR that changes only docs (`docs-only`, set by `generate-pipeline-parameters.sh`), install, build, lint, type checks, Knip and `test-kitchensink` are filtered out, and `docs-check` (`yarn check-markdown-links`, with only the pinned `markdown-link-check` installed) is what `all-jobs-passed` waits for. `docs-check` runs on every PR. When adding an always-run job, give it the `*codeJobs` filter unless it reads Markdown or images.
 
 `linux-x64` runs on any `&full-workflow-filters` branch directly. The other four need more than that. On `develop`, `release/*`, and `vN` they run only from a scheduled pipeline or a manual trigger. On `electron/*` or an allowlisted branch, `&full-workflow-filters` alone is enough.
 
