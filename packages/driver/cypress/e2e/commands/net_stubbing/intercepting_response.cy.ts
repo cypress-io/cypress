@@ -39,6 +39,34 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    // Chrome rewrites the status line of a response it is asked to override,
+    // so these fail if the override drops the origin's phrase.
+    it('keeps the origin reason phrase for the page when a handler changes a header', function () {
+      cy.intercept('/status-code*', function (req) {
+        req.continue(function (res) {
+          res.headers['x-request-id'] = '7f3c2a91-5d4e-4b8a-9c61-2e0f8d3b6a45'
+        })
+      })
+
+      cy.window().then(function (win) {
+        return win.fetch('/status-code?code=200&message=Totally%20Fine')
+      })
+      .its('statusText').should('eq', 'Totally Fine')
+    })
+
+    it('keeps the origin reason phrase for the page when a handler changes the body', function () {
+      cy.intercept('/status-code*', function (req) {
+        req.continue(function (res) {
+          res.body = 'Rewritten by the handler'
+        })
+      })
+
+      cy.window().then(function (win) {
+        return win.fetch('/status-code?code=200&message=Totally%20Fine')
+      })
+      .its('statusText').should('eq', 'Totally Fine')
+    })
+
     it('intercepts redirects as expected', function () {
       const href = `/fixtures/generic.html?t=${Date.now()}`
       const url = `/redirect?href=${encodeURIComponent(href)}`

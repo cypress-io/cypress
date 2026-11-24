@@ -4,6 +4,7 @@ import type { Mock } from 'vitest'
 import { Readable } from 'stream'
 import type { Protocol } from 'devtools-protocol'
 import { HttpIntercept } from '@packages/network-interception'
+import type { InterceptMiddleware } from '@packages/network-interception'
 import { digestBody } from '../../../lib/browsers/cdp-protocol/body-digest'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
@@ -1970,6 +1971,7 @@ describe('CdpFetchTransport', () => {
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [
           { name: 'content-type', value: 'application/octet-stream' },
           { name: 'x-custom', value: 'yes' },
@@ -2353,7 +2355,6 @@ describe('CdpFetchTransport', () => {
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'shared.0',
         responseCode: 0,
-        responsePhrase: 'unknown',
       })
     })
 
@@ -3981,6 +3982,7 @@ describe('CdpFetchTransport', () => {
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 204,
+        responsePhrase: 'No Content',
         responseHeaders: [{
           name: 'x-verbatim',
           value: 'empty',
@@ -4416,6 +4418,7 @@ describe('CdpFetchTransport', () => {
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'text/html',
@@ -4531,10 +4534,105 @@ describe('CdpFetchTransport', () => {
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'content-type',
           value: 'application/json',
         }],
+      })
+    })
+
+    describe('reason phrase', () => {
+      // the phrase the driver's test server sends for /status-code?message=Totally%20Fine
+      const runWithPhrase = async (middleware: InterceptMiddleware, responseStatusText = 'Totally Fine') => {
+        const client = createClient()
+        const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+        const { transport } = createTransport(client, { httpIntercept })
+        const request = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1' })
+        const response = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', responseStatusCode: 200, responseStatusText })
+
+        response.responseHeaders = [{ name: 'Content-Type', value: 'text/html' }]
+
+        httpIntercept.use(middleware)
+
+        const onRequestPaused = await startTransport(transport, client)
+        const handled = onRequestPaused(request)
+
+        await tick()
+        await onRequestPaused(response)
+        await handled
+
+        return client
+      }
+
+      it('keeps the origin reason phrase when middleware changes only headers', async () => {
+        const client = await runWithPhrase(async (req, next) => {
+          const res = await next(req)
+
+          return { ...res, headers: { 'content-type': 'text/html', 'x-request-id': '7f3c2a91-5d4e-4b8a-9c61-2e0f8d3b6a45' } }
+        })
+
+        expectCalledWith(client.send, 'Fetch.continueResponse', {
+          requestId: 'fetch-request',
+          responseCode: 200,
+          responsePhrase: 'Totally Fine',
+          responseHeaders: [
+            { name: 'content-type', value: 'text/html' },
+            { name: 'x-request-id', value: '7f3c2a91-5d4e-4b8a-9c61-2e0f8d3b6a45' },
+          ],
+        })
+      })
+
+      it('keeps the origin reason phrase when middleware replaces the body', async () => {
+        const client = await runWithPhrase(async (req, next) => {
+          const res = await next(req)
+
+          return { ...res, body: '<html><body>Hello, Ada Lovelace</body></html>' }
+        })
+
+        expect(callsMatching(client.send, ['Fetch.fulfillRequest'])[0]?.[1]).toMatchObject({
+          requestId: 'fetch-request',
+          responseCode: 200,
+          responsePhrase: 'Totally Fine',
+        })
+      })
+
+      it('sends the standard phrase for a status code middleware changed', async () => {
+        const client = await runWithPhrase(async (req, next) => {
+          const res = await next(req)
+
+          return { ...res, statusCode: 202, body: '<html><body>Queued</body></html>' }
+        })
+
+        expect(callsMatching(client.send, ['Fetch.fulfillRequest'])[0]?.[1]).toMatchObject({
+          responseCode: 202,
+          responsePhrase: 'Accepted',
+        })
+      })
+
+      it('sends the standard phrase when the origin sent none', async () => {
+        const client = await runWithPhrase(async (req, next) => {
+          const res = await next(req)
+
+          return { ...res, body: '<html><body>Hello, Ada Lovelace</body></html>' }
+        }, '')
+
+        expect(callsMatching(client.send, ['Fetch.fulfillRequest'])[0]?.[1]).toMatchObject({
+          responsePhrase: 'OK',
+        })
+      })
+
+      it('sends "unknown" for a code with no standard phrase', async () => {
+        const client = await runWithPhrase(async (req, next) => {
+          const res = await next(req)
+
+          return { ...res, statusCode: 777, body: '<html><body>Hello, Ada Lovelace</body></html>' }
+        })
+
+        expect(callsMatching(client.send, ['Fetch.fulfillRequest'])[0]?.[1]).toMatchObject({
+          responseCode: 777,
+          responsePhrase: 'unknown',
+        })
       })
     })
 
@@ -4606,6 +4704,7 @@ describe('CdpFetchTransport', () => {
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
         responseCode: 200,
+        responsePhrase: 'OK',
         responseHeaders: [{
           name: 'Content-Encoding',
           value: 'gzip',

@@ -610,6 +610,68 @@ describe('lib/network-runtime', () => {
     expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').toBeUndefined()
   })
 
+  it('createCdpFetchRuntime keeps the origin reason phrase on a response it releases with a header override', async () => {
+    const body = Buffer.from('OK')
+    const client = {
+      send: vi.fn(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: body.toString('base64'), base64Encoded: true }
+        }
+
+        return {}
+      }),
+      on: vi.fn(),
+      off: vi.fn(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const pause = {
+      requestId: 'status-request',
+      networkId: 'network-status-1',
+      url: 'http://localhost:3500/status-code?code=200&message=Totally%20Fine',
+      resourceType: 'XHR' as Protocol.Network.ResourceType,
+    }
+
+    const handled = onRequestPaused(createPausedRequest(pause))
+
+    await flush()
+
+    // what an Express server sends for the driver test server's /status-code
+    // route with X-Frame-Options set, which the pipeline always strips, so
+    // the response is released with a header override
+    await onRequestPaused({
+      ...createPausedRequest({
+        ...pause,
+        responseStatusCode: 200,
+        responseHeaders: [
+          { name: 'X-Powered-By', value: 'Express' },
+          { name: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { name: 'Content-Type', value: 'text/plain; charset=utf-8' },
+          { name: 'Content-Length', value: '2' },
+          { name: 'ETag', value: 'W/"2-nOO9QiTIwXgNtWtBJezz8kv3SLc"' },
+          { name: 'Date', value: 'Tue, 24 Nov 2026 01:21:48 GMT' },
+          { name: 'Connection', value: 'keep-alive' },
+          { name: 'Keep-Alive', value: 'timeout=5' },
+        ],
+      }),
+      responseStatusText: 'Totally Fine',
+    })
+
+    await flush()
+    await handled
+
+    const continueResponseCall = findCall(client.send, 'Fetch.continueResponse')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse').toBeDefined()
+    expect(continueResponseCall![1]).toMatchObject({
+      requestId: 'status-request',
+      responseCode: 200,
+      responsePhrase: 'Totally Fine',
+    })
+
+    expect(continueResponseCall![1].responseHeaders).toBeDefined()
+  })
+
   it('createCdpFetchRuntime propagates CDP XHR resourceType onto the synthetic Express request', async () => {
     const client = {
       send: vi.fn(async (method: string) => {

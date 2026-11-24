@@ -178,8 +178,21 @@ export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   cookiesBeforeIntercept?: CookiesBeforeIntercept
   requestId: string
   responseCode: number
+  // the reason phrase Chrome read at the pause, kept once encoded only while
+  // the status code is the origin's
   responseStatusText?: string
   responseHeaders?: Protocol.Fetch.HeaderEntry[]
+}
+
+/**
+ * Chrome writes an overridden status line with this phrase, or with its own
+ * standard one when none is sent, so an origin's `200 Totally Fine` would
+ * reach the page as `200 OK`. CDP rejects a code it has no standard phrase for
+ * when the phrase is missing ("Invalid http status code or phrase"), so such a
+ * code gets "unknown", as Node sends it on the HTTP proxy path.
+ */
+function toResponsePhrase ({ responseCode, responseStatusText }: CdpFetchTransportResponse): string {
+  return responseStatusText || STATUS_CODES[responseCode] || 'unknown'
 }
 
 /**
@@ -711,11 +724,7 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.fulfillRequest', {
           requestId: response.requestId,
           responseCode: response.responseCode,
-          // CDP rejects a status code it has no built-in reason phrase for
-          // ("Invalid http status code or phrase"), which turns req.reply(777)
-          // into a silently released pause. Node's MITM path serves unknown
-          // codes with the phrase "unknown"; mirror that.
-          responsePhrase: STATUS_CODES[response.responseCode] ?? 'unknown',
+          responsePhrase: toResponsePhrase(response),
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
           ...(response.body !== undefined ? { body: response.body } : {}),
         }, response.sessionId)
@@ -725,11 +734,11 @@ export class CdpFetchTransport {
         await this.client.send('Fetch.continueResponse', {
           requestId: response.requestId,
           responseCode: response.responseCode,
-          // Chrome rejects a code it has no built-in phrase for; for every
-          // known code, omit the phrase so the origin's own phrase survives
-          // the pass-through untouched.
-          ...(STATUS_CODES[response.responseCode] ? {} : { responsePhrase: 'unknown' }),
-          ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
+          // Chrome only applies a status line override that comes with headers
+          ...(response.responseHeaders ? {
+            responsePhrase: toResponsePhrase(response),
+            responseHeaders: response.responseHeaders,
+          } : {}),
         }, response.sessionId)
       }
 

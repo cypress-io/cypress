@@ -264,10 +264,14 @@ function encodePausedResponse (
   // A skipped body was never read, so its placeholder cannot replace the stream.
   const fulfilled = bodyModified || (contentTypeModified && response.body !== undefined && !pausedResponse.bodySkipped) || redirectModified
 
+  const responseCode = response.statusCode ?? pausedResponse.responseCode
+
   return {
     ...pausedResponse,
     fulfilled,
-    responseCode: response.statusCode ?? pausedResponse.responseCode,
+    responseCode,
+    // The origin's reason phrase only describes the origin's status code.
+    responseStatusText: responseCode === pausedResponse.responseCode ? pausedResponse.responseStatusText : undefined,
     responseHeaders: fulfilled
       ? toFulfilledHeaders(middlewareHeaders, pausedResponse.responseHeaders)
       : toContinuedHeaders(middlewareHeaders, pausedResponse.responseHeaders),
