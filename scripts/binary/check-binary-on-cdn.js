@@ -73,14 +73,22 @@ const checkIfBinaryExistsOnCdn = async (args = process.argv) => {
     return { type, file, url, checksum }
   }))
 
-  const reused = found.every(({ checksum }) => checksum)
+  let reused = found.every(({ checksum }) => checksum)
 
   if (reused) {
     console.log('This commit already has a binary and npm package on the CDN. Downloading them instead of building...')
 
-    for (const { type, file, url, checksum } of found) {
-      await download({ url, checksum, destination: path.join(out, file) })
-      await uploadUtils.saveUrl(path.join(out, `${type}-url.json`))(url)
+    try {
+      for (const { type, file, url, checksum } of found) {
+        await download({ url, checksum, destination: path.join(out, file) })
+        await uploadUtils.saveUrl(path.join(out, `${type}-url.json`))(url)
+      }
+    } catch (err) {
+      // A failed download costs a rebuild rather than failing every binary job
+      console.error(err)
+      console.log('Building the binary, since downloading it from the CDN failed.')
+      await fs.emptyDir(out)
+      reused = false
     }
   } else {
     console.log('Building the binary, since the CDN does not have both artifacts for this commit.')

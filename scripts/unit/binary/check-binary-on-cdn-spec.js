@@ -40,6 +40,10 @@ describe('check-binary-on-cdn', () => {
         return new Response(null, { status: 404 })
       }
 
+      if (method !== 'HEAD' && file.downloadError) {
+        throw file.downloadError
+      }
+
       return new Response(method === 'HEAD' ? null : file.served, {
         status: 200,
         headers: { 'x-amz-meta-checksum': file.checksum },
@@ -80,19 +84,22 @@ describe('check-binary-on-cdn', () => {
     expect(await fs.readdir(out)).to.deep.eq(['binary-reuse.json'])
   })
 
-  it('fails when a download does not match its recorded checksum', async () => {
-    cdn[binaryUrl] = { served: Buffer.from('PK\u0003\u0004 truncated'), checksum: sha512(zip) }
-    cdn[npmUrl] = { served: tgz, checksum: sha512(tgz) }
+  it('falls back to building when a download does not match its recorded checksum', async () => {
+    cdn[binaryUrl] = { served: zip, checksum: sha512(zip) }
+    cdn[npmUrl] = { served: Buffer.from('\u001f\u008b truncated'), checksum: sha512(tgz) }
 
-    let error
+    expect(await run()).to.be.false
 
-    try {
-      await run()
-    } catch (err) {
-      error = err
-    }
+    expect(await fs.readdir(out)).to.deep.eq(['binary-reuse.json'])
+    expect(await fs.readJson(path.join(out, 'binary-reuse.json'))).to.deep.eq({ reused: false })
+  })
 
-    expect(error?.message).to.include(`${binaryUrl} downloaded with SHA-512`)
-    expect(await fs.pathExists(path.join(out, 'binary-reuse.json'))).to.be.false
+  it('falls back to building when a download fails', async () => {
+    cdn[binaryUrl] = { served: zip, checksum: sha512(zip) }
+    cdn[npmUrl] = { served: tgz, checksum: sha512(tgz), downloadError: new TypeError('fetch failed') }
+
+    expect(await run()).to.be.false
+
+    expect(await fs.readdir(out)).to.deep.eq(['binary-reuse.json'])
   })
 })
