@@ -1,8 +1,11 @@
 import { createRequire } from 'module'
 import { EventEmitter } from 'events'
 import express from 'express'
+import fs from 'fs/promises'
+import http from 'http'
 import _ from 'lodash'
 import nock from 'nock'
+import path from 'path'
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import type { Address } from 'net'
@@ -224,6 +227,81 @@ describe('lib/server-base', () => {
       server.createExpressApp({ morgan: true })
 
       expect(useMorganStub).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('response compression', () => {
+    let moduleSource: Buffer
+    let origin: http.Server
+    let originPort: number
+
+    // Asks the way a browser asks a proxy: the absolute URL in the request line.
+    function getThroughServer (url: string) {
+      return new Promise<{ headers: http.IncomingHttpHeaders, body: Buffer }>((resolve, reject) => {
+        http.get({
+          host: 'localhost',
+          port: server._port(),
+          path: url,
+          headers: { 'accept-encoding': 'gzip, deflate, br' },
+        }, (res) => {
+          const chunks: Buffer[] = []
+
+          res.on('data', (chunk) => chunks.push(chunk))
+          res.on('end', () => resolve({ headers: res.headers, body: Buffer.concat(chunks) }))
+          res.on('error', reject)
+        }).on('error', reject)
+      })
+    }
+
+    beforeEach(async () => {
+      // a module Vite 8's dev server served, over compression's 1 KB threshold
+      moduleSource = await fs.readFile(path.join(__dirname, '../support/fixtures/server/vite-dev-server-module.js'))
+
+      origin = http.createServer((req, res) => {
+        // the headers Vite set on it; Node adds Date, Connection and Keep-Alive
+        res.writeHead(200, {
+          'Vary': 'Origin',
+          'Content-Type': 'text/javascript',
+          'Cache-Control': 'no-cache',
+          'Etag': 'W/"343-sChoqqytW39AeGdPqlsiUKVRF7c"',
+          'Content-Length': moduleSource.length,
+        })
+
+        res.end(moduleSource)
+      })
+
+      await new Promise<void>((resolve) => origin.listen(0, 'localhost', resolve))
+
+      const address = origin.address()
+
+      if (!address || typeof address === 'string') {
+        throw new Error('the origin is not listening on a TCP port')
+      }
+
+      originPort = address.port
+
+      // the morgan stub never hands the request on
+      _.extend(config, { morgan: false })
+
+      await server.open(config, getOpenOptions())
+    })
+
+    afterEach(async () => {
+      await new Promise((resolve) => origin.close(resolve))
+    })
+
+    it('passes a proxied response through with the encoding the origin sent', async () => {
+      const { headers, body } = await getThroughServer(`http://localhost:${originPort}/src/team.ts`)
+
+      expect(headers['content-encoding']).toBeUndefined()
+      expect(headers['vary']).toBe('Origin')
+      expect(body.equals(moduleSource), 'the body arrives as the origin sent it').toBe(true)
+    })
+
+    it('still compresses the files Cypress serves itself', async () => {
+      const { headers } = await getThroughServer(`http://localhost:${originPort}/__cypress/socket.io.js`)
+
+      expect(headers['content-encoding']).toBe('br')
     })
   })
 

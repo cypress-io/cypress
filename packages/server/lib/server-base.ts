@@ -34,7 +34,7 @@ import { isUnsafePort } from '@packages/config'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import type { InitializeRoutes } from './routes'
-import { createCommonRoutes } from './routes'
+import { createCommonRoutes, isNetworkProxyResponse } from './routes'
 import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { cypressSessions } from './cypress-sessions'
 import type { FoundSpec, ProtocolManagerShape, TestingType, ExtraTargetDetach } from '@packages/types'
@@ -213,7 +213,18 @@ const setProxiedUrl = function (req) {
   req.url = getPath(req.url)
 }
 
-const notSSE = (req, res) => {
+const shouldCompress = (req, res) => {
+  // Network proxy responses go out as the pipeline wrote them. The pipeline
+  // keeps the origin's own content-encoding, identity included, because
+  // CompressBody re-applies an encoding it decoded. Compressing an identity
+  // response here would add Content-Encoding and Vary headers the origin never
+  // sent, hold a streamed body back until zlib's buffer fills or the response
+  // ends, and cost a compression here and a decompression in the browser, which
+  // is on this machine anyway.
+  if (isNetworkProxyResponse(res)) {
+    return false
+  }
+
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
@@ -636,7 +647,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     app.use(_forceProxyMiddleware(clientRoute, namespace, this.isBrowserNetworkMode))
 
     app.use(require('cookie-parser')())
-    app.use(compression({ filter: notSSE }))
+    app.use(compression({ filter: shouldCompress }))
     if (morgan) {
       app.use(this.useMorgan())
     }

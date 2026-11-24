@@ -29,6 +29,13 @@ import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, fullyQualifiedRe, isLoop
 
 const debug = Debug('cypress:server:routes')
 
+const networkProxyResponses = new WeakSet<object>()
+
+/** Whether the network proxy pipeline, rather than one of Cypress's own routes, is writing this response. */
+export const isNetworkProxyResponse = (res: object): boolean => {
+  return networkProxyResponses.has(res)
+}
+
 export interface InitializeRoutes {
   config: Cfg
   getSpec: () => FoundSpec | null
@@ -74,6 +81,8 @@ export const createCommonRoutes = ({
 
       return
     }
+
+    networkProxyResponses.add(res)
 
     await networkProxy.handleHttpRequest(req, res)
   }
