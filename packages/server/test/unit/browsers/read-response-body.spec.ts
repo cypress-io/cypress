@@ -53,11 +53,36 @@ describe('lib/browsers/cdp-protocol/read-response-body', () => {
       expect(mayExceedWholeReadLimit(undefined)).toBe(true)
     })
 
-    it('reads a compressed body in chunks, since its decoded size is unknown', () => {
+    it('reads a gzip or deflate body whole when it cannot decode past the limit', () => {
+      const largestWholeRead = String(Math.floor(READ_WHOLE_BODY_MAX_BYTES / 1032))
+
+      for (const encoding of ['gzip', 'x-gzip', 'Deflate']) {
+        expect(mayExceedWholeReadLimit([
+          { name: 'Content-Length', value: largestWholeRead },
+          { name: 'Content-Encoding', value: encoding },
+        ])).toBe(false)
+      }
+
+      expect(mayExceedWholeReadLimit([
+        { name: 'Content-Length', value: String(Number(largestWholeRead) + 1) },
+        { name: 'Content-Encoding', value: 'gzip' },
+      ])).toBe(true)
+    })
+
+    it('reads a compressed body in chunks when its decoded size is unbounded', () => {
       expect(mayExceedWholeReadLimit([
         { name: 'Content-Length', value: '48213' },
         { name: 'Content-Encoding', value: 'gzip' },
       ])).toBe(true)
+
+      for (const encoding of ['br', 'zstd', 'gzip, br']) {
+        expect(mayExceedWholeReadLimit([
+          { name: 'Content-Length', value: '43' },
+          { name: 'Content-Encoding', value: encoding },
+        ])).toBe(true)
+      }
+
+      expect(mayExceedWholeReadLimit([{ name: 'Content-Encoding', value: 'gzip' }])).toBe(true)
     })
 
     it('treats Content-Encoding: identity as uncompressed', () => {

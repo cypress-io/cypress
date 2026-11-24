@@ -38,26 +38,43 @@ const headerValue = (headers: Protocol.Fetch.HeaderEntry[] | undefined, name: st
   return headers?.find((header) => header.name.toLowerCase() === name)?.value
 }
 
+// Deflate, and gzip which wraps it, expand a body at most 1032 times.
+const DEFLATE_MAX_EXPANSION = 1032
+
+const DEFLATE_ENCODINGS = new Set(['gzip', 'x-gzip', 'deflate'])
+
 /**
  * Whether the decoded body may be larger than READ_WHOLE_BODY_MAX_BYTES.
- * `Content-Length: 512` reads whole; a missing or larger Content-Length, or
- * any Content-Encoding, reads in chunks. Both read methods return the decoded
- * body, and a compressed Content-Length says nothing about its decoded size.
+ * Both read methods return the decoded body, so a compressed Content-Length
+ * only bounds it for gzip or deflate: `Content-Encoding: gzip` with
+ * `Content-Length: 1000` reads whole, with `Content-Length: 2000` in chunks.
+ * A missing Content-Length, or any other encoding, reads in chunks.
+ *
+ * Reading whole keeps a small corrupt gzip body failing the way the origin
+ * sent it. Chrome reads such a body as empty without an error, so once its
+ * body is taken it can only be fulfilled as an empty, valid response; a body
+ * read whole and left unchanged is continued, and Chrome then fails it with
+ * net::ERR_CONTENT_DECODING_FAILED.
  */
 export function mayExceedWholeReadLimit (responseHeaders: Protocol.Fetch.HeaderEntry[] | undefined): boolean {
-  const contentEncoding = headerValue(responseHeaders, 'content-encoding')
-
-  if (contentEncoding && contentEncoding.trim().toLowerCase() !== 'identity') {
-    return true
-  }
-
   const contentLength = headerValue(responseHeaders, 'content-length')
 
   if (!contentLength || !/^\d+$/.test(contentLength.trim())) {
     return true
   }
 
-  return Number(contentLength) > READ_WHOLE_BODY_MAX_BYTES
+  const contentEncoding = headerValue(responseHeaders, 'content-encoding')?.trim().toLowerCase()
+  let maxDecodedBytes = Number(contentLength)
+
+  if (contentEncoding && contentEncoding !== 'identity') {
+    if (!DEFLATE_ENCODINGS.has(contentEncoding)) {
+      return true
+    }
+
+    maxDecodedBytes *= DEFLATE_MAX_EXPANSION
+  }
+
+  return maxDecodedBytes > READ_WHOLE_BODY_MAX_BYTES
 }
 
 const readTakenBody = async (client: ReadBodyClient, stream: string, url: string, sessionId?: string): Promise<Buffer> => {
