@@ -1,3 +1,10 @@
+# [@[secure]/webpack-dev-server-v6.2.1](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.2.0...@[secure]/webpack-dev-server-v6.2.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* compile Angular [secure] specs when specPattern uses braces ([#35531](https://github.com/[secure]-io/[secure]/issues/35531)) ([df2ed7f](https://github.com/[secure]-io/[secure]/commit/df2ed7f5a402229abc404403287a71f77e911384))
+
 # [@[secure]/webpack-dev-server-v6.2.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/webpack-dev-server-v6.1.2...@[secure]/webpack-dev-server-v6.2.0) (2026-11-14)
 
 

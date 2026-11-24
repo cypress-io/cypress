@@ -6,8 +6,7 @@
   "main": "lib-dist/index.js",
   "files": [
     "app-dist",
-    "lib-dist",
-    "theme"
+    "lib-dist"
   ],
   "scripts": {
     "build": "gulp build",
