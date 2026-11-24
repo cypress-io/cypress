@@ -260,6 +260,7 @@ export class Automation {
         case 'create:download':
         case 'canceled:download':
         case 'complete:download':
+        case 'beforeunload:dialog:accepted':
           return data
         default:
           return automate(data)

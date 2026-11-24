@@ -27,6 +27,7 @@ import { cdpGetUrl } from '../../automation/commands/get_url'
 import { cdpReloadFrame } from '../../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../../automation/commands/get_frame_title'
+import { cdpActivateFrame } from '../../automation/commands/user_activation'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -82,9 +83,14 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private frameTree: Protocol.Page.FrameTree | undefined
   private gettingFrameTree: Promise<void> | undefined | null
   private autFrameId: string | undefined
+  private topFrameId: string | undefined
+  // Electron accepts `beforeunload` dialogs itself, through `will-prevent-unload`,
+  // before they could be accepted here, so they are only reported
+  browserAcceptsBeforeUnloadDialogs = false
   private autFrameNavigatedListener: ((url: string) => void) | undefined
   private cachedDataUrlRequestIds: Set<string> = new Set()
   private executionContexts: Map<Protocol.Runtime.ExecutionContextId, Protocol.Runtime.ExecutionContextDescription> = new Map()
+  private activationWorlds: Map<Protocol.Page.FrameId, Protocol.Runtime.ExecutionContextId> = new Map()
 
   private constructor (private sendDebuggerCommandFn: SendDebuggerCommand, private onFn: OnFn, private offFn: OffFn, private sendCloseCommandFn: SendCloseCommand, private automation: Automation, private focusTabOnScreenshot: boolean = false, private bringsPageToFront: boolean = false, private storageOrigins: Set<string> = new Set()) {
     onFn('Network.requestWillBeSent', this.onNetworkRequestWillBeSent)
@@ -96,6 +102,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
     onFn('Runtime.executionContextCreated', this.onExecutionContextCreated)
     onFn('Runtime.executionContextDestroyed', this.onExecutionContextDestroyed)
+    onFn('Runtime.executionContextsCleared', this.onExecutionContextsCleared)
+
+    onFn('Page.javascriptDialogOpening', this.onJavascriptDialogOpening)
 
     this.on = onFn
     this.off = offFn
@@ -129,6 +138,13 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, bringsPageToFront, storageOrigins)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
+
+    // known before any dialog can open, since an open dialog blocks Page.getFrameTree
+    try {
+      cdpAutomation.topFrameId = (await sendDebuggerCommandFn('Page.getFrameTree')).frameTree.frame.id
+    } catch (err) {
+      debug('failed to get the top frame id: %s', err?.message)
+    }
 
     return cdpAutomation
   }
@@ -321,6 +337,68 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     if (this.executionContexts.has(event.executionContextId)) {
       this.executionContexts.delete(event.executionContextId)
     }
+
+    for (const [frameId, contextId] of this.activationWorlds) {
+      if (contextId === event.executionContextId) {
+        this.activationWorlds.delete(frameId)
+      }
+    }
+  }
+
+  // Chromium clears every context when the top frame navigates, taking the isolated
+  // worlds with them
+  private onExecutionContextsCleared = () => {
+    this.activationWorlds.clear()
+  }
+
+  // A page with sticky user activation can open a "Leave site?" dialog from a `beforeunload`
+  // handler. Nobody answers it during a run, so navigation would wait on it forever. Accept
+  // the dialog so the navigation goes ahead, as it would if the page had no handler.
+  // Other dialog types come from the AUT's alert/confirm/prompt, which the driver stubs.
+  // A dialog from the top frame is the runner's own, such as Studio's unsaved changes
+  // warning, and is left for the user to answer.
+  private onJavascriptDialogOpening = async (params: Protocol.Page.JavascriptDialogOpeningEvent) => {
+    if (params.type !== 'beforeunload') {
+      return
+    }
+
+    if (this.isFromTopFrame(params)) {
+      debug('leaving beforeunload dialog from the top frame %o', { url: params.url })
+
+      return
+    }
+
+    debug('accepting beforeunload dialog %o', { url: params.url, frameId: params.frameId })
+
+    if (!this.browserAcceptsBeforeUnloadDialogs) {
+      try {
+        await this.sendDebuggerCommandFn('Page.handleJavaScriptDialog', { accept: true })
+      } catch (err) {
+        debug('failed to accept beforeunload dialog: %s', err?.message)
+
+        return
+      }
+    }
+
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url: params.url }).catch((err) => {
+      debug('failed to report accepted beforeunload dialog: %s', err?.message)
+    })
+  }
+
+  private isFromTopFrame (params: Protocol.Page.JavascriptDialogOpeningEvent) {
+    const topFrameId = this.topFrameId ?? this.frameTree?.frame.id
+
+    if (params.frameId !== undefined && topFrameId !== undefined) {
+      return params.frameId === topFrameId
+    }
+
+    // Without both frame ids, the frame's url tells: the runner is served under
+    // Cypress's `/__/` route.
+    try {
+      return new URL(params.url).pathname.startsWith('/__/')
+    } catch {
+      return false
+    }
   }
 
   private getAllCookies = async (filter: CyCookieFilter) => {
@@ -495,6 +573,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       }
 
       const frameTree = (await this.send('Page.getFrameTree')).frameTree
+
+      this.topFrameId = frameTree?.frame?.id ?? this.topFrameId
 
       let frame = this._findAutFrame(frameTree)
 
@@ -686,6 +766,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         return cdpNavigateHistory(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame(), data.historyNumber)
       case 'get:aut:title':
         return cdpGetFrameTitle(this.sendDebuggerCommandFn, this.executionContexts, await this._getAutFrame())
+      case 'activate:aut:frame':
+        return cdpActivateFrame(this.sendDebuggerCommandFn, this.activationWorlds, await this._getAutFrame())
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }

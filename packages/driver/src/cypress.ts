@@ -41,6 +41,7 @@ import type { StateFunc } from './cypress/state'
 
 import * as $Events from './cypress/events'
 import $Keyboard from './cy/keyboard'
+import { deferActivationOfLoadedAut, logBeforeUnloadDialogAccepted } from './cy/user-activation'
 import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origin/communicator'
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
@@ -470,6 +471,13 @@ class $Cypress {
       })
       .then(() => {
         this.cy.initialize(this.$autIframe)
+
+        // A component testing spec runs in the AUT document, which has usually
+        // finished loading by now, so its load event has already passed.
+        if (this.testingType === 'component') {
+          deferActivationOfLoadedAut(this, this.$autIframe.prop('contentWindow'))
+        }
+
         this.onSpecReady()
       })
     }
@@ -839,6 +847,9 @@ class $Cypress {
 
       case 'app:window:before:unload':
         return this.emit('window:before:unload', args[0])
+
+      case 'app:beforeunload:dialog:accepted':
+        return logBeforeUnloadDialogAccepted(this, this.cy, args[0])
 
       case 'app:window:unload':
         return this.emit('window:unload', args[0])

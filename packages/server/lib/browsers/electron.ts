@@ -87,6 +87,8 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, undefined, false, false, storageOrigins)
 
+  automation.browserAcceptsBeforeUnloadDialogs = true
+
   const startCaptureScreencast = async () => {
     if (options.isTextTerminal) {
       await pageCriClient.send('Page.stopScreencast')

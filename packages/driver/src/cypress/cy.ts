@@ -38,6 +38,7 @@ import { create as createSnapshots } from '../cy/snapshots'
 import { $Command } from './command'
 import { CommandQueue } from './command_queue'
 import { initVideoRecorder } from '../cy/video-recorder'
+import { activateAut, activateAutLoadedEarly, deferActivationOfLoadedAut } from '../cy/user-activation'
 import { TestConfigOverride } from '../cy/testConfigOverrides'
 import type { IOverrides } from '../cy/overrides'
 import { create as createOverrides } from '../cy/overrides'
@@ -162,6 +163,16 @@ type ICySnapshots = Omit<
   'onCssModified' | 'onBeforeWindowLoad'
 >
 
+// `begun` settles once the AUT document begins unloading
+const createUnloadSignal = () => {
+  let begin = () => {}
+  const begun = new Promise<void>((resolve) => {
+    begin = resolve
+  })
+
+  return { begun, begin }
+}
+
 // How many times each runnable has started. Hooks are reused across tests and retries,
 // so this tells a completion from an earlier run apart from one for the current run.
 const runnableRuns = new WeakMap<object, number>()
@@ -231,6 +242,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   interceptBlur: ReturnType<typeof createFocused>['interceptBlur']
 
   private testConfigOverride: TestConfigOverride
+  private autActivation: { document: Document, activating: PromiseLike<void> } | undefined
+  private autLoadsHandled = 0
+  private autLoadSettled = 0
+  private autUnload = createUnloadSignal()
   private commandFns: Record<string, (...args: any[]) => any> = {}
   private queryFns: Record<string, (...args: any[]) => any> = {}
 
@@ -367,6 +382,10 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     // clears out any extra tabs/windows between tests
     Cypress.on('test:before:run:async', () => {
       return Cypress.backend('close:extra:targets')
+    })
+
+    Cypress.on('test:before:run:async', () => {
+      return activateAutLoadedEarly(Cypress, this.state('window'))
     })
 
     if (!Cypress.isCrossOriginSpecBridge) {
@@ -577,6 +596,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           this.urlNavigationEvent('load')
         }
 
+        const load = ++this.autLoadsHandled
+        const unload = this.autUnload
+
+        // before window:load, so its handlers and the next command see an activated
+        // page, unless the page begins unloading first and no longer needs it
+        await Promise.race([this.finishActivatingAut(autWindow), unload.begun])
+
         // stability is signalled after the window:load event to give event
         // listeners time to be invoked prior to moving on, but not if
         // there is a cross-origin error and the cy.origin API is
@@ -600,7 +626,27 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
           throw err
         } finally {
-          this.isStable(true, 'load')
+          // A page that redirects as soon as it loads, such as with
+          // `<meta http-equiv="refresh" content="0">`, begins unloading before
+          // this load is signalled. Its beforeunload found the page still
+          // unstable and signalled nothing, so it's signalled in a task of its
+          // own, as the browser would have, once the command waiting on this load
+          // has moved on. Otherwise that command would take the redirect as its
+          // own and leave it out of the Command Log. A later page that has already
+          // settled stability, such as one a cross-origin page navigated to while
+          // it waited, is left alone.
+          if (this.autLoadSettled < load) {
+            this.autLoadSettled = load
+            this.isStable(true, 'load')
+
+            if (this.autUnload !== unload) {
+              setTimeout(() => {
+                if (this.autLoadSettled === load) {
+                  this.isStable(false, 'beforeunload')
+                }
+              })
+            }
+          }
         }
       } catch (err: any) {
         if (err.isFromWindowLoadEvent) {
@@ -916,6 +962,38 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.overrides.wrapNativeMethods(contentWindow)
 
     this.onBeforeWindowLoad()
+
+    // Started as the document begins to load, so the activation has usually
+    // finished by the time the load handler waits on it. A component testing
+    // spec's page is left to the load handler, since no test's `userActivation`
+    // may apply yet, and a spec bridge's cross-origin AUT to the primary origin's.
+    if (this.Cypress.testingType !== 'component' && !this.Cypress.isCrossOriginSpecBridge) {
+      this.autActivation = { document: contentWindow.document, activating: activateAut(this.Cypress, contentWindow) }
+    }
+  }
+
+  // Waits for the activation started when `autWindow`'s document began to load. A
+  // document Cypress didn't see begin to load, such as a cross-origin one, is
+  // activated now. A component testing spec's page that loads before a test starts
+  // is activated once one does.
+  private async finishActivatingAut (autWindow: Window) {
+    if (this.Cypress.testingType === 'component' && !this.state('runnable')) {
+      return deferActivationOfLoadedAut(this.Cypress, autWindow)
+    }
+
+    const activation = this.autActivation
+
+    this.autActivation = undefined
+
+    let activating: PromiseLike<void> | undefined
+
+    try {
+      activating = activation && autWindow.document === activation.document ? activation.activating : undefined
+    } catch {
+      // a cross-origin AUT can't be read from here, so it isn't the document that began loading
+    }
+
+    await (activating ?? activateAut(this.Cypress, autWindow))
   }
 
   onUncaughtException ({ handlerType, frameType, err, promise }) {
@@ -1178,6 +1256,8 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       },
       onLoad: () => { },
       onBeforeUnload: (e) => {
+        this.autUnload.begin()
+        this.autUnload = createUnloadSignal()
         this.isStable(false, 'beforeunload')
 
         this.Cookies.setInitial()

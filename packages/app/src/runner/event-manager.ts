@@ -178,6 +178,9 @@ export class EventManager {
         case 'canceled:download':
           Cypress.downloads.end(data, true)
           break
+        case 'beforeunload:dialog:accepted':
+          Cypress.action('app:beforeunload:dialog:accepted', data)
+          break
         default:
           break
       }

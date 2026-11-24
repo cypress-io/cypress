@@ -242,8 +242,8 @@ ROUTES (1)
 
 TEST BODY · r3
    1  visit     cypress/e2e/network.html
-   2  wait      @getUsers
   e1    (fetch) ● GET 200 /cypress/e2e/network.html
+   2  wait      @getUsers
   e2    (fetch) ● GET 200 /api/users  getUsers  (stubbed)
    3  get       #status
    4  -assert   expected <div#status> to have text stubbed-ok
@@ -574,8 +574,8 @@ ROUTES (1)
 TEST BODY · r3
    1  checkpoint  the page settled
    2  visit       cypress/e2e/journey.html
-   3  wait        @getUsers
   e1    (fetch) ● GET 200 /api/users  getUsers  (stubbed)
+   3  wait        @getUsers
    4  log         the stub answered
    5  get         #name  @nameField
    6  -type       tap

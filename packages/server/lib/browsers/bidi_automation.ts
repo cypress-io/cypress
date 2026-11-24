@@ -17,6 +17,7 @@ import type {
   NetworkResponseCompletedParameters,
   NetworkFetchErrorParameters,
   BrowsingContextInfo,
+  BrowsingContextUserPromptOpenedParameters,
 } from 'webdriver/build/bidi/localTypes'
 import type { CyCookie as CyBaseCookie } from '../automation/cookie/util'
 import type { BidiCyCookie as CyCookie, StoragePartialCookie } from '../automation/cookie/converters/bidi'
@@ -25,6 +26,7 @@ import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
+import { bidiActivateContext } from '../automation/commands/user_activation'
 import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
@@ -118,11 +120,13 @@ export class BidiAutomation {
     'network.fetchError',
     'browsingContext.contextCreated',
     'browsingContext.contextDestroyed',
+    'browsingContext.userPromptOpened',
   ]
 
   private webDriverClient: WebDriverClient
   private automation: Automation
   private autContextId: string | undefined = undefined
+  private autDocumentUrl: string | undefined = undefined
   // set in firefox-utils when creating the webdriver session initially and in the 'reset:browser:tabs:for:next:spec' automation hook for subsequent tests when the top level context is recreated
   private topLevelContextId: string | undefined = undefined
   private interceptId: string | undefined = undefined
@@ -154,6 +158,42 @@ export class BidiAutomation {
     this.webDriverClient.on('network.fetchError', this.onFetchError)
     this.webDriverClient.on('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.on('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+    this.webDriverClient.on('browsingContext.userPromptOpened', this.onUserPromptOpened)
+  }
+
+  // A page with sticky user activation can open a "Leave site?" dialog from a `beforeunload`
+  // handler. Nobody answers it during a run, so navigation would wait on it forever. Accept
+  // the dialog so the navigation goes ahead, as it would if the page had no handler.
+  // `handler` is what the session's prompt handler already does with it: Firefox accepts
+  // `beforeunload` prompts on its own unless that handler is `ignore`.
+  private onUserPromptOpened = async (params: BrowsingContextUserPromptOpenedParameters) => {
+    if (params.type !== 'beforeunload') {
+      return
+    }
+
+    debug('received beforeunload prompt %o', params)
+
+    // The prompt belongs to the top-level context, whose URL is the runner's. The
+    // dialogs Cypress accepts during a test come from the AUT, so the dialog is
+    // reported with the URL of the AUT page that asked. It's read now, since
+    // accepting lets the navigation go ahead and request the next page.
+    const url = this.autDocumentUrl ?? ''
+
+    if (params.handler === 'ignore') {
+      try {
+        await this.webDriverClient.browsingContextHandleUserPrompt({ context: params.context, accept: true })
+      } catch (err) {
+        debug('failed to accept beforeunload prompt: %s', err?.message)
+
+        return
+      }
+    } else if (params.handler !== 'accept') {
+      return
+    }
+
+    await this.automation.push('beforeunload:dialog:accepted', { message: params.message, url }).catch((err) => {
+      debug('failed to report accepted beforeunload prompt: %s', err?.message)
+    })
   }
 
   setTopLevelContextId = (contextId?: string) => {
@@ -174,6 +214,7 @@ export class BidiAutomation {
 
   private setAndResolveAutContextId (contextId: string) {
     this.autContextId = contextId
+    this.autDocumentUrl = undefined
     this.autContextDeferred?.resolve(contextId)
     this.autContextDeferred = undefined
   }
@@ -388,6 +429,7 @@ export class BidiAutomation {
       debug(`top level browsing context ${params.context} destroyed`)
       // if the top level context is destroyed, we can imply that the AUT context is destroyed along with it
       this.autContextId = undefined
+      this.autDocumentUrl = undefined
       // Fail any requests still waiting on an AUT context: the tab they belong
       // to is gone, and the AUT of a subsequently created tab must not satisfy
       // them.
@@ -414,6 +456,7 @@ export class BidiAutomation {
       debug(`AUT browsing context ${params.context} destroyed within top-level parent context ${params.parent}.`)
 
       this.autContextId = undefined
+      this.autDocumentUrl = undefined
     }
   }
 
@@ -429,6 +472,12 @@ export class BidiAutomation {
     })
 
     const resourceType = normalizeResourceType(params.request.initiatorType)
+
+    // A page's `beforeunload` runs before the next page is requested, so this is
+    // the page that asks to confirm leaving.
+    if (params.context === this.autContextId && params.navigation !== null) {
+      this.autDocumentUrl = url
+    }
 
     const urlWithoutHash = url.includes('#') ? url.substring(0, url.indexOf('#')) : url
 
@@ -649,6 +698,7 @@ export class BidiAutomation {
     this.webDriverClient.off('network.fetchError', this.onFetchError)
     this.webDriverClient.off('browsingContext.contextCreated', this.onBrowsingContextCreated)
     this.webDriverClient.off('browsingContext.contextDestroyed', this.onBrowsingContextDestroyed)
+    this.webDriverClient.off('browsingContext.userPromptOpened', this.onUserPromptOpened)
   }
 
   static create (webdriverClient: WebDriverClient, automation: Automation) {
@@ -820,6 +870,14 @@ export class BidiAutomation {
           }
 
           return
+        case 'activate:aut:frame':
+        {
+          const autContextId = await this.ensureAutContextId('Cannot activate AUT frame: no AUT context initialized')
+
+          await bidiActivateContext(this.webDriverClient, autContextId)
+
+          return
+        }
         case 'get:aut:url':
         {
           const autContextId = await this.ensureAutContextId('Cannot get AUT url: no AUT context initialized')

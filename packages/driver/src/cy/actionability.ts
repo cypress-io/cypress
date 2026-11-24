@@ -9,6 +9,7 @@ import type { ElWindowPosition, ElViewportPosition, ElementPositioning } from '.
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
 import { callNativeMethod, getNativeProp } from '../dom/elements/nativeProps'
+import { createTransientActivationRenewer } from './user-activation'
 const debug = debugFn('cypress:driver:actionability')
 // for logs emitted on every retry iteration of an actionability check
 const debugVerbose = debugFn('cypress-verbose:driver:actionability')
@@ -436,6 +437,9 @@ interface VerifyCallbacks {
   onReady?: (finalEl: any, coords: ElementPositioning, $el: any) => any
   onScroll?: ($el: any, type: 'element' | 'window' | 'container') => any
   subjectFn?: () => any
+  // the command stands in for a real user's click or key press, which gives the
+  // page transient activation for the handlers its events run
+  activatesUser?: boolean
 }
 
 const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
@@ -649,11 +653,22 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
       } catch (err) {
         options.error = err
 
-        return cy.retry(retryActionability, options)
+        return cy.retry(attempt, options)
       }
     }
 
-    return retryActionability()
+    const renewActivation = callbacks.activatesUser ? createTransientActivationRenewer(cy.Cypress, cy.state('window')) : undefined
+
+    // The activation is renewed before an attempt rather than between its checks and
+    // its events, which have to run synchronously. The wait goes through Bluebird so
+    // cancelling the command, as `Cypress.stop()` does, still stops the events it fires.
+    const attempt = () => {
+      const renewing = renewActivation?.()
+
+      return renewing ? Promise.resolve(renewing).then(retryActionability) : retryActionability()
+    }
+
+    return attempt()
   })
 }
 

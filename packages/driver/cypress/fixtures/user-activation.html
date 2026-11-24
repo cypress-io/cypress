@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User activation</title>
+</head>
+<body>
+  <a id="next-page" href="/fixtures/user-activation.html?page=2">Next page</a>
+  <button id="button">Button</button>
+  <input id="text" aria-label="Text">
+  <input id="date" type="date" aria-label="Date">
+
+  <script>
+    // what the application could observe of the activation: trusted input and focus changes
+    window.observedEvents = []
+
+    const record = (e) => {
+      if (e.isTrusted) {
+        window.observedEvents.push(e.type)
+      }
+    }
+
+    for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'touchend', 'keydown', 'keyup', 'focusin', 'focusout']) {
+      window.addEventListener(type, record, true)
+    }
+
+    if (new URLSearchParams(window.location.search).has('beforeunload')) {
+      window.addEventListener('beforeunload', (e) => {
+        e.preventDefault()
+        e.returnValue = 'You have unsaved changes'
+      })
+    }
+  </script>
+</body>
+</html>

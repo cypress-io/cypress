@@ -1104,6 +1104,7 @@ cy
     responseTimeout: 6000,
     scrollBehavior: 'center',
     taskTimeout: 6000,
+    userActivation: false,
     viewportHeight: 200,
     viewportWidth: 200,
     waitForAnimations: false,

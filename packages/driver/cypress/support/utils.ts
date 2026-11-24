@@ -1,3 +1,5 @@
+import $elements from '../../src/dom/elements'
+
 const { $, _, Promise } = Cypress
 
 // the reporter renders inside a same-origin iframe in the runner UI, so
@@ -226,3 +228,15 @@ Cypress.Commands.add('shouldWithTimeout', shouldWithTimeout)
 const chaiSubset = require('chai-subset')
 
 chai.use(chaiSubset)
+
+// Checks the tag name rather than `instanceof`, which AUT elements fail because they
+// come from another realm.
+export const getAutInput = (doc: Document, selector: string): HTMLInputElement => {
+  const el = doc.querySelector(selector)
+
+  if (!$elements.isInput(el)) {
+    throw new Error(`Expected \`${selector}\` to match an <input> element`)
+  }
+
+  return el
+}

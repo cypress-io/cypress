@@ -60,6 +60,7 @@ exports['module api and after:run results'] = `
     "testIsolation": true,
     "trashAssetsBeforeRuns": true,
     "trustedCertificates": [],
+    "userActivation": true,
     "userAgent": null,
     "video": false,
     "videoCompression": false,

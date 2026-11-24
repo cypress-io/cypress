@@ -965,6 +965,10 @@ describe('config/src/project/utils', () => {
       await defaults('viewportHeight', 660)
     })
 
+    it('userActivation=true', async function () {
+      await defaults('userActivation', true)
+    })
+
     it('userAgent=null', async function () {
       await defaults('userAgent', null)
     })
@@ -1337,6 +1341,7 @@ describe('config/src/project/utils', () => {
           testIsolation: { value: true, from: 'default' },
           trashAssetsBeforeRuns: { value: true, from: 'default' },
           trustedCertificates: { value: [], from: 'default' },
+          userActivation: { value: true, from: 'default' },
           userAgent: { value: null, from: 'default' },
           video: { value: false, from: 'default' },
           videoCompression: { value: false, from: 'default' },
@@ -1470,6 +1475,7 @@ describe('config/src/project/utils', () => {
           testIsolation: { value: true, from: 'default' },
           trashAssetsBeforeRuns: { value: true, from: 'default' },
           trustedCertificates: { value: [], from: 'default' },
+          userActivation: { value: true, from: 'default' },
           userAgent: { value: null, from: 'default' },
           video: { value: false, from: 'default' },
           videoCompression: { value: false, from: 'default' },

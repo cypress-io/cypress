@@ -216,6 +216,11 @@
     "field": "trustedCertificates"
   },
   {
+    "value": true,
+    "from": "default",
+    "field": "userActivation"
+  },
+  {
     "value": null,
     "from": "default",
     "field": "userAgent"

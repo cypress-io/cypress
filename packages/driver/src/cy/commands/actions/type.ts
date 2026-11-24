@@ -8,6 +8,7 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
+import { createTransientActivationRenewer } from '../../user-activation'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
@@ -287,6 +288,9 @@ export default function (Commands, Cypress, cy, state, config) {
         $el: options.$el,
         chars,
         delay: options.delay,
+        // renews the activation between keys once it may have run low, as every real
+        // keydown does, so the last keys of a long string still have it
+        onBeforeKey: createTransientActivationRenewer(Cypress, cy.state('window')),
         release: options.release,
         parseSpecialCharSequences: options.parseSpecialCharSequences,
         window: win,
@@ -481,6 +485,8 @@ export default function (Commands, Cypress, cy, state, config) {
       return $actionability.verify(cy, options.$el, config, options, {
         subjectFn: () => cy.getSubjectFromChain(subjectChain),
 
+        activatesUser: true,
+
         onScroll ($el, type) {
           return Cypress.action('cy:scrolled', $el, type)
         },
@@ -632,6 +638,8 @@ export default function (Commands, Cypress, cy, state, config) {
         }
 
         return $actionability.verify(cy, $el, config, options, {
+          activatesUser: true,
+
           onScroll ($el, type) {
             return Cypress.action('cy:scrolled', $el, type)
           },

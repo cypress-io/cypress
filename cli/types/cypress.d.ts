@@ -3543,6 +3543,13 @@ declare namespace Cypress {
      */
     waitForAnimations: boolean
     /**
+     * Whether Cypress gives the application under test the [user activation](https://developer.mozilla.org/en-US/docs/Web/Security/User_activation) that a real user's interactions give a page. After each page load, the page behaves as if someone had already interacted with it, so APIs like `navigator.vibrate()` and `beforeunload` confirmation dialogs work. For a few seconds after a page starts to load, APIs that need a fresh interaction, like `requestFullscreen()`, also work from code that runs as it loads. In Chromium-based browsers, action commands such as `.click()` and `.type()` also give the event handlers they run the activation a real click or key press gives, so a handler can call APIs like `requestFullscreen()` and `showPicker()`. Cypress accepts any `beforeunload` dialog this enables. Set to `false` to test what a page does before anyone interacts with it.
+     *
+     * Chromium-based browsers keep a page's activation when it navigates to another page on the same origin, so turn this off in your config or for the outermost suite of a spec, before any test activates the page. Not supported in WebKit.
+     * @default true
+     */
+    userActivation: boolean
+    /**
      * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
      * @default 'top'
      */
@@ -3790,7 +3797,7 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'userActivation' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -3798,7 +3805,7 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'userActivation' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
