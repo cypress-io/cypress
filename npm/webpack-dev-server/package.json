@@ -34,6 +34,7 @@
     "fs-extra": "9.1.0",
     "html-webpack-plugin-5": "npm:html-webpack-plugin@^5",
     "local-pkg": "0.4.1",
+    "micromatch": "^4.0.8",
     "semver": "^7.7.3",
     "tslib": "^2.3.1",
     "tsx": "^4.23.12",
@@ -44,6 +45,7 @@
   "devDependencies": {
     "@angular-devkit/core": "^21.2.7",
     "@packages/eslint-config": "0.0.0-development",
+    "@types/micromatch": "4.0.10",
     "@types/node": "24.10.1",
     "@types/semver": "^7.5.0",
     "@types/webpack-bundle-analyzer": "4.7.0",
