@@ -1,9 +1,18 @@
 {
   "extends": "../ts/tsconfig.json",
+  // React `.tsx` files are checked by tsconfig.react.json
   "include": [
-    "src/**/*",
-    "cypress/**/*",
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "src/**/*.vue.tsx",
+    "src/**/*.vue.*.tsx",
+    "cypress/**/*.ts",
+    "cypress/**/*.vue.tsx",
+    "cypress/**/*.vue.*.tsx",
     "*.d.ts"
+  ],
+  "exclude": [
+    "vue-sfc.react.d.ts"
   ],
   "compilerOptions": {
     "module": "esnext",

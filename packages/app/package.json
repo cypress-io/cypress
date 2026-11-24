@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "vite build",
-    "check-ts": "vue-tsc --noEmit && yarn -s tslint",
+    "check-ts": "vue-tsc --noEmit && tsc --noEmit -p tsconfig.react.json && yarn -s tslint",
     "clean": "rimraf dist && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "cypress:launch": "yarn cypress:run-cypress-in-cypress gulp open --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
@@ -21,7 +21,7 @@
     "lint": "eslint",
     "start": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1",
     "test": "echo 'ok'",
-    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "tslint": "tslint --config ../ts/tslint.json --project . && tslint --config ../ts/tslint.json --project tsconfig.react.json",
     "watch": "echo \"run 'yarn dev' or 'yarn watch' from the root\" && exit 1"
   },
   "lint-staged": {

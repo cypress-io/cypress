@@ -1,14 +1,18 @@
 {
   "extends": "../frontend-shared/tsconfig.json",
+  // React `.tsx` files are checked by tsconfig.react.json
   "include": [
-    "src/**/*.vue", 
-    "src/**/*.tsx", 
+    "src/**/*.vue",
+    "src/**/*.vue.tsx",
+    "src/**/*.vue.*.tsx",
     "src/**/*.ts",
-    "cypress/**/*.ts", 
-    "cypress/**/*.tsx",
+    "cypress/**/*.ts",
+    "cypress/**/*.vue.tsx",
+    "cypress/**/*.vue.*.tsx",
     "*.d.ts",
-    "../frontend-shared/src/**/*.vue", 
-    "../frontend-shared/src/**/*.tsx", 
+    "../frontend-shared/src/**/*.vue",
+    "../frontend-shared/src/**/*.vue.tsx",
+    "../frontend-shared/src/**/*.vue.*.tsx",
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {

@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/**/*.tsx",
+    "cypress/**/*.tsx",
+    "*.d.ts",
+    "cypress/support/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.vue.tsx",
+    "**/*.vue.*.tsx"
+  ],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  }
+}
