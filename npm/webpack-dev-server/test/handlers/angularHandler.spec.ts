@@ -142,15 +142,46 @@ describe('angularHandler', { timeout: 60000 }, function () {
 })
 
 describe('generateTsConfig', () => {
-  it('sets its own exclude so specs excluded from the app build stay in the component test compilation', async () => {
-    const projectRoot = path.join(path.sep, 'workspace', 'greeting-app')
+  const projectRoot = path.join(path.sep, 'home', 'mara.lindqvist', 'projects', 'storefront')
+
+  const readInclude = async (specPattern: string | string[]) => {
     const devServerConfig = {
+      framework: 'angular',
+      cypressConfig: {
+        projectRoot,
+        specPattern,
+      } as Cypress.PluginConfigOptions,
+    } as AngularWebpackDevServerConfig
+
+    const tsConfigPath = await generateTsConfig(devServerConfig, { tsConfig: 'tsconfig.app.json' })
+
+    return JSON.parse(await fs.readFile(tsConfigPath, 'utf8')).include
+  }
+
+  it('expands the braces in the default specPattern, which TypeScript include does not support', async () => {
+    expect(await readInclude('**/*.cy.{js,jsx,ts,tsx}')).toEqual([
+      toPosix(path.join(projectRoot, '**/*.cy.js')),
+      toPosix(path.join(projectRoot, '**/*.cy.jsx')),
+      toPosix(path.join(projectRoot, '**/*.cy.ts')),
+      toPosix(path.join(projectRoot, '**/*.cy.tsx')),
+    ])
+  })
+
+  it('expands braces in each entry of a specPattern array and drops duplicates', async () => {
+    expect(await readInclude(['{src,projects}/**/*.cy.ts', 'src/**/*.cy.ts'])).toEqual([
+      toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
+      toPosix(path.join(projectRoot, 'projects/**/*.cy.ts')),
+    ])
+  })
+
+  it('sets its own exclude so specs excluded from the app build stay in the component test compilation', async () => {
+    const devServerConfig = {
+      framework: 'angular',
       cypressConfig: {
         projectRoot,
         specPattern: 'src/**/*.cy.ts',
         supportFile: path.join(projectRoot, 'cypress', 'support', 'component.ts'),
       } as Cypress.PluginConfigOptions,
-      framework: 'angular',
     } as AngularWebpackDevServerConfig
 
     const tsConfigPath = await generateTsConfig(devServerConfig, { tsConfig: 'tsconfig.app.json' })

@@ -269,6 +269,8 @@ describe('lib/tasks/verify', () => {
       expect(out).toContain('No version of Cypress is installed')
       expect(out).toContain('/cache/Cypress/1.2.3/Cypress.app')
       expect(out).toContain('cypress install')
+      expect(out).toContain('If your package manager blocks install scripts')
+      expect(out).toContain('https://on.cypress.io/app/get-started/install-cypress#Package-Manager')
     }
   })
 
@@ -1033,6 +1035,8 @@ describe('lib/tasks/verify', () => {
         expect(out).toContain('Cypress binary is missing')
         expect(out).toContain('/cache/Cypress')
         expect(out).toContain('not-installed-ci-error')
+        expect(out).toContain('Your package manager blocks install scripts')
+        expect(out).toContain('https://on.cypress.io/app/get-started/install-cypress#Package-Manager')
 
         return
       }

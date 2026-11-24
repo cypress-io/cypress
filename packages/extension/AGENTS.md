@@ -39,7 +39,6 @@ app/
   newtab.html / popup.html   Extension UI pages
 lib-dist/              Compiled TypeScript library code (published)
 app-dist/              Compiled extension bundles (published)
-theme/                 Extension icon and popup theme assets
 ```
 
 ## Gotchas / Notes
