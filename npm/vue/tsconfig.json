@@ -30,9 +30,10 @@
     /* Module Resolution Options */
     // "moduleResolution": "node",            /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     "baseUrl": "./",                          /* Base directory to resolve non-absolute module names. */
-    // vue-i18n and vue-router are hoisted to the repo root, where `vue` is the app's
-    // newer version. Point every import of Vue, theirs included, at this package's
-    // own copy so their augmentations land on the Vue these specs run against.
+    // Resolves `vue` and `@vue/*` to this package's own copy, including the imports
+    // in vue-i18n and vue-router, so their `$i18n`, `$t` and `$router` types extend
+    // the Vue this package builds and tests against. Both are hoisted to the repo
+    // root, where `vue` is the app's newer version.
     "paths": {
       "vue": ["node_modules/vue"],
       "@vue/*": ["node_modules/@vue/*"]

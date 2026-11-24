@@ -37,8 +37,10 @@ declare global {
       /**
        * The app's own React and React DOM, which the runner bundle reads from
        * the host modules and re-exports here. The reporter, Studio and cy.prompt
-       * mount through them. The app never calls them itself, so they stay
-       * untyped.
+       * mount through them.
+       *
+       * TODO: type them as `typeof React` and `typeof ReactDOMClient` from
+       * @types/react and @types/react-dom.
        */
       React: any
       ReactDOM: any
