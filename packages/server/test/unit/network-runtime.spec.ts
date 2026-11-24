@@ -1,4 +1,6 @@
 import { deepStrictEqual } from 'assert'
+import fs from 'fs/promises'
+import path from 'path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import { NetworkProxy } from '@packages/proxy'
@@ -606,6 +608,63 @@ describe('lib/network-runtime', () => {
     expect(continueResponseCall![1]).not.toHaveProperty('responseHeaders')
 
     expect(fulfillCall, 'expected no Fetch.fulfillRequest for an unrewritten asset').toBeUndefined()
+  })
+
+  // The pipeline drops the Connection header a keep-alive origin sends, which
+  // must not read as a change to a response it otherwise left alone.
+  it('createCdpFetchRuntime continues a keep-alive module response from a dev server without a header override', async () => {
+    const moduleBody = await fs.readFile(path.join(__dirname, '../support/fixtures/server/vite-dev-server-module.js'))
+    const client = {
+      send: vi.fn(async (method: string) => {
+        if (method === 'Fetch.getResponseBody') {
+          return { body: moduleBody.toString('base64'), base64Encoded: true }
+        }
+
+        return {}
+      }),
+      on: vi.fn(),
+      off: vi.fn(),
+    }
+    const runtime = createCdpFetchRuntime({ ...baseDeps(), client })
+    const onRequestPaused = await startCdpRuntime(runtime, client)
+    const pause = {
+      requestId: 'module-request',
+      networkId: 'network-module-1',
+      url: 'http://localhost:5173/src/team.ts',
+      resourceType: 'Script' as Protocol.Network.ResourceType,
+    }
+
+    const handled = onRequestPaused(createPausedRequest(pause))
+
+    await flush()
+
+    // the headers Vite 8's dev server sent with that module
+    await onRequestPaused(createPausedRequest({
+      ...pause,
+      responseStatusCode: 200,
+      responseHeaders: [
+        { name: 'Vary', value: 'Origin' },
+        { name: 'Content-Type', value: 'text/javascript' },
+        { name: 'Cache-Control', value: 'no-cache' },
+        { name: 'Etag', value: 'W/"343-sChoqqytW39AeGdPqlsiUKVRF7c"' },
+        { name: 'Date', value: 'Tue, 24 Nov 2026 01:10:08 GMT' },
+        { name: 'Connection', value: 'keep-alive' },
+        { name: 'Keep-Alive', value: 'timeout=5' },
+        { name: 'Content-Length', value: String(moduleBody.length) },
+      ],
+    }))
+
+    await flush()
+    await handled
+
+    const continueResponseCall = findCall(client.send, 'Fetch.continueResponse')
+
+    expect(continueResponseCall, 'expected Fetch.continueResponse for an unrewritten module').toBeDefined()
+    expect(continueResponseCall![1]).toEqual({
+      requestId: 'module-request',
+    })
+
+    expect(findCall(client.send, 'Fetch.fulfillRequest'), 'expected no Fetch.fulfillRequest for an unrewritten module').toBeUndefined()
   })
 
   it('createCdpFetchRuntime propagates CDP XHR resourceType onto the synthetic Express request', async () => {

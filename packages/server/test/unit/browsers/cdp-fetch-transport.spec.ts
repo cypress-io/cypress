@@ -814,7 +814,7 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    describe('continuing a response whose headers only changed order', () => {
+    describe('deciding whether a continued response overrides its headers', () => {
       const decodePausedResponse = (codec: ReturnType<typeof createCdpFetchCodec>, responseHeaders: Protocol.Fetch.HeaderEntry[]) => {
         const request: CdpFetchTransportRequest = {
           id: 'network-1',
@@ -852,6 +852,47 @@ describe('CdpFetchTransport', () => {
 
         expect(encoded.fulfilled).toBe(false)
         expect(encoded.responseHeaders).toBeUndefined()
+      })
+
+      // the pipeline drops Connection from every response it passes on
+      it('omits the headers when the middleware view lacks only the Connection header', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, [
+          { name: 'Content-Type', value: 'text/javascript' },
+          { name: 'Content-Length', value: '6' },
+          { name: 'Connection', value: 'keep-alive' },
+          { name: 'Keep-Alive', value: 'timeout=5' },
+        ])
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: 'origin',
+          headers: { 'content-type': 'text/javascript', 'keep-alive': 'timeout=5' },
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toBeUndefined()
+      })
+
+      it('keeps the origin Connection header when other headers changed', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, [
+          { name: 'Content-Type', value: 'text/javascript' },
+          { name: 'Connection', value: 'keep-alive' },
+        ])
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: 'origin',
+          headers: { 'content-type': 'text/javascript', 'x-request-id': '7f3c2a91-5d4e-4b8a-9c61-2e0f8d3b6a45' },
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toStrictEqual([
+          { name: 'content-type', value: 'text/javascript' },
+          { name: 'x-request-id', value: '7f3c2a91-5d4e-4b8a-9c61-2e0f8d3b6a45' },
+          { name: 'Connection', value: 'keep-alive' },
+        ])
       })
 
       // the later of two lines for the same cookie is the one stored, so the
