@@ -62,7 +62,7 @@ describe('e2e browser reset', () => {
   // still has an open connection (#34216).
   systemTests.it('clears IndexedDB that a spec leaves with an open connection', {
     project: 'e2e',
-    spec: 'browser_reset_open_connection_spec.cy.js,browser_reset_second_spec.cy.js',
+    spec: 'browser_reset_open_connection_spec.cy.ts,browser_reset_second_spec.cy.js',
     browser: ['electron', 'chrome'],
   })
 })
