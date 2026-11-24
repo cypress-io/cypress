@@ -95,6 +95,15 @@ describe(`Angular CLI versions`, () => {
     })
   }
 
+  systemTests.it('v21 with the default specPattern', {
+    project: 'angular-21',
+    configFile: 'cypress-default-spec-pattern.config.ts',
+    spec: 'src/app/mount.cy.ts',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
+
   systemTests.it('angular 21 custom config', {
     project: 'angular-custom-config',
     spec: 'src/app/my-component.cy.ts',
