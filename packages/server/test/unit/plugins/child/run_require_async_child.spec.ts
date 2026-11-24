@@ -45,25 +45,25 @@ describe('lib/plugins/child/run_require_async_child', () => {
     it('sends the serialized error via ipc on process uncaughtException', () => {
       yieldTo('uncaughtException', err)
 
-      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', err)
+      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', { ...err, stack: 'error name: error message' })
     })
 
     it('sends the serialized error via ipc on process unhandledRejection', () => {
       yieldTo('unhandledRejection', err)
 
-      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', err)
+      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', { ...err, stack: 'error name: error message' })
     })
 
     it('unwraps object rejection reason from event.reason on process unhandledRejection', () => {
       yieldTo('unhandledRejection', { reason: err })
 
-      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', err)
+      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', { ...err, stack: 'error name: error message' })
     })
 
     it('sends the serialized OpenSSL error via ipc on process unhandledRejection', () => {
       yieldTo('unhandledRejection', { ...err, reason: 'reason' })
 
-      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', err)
+      expect(ipc.send).toHaveBeenCalledWith('childProcess:unhandledError', { ...err, stack: 'error name: error message' })
     })
 
     // A watch-mode preprocessor that leaves `Promise.reject(formattedMessages)` unhandled

@@ -129,7 +129,7 @@ export const buildErrorLocationFromConfigFileError = async (
   return null
 }
 
-export const serializeError = (err: Error & Partial<SerializedError>): SerializedError => {
+export const serializeError = (err: Partial<SerializedError>): SerializedError => {
   const obj = _.pick(err,
     'name', 'message', 'stack', 'code', 'annotated', 'type',
     'details', 'isCypressErr', 'messageMarkdown',
@@ -144,8 +144,8 @@ export const serializeError = (err: Error & Partial<SerializedError>): Serialize
   return obj
 }
 
-const hasErrorMessage = (value: unknown): value is Error => {
-  return value instanceof Error || (typeof value === 'object' && value !== null && 'message' in value && typeof value.message === 'string')
+const hasErrorMessage = (value: unknown): value is { message: string } => {
+  return typeof value === 'object' && value !== null && 'message' in value && typeof value.message === 'string'
 }
 
 const describeNonError = (value: unknown): string => {
@@ -157,7 +157,7 @@ const describeNonError = (value: unknown): string => {
     return value.join('\n')
   }
 
-  return inspect(value, { depth: 5 })
+  return inspect(value)
 }
 
 /**
@@ -166,17 +166,14 @@ const describeNonError = (value: unknown): string => {
  * `uncaughtException` or `unhandledRejection` need not be Errors.
  */
 export const serializeUnhandledError = (value: unknown): SerializedError => {
-  if (hasErrorMessage(value)) {
-    const serialized = serializeError(value)
+  const serialized: Partial<SerializedError> & { message: string } = hasErrorMessage(value)
+    ? serializeError(value)
+    : { message: describeNonError(value) }
+  const name = serialized.name || 'Error'
 
-    // The parent only treats a value with both `name` and `message` as an error
-    return { ...serialized, name: serialized.name || 'Error' }
-  }
-
-  const message = describeNonError(value)
-
-  // The value carries no stack of its own; the parent prints `stack` as the error's body
-  return { name: 'Error', message, stack: `Error: ${message}` }
+  // The parent only treats a value with both `name` and `message` as an error, and prints
+  // `stack` as the error's body, so a value without a stack would show nothing
+  return { ...serialized, name, stack: serialized.stack || `${name}: ${serialized.message}` }
 }
 
 export const nonNodeRequires = (): string[] => {

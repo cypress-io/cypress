@@ -191,10 +191,11 @@ describe('lib/plugins/util', () => {
       expect(util.serializeUnhandledError(err)).toStrictEqual(util.serializeError(err))
     })
 
-    it('gives an object that only has a message the name Error', () => {
+    it('gives an object that only has a message the name Error and a stack', () => {
       expect(util.serializeUnhandledError({ message: 'Request failed with status code 503' })).toStrictEqual({
         name: 'Error',
         message: 'Request failed with status code 503',
+        stack: 'Error: Request failed with status code 503',
       })
     })
 
@@ -217,13 +218,14 @@ describe('lib/plugins/util', () => {
     })
 
     it('uses util.inspect output as the message for any other value', () => {
-      expect(util.serializeUnhandledError({ status: 503, retryAfter: 30 })).toMatchObject({
+      expect(util.serializeUnhandledError({ status: 503, retryAfter: 30 })).toStrictEqual({
         name: 'Error',
         message: '{ status: 503, retryAfter: 30 }',
+        stack: 'Error: { status: 503, retryAfter: 30 }',
       })
 
-      expect(util.serializeUnhandledError(undefined)).toMatchObject({ name: 'Error', message: 'undefined' })
-      expect(util.serializeUnhandledError([])).toMatchObject({ name: 'Error', message: '[]' })
+      expect(util.serializeUnhandledError(undefined)).toStrictEqual({ name: 'Error', message: 'undefined', stack: 'Error: undefined' })
+      expect(util.serializeUnhandledError([])).toStrictEqual({ name: 'Error', message: '[]', stack: 'Error: []' })
     })
   })
 
