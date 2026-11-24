@@ -9,6 +9,9 @@
     "module": "esnext",
     "lib": ["dom", "ESNext"],
     "jsx": "preserve",
+    // Vue 3.4+ doesn't register a global JSX namespace, so Vue JSX reads its
+    // types from vue/jsx-runtime
+    "jsxImportSource": "vue",
     "preserveWatchOutput": true,
     "noImplicitThis": false,
     "noErrorTruncation": true,
