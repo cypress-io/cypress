@@ -8,7 +8,7 @@ import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
-import { FRAGMENT_MESSAGES_OVER_BYTES } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
+import { FRAGMENT_CHARS } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
 import * as protocol from '../../../lib/browsers/protocol'
 import { cypressSessions } from '../../../lib/cypress-sessions'
 import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
@@ -564,7 +564,7 @@ describe('lib/browsers/browser-cri-client', function () {
       expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
-    it('sends messages over the fragmenting threshold to the extra target as fragments', async () => {
+    it('sends messages longer than FRAGMENT_CHARS to the extra target as fragments', async () => {
       const originalSend = vi.fn()
       const criClient = {
         send: stub(),
@@ -577,7 +577,7 @@ describe('lib/browsers/browser-cri-client', function () {
 
       await BrowserCriClient._onAttachToTarget(options as any)
 
-      criClient._ws.send('a'.repeat(FRAGMENT_MESSAGES_OVER_BYTES + 1))
+      criClient._ws.send('a'.repeat(FRAGMENT_CHARS + 1))
 
       expect(originalSend.mock.calls.length).toBeGreaterThan(1)
     })
