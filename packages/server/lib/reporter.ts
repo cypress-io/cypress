@@ -322,7 +322,7 @@ const events: ReporterEventHandlers = {
   'test': mergeRunnable('test'),
   'test end': mergeRunnable('test end'),
   'hook': safelyMergeRunnable,
-  'retry': true,
+  'retry': mergeRunnable('retry'),
   'hook end': safelyMergeRunnable,
   'pass': mergeRunnable('pass'),
   'pending': mergeRunnable('pending'),
