@@ -17,11 +17,15 @@ import {
   mergeDefaults,
   shouldHonorNumTestsKeptInMemory,
 } from './utils'
+import { setUrls } from '../utils'
+import type { GetFilesByGlob } from './types'
+
+export type { GetFilesByGlob }
 
 const debug = Debug('cypress:config:project')
 
 // TODO: any -> SetupFullConfigOptions in data-context/src/data/ProjectConfigManager.ts
-export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any): Promise<FullConfig> {
+export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: GetFilesByGlob): Promise<FullConfig> {
   debug('setting config object %o', obj)
   const { projectRoot, projectName, envFile, options, cliConfig, repoRoot } = obj
 
@@ -146,5 +150,7 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
 
   debug('merged plugins config %o', merged)
 
-  return merged
+  // With a fixed port, the server doesn't recompute the urls once it starts,
+  // so a baseUrl returned from setupNodeEvents has to be applied here
+  return merged.port ? setUrls(merged) : merged
 }

@@ -49,6 +49,13 @@ const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
 
+/**
+ * What kept the project from loading: its configuration (including a dev server or
+ * `setupNodeEvents` that failed with it), a testing type that is not set up, or a
+ * browser that cannot be found or driven
+ */
+type LoadErrorKind = 'config' | 'setup' | 'browser'
+
 // A Cypress error keeps the first paragraph in `message` and the rest, such as the
 // stack trace of a config file that failed to load, in `details`. An error that did not
 // come from a template has only its stack to say where it came from.
@@ -305,48 +312,99 @@ export class DataContext {
     logError(e)
   }
 
-  // The error on display that the record was written for, so dismissing some other error leaves the record alone
-  private _loadErrorIdForTap: string | null = null
-
-  get loadErrorIdForTap () {
-    return this._loadErrorIdForTap
+  /**
+   * Whether `--headless` keeps the Cypress window hidden for the whole session and launches its browsers headless
+   */
+  get isHeadless () {
+    return this.isOpenMode && Boolean(this.modeOptions.headless)
   }
 
-  /**
-   * Records that the project could not load, for `cypress tap status` to report when the
-   * project never starts a session. Only errors that stop the project from starting belong
-   * here, which is why `onError`, also used for errors from a project that is running
-   * normally, does not call it. Without a project there is nothing for a session to describe.
-   */
-  reportLoadErrorToTap (error: CypressError | string) {
-    const projectRoot = this.currentProject
+  // The load errors still unresolved, by kind, so an error of one kind replacing another does not
+  // lose it: each step of loading withdraws only the kind it resolves, and a configuration that
+  // loads does not finish a setup or find a browser. The last one reported is what `cypress tap`
+  // is shown.
+  private _loadErrors = new Map<LoadErrorKind, string>()
 
-    if (!this.isOpenMode || !projectRoot) {
+  /**
+   * Records that the project could not load, for `cypress tap status` to report, whether it
+   * never started a session or its configuration broke during one. That record, and the error
+   * printed by the caller, are how a `--headless` session reports a problem, since its window
+   * stays hidden. Only errors that stop the project from loading belong here, which is why
+   * `onError`, also used for errors from a project that is running normally, does not call it.
+   * Without a project there is nothing for a session to describe.
+   */
+  reportLoadError (error: CypressError | string, kind: LoadErrorKind = 'config') {
+    if (!this.isOpenMode || !this.currentProject) {
       return
     }
 
-    // A message with no error behind it has nothing on display to dismiss
-    this._loadErrorIdForTap = typeof error === 'string' ? null : this.coreData.diagnostics?.error?.id ?? null
+    this._loadErrors.delete(kind)
+    this._loadErrors.set(kind, stripVTControlCharacters(typeof error === 'string' ? error : formatForOutput(error)))
+    this.recordLoadErrorForTap()
+  }
+
+  private recordLoadErrorForTap () {
+    const projectRoot = this.currentProject
+    const loadError = [...this._loadErrors.values()].pop()
+
+    if (!projectRoot || loadError === undefined) {
+      this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
+
+      return
+    }
 
     this._apis.projectApi.setSessionLoadError({
       projectRoot,
       testingType: this.coreData.currentTestingType,
-      loadError: stripVTControlCharacters(typeof error === 'string' ? error : formatForOutput(error)),
+      loadError,
     }).catch((err) => this.debug('could not record the load error for cypress tap: %o', err))
   }
 
   /**
-   * Withdraws the record of a load error once the error has been dismissed or the project
-   * is loading again, so `cypress tap status` does not keep reporting it.
+   * Withdraws the record of a load error once whatever caused it is resolved, so `cypress tap
+   * status` does not keep reporting it. Given `kinds`, only errors of those kinds are
+   * withdrawn, and an older error of another kind is reported again; without them, all are,
+   * as when another project replaces them.
    */
-  clearLoadErrorForTap () {
+  clearLoadError (kinds?: LoadErrorKind[]) {
     if (!this.isOpenMode) {
       return
     }
 
-    this._loadErrorIdForTap = null
+    if (kinds) {
+      const withdrawn = kinds.filter((kind) => this._loadErrors.delete(kind))
 
-    this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
+      if (!withdrawn.length) {
+        return
+      }
+    } else {
+      this._loadErrors.clear()
+    }
+
+    this.recordLoadErrorForTap()
+  }
+
+  /**
+   * Records, for `cypress tap status`, that the plugins process exited after the session
+   * started. It is kept apart from the load errors because the project is still loaded and
+   * its browser still drivable, so tap keeps working, but anything that needs the process,
+   * such as `cy.task`, fails until the configuration loads again.
+   */
+  reportPluginsError (error: CypressError) {
+    if (!this.isOpenMode) {
+      return
+    }
+
+    this._apis.projectApi.setSessionPluginsError(stripVTControlCharacters(formatForOutput(error)))
+  }
+
+  /** Withdraws the record `reportPluginsError` made, once the configuration loads again and restarts the process */
+  clearPluginsError () {
+    if (!this.isOpenMode) {
+      return
+    }
+
+    this._apis.projectApi.setSessionPluginsError(null)
   }
 
   onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {
@@ -482,7 +540,7 @@ export class DataContext {
   }
 
   static #activeRequestCount = 0
-  static #awaitingEmptyRequestCount: Function[] = []
+  static #awaitingEmptyRequestCount: Array<() => void> = []
 
   static addActiveRequest () {
     this.#activeRequestCount++
@@ -502,7 +560,7 @@ export class DataContext {
       return
     }
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       this.#awaitingEmptyRequestCount.push(resolve)
     })
   }

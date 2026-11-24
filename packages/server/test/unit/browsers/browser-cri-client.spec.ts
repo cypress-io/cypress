@@ -8,8 +8,10 @@ import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { CriClient } from '../../../lib/browsers/cdp-protocol/cri-client'
+import { FRAGMENT_MESSAGES_OVER_BYTES } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
 import * as protocol from '../../../lib/browsers/protocol'
 import { cypressSessions } from '../../../lib/cypress-sessions'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -188,6 +190,36 @@ describe('lib/browsers/browser-cri-client', function () {
       await expect(getClient()).rejects.toThrow()
     })
 
+    it('stops retrying and reports the exit when the browser exits before connecting', async function () {
+      connectAsync.mockRestore()
+      const getDelayMsForRetry = vi.spyOn(protocol, '_getDelayMsForRetry').mockReturnValue(0)
+      const connect = vi.spyOn(net, 'connect').mockImplementation(() => {
+        const socket = new net.Socket()
+
+        process.nextTick(() => socket.emit('error', Object.assign(new Error('connect ECONNREFUSED'), { code: 'ECONNREFUSED' })))
+
+        return socket
+      })
+      const getBrowserExit = vi.fn()
+      .mockReturnValueOnce(undefined)
+      .mockReturnValue({ code: 21, signal: null })
+
+      await expect(BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', getBrowserExit, onAsynchronousError: onError, onServiceWorkerClientEvent }))
+      .rejects.toMatchObject({ type: 'CDP_BROWSER_EXITED_BEFORE_CONNECT' })
+
+      expect(connect).toHaveBeenCalledTimes(2)
+      expect(getDelayMsForRetry).toHaveBeenCalledTimes(1)
+    })
+
+    it('reports a connection failure when the browser is still running', async function () {
+      connectAsync.mockImplementation(() => {
+        throw new Error('connect ECONNREFUSED')
+      })
+
+      await expect(BrowserCriClient.create({ hosts: ['127.0.0.1'], port: PORT, browserName: 'Chrome', getBrowserExit: () => undefined, onAsynchronousError: onError, onServiceWorkerClientEvent }))
+      .rejects.toMatchObject({ type: 'CDP_COULD_NOT_CONNECT' })
+    })
+
     it('attempts to connect to multiple hosts', async function () {
       connectAsync.mockRestore()
       const socket = new net.Socket()
@@ -223,6 +255,31 @@ describe('lib/browsers/browser-cri-client', function () {
 
       expect(client.attachToTargetUrl).toBeInstanceOf(Function)
 
+      expect(criImport.Version).toHaveBeenCalledTimes(3)
+    })
+
+    it('stops retrying the handshake and reports the exit when the browser exits after opening its port', async function () {
+      const getDelayMsForRetry = vi.spyOn(protocol, '_getDelayMsForRetry').mockReturnValue(100)
+      const connectionRefused = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:50505'), { code: 'ECONNREFUSED' })
+
+      criImport.Version.withArgs({ host: HOST, port: THROWS_PORT, useHostName: true }).rejects(connectionRefused)
+
+      await expect(BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', getBrowserExit: () => ({ code: null, signal: 'SIGSEGV' }), onAsynchronousError: onError, onServiceWorkerClientEvent }))
+      .rejects.toMatchObject({ type: 'CDP_BROWSER_EXITED_BEFORE_CONNECT', details: expect.stringContaining('ECONNREFUSED') })
+
+      expect(criImport.Version).toHaveBeenCalledTimes(1)
+      expect(getDelayMsForRetry).not.toHaveBeenCalled()
+    })
+
+    it('keeps retrying a handshake error that is not a connection error after the browser exits', async function () {
+      vi.spyOn(protocol, '_getDelayMsForRetry')
+      .mockReturnValue(undefined)
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(100)
+
+      const client = await BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', getBrowserExit: () => ({ code: 1, signal: null }), onAsynchronousError: onError, onServiceWorkerClientEvent })
+
+      expect(client.attachToTargetUrl).toBeInstanceOf(Function)
       expect(criImport.Version).toHaveBeenCalledTimes(3)
     })
 
@@ -507,6 +564,24 @@ describe('lib/browsers/browser-cri-client', function () {
       expectCalledWith(options.browserClient.send, 'Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
+    it('sends messages over the fragmenting threshold to the extra target as fragments', async () => {
+      const originalSend = vi.fn()
+      const criClient = {
+        send: stub(),
+        on: vi.fn(),
+        _ws: { send: originalSend },
+      }
+
+      options.CriConstructor.mockReturnValue(criClient)
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      await BrowserCriClient._onAttachToTarget(options as any)
+
+      criClient._ws.send('a'.repeat(FRAGMENT_MESSAGES_OVER_BYTES + 1))
+
+      expect(originalSend.mock.calls.length).toBeGreaterThan(1)
+    })
+
     it('does not throw if Fetch.enable on extra target throws', async () => {
       const fetchEnableFailed = Object.assign(new Error(''), { name: 'Fetch.enable failed' })
       const extraTargetCriClient = {
@@ -578,7 +653,7 @@ describe('lib/browsers/browser-cri-client', function () {
         requestId: 'request-id',
         headers: [
           { name: 'X-Another-Custom-Header', value: 'value' },
-          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+          { name: 'X-Cypress-Is-From-Extra-Target', value: getMetadataHeaderValue() },
         ],
       })
     })
@@ -658,7 +733,7 @@ describe('lib/browsers/browser-cri-client', function () {
       expectCalledWith(criClient.send, 'Fetch.continueRequest', {
         requestId: 'request-id',
         headers: [
-          { name: 'X-Cypress-Is-From-Extra-Target', value: 'true' },
+          { name: 'X-Cypress-Is-From-Extra-Target', value: getMetadataHeaderValue() },
         ],
       })
     })

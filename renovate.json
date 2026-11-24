@@ -1,8 +1,10 @@
 {
   "configMigration": true,
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "extends": [
-    ":semanticPrefixFixDepsChoreOthers",
+    ":semanticCommits",
     "group:monorepos",
     "group:recommended",
     "helpers:pinGitHubActionDigests",
@@ -28,10 +30,32 @@
     "**/node_modules/**",
     "**/system-tests/projects/**"
   ],
+  "internalChecksFilter": "strict",
   "labels": [
     "type: dependencies"
   ],
+  "minimumReleaseAge": "7 days",
   "packageRules": [
+    {
+      "matchPackageNames": [
+        "*"
+      ],
+      "semanticCommitScope": "deps",
+      "semanticCommitType": "chore"
+    },
+    {
+      "description": "Runtime dependencies of the CLI, the binary and the published npm packages reach users",
+      "matchDepTypes": [
+        "dependencies"
+      ],
+      "matchFileNames": [
+        "cli/**",
+        "npm/**",
+        "packages/**"
+      ],
+      "semanticCommitScope": null,
+      "semanticCommitType": "dependency"
+    },
     {
       "automerge": true,
       "matchUpdateTypes": [
@@ -42,13 +66,22 @@
       ]
     },
     {
-      "description": "Cooldown before updating pinned GitHub Action SHAs so a moved/compromised tag isn't merged immediately",
-      "matchManagers": [
-        "github-actions",
-        "custom.regex"
+      "description": "Peer ranges are the versions users may install; bumping them drops support for older versions",
+      "matchDepTypes": [
+        "peerDependencies"
       ],
-      "minimumReleaseAge": "7 days",
-      "internalChecksFilter": "strict"
+      "enabled": false
+    },
+    {
+      "description": "The base-internal tag without a suffix pins the minimum supported Node.js version",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "cypress/base-internal"
+      ],
+      "matchCurrentValue": "/^\\d+\\.\\d+\\.\\d+$/",
+      "enabled": false
     }
   ],
   "postUpdateOptions": [
@@ -58,5 +91,9 @@
   "prHourlyLimit": 1,
   "rangeStrategy": "bump",
   "separateMultipleMajor": true,
-  "timezone": "America/New_York"
+  "timezone": "America/New_York",
+  "vulnerabilityAlerts": {
+    "enabled": false,
+    "minimumReleaseAge": null
+  }
 }

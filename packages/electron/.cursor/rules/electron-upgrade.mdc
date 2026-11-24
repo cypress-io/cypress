@@ -196,25 +196,7 @@ yarn test
 # - Chromium behavior changes
 ```
 
-## Step 11: V8 Snapshot Cache (if needed)
-
-### Update V8 Snapshot Cache
-```bash
-# Run GitHub workflow: update_v8_snapshot_cache.yml
-# Use branch with electron updates
-# Select 'Generate from scratch' and 'commit directly to branch'
-# Takes 6-8 hours to complete
-```
-
 ## Common Issues and Solutions
-
-### Integrity Check Failures
-```bash
-# Update fs.readFileSync string representation in:
-# /scripts/binary/binary-integrity-check-source.js
-# Create throwaway script: console.log(fs.readFileSync.toString())
-# Run with: electron throwaway-script.js
-```
 
 ### ResizeObserver Errors
 ```bash

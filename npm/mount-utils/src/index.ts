@@ -19,6 +19,7 @@ export const getContainerEl = (): HTMLElement => {
  * Utility function to register CT side effects and run cleanup code during the "test:before:run" Cypress hook
  * @param optionalCallback Callback to be called before the next test runs
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- published API; narrowing the parameter would break callers that pass a `Function`
 export function setupHooks (optionalCallback?: Function) {
   // We don't want CT side effects to run when e2e
   // testing so we early return.

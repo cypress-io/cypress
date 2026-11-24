@@ -10,11 +10,11 @@ export const WizardFrontendFramework = objectType({
   definition (t) {
     t.nonNull.string('type', {
       description: 'The unique identifier for a framework or library',
-    }),
+    })
 
     t.nonNull.string('category', {
       description: 'The category (framework, like next.js, or library, like react',
-    }),
+    })
 
     t.nonNull.string('name', {
       description: 'The display name of the framework',

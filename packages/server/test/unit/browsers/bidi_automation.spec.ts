@@ -9,6 +9,7 @@ import type { NetworkBeforeRequestSentParametersModified } from '../../../lib/br
 import type { Automation } from '../../../lib/automation'
 import type { NetworkFetchErrorParameters, NetworkResponseCompletedParameters, NetworkResponseStartedParameters } from 'webdriver/build/bidi/localTypes'
 import { AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 // make sure testing promises resolve before asserting on async function conditions
 const flushPromises = () => {
@@ -371,7 +372,7 @@ describe('lib/browsers/bidi_automation', () => {
                 name: 'X-Cypress-Is-AUT-Frame',
                 value: {
                   type: 'string',
-                  value: 'true',
+                  value: getMetadataHeaderValue(),
                 },
               },
             ],
@@ -2063,6 +2064,20 @@ describe('lib/browsers/bidi_automation', () => {
         })
 
         describe('clear:cookies', () => {
+          it('clears each of two cookies that share a name at different paths', async () => {
+            const cookieAt = (path: string) => ({ name: 'foo', value: path, domain: 'www.foobar.com', path, httpOnly: false, secure: false, sameSite: 'lax' })
+            const browserCookieAt = (path: string) => ({ ...cookieAt(path), value: { type: 'string', value: path } })
+
+            mockWebdriverClient.storageGetCookies = vi.fn().mockResolvedValue({ cookies: [browserCookieAt('/'), browserCookieAt('/fixtures')] })
+            mockWebdriverClient.storageDeleteCookies = vi.fn().mockResolvedValue(undefined)
+
+            await bidiAutomationInstance.automationMiddleware.onRequest('clear:cookies', [cookieAt('/'), cookieAt('/fixtures')])
+
+            const clearedPaths = mockWebdriverClient.storageDeleteCookies.mock.calls.map(([{ filter }]) => filter.path)
+
+            expect(clearedPaths.sort()).toEqual(['/', '/fixtures'])
+          })
+
           it('clears a single cookie and returns its value', async () => {
             const cookiesToClear = [{
               name: 'testCookie',

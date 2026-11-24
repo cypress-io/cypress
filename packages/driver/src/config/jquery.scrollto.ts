@@ -72,33 +72,28 @@ export function scrollTo (target, duration, settings) {
     let attr = {}
     let toff
 
-    switch (typeof targ) {
-      // A number will pass the regex
-      case 'number': break
-      case 'string':
-        if (/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(targ)) {
-          targ = both(targ)
-          // We are done
-          break
-        }
-
-        // Relative/Absolute selector
+    // A number, or a string of pixels or a percentage, is a position for both
+    // axes. Any other string is a selector for the element to scroll to.
+    if (typeof targ === 'number' || typeof targ === 'string') {
+      if (/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(String(targ))) {
+        targ = both(targ)
+      } else if (typeof targ === 'string') {
         targ = win ? $(targ) : $(targ, elem)
-        break
-        /* falls through */
-      case 'object':
-        if (targ.length === 0) return
+      } else {
+        // `NaN`, `Infinity` and numbers written in exponent form, such as
+        // `1e21`, fail the position check, and a number can't be a selector.
+        return
+      }
+    }
 
-        // DOMElement / jQuery
-        if (targ.is || targ.style) {
-          // Get the real position of the target
-          toff = (targ = $(targ)).offset()
-        }
+    if (typeof targ === 'object') {
+      if (targ.length === 0) return
 
-        break
-
-      default:
-        break
+      // DOMElement / jQuery
+      if (targ.is || targ.style) {
+        // Get the real position of the target
+        toff = (targ = $(targ)).offset()
+      }
     }
 
     const offset = isFunction(settings.offset) && settings.offset(elem, targ) || settings.offset

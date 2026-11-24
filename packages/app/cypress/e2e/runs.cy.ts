@@ -1,5 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-
 import type { SinonStub } from 'sinon'
 
 function moveToRunsPage (): void {
@@ -79,7 +77,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       moveToRunsPage()
-      cy.contains(defaultMessages.runs.connect.buttonUser).should('exist')
+      cy.contains('Connect to Cypress Cloud').should('exist')
     })
 
     it('clicking the login button will open the login modal', () => {
@@ -90,7 +88,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         o.sinon.stub(ctx._apis.authApi, 'logIn')
       })
 
-      cy.contains(defaultMessages.runs.connect.buttonUser).click()
+      cy.contains('Connect to Cypress Cloud').click()
 
       cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).should('be.visible')
 
@@ -140,19 +138,19 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
 
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
       cy.get('[aria-modal="true"]').should('exist')
 
       cy.validateExternalLink({
-        name: defaultMessages.runs.connect.modal.createOrg.button,
+        name: 'Create organization',
         href: 'http://dummy.cypress.io/organizations/create',
       })
 
       // validateExternalLink includes clicking on the createOrg button, which triggers the waiting state
-      cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
+      cy.contains('button', 'Waiting for you to create an organization...').should('be.visible')
 
       cy.validateExternalLink({
-        name: defaultMessages.links.needHelp,
+        name: 'Need help',
         href: 'https://on.cypress.io/adding-new-project',
       })
 
@@ -185,7 +183,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
 
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
       cy.get('[aria-modal="true"]').should('exist')
 
       // Clear existing remote GQL intercept to allow new queries to execute normally
@@ -193,9 +191,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         return obj.result
       })
 
-      cy.contains('button', defaultMessages.runs.connect.modal.createOrg.refreshButton).click()
+      cy.contains('button', 'Refresh organizations list').click()
 
-      cy.findByText(defaultMessages.runs.connect.modal.selectProject.manageOrgs)
+      cy.findByText('Manage organizations')
     })
 
     it('refetches cloudViewer data on open', () => {
@@ -221,7 +219,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
 
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
       cy.get('[aria-modal="true"]').should('exist')
 
       cy.withCtx((_, o) => {
@@ -251,11 +249,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       moveToRunsPage()
 
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
       cy.get('[aria-modal="true"]').should('exist')
 
       cy.validateExternalLink({
-        name: defaultMessages.runs.connect.modal.selectProject.manageOrgs,
+        name: 'Manage organizations',
         href: 'http://dummy.cypress.io/organizations',
       })
 
@@ -338,9 +336,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       moveToRunsPage()
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
-      cy.findByText(defaultMessages.runs.connectSuccessAlert.title, { timeout: 10000 }).scrollIntoView().should('be.visible')
+      cy.findByText('Connect a Cypress Cloud project').click()
+      cy.contains('button', 'Create project').click()
+      cy.findByText('This project is now connected to Cypress Cloud!', { timeout: 10000 }).scrollIntoView().should('be.visible')
 
       cy.withCtx(async (ctx) => {
         const config = await ctx.project.getConfig()
@@ -378,11 +376,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.get('[href="#/runs"]').click()
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
+      cy.contains('button', 'Create project').click()
 
       cy.get('[data-cy="alert"]').within(() => {
-        cy.contains(defaultMessages.runs.connect.errors.baseError.title)
+        cy.contains('Cypress Cloud error')
         cy.get('[data-cy="alert-suffix-icon"]').should('not.exist')
       })
 
@@ -414,16 +412,16 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.get('[href="#/runs"]').click()
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
-      cy.contains('button', defaultMessages.runs.connect.modal.selectProject.createProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
+      cy.contains('button', 'Create project').click()
 
       cy.get('[data-cy="alert"]').within(() => {
-        cy.contains(defaultMessages.runs.connect.errors.internalServerError.title)
+        cy.contains('Cannot connect to Cypress Cloud')
         cy.get('[data-cy="alert-suffix-icon"]').should('exist')
       })
 
       cy.get('[data-cy="alert-body"]').within(() => {
-        cy.contains(defaultMessages.runs.connect.errors.internalServerError.description.replace('{0}', 'Support Page'))
+        cy.contains('The request times out when trying to retrieve the info from Cypress Cloud. Please refresh the page to try again and visit our Support Page if this behavior continues.')
       })
     })
   })
@@ -466,12 +464,12 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('if project Id is specified in config file that does not exist, shows call to action', () => {
-      cy.findByText(defaultMessages.runs.errors.notFound.button).should('be.visible')
+      cy.findByText('Reconnect your project').should('be.visible')
     })
 
     // TODO: fix flaky test
     it.skip('opens Connect Project modal after clicking Reconnect Project button', () => {
-      cy.findByText(defaultMessages.runs.errors.notFound.button).click()
+      cy.findByText('Reconnect your project').click()
 
       cy.get('[aria-modal="true"]').should('exist')
       cy.contains('[data-cy="selectProject"] button', 'Mock Project')
@@ -503,7 +501,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp('/runs')
-      cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
+      cy.findByText('Request access').should('be.visible')
     })
 
     it('clicking on the call to action should call the mutation', () => {
@@ -533,7 +531,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.visitApp('/runs')
 
-      cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
+      cy.findByText('Request access').click()
 
       cy.withCtx((ctx, o) => {
         expect(o.testState.cloudProjectRequestAccessWasCalled).to.eql(true)
@@ -561,9 +559,9 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.visitApp('/runs')
-      cy.findByText(defaultMessages.runs.errors.unauthorized.button).should('be.visible')
-      cy.findByText(defaultMessages.runs.errors.unauthorized.button).click()
-      cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('be.visible')
+      cy.findByText('Request access').should('be.visible')
+      cy.findByText('Request access').click()
+      cy.findByText('Request Sent').should('be.visible')
     })
   })
 
@@ -596,7 +594,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
     })
 
     it('if project Id is specified in config file that is not accessible, shows call to action', () => {
-      cy.findByText(defaultMessages.runs.errors.unauthorizedRequested.button).should('be.visible')
+      cy.findByText('Request Sent').should('be.visible')
     })
   })
 
@@ -620,19 +618,19 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       moveToRunsPage()
-      cy.findByText(defaultMessages.runs.connect.buttonProject).should('exist')
+      cy.findByText('Connect a Cypress Cloud project').should('exist')
     })
 
     it('displays how to record prompt when connected and no runs in Component Testing', () => {
       scaffoldTestingTypeAndVisitRunsPage('component')
-      cy.contains(defaultMessages.runs.empty.title).should('be.visible')
+      cy.contains('Copy the command below to record your first run').should('be.visible')
       cy.findByDisplayValue('npx cypress run --component --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
     it('displays how to record prompt when connected and no runs in E2E', () => {
       scaffoldTestingTypeAndVisitRunsPage('e2e')
 
-      cy.contains(defaultMessages.runs.empty.title).should('be.visible')
+      cy.contains('Copy the command below to record your first run').should('be.visible')
       cy.findByDisplayValue('npx cypress run --record --key 2aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa').should('be.visible')
     })
 
@@ -883,11 +881,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.get('[href="#/runs"]').click()
 
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
       cy.get('[aria-modal="true"]').should('exist')
 
       cy.validateExternalLink({
-        name: defaultMessages.runs.connect.modal.createOrg.button,
+        name: 'Create organization',
         href: 'http://dummy.cypress.io/organizations/create',
       })
 
@@ -918,11 +916,11 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       })
 
       cy.get('[href="#/runs"]').click()
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
       cy.get('[aria-modal="true"]').should('exist')
 
       cy.validateExternalLink({
-        name: defaultMessages.runs.connect.modal.selectProject.manageOrgs,
+        name: 'Manage organizations',
         href: 'http://dummy.cypress.io/organizations',
       })
 

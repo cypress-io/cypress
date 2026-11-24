@@ -10,7 +10,7 @@ interface CypressCTWebpackPluginOptions {
   projectRoot: string
   supportFile: string | false
   devServerEvents: EventEmitter
-  webpack: Function
+  webpack: typeof webpack
   indexHtmlFile: string
 }
 
@@ -29,7 +29,7 @@ export class CypressCTWebpackPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string | false
   private compilation: Compilation | null = null
-  private webpack: Function
+  private webpack: typeof webpack
   private indexHtmlFile: string
 
   private readonly projectRoot: string
@@ -53,7 +53,7 @@ export class CypressCTWebpackPlugin {
     }
   }
 
-  private beforeCompile = async (compilationParams: object, callback: Function) => {
+  private beforeCompile = async (compilationParams: object, callback: () => void) => {
     if (!this.compilation) {
       callback()
 
@@ -122,7 +122,7 @@ export class CypressCTWebpackPlugin {
   private addCompilationHooks = (compilation: Compilation) => {
     this.compilation = compilation
 
-    const loader = (this.webpack as typeof webpack).NormalModule.getCompilationHooks(compilation).loader
+    const loader = this.webpack.NormalModule.getCompilationHooks(compilation).loader
 
     loader.tap('CypressCTPlugin', this.addLoaderContext)
   }

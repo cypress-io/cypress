@@ -411,6 +411,58 @@ describe('http', function () {
 
       sendOutgoing.mockRestore()
     })
+
+    it('writes a request-stage short-circuit response to the client (#34810)', async function () {
+      // Models serveInternalRoutes answering an unowned reserved path without
+      // calling next(). Before the codec wrote synthesized responses on the
+      // Express transport, the 404 was produced and then silently discarded,
+      // so the client never received a response.
+      const http = new Http(httpOpts)
+      const httpIntercept = new HttpIntercept(proxyHttpCodec)
+      const written: { statusCode?: number, body?: unknown } = {}
+      const shortCircuit = vi.fn().mockImplementation((request) => {
+        return Promise.resolve({
+          id: request.id,
+          url: request.url,
+          statusCode: 404,
+          headers: { 'content-type': 'text/plain' },
+          body: 'Not Found',
+        })
+      })
+
+      httpIntercept.use(shortCircuit)
+      httpIntercept.use(http.createLegacyProxyPipeline(proxyHttpCodec))
+      http.networkInterception = httpIntercept
+
+      const res = {
+        headersSent: false,
+        writableFinished: false,
+        on,
+        off,
+        status (statusCode: number) {
+          written.statusCode = statusCode
+
+          return this
+        },
+        set () {
+          return this
+        },
+        end (body?: unknown) {
+          written.body = body
+          this.writableFinished = true
+
+          return this
+        },
+      }
+
+      // @ts-expect-error - partial request and response stubs, not a full CypressIncomingRequest / CypressOutgoingResponse
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'http://localhost:1234/__/does-not-exist', headers: {} }, res)
+
+      expect(shortCircuit).toHaveBeenCalledOnce()
+      expect(written.statusCode).toBe(404)
+      expect(written.body).toBe('Not Found')
+      expect(res.writableFinished).toBe(true)
+    })
   })
 
   describe('Http.reset', function () {
@@ -686,6 +738,40 @@ describe('http', function () {
       // "Never received pre-request" warning and inflates unmatchedRequests
       expect(http.preRequests.pendingRequests.length).toEqual(0)
       expect(next, 'origin fetch').not.toHaveBeenCalled()
+    })
+
+    it('reports a cancel while awaiting the response as a closed connection', async function () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => false,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {},
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+
+      const next = vi.fn(() => {
+        codec.abortRequest('network-1')
+
+        return Promise.reject(new Error('CDP Fetch request canceled by the browser: root:network-1'))
+      })
+
+      const handled = http.createLegacyProxyPipeline(codec)(request, next)
+
+      await expect(handled).rejects.toMatchObject({
+        code: 'ERR_BROWSER_CONNECTION_CLOSED',
+        message: 'The browser closed the connection before the response completed.',
+      })
     })
 
     it('keeps waiting on the pre-request while the request is not aborted', async function () {

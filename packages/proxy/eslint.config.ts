@@ -1,9 +1,11 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  ...vitestConfig,
   {
     languageOptions: {
       parserOptions: {
@@ -11,6 +13,7 @@ export default [
       },
     },
   },
+  noFloatingPromisesConfig(['lib/**/*.ts']),
   // The CommonJS entry point runs in Node
   {
     files: ['index.js'],

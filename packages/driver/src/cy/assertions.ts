@@ -69,6 +69,7 @@ const exists = (subject, cy: $Cy) => {
 
   // verify the $el exists and use our default error messages
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- chai property assertion, which throws when the subject is missing
     cy.expect(subject).to.exist
   } finally {
     cy.state('onBeforeLog', null)

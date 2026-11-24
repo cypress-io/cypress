@@ -87,25 +87,61 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent, undefined, false, false, storageOrigins)
 
+  const startCaptureScreencast = async () => {
+    if (options.isTextTerminal) {
+      await pageCriClient.send('Page.stopScreencast')
+    }
+
+    await pageCriClient.send('Page.startScreencast', screencastOpts())
+  }
+
+  const endCaptureScreencast = async () => {
+    await pageCriClient.send('Page.stopScreencast')
+
+    if (options.isTextTerminal) {
+      await startNoopScreencast(pageCriClient)
+    }
+  }
+
+  // A capture that outlives its cy.screenshot() timeout overlaps the failure screenshot, so the
+  // screencast is swapped once for all captures in flight rather than per capture.
+  let capturesInFlight = 0
+  let screencastSwap: Promise<unknown> = Promise.resolve()
+
+  const swapScreencast = (swap: () => Promise<void>) => {
+    screencastSwap = screencastSwap.catch(_.noop).then(swap)
+
+    return screencastSwap
+  }
+
   automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
     switch (message) {
       case 'take:screenshot': {
-        // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
-        // workaround: start and stop screencasts between screenshots
-        // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
-        if (!options.videoApi) {
-          await pageCriClient.send('Page.startScreencast', screencastOpts())
-          const ret = await fn(message, data)
-
-          await pageCriClient.send('Page.stopScreencast')
-
-          return ret
+        if (options.videoApi) {
+          return fn(message, data)
         }
 
-        return fn(message, data)
+        // Page.captureScreenshot waits for a new frame, and on a page that isn't changing only a
+        // screencast with a real frame rate makes Electron produce one. The no-op screencast doesn't.
+        if (capturesInFlight++ === 0) {
+          swapScreencast(startCaptureScreencast).catch(_.noop)
+        }
+
+        try {
+          await screencastSwap
+
+          return await fn(message, data)
+        } finally {
+          if (--capturesInFlight === 0) {
+            await swapScreencast(endCaptureScreencast)
+          }
+        }
       }
       case 'focus:browser:window': {
-        win.show()
+        // A headless browser window is hidden on purpose
+        if (!options.browser.isHeadless) {
+          win.show()
+        }
 
         return
       }
@@ -144,20 +180,26 @@ async function handleVideo (handleVideoOptions: { pageCriClient: CriClient, cdpA
   if (videoApi) {
     await recordVideo(cdpAutomation, videoApi)
   } else if (options.isTextTerminal) {
-    // To prevent https://github.com/electron/electron/issues/45398, we start a dummy screen cast with a quality of 0
-    // and only capture every 2^32 - 1 frames without listening to any frames. This is effectively a no-op, but it
-    // prevents the issue from occurring.
-    await pageCriClient.send('Page.startScreencast', {
-      format: 'jpeg',
-      everyNthFrame: 2 ** 31 - 1,
-      quality: 0,
-    })
+    await startNoopScreencast(pageCriClient)
   }
+}
+
+// To prevent https://github.com/electron/electron/issues/45398, we start a dummy screen cast with a quality of 0
+// and only capture every 2^32 - 1 frames without listening to any frames. This is effectively a no-op, but it
+// prevents the issue from occurring.
+function startNoopScreencast (pageCriClient: CriClient) {
+  return pageCriClient.send('Page.startScreencast', {
+    format: 'jpeg',
+    everyNthFrame: 2 ** 31 - 1,
+    quality: 0,
+  })
 }
 
 export = {
   _defaultOptions (projectRoot: string | undefined, state: Preferences, options: BrowserLaunchOpts, automation: Automation): ElectronOpts {
-    const _this = this
+    // onNewWindow's own `this` is the window that opened the child, so it
+    // reaches this module through launchChild
+    const launchChild = (url: string, parent: BrowserWindow) => this._launchChild(url, parent, projectRoot, state, options, automation)
 
     const defaults: Windows.WindowOptions = {
       x: state.browserX || undefined,
@@ -212,6 +254,7 @@ export = {
         }
       },
       async onNewWindow (this: BrowserWindow, { url }) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- nulled once the window closes, which `this` can't be
         let _win: BrowserWindow | null = this
 
         _win.on('closed', () => {
@@ -221,7 +264,7 @@ export = {
         })
 
         try {
-          const child = await _this._launchChild(url, _win, projectRoot, state, options, automation)
+          const child = await launchChild(url, _win)
 
           // close child on parent close
           _win.on('close', () => {
@@ -283,7 +326,8 @@ export = {
       // in run mode, force new windows to automatically open with show: false
       // this prevents window.open inside of javascript client code to cause a new BrowserWindow instance to open
       // https://github.com/cypress-io/cypress/issues/123
-      show: !options.isTextTerminal,
+      // A headless browser's windows stay hidden in open mode too
+      show: !options.isTextTerminal && !options.browser.isHeadless,
     })
 
     const win = Windows.create(projectRoot, electronOptions)
@@ -487,6 +531,8 @@ export = {
     // In addition to the session, also set the user-agent optimistically through CDP. @see https://github.com/cypress-io/cypress/issues/23597
     browserCriClient?.currentlyAttachedTarget?.send('Network.setUserAgentOverride', {
       userAgent,
+    }).catch((error) => {
+      debug('failed to set user agent through CDP, relying on the session %o', { error })
     })
 
     return webContents.session.setUserAgent(userAgent)

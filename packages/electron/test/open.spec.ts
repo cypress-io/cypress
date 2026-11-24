@@ -469,7 +469,7 @@ describe('open', () => {
       })
 
       it('logs error stack and exits with code 1', async () => {
-        await expect(open('nonexistent/path', argv))
+        await open('nonexistent/path', argv)
 
         expect(console.debug).toHaveBeenCalledWith(expect.any(String))
         expect(process.exit).toHaveBeenCalledWith(1)

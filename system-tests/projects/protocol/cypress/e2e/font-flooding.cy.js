@@ -2,7 +2,7 @@
 const CLICKS_PER_TEST = 10
 
 describe('font flooding', () => {
-  it('will not occur', () => {
+  it('will not occur in the first test', () => {
     cy.visit('cypress/fixtures/font-flooding.html')
 
     Cypress._.times(CLICKS_PER_TEST, () => {
@@ -12,7 +12,7 @@ describe('font flooding', () => {
     cy.get('#btn').should('have.text', 'Clicked')
   })
 
-  it('will not occur', () => {
+  it('will not occur in a later test', () => {
     cy.visit('cypress/fixtures/font-flooding.html')
 
     Cypress._.times(CLICKS_PER_TEST, () => {

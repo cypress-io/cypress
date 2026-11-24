@@ -168,7 +168,7 @@ const attachToWindow = (autWindow: Window) => {
 
   // this communicates to the injection code that Cypress is now available so
   // it can safely subscribe to Cypress events, etc
-  autWindow.__attachToCypress ? autWindow.__attachToCypress(Cypress) : undefined
+  autWindow.__attachToCypress?.(Cypress)
 
   Cypress.state('window', autWindow)
   Cypress.state('document', autWindow.document)
@@ -248,8 +248,8 @@ const attachToWindow = (autWindow: Window) => {
 }
 
 // only bind the message handler one time when the spec bridge is created
-window.addEventListener('message', ({ data }) => {
-  Cypress?.specBridgeCommunicator.onMessage({ data })
+window.addEventListener('message', (event) => {
+  Cypress?.specBridgeCommunicator.onMessage(event)
 }, false)
 
 createCypress()

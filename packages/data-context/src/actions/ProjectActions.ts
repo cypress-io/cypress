@@ -31,6 +31,11 @@ export interface ProjectApiShape {
   setSessionLoadError(args: { projectRoot: string, testingType: Cypress.TestingType | null, loadError: string }): Promise<void>
   clearSessionLoadError(): Promise<void>
   /**
+   * Records, for `cypress tap`, that the plugins process of a running session exited, or
+   * withdraws that record with `null`.
+   */
+  setSessionPluginsError(message: string | null): void
+  /**
    * "Initializes" the given mode, since plugins can define the browsers available
    * TODO(tim): figure out what this is actually doing, it seems it's necessary in
    *   order for CT to startup
@@ -130,7 +135,7 @@ export class ProjectActions {
     })
 
     // The project a load error was recorded for is gone
-    this.ctx.clearLoadErrorForTap()
+    this.ctx.clearLoadError()
 
     // Also clear any data associated with the linked cloud project
     this.ctx.actions.cloudProject.clearCloudProject()
@@ -274,7 +279,7 @@ export class ProjectActions {
 
       return dir
     } catch (exception) {
-      throw Error(`Cannot add ${projectRoot} to projects as it does not exist in the file system`)
+      throw Error(`Cannot add ${projectRoot} to projects as it does not exist in the file system`, { cause: exception })
     }
   }
 
@@ -596,6 +601,7 @@ export class ProjectActions {
         this.ctx.lifecycleManager.setCurrentTestingType(targetTestingType)
         await this.ctx.lifecycleManager.setInitialActiveBrowser()
         this.ctx.lifecycleManager.setCurrentTestingType(originalTestingType)
+        this.requireActiveBrowser()
 
         // This is the magic sauce - we now have a browser selected, so this will toggle
         // the testing type, trigger specs to update, and launch the browser
@@ -628,7 +634,7 @@ export class ProjectActions {
         await this.ctx.lifecycleManager.setInitialActiveBrowser()
 
         await this.api.launchProject(
-          this.ctx.coreData.activeBrowser!,
+          this.requireActiveBrowser(),
           {
             name: '',
             absolute: '',
@@ -658,7 +664,7 @@ export class ProjectActions {
         throw new RunSpecError('SPEC_NOT_FOUND', `Unable to find matching spec with path ${specPath}`)
       }
 
-      const browser = this.ctx.coreData.activeBrowser!
+      const browser = this.requireActiveBrowser()
 
       // Hooray, everything looks good and we're all set up
       // Try to launch the requested spec by navigating to it in the browser
@@ -679,6 +685,18 @@ export class ProjectActions {
         detailMessage: err.message,
       }
     }
+  }
+
+  // Choosing a browser can leave none, as when no browser is found, or when a `--headless`
+  // session's `--browser` cannot be found or driven and none is chosen in its place
+  private requireActiveBrowser () {
+    const browser = this.ctx.coreData.activeBrowser
+
+    if (!browser) {
+      throw new RunSpecError('GENERAL_ERROR', 'Cypress has no browser to run the spec in.')
+    }
+
+    return browser
   }
 
   async debugCloudRun (runNumber: number) {

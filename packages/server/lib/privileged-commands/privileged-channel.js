@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions -- the server calls this function, see below
 (({ browserFamily, isSpecBridge, key, namespace, scripts, url, win = window, documentDomainContext }) => {
   /**
    * This file is read as a string in the server and injected into the spec

@@ -285,8 +285,6 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       let mouseleave = _.noop
       let mouseover: EventFunc = notFired
       let mouseenter = _.noop
-      let pointermove: EventFunc = notFired
-      let mousemove: EventFunc = notFired
 
       const lastHoveredEl = getLastHoveredEl(state)
 
@@ -359,11 +357,11 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         }
       }
 
-      pointermove = () => {
+      const pointermove: EventFunc = () => {
         return sendPointermove(el, defaultPointerOptions)
       }
 
-      mousemove = () => {
+      const mousemove: EventFunc = () => {
         return sendMousemove(el, defaultMouseOptions)
       }
 

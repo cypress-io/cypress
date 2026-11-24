@@ -14,7 +14,7 @@ import { isSelector } from './utils'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:elements')
-const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
+const canSetSelectionRangeElementRe = /^(text|search|url|tel|password)$/
 
 const fixedOrStickyRe = /(fixed|sticky)/
 

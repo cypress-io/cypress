@@ -1,9 +1,18 @@
-import { baseConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, mochaConfig, nodeConfig, noFloatingPromisesConfig, userNodeConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
+  ...nodeConfig,
+  {
+    // The config child process runs on the user's Node
+    ...userNodeConfig,
+    files: ['lib/plugins/child/**'],
+  },
+  // Only the unit specs run on Vitest; integration and performance specs run on mocha
+  ...vitestConfig.map((block) => ({ ...block, files: ['test/unit/**'] })),
+  ...mochaConfig.map((block) => ({ ...block, files: ['test/**'], ignores: [...(block.ignores ?? []), 'test/unit/**'] })),
   {
     languageOptions: {
       parserOptions: {
@@ -16,6 +25,7 @@ export default [
       },
     },
   },
+  noFloatingPromisesConfig(['lib/**/*.ts']),
   {
     files: ['test/**/*.{js,ts}'],
     languageOptions: {
@@ -30,6 +40,11 @@ export default [
     },
   },
   {
-    ignores: ['test/support/fixtures/server/**/*', 'lib/validations/**/*'],
+    ignores: [
+      'test/support/fixtures/server/**/*',
+      'lib/validations/**/*',
+      // The memory profiler writes here, relative to the cwd, when specs run from this package
+      'cypress/logs/**/*',
+    ],
   },
 ]

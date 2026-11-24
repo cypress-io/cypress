@@ -117,11 +117,10 @@ describe('shouldStreamResponseBody', () => {
   })
 
   describe('service-worker script request', () => {
+    // the script body is left as the origin served it on this path, so nothing
+    // needs it materialized
     runCases([
-      ['materializes when the service-worker request header is "script"', { requestHeaders: { 'service-worker': 'script' } }, undefined, false],
-      ['matches the service-worker header name case-insensitively', { requestHeaders: { 'Service-Worker': 'script' } }, undefined, false],
-      ['streams when the service-worker header has a different value', { requestHeaders: { 'service-worker': 'navigate' } }, undefined, true],
-      ['matches the service-worker header value case-insensitively', { requestHeaders: { 'service-worker': 'Script' } }, undefined, false],
+      ['streams when the service-worker request header is "script"', { requestHeaders: { 'service-worker': 'script' } }, undefined, true],
     ])
   })
 
@@ -148,6 +147,21 @@ describe('shouldStreamResponseBody', () => {
     )
 
     runCases(cases)
+  })
+
+  describe('Media resourceType', () => {
+    const rangeResponse: Protocol.Fetch.HeaderEntry[] = [
+      { name: 'content-type', value: 'video/mp4' },
+      { name: 'content-length', value: '104857600' },
+      { name: 'content-range', value: 'bytes 0-104857599/104857600' },
+    ]
+
+    runCases([
+      ['streams a 206 range response despite a content-length', { resourceType: 'Media', responseStatusCode: 206, responseHeaders: rangeResponse }, undefined, true],
+      ['streams a 200 response despite a content-length', { resourceType: 'Media', responseStatusCode: 200, responseHeaders: [{ name: 'content-length', value: '1024' }] }, undefined, true],
+      ['materializes when hasMatchingRoute returns true', { resourceType: 'Media', responseStatusCode: 206, responseHeaders: rangeResponse }, { hasMatchingRoute: () => true }, false],
+      ['materializes the same headers on a Fetch resourceType', { resourceType: 'Fetch', responseStatusCode: 206, responseHeaders: rangeResponse }, undefined, false],
+    ])
   })
 
   describe('default options', () => {

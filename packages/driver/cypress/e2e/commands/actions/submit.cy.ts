@@ -289,7 +289,7 @@ describe('src/cy/commands/actions/submit', () => {
           done()
         })
 
-        return cy.submit()
+        cy.submit()
       })
 
       it('eventually fails the assertion', function (done) {

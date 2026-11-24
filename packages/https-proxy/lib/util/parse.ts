@@ -37,7 +37,6 @@ export function hostAndPort (reqUrl: string, headers: any, defaultPort: number) 
 
     hostPort.host = parsedUrl.hostname
     hostPort.port = parsedUrl.port
-    reqUrl = parsedUrl.path
   }
 
   return hostPort

@@ -22,7 +22,7 @@
       prefix-icon-class="icon-dark-white"
       @click="emits('retry')"
     >
-      {{ t('warnings.retry') }}
+      Try again
     </Button>
   </Alert>
 </template>
@@ -35,9 +35,6 @@ import Button from '@cy/components/Button.vue'
 import RefreshIcon from '~icons/cy/refresh_x16'
 import { computed, ref } from 'vue'
 import { useVModels } from '@vueuse/core'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const emits = defineEmits<{
   (eventName: 'update:modelValue', value: boolean): void

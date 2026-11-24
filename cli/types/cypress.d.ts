@@ -4192,7 +4192,7 @@ declare namespace Cypress {
     ensureScrollable: boolean
   }
 
-  interface ScrollIntoViewOptions extends ScrollToOptions {
+  interface ScrollIntoViewOptions extends Omit<ScrollToOptions, 'ensureScrollable'> {
     /**
      * Amount to scroll after the element has been scrolled into view
      *
@@ -5078,8 +5078,10 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
+    /* eslint-disable @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users */
     // tslint:disable-next-line ban-types
     (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /* eslint-enable @typescript-eslint/no-unsafe-function-type */
     /**
      * Asserts that the target is a member of the given array list.
      * @example
@@ -5682,8 +5684,10 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
+    /* eslint-disable @typescript-eslint/no-unsafe-function-type -- public type; `Function` here is any error constructor, and narrowing it would break users */
     // tslint:disable-next-line ban-types
     (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /* eslint-enable @typescript-eslint/no-unsafe-function-type */
     /**
      * Asserts that the target is a member of the given array list.
      * @example
@@ -6760,10 +6764,12 @@ declare namespace Cypress {
      */
     (action: 'url:changed', fn: (url: string) => void): Cypress
     /**
-     * Fires when the test has failed. It is technically possible to prevent the test
-     * from actually failing by binding to this event and invoking an async `done` callback.
-     * However this is **strongly discouraged**. Tests should never legitimately fail.
-     *  This event exists because it's extremely useful for debugging purposes.
+     * Fires when the test has failed. Binding to this event without rethrowing the error
+     * prevents the test from failing, and Cypress doesn't run the test's remaining commands.
+     * Throw the error, or another error, from the handler to fail the test.
+     * A test that takes a `done` callback still fails with a timeout unless the handler calls `done`.
+     * Preventing a test from failing is **strongly discouraged**. Tests should never legitimately fail.
+     * This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'fail', fn: (error: CypressError, mocha: Mocha.Runnable) => void): Cypress

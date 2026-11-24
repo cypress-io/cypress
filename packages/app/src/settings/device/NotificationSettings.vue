@@ -1,10 +1,10 @@
 <template>
   <SettingsSection anchor="notifications">
     <template #title>
-      {{ t('settingsPage.notifications.title') }}
+      Desktop notifications
     </template>
     <template #description>
-      {{ t('settingsPage.notifications.description') }}
+      Cypress can notify you about Cloud test runs for your branch.
     </template>
     <div class="border rounded border-gray-100">
       <div
@@ -18,7 +18,7 @@
             fill-color="indigo-200"
             stroke-color="indigo-500"
           />
-          {{ t('settingsPage.notifications.enableNotificationsLabel') }}
+          To modify notification settings, enable desktop notifications
         </div>
 
         <ButtonDS
@@ -26,7 +26,7 @@
           class="font-normal"
           @click="enableNotifications"
         >
-          {{ t('specPage.banners.enableNotifications.enableDesktopNotifications') }}
+          Enable desktop notifications
         </ButtonDS>
       </div>
 
@@ -50,7 +50,7 @@
         </div>
         <div class="py-[16px]">
           <h4 class="flex text-gray-800 text-[16px] leading-[24px] items-center">
-            {{ t('settingsPage.notifications.notifyMeWhenRunCompletes') }}
+            Notify me when a run completes
           </h4>
           <div class="pt-[5px]">
             <!-- TODO: Use Design System Checkbox when https://github.com/cypress-io/cypress-design/issues/255 is fixed -->
@@ -82,18 +82,14 @@
             :disabled="!desktopNotificationsEnabled"
             @click="showTestNotification"
           >
-            {{ t('settingsPage.notifications.sendTestNotification') }}
+            Send a test notification
           </Button>
-          <i18n-t
-            tag="p"
-            scope="global"
-            keypath="settingsPage.notifications.notReceivingNotifications"
-            class="pt-[15px] text-gray-600 text-sm font-normal"
-          >
+          <p class="pt-[15px] text-gray-600 text-sm font-normal">
+            Not receiving notifications? You might need to allow notifications from Cypress in your computer's system preferences.
             <ExternalLink :href="troubleshootingHref">
-              {{ t('settingsPage.notifications.troubleshoot') }}
+              Troubleshoot
             </ExternalLink>
-          </i18n-t>
+          </p>
         </div>
       </div>
     </div>
@@ -103,7 +99,6 @@
 <script lang="ts" setup>
 import { computed, ref, watchEffect } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import SettingsSection from '../SettingsSection.vue'
 import { SetNotificationSettingsDocument, NotificationSettings_ShowNotificationDocument } from '../../generated/graphql'
@@ -115,8 +110,6 @@ import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { debouncedWatch } from '@vueuse/core'
 import { IconSecurityLockLocked } from '@cypress-design/vue-icon'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   gql: NotificationSettingsFragment
@@ -151,12 +144,12 @@ const switches = [
   {
     id: 'notifyWhenRunStarts',
     labelId: 'notifyWhenRunStartsLabel',
-    title: t('settingsPage.notifications.notifyMeWhenRunStarts'),
+    title: 'Notify me when a run starts',
   },
   {
     id: 'notifyWhenRunStartsFailing',
     labelId: 'notifyWhenRunStartsFailingLabel',
-    title: t('settingsPage.notifications.notifyMeWhenRunIsFailing'),
+    title: 'Notify me when a run begins to fail',
   },
 ]
 
@@ -170,10 +163,10 @@ watchEffect(() => {
 })
 
 const statuses = [
-  { id: 'passed', label: t('settingsPage.notifications.passed') },
-  { id: 'failed', label: t('settingsPage.notifications.failed') },
-  { id: 'cancelled', label: t('settingsPage.notifications.canceled') },
-  { id: 'errored', label: t('settingsPage.notifications.errored') },
+  { id: 'passed', label: 'Passed' },
+  { id: 'failed', label: 'Failed' },
+  { id: 'cancelled', label: 'Canceled' },
+  { id: 'errored', label: 'Errored' },
 ]
 
 const desktopNotificationsEnabled = computed(() => props.gql.localSettings.preferences.desktopNotificationsEnabled)
@@ -182,7 +175,7 @@ const setPreferences = useMutation(SetNotificationSettingsDocument)
 const showNotification = useMutation(NotificationSettings_ShowNotificationDocument)
 
 async function showTestNotification () {
-  await showNotification.executeMutation({ title: t('settingsPage.notifications.testNotificationTitle'), body: t('settingsPage.notifications.testNotificationBody') })
+  await showNotification.executeMutation({ title: 'Hello From Cypress', body: 'This is a test notification' })
 }
 
 function updatePref (property: string, value: boolean) {
@@ -194,7 +187,7 @@ function updatePref (property: string, value: boolean) {
 async function enableNotifications () {
   updatePref('desktopNotificationsEnabled', true)
 
-  await showNotification.executeMutation({ title: t('specPage.banners.enableNotifications.notificationsEnabledTitle'), body: t('specPage.banners.enableNotifications.notificationsEnabledBody') })
+  await showNotification.executeMutation({ title: 'Notifications Enabled', body: 'Nice, notifications are enabled!' })
 }
 
 const debounce = 200

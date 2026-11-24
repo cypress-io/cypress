@@ -19,18 +19,19 @@ exports['e2e server sent events / passes'] = `
 
   server sent events
     ✓ does not crash
+    ✓ receives the stream when a response handler changes the content-type
     ✓ reads SSE framing from a fetch ReadableStream before cancelling
     ✓ aborts proxied connections to prevent client connection buildup
 
 
-  3 passing
+  4 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -48,9 +49,9 @@ exports['e2e server sent events / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  server_sent_events.cy.js                 XX:XX        3        3        -        -        - │
+  │ ✔  server_sent_events.cy.js                 XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `

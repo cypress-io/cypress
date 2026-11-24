@@ -11,7 +11,7 @@ paths:
 Never hand-edit a snapshot file, and never regenerate one to make a failure go away.
 Four mechanisms live in this repo — using the wrong one is a hard error, not a no-op.
 
-- **snap-shot-it `.js`** (`@packages/server`, `system-tests`, `@tooling/v8-snapshot`, root
+- **snap-shot-it `.js`** (`@packages/server`, `system-tests`, root
   `__snapshots__/`) — `SNAPSHOT_UPDATE=1 <test command>`
 - **vitest `.snap`** (`cli`, `@packages/{config,launcher}`, `npm/webpack-dev-server`) —
   `yarn test -u` in that workspace

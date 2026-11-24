@@ -22,6 +22,7 @@ export type CypressIncomingRequest = Request & {
   isAUTFrame: boolean
   credentialsLevel?: RequestCredentialLevel
   isFromExtraTarget: boolean
+  isFileServerRequest?: boolean
   /**
    * Resource type from browserPreRequest. Copied to req so intercept matching can work.
    */

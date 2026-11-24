@@ -269,7 +269,12 @@ has started or finished.
 
 Poll the 'status' command for progress. Read status first and keep its
 startedAt: a verdict still carrying that same startedAt describes the spec
-before this one, so wait for a verdict whose startedAt differs.`,
+before this one, so wait for a verdict whose startedAt differs.
+
+If the session's plugins process has stopped, the output also carries
+\`pluginsError\`. An end-to-end spec then fails to build with that reason as
+its error. In component testing the dev server stops with the plugins process,
+so the spec may not load at all.`,
   params: [
     { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
   ],
@@ -284,7 +289,18 @@ session can be targeted by its PID in other commands using \`--session\`.
 
 tap only supports Chromium based browsers (Chrome, Chromium, Edge, Electron).
 A session running any other browser is listed as unsupported, and every other
-tap command refuses it.`,
+tap command refuses it.
+
+A session whose project stopped loading, for example because its configuration
+file became invalid, is listed as "could not load", with the reason as
+\`loadError\` in the JSON. Every tap command but \`status\` refuses it.
+
+A session whose plugins process stopped after the project loaded is listed as
+"plugins stopped", with the reason as \`pluginsError\` in the JSON. Other tap
+commands still work on it, but \`cy.task\` fails with that reason, an end-to-end
+spec fails to build with it, and a component spec may not load at all, since
+the dev server stops with the plugins process. Save the configuration file to
+load it again, or stop Cypress and start it again.`,
 } as const satisfies TapNativeCommandSchema
 
 const statusMeta = {
@@ -298,7 +314,9 @@ Stages:
 - not connected: Cypress cannot be reached.
 - error: Cypress is running but could not load the project, for example because
   its configuration file is invalid. \`error\` carries the reason; fix the
-  project, then stop Cypress and start it again.
+  project, then stop Cypress and start it again. A configuration file that
+  becomes invalid after the project loaded also reports error, and needs the
+  same: fix it, then stop Cypress and start it again.
 - browser not selected: Cypress does not have a supported browser open.
 - spec not selected: Cypress has a browser open but no spec is selected.
 - loading: Cypress is loading the spec.
@@ -311,13 +329,24 @@ Statuses other than passed and failed are intermediate states, indicating that
 Cypress requires additional instruction or is still processing. Loading stays
 loading for as long as the spec takes to build, so a poller needs its own
 timeout; a spec whose build fails reports failed and carries the reason as
-error — it ran no tests, so it reports no counts either.
+error — it ran no tests, so it reports no counts either. A spec that throws
+while loading, such as a component spec that fails to compile, also carries
+error, beside the counts of its run.
 
 From loading onwards the output carries \`startedAt\`, the spec every other field
 describes (null while loading). In the event of a rerun the previous spec's
 verdict remains visible until the new one begins, identical on every other
 field, so use \`startedAt\` to validate whether output describes the previous
-spec or the new one.`,
+spec or the new one.
+
+If the session's plugins process exits after the project loaded, every stage
+from browser not selected onwards also carries \`pluginsError\` with the reason.
+The session can still be driven, but \`cy.task\` fails with that reason, and an
+end-to-end spec fails to build and reports failed with it as the error. In
+component testing the dev server stops with the plugins process, so a spec may
+stay loading instead. Save the configuration file to load it again, or stop
+Cypress and start it again;
+\`pluginsError\` is gone once the configuration has loaded.`,
 } as const satisfies TapNativeCommandSchema
 
 const specsMeta = {

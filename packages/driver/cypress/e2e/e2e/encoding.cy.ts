@@ -196,6 +196,16 @@ describe('encoding', () => {
           cy.wrap(interception).should((errored) => {
             expect(errored.state).to.eq('Errored')
             expect(errored.error, 'interception.error').to.exist
+
+            // A canceled load or a browser-connection teardown can land on the
+            // interception too, so only this response's failure passes. The
+            // reason after the prefix varies by browser version, so only its
+            // shape is checked.
+            const failedResponsePrefix = 'CDP Fetch response failed for http://www.foobar.com:3500/encoding/br/js: '
+            const message = errored.error?.message ?? ''
+
+            expect(message.slice(0, failedResponsePrefix.length), 'interception.error.message').to.eq(failedResponsePrefix)
+            expect(message.slice(failedResponsePrefix.length), 'Network.ErrorReason').to.match(/^[A-Za-z]+$/)
           })
         } else {
           expect(interception.response?.statusCode).to.eq(200)

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { injectIntoServiceWorker } from '../../../../lib/http/util/service-worker-injector'
+import { getServiceWorkerInstrumentationExpression, injectIntoServiceWorker } from '../../../../lib/http/util/service-worker-injector'
 import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../../lib/http/util/disable-navigation-preload'
 
 const APP_SERVICE_WORKER_BODY = `
@@ -12,10 +12,12 @@ self.addEventListener('fetch', (event) => {
 
 // Executes the injector's generated source in a fake service worker scope so the
 // wrapped fetch listener can be dispatched against, rather than only string-asserted.
-const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceWorker>[1]) => {
-  const listeners: { type: string, listener: Function }[] = []
+// With reservedPathPrefixes it runs the browser network path's form: the
+// instrumentation expression, evaluated ahead of the unmodified script.
+const runInjectedServiceWorker = (options: { reservedPathPrefixes?: string[], hasBinding?: boolean, instrumentationEvaluations?: number } = {}) => {
+  const listeners: { type: string, listener: (...args: any[]) => unknown }[] = []
   const clientEvents: any[] = []
-  let onfetchSlot: Function | null = null
+  let onfetchSlot: ((...args: any[]) => unknown) | null = null
 
   const fakeSelf: any = {
     registration: { scope: 'https://example.com/' },
@@ -23,19 +25,22 @@ const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceW
       claim: async () => {},
       matchAll: async () => [],
     },
-    addEventListener: (type: string, listener: Function) => {
+    addEventListener: (type: string, listener: (...args: any[]) => unknown) => {
       listeners.push({ type, listener })
     },
-    removeEventListener: (type: string, listener: Function) => {
+    removeEventListener: (type: string, listener: (...args: any[]) => unknown) => {
       const index = listeners.findIndex((entry) => entry.type === type && entry.listener === listener)
 
       if (index > -1) {
         listeners.splice(index, 1)
       }
     },
-    __cypressServiceWorkerClientEvent: vi.fn((event: string) => {
+  }
+
+  if (options.hasBinding !== false) {
+    fakeSelf.__cypressServiceWorkerClientEvent = vi.fn((event: string) => {
       clientEvents.push(JSON.parse(event))
-    }),
+    })
   }
 
   // a real accessor pair so the injector's onfetch redefinition has a descriptor to wrap
@@ -43,18 +48,26 @@ const runInjectedServiceWorker = (options?: Parameters<typeof injectIntoServiceW
     configurable: true,
     enumerable: true,
     get: () => onfetchSlot,
-    set: (value: Function | null) => {
+    set: (value: ((...args: any[]) => unknown) | null) => {
       onfetchSlot = value
     },
   })
 
-  const actual = injectIntoServiceWorker(Buffer.from(APP_SERVICE_WORKER_BODY), options)
+  if (options.reservedPathPrefixes) {
+    const expression = getServiceWorkerInstrumentationExpression({ reservedPathPrefixes: options.reservedPathPrefixes })
 
-  new Function('self', actual)(fakeSelf)
+    for (let i = 0; i < (options.instrumentationEvaluations ?? 1); i++) {
+      new Function('self', expression)(fakeSelf)
+    }
+
+    new Function('self', APP_SERVICE_WORKER_BODY)(fakeSelf)
+  } else {
+    new Function('self', injectIntoServiceWorker(Buffer.from(APP_SERVICE_WORKER_BODY)))(fakeSelf)
+  }
 
   const fetchListener = listeners.find((entry) => entry.type === 'fetch')!.listener
 
-  const dispatchTo = async (listener: Function, url: string) => {
+  const dispatchTo = async (listener: (...args: any[]) => unknown, url: string) => {
     const respondWith = vi.fn()
 
     await listener({ request: { url }, respondWith })
@@ -86,35 +99,62 @@ describe('lib/http/util/service-worker-injector', () => {
       // as it is subject to change and is not relevant to the test
       const expected = new RegExp(`
       let __cypressIsScriptEvaluated = false;
-      \\(function __cypressInjectIntoServiceWorker\\(.*\\) \\{.*\\}\\)\\(null\\);
+      \\(function __cypressInjectIntoServiceWorker\\(.*\\) \\{.*\\}\\)\\(null, \\(\\) => __cypressIsScriptEvaluated\\);
       foo;
       __cypressIsScriptEvaluated = true;`.replace(/\s/g, ''))
 
       expect(actual.replace(/\s/g, '')).toEqual(expect.stringMatching(expected))
     })
 
-    it('does not prepend the navigation preload expression when the option is omitted', () => {
+    it('does not include the navigation preload expression', () => {
       const actual = injectIntoServiceWorker(Buffer.from('foo'))
 
       expect(actual).not.toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
     })
 
-    it('does not prepend the navigation preload expression when the option is false', () => {
-      const actual = injectIntoServiceWorker(Buffer.from('foo'), { disableServiceWorkerNavigationPreload: false })
+    it('does not report fetch handlers while the script is still evaluating', () => {
+      const sw = runInjectedServiceWorker()
 
-      expect(actual).not.toContain(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
+      expect(sw.clientEvents).toEqual([])
     })
+  })
 
-    it('prepends the navigation preload expression before the injector IIFE and the original body when the option is set', () => {
-      const actual = injectIntoServiceWorker(Buffer.from('foo'), { disableServiceWorkerNavigationPreload: true })
+  describe('getServiceWorkerInstrumentationExpression', () => {
+    it('disables navigation preload ahead of the instrumentation', () => {
+      const actual = getServiceWorkerInstrumentationExpression({ reservedPathPrefixes })
 
       const preloadIndex = actual.indexOf(DISABLE_NAVIGATION_PRELOAD_EXPRESSION)
       const injectorIndex = actual.indexOf('__cypressInjectIntoServiceWorker')
-      const bodyIndex = actual.indexOf('foo')
 
       expect(preloadIndex).toBeGreaterThan(-1)
       expect(preloadIndex).toBeLessThan(injectorIndex)
-      expect(preloadIndex).toBeLessThan(bodyIndex)
+    })
+
+    it('reports fetch handlers the script adds once the binding exists', () => {
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes })
+
+      expect(sw.clientEvents).toEqual([
+        { type: 'hasFetchHandler', payload: { hasFetchHandler: true }, scope: 'https://example.com/' },
+      ])
+    })
+
+    // a crash-reloaded worker can be sent the expression by both the page
+    // connection's crash handler and the browser connection's crash hold
+    it('instruments a worker once when the expression is evaluated twice before its script runs', async () => {
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes, instrumentationEvaluations: 2 })
+
+      await sw.dispatchFetch('https://example.com/api/users')
+
+      expect(sw.appFetchCalls()).toEqual(['https://example.com/api/users'])
+      expect(sw.fetchRequestEvents()).toHaveLength(1)
+      expect(sw.clientEvents.filter((event) => event.type === 'hasFetchHandler')).toHaveLength(1)
+    })
+
+    it('does not call a binding that does not exist yet when the script adds a fetch handler', () => {
+      const sw = runInjectedServiceWorker({ reservedPathPrefixes, hasBinding: false })
+
+      expect(sw.clientEvents).toEqual([])
+      expect(sw.appFetchCalls()).toEqual([])
     })
   })
 

@@ -6,6 +6,7 @@ import { color, layout, titleLine } from './format'
 export const renderRunHuman = (result: TapRunResult): string => {
   return layout([
     [titleLine(color.pending('●'), `${result.spec} is ${result.status}`)],
+    ...(result.pluginsError ? [[color.warn(result.pluginsError)]] : []),
     [color.muted('use tap status to check progress')],
   ])
 }

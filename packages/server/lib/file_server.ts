@@ -18,7 +18,7 @@ export type FileServer = {
   token: string
   port: () => number
   address: () => string
-  close: () => void
+  close: () => Promise<void>
 }
 
 const onRequest = function (req: http.IncomingMessage, res: http.ServerResponse, expectedToken: string, fileServerFolder: string) {

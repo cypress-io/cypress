@@ -5,11 +5,9 @@ import ffmpeg from 'fluent-ffmpeg'
 import stream from 'stream'
 import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
-import { path as ffprobePath } from '@ffprobe-installer/ffprobe'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
 import type { ProcessOptions, WriteVideoFrame } from '@packages/types'
-import type { FfprobeData } from 'fluent-ffmpeg'
 
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')
@@ -19,7 +17,6 @@ const debugFrames = Debug('cypress-verbose:server:video:frames')
 debug('using ffmpeg from %s', ffmpegPath)
 
 ffmpeg.setFfmpegPath(ffmpegPath)
-ffmpeg.setFfprobePath(ffprobePath)
 
 const deferredPromise = function () {
   let reject
@@ -95,18 +92,6 @@ export function getCodecData (src): Bluebird<CodecData> {
     })
   }).tapCatch((err) => {
     return debug('getting codecData failed', { err })
-  })
-}
-
-export function getChapters (fileName): Bluebird<FfprobeData> {
-  return new Bluebird<FfprobeData>((resolve, reject) => {
-    ffmpeg.ffprobe(fileName, ['-show_chapters'], (err, metadata) => {
-      if (err) {
-        return reject(err)
-      }
-
-      resolve(metadata)
-    })
   })
 }
 

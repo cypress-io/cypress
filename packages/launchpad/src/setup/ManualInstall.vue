@@ -5,7 +5,7 @@
     <p
       class="pt-[24px] pr-[24px] pl-[24px] mb-[-12px] text-gray-800 font-500 text-[16px]"
     >
-      {{ t('setupWizard.installDependencies.pasteCommand') }}
+      Paste this command into your terminal to install the following packages:
     </p>
     <TerminalPrompt
       class="m-[24px]"
@@ -27,12 +27,12 @@
         <i-cy-status-download-done_x24
           v-if="dep.satisfied"
           class="h-[24px] my-[12px] ml-[24px] w-[24px] float-right"
-          :aria-label="t('setupWizard.installDependencies.installed')"
+          aria-label="installed"
         />
         <i-cy-status-download-pending_x24
           v-else
           class="h-[24px] my-[8px] ml-[24px] w-[24px] float-right"
-          :aria-label="t('setupWizard.installDependencies.pendingInstall')"
+          aria-label="pending installation"
         />
         <span class="text-[14px] ">
           <ExternalLink
@@ -65,9 +65,6 @@ import { gql } from '@urql/core'
 import TerminalPrompt from '@cy/components/TerminalPrompt.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { ManualInstallFragment } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 gql`
 fragment ManualInstall on Query {

@@ -1,11 +1,12 @@
 import _ from 'lodash'
 import UrlParse from 'url-parse'
+import { resolveDevelopmentCloudWorkspaceUrl } from '@packages/config'
 
 const app_config = require('../../config/app.json')
 
-export const getApiUrl = (): string => {
-  return app_config[process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'].api_url
-}
+const environment = process.env.CYPRESS_CONFIG_ENV || process.env.CYPRESS_INTERNAL_ENV || 'development'
+
+export const apiUrl: string = resolveDevelopmentCloudWorkspaceUrl(app_config[environment].api_url, environment)
 
 const CLOUD_ENDPOINTS = {
   api: '',
@@ -44,10 +45,10 @@ const parseArgs = function (url, args: any[] = []) {
   return url
 }
 
-const _makeRoutes = (baseUrl: string | (() => string), routes: typeof CLOUD_ENDPOINTS) => {
+const _makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
   return _.reduce(routes, (memo, value, key) => {
     memo[key] = function (...args: any[]) {
-      let url = new UrlParse(typeof baseUrl === 'function' ? baseUrl() : baseUrl, true)
+      let url = new UrlParse(baseUrl, true)
 
       if (value) {
         url.set('pathname', value)
@@ -64,6 +65,6 @@ const _makeRoutes = (baseUrl: string | (() => string), routes: typeof CLOUD_ENDP
   }, {} as Record<keyof typeof CLOUD_ENDPOINTS, (...args: any[]) => string>)
 }
 
-export const apiRoutes = _makeRoutes(getApiUrl, CLOUD_ENDPOINTS)
+export const apiRoutes = _makeRoutes(apiUrl, CLOUD_ENDPOINTS)
 
 export const makeRoutes = (baseUrl) => _makeRoutes(baseUrl, CLOUD_ENDPOINTS)

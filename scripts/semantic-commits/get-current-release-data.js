@@ -13,7 +13,8 @@ const getYarnInfo = (pkg) => {
  */
 const getBranchMajor = () => {
   try {
-    const tag = childProcess.execSync(`git describe --tags --abbrev=0 --match 'v[0-9]*'`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+    // execFileSync skips the shell: cmd.exe on Windows would pass quotes around the pattern through to git
+    const tag = childProcess.execFileSync('git', ['describe', '--tags', '--abbrev=0', '--match', 'v[0-9]*'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
 
     return semver.major(semver.coerce(tag))
   } catch (err) {
@@ -25,7 +26,7 @@ const isAncestorOfHead = (sha) => {
   if (!/^[0-9a-f]{40}$/.test(sha)) return false
 
   try {
-    childProcess.execSync(`git merge-base --is-ancestor ${sha} HEAD`, { stdio: 'ignore' })
+    childProcess.execFileSync('git', ['merge-base', '--is-ancestor', sha, 'HEAD'], { stdio: 'ignore' })
 
     return true
   } catch (err) {

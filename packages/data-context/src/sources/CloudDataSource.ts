@@ -22,7 +22,7 @@ import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
-import { CLOUD_URLS, resolveCloudEnv } from '../util/cloudUrls'
+import { resolveCloudEnv, resolveCloudUrl } from '../util/cloudUrls'
 import type { CloudEnv } from '../util/cloudUrls'
 import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
@@ -31,6 +31,7 @@ import { pathToArray } from 'graphql/jsutils/Path'
 export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationResult<T | null>> & { executing?: Promise<ExecutionResult<T> & Partial<OperationResult<T | null>>> }
 
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
+const cloudEnv = resolveCloudEnv()
 
 type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T : never
 type CloudQueryField = StartsWith<keyof NexusGen['fieldTypes']['Query'], 'cloud'>
@@ -114,7 +115,7 @@ export class CloudDataSource {
 
   reset () {
     return this.#cloudUrqlClient = createClient({
-      url: `${this.getCloudUrl(resolveCloudEnv())}/test-runner-graphql`,
+      url: `${this.getCloudUrl(cloudEnv)}/test-runner-graphql`,
       exchanges: [
         dedupExchange,
         cacheExchange({
@@ -329,7 +330,7 @@ export class CloudDataSource {
   }
 
   getCloudUrl (env: CloudEnv) {
-    return CLOUD_URLS[env]
+    return resolveCloudUrl(env)
   }
 
   /**

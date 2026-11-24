@@ -2,7 +2,7 @@
   <div v-if="type === 'ci1'">
     <div class="p-[24px] pt-[20px]">
       <p class="mb-[16px] text-gray-600">
-        {{ t('topNav.docsMenu.prompts.ci1.description') }}
+        Optimize your tests in CI by following these guides.
       </p>
       <ul
         class="flex flex-wrap gap-[16px]"
@@ -38,7 +38,7 @@
             <template #prefix>
               <i-cy-book class="h-[16px] w-[16px] icon-dark-gray-500 icon-light-gray-50" />
             </template>
-            {{ t('topNav.docsMenu.prompts.ci1.seeOtherGuides') }}
+            See other guides
           </Button>
         </li>
       </ul>
@@ -57,10 +57,10 @@
       <i-cy-infinity-loop_x18 class="h-[20px] mr-[20px] w-[20px] icon-dark-indigo-500" />
       <div class="grow">
         <p class="pb-[4px] text-indigo-500">
-          {{ t('topNav.docsMenu.prompts.ci1.intro') }}
+          Introduction to CI
         </p>
         <p class="text-gray-600 text-[14px]">
-          {{ t('topNav.docsMenu.prompts.ci1.learnTheBasics') }}
+          Learn the basics of running Cypress in CI.
         </p>
       </div>
       <i-cy-arrow-outline-right
@@ -80,8 +80,8 @@
         :class="{'w-[50%]': shrink}"
       >
         <span>
-          <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration1.parallelTime') }}</span>
-          {{ t('topNav.docsMenu.prompts.orchestration1.withParallelization') }}
+          <span class="font-bold">5 mins</span>
+          with Parallelization
         </span>
         <div class="border-l border-l-jade-500 border-opacity-50 grid w-[28px] place-content-center">
           <i-cy-lightning_x16 class="h-[16px] w-[16px] icon-dark-white icon-light-jade-400" />
@@ -91,8 +91,8 @@
         class="rounded flex bg-gray-500 text-white mb-[12px] pt-[9px] pr-[3px] pb-[7px] pl-[12px] justify-between"
       >
         <span>
-          <span class="font-bold">{{ t('topNav.docsMenu.prompts.orchestration1.noParallelTime') }}</span>
-          {{ t('topNav.docsMenu.prompts.orchestration1.withoutParallelization') }}
+          <span class="font-bold">12 mins</span>
+          without Parallelization
         </span>
         <div class="border-l border-l-gray-600 border-opacity-50 grid w-[28px] place-content-center">
           <i-cy-dollar_x16 class="h-[16px] w-[16px] icon-dark-white" />
@@ -100,7 +100,7 @@
       </div>
     </div>
     <p class="mt-[20px] mb-[10px] text-gray-600">
-      {{ t('topNav.docsMenu.prompts.orchestration1.intro') }}
+      With Smart Orchestration, you'll be able to:
     </p>
     <ul class="text-gray-700">
       <li
@@ -124,7 +124,7 @@
       size="lg"
       class="mt-[12px]"
     >
-      {{ t('topNav.docsMenu.prompts.orchestration1.learnMore') }}
+      Learn more
       <template #suffix>
         <i-cy-arrow-right_x16 class="icon-dark-current" />
       </template>
@@ -134,8 +134,6 @@
 
 <script setup lang="ts">
 import Button from '@cy/components/Button.vue'
-import { useI18n } from '@cy/i18n'
-const { t } = useI18n()
 import type { LinkWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useTimeout } from '@vueuse/core'
@@ -234,8 +232,8 @@ const seeOtherGuidesInfo = {
 }
 
 const orchestrationBullets = [
-  t('topNav.docsMenu.prompts.orchestration1.bullet1'),
-  t('topNav.docsMenu.prompts.orchestration1.bullet2'),
-  t('topNav.docsMenu.prompts.orchestration1.bullet3'),
+  'Run spec files in parallel',
+  'Prioritize failed specs to run first',
+  'Cancel CI runs on test failure',
 ]
 </script>

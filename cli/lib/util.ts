@@ -22,6 +22,7 @@ import logger from './logger'
 import Debug from 'debug'
 import fs from 'fs-extra'
 import { relativeToRepoRoot } from './relative-to-repo-root'
+import { resolveDevelopmentCloudWorkspaceNumber } from './development-cloud-workspace'
 
 const debug = Debug('cypress:cli')
 
@@ -253,6 +254,13 @@ const getApplicationDataFolder = (...paths: string[]): string => {
 
   // allow overriding the app_data folder
   let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+  const cloudWorkspaceNum = resolveDevelopmentCloudWorkspaceNumber(folder, env)
+  const hasCloudWorkspace = cloudWorkspaceNum !== undefined
+
+  if (hasCloudWorkspace) {
+    folder = `${folder}-workspace-${cloudWorkspaceNum}`
+  }
+
   // eslint-disable-next-line no-restricted-syntax
   const pkg = JSON.parse(fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8'))
   const PRODUCT_NAME = pkg.productName || pkg.name
@@ -295,6 +303,7 @@ const util = {
       return value ? '1' : '0'
     })
     .extend(this.getOriginalNodeOptions())
+    .extend(this.getTerminalSize())
     .value()
   },
 
@@ -314,6 +323,13 @@ const util = {
       FORCE_STDOUT_TTY: this.isTty(process.stdout.fd),
       FORCE_STDERR_TTY: this.isTty(process.stderr.fd),
     }
+  },
+
+  // On Windows the binary's stdio is always piped, so it cannot measure the terminal itself
+  getTerminalSize (): { FORCE_TTY_COLUMNS?: string, FORCE_TTY_ROWS?: string } {
+    const stream = [process.stdout, process.stderr].find((s) => s.isTTY && s.columns && s.rows)
+
+    return stream ? { FORCE_TTY_COLUMNS: String(stream.columns), FORCE_TTY_ROWS: String(stream.rows) } : {}
   },
 
   getEnvColors (): any {

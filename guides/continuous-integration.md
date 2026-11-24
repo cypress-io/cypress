@@ -14,7 +14,7 @@ Runs on PRs targeting `develop` or `release/*` branches (excluding draft PRs).
 
 | Stage | What It Does |
 |-------|--------------|
-| Build | Installs dependencies, builds packages, generates V8 snapshots |
+| Build | Installs dependencies, builds packages |
 | Lint & Type Check | ESLint, TypeScript compilation, type linting |
 | Unit Tests | Runs unit tests across packages |
 | Integration Tests | Driver tests (Chrome, Firefox, Electron, WebKit), server tests, component tests |
@@ -56,7 +56,7 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 | PR opened/updated | Pull Request | Skipped for draft PRs |
 | Push to `develop` | Full | Linux x64 is path-filtered by changed files; binary builds and release gating always run. Other platforms run from the develop schedule, not this push |
 | Push to `release/*` | Full | Linux x64 runs the complete test suite and binary builds, unfiltered. Other platforms run from the release schedule |
-| Push to `vN` | Full | Path-filtered like a `develop` push; all five platforms run |
+| Push to `vN` | Full | Linux x64 is path-filtered like a `develop` push. Other platforms run from the weekly `vN` schedule, not this push |
 | Scheduled pipeline | Full | Nightly cron on `develop`, weekly build on `vN`; always unfiltered, even though they run on that branch |
 | Manual (CircleCI UI) | Configurable | Can run the full Linux x64 workflow, or all four scheduled platforms, on any branch; `run-all-jobs=true` forces everything on Linux x64 |
 
@@ -76,34 +76,19 @@ Linux ARM64, macOS Intel, macOS Apple Silicon, and Windows build from a CircleCI
 
 ## GitHub Actions
 
-GitHub Actions handle automation, security scanning, and repository maintenance.
+GitHub Actions handle automation, PR validation, and compliance.
 
 ### Automation
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | **Update Browser Versions** | Daily at 8am UTC | Checks for new Chrome stable/beta versions and creates PRs to update CI config |
-| **Update V8 Snapshot Cache** | Daily + release branch pushes | Regenerates V8 snapshots to maintain startup performance |
-
-### Security
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| **Snyk SCA Scan** | PRs to develop/release | Scans dependencies for known vulnerabilities |
-| **Snyk Static Analysis** | PRs to develop/release | Performs code security analysis |
 
 ### PR Validation
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | **Semantic Pull Request** | PR opened/edited | Validates PR title follows conventional commit format and has changelog entry |
-
-### Repository Maintenance
-
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| **Stale Issues/PRs** | Daily at 1:30am UTC | Marks inactive issues/PRs as stale after 180 days, closes after 14 more days |
-| **Triage Workflows** | Issue/PR opened | Adds external contributor items to the triage project board |
 
 ### Compliance
 

@@ -15,7 +15,7 @@ export const activeListeners = (onStub: sinon.SinonStub, offStub: sinon.SinonStu
   .filter(({ call }) => call.args[0] === event)
   .sort((a, b) => a.call.callId - b.call.callId)
 
-  const active: Function[] = []
+  const active: ((...args: any[]) => unknown)[] = []
 
   events.forEach(({ type, call }) => {
     const listener = call.args[1]

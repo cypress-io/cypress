@@ -4,7 +4,7 @@
   >
     <WarningList :gql="query.data.value" />
     <LaunchpadHeader
-      :title="t('setupWizard.chooseBrowser.title')"
+      title="Choose a browser"
       :description="headingDescription"
     />
     <OpenBrowserList
@@ -24,10 +24,7 @@ import OpenBrowserList from './OpenBrowserList.vue'
 import WarningList from '../warning/WarningList.vue'
 import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument, OpenBrowser_FocusActiveBrowserWindowDocument, OpenBrowser_ResetLatestVersionTelemetryDocument, OpenBrowser_LocalSettingsDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
-import { useI18n } from '@cy/i18n'
 import { computed, ref, onMounted, watch } from 'vue'
-
-const { t } = useI18n()
 
 gql`
 query OpenBrowser {
@@ -146,7 +143,9 @@ const closeBrowserFn = () => {
 }
 
 const headingDescription = computed(() => {
-  return t('setupWizard.chooseBrowser.description', { testingType: query.data.value?.currentProject?.currentTestingType === 'component' ? 'component' : 'E2E' })
+  const testingType = query.data.value?.currentProject?.currentTestingType === 'component' ? 'component' : 'E2E'
+
+  return `Choose your preferred browser for ${testingType} testing.`
 })
 
 const focusActiveBrowserWindow = useMutation(OpenBrowser_FocusActiveBrowserWindowDocument)

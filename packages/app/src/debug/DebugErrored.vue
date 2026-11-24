@@ -1,6 +1,6 @@
 <template>
   <Alert
-    :title="t('debugPage.incomplete')"
+    title="Incomplete"
     status="warning"
     :icon="ErrorOutlineIcon"
     class="flex flex-col mb-[24px] w-full"
@@ -15,7 +15,7 @@
       </ul>
     </div>
     <div class="mt-[20px]">
-      {{ t('debugPage.specsSkipped', {n: totalSpecs, totalSkippedSpecs}) }}
+      {{ totalSkippedSpecs }} of {{ totalSpecs }} {{ totalSpecs === 1 ? 'spec' : 'specs' }} skipped
     </div>
   </Alert>
 </template>
@@ -25,9 +25,6 @@ import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import Alert from '@cy/components/Alert.vue'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 dayjs.extend(utc)
 

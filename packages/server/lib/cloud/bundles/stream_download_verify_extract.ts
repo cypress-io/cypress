@@ -4,7 +4,7 @@ import { pipeline } from 'stream/promises'
 import { Transform } from 'stream'
 import path from 'path'
 import os from 'os'
-import type { Parser as TarParser } from 'tar'
+import { Parser } from 'tar'
 import fetch from 'cross-fetch'
 import Debug from 'debug'
 import { strictAgent } from '@packages/network'
@@ -150,12 +150,6 @@ const runDownloadAttempt = async ({ url, staging, kind }: StreamDownloadVerifyEx
     },
   })
 
-  // tar must stay out of the V8 snapshot — the snapshot rewriter breaks its
-  // classes ("Must call super constructor"). The snapshot bundler resolves a
-  // bare 'tar' require via `main`, but can't resolve the 'tar/parse' `exports`
-  // subpath, so this require is left for Node to resolve from disk at runtime.
-  // TS can't resolve the subpath either (node10 moduleResolution), hence the cast.
-  const { Parser } = require('tar/parse') as { Parser: typeof TarParser }
   const parser = new Parser({ strict: true })
   const entryPromises: Promise<void>[] = []
 
@@ -189,8 +183,8 @@ const runDownloadAttempt = async ({ url, staging, kind }: StreamDownloadVerifyEx
   const controller = new AbortController()
   const fetchTimeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
-  let bundleSig: string | null = null
-  let manifestSig: string | null = null
+  let bundleSig: string | null
+  let manifestSig: string | null
 
   try {
     debug('fetching %s bundle from %s', kind, url)

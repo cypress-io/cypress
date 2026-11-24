@@ -113,7 +113,7 @@ describe('lib/tap/commands/inspect extractInspect', () => {
     const result = await readInspect(connection, frame, '.plain')
 
     expect(result.found).to.eq(true)
-    expect(result.aria).to.be.undefined
+    expect(result.aria).toBeUndefined()
     expect(result.tag).to.eq('input')
   })
 

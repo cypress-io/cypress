@@ -1,7 +1,6 @@
 import ButtonCounter from './ButtonCounter.vue'
 import { mount } from '@cypress/vue'
 
-/* eslint-env mocha */
 describe('ButtonCounter', () => {
   beforeEach(() => {
     mount(ButtonCounter)

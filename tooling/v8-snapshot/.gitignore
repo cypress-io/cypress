@@ -1,3 +1,0 @@
-test/fixtures/*/cache/
-test/fixtures/iterative/project/*
-!test/fixtures/iterative/project/yarn.lock

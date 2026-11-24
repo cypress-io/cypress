@@ -1,13 +1,12 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React, { useCallback, useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 import appState from '../lib/app-state'
 import type { Events } from '../lib/events'
 import events from '../lib/events'
 import Test from '../test/test'
-import type { CollapsibleHeaderComponentProps } from '../collapsible/collapsible'
 import Collapsible from '../collapsible/collapsible'
 
 import type SuiteModel from './suite-model'
@@ -36,57 +35,69 @@ const headerIconDefaultProps = {
   className: 'header-icon',
 }
 
-const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, spec }: SuiteProps) => {
-  const headerIconStyle = {
-    marginTop: '1px',
+const headerIconStyle = {
+  marginTop: '1px',
+}
+
+const SuiteHeaderIcon = ({ isOpen, state }: { isOpen: boolean, state: SuiteModel['state'] }) => {
+  let headerIcon
+
+  switch (state) {
+    case 'active':
+      headerIcon = <IconObjectStackRunning {...headerIconDefaultProps} style={headerIconStyle} />
+      break
+    case 'passed':
+      headerIcon = <IconObjectStackPassed {...headerIconDefaultProps} secondaryStrokeColor='jade-400' style={headerIconStyle} />
+      break
+    case 'failed':
+      headerIcon = <IconObjectStackFailed {...headerIconDefaultProps} secondaryStrokeColor='red-400' style={headerIconStyle} />
+      break
+    case 'pending':
+      headerIcon = <IconObjectStackSkipped {...headerIconDefaultProps} style={headerIconStyle} />
+      break
+    case 'processing':
+      headerIcon = <IconObjectStackQueued {...headerIconDefaultProps} style={headerIconStyle} />
+      break
+    default:
+      headerIcon = <></>
+      break
   }
 
-  const getHeaderIcon = useCallback((isOpen: boolean) => {
-    let headerIcon
+  return <>
+    {isOpen ? <IconChevronDownMedium className='header-collapsible-indicator' strokeColor='gray-700' style={headerIconStyle} /> : <IconChevronRightMedium size='16' className='header-collapsible-indicator' strokeColor='gray-700' style={headerIconStyle} />}
+    {headerIcon}
+  </>
+}
 
-    switch (model.state) {
-      case 'active':
-        headerIcon = <IconObjectStackRunning {...headerIconDefaultProps} style={headerIconStyle} />
-        break
-      case 'passed':
-        headerIcon = <IconObjectStackPassed {...headerIconDefaultProps} secondaryStrokeColor='jade-400' style={headerIconStyle} />
-        break
-      case 'failed':
-        headerIcon = <IconObjectStackFailed {...headerIconDefaultProps} secondaryStrokeColor='red-400' style={headerIconStyle} />
-        break
-      case 'pending':
-        headerIcon = <IconObjectStackSkipped {...headerIconDefaultProps} style={headerIconStyle} />
-        break
-      case 'processing':
-        headerIcon = <IconObjectStackQueued {...headerIconDefaultProps} style={headerIconStyle} />
-        break
-      default:
-        headerIcon = <></>
-        break
-    }
+interface SuiteHeaderProps {
+  isOpen: boolean
+  model: SuiteModel
+  studioEnabled: boolean
+  spec?: Cypress.Cypress['spec']
+}
 
-    return <>
-      {isOpen ? <IconChevronDownMedium className='header-collapsible-indicator' strokeColor='gray-700' style={headerIconStyle} /> : <IconChevronRightMedium size='16' className='header-collapsible-indicator' strokeColor='gray-700' style={headerIconStyle} />}
-      {headerIcon}
+// An observer of its own, since Collapsible renders it and isn't one
+const SuiteHeader: React.FC<SuiteHeaderProps> = observer(({ isOpen, model, studioEnabled, spec }) => {
+  return (
+    <>
+      <div className='runnable-and-suite-header-icon'>
+        <SuiteHeaderIcon isOpen={isOpen} state={model.state} />
+      </div>
+      <span className='runnable-title'>{model.title}</span>
+      {(studioEnabled && !appState.studioActive && spec?.relative !== '__all') && (
+        <>
+          <CreateNewTestButton suiteId={model.id} dataCy='create-new-test-from-suite' />
+          <span className='button-hover-shadow' />
+        </>
+      )}
     </>
-  }, [model.state])
+  )
+})
 
-  const HeaderComponent = useCallback(({ isOpen }: CollapsibleHeaderComponentProps) => {
-    return (
-      <>
-        <div className='runnable-and-suite-header-icon'>
-          {getHeaderIcon(isOpen)}
-        </div>
-        <span className='runnable-title'>{model.title}</span>
-        {(studioEnabled && !appState.studioActive && spec?.relative !== '__all') && (
-          <>
-            <CreateNewTestButton suiteId={model.id} dataCy='create-new-test-from-suite' />
-            <span className='button-hover-shadow' />
-          </>
-        )}
-      </>
-    )
-  }, [getHeaderIcon, model.title, studioEnabled, appState.studioActive])
+SuiteHeader.displayName = 'SuiteHeader'
+
+const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, spec }: SuiteProps) => {
+  const renderHeader = (isOpen: boolean) => <SuiteHeader isOpen={isOpen} model={model} studioEnabled={studioEnabled} spec={spec} />
 
   const runnablesList = useMemo(() => (
     <ul className='runnables'>
@@ -100,13 +111,13 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
         />)
       })}
     </ul>
-  ), [model.children, studioEnabled])
+  ), [model.children, studioEnabled, spec])
 
   return (
     // we don't want to show the collapsible if there are no tests in the suite
     model.children && !model.children.some((c) => c.type === 'test') ? runnablesList : (
       <Collapsible
-        HeaderComponent={HeaderComponent}
+        renderHeader={renderHeader}
         headerClass='runnable-wrapper'
         headerStyle={{}}
         hideExpander

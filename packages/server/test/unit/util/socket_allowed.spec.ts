@@ -95,6 +95,16 @@ describe('lib/util/socket_allowed', function () {
       expect(sw.isTrustedOrigin('http://www.barbaz.com:3500')).toBe(false)
     })
 
+    it('keeps trusting top after the primary moves to a sibling subdomain when injecting document.domain', () => {
+      const remoteStates = createRemoteStates(true)
+
+      sw = new SocketAllowed(remoteStates, () => SERVER_PORT)
+      remoteStates.set('http://www.foobar.com:3500/index.html')
+      remoteStates.set('http://app.foobar.com:3500/index.html')
+
+      expect(sw.isTrustedOrigin('http://www.foobar.com:3500')).toBe(true)
+    })
+
     it('follows the primary as it moves', () => {
       const remoteStates = createRemoteStates()
 

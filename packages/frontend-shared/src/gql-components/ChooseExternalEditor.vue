@@ -7,7 +7,7 @@
       item-value="name"
       item-key="id"
       :label-id="labelId"
-      :placeholder="t('settingsPage.editor.noEditorSelectedPlaceholder')"
+      placeholder="Choose your editor..."
       class="w-[400px]"
       data-cy="selectEditor"
       @update:model-value="updateEditor"
@@ -32,26 +32,20 @@
       </template>
     </Select>
   </div>
+  <!-- eslint-disable vue/multiline-html-element-content-newline -->
   <p
     class="mt-[8px] max-w-[400px] text-sm text-gray-600"
     data-cy="launch-editor-hint"
-  >
-    <i18n-t
-      scope="global"
-      keypath="settingsPage.editor.launchEditorHint"
-    >
-      <ExternalLink href="https://on.cypress.io/file-opener-preference">
-        <code class="font-medium">LAUNCH_EDITOR</code>
-      </ExternalLink>
-    </i18n-t>
-  </p>
+  >Editor not listed? Set <ExternalLink :href="launchEditorHintLink">
+    <code class="font-medium">LAUNCH_EDITOR</code>
+  </ExternalLink> and restart.</p>
+  <!-- eslint-enable vue/multiline-html-element-content-newline -->
 </template>
 
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 import { ref, computed } from 'vue'
 import Icon from '@cy/components/Icon.vue'
-import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
 import ExternalLink from './ExternalLink.vue'
 import Cursor from '~icons/logos/cursor'
@@ -66,6 +60,15 @@ import Terminal from '~icons/cy/terminal_x16.svg'
 import { IconTechnologyCodeEditor } from '@cypress-design/vue-icon'
 import { gql } from '@urql/core'
 import type { ChooseExternalEditorFragment } from '../generated/graphql'
+import { getUrlWithParams } from '../utils/getUrlWithParams'
+
+const launchEditorHintLink = getUrlWithParams({
+  url: 'https://on.cypress.io/file-opener-preference',
+  params: {
+    utm_medium: 'Choose External Editor',
+    utm_content: 'Launch Editor Hint',
+  },
+})
 
 const icons: Record<string, FunctionalComponent<SVGAttributes>> = {
   'code': VSCode,
@@ -107,8 +110,6 @@ const props = defineProps<{
   gql: ChooseExternalEditorFragment
   labelId: string
 }>()
-
-const { t } = useI18n()
 
 type Editor = ChooseExternalEditorFragment['localSettings']['availableEditors'][number]
 

@@ -1,5 +1,4 @@
 import { loadSpec } from './support/spec-loader'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('src/cypress/runner', () => {
   describe('tests finish with correct state', () => {
@@ -111,10 +110,8 @@ describe('src/cypress/runner', () => {
       .click()
       .should('have.class', 'command-is-pinned')
 
-      const { highlightsLabel } = defaultMessages.runner.snapshot
-
       // disable highlights
-      cy.findByLabelText(highlightsLabel)
+      cy.findByLabelText('Highlights')
       .should('have.attr', 'aria-checked', 'true')
       .click()
       .should('have.attr', 'aria-checked', 'false')
@@ -126,7 +123,7 @@ describe('src/cypress/runner', () => {
       .click()
       .should('have.class', 'command-is-pinned')
 
-      cy.findByLabelText(highlightsLabel)
+      cy.findByLabelText('Highlights')
       .should('have.attr', 'aria-checked', 'true')
     })
 

@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { ReporterResults } from '../../../lib/types/reporter'
-import { patchRunResultsAfterCrash } from '../../../lib/util/graceful_crash_handling'
+import { EarlyExitTerminator, patchRunResultsAfterCrash } from '../../../lib/util/graceful_crash_handling'
 
 const baseReporterResults = (): ReporterResults => {
   return {
@@ -173,6 +173,19 @@ describe('lib/util/graceful_crash_handling', () => {
       expect(out.tests[0].attempts[0].error).toMatchObject({ message: 'first flake' })
       expect(out.tests[0].attempts[1].state).toBe('failed')
       expect(out.tests[0].attempts[1].error?.message).toBe('tab crashed')
+    })
+  })
+
+  describe('EarlyExitTerminator', () => {
+    it('records the type of the error that ended the spec', () => {
+      vi.spyOn(console, 'log').mockImplementation(() => {})
+      const terminator = new EarlyExitTerminator()
+
+      expect(terminator.exitErrorType).toBeUndefined()
+
+      terminator.exitEarly(Object.assign(new Error('crashed'), { type: 'BROWSER_CRASHED' }))
+
+      expect(terminator.exitErrorType).toBe('BROWSER_CRASHED')
     })
   })
 })

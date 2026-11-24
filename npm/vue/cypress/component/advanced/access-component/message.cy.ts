@@ -1,4 +1,3 @@
-/// <reference path="../../../../dist/index.d.ts" />
 import Message from './Message.vue'
 import { mount } from '@cypress/vue'
 
@@ -7,7 +6,6 @@ import { mount } from '@cypress/vue'
 
 const createCmp = (propsData?: { message: string }) => mount(Message, { propsData })
 
-/* eslint-env mocha */
 describe('Message', () => {
   describe('properties', () => {
     it('has a message property', () => {

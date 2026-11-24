@@ -53,7 +53,6 @@ import type { Ref } from 'vue'
 import type { CreateSpecModalFragment } from '../generated/graphql'
 import { gql } from '@urql/vue'
 import { not, whenever } from '@vueuse/core'
-import { useI18n } from '@cy/i18n'
 import { getPathForPlatform } from '../paths'
 
 const props = defineProps<{
@@ -97,8 +96,8 @@ fragment CreateSpecModal on Query {
 
 const currentGeneratorId: Ref<GeneratorId | undefined> = ref(props.initialGenerator)
 
-const { t } = useI18n()
-const title = ref(t('createSpec.newSpecModalTitle'))
+const defaultTitle = 'Create new spec'
+const title = ref(defaultTitle)
 
 const filteredGenerators = getFilteredGeneratorList(props.gql.currentProject)
 
@@ -111,7 +110,7 @@ const generator = computed(() => {
 })
 
 const helpLink = computed(() => {
-  if (title.value === t('createSpec.e2e.importFromScaffold.specsAddedHeader')) {
+  if (title.value === 'Great! We added the following files to your project:') {
     return 'https://on.cypress.io/writing-and-organizing-tests'
   }
 
@@ -123,7 +122,7 @@ const specFileName = computed(() => {
 })
 
 whenever(not(generator), () => {
-  title.value = t('createSpec.newSpecModalTitle')
+  title.value = defaultTitle
 })
 
 function close () {

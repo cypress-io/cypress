@@ -12,11 +12,11 @@
       <span
         class="hidden lg:flex"
         data-cy="full-header-text"
-      >{{ t(VALUES[mode].header) }}</span>
+      >{{ VALUES[mode].header }}</span>
       <span
         class="lg:hidden"
         data-cy="short-header-text"
-      >{{ t(VALUES[mode].shortHeader || VALUES[mode].header) }}</span>
+      >{{ VALUES[mode].shortHeader || VALUES[mode].header }}</span>
       <i-cy-circle-bg-question-mark_x16 class="ml-1 icon-dark-indigo-500 icon-light-indigo-100" />
     </button>
     <template
@@ -30,17 +30,12 @@
           :class="{'my-2': !project.isProjectConnected}"
           class="max-w-[300px]"
         >
-          <i18n-t
-            scope="global"
-            :keypath="tooltipTextKey"
+          {{ tooltipText.beforeLink }}<ExternalLink
+            :href="VALUES[mode].docsUrl"
+            class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
           >
-            <ExternalLink
-              :href="VALUES[mode].docsUrl"
-              class="font-medium text-indigo-500 contents group-hocus:text-indigo-600"
-            >
-              {{ t(VALUES[mode].docs) }}
-            </ExternalLink>
-          </i18n-t>
+            {{ VALUES[mode].docs }}
+          </ExternalLink>{{ tooltipText.afterLink }}
         </div>
         <div>
           <Button
@@ -50,7 +45,7 @@
             data-cy="login-button"
             @click="emits('showLoginConnect')"
           >
-            {{ t('specPage.cloudLoginButton') }}
+            {{ 'Log in to Cypress Cloud' }}
           </Button>
           <Button
             v-else-if="cloudStatusMatches('needsProjectConnect')"
@@ -59,7 +54,7 @@
             data-cy="connect-button"
             @click="emits('showLoginConnect')"
           >
-            {{ t("specPage.connectProjectButton") }}
+            {{ 'Connect your project' }}
           </Button>
           <Button
             v-else-if="project.isNotFound"
@@ -68,7 +63,7 @@
             data-cy="reconnect-button"
             @click="emits('showLoginConnect')"
           >
-            {{ t("specPage.reconnectProjectButton") }}
+            {{ 'Reconnect your project' }}
           </Button>
           <RequestAccessButton
             v-else-if="project.isNotAuthorized"
@@ -89,34 +84,36 @@ import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import UserOutlineIcon from '~icons/cy/user-outline_x16.svg'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { SpecHeaderCloudDataTooltipFragment } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
 import { gql } from '@urql/vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const { cloudStatusMatches, project } = useUserProjectStatusStore()
 
-const { t } = useI18n()
-
 type CloudDataTooltipMode = 'LATEST_RUNS' | 'AVG_DURATION'
+
+type TooltipText = {
+  beforeLink: string
+  afterLink: string
+}
 
 type CouldDataTooltipModeValues = {
   header: string
   shortHeader: string
-  connected: string
-  notConnected: string
-  noAccess: string
+  connected: TooltipText
+  notConnected: TooltipText
+  noAccess: TooltipText
   docsUrl: string
   docs: string
 }
 
 const VALUES: Record<CloudDataTooltipMode, CouldDataTooltipModeValues> = {
   LATEST_RUNS: {
-    header: 'specPage.latestRuns.header',
-    shortHeader: 'specPage.latestRuns.headerShort',
-    connected: 'specPage.latestRuns.tooltip.connected',
-    notConnected: 'specPage.latestRuns.tooltip.notConnected',
-    noAccess: 'specPage.latestRuns.tooltip.noAccess',
+    header: 'Latest runs',
+    shortHeader: 'Runs',
+    connected: { beforeLink: 'The ', afterLink: ' in Cypress Cloud' },
+    notConnected: { beforeLink: 'Connect to Cypress Cloud to see the ', afterLink: '' },
+    noAccess: { beforeLink: 'Request access to this project in Cypress Cloud to view the ', afterLink: '' },
     docsUrl: getUrlWithParams({
       url: 'https://on.cypress.io/specs-latest-runs',
       params: {
@@ -124,14 +121,14 @@ const VALUES: Record<CloudDataTooltipMode, CouldDataTooltipModeValues> = {
         utm_campaign: 'Latest Runs',
       },
     }),
-    docs: 'specPage.latestRuns.tooltip.linkText',
+    docs: 'status of your latest runs',
   },
   AVG_DURATION: {
-    header: 'specPage.averageDuration.header',
-    shortHeader: 'specPage.averageDuration.headerShort',
-    connected: 'specPage.averageDuration.tooltip.connected',
-    notConnected: 'specPage.averageDuration.tooltip.notConnected',
-    noAccess: 'specPage.averageDuration.tooltip.noAccess',
+    header: 'Average duration',
+    shortHeader: 'Duration',
+    connected: { beforeLink: 'The ', afterLink: ' of your latest runs in Cypress Cloud' },
+    notConnected: { beforeLink: 'Connect to Cypress Cloud to see the ', afterLink: ' of your latest runs' },
+    noAccess: { beforeLink: 'Request access to this project in Cypress Cloud to view the ', afterLink: ' of your latest runs' },
     docsUrl: getUrlWithParams({
       url: 'https://on.cypress.io/specs-average-duration',
       params: {
@@ -139,7 +136,7 @@ const VALUES: Record<CloudDataTooltipMode, CouldDataTooltipModeValues> = {
         utm_campaign: 'Average Duration',
       },
     }),
-    docs: 'specPage.averageDuration.tooltip.linkText',
+    docs: 'average spec durations',
   },
 }
 
@@ -167,7 +164,7 @@ fragment SpecHeaderCloudDataTooltip on Query {
 }
 `
 
-const tooltipTextKey = computed(() => {
+const tooltipText = computed(() => {
   if (project.isProjectConnected) {
     return VALUES[props.mode].connected
   }

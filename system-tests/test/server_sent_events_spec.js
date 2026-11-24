@@ -18,6 +18,16 @@ const onServer = function (app, srv) {
 }
 
 const onSSEServer = (app) => {
+  app.get('/sse/finite', (req, res) => {
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'text/event-stream',
+    })
+
+    res.write('data: one\n\n')
+    setTimeout(() => res.end('data: two\n\n'), 100)
+  })
+
   return app.get('/sse', function (req, res) {
     let int
 

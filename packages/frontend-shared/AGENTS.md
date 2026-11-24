@@ -1,6 +1,6 @@
 # @packages/frontend-shared
 
-Shared Vue 3 component library, TailwindCSS configuration, composables, GraphQL fragments, and i18n strings consumed by both `@packages/app` (browser-side UI) and `@packages/launchpad` (Electron-rendered UI). Any component or utility intended to appear identically in both apps belongs here.
+Shared Vue 3 component library, TailwindCSS configuration, composables, and GraphQL fragments consumed by both `@packages/app` (browser-side UI) and `@packages/launchpad` (Electron-rendered UI). Any component or utility intended to appear identically in both apps belongs here.
 
 ## Key Commands
 
@@ -32,7 +32,6 @@ src/
   generated/     Auto-generated files: GraphQL schema snapshot used in tests
   gql-components/ Components that are tightly coupled to specific GraphQL queries/fragments
   graphql/       urql exchanges, GraphQL client setup, and fragment definitions
-  locales/       i18n JSON translation files
   public/        Static public assets served during development
   shiki/         Syntax highlighting theme and language definitions
   store/         Shared Pinia stores
@@ -43,10 +42,12 @@ src/
 
 ## Gotchas / Notes
 
+- The file name picks the JSX compiler in `app`, `launchpad` and `frontend-shared`: `*.vue.tsx`, `*.vue.cy.tsx`, `*.vue.spec.tsx` and `<script lang="tsx">` in a `.vue` file are Vue JSX, and every other `.tsx` is React. `.jsx` files aren't compiled at all, so write JSX in TypeScript. A Vue JSX file without the `.vue` infix compiles as React and fails at runtime with `Objects are not valid as a React child (found: object with keys {__v_isVNode, ...})`. `makeConfig` in `vite.config.mjs` sets this up.
 - There are **no E2E tests** in this package — only component tests. E2E coverage comes from `app` and `launchpad` which consume these components.
 - The `build` target depends on `generate-shiki-theme` (declared in `nx.targets`) — run that first if the generated theme file is missing.
 - `patch-package` is applied via `postinstall` to patch a local dependency; it is nohoisted to prevent conflicts.
 - The `generated/schema-for-tests.gen.json` is an nx output artifact and must exist before component tests can run type-checking correctly.
+- Don't write component tests that assert computed color values for a styling-only change, such as a global rule in `src/styles/`. Pinning RGB strings from the design tokens breaks on any palette change without catching anything a reviewer wouldn't see. Check the change visually instead, with before-and-after screenshots for the pull request.
 
 ## Integration Points
 

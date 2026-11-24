@@ -1,4 +1,5 @@
 import { createRequire } from 'module'
+import { EventEmitter } from 'events'
 import express from 'express'
 import _ from 'lodash'
 import nock from 'nock'
@@ -11,11 +12,12 @@ import { clearCtx, setCtx } from '@packages/data-context'
 import { connect } from '@packages/network'
 import type { NetworkProxy } from '@packages/proxy'
 
+import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
 import { cache } from '../../lib/cache'
 import { cypressSessions } from '../../lib/cypress-sessions'
 import * as serverErrors from '../../lib/errors'
 import * as fileServer from '../../lib/file_server'
-import { ServerBase, _forceProxyMiddleware } from '../../lib/server-base'
+import { ServerBase, _errorHandler, _forceProxyMiddleware } from '../../lib/server-base'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import { runnerMutationRule } from '@packages/data-context/graphql/rootFieldRules'
 import { subscriptionOnlyRule } from '@packages/data-context/graphql/subscriptionOnlyRule'
@@ -151,7 +153,7 @@ afterAll(() => {
 describe('lib/server-base', () => {
   let config: any
   let server: TestServer
-  let fileServerMock: { close: () => void, port: () => number }
+  let fileServerMock: { close: Mock, port: () => number }
   let oldFileServer: any
   let createFileServer: Mock
 
@@ -171,7 +173,7 @@ describe('lib/server-base', () => {
     await cache.remove()
 
     fileServerMock = {
-      close () {},
+      close: vi.fn(),
       port () {
         return 1111
       },
@@ -1112,7 +1114,101 @@ describe('lib/server-base', () => {
           type: 'PORT_IN_USE_SHORT',
           message: expect.stringContaining(String(port)),
         })
+
+        // the file server created for the failed attempt is still listening,
+        // so it has to be closed rather than left holding its port
+        expect(fileServerMock.close).toHaveBeenCalled()
       })
+    })
+  })
+
+  describe('#_listen', () => {
+    // Stands in for an http.Server whose listen() always succeeds and whose
+    // address reports the next port. Keeps the port sequence deterministic so
+    // the browser-blocked-port retry can be exercised without a real bind.
+    function fakeListeningServer (ports: number[]) {
+      const srv: any = new EventEmitter()
+      let nextPort = 0
+
+      srv.listen = vi.fn((_port: number, _host: string, cb: () => void) => {
+        process.nextTick(cb)
+
+        return srv
+      })
+
+      // the server keeps reporting its last port after the sequence runs out,
+      // since teardown reads address() again
+      srv.address = vi.fn(() => ({ address: '127.0.0.1', family: 'IPv4', port: ports[Math.min(nextPort++, ports.length - 1)] }))
+      srv.close = vi.fn((cb: (err?: Error) => void) => {
+        process.nextTick(() => cb())
+      })
+
+      srv.destroyAsync = vi.fn()
+
+      return srv
+    }
+
+    it('listens on the configured port when browsers allow it', async () => {
+      server._server = fakeListeningServer([54321])
+
+      await expect(server._listen(54321)).resolves.toBe(54321)
+
+      expect(server._server.listen).toHaveBeenCalledWith(54321, '127.0.0.1', expect.any(Function))
+    })
+
+    it('redraws an ephemeral port that browsers block instead of failing to load it', async () => {
+      server._server = fakeListeningServer([10080, 54321])
+
+      await expect(server._listen(null)).resolves.toBe(54321)
+
+      expect(server._server.listen).toHaveBeenCalledTimes(2)
+      expect(server._server.listen).toHaveBeenLastCalledWith(0, '127.0.0.1', expect.any(Function))
+      expect(server._server.close).toHaveBeenCalledTimes(1)
+    })
+
+    it('rejects a bind failure other than EADDRINUSE instead of leaving the run hanging', async () => {
+      const srv: any = new EventEmitter()
+
+      srv.listen = vi.fn(() => {
+        const err = Object.assign(new Error('listen EACCES: permission denied'), { code: 'EACCES' })
+
+        process.nextTick(() => srv.emit('error', err))
+
+        return srv
+      })
+
+      srv.destroyAsync = vi.fn()
+
+      server._server = srv
+
+      await expect(server._listen(null)).rejects.toMatchObject({ code: 'EACCES' })
+    })
+
+    it('rejects with the close error instead of retrying when the blocked port cannot be released', async () => {
+      const srv = fakeListeningServer([10080, 54321])
+      const closeErr = Object.assign(new Error('close failed'), { code: 'EBADF' })
+
+      srv.close = vi.fn((cb: (err?: Error) => void) => {
+        process.nextTick(() => cb(closeErr))
+      })
+
+      server._server = srv
+
+      await expect(server._listen(null)).rejects.toBe(closeErr)
+
+      // a server that is still bound cannot listen again
+      expect(srv.listen).toHaveBeenCalledTimes(1)
+    })
+
+    it('gives up after repeated blocked ephemeral ports instead of listening forever', async () => {
+      server._server = fakeListeningServer(Array(10).fill(10080))
+
+      await expect(server._listen(null)).rejects.toMatchObject({
+        type: 'PORT_BLOCKED_BY_BROWSER',
+        message: expect.stringContaining('could not find a port that browsers allow'),
+      })
+
+      expect(server._server.listen).toHaveBeenCalledTimes(10)
     })
   })
 
@@ -1507,6 +1603,25 @@ describe('lib/server-base', () => {
       )
     })
 
+    it('removes Cypress cookies from the upgrade request', () => {
+      server.remoteStates.set('https://www.foobar.com')
+
+      const upgradeWith = (cookie: string) => {
+        const req = {
+          connection: { encrypted: true },
+          url: '/',
+          headers: { host: 'www.foobar.com', cookie },
+        }
+
+        server.proxyWebsockets(proxy, '/foo', req, socket, head)
+
+        return req.headers
+      }
+
+      expect(upgradeWith('session_id=8f2c1e9a40b7; __cypress.unload=true').cookie).toEqual('session_id=8f2c1e9a40b7')
+      expect(upgradeWith('__cypress.unload=true')).not.toHaveProperty('cookie')
+    })
+
     it('ends the socket if its writable and there is no __cypress.remoteHost', () => {
       const req = {
         url: '/',
@@ -1619,6 +1734,92 @@ describe('lib/server-base', () => {
 
       expect(next).toHaveBeenCalledTimes(1)
       expect(res.redirect).not.toHaveBeenCalled()
+    })
+
+    describe('on the browser (CDP) network path', () => {
+      const listenPort = 2020
+
+      const runNative = (req) => {
+        const res = { redirect: vi.fn() }
+        const next = vi.fn()
+
+        _forceProxyMiddleware(clientRoute, undefined, () => true)(req, res, next)
+
+        return { res, next }
+      }
+
+      const direct = (proxiedUrl: string, host: string | undefined, headers = {}) => {
+        return { proxiedUrl, headers: { ...(host ? { host } : {}), ...headers }, socket: { localPort: listenPort } }
+      }
+
+      it('lets a loopback-token request through under any host', () => {
+        const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', 'other.example.com', {
+          [CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER]: cypressInternalLoopbackToken,
+        }))
+
+        expect(next).toHaveBeenCalledTimes(1)
+        expect(res.redirect).not.toHaveBeenCalled()
+      })
+
+      it('lets a request addressed to this server by a loopback name on its port through', () => {
+        for (const host of ['localhost:2020', '127.0.0.1:2020', '[::1]:2020', 'app.localhost:2020']) {
+          const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', host))
+
+          expect(next, host).toHaveBeenCalledTimes(1)
+          expect(res.redirect, host).not.toHaveBeenCalled()
+        }
+      })
+
+      it('redirects a request under another host, or another port, to clientRoute', () => {
+        for (const host of ['other.example.com:2020', 'localhost:4000', 'localhost', undefined]) {
+          const { res, next } = runNative(direct('/__cypress/iframes/spec.cy.js', host))
+
+          expect(res.redirect, String(host)).toHaveBeenCalledWith(clientRoute)
+          expect(next, String(host)).not.toHaveBeenCalled()
+        }
+      })
+
+      it('still lets clientRoute and the runner bundles through under another host, so the runner page answers', () => {
+        for (const url of ['/__/', '/__cypress/runner/cypress_runner.js']) {
+          const { res, next } = runNative(direct(url, 'other.example.com:2020'))
+
+          expect(next, url).toHaveBeenCalledTimes(1)
+          expect(res.redirect, url).not.toHaveBeenCalled()
+        }
+      })
+    })
+  })
+
+  describe('#_errorHandler', () => {
+    const err = new Error('boom')
+
+    err.stack = 'Error: boom\n    at handler (/packages/server/lib/server-base.ts:1:1)'
+
+    let logError: Mock
+
+    beforeEach(() => {
+      logError = vi.spyOn(console, 'error').mockImplementation(() => {}) as unknown as Mock
+    })
+
+    it('logs the stack to stderr and answers 500 without a body', () => {
+      const res = { headersSent: false, sendStatus: vi.fn() }
+      const req = { socket: { destroy: vi.fn() } }
+
+      _errorHandler(err, req as any, res as any, vi.fn())
+
+      expect(logError).toHaveBeenCalledWith(err.stack)
+      expect(res.sendStatus).toHaveBeenCalledWith(500)
+      expect(req.socket.destroy).not.toHaveBeenCalled()
+    })
+
+    it('destroys the socket when the response has already started', () => {
+      const res = { headersSent: true, sendStatus: vi.fn() }
+      const req = { socket: { destroy: vi.fn() } }
+
+      _errorHandler(err, req as any, res as any, vi.fn())
+
+      expect(req.socket.destroy).toHaveBeenCalledTimes(1)
+      expect(res.sendStatus).not.toHaveBeenCalled()
     })
   })
 

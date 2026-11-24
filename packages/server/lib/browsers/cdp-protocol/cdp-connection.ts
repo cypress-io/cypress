@@ -5,6 +5,7 @@ import CDP from 'chrome-remote-interface'
 import type { CypressError } from '@packages/errors'
 import type { DebuggableCDPClient } from './debug-cdp-connection'
 import { debugCdpConnection } from './debug-cdp-connection'
+import { sendLargeMessagesInFragments } from './send-large-messages-in-fragments'
 import type { CdpEvent, CdpCommand } from './cdp_automation'
 import { CDPDisconnectedError, CDPTerminatedError, CDPAlreadyConnectedError } from './cri-errors'
 import { asyncRetry } from '../../util/async_retry'
@@ -99,6 +100,10 @@ export class CDPConnection {
     }
 
     this._connection = await CDP(this._options) as CdpClient
+
+    // Before the debug logger, which wraps `_ws.send` too and parses each call
+    // as JSON, so it has to see whole messages rather than fragments.
+    sendLargeMessagesInFragments(this._connection)
 
     debugCdpConnection(this.verboseDebug.namespace, this._connection as DebuggableCDPClient)
 

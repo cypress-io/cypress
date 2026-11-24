@@ -1,11 +1,13 @@
-import { baseConfig, frontendOverrides, graphqlConfig, jsonConfig, vueTsxOverrides } from '@packages/eslint-config'
+import { baseConfig, compatConfig, frontendOverrides, graphqlConfig, jsonConfig, mochaConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
   ...jsonConfig,
-  ...vueTsxOverrides,
+  ...compatConfig,
   ...frontendOverrides,
   ...graphqlConfig(),
+  // The component specs' `specPattern` also takes in `*.spec.*` files
+  ...mochaConfig.map((block) => ({ ...block, files: ['src/**/*.spec.{js,jsx,ts,tsx}'] })),
   {
     languageOptions: {
       parserOptions: {
@@ -28,6 +30,14 @@ export default [
     files: ['src/prompt/prompt-app-types.ts', 'src/studio/studio-app-types.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+    },
+  },
+  {
+    // The tap component tests call TapManager's promise-based `exec` directly and
+    // queue no Cypress commands, only synchronous `cy.stub`s, so awaiting is correct
+    files: ['src/tap/**/*.cy.ts'],
+    rules: {
+      'cypress/no-async-tests': 'off',
     },
   },
   {

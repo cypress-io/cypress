@@ -141,7 +141,7 @@ CyEventEmitter & {
   stackUtils?: {
     getSourceDetailsForFirstLine: (
       stack: string,
-      projectRoot: string
+      projectRoot: string,
     ) => {
       line: number
       column: number

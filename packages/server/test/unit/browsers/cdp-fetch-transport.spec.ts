@@ -12,6 +12,7 @@ import type { ChromeStoreCookie } from '../../../lib/browsers/cdp-protocol/cdp-s
 import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
 import { toNetworkError } from '../../../lib/browsers/cdp-protocol/cdp-network-error'
 import { shouldStreamResponseBody } from '../../../lib/browsers/cdp-protocol/should-stream-response-body'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
 function createPausedRequest (options: {
   requestId: string
@@ -758,6 +759,61 @@ describe('CdpFetchTransport', () => {
       expect(encoded.responseHeaders).toBeUndefined()
     })
 
+    // https://github.com/cypress-io/cypress/issues/35256
+    describe('a skipped (stream-shaped) response', () => {
+      const decodeSkippedResponse = (codec: ReturnType<typeof createCdpFetchCodec>) => {
+        const request: CdpFetchTransportRequest = {
+          id: 'network-1',
+          url: 'https://example.test/',
+          method: 'GET',
+          headers: {},
+          initialPriority: 'High',
+          referrerPolicy: 'strict-origin-when-cross-origin',
+        }
+
+        codec.decodeRequest(request)
+
+        return codec.decodeResponse({
+          ...request,
+          requestId: 'fetch-request',
+          responseCode: 200,
+          responseStatusText: 'OK',
+          responseHeaders: [{ name: 'content-type', value: 'text/event-stream' }],
+          bodySkipped: true,
+          originalBodyDigest: digestBody(Buffer.alloc(0)),
+        })
+      }
+
+      it('continues when middleware changes only the content-type', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodeSkippedResponse(codec)
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: Buffer.alloc(0),
+          headers: { ...response.headers, 'content-type': 'text/event-stream; charset=utf-8' },
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.body).toBeUndefined()
+        expect(encoded.responseHeaders).toEqual([{ name: 'content-type', value: 'text/event-stream; charset=utf-8' }])
+      })
+
+      it('fulfills when middleware sets a body', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodeSkippedResponse(codec)
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: Buffer.from('data: stubbed\n\n'),
+          headers: { ...response.headers, 'content-type': 'text/event-stream; charset=utf-8' },
+        })
+
+        expect(encoded.fulfilled).toBe(true)
+        expect(encoded.body).toBe(Buffer.from('data: stubbed\n\n').toString('base64'))
+      })
+    })
+
     describe('continuing a response whose headers only changed order', () => {
       const decodePausedResponse = (codec: ReturnType<typeof createCdpFetchCodec>, responseHeaders: Protocol.Fetch.HeaderEntry[]) => {
         const request: CdpFetchTransportRequest = {
@@ -853,6 +909,133 @@ describe('CdpFetchTransport', () => {
 
       expect(encoded.fulfilled).toBe(true)
       expect(encoded.body).toBe(Buffer.from('stubbed').toString('base64'))
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34704
+    // At a redirect pause Chrome follows the redirect as the origin sent it even
+    // when continueResponse overrides its headers, so a changed location or
+    // referrer-policy has to be fulfilled.
+    describe('encoding a redirect', () => {
+      const decodePausedResponse = (codec: ReturnType<typeof createCdpFetchCodec>, options: {
+        responseHeaders?: Protocol.Fetch.HeaderEntry[]
+        redirectPause?: boolean
+      } = {}) => {
+        const request: CdpFetchTransportRequest = {
+          id: 'network-1',
+          url: 'https://example.test/redirect',
+          method: 'GET',
+          headers: {},
+          initialPriority: 'High',
+          referrerPolicy: 'strict-origin-when-cross-origin',
+        }
+
+        codec.decodeRequest(request)
+
+        return codec.decodeResponse({
+          ...request,
+          requestId: 'fetch-request',
+          responseCode: 302,
+          responseStatusText: 'Found',
+          responseHeaders: options.responseHeaders ?? [
+            { name: 'Location', value: '/original' },
+            { name: 'Date', value: 'today' },
+          ],
+          ...(options.redirectPause ?? true ? { redirectPause: true } : {}),
+          originalBodyDigest: digestBody(Buffer.alloc(0)),
+        })
+      }
+
+      const toHeaderEntries = (headers: Record<string, string>) => Object.entries(headers).map(([name, value]) => ({ name, value }))
+
+      it.each([
+        { change: 'changed', headers: { location: '/rewritten', date: 'today' } },
+        { change: 'removed', headers: { date: 'today' } },
+      ])('fulfills a redirect whose location middleware $change', ({ headers }) => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec)
+
+        expect(response.headers).toStrictEqual({ location: '/original', date: 'today' })
+
+        const encoded = codec.encodeResponse({ ...response, body: '', headers })
+
+        expect(encoded.fulfilled).toBe(true)
+        expect(encoded.responseCode).toBe(302)
+        expect(encoded.responseHeaders).toStrictEqual(toHeaderEntries(headers))
+        expect(encoded.body).toBe('')
+      })
+
+      // Chrome applies a redirect's Referrer-Policy to the request it follows
+      // the redirect with, and ignores a continueResponse override of it.
+      it.each([
+        { change: 'added', originPolicy: undefined, policy: 'no-referrer' },
+        { change: 'changed', originPolicy: 'unsafe-url', policy: 'no-referrer' },
+        { change: 'removed', originPolicy: 'no-referrer', policy: undefined },
+      ])('fulfills a redirect whose referrer-policy middleware $change', ({ originPolicy, policy }) => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, {
+          responseHeaders: [
+            { name: 'Location', value: '/original' },
+            ...(originPolicy ? [{ name: 'Referrer-Policy', value: originPolicy }] : []),
+          ],
+        })
+
+        const headers = { location: '/original', ...(policy ? { 'referrer-policy': policy } : {}) }
+        const encoded = codec.encodeResponse({ ...response, body: '', headers })
+
+        expect(encoded.fulfilled).toBe(true)
+        expect(encoded.responseHeaders).toStrictEqual(toHeaderEntries(headers))
+        expect(encoded.body).toBe('')
+      })
+
+      // The origin's casing differs from the middleware view, which a plain
+      // string comparison of the header lists would mistake for a change.
+      it('continues a redirect that middleware passed through untouched', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec)
+
+        const encoded = codec.encodeResponse({ ...response, body: '' })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toBeUndefined()
+      })
+
+      it('continues a redirect when middleware changed a header that does not affect how it is followed', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec)
+
+        const headers = { 'location': '/original', 'date': 'today', 'x-custom': 'yes' }
+        const encoded = codec.encodeResponse({ ...response, body: '', headers })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toStrictEqual(toHeaderEntries(headers))
+      })
+
+      it('continues a redirect when middleware reported no headers', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec)
+
+        const encoded = codec.encodeResponse({
+          ...response,
+          body: '',
+          headers: undefined,
+        })
+
+        expect(encoded.fulfilled).toBe(false)
+      })
+
+      // Outside the redirect-received state Chrome applies continueResponse's
+      // headers before it decides whether to redirect. The transport decides
+      // which state a pause is in.
+      it('continues a response not paused as a redirect when middleware changes its location', () => {
+        const codec = createCdpFetchCodec()
+        const response = decodePausedResponse(codec, { redirectPause: false })
+
+        const headers = { location: '/rewritten', date: 'today' }
+        const encoded = codec.encodeResponse({ ...response, body: '', headers })
+
+        expect(encoded.fulfilled).toBe(false)
+        expect(encoded.responseHeaders).toStrictEqual(toHeaderEntries(headers))
+      })
     })
 
     // A body we cannot prove came from the origin has to be fulfilled, or a
@@ -1273,7 +1456,7 @@ describe('CdpFetchTransport', () => {
       await tick()
 
       expectCalledOnceWith(isAUTFrame, 'frame-1')
-      expectCalledWith(seenIsAutFrameHeader, 'true')
+      expectCalledWith(seenIsAutFrameHeader, getMetadataHeaderValue())
       // AUT marker must not leave the process toward the origin.
       expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
@@ -1478,7 +1661,7 @@ describe('CdpFetchTransport', () => {
 
       await tick()
 
-      expectCalledWith(seenExtraTargetHeader, 'true')
+      expectCalledWith(seenExtraTargetHeader, getMetadataHeaderValue())
       expectCalledWith(client.send, 'Fetch.continueRequest', {
         requestId: 'fetch-request',
         headers: [{
@@ -1796,6 +1979,79 @@ describe('CdpFetchTransport', () => {
       expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
     })
 
+    // https://github.com/cypress-io/cypress/issues/34704
+    // A redirect is fulfilled with an empty body whether or not its body would
+    // normally be read. EventSource bodies are streamed rather than read, so
+    // that case also checks a redirect never starts Network.streamResourceContent,
+    // even with streaming and capture enabled.
+    it.each([
+      { read: 'read', resourceType: 'Fetch', streamOptions: {} },
+      { read: 'skipped', resourceType: 'EventSource', streamOptions: { shouldStreamBody: () => true, shouldCaptureBody: () => true } },
+    ] as const)('fulfills a redirect whose location header middleware changed, when its body is $read', async ({ resourceType, streamOptions }) => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, ...streamOptions })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return {
+          ...response,
+          body: await readStream(response.bodyStream!),
+          headers: {
+            ...response.headers,
+            location: '/rewritten',
+          },
+        }
+      })
+
+      await driveResponsePause(onRequestPaused, { requestId: 'fetch-request', networkId: 'network-1', resourceType }, {
+        statusCode: 302,
+        headers: [{ name: 'Location', value: '/original' }],
+      })
+
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 302,
+        responsePhrase: 'Found',
+        responseHeaders: [{ name: 'location', value: '/rewritten' }],
+        body: '',
+      })
+
+      expectNotCalledWith(client.send, 'Fetch.getResponseBody')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Network.streamResourceContent')
+    })
+
+    // Chrome pauses these at response-received, where continueResponse's
+    // headers take effect, so a changed location doesn't need a fulfill.
+    it.each([
+      { pause: 'a redirect status with no location', statusCode: 302, headers: [{ name: 'Date', value: 'today' }] },
+      { pause: 'a location on a non-redirect status', statusCode: 201, headers: [{ name: 'Location', value: '/created' }] },
+    ])('continues $pause when middleware changes the location', async ({ statusCode, headers }) => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+
+        return { ...response, headers: { ...response.headers, location: '/rewritten' } }
+      })
+
+      await driveResponsePause(onRequestPaused, { requestId: 'fetch-request', networkId: 'network-1' }, { statusCode, headers })
+
+      expectCalledWith(client.send, 'Fetch.getResponseBody', { requestId: 'fetch-request' })
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+
+      const [[, continued]] = callsMatching(client.send, ['Fetch.continueResponse'])
+
+      expect(continued).toMatchObject({ requestId: 'fetch-request', responseCode: statusCode })
+      expect(continued.responseHeaders).toContainEqual({ name: 'location', value: '/rewritten' })
+    })
+
     it('matches request and response pauses by fetch request id', async () => {
       const client = createClient()
       const { transport } = createTransport(client)
@@ -1931,10 +2187,10 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('does not let a timed out redirect hop reject a newer hop with a distinct fetch request id', async () => {
-      vi.useFakeTimers()
+    it('keeps a newer redirect hop cancelable after an older hop sharing its network id finishes', async () => {
       const client = createClient()
-      const { transport } = createTransport(client)
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { onRequestCanceled })
       const onRequestPaused = await startTransport(transport, client)
 
       const firstHandled = onRequestPaused(createPausedRequest({
@@ -1944,7 +2200,6 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      await vi.advanceTimersByTimeAsync(1)
 
       const secondHandled = onRequestPaused(createPausedRequest({
         requestId: 'second-request-pause-id',
@@ -1953,20 +2208,91 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      await vi.advanceTimersByTimeAsync(29999)
-      await firstHandled
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'second-request-pause-id',
+        requestId: 'first-request-pause-id',
         networkId: 'shared-network-id',
-        url: 'https://example.test/final',
-        responseStatusCode: 200,
+        url: 'https://example.test/redirect',
+        responseStatusCode: 301,
       }))
+
+      await firstHandled
+
+      onLoadingFailed(client, { requestId: 'shared-network-id', canceled: true })
 
       await secondHandled
 
+      expectCalledOnceWith(onRequestCanceled, 'shared-network-id')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse', { requestId: 'second-request-pause-id' })
+    })
+
+    it('fails the flow with ESOCKETTIMEDOUT when a request handler\'s responseTimeout elapses before headers arrive', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      let upstreamError: (Error & { code?: string }) | undefined
+
+      httpIntercept.use(async (req, next) => {
+        try {
+          return await next({ ...req, responseTimeout: 45000 })
+        } catch (err) {
+          upstreamError = err as Error
+
+          throw err
+        }
+      })
+
+      vi.useFakeTimers({ shouldAdvanceTime: false })
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          resourceType: 'XHR',
+        }))
+
+        await vi.advanceTimersByTimeAsync(44999)
+
+        expect(upstreamError).toBeUndefined()
+
+        await vi.advanceTimersByTimeAsync(1)
+        await handled
+      } finally {
+        vi.useRealTimers()
+      }
+
+      expect(upstreamError?.code).toBe('ESOCKETTIMEDOUT')
+      expect(transport['inFlightRequests'].size).toBe(0)
+    })
+
+    it('waits for a response pause however long the origin takes to send headers when no responseTimeout is set', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: false })
+      const client = createClient()
+      const { transport } = createTransport(client)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'XHR',
+      }))
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000)
+
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'XHR',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
       expectCalledWith(client.send, 'Fetch.continueResponse', {
-        requestId: 'second-request-pause-id',
+        requestId: 'fetch-request',
         responseCode: 200,
       })
     })
@@ -3507,7 +3833,7 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('does not charge the response body transfer against the response pause timeout', async () => {
+    it('does not charge the response body transfer against the responseTimeout', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
@@ -3516,7 +3842,7 @@ describe('CdpFetchTransport', () => {
 
       client.sendWithArgs('Fetch.getResponseBody').returns(slowBody.promise)
 
-      httpIntercept.use(async (req, next) => next(req))
+      httpIntercept.use(async (req, next) => next({ ...req, responseTimeout: 30000 }))
 
       vi.useFakeTimers({ shouldAdvanceTime: false })
 
@@ -3534,8 +3860,6 @@ describe('CdpFetchTransport', () => {
           responseStatusCode: 200,
         }))
 
-        // the pause already arrived, so a body slower than the 30s pause
-        // timeout must not fail the flow
         await vi.advanceTimersByTimeAsync(31000)
 
         slowBody.resolve({ body: '', base64Encoded: false })
@@ -4401,6 +4725,38 @@ describe('CdpFetchTransport', () => {
       // to release — sending one would target a request id CDP no longer knows
       expectNotCalledWith(client.send, 'Fetch.continueResponse')
       expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+    })
+
+    it('cancels the flow when the browser dropped the pause before it was continued', async () => {
+      const client = createClient()
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { httpIntercept: new HttpIntercept(createCdpFetchCodec()), onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.sendWithArgs('Fetch.continueRequest').rejects(new Error('Invalid InterceptionId.'))
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expectCalledOnceWith(onRequestCanceled, 'network-1')
+    })
+
+    it('does not cancel the flow for other continueRequest failures', async () => {
+      const client = createClient()
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { httpIntercept: new HttpIntercept(createCdpFetchCodec()), onRequestCanceled })
+      const onRequestPaused = await startTransport(transport, client)
+
+      client.sendWithArgs('Fetch.continueRequest').rejects(new Error('Invalid header: x-cypress-is-aut-frame'))
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+      }))
+
+      expect(onRequestCanceled).not.toHaveBeenCalled()
     })
 
     it('leaves a genuine network failure to the response error pause', async () => {

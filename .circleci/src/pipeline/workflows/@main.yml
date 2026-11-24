@@ -2,8 +2,6 @@ linux-x64:
   when: &full-workflow-filters
     or:
       - equal: [ develop, << pipeline.git.branch >> ]
-      # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -16,12 +14,27 @@ linux-x64:
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
       - equal: [ 'bill/server-vitest-foundation', << pipeline.git.branch >> ]
   jobs:
+    # Bots can't join the GitHub teams that restrict our contexts, and jobs after
+    # an approval run as the approver. The install runs the bot's dependency changes.
+    # The install has one variant per case because CircleCI drops a job whose
+    # requires are all filtered out.
     - node_modules_install:
         build-better-sqlite3: true
+        filters: &humanPushFilter pipeline.parameters.bot-approval-required == false
+    - approve-bot-pr:
+        type: approval
+        filters: &botApprovalFilter pipeline.parameters.bot-approval-required == true
+    - node_modules_install:
+        name: bot-node-modules-install
+        build-better-sqlite3: true
+        requires:
+          - approve-bot-pr
+        filters: *botApprovalFilter
     - build:
         context: test-runner:env-canary
         requires:
           - node_modules_install
+          - bot-node-modules-install
     - check-lockfile:
         requires:
           - build
@@ -71,6 +84,10 @@ linux-x64:
         requires:
           - build
     - server-performance-tests:
+        requires:
+          - build
+    - open-mode-telemetry:
+        context: test-runner:cypress-record-key
         requires:
           - build
     - system-tests-node-modules-install:
@@ -130,6 +147,10 @@ linux-x64:
         requires:
           - build
     - driver-integration-tests-firefox:
+        context: test-runner:cypress-record-key
+        requires:
+          - build
+    - driver-integration-tests-firefox-beta:
         context: test-runner:cypress-record-key
         requires:
           - build
@@ -272,9 +293,6 @@ linux-x64:
     - npm-cypress-schematic:
         requires:
           - build
-    - v8-integration-tests:
-        requires:
-          - system-tests-node-modules-install
 
     - ready-to-release:
         requires:
@@ -298,6 +316,7 @@ linux-x64:
           - check-lockfile
           - percy-finalize
           - driver-integration-tests-firefox
+          - driver-integration-tests-firefox-beta
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-chrome-inject-document-domain
@@ -329,7 +348,6 @@ linux-x64:
           - test-kitchensink
           - unit-tests
           - verify-release-readiness
-          - v8-integration-tests
 
     - npm-release:
         filters:
@@ -353,8 +371,7 @@ linux-x64:
     - test-against-staging:
         context: test-runner:record-tests
         # Expression-based filter: branch-based allowlist OR force-persist-artifacts pipeline parameter.
-        # 'update-v8-snapshot-cache-on-develop' is included so v8 snapshot cache updates are fully tested.
-        filters: &mainBuildFilters pipeline.git.branch == "develop" or pipeline.git.branch matches /^release\/\d+\.\d+\.\d+$/ or pipeline.git.branch matches /^v\d+$/ or pipeline.git.branch matches /^electron\/\d+\.\d+\.\d+$/ or pipeline.git.branch == "update-v8-snapshot-cache-on-develop" or pipeline.parameters.force-persist-artifacts == true
+        filters: &mainBuildFilters pipeline.git.branch == "develop" or pipeline.git.branch matches /^release\/\d+\.\d+\.\d+$/ or pipeline.git.branch matches /^v\d+$/ or pipeline.git.branch matches /^electron\/\d+\.\d+\.\d+$/ or pipeline.parameters.force-persist-artifacts == true
         requires:
           - build
     - test-kitchensink:
@@ -464,8 +481,8 @@ linux-x64:
           - yarn-pnp-preprocessor-system-test: terminal
           - svelte-webpack-system-test: terminal
 
-# linux-arm64, darwin-x64, and darwin-arm64 don't run on every develop or
-# release/* push. The two darwin workflows compete for leased self-hosted
+# linux-arm64, darwin-x64, and darwin-arm64 don't run on every develop,
+# release/*, or vN push. The two darwin workflows compete for leased self-hosted
 # macOS hardware, and per-merge platform signal isn't actionable at that
 # frequency. linux-arm64 is cheap but rides the same gate so all platform
 # coverage lands in one sweep. A release branch is long-lived enough that a
@@ -495,11 +512,25 @@ linux-arm64:
                     pattern: /^v\d+$/
                     value: << pipeline.git.branch >>
   jobs:
+    - approve-bot-pr:
+        type: approval
+        filters: *botApprovalFilter
+
     - node_modules_install:
         name: linux-arm64-node-modules-install
         executor: linux-arm64
         resource_class: arm.medium
         only-cache-for-root-user: true
+        filters: *humanPushFilter
+
+    - node_modules_install:
+        name: linux-arm64-bot-node-modules-install
+        executor: linux-arm64
+        resource_class: arm.medium
+        only-cache-for-root-user: true
+        requires:
+          - approve-bot-pr
+        filters: *botApprovalFilter
 
     - build:
         name: linux-arm64-build
@@ -508,6 +539,7 @@ linux-arm64:
         resource_class: arm.medium
         requires:
           - linux-arm64-node-modules-install
+          - linux-arm64-bot-node-modules-install
 
     - create-build-artifacts:
         name: linux-arm64-create-build-artifacts
@@ -520,11 +552,6 @@ linux-arm64:
         requires:
           - linux-arm64-build
 
-    - v8-integration-tests:
-        executor: linux-arm64
-        resource_class: arm.medium
-        requires:
-          - linux-arm64-build
     - driver-integration-memory-tests:
         executor: linux-arm64
         resource_class: arm.medium
@@ -539,11 +566,25 @@ linux-arm64:
 darwin-x64:
   when: *scheduled-platform-filters
   jobs:
+    - approve-bot-pr:
+        type: approval
+        filters: *botApprovalFilter
+
     - node_modules_install:
         name: darwin-x64-node-modules-install
         executor: darwin-amd64
         resource_class: cypress-io/intel-macstadium
         only-cache-for-root-user: true
+        filters: *humanPushFilter
+
+    - node_modules_install:
+        name: darwin-x64-bot-node-modules-install
+        executor: darwin-amd64
+        resource_class: cypress-io/intel-macstadium
+        only-cache-for-root-user: true
+        requires:
+          - approve-bot-pr
+        filters: *botApprovalFilter
 
     - build:
         name: darwin-x64-build
@@ -552,6 +593,7 @@ darwin-x64:
         resource_class: cypress-io/intel-macstadium
         requires:
           - darwin-x64-node-modules-install
+          - darwin-x64-bot-node-modules-install
 
     - create-build-artifacts:
         name: darwin-x64-create-build-artifacts
@@ -560,13 +602,6 @@ darwin-x64:
           - test-runner:upload
           - test-runner:commit-status-checks
           - test-runner:build-binary
-        executor: darwin-amd64
-        resource_class: cypress-io/intel-macstadium
-        requires:
-          - darwin-x64-build
-
-    - v8-integration-tests:
-        name: darwin-x64-v8-integration-tests
         executor: darwin-amd64
         resource_class: cypress-io/intel-macstadium
         requires:
@@ -589,11 +624,25 @@ darwin-x64:
 darwin-arm64:
   when: *scheduled-platform-filters
   jobs:
+    - approve-bot-pr:
+        type: approval
+        filters: *botApprovalFilter
+
     - node_modules_install:
         name: darwin-arm64-node-modules-install
         executor: darwin-arm64
         resource_class: cypress-io/m1-macstadium
         only-cache-for-root-user: true
+        filters: *humanPushFilter
+
+    - node_modules_install:
+        name: darwin-arm64-bot-node-modules-install
+        executor: darwin-arm64
+        resource_class: cypress-io/m1-macstadium
+        only-cache-for-root-user: true
+        requires:
+          - approve-bot-pr
+        filters: *botApprovalFilter
 
     - build:
         name: darwin-arm64-build
@@ -602,6 +651,7 @@ darwin-arm64:
         resource_class: cypress-io/m1-macstadium
         requires:
           - darwin-arm64-node-modules-install
+          - darwin-arm64-bot-node-modules-install
 
     - create-build-artifacts:
         name: darwin-arm64-create-build-artifacts
@@ -615,12 +665,6 @@ darwin-arm64:
         requires:
           - darwin-arm64-build
 
-    - v8-integration-tests:
-        name: darwin-arm64-v8-integration-tests
-        executor: darwin-arm64
-        resource_class: cypress-io/m1-macstadium
-        requires:
-          - darwin-arm64-build
     - driver-integration-memory-tests:
         name: darwin-arm64-driver-integration-memory-tests
         executor: darwin-arm64
@@ -639,11 +683,25 @@ darwin-arm64:
 windows:
   when: *scheduled-platform-filters
   jobs:
+    - approve-bot-pr:
+        type: approval
+        filters: *botApprovalFilter
+
     - node_modules_install:
         name: windows-node-modules-install
         executor: windows
         resource_class: windows.medium
         only-cache-for-root-user: true
+        filters: *humanPushFilter
+
+    - node_modules_install:
+        name: windows-bot-node-modules-install
+        executor: windows
+        resource_class: windows.medium
+        only-cache-for-root-user: true
+        requires:
+          - approve-bot-pr
+        filters: *botApprovalFilter
 
     - build:
         name: windows-build
@@ -652,6 +710,7 @@ windows:
         resource_class: windows.large
         requires:
           - windows-node-modules-install
+          - windows-bot-node-modules-install
 
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
@@ -701,12 +760,6 @@ windows:
         requires:
           - windows-create-build-artifacts
 
-    - v8-integration-tests:
-        name: windows-v8-integration-tests
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
     - driver-integration-memory-tests:
         name: windows-driver-integration-memory-tests
         executor: windows

@@ -3,7 +3,7 @@ import { mount } from '@cypress/react'
 import './tic-tac-toe.css'
 
 // let's put React component right in the spec file
-export default function Square ({ value: valueAsProp }: { value?: string }) {
+function Square ({ value: valueAsProp }: { value?: string }) {
   const [valueAsState, setValueAsState] = useState<string | null | undefined>(null)
 
   return (

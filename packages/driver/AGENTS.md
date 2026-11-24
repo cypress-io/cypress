@@ -41,6 +41,7 @@ src/
 - Cypress tests for the driver itself use a local Express server (spawned automatically in `e2e.setupNodeEvents`) rather than a manually started dev server.
 - `postinstall` runs `patch-package` to apply local patches to dependencies. File an upstream issue for each patch and link it from a comment in the patch and from the PR, and note in the PR any way the patch makes Cypress behave differently from other tools built on the same library.
 - Elements and shadow roots in the AUT come from its iframe, a different realm from the driver, so `instanceof HTMLInputElement` or `instanceof ShadowRoot` is `false` for them. Check `element.localName` or the object's string tag instead, as `isShadowRoot` in `src/dom/elements/shadow.ts` does.
+- An `export {}` in a spec under `cypress/` is not only for TypeScript. The specs are bundled by webpack, which treats a file with an `import` or `export` as an ES module (strict mode) and one with neither as a script. Keep the marker in a spec with no imports, and don't swap it for a tsconfig `moduleDetection` setting: that changes type checking, not the bundle.
 - Cross-origin testing (`cy.origin`) relies on the `cross-origin/` spec bridge and a secondary `cypress.ts` bundle injected into cross-origin frames.
 
 ## Regression tests for GitHub issues

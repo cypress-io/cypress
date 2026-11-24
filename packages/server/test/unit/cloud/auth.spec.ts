@@ -126,40 +126,6 @@ describe('lib/cloud/auth', function () {
         expect(url).toBe(FULL_SIGNUP_URL_UTM)
       })
     })
-
-    it('includes remoteOrigin in the auth URL when provided', function () {
-      return auth._internal.buildFullSignupUrl(
-        BASE_URL,
-        server,
-        'UTM Source',
-        'UTM Medium',
-        'UTM Content',
-        'https://github.com/cypress-io/cypress.git',
-      )
-      .then((url) => {
-        expect(url).toContain('remoteOrigin=')
-        expect(decodeURIComponent(url)).toContain(
-          'https://github.com/cypress-io/cypress.git',
-        )
-      })
-    })
-
-    it('includes remoteOrigin in the login URL when provided', function () {
-      return auth._internal.buildFullLoginUrl(
-        BASE_URL,
-        server,
-        'UTM Source',
-        'UTM Medium',
-        'UTM Content',
-        'https://github.com/cypress-io/cypress.git',
-      )
-      .then((url) => {
-        expect(url).toContain('remoteOrigin=')
-        expect(decodeURIComponent(url)).toContain(
-          'https://github.com/cypress-io/cypress.git',
-        )
-      })
-    })
   })
 
   describe('_internal.launchNativeAuth', function () {
@@ -216,8 +182,9 @@ describe('lib/cloud/auth', function () {
       vi.spyOn(auth._internal, 'launchNativeAuth').mockResolvedValue(undefined)
       vi.spyOn(auth._internal, 'stopServer').mockImplementation(() => {})
 
-      await auth.start(() => {}, 'code')
+      await auth.start(() => {}, 'Binary: Launchpad', 'Nav', 'Log In')
 
+      expect(auth._internal.launchServer).toHaveBeenCalledWith('www.foo.bar', expect.any(Function), 'Binary: Launchpad', 'Nav', 'Log In', 'login')
       expect(auth._internal.stopServer).toHaveBeenCalledOnce()
     })
 
@@ -232,7 +199,7 @@ describe('lib/cloud/auth', function () {
       await auth.startSignup(() => {}, 'code')
 
       expect(user.getBaseSignupUrl).toHaveBeenCalledOnce()
-      expect(auth._internal.launchServer).toHaveBeenCalledWith('www.foo.bar', expect.any(Function), 'code', undefined, undefined, 'signup', undefined)
+      expect(auth._internal.launchServer).toHaveBeenCalledWith('www.foo.bar', expect.any(Function), 'code', undefined, undefined, 'signup')
       expect(auth._internal.stopServer).toHaveBeenCalledOnce()
     })
 

@@ -1,4 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import type { CloudRunStatus } from '@packages/frontend-shared/src/generated/graphql'
 
 function specRowSelector (specFileName: string) {
@@ -614,7 +613,7 @@ describe('App/Cloud Integration - Latest runs (no branch)', { viewportWidth: 120
   })
 })
 
-describe('App/Cloud Integration - Latest runs and Average duration', { viewportWidth: 1200 }, () => {
+describe('App/Cloud Integration - Latest runs and Average duration (offline)', { viewportWidth: 1200 }, () => {
   context('when offline', () => {
     beforeEach(() => {
       cy.scaffoldProject('cypress-in-cypress')
@@ -641,8 +640,8 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23419
     it('shows offline alert then hides it after coming online', { retries: 15 }, () => {
       cy.findByTestId('offline-alert')
-      .should('contain.text', defaultMessages.specPage.offlineWarning.title)
-      .and('contain.text', defaultMessages.specPage.offlineWarning.explainer)
+      .should('contain.text', 'No internet connection')
+      .and('contain.text', 'Please check your internet connection to resolve this issue. When your internet connection is fixed, we will automatically attempt to fetch the run metrics from Cypress Cloud.')
 
       cy.goOnline()
       cy.findByTestId('offline-alert').should('not.exist')

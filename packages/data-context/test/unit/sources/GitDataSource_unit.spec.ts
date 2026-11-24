@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import EventEmitter from 'events'
 
 import type { SimpleGit } from 'simple-git'

@@ -11,7 +11,7 @@ export const CreateNewTestButton = ({ suiteId, dataCy }: { suiteId: string, data
     e.stopPropagation()
 
     events.emit('studio:init:suite', { suiteId, entrySource: 'new-test-suite' })
-  }, [events, suiteId])
+  }, [suiteId])
 
   return (
     <Button data-cy={dataCy} size='20' onClick={_launchStudio} variant='outline-dark' className={cs('launch-studio-button')} >

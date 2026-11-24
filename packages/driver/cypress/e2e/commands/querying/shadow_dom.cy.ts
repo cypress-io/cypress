@@ -75,6 +75,7 @@ describe('src/cy/commands/querying - shadow dom', () => {
         }
 
         beforeEach(reset)
+
         afterEach(reset)
 
         it('turns option on and off at will', () => {

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 
 export default function MouseMovement ({ onMoved }: { onMoved: (moved: boolean) => void }) {
   // a ref, not state, so the listener and cleanup always see the latest timer
-  const timer = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
     function timeout () {
@@ -14,19 +14,19 @@ export default function MouseMovement ({ onMoved }: { onMoved: (moved: boolean) 
 
     function onMouseMove () {
       console.log('MouseMovement onMouseMove')
-      clearTimeout(timer.current)
-      timer.current = setTimeout(timeout, 4000)
+      clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(timeout, 4000)
       onMoved(true)
     }
 
     console.log('MouseMovement componentWillMount')
     document.addEventListener('mousemove', onMouseMove)
-    timer.current = setTimeout(timeout, 4000)
+    timerRef.current = setTimeout(timeout, 4000)
 
     return () => {
       console.log('MouseMovement componentWillUnmount')
       document.removeEventListener('mousemove', onMouseMove)
-      clearTimeout(timer.current)
+      clearTimeout(timerRef.current)
     }
   }, [onMoved])
 

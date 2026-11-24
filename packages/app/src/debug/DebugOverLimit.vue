@@ -25,7 +25,6 @@ import LockedProject from '~icons/cy/locked-project_x48.svg'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import type { DebugReasonsRunIsHiddenFragment, OverLimitActionTypeEnum } from '../generated/graphql'
 import { getUtmSource } from '@packages/frontend-shared/src/utils/getUtmSource'
-import { useI18n } from '@cy/i18n'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { computed } from 'vue'
 import { DEBUG_TAB_MEDIUM } from './utils/constants'
@@ -50,8 +49,6 @@ fragment DebugReasonsRunIsHidden on CloudRun {
   }
 }
 `
-
-const { t } = useI18n()
 
 const props = defineProps<{
   overLimitReasons: (CloudRunHidingReason | null)[]
@@ -82,18 +79,20 @@ const iconClasses = computed(() => {
 const copy = computed(() => {
   if (isRetentionLimit(overLimitReason.value)) {
     return {
-      title: t('debugPage.overLimit.retentionExceededTitle'),
-      message: t('debugPage.overLimit.retentionExceededMessage', { limitDays: overLimitReason.value.dataRetentionDays, runAgeDays: props.runAgeDays }),
-      actionLabel: isPlanAdmin.value ? t('debugPage.overLimit.upgradePlan') : t('debugPage.overLimit.contactAdmin'),
+      title: 'Beyond data retention',
+      message: `Your data retention limit is ${overLimitReason.value.dataRetentionDays ?? ''} days and these tests ran ${props.runAgeDays} days ago. Upgrade your plan to increase your data retention limit.`,
+      actionLabel: isPlanAdmin.value ? 'Upgrade plan' : 'Contact admin',
     }
   }
 
   const numberTests = overLimitReason.value?.monthlyTests || 0
 
   return {
-    title: t('debugPage.overLimit.usageExceededTitle'),
-    message: isPlanAdmin.value ? t('debugPage.overLimit.usageExceededAdminMessage', { numberTests }) : t('debugPage.overLimit.usageExceededUserMessage', { numberTests }),
-    actionLabel: isPlanAdmin.value ? t('debugPage.overLimit.upgradePlan') : t('debugPage.overLimit.contactAdmin'),
+    title: 'You\'ve reached your monthly test result limit',
+    message: isPlanAdmin.value
+      ? `Your Free Cypress Cloud plan includes ${numberTests} monthly recorded test results. Upgrade your plan now to view more test results.`
+      : `Your Free Cypress Cloud plan includes ${numberTests} monthly recorded test results. Contact your Cypress Cloud admin to upgrade your plan and view more test results.`,
+    actionLabel: isPlanAdmin.value ? 'Upgrade plan' : 'Contact admin',
   }
 })
 

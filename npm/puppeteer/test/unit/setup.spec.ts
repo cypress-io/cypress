@@ -56,7 +56,7 @@ describe('#setup', () => {
     error.stack = '<error stack>'
     on.mockImplementation(() => { throw error })
 
-    expect(() => setup({ on, onMessage })).toThrow('Could not set up `after:browser:launch` task. Ensure you are running Cypress >= 13.6.0. The following error was encountered:\n\n<error stack>')
+    expect(() => setup({ on, onMessage })).toThrow('Could not set up `after:browser:launch` task. Ensure you are running Cypress >= 14.0.0. The following error was encountered:\n\n<error stack>')
   })
 
   describe('running message handler', () => {

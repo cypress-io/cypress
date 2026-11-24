@@ -2,60 +2,49 @@
   <RunsError
     v-if="!currentProject?.cloudProject"
     icon="error"
-    :button-text="t('runs.errors.connectionFailed.button')"
+    button-text="Try again"
     :button-icon="ConnectIcon"
-    :message="t('runs.errors.connectionFailed.title')"
+    message="Cannot connect to Cypress Cloud"
     @button-click="emit('reExecuteRunsQuery')"
   >
-    <i18n-t
-      scope="global"
-      keypath="runs.errors.connectionFailed.description"
-    >
-      <ExternalLink href="https://www.cypressstatus.com/">
-        {{ t('runs.errors.connectionFailed.link') }}
-      </ExternalLink>
-    </i18n-t>
+    <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+    The request times out when trying to retrieve the recorded runs from Cypress Cloud. Please refresh the page to try again and visit our <ExternalLink href="https://www.cypressstatus.com/">Support page</ExternalLink> if this behavior continues.
   </RunsError>
   <RunsError
     v-else-if="currentProject?.cloudProject?.__typename === 'CloudProjectNotFound'"
     icon="error"
-    :button-text="t('runs.errors.notFound.button')"
+    button-text="Reconnect your project"
     :button-icon="ConnectIcon"
-    :message="t('runs.errors.notFound.title')"
+    message="Couldn't find your project"
     @button-click="openLoginConnectModal({utmMedium: 'Runs Tab'})"
   >
-    <i18n-t
-      scope="global"
-      keypath="runs.errors.notFound.description"
+    We were unable to find an existing project matching the <CodeTag
+      bg
+      class="text-purple-500 bg-purple-50"
     >
-      <CodeTag
-        bg
-        class="text-purple-500 bg-purple-50"
-      >
-        projectId: "{{ currentProject?.projectId }}"
-      </CodeTag>
-    </i18n-t>
+      projectId: "{{ currentProject?.projectId }}"
+    </CodeTag> set in your Cypress config file. You can reconnect with an existing project or create a new project.
   </RunsError>
   <template v-else-if="currentProject?.cloudProject?.__typename === 'CloudProjectUnauthorized'">
     <RunsError
       v-if="hasRequestedAccess"
       icon="access"
-      :button-text="t('runs.errors.unauthorizedRequested.button')"
+      button-text="Request Sent"
       :button-icon="SendIcon"
-      :message="t('runs.errors.unauthorizedRequested.title')"
+      message="Your access request for this project has been sent."
       button-disabled
     >
-      {{ t('runs.errors.unauthorizedRequested.description') }}
+      The owner of this project has been notified of your request. We'll notify you via email when your access request has been granted.
     </RunsError>
     <RunsError
       v-else
       icon="access"
-      :button-text="t('runs.errors.unauthorized.button')"
+      button-text="Request access"
       :button-icon="SendIcon"
-      :message="t('runs.errors.unauthorized.title')"
+      message="Request access to view the recorded runs"
       @button-click="requestAccess"
     >
-      {{ t('runs.errors.unauthorized.description') }}
+      This is a private project that you do not currently have access to. Please request access from the project owner in order to view the list of runs.
     </RunsError>
   </template>
 </template>
@@ -68,14 +57,11 @@ import { RunsErrorRenderer_RequestAccessDocument } from '../generated/graphql'
 import type { RunsErrorRendererFragment } from '../generated/graphql'
 import ConnectIcon from '~icons/cy/chain-link_x16.svg'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
-import { useI18n } from '@cy/i18n'
 import CodeTag from '@packages/frontend-shared/src/components/CodeTag.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const { openLoginConnectModal } = useUserProjectStatusStore()
-
-const { t } = useI18n()
 
 gql`
 fragment RunsErrorRenderer on Query {

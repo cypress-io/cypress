@@ -32,6 +32,7 @@
 import { ref, onMounted, onBeforeUnmount, watch, computed, h } from 'vue'
 import type { VNode } from 'vue'
 import { init, loadRemote, registerRemotes } from '@module-federation/runtime'
+import { federationShared } from '../runner/federationShared'
 import type { StudioAppDefaultShape, StudioPanelShape } from './studio-app-types'
 import type { UserProjectStatusStore } from '@cy/store/user-project-status-store'
 import LoadingStudioPanel from './LoadingStudioPanel.vue'
@@ -192,17 +193,7 @@ init({
     entry: '/__cypress-studio/app-studio.js',
     shareScope: 'default',
   }],
-  shared: {
-    react: {
-      scope: 'default',
-      version: '18.3.1',
-      lib: () => window.UnifiedRunner.React,
-      shareConfig: {
-        singleton: true,
-        requiredVersion: '^18.3.1',
-      },
-    },
-  },
+  shared: federationShared,
   name: 'app',
 })
 

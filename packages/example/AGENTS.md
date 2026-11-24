@@ -9,7 +9,7 @@ yarn workspace @packages/example build
 # Unit tests (vitest) for the URL rewrites in bin/convert-content.ts
 yarn workspace @packages/example test
 
-# Lint (ESLint 9 flat config, eslint.config.ts)
+# Lint (ESLint flat config, eslint.config.ts)
 yarn workspace @packages/example lint
 
 # Deploy app content to GitHub Pages (production!)

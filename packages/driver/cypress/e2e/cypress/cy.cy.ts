@@ -261,6 +261,7 @@ describe('driver/src/cypress/cy', () => {
       })
 
       it('is called with the correct ctx', function () {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias -- compared against the callback's own `this`
         const ctx = this
         let expected = false
 
@@ -472,10 +473,8 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('has the current runnable ctx', function () {
-      const _this = this
-
       cy.noop((ctx) => {
-        expect(_this === ctx).to.be.true
+        expect(this === ctx).to.be.true
       })
     })
 

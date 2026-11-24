@@ -22,7 +22,8 @@ for (const { projectName, test } of PROJECTS) {
     beforeEach(() => {
       cy.scaffoldProject(projectName)
       cy.findBrowsers()
-    }),
+    })
+
     it(`While hovering on Mount(), shows component on AUT for ${projectName}`, () => {
       if (projectName === 'react18') {
         cy.openProject(projectName, ['--config-file', 'cypress-vite-default.config.ts', '--component'])

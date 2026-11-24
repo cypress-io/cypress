@@ -18,15 +18,14 @@
       />
     </template>
     <TransitionQuickFade mode="out-in">
-      <span v-if="!copied">{{ t('clipboard.copy') }}</span>
-      <span v-else>{{ t('clipboard.copied') }}</span>
+      <span v-if="!copied">Copy</span>
+      <span v-else>Copied!</span>
     </TransitionQuickFade>
   </Button>
 </template>
 
 <script setup lang="ts">
 import { useClipboard } from './useClipboard'
-import { useI18n } from '@cy/i18n'
 import type { ButtonSizes, ButtonVariants } from '@cy/components/Button.vue'
 import Button from '@cy/components/Button.vue'
 import TransitionQuickFade from '@cy/components/transitions/TransitionQuickFade.vue'
@@ -48,5 +47,4 @@ const copyToClipboard = () => {
     copy(props.text)
   }
 }
-const { t } = useI18n()
 </script>

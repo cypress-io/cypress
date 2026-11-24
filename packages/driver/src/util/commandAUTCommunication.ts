@@ -9,6 +9,7 @@ export const isRunnerAbleToCommunicateWithAut = (autWindow?: Window): boolean =>
   const win = autWindow || Cypress.state('window')
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- reading href throws when the AUT is cross-origin
     win.location.href
 
     return true

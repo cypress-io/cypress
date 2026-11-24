@@ -19,7 +19,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
   describe('DISABLE_NAVIGATION_PRELOAD_EXPRESSION (worker realm)', () => {
     // A prototype-backed fake so patches can be told apart from an instance's
     // own properties, the same shape the real NavigationPreloadManager has.
-    function createManagerClass (methods: { enable?: Function, disable?: Function }) {
+    function createManagerClass (methods: { enable?: (...args: any[]) => unknown, disable?: (...args: any[]) => unknown }) {
       function FakeNavigationPreloadManager (this: any) {}
 
       if (methods.enable) {
@@ -89,6 +89,36 @@ describe('lib/http/util/disable-navigation-preload', () => {
       expect(() => evaluateWorker({})).not.toThrow()
     })
 
+    // A worker paused for the debugger gets its registration only once its
+    // script is about to run, after this expression has been evaluated.
+    it('patches from install and activate listeners when the registration is not set up yet', async () => {
+      const originalEnable = vi.fn().mockRejectedValue(new Error('original enable should not be called'))
+      const disable = vi.fn().mockResolvedValue(undefined)
+      const Manager = createManagerClass({ enable: originalEnable, disable })
+      const listeners: Record<string, () => void> = {}
+      const fakeSelf: { registration?: unknown, addEventListener: (type: string, listener: () => void) => void } = {
+        addEventListener: (type, listener) => {
+          listeners[type] = listener
+        },
+      }
+
+      evaluateWorker(fakeSelf)
+
+      expect(Object.keys(listeners).sort()).toEqual(['activate', 'install'])
+
+      const preload = new (Manager as any)()
+
+      fakeSelf.registration = { navigationPreload: preload }
+      listeners.install()
+
+      await expect(preload.enable()).resolves.toBeUndefined()
+      expect(originalEnable).not.toHaveBeenCalled()
+
+      listeners.activate()
+
+      expect(disable).toHaveBeenCalledTimes(2)
+    })
+
     it('is inert when navigationPreload is missing', () => {
       expect(() => evaluateWorker({ registration: {} })).not.toThrow()
     })
@@ -109,7 +139,7 @@ describe('lib/http/util/disable-navigation-preload', () => {
   })
 
   describe('DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION (window realm)', () => {
-    function createManagerCtor (enable?: Function) {
+    function createManagerCtor (enable?: (...args: any[]) => unknown) {
       function FakeNavigationPreloadManager (this: any) {}
 
       FakeNavigationPreloadManager.prototype.enable = enable ?? vi.fn().mockResolvedValue(undefined)
@@ -118,8 +148,8 @@ describe('lib/http/util/disable-navigation-preload', () => {
     }
 
     function createFakeSelf (options: {
-      NavigationPreloadManager?: Function
-      getRegistrations?: Function
+      NavigationPreloadManager?: (...args: any[]) => unknown
+      getRegistrations?: (...args: any[]) => unknown
     } = {}) {
       return {
         NavigationPreloadManager: options.NavigationPreloadManager,

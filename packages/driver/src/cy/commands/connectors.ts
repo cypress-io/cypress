@@ -309,7 +309,6 @@ export default function (Commands, Cypress, cy, state) {
 
     each (subject, options, fn) {
       let userOptions = options
-      const ctx = this
 
       if (_.isUndefined(fn)) {
         fn = userOptions
@@ -342,7 +341,7 @@ export default function (Commands, Cypress, cy, state) {
         }
 
         const callback = () => {
-          const ret = fn.call(ctx, el, index, subject)
+          const ret = fn.call(this, el, index, subject)
 
           // if the return value is false then return early
           if (ret === false) {

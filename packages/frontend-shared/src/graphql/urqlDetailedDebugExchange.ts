@@ -7,7 +7,7 @@ import { print } from 'graphql'
 
 declare global {
   interface Window {
-    __toPrintClear: Function
+    __toPrintClear: () => void
     __toPrint__: {
       queries: Record<any, any>
       logs: any[]

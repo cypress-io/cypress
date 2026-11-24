@@ -51,6 +51,7 @@ describe('lib/tap/events', () => {
     vi.stubGlobal('fetch', fetchMock)
     delete process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV
     delete process.env.CYPRESS_INTERNAL_ENV
+    delete process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM
     delete process.env.CYPRESS_DISABLE_GUEST_TELEMETRY
     vi.mocked(resolvedSessionIdentity).mockReturnValue(null)
     vi.mocked(detectAgent).mockReturnValue(undefined)
@@ -204,6 +205,66 @@ describe('lib/tap/events', () => {
     await reportTapTrace(0)
 
     expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:3000/anon-collect')
+  })
+
+  it.each([0, 1, 2, 3, 4, 5])('reports to development workspace %s', async (cloudWorkspaceNum) => {
+    process.env.CYPRESS_INTERNAL_ENV = 'development'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = String(cloudWorkspaceNum)
+
+    await reportTapTrace(0)
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0][0]).toBe(`http://localhost:${3000 + cloudWorkspaceNum * 10000}/anon-collect`)
+  })
+
+  it('uses the workspace for the machine collector', async () => {
+    process.env.CYPRESS_INTERNAL_ENV = 'development'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '4'
+    vi.mocked(resolvedSessionIdentity).mockReturnValue({ sessionId: 'inst-1', machineId: 'machine-hash', userId: null })
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:43000/machine-collect')
+  })
+
+  it('rejects an empty workspace selector', async () => {
+    process.env.CYPRESS_INTERNAL_ENV = 'development'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = ''
+
+    await reportTapTrace(0)
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('uses the workspace when the collector explicitly selects development', async () => {
+    process.env.CYPRESS_INTERNAL_ENV = 'production'
+    process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = 'development'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '4'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe('http://localhost:43000/anon-collect')
+  })
+
+  it.each(['staging', 'production'])('ignores the workspace when the collector selects %s', async (environment) => {
+    process.env.CYPRESS_INTERNAL_ENV = 'development'
+    process.env.CYPRESS_INTERNAL_EVENT_COLLECTOR_ENV = environment
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = 'invalid'
+
+    await reportTapTrace(0)
+
+    expect(fetchMock.mock.calls[0][0]).toBe(environment === 'staging'
+      ? 'https://cloud-staging.cypress.io/anon-collect'
+      : 'https://cloud.cypress.io/anon-collect')
+  })
+
+  it.each(['', '6', '7', '-1', '1.5', '4abc', '04', ' 4', '4 ', 'NaN'])('sends nothing for invalid development workspace %j', async (cloudWorkspaceNum) => {
+    process.env.CYPRESS_INTERNAL_ENV = 'development'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = cloudWorkspaceNum
+
+    await expect(reportTapTrace(0)).resolves.toBeUndefined()
+
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('reports to the collector the internal environment names', async () => {

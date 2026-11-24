@@ -73,8 +73,8 @@ describe('sourcemap plugin', () => {
     if (plugin.transform instanceof Function) {
       const result = plugin.transform.call(plugin, code, id)
 
-      expect(result).to.be.undefined
-      expect(plugin.getCombinedSourcemap).not.toHaveBeenCalled
+      expect(result).toBeUndefined()
+      expect(plugin.getCombinedSourcemap).not.toHaveBeenCalled()
     } else {
       throw new Error('transform is not a function')
     }
@@ -95,8 +95,8 @@ describe('sourcemap plugin', () => {
     if (plugin.transform instanceof Function) {
       const result = plugin.transform.call(plugin, code, id)
 
-      expect(result).to.be.undefined
-      expect(plugin.getCombinedSourcemap).not.toHaveBeenCalled
+      expect(result).toBeUndefined()
+      expect(plugin.getCombinedSourcemap).not.toHaveBeenCalled()
     } else {
       throw new Error('transform is not a function')
     }

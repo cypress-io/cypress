@@ -1,5 +1,6 @@
 const { _ } = Cypress
 
+// eslint-disable-next-line mocha/no-exports -- exports nothing: it makes TypeScript and webpack treat this spec as a module
 export {}
 
 describe('src/cy/commands/assertions', () => {
@@ -182,7 +183,7 @@ describe('src/cy/commands/assertions', () => {
           cy.on('fail', spy)
 
           // @ts-expect-error - intentionally omitting the subject
-          return cy.wrap().should('not.be.visible')
+          cy.wrap().should('not.be.visible')
         })
 
         it('null', function (done) {
@@ -194,7 +195,7 @@ describe('src/cy/commands/assertions', () => {
 
           cy.on('fail', spy)
 
-          return cy.wrap(null).should('not.be.visible')
+          cy.wrap(null).should('not.be.visible')
         })
 
         it('[]', function (done) {
@@ -206,7 +207,7 @@ describe('src/cy/commands/assertions', () => {
 
           cy.on('fail', spy)
 
-          return cy.wrap([]).should('not.be.visible')
+          cy.wrap([]).should('not.be.visible')
         })
 
         it('{}', function (done) {
@@ -218,7 +219,7 @@ describe('src/cy/commands/assertions', () => {
 
           cy.on('fail', spy)
 
-          return cy.wrap({}).should('not.be.visible')
+          cy.wrap({}).should('not.be.visible')
         })
 
         it('fails not.visible for detached DOM', function (done) {

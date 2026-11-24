@@ -1,4 +1,4 @@
-/* eslint-disable mocha/no-global-tests, no-undef */
+/* eslint-disable mocha/no-top-level-tests, no-undef */
 it('fails', () => {
   cy.then(() => {
     throw new Error('this should fail here')

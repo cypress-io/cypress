@@ -46,7 +46,7 @@ export interface CyPromptCloudApi {
 
 type AsyncRetry = <TArgs extends any[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
-  options: RetryOptions
+  options: RetryOptions,
 ) => (...args: TArgs) => Promise<TResult>
 
 export interface CyPromptAuthenticatedUserShape {
@@ -110,7 +110,7 @@ export interface CyPromptServerShape {
 
 export interface CyPromptServerDefaultShape {
   createCyPromptServer: (
-    options: CyPromptServerOptions
+    options: CyPromptServerOptions,
   ) => Promise<CyPromptServerShape> | CyPromptServerShape
   MOUNT_VERSION: number
 }

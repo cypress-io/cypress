@@ -25,7 +25,7 @@ import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
 import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
-import { AUT_FRAME_HEADER } from './constants'
+import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
 const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
@@ -204,7 +204,7 @@ export class BidiAutomation {
     // identify the AUT by its window.name (seeded with AUT_FRAME_NAME_IDENTIFIER
     // for exactly this purpose) rather than assuming it is the first child
     // created.
-    let contextName = ''
+    let contextName: string
 
     const identification = { contextId, destroyed: false }
 
@@ -470,7 +470,7 @@ export class BidiAutomation {
           name: AUT_FRAME_HEADER,
           value: {
             type: 'string',
-            value: 'true',
+            value: getMetadataHeaderValue(),
           },
         })
       }
@@ -525,7 +525,9 @@ export class BidiAutomation {
       headers: parsedHeaders,
     }
 
-    this.automation.onRequestEvent?.('response:received', browserResponseReceived)
+    this.automation.onRequestEvent?.('response:received', browserResponseReceived)?.catch((error) => {
+      debugVerbose('error handling response:received %o', { requestId: params.request.request, error })
+    })
   }
 
   private onFetchError = (params: NetworkFetchErrorParameters) => {
@@ -620,11 +622,13 @@ export class BidiAutomation {
       name,
     } = cookie
     // get the cookie we are clearing from the BiDi API to make sure it exists
-    const cookieToBeCleared = (await this.getAllCookiesMatchingFilter({
+    const matching = await this.getAllCookiesMatchingFilter({
       domain,
       path,
       name,
-    }))[0]
+    })
+    // a cookie at a parent path or domain matches as well, and must not be cleared in place of this one
+    const cookieToBeCleared = matching.find((match) => match.path === path && match.domain === domain) ?? matching[0]
 
     debugCookies(`found cookie matching %o filter: %o`, { domain, name, path }, cookieToBeCleared)
 

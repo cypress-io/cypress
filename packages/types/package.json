@@ -41,7 +41,7 @@
     "axios": "^1.20.0",
     "better-sqlite3": "13.0.3",
     "devtools-protocol": "0.0.1687809",
-    "eslint": "^9.31.0",
+    "eslint": "^10.14.0",
     "express": "4.21.0",
     "jiti": "^2.4.2",
     "rimraf": "^6.1.1",

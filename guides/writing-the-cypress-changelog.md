@@ -23,11 +23,11 @@ These prefixes do **not** require an entry:
 
 Choosing `fix` asserts the change ships to users, so do not then skip the entry because the impact looks internal. Use `chore` or `refactor` if the change truly has no user-facing effect, or `internal` if it is user-facing but not yet reachable.
 
-This changelog describes the **binary**. Validation only considers changed files under `cli/` or `packages/` (excluding `cli/CHANGELOG.md` itself), so a pull request touching only `npm/`, `system-tests/`, `scripts/`, `tooling/`, or docs needs no entry — and should probably not carry a user-facing prefix. The `npm/*` packages are versioned and published independently by semantic-release and never appear here.
+This changelog describes the **binary**. Validation only considers changed files under `cli/` or `packages/` (excluding `cli/CHANGELOG.md` itself), so a pull request touching only `npm/`, `system-tests/`, `scripts/`, or docs needs no entry — and should probably not carry a user-facing prefix. The `npm/*` packages are versioned and published independently by semantic-release and never appear here.
 
 ## Writing Guidelines
 
-1. The changelog is formatted like the following. If there is not a pending changelog for the next release, add these sections.
+1. The changelog is formatted like the following. If there is not a pending changelog for the next release, add these sections. The topmost `## X.Y.Z` is not always pending: released versions carry no marker in the file, so check for a release tag with `git ls-remote --tags origin vX.Y.Z`. If the tag exists, that version has shipped, and your entry goes in a new section for the next version above it.
 
     ```md
     ## <RELEASE_VERSION>
@@ -69,9 +69,8 @@ This changelog describes the **binary**. Validation only considers changed files
     - All other change types, with issues: ``Addresses [#1234](https://github.com/cypress-io/cypress/issues/1234).``
     - All other change types, no issue: ``Addressed in [#1234](https://github.com/cypress-io/cypress/pull/1234).``
     - Multiple issues are sorted ascending and joined with a comma and `and`: ``Fixes [#12](https://github.com/cypress-io/cypress/issues/12), [#13](https://github.com/cypress-io/cypress/issues/13) and [#14](https://github.com/cypress-io/cypress/issues/14).``
-10. When a changelog item references a Cypress command, plugin event, or configuration option, link the first mention to its documentation for consistency with existing entries. Either link form is acceptable: the `https://on.cypress.io/<slug>` short link or an absolute `https://docs.cypress.io/<path>` URL.
-    - _Example (`on.cypress.io`):_ `` [`cy.visit()`](https://on.cypress.io/visit) ``, `` [`before:spec`](https://on.cypress.io/before-spec-api) ``.
-    - _Example (`docs.cypress.io`):_ `` [`before:spec`](https://docs.cypress.io/api/plugins/before-spec-api) ``, `` [`numTestsKeptInMemory`](https://docs.cypress.io/app/references/configuration#Global) ``.
+10. When a changelog item references a Cypress command, plugin event, or configuration option, link the first mention to its documentation for consistency with existing entries. Prefer the `https://on.cypress.io/<slug>` short link, where the slug is the last segment of the docs path (`docs.cypress.io/app/guides/writing-tests` becomes `on.cypress.io/writing-tests`). Check that the short link redirects to the right page, and fall back to an absolute `https://docs.cypress.io/<path>` URL only when it doesn't. Don't add UTM params to changelog links.
+    - _Example:_ `` [`cy.visit()`](https://on.cypress.io/visit) ``, `` [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) ``.
 11. If a change is only observable under a specific run context (e.g. `cypress run` vs. `cypress open`, or behind an experimental flag), state which context is affected so users can tell whether the change applies to them.
 12. A release often ships between the commit that adds an entry and the review that merges it. Re-check placement every time you pull `develop`, and again before marking a pull request ready: if a new `## X.Y.Z` heading has appeared above your entry, move the entry up into the new topmost release, keeping it under the same named section there. This is silent in both directions — the entry still reads correctly in the diff, and validation parses only the topmost release, so an entry stranded under an already-shipped version is simply never seen.
 13. Describe a `perf` entry by its effect, such as "starts running specs sooner", without exact timings or percentages. A benchmark measures one machine and one project, so a number from it reads as a promise to every user. Keep the measurements in the pull request.

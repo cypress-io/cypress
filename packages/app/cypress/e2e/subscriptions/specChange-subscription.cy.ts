@@ -1,4 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 import { getPathForPlatform } from '../../../src/paths'
 
 describe('specChange subscription', () => {
@@ -93,7 +92,7 @@ describe('specChange subscription', () => {
       })
 
       cy.get('[data-cy="create-spec-page-title"]')
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
 
       cy.withCtx(async (ctx, o) => {
         await ctx.actions.file.writeFileInProject(o.path, '')
@@ -148,7 +147,7 @@ describe('specChange subscription', () => {
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="create-spec-page-title"]')
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
     })
 
     it('responds to a cypress.config.js file change', () => {
@@ -291,7 +290,7 @@ e2e: {
       }, { path: getPathForPlatform('cypress/e2e/dom-content.spec.js') })
 
       cy.get('[data-cy="create-spec-page-title"]')
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
     })
 
     it('responds to a cypress.config.js file change', () => {
@@ -420,7 +419,7 @@ e2e: {
       }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
 
       cy.get('[data-cy="create-spec-page-title"]')
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
     })
 
     it('responds to a cypress.config.js file change', () => {
@@ -488,7 +487,7 @@ module.exports = {
       })
 
       cy.get('[data-cy="create-spec-page-title"]', { timeout: 15000 })
-      .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
+      .should('contain', 'No specs found')
     })
   })
 })

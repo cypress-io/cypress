@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import os from 'os'
 import path from 'path'
 import mockfs from 'mock-fs'
@@ -10,7 +11,9 @@ import utils from '../../../lib/browsers/utils'
 import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import * as protocol from '../../../lib/browsers/protocol'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 
 // Building the real schemas in this worker loads a second `graphql` realm, which
@@ -168,9 +171,9 @@ describe('lib/browsers/chrome', () => {
       }
 
       // mock launched browser child process object
-      launchedBrowser = {
+      launchedBrowser = Object.assign(new EventEmitter(), {
         kill: vi.fn(),
-      }
+      })
 
       onCriEvent = async (event, data, options) => {
         await chrome.open({ isHeadless: true } as any, 'http://', { ...openOpts, ...options } as any, automation)
@@ -288,6 +291,18 @@ describe('lib/browsers/chrome', () => {
       await chrome.open({ isHeadless: true } as any, 'http://', mitmOpts as any, automation)
 
       expect(browserCriClient.reenableChildTargetInterception).toBeUndefined()
+    })
+
+    it('hands the service worker instrumentation to the page client on the browser (CDP) network path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...openOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBe('(function __cypressInstrument () {})()')
+    })
+
+    it('does not hand the page client service worker instrumentation on the MITM path', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, serviceWorkerInstrumentation: '(function __cypressInstrument () {})()' } as any, automation)
+
+      expect(pageCriClient.serviceWorkerInstrumentation).toBeUndefined()
     })
 
     it('executeBeforeBrowserLaunch is noop if before:browser:launch is not registered', async () => {
@@ -459,15 +474,13 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
-      const pathToTheme = extension.getPathToTheme()
-
       await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
 
       const args = launchSpy.mock.calls[0][3]
 
       expect(args).toEqual(expect.arrayContaining([
         '--foo=bar',
-        `--load-extension=/foo/bar/baz.js,/path/to/ext,${pathToTheme}`,
+        '--load-extension=/foo/bar/baz.js,/path/to/ext',
         '--user-data-dir=/profile/dir',
         '--disk-cache-dir=/profile/dir/CypressCache',
       ]))
@@ -478,8 +491,6 @@ describe('lib/browsers/chrome', () => {
         return Promise.resolve({ args: ['--foo=bar', '--load-extension=/foo/bar/baz.js,/quux.js'] })
       })
 
-      const pathToTheme = extension.getPathToTheme()
-
       const onWarning = vi.fn()
 
       await chrome.open({ isHeaded: true } as any, 'http://', { onWarning, onError: () => {} } as any, automation)
@@ -488,7 +499,7 @@ describe('lib/browsers/chrome', () => {
 
       expect(args).toEqual(expect.arrayContaining([
         '--foo=bar',
-        `--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,${pathToTheme}`,
+        '--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext',
         '--user-data-dir=/profile/dir',
         '--disk-cache-dir=/profile/dir/CypressCache',
       ]))
@@ -542,6 +553,42 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
+    describe('when the profile has a browser theme saved', () => {
+      const openWithTheme = async (pack: string) => {
+        readJsonByPath['/profile/dir/Default/Preferences'] = () => {
+          return Promise.resolve({
+            extensions: {
+              alerts: { initialized: true },
+              theme: { id: 'pcmgedibbghfeopppnoaogaeancdcnjo', pack },
+            },
+          })
+        }
+
+        await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
+
+        const written = callsWith(outputJson, '/profile/dir/Default/Preferences', expect.anything())
+
+        return written.length ? written[written.length - 1][1] : undefined
+      }
+
+      it.each([
+        ['Linux', '/home/jordan.rivera/.cache/Cypress/16.3.0/Cypress/resources/app/packages/extension/theme'],
+        ['Windows', 'C:\\Users\\jordan.rivera\\AppData\\Local\\Cypress\\Cache\\16.3.0\\Cypress\\resources\\app\\packages\\extension\\theme'],
+      ])('removes the theme Cypress loaded on %s and keeps other extension settings', async (_platform, pack) => {
+        const prefs = await openWithTheme(pack)
+
+        expect(prefs.extensions).toEqual({ alerts: { initialized: true } })
+      })
+
+      it('keeps a theme that Cypress did not load', async () => {
+        const pack = '/home/jordan.rivera/.config/chromium/Default/Extensions/iiihlpikmpijkgmkmmnjpkbnmcjeijeh/1.2_0'
+
+        const prefs = await openWithTheme(pack)
+
+        expect(prefs.extensions.theme).toEqual({ id: 'pcmgedibbghfeopppnoaogaeancdcnjo', pack })
+      })
+    })
+
     it('calls cri client close on kill', async () => {
       // need a reference here since the stub will be monkey-patched
       const {
@@ -556,6 +603,36 @@ describe('lib/browsers/chrome', () => {
 
       expect(browserCriClient.close).toHaveBeenCalledOnce()
       expect(kill).toHaveBeenCalledOnce()
+    })
+
+    it('reports a non-zero browser exit to the CDP connection while it is connecting', async () => {
+      let exitSeenWhileConnecting
+
+      vi.mocked(BrowserCriClient.create).mockImplementation(async ({ getBrowserExit }) => {
+        launchedBrowser.emit('exit', 21, null)
+        exitSeenWhileConnecting = getBrowserExit?.()
+
+        return browserCriClient
+      })
+
+      await chrome.open({ isHeadless: true } as any, 'http://', openOpts as any, automation)
+
+      expect(exitSeenWhileConnecting).toEqual({ code: 21, signal: null })
+    })
+
+    it('keeps connecting when the launched process exits with code 0', async () => {
+      let exitSeenWhileConnecting
+
+      vi.mocked(BrowserCriClient.create).mockImplementation(async ({ getBrowserExit }) => {
+        launchedBrowser.emit('exit', 0, null)
+        exitSeenWhileConnecting = getBrowserExit?.()
+
+        return browserCriClient
+      })
+
+      await chrome.open({ isHeadless: true } as any, 'http://', openOpts as any, automation)
+
+      expect(exitSeenWhileConnecting).toBeUndefined()
     })
 
     it('sends after:browser:launch with debugger url', async () => {
@@ -744,7 +821,7 @@ describe('lib/browsers/chrome', () => {
             },
             {
               name: 'X-Cypress-Is-AUT-Frame',
-              value: 'true',
+              value: getMetadataHeaderValue(),
             },
           ],
         })
@@ -765,6 +842,31 @@ describe('lib/browsers/chrome', () => {
 
         expectCalledWith(pageCriClient.send, 'Page.getFrameTree')
       })
+    })
+  })
+
+  describe('#_setAutomation', () => {
+    const bringsPageToFront = async (isTextTerminal: boolean, isHeadless: boolean) => {
+      const create = vi.spyOn(CdpAutomation, 'create').mockResolvedValue({} as CdpAutomation)
+      const client = { send: vi.fn(), on: vi.fn(), off: vi.fn() }
+
+      // Safe because `_setAutomation` only passes these through to the stubbed `create`, and reads
+      // `isTextTerminal` and `isHeadless`, the one field each of the last two provides
+      await chrome._setAutomation(client as any, { use: vi.fn() } as any, vi.fn(), { isTextTerminal } as any, { isHeadless } as any)
+
+      return create.mock.lastCall?.[7]
+    }
+
+    it('brings the page to the front in run mode', async () => {
+      expect(await bringsPageToFront(true, false)).toBe(true)
+    })
+
+    it('brings the page to the front for a headless browser in open mode, which has no extension to ask', async () => {
+      expect(await bringsPageToFront(false, true)).toBe(true)
+    })
+
+    it('asks the extension to activate the tab for a headed browser in open mode', async () => {
+      expect(await bringsPageToFront(false, false)).toBe(false)
     })
   })
 
@@ -1018,7 +1120,7 @@ describe('lib/browsers/chrome', () => {
     const registration = (registrationId: string, scopeURL: string, isDeleted = false) => ({ registrationId, scopeURL, isDeleted })
 
     function setup (options: object, url = 'https://example.com/__/#/specs/runner', snapshot: ReturnType<typeof registration>[] | null = []) {
-      const registrationListeners: Function[] = []
+      const registrationListeners: ((...args: any[]) => void)[] = []
 
       const pageCriClient = {
         send: vi.fn(async (command: string, _params?: unknown) => {
@@ -1028,10 +1130,10 @@ describe('lib/browsers/chrome', () => {
             registrationListeners.slice().forEach((listener) => listener({ registrations: snapshot }))
           }
         }),
-        on: vi.fn((eventName: string, listener: Function) => {
+        on: vi.fn((eventName: string, listener: (...args: any[]) => void) => {
           if (eventName === 'ServiceWorker.workerRegistrationUpdated') registrationListeners.push(listener)
         }),
-        off: vi.fn((eventName: string, listener: Function) => {
+        off: vi.fn((eventName: string, listener: (...args: any[]) => void) => {
           const index = registrationListeners.indexOf(listener)
 
           if (eventName === 'ServiceWorker.workerRegistrationUpdated' && index > -1) registrationListeners.splice(index, 1)
@@ -2210,9 +2312,9 @@ describe('lib/browsers/chrome', () => {
         onServiceWorkerClientEvent: vi.fn(),
       }
 
-      launchedBrowser = {
+      launchedBrowser = Object.assign(new EventEmitter(), {
         kill: vi.fn(),
-      }
+      })
 
       vi.spyOn(chrome, '_writeExtension').mockResolvedValue('/path/to/ext')
       vi.spyOn(BrowserCriClient, 'create').mockResolvedValue(browserCriClient)

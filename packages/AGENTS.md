@@ -10,7 +10,7 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 
 - **@packages/app** — The main Vue 3 front-end application for the Cypress browser-side UI (specs list, Test Replay, runner toolbar, Studio).
 - **@packages/launchpad** — Vue 3 Electron-rendered application shown when running `cypress open`; handles login, project selection, and configuration setup.
-- **@packages/frontend-shared** — Shared Vue 3 components, TailwindCSS config, composables, and i18n strings consumed by both `app` and `launchpad`.
+- **@packages/frontend-shared** — Shared Vue 3 components, TailwindCSS config, and composables consumed by both `app` and `launchpad`.
 - **@packages/reporter** — The test result reporter UI (command log, test tree) rendered inside the runner iframe.
 - **@packages/runner** — Legacy webpack bundler for `driver` and `reporter`; being phased out in favour of `app`.
 
@@ -49,10 +49,8 @@ The `packages/` workspace contains all first-party Cypress packages that make up
 - **@packages/stderr-filtering** — Utility for tagging and filtering noisy third-party stderr output into `debug` streams.
 - **@packages/agent-info** — Detects whether an AI coding agent invoked the current process, and which one, by fingerprinting environment variables.
 
-### Build & Snapshot Infrastructure
+### Build Infrastructure
 
-- **@packages/v8-snapshot-require** — Loads V8 heap snapshots created by `@tooling/v8-snapshot` to accelerate Electron startup time.
-- **@packages/packherd-require** — Module loader for bundles produced by `@tooling/packherd`; also provides on-demand TypeScript transpilation with source-map support.
 - **@packages/web-config** — Shared webpack/Vite configuration helpers for browser bundles inside the monorepo.
 - **@packages/ts** — Standardises `ts-node` version and base `tsconfig` options for development-time TypeScript require hooks.
 - **@packages/eslint-config** — Monorepo-wide ESLint flat-config with rules for TypeScript, Vue, React, Cypress tests, and imports.

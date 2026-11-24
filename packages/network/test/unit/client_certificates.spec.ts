@@ -128,7 +128,8 @@ describe('lib/client-certificates', () => {
 
       expect(certs.url).toEqual(url)
       expect(certs.pathnameLength).toEqual(5)
-      expect(certs)
+      expect(certs.clientCertificates).toEqual(new ClientCertificates())
+      expect(certs.matchRule).toBeUndefined()
     })
   })
 

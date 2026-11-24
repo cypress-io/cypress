@@ -1,5 +1,5 @@
 /* eslint-disable
-    mocha/no-global-tests,
+    mocha/no-top-level-tests,
     no-undef
 */
 it('nests the file based on spec path', () => {

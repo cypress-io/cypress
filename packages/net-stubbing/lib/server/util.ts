@@ -19,7 +19,58 @@ import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
-const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
+
+const isLineTerminator = (ch: string) => {
+  return ch === '\n' || ch === '\r' || ch === '\u2028' || ch === '\u2029'
+}
+
+/**
+ * Whether `text` has an opening `<…>` and a later closing `</…>`, each on a
+ * single line, with at least one character between them. Stubbed bodies are
+ * user fixtures that can be large, so this scans in linear time rather than
+ * using a backtracking regex.
+ *
+ * The earliest `<` on a line is always the best start for a tag, and the
+ * earliest-ending opening tag leaves the most room for the closing one, so a
+ * single forward pass per half is enough.
+ */
+function isHtmlLike (text: string) {
+  let openStart = -1
+  let openEnd = -1
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+
+    if (isLineTerminator(ch)) {
+      openStart = -1
+    } else if (ch === '<') {
+      if (openStart === -1) openStart = i
+    } else if (ch === '>' && openStart !== -1 && i >= openStart + 2) {
+      openEnd = i
+      break
+    }
+  }
+
+  if (openEnd === -1) {
+    return false
+  }
+
+  let closeStart = -1
+
+  for (let i = openEnd + 2; i < text.length; i++) {
+    const ch = text[i]
+
+    if (isLineTerminator(ch)) {
+      closeStart = -1
+    } else if (ch === '<') {
+      if (closeStart === -1 && text[i + 1] === '/') closeStart = i
+    } else if (ch === '>' && closeStart !== -1 && i >= closeStart + 3) {
+      return true
+    }
+  }
+
+  return false
+}
 
 const isValidJSON = function (text: unknown) {
   if (_.isObject(text)) {
@@ -40,7 +91,7 @@ export function parseContentType (response?: string) {
     return mime.getType('json')
   }
 
-  if (response && htmlLikeRe.test(response)) {
+  if (response && isHtmlLike(String(response))) {
     return mime.getType('html')
   }
 

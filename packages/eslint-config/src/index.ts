@@ -2,13 +2,23 @@ export * from './baseConfig'
 
 export * from './cliOverrides'
 
+export * from './compatConfig'
+
 export * from './frontendOverrides'
 
 export * from './graphqlConfig'
 
 export * from './jsonConfig'
 
-export * from './vueTsxOverrides'
+export * from './mochaConfig'
+
+export * from './nodeConfig'
+
+export * from './reactConfig'
+
+export * from './typeAwareConfig'
+
+export * from './vitestConfig'
 
 import * as globalImport from 'globals'
 

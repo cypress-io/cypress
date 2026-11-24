@@ -1,5 +1,3 @@
-// tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
-import { defaultMessages } from '@cy/i18n'
 import { registerMountFn, addVueCommand } from './common'
 import '../../src/styles/shared.scss'
 import 'tailwindcss/tailwind.css'
@@ -33,7 +31,6 @@ declare global {
     }
   }
 }
-cy.i18n = defaultMessages
 cy.gqlStub = GQLStubRegistry
 
 function logInternal<T> (name: string | Partial<Cypress.LogConfig>, cb: (log: Cypress.Log | undefined) => Cypress.Chainable<T>, opts: Partial<Cypress.Loggable> = {}): Cypress.Chainable<T> {

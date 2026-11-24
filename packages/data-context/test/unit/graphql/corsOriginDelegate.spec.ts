@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals'
 import type { Request } from 'express'
 import type { CorsOptions } from 'cors'
 
@@ -33,6 +33,17 @@ function evaluate (req: Request): CorsOptions {
 }
 
 describe('corsOriginDelegate', () => {
+  const processEnv = process.env
+
+  beforeEach(() => {
+    process.env = { ...processEnv }
+    delete process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM
+  })
+
+  afterEach(() => {
+    process.env = processEnv
+  })
+
   it('allows requests with no Origin header', () => {
     expect(evaluate(makeReq()).origin).toBe(true)
   })
@@ -73,6 +84,53 @@ describe('corsOriginDelegate', () => {
 
   it('denies arbitrary origins on /cloud-notification', () => {
     expect(evaluate(makeReq({ origin: 'https://other.example.com', path: '/cloud-notification' })).origin).toBe(false)
+  })
+
+  it('allows only the selected development workspace on /cloud-notification', () => {
+    process.env.CYPRESS_INTERNAL_ENV = 'development'
+    delete process.env.CYPRESS_INTERNAL_CLOUD_ENV
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '4'
+
+    expect(evaluate(makeReq({ origin: 'http://localhost:43000', path: '/cloud-notification' })).origin).toBe(true)
+    expect(evaluate(makeReq({ origin: 'http://localhost:3000', path: '/cloud-notification' })).origin).toBe(false)
+    expect(evaluate(makeReq({ origin: 'http://localhost:33000', path: '/cloud-notification' })).origin).toBe(false)
+    expect(evaluate(makeReq({ origin: 'http://localhost:43000' })).origin).toBe(false)
+    expect(evaluate(makeReq({ origin: `http://localhost:${OWN_PORT}` })).origin).toBe(true)
+  })
+
+  it('resolves workspace changes when evaluating each request', () => {
+    process.env.CYPRESS_INTERNAL_CLOUD_ENV = 'development'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '0'
+
+    expect(evaluate(makeReq({ origin: 'http://localhost:3000', path: '/cloud-notification' })).origin).toBe(true)
+
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '4'
+
+    expect(evaluate(makeReq({ origin: 'http://localhost:3000', path: '/cloud-notification' })).origin).toBe(false)
+    expect(evaluate(makeReq({ origin: 'http://localhost:43000', path: '/cloud-notification' })).origin).toBe(true)
+  })
+
+  it('allows workspace Cloud notifications when the API selects development and GraphQL selects staging', () => {
+    process.env.CYPRESS_INTERNAL_ENV = 'production'
+    process.env.CYPRESS_CONFIG_ENV = 'development'
+    process.env.CYPRESS_INTERNAL_CLOUD_ENV = 'staging'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = '4'
+
+    expect(evaluate(makeReq({ origin: 'http://localhost:43000', path: '/cloud-notification' })).origin).toBe(true)
+    expect(evaluate(makeReq({ origin: 'https://cloud-staging.cypress.io', path: '/cloud-notification' })).origin).toBe(true)
+    expect(evaluate(makeReq({ origin: 'http://localhost:3000', path: '/cloud-notification' })).origin).toBe(false)
+    expect(evaluate(makeReq({ origin: 'http://localhost:43000' })).origin).toBe(false)
+  })
+
+  it('ignores the workspace when both the API and GraphQL select staging', () => {
+    process.env.CYPRESS_INTERNAL_ENV = 'staging'
+    process.env.CYPRESS_CONFIG_ENV = 'staging'
+    process.env.CYPRESS_INTERNAL_CLOUD_ENV = 'staging'
+    process.env.CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM = 'invalid'
+
+    expect(evaluate(makeReq({ origin: 'https://cloud-staging.cypress.io', path: '/cloud-notification' })).origin).toBe(true)
+    expect(evaluate(makeReq({ origin: 'http://localhost:3000', path: '/cloud-notification' })).origin).toBe(true)
+    expect(evaluate(makeReq({ origin: 'http://localhost:43000', path: '/cloud-notification' })).origin).toBe(false)
   })
 })
 

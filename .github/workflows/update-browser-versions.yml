@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Generate Cypress Bot App token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ secrets.CYPRESS_BOT_APP_CLIENT_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
@@ -25,7 +25,7 @@ jobs:
           # Required to request a team (e.g. @cypress-io/app) as PR reviewer
           permission-members: read
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ env.BASE_BRANCH }}
           fetch-depth: 0
@@ -33,14 +33,14 @@ jobs:
       - name: Fetch remote branches
         run: git fetch origin
       - name: Set up Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .node-version
       - name: install dependencies
         run: CI=true yarn
-      - name: Check for new Chrome versions
+      - name: Check for new Chrome and Firefox versions
         id: get-versions
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { getVersions } = require('./scripts/github-actions/update-browser-versions.js')
@@ -71,7 +71,7 @@ jobs:
       - name: Check need for update on existing branch
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
         id: check-need-for-branch-update
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { checkNeedForBranchUpdate } = require('./scripts/github-actions/update-browser-versions.js')
@@ -81,11 +81,13 @@ jobs:
               latestStableVersion: '${{ steps.get-versions.outputs.latest_stable_version }}',
               latestBetaVersion: '${{ steps.get-versions.outputs.latest_beta_version }}',
               latestChromeForTestingStableVersion: '${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}',
+              latestFirefoxStableVersion: '${{ steps.get-versions.outputs.latest_firefox_stable_version }}',
+              latestFirefoxBetaVersion: '${{ steps.get-versions.outputs.latest_firefox_beta_version }}',
             })
       ## Both
       - name: Update Browser Versions File
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { updateBrowserVersionsFile } = require('./scripts/github-actions/update-browser-versions.js')
@@ -94,10 +96,12 @@ jobs:
               latestStableVersion: '${{ steps.get-versions.outputs.latest_stable_version }}',
               latestBetaVersion: '${{ steps.get-versions.outputs.latest_beta_version }}',
               latestChromeForTestingStableVersion: '${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}',
+              latestFirefoxStableVersion: '${{ steps.get-versions.outputs.latest_firefox_stable_version }}',
+              latestFirefoxBetaVersion: '${{ steps.get-versions.outputs.latest_firefox_beta_version }}',
             })
       - name: Commit and push via API
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -117,7 +121,7 @@ jobs:
       ## Update available and a branch/PR already exists
       - name: Update PR Title
         if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -134,7 +138,7 @@ jobs:
       - name: Create Pull Request
         id: create-pr
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
@@ -146,6 +150,6 @@ jobs:
               baseBranch: '${{ env.BASE_BRANCH }}',
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
               description: '${{ steps.get-versions.outputs.description }}',
-              body: 'This PR was auto-generated to update pinned Chrome (Version History), Chrome for Testing ([last-known-good-versions.json](https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json)), or both for CI.',
+              body: 'This PR was auto-generated to update pinned Chrome (Version History), Chrome for Testing ([last-known-good-versions.json](https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json)), and/or Firefox ([firefox_versions.json](https://product-details.mozilla.org/1.0/firefox_versions.json)) for CI.',
               team_reviewers: ['app']
             })

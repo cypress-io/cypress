@@ -16,7 +16,7 @@ export default [
     },
     rules: {
       'no-console': 'off',
-      'mocha/no-global-tests': 'off',
+      'mocha/no-top-level-tests': 'off',
       'vue/no-required-prop-with-default': 'off',
     },
   },

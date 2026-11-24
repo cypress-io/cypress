@@ -1,5 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
-import { acceptWillRenderHtml, contentTypeIsHtml, contentTypeIsJavaScript, serviceWorkerHeaderIsScript } from '@packages/network-interception'
+import { acceptWillRenderHtml, contentTypeIsHtml, contentTypeIsJavaScript } from '@packages/network-interception'
 
 // Decides, at a CDP Fetch Response-stage pause, whether the transport must
 // eagerly materialize the body (today's Fetch.getResponseBody) or can take
@@ -101,17 +101,6 @@ const isJsRewriteEligible = (contentType: string | undefined, options: ShouldStr
   return contentTypeIsJavaScript(contentType)
 }
 
-// MaybeInjectServiceWorker (packages/proxy/lib/http/response-middleware.ts)
-// prepends script text into the service worker body even when it's empty.
-// Deliberately broader than the proxy's hasServiceWorkerHeader (which checks
-// two exact name casings): any casing counts, and a wasted materialize is
-// the safe direction.
-const isServiceWorkerScriptRequest = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
-  const value = getRequestHeader(event.request.headers, 'service-worker')
-
-  return serviceWorkerHeaderIsScript(value?.toLowerCase())
-}
-
 // A malformed content-length proves nothing about the body's length, so it
 // must not count as finite — falling through lets a later rule (or the
 // stream default) decide instead. A parseable content-length is the only
@@ -130,13 +119,11 @@ const isProvablyFinite = (event: Protocol.Fetch.RequestPausedEvent): boolean => 
 }
 
 // Middleware that reads or writes into even an empty body must see the real
-// one: HTML injection, obstructive-code rewriting, service-worker injection,
-// and cy.intercept route handlers all break silently on the empty stand-in
-// the stream path hands them.
+// one: HTML injection, obstructive-code rewriting, and cy.intercept route
+// handlers all break silently on the empty stand-in the stream path hands them.
 const bodyIsNeeded = (event: Protocol.Fetch.RequestPausedEvent, contentType: string | undefined, options: ShouldStreamResponseBodyOptions): boolean => {
   return isInjectionEligible(event, contentType) ||
     isJsRewriteEligible(contentType, options) ||
-    isServiceWorkerScriptRequest(event) ||
     !!options.hasMatchingRoute?.(event)
 }
 
@@ -154,6 +141,12 @@ export const shouldStreamResponseBody = (event: Protocol.Fetch.RequestPausedEven
 
   if (bodyIsNeeded(event, contentType, options)) {
     return false
+  }
+
+  // Media players read a range's opening bytes and then cancel or seek, so a
+  // content-length covering the whole file must not hold the pause until it arrives.
+  if (event.resourceType === 'Media') {
+    return true
   }
 
   return !isProvablyFinite(event)

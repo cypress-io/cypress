@@ -106,6 +106,7 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
         {groupPlaceholder}
         <div className='runnable-err-content'>
           <div className='runnable-err-message'>
+            {/* eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- markdown-it renders the error message with HTML disabled */}
             <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
             <DocsUrl url={err.docsUrl} title={err.docsUrlTitle} />
             {err.triggerAction && <TriggerAction triggerAction={err.triggerAction} />}

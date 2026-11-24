@@ -15,6 +15,8 @@ export type HttpRequest = {
   // Request-stage route-match result, threaded through to the response pause
   // so classification agrees with the interception that actually ran.
   hadMatchingRoutes?: boolean
+  // Set by a cy.intercept request handler; bounds the wait for response headers.
+  responseTimeout?: number
 }
 
 export type HttpResponse = {

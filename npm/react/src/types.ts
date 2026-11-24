@@ -26,7 +26,7 @@ export interface InternalMountOptions {
   render: (
     reactComponent: ReturnType<typeof React.createElement>,
     el: HTMLElement,
-    reactDomToUse: typeof import('react-dom/client')
+    reactDomToUse: typeof import('react-dom/client'),
   ) => void
   unmount: (options: UnmountArgs) => void
   cleanup: () => boolean

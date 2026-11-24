@@ -40,11 +40,33 @@ describe('writeWithBackpressure', () => {
     })
 
     it('resolves once drain is emitted', async () => {
-      const writePromise = writeWithBackpressure(output, 'test')
+      let emitDrain: (() => void) | undefined
+
+      // @ts-expect-error - mock impl does not match impl
+      output.once.mockImplementation((event, listener) => {
+        if (event === 'drain') {
+          emitDrain = listener
+        }
+
+        return output
+      })
+
+      let resolved = false
+      const writePromise = writeWithBackpressure(output, 'test').then(() => {
+        resolved = true
+      })
 
       expect(output.write).toHaveBeenCalledWith(Buffer.from('test'))
       expect(output.once).toHaveBeenCalledWith('drain', expect.any(Function))
-      expect(writePromise).resolves
+
+      // A macrotask runs after every pending microtask, so a promise that
+      // didn't wait for drain has settled by now
+      await new Promise((resolve) => setImmediate(resolve))
+      expect(resolved).toBe(false)
+
+      emitDrain?.()
+      await writePromise
+      expect(resolved).toBe(true)
     })
   })
 })

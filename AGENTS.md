@@ -9,13 +9,12 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 - **`cli/`** — The main `cypress` npm package (CLI entry point) and co-located component testing framework adapters (`@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/svelte`, `@cypress/mount-utils`)
 - **`packages/`** — Core internal packages: the test driver, Electron app, HTTP server, proxy, launcher, frontend Vue app, launchpad, reporter, config, data-context, telemetry, types, errors, and more
 - **`npm/`** — Publicly published npm packages: bundler integrations, component testing adapters, plugins, and dev tooling
-- **`tooling/`** — Internal build tooling: V8 snapshot creation, `packherd` dependency bundler, and `electron-mksnapshot`
 - **`system-tests/`** — Full end-to-end system test suite: `test/` runs against the dev app, `test-binary/` against a built Cypress binary
 - **`scripts/`** — Internal build, release, and CI automation scripts
 
 ## Task runbooks
 
-Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), [V8 snapshots](./guides/v8-snapshots.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
+Step-by-step procedures live in [`guides/`](./guides/) — start there for any multi-step workflow ([release process](./guides/release-process.md), [writing the changelog](./guides/writing-the-cypress-changelog.md), and others indexed in [`guides/README.md`](./guides/README.md)). They are the canonical source for humans and agents alike.
 
 `.claude/skills/*/SKILL.md` adds a thin layer on top for the two workflows that need agent-specific execution guidance — which permissions a phase needs, long-running commands, and host quirks that would be noise in a contributor guide. Claude Code loads them on demand; **other agents should read the file directly**, since nothing loads them automatically:
 
@@ -111,12 +110,6 @@ yarn lint:fix
 # Full monorepo build
 yarn build
 
-# Build V8 snapshot (dev)
-yarn build-v8-snapshot-dev
-
-# Build V8 snapshot (prod)
-yarn build-v8-snapshot-prod
-
 # Clean all build artifacts
 yarn clean
 
@@ -126,7 +119,7 @@ yarn clean-deps && yarn
 
 ## Architecture
 
-Orientation, not a registry — the directories under `packages/`, `npm/`, and `tooling/` are the authoritative list, and each carries its own `AGENTS.md` with the detail. Read a package's own file before working in it rather than relying on the one-liner here.
+Orientation, not a registry — the directories under `packages/` and `npm/` are the authoritative list, and each carries its own `AGENTS.md` with the detail. Read a package's own file before working in it rather than relying on the one-liner here.
 
 ### CLI & Distribution
 
@@ -176,17 +169,12 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **`@packages/example`** — The bundled kitchensink example project. Its `cypress/` and `app/` contents are generated from upstream `cypress-example-kitchensink` — change it there, not here.
 - **`@packages/root`** — Root package metadata consumed by the binary build.
 
-### Build & Snapshot Infrastructure
+### Build Infrastructure
 
-- **`@packages/v8-snapshot-require`** — Module loading utilities for V8 snapshots in Electron.
-- **`@packages/packherd-require`** — Module loader for dependencies bundled by `@tooling/packherd`.
 - **`@packages/web-config`** — Webpack/PostCSS configuration for the Vue frontend bundles.
 - **`@packages/ts`** — Shared TypeScript configuration and `ts-node` register helper.
 - **`@packages/eslint-config`** — Shared ESLint configuration preset used across packages.
 - **`@packages/resolve-dist`** — Resolves paths to compiled distribution artifacts.
-- **`@tooling/v8-snapshot`** — V8 snapshot creation tooling for Electron startup optimization.
-- **`@tooling/packherd`** — Bundles all reachable dependencies from an entry point into a single artifact.
-- **`@tooling/electron-mksnapshot`** — Configurable `mksnapshot` binary wrapper for the target Electron version.
 
 ### Component Testing Adapters (published via `npm/`)
 
@@ -226,10 +214,11 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **Type-only imports**: `importsNotUsedAsValues: "error"` — use `import type` for type-only imports.
 - **Type guards over `as`** — Narrow with a type guard, an `asserts` function or an `in` check rather than an `as` assertion, and explain any assertion that remains with a "Safe because" comment. See [Type Assertions](./guides/typescript.md#type-assertions).
 - **Unused vars**: Unused variables and imports are errors. Unused function parameters and caught errors are allowed, since callbacks often have to accept arguments they ignore. In packages on the flat config, prefix a variable that exists only to be type-checked with `_`.
-- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
-- **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
+- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment). In a Vitest spec, disable `vitest/no-focused-tests` instead: mocha's rules only apply where mocha runs the tests (see [`mochaConfig`](./packages/eslint-config/AGENTS.md#mochaconfig)).
+- **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why. In a workspace that spreads `vitestConfig`, a skip that has to stay also needs `eslint-disable-next-line vitest/no-disabled-tests` below that comment.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
+- **Regex performance** — Before adding or changing a regex, follow [Writing performant regular expressions](./guides/writing-performant-regular-expressions.md) and measure it with `yarn check-regex`.
 
 ### Code Comments
 
@@ -238,6 +227,7 @@ Orientation, not a registry — the directories under `packages/`, `npm/`, and `
 - **Don't repeat yourself** — Do not restate the same comment multiple times in a file as the code flows through each step.
 - **Present state only** — Keep comments relevant to the current state of the code. Do not describe what changed or how the code used to be different.
 - **Name the reason, not the predecessor** — "Matches what the old plugin did" is not a *why*, and it rots once that plugin is deleted. State the reason the old code had, and put parity with replaced tooling in the commit message or guide.
+- **Show the effect first** — For code that rewrites a value (a parser, a sanitizer, a name or path normalizer), open with what it does to its input, with a concrete example such as `` `outer/</<` becomes `outer` ``. Background on why the input looks that way comes after, if at all.
 - **No measurements** — Don't cite benchmark numbers in a comment. They depend on the machine they came from and go stale with the code around them. State the reason instead, and keep the numbers in the commit message or pull request.
 
 Bad examples:
@@ -265,7 +255,7 @@ Code in this monorepo runs in several runtimes, each with its own JavaScript / r
 - **Dev tooling, gulp, build/dev scripts** — the Node version in [`.node-version`](./.node-version).
 - **The bundled app (main/Electron process)** — the Node embedded in the `electron` version pinned in the root [`package.json`](./package.json) (look up that Electron release's Node/V8).
 - **The config/plugins child process** (`@packages/server` `lib/plugins/child/require_async_child.ts`, forked by `@packages/data-context` `ProjectConfigIpc`) and the **`cypress` CLI** (`cli/`) — the *user's* Node, whose supported range is `engines.node` in [`cli/package.json`](./cli/package.json). This floor is lower than the dev/bundled Node, so it is the binding constraint for that code.
-- **Browser-shipped bundles** (`@packages/app`, `@packages/frontend-shared`, `@packages/driver`) — the last 3 major versions of the supported browsers. Since Safari releases majors roughly annually, the last 3 major versions reach back years, making this the most conservative floor. `@packages/driver` runs in the user's AUT browser. For WebKit, Cypress runs the WebKit bundled with the installed `playwright-webkit` version — not the user's system Safari — so the WebKit floor tracks that dependency.
+- **Browser-shipped bundles** (`@packages/app`, `@packages/frontend-shared`, `@packages/driver`, `@packages/reporter`, `@packages/runner`; not `@packages/launchpad`, which only renders in Electron) — the last 3 major versions of the supported browsers. Since Safari releases majors roughly annually, the last 3 major versions reach back years, making this the most conservative floor. `@packages/driver` runs in the user's AUT browser. For WebKit, Cypress runs the WebKit bundled with the installed `playwright-webkit` version — not the user's system Safari — so the WebKit floor tracks that dependency. The floor is written down as a browserslist query in [`browser-bundles.browserslistrc`](./browser-bundles.browserslistrc), where `last 3 Safari major versions` stands in for that WebKit build. Read the file by path, never by moving it to a name browserslist finds on its own (the file's header says why). ESLint's [`compatConfig`](./packages/eslint-config/AGENTS.md#compatconfig) checks the bundles against it.
 
 Verify an API against the relevant floor (node.green for Node, caniuse/MDN for browsers) before relying on it.
 
@@ -279,10 +269,14 @@ Verify an API against the relevant floor (node.green for Node, caniuse/MDN for b
 - Verify a changelog entry with `GH_TOKEN="$(gh auth token)" node ./scripts/semantic-commits/validate-binary-changelog.js`, the same check CI's `verify-release-readiness` job runs. It fails without that token, and needs a root `yarn` install.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
+### Dependency Updates
+
+Whether you're bumping a dependency or reviewing a Renovate PR, follow [Code Review of Dependency Updates](./CONTRIBUTING.md#code-review-of-dependency-updates). Read the changelog for every version in the range, not just the target release, and don't trust semver to flag breaking changes. Check the dependency's `engines.node` against the floor of the runtime that loads it (see [Runtime targets](#runtime-targets)), not the dev Node version.
+
 ## CI/CD
 
-- **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`. See [`.circleci/AGENTS.md`](.circleci/AGENTS.md) for when to add a branch to the full-CI allowlist (binary tests, Windows jobs, v8 snapshot validation).
-- **Supplementary**: GitHub Actions for security scanning (Snyk), SBOM generation, browser version auto-updates, and PR validation.
+- **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`. See [`.circleci/AGENTS.md`](.circleci/AGENTS.md) for when to add a branch to the full-CI allowlist (binary tests, Windows jobs).
+- **Supplementary**: GitHub Actions for SBOM generation, browser version auto-updates, and PR validation.
 - **Base branch**: `develop` — all PRs target `develop`; release branches follow `release/X.Y.Z`.
 - **Multi-platform matrix**: Linux x64, Linux ARM64, macOS x64, macOS ARM64, Windows — all run in parallel. Coverage is per-job, not uniform: `unit-tests` runs only on linux-x64 and windows, so a unit test coupled to the host architecture passes CI and still fails locally on arm64. See [`cli/AGENTS.md`](./cli/AGENTS.md) for keeping specs host-independent.
 - **Release gate**: All tests must pass through the `ready-to-release` aggregation job before `npm-release` runs.
@@ -295,7 +289,7 @@ Running the repo in a hosted container (Cursor Cloud, Claude Code on the web, an
 
 ### Environment
 
-- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which runs the postinstall. What it covers depends on `CI` ([`scripts/run-postInstall.js`](./scripts/run-postInstall.js)): with `CI` set, as on Claude Code on the web, it skips `yarn-deduplicate`, `yarn build` and the V8 snapshot, so nothing is built. Check `echo $CI`, and run `yarn build` before anything that loads built packages, such as system tests. After adding or changing a dependency, run `yarn check-lockfile`. If it lists duplicates, run `yarn dedupe-lockfile` and commit the result, or CI's "Check yarn.lock is deduplicated" job fails. Then run `yarn check-lockfile-drift`. It runs a full `yarn install`, which drops request keys that nothing asks for any more, such as those left by a reverted `resolutions` entry. `--frozen-lockfile` keeps those keys, so a stale lockfile still passes a frozen install and only fails CI's "Check yarn.lock matches resolved dependencies" job. Don't call `yarn-deduplicate` directly: `dedupe-lockfile` leaves out `graphql`, which the repo holds at two majors on purpose (see [`@packages/eslint-config`'s dependency pins](./packages/eslint-config/AGENTS.md#dependency-pins)).
+- Yarn 1.22.22 is pre-installed. Whatever the host runs to prepare the container invokes `yarn`, which runs the postinstall. What it covers depends on `CI` ([`scripts/run-postInstall.js`](./scripts/run-postInstall.js)): with `CI` set, as on Claude Code on the web, it skips `yarn-deduplicate` and `yarn build`, so nothing is built. Check `echo $CI`, and run `yarn build` before anything that loads built packages, such as system tests. After adding or changing a dependency, run `yarn check-lockfile`. If it lists duplicates, run `yarn dedupe-lockfile` and commit the result, or CI's "Check yarn.lock is deduplicated" job fails. Then run `yarn check-lockfile-drift`. It runs a full `yarn install`, which drops request keys that nothing asks for any more, such as those left by a reverted `resolutions` entry. `--frozen-lockfile` keeps those keys, so a stale lockfile still passes a frozen install and only fails CI's "Check yarn.lock matches resolved dependencies" job. Don't call `yarn-deduplicate` directly: `dedupe-lockfile` leaves out `graphql`, which the repo holds at two majors on purpose (see [`@packages/eslint-config`'s dependency pins](./packages/eslint-config/AGENTS.md#dependency-pins)).
 - The root `package.json` sets `engines.node` to the version in [`.node-version`](./.node-version), so yarn refuses to run any script on an older Node: `The engine "node" is incompatible with this module`. Containers that pre-install a lower version need the required one installed before anything else works — see [Matching the required Node version](#matching-the-required-node-version).
 - Browsers and a display differ by host. Cursor Cloud runs Xvfb on `DISPLAY=:1` and ships Chrome at `/usr/bin/google-chrome-stable`. Claude Code on the web has Xvfb installed but leaves `DISPLAY` unset, and has no Chrome — only the Chromium that Playwright bundles under `$PLAYWRIGHT_BROWSERS_PATH`. There, `cypress run` starts its own Xvfb when `DISPLAY` is unset, so the Cypress-based suites do run; pass `--browser "$PLAYWRIGHT_BROWSERS_PATH/chromium"` instead of `--browser chrome`, and wrap anything else that needs a display (such as `yarn dev`) in `xvfb-run -a`. On any host, prefix Electron commands with `env -u ELECTRON_RUN_AS_NODE`: some agent hosts set it, and it makes Electron start as plain Node.
 
@@ -350,6 +344,6 @@ Prefer this over `yarn --ignore-engines`: the flag only silences the check for t
 
 ### Key caveats
 
-- The postinstall takes ~4-5 minutes (build + V8 snapshot generation). If `yarn` is interrupted, re-run it.
+- The postinstall takes ~4-5 minutes (mostly `yarn build`). If `yarn` is interrupted, re-run it.
 - `yarn --frozen-lockfile` should be preferred when the lockfile hasn't changed; it falls back to `yarn` (which runs postinstall) if it fails.
 - Do not run `yarn` from within sub-packages. Always run from the repo root.

@@ -1,4 +1,3 @@
-/// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
 const NEXT_PROJECTS_TSCONFIG_TAILWIND: ProjectFixtureDir[] = ['next-15-tsconfig-tailwind', 'next-16-tsconfig-tailwind']

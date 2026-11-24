@@ -63,6 +63,29 @@ describe('CDPSocketServer', () => {
     expect(() => new CDPSocketServer({ path: '/__socket' } as any)).toThrow('CDPSocketServer requires an isTrustedOrigin check')
   })
 
+  it('emits without throwing before a CDP client is attached', () => {
+    const server = new CDPSocketServer({ path: '/__socket', isTrustedOrigin: () => true })
+
+    expect(server.emit('some:event')).toBe(true)
+  })
+
+  it('does not reject when the broadcast payload fails to encode', async () => {
+    const { client, server } = await attachServer()
+
+    createContext(client, { id: 1 })
+
+    const evaluateCalls = () => client.send.mock.calls.filter(([method]) => method === 'Runtime.evaluate').length
+    const before = evaluateCalls()
+
+    // JSON can't serialize a BigInt, so encoding rejects
+    expect(server.emit('some:event', 1n)).toBe(true)
+
+    // an unhandled rejection here would fail the run
+    await flush()
+
+    expect(evaluateCalls()).toBe(before)
+  })
+
   it('closes the previous socket when a new client is attached', async () => {
     const server = new CDPSocketServer({ path: '/__socket', isTrustedOrigin: () => true })
     const first = makeClient()

@@ -4,18 +4,18 @@ interface CardProps {
   onSelect: (choice: number | null) => void
 }
 
-export default function Card (props: CardProps) {
+export default function Card ({ onSelect }: CardProps) {
   useEffect(() => {
     const timeoutID = setTimeout(() => {
       console.log('after timeout')
-      props.onSelect(null)
+      onSelect(null)
     }, 5000)
 
     return () => {
       console.log('clearing timeout')
       clearTimeout(timeoutID)
     }
-  }, [props.onSelect])
+  }, [onSelect])
 
   console.log('inside Card')
 
@@ -23,7 +23,7 @@ export default function Card (props: CardProps) {
     <button
       key={choice}
       data-testid={choice}
-      onClick={() => props.onSelect(choice)}
+      onClick={() => onSelect(choice)}
     >
       {choice}
     </button>

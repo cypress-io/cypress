@@ -5,9 +5,9 @@
   >
     <div class="space-y-[24px]">
       <SettingsCard
-        :title="t('settingsPage.project.title')"
+        title="Project settings"
         name="project"
-        :description="t('settingsPage.project.description')"
+        description="Review the configuration settings currently in use for this project."
         :icon="IconFolder"
         max-height="10000px"
       >
@@ -17,8 +17,8 @@
         />
       </SettingsCard>
       <SettingsCard
-        :title="t('settingsPage.device.title')"
-        :description="t('settingsPage.device.description')"
+        title="Device settings"
+        description="Review the configuration settings currently in use for this device."
         name="device"
         :icon="IconLaptop"
         max-height="800px"
@@ -32,8 +32,8 @@
         <TestingPreferences :gql="props.gql" />
       </SettingsCard>
       <SettingsCard
-        :title="t('settingsPage.cloud.title')"
-        :description="t('settingsPage.cloud.description')"
+        title="Cypress Cloud settings"
+        description="Review the configuration settings for recording to Cypress Cloud."
         :icon="IconOdometer"
         name="cloud"
         max-height="10000px"
@@ -50,9 +50,9 @@
       variant="outline"
       :prefix-icon="SettingsIcon"
       prefix-icon-class="icon-dark-gray-500 icon-light-gray-50 group-hocus:icon-dark-indigo-400 group-hocus:icon-light-indigo-50"
-      :href="t('settingsPage.footer.buttonLink')"
+      :href="configurationGuideUrl"
     >
-      {{ t('settingsPage.footer.button') }}
+      Configuration guide
     </Button>
   </div>
 </template>
@@ -60,7 +60,6 @@
 <script lang="ts" setup>
 
 import { computed } from 'vue'
-import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
 import ExternalEditorSettings from './device/ExternalEditorSettings.vue'
@@ -76,15 +75,15 @@ import IconOdometer from '~icons/cy/object-odometer_x24.svg'
 import IconFolder from '~icons/cy/folder-outline_x24.svg'
 import SettingsIcon from '~icons/cy/settings_x16.svg'
 import { isWindows } from '@packages/frontend-shared/src/utils/isWindows'
-
-const { t } = useI18n()
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 
 const footerText = computed(() => {
-  return t('settingsPage.footer.text',
-    { testingType: props.gql.currentProject?.currentTestingType === 'component'
-      ? 'component'
-      : 'E2E' })
+  const testingType = props.gql.currentProject?.currentTestingType === 'component' ? 'component' : 'E2E'
+
+  return `You can reconfigure the ${testingType} testing settings for this project if you're experiencing issues with your Cypress configuration.`
 })
+
+const configurationGuideUrl = getUrlWithParams({ url: 'https://on.cypress.io/configuration', params: { utm_medium: 'Settings', utm_campaign: 'Configuration Guide' } })
 
 gql`
 fragment SettingsContainer on Query {

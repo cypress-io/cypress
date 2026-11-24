@@ -8,10 +8,10 @@
 # Every path a job could care about must map to a run-* param below: a path
 # that matches nothing is an error rather than a silent skip.
 #
-# release/* branches, the update-v8-snapshot-cache-on-develop branch, the
-# run-all-jobs manual trigger, and any develop or vN run that isn't a webhook
-# push (scheduled pipelines, API triggers, or an unset/unknown trigger source)
-# skip path inspection entirely and run everything.
+# release/* branches, the run-all-jobs manual trigger, and any develop or vN
+# run that isn't a webhook push (scheduled pipelines, API triggers, or an
+# unset/unknown trigger source) skip path inspection entirely and run
+# everything.
 #
 # The corresponding pipeline parameters in @pipeline.yml default to true, so a
 # continuation that omits them runs everything rather than nothing.
@@ -25,7 +25,6 @@ launchpad_tests=false
 reporter_tests=false
 frontend_shared_tests=false
 system_tests=false
-v8_tests=false
 cli_tests=false
 unit_tests=false
 npm_webpack_dev_server_tests=false
@@ -40,6 +39,10 @@ npm_vite_plugin_esm_tests=false
 npm_mount_utils_tests=false
 npm_grep_tests=false
 npm_schematic_tests=false
+# True when a PR changes only docs, so the pull-request workflow can skip the
+# install, build, lint, type-check and Knip jobs, none of which read them. Never
+# set on a branch push or an all-true run, which keep the full sweep.
+docs_only=false
 
 # run-force-http1-tests and percy-enabled are NOT forwarded here: each is
 # already a pipeline parameter declared in both the setup config and
@@ -48,9 +51,19 @@ npm_schematic_tests=false
 # collides with that inherited value and CircleCI rejects the continuation with
 # "Conflicting pipeline parameters."
 
+# Restricted contexts check the pusher's GitHub team membership, which bots
+# (Renovate, cypress-bot, Cursor Agent) can't have. CircleCI leaves
+# CIRCLE_USERNAME empty for a pusher with no CircleCI account. Fork PRs
+# (pull/N) are excluded because approve-contributor-pr already gates them.
+bot_approval_required=false
+if [[ "${TRIGGER_SOURCE:-}" == "webhook" ]] && [[ ! "${CIRCLE_BRANCH:-}" =~ ^pull/[0-9]+ ]] && [[ -z "${CIRCLE_USERNAME:-}" ]]; then
+  bot_approval_required=true
+fi
+echo "Pushed by '${CIRCLE_USERNAME:-<unset>}' (trigger source '${TRIGGER_SOURCE:-<unset>}') — bot-approval-required=$bot_approval_required" >&2
+
 emit_json() {
   cat <<EOF
-{"run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-schematic-tests": $npm_schematic_tests}
+{"bot-approval-required": $bot_approval_required, "run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-schematic-tests": $npm_schematic_tests, "docs-only": $docs_only}
 EOF
 }
 
@@ -62,7 +75,6 @@ emit_all_true() {
   reporter_tests=true
   frontend_shared_tests=true
   system_tests=true
-  v8_tests=true
   cli_tests=true
   unit_tests=true
   npm_webpack_dev_server_tests=true
@@ -81,10 +93,8 @@ emit_all_true() {
 }
 
 # ----- branch override --------------------------------------------------------
-# On release branches and the v8 snapshot cache branch all jobs must run.
 BRANCH="${CIRCLE_BRANCH:-}"
-if [[ "$BRANCH" =~ ^release/ ]] || \
-   [[ "$BRANCH" == "update-v8-snapshot-cache-on-develop" ]]; then
+if [[ "$BRANCH" =~ ^release/ ]]; then
   echo "Branch '$BRANCH' — running all tests" >&2
   emit_all_true
   exit 0
@@ -350,12 +360,6 @@ while IFS= read -r file; do
       server_tests=true
       system_tests=true
       ;;
-    packages/packherd-require/*)
-      v8_tests=true
-      ;;
-    packages/v8-snapshot-require/*)
-      v8_tests=true
-      ;;
     packages/stderr-filtering/*)
       server_tests=true
       app_ui_tests=true
@@ -374,9 +378,6 @@ while IFS= read -r file; do
       ;;
     system-tests/*)
       system_tests=true
-      ;;
-    tooling/*)
-      v8_tests=true
       ;;
     npm/webpack-dev-server/*)
       npm_webpack_dev_server_tests=true
@@ -453,6 +454,28 @@ while IFS= read -r file; do
       ;;
   esac
 done <<< "$CHANGED"
+
+# ----- docs-only detection ----------------------------------------------------
+# Narrower than the documentation case above, which also covers config files
+# that lint and Knip do read (eslint.config.ts, knip.json). Markdown under a
+# src/, test/, fixtures or templates directory can be read by code, such as a
+# codegen template, so it doesn't count.
+if [[ "$filtering_branch_push" == "false" ]]; then
+  docs_only=true
+  while IFS= read -r file; do
+    case "$file" in
+      */src/*|src/*|*/test/*|test/*|*/__fixtures__/*|*/fixtures/*|*/templates/*)
+        docs_only=false
+        ;;
+      *.md|*.mdx|assets/*|guides/*|LICENSE)
+        ;;
+      *)
+        docs_only=false
+        ;;
+    esac
+  done <<< "$CHANGED"
+  echo "docs-only=$docs_only" >&2
+fi
 
 # ----- emit result ------------------------------------------------------------
 echo "Emitting pipeline parameters" >&2

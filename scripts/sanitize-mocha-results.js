@@ -33,7 +33,7 @@ async function checkReportFile (filename, circleEnv) {
   try {
     report = await fs.readFile(path.join(REPORTS_PATH, filename))
   } catch (err) {
-    throw new Error(`Unable to read the report in ${filename}: ${err.message}`)
+    throw new Error(`Unable to read the report in ${filename}: ${err.message}`, { cause: err })
   }
 
   // go through all the env vars and check if they're in the report,
@@ -81,7 +81,7 @@ async function sanitizeMochaResults () {
   try {
     filenames = await fs.readdir(REPORTS_PATH)
   } catch (err) {
-    throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`)
+    throw new Error(`Problem reading from ${REPORTS_PATH}: ${err.message}`, { cause: err })
   }
 
   const resultCount = filenames.length

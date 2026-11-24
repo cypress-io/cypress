@@ -44,7 +44,7 @@ export const LocalSettingsPreferences = objectType({
         const preferences = await ctx._apis.localSettingsApi.getPreferences()
         const dismissed = preferences.majorVersionWelcomeDismissed || {}
 
-        if (!ctx.lifecycleManager.isWelcomeBypassedForAgent) {
+        if (!ctx.lifecycleManager.isWelcomeBypassed) {
           return dismissed
         }
 
@@ -68,7 +68,7 @@ export const LocalSettingsPreferences = objectType({
           const cliBrowser = ctx.coreData.cliBrowser
 
           // The server launches the browser itself, so the Launchpad launching it too would open a second one
-          if (!cliBrowser || ctx.lifecycleManager.isWelcomeBypassedForAgent) {
+          if (!cliBrowser || ctx.lifecycleManager.isWelcomeBypassed) {
             return false
           }
 

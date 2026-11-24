@@ -13,7 +13,7 @@ import type { CyCookie, CyCookieFilter } from '../automation/cookie/util'
 import type { CDPSocketServer } from '@packages/socket'
 import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
-import { AUT_FRAME_HEADER } from './constants'
+import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -110,11 +110,9 @@ export class WebKitAutomation {
   }
 
   private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
-    const _this = this
-
     videoApi.useVideoController({
-      async endVideoCapture () {
-        const pwVideo = _this.page.video()
+      endVideoCapture: async () => {
+        const pwVideo = this.page.video()
 
         if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
 
@@ -122,7 +120,7 @@ export class WebKitAutomation {
 
         await Promise.all([
           // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
-          _this.page.close(),
+          this.page.close(),
           pwVideo.saveAs(videoApi.videoName),
         ])
       },
@@ -163,7 +161,7 @@ export class WebKitAutomation {
       return route.continue({
         headers: {
           ...request.headers(),
-          [AUT_FRAME_HEADER]: 'true',
+          [AUT_FRAME_HEADER]: getMetadataHeaderValue(),
         },
       })
     })
@@ -216,7 +214,10 @@ export class WebKitAutomation {
       }
 
       debug('received request %o', { browserPreRequest })
-      this.automation.onBrowserPreRequest?.(browserPreRequest)
+      // Playwright ignores a listener's result, so a failure is logged here
+      this.automation.onBrowserPreRequest?.(browserPreRequest)?.catch((error) => {
+        debug('error adding browser pre-request %o', { requestId, error })
+      })
     })
 
     this.page.on('requestfinished', async (request) => {
@@ -224,17 +225,22 @@ export class WebKitAutomation {
 
       if (!requestId) return
 
-      const response = await request.response()
+      // Like 'request' above, Playwright ignores the listener's result, so failures are logged here
+      try {
+        const response = await request.response()
 
-      const responseReceived = {
-        requestId,
-        status: response?.status(),
-        headers: await response?.allHeaders(),
+        const responseReceived = {
+          requestId,
+          status: response?.status(),
+          headers: await response?.allHeaders(),
+        }
+
+        debug('received requestfinished %o', { responseReceived })
+
+        await this.automation.onRequestEvent?.('response:received', responseReceived)
+      } catch (error) {
+        debug('error handling requestfinished %o', { requestId, error })
       }
-
-      debug('received requestfinished %o', { responseReceived })
-
-      this.automation.onRequestEvent?.('response:received', responseReceived)
     })
 
     // When a request fails (e.g. `req.destroy()` / `forceNetworkError` resets the

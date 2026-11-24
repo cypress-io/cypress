@@ -42,7 +42,7 @@ bin/
 
 - After `yarn install`, this package requires an explicit `yarn build` before it is usable — the `postinstall` script prints a reminder but does not build automatically.
 - The `build:esm` target exists but is not part of the default `build` target for daily use; it is available for testing ESM compatibility.
-- `@electron/fuses` is used to set Electron security fuses (e.g., disabling Node.js integration in renderers) during binary packaging.
+- `@electron/fuses` sets Electron security fuses during binary packaging, from `scripts/after-pack-hook.js`, not from this package.
 - `app/` is a placeholder, not a runnable app, and neither file in it may be deleted. `install.ts` passes it to `@electron/packager` as `dir: 'app'`, which resolves against the cwd — so `build-binary` has to be run from this package's root, as `yarn workspace` does. The packager's `validateElectronApp` then requires both a `package.json` and the `main` it names; since that manifest declares no `main`, the entry point it looks for is exactly `index.js`. Both are stubs on purpose — nothing in `app/` ever executes, because `packageAndExit()` deletes the packaged `resources/app` right after packaging and `open()` symlinks the real app over that path at launch.
 
 ## Integration Points

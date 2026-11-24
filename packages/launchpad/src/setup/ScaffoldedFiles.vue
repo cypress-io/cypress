@@ -1,7 +1,7 @@
 <template>
   <LaunchpadHeader
-    :title="t('setupWizard.configFiles.title')"
-    :description="t('setupWizard.configFiles.description')"
+    title="Configuration files"
+    description="We added the following files to your project:"
   />
   <div class="mx-auto max-w-[55rem] py-8">
     <FileRow
@@ -21,7 +21,7 @@
         data-cy="continue-button"
         @click="completeSetup"
       >
-        {{ t('setupPage.step.continue') }}
+        Continue
       </Button>
     </div>
   </div>
@@ -30,15 +30,12 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { gql } from '@urql/core'
-import { useI18n } from '@cy/i18n'
 import Button from '@cypress-design/vue-button'
 import FileRow from '../components/code/FileRow.vue'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import type { ScaffoldedFilesFragment } from '../generated/graphql'
 import { ScaffoldedFiles_CompleteSetupDocument } from '../generated/graphql'
 import { useMutation } from '@urql/vue'
-
-const { t } = useI18n()
 
 gql`
 mutation ScaffoldedFiles_completeSetup {

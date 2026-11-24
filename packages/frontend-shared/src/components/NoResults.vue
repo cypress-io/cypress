@@ -9,7 +9,7 @@
       alt
     />
     <p class="leading-normal text-gray-500 text-[18px]">
-      {{ message || t('noResults.defaultMessage') }}
+      {{ message || 'No results matched your search:' }}
       <span
         v-if="searchTerm"
         class="text-purple-500 truncate"
@@ -25,14 +25,13 @@
       <template #prefix>
         <i-cy-delete_x12 class="w-[12px] icon-dark-gray-400" />
       </template>
-      {{ t('noResults.clearSearch') }}
+      Clear search
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
 import Button from './Button.vue'
-import { useI18n } from '@cy/i18n'
 import NoResultsIllustration from '../assets/illustrations/no-results.svg'
 
 defineProps<{
@@ -44,7 +43,4 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'clear'): void
 }>()
-
-const { t } = useI18n()
-
 </script>
