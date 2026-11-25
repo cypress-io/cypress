@@ -2156,8 +2156,6 @@ describe('CdpFetchTransport', () => {
     // Middleware never touched these headers, so continueResponse omits the
     // field entirely rather than resending a lowercased, re-folded copy of
     // the same wire-encoding headers CDP already has on the paused request.
-    // Chrome rejects a continueResponse that overrides the status without the
-    // headers, so an unchanged response must override neither.
     it('overrides neither status nor headers on pass-through continueResponse when middleware left the response unchanged', async () => {
       const client = createClient()
       const { transport } = createTransport(client)
@@ -4803,8 +4801,7 @@ describe('CdpFetchTransport', () => {
 
       await handled
 
-      // Chrome rejects a status override that carries no headers, so the
-      // pause's own headers go with it.
+      // the pause's own headers go with the new status (see continueResponsesChromeRejects)
       expect(callsMatching(client.send, ['Fetch.continueResponse'])).toHaveLength(1)
       expectCalledWith(client.send, 'Fetch.continueResponse', {
         requestId: 'fetch-request',
