@@ -5,6 +5,10 @@
 
 - Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).
 
+**Bugfixes:**
+
+- Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#TODO-PR-NUMBER](https://github.com/cypress-io/cypress/pull/TODO-PR-NUMBER).
+
 ## 16.4.0
 
 **Features:**
