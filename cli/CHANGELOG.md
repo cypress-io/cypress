@@ -60,6 +60,7 @@
 - Fixed an issue where run mode durations of 24 hours or more dropped the whole days, so a run that took exactly 24 hours was reported as `0ms` and a run of 26 hours as `2:00:00`. Fixes [#34976](https://github.com/cypress-io/cypress/issues/34976).
 - Fixed a regression in [16.3.0](#16-3-0) where privileged commands such as [`cy.task()`](https://on.cypress.io/task) and [`cy.origin()`](https://on.cypress.io/origin) failed with "must only be invoked from the spec file or support file" when the project set a fixed [`port`](https://on.cypress.io/configuration#Global) and `setupNodeEvents` returned a `baseUrl`. Fixed in [#35513](https://github.com/cypress-io/cypress/pull/35513).
 - Fixed an issue where Angular component tests with webpack failed with "`<spec>` is missing from the TypeScript compilation" when [`specPattern`](https://on.cypress.io/configuration#component) was left at its default or used braces, such as `{src,projects}/**/*.cy.ts`. Fixed in [#35531](https://github.com/cypress-io/cypress/pull/35531).
+- Fixed an issue where Angular component tests with webpack failed with "`<spec>` is missing from the TypeScript compilation" when the project's build tsconfig, such as `tsconfig.app.json`, listed the specs in `exclude` to keep them out of `ng build`. Fixed in [#35542](https://github.com/cypress-io/cypress/pull/35542).
 
 **Misc:**
 
