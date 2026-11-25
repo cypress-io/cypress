@@ -187,23 +187,27 @@ const exists = async (file: string) => {
 /**
  * Next allows the `pages` directory to be located at either
  * `${projectRoot}/pages` or `${projectRoot}/src/pages`.
- * App Router-only projects have neither, so return undefined: Next treats every
- * file under `pagesDir` as a page, and rejects any dependency that uses `export *`.
+ * App Router-only projects have neither, so return `${projectRoot}/pages` even
+ * though it doesn't exist. Next treats every file under `pagesDir` as a page and
+ * rejects `export *` in pages, so the project root would break dependencies such
+ * as `@mui/material`. Next's Babel loader also needs a path here when the project
+ * has a Babel config, so `undefined` won't do.
  */
-async function findPagesDir (projectRoot: string): Promise<string | undefined> {
+async function findPagesDir (projectRoot: string) {
   // prioritize ./pages over ./src/pages
-  let pagesDir = path.join(projectRoot, 'pages')
+  const pagesDir = path.join(projectRoot, 'pages')
 
   if (await exists(pagesDir)) {
     return pagesDir
   }
 
-  pagesDir = path.join(projectRoot, 'src', 'pages')
-  if (await exists(pagesDir)) {
-    return pagesDir
+  const srcPagesDir = path.join(projectRoot, 'src', 'pages')
+
+  if (await exists(srcPagesDir)) {
+    return srcPagesDir
   }
 
-  return undefined
+  return pagesDir
 }
 
 // 'next/dist/trace/trace' has been the trace location since Next.js 12.0

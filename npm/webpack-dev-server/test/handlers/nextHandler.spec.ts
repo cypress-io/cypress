@@ -44,11 +44,12 @@ const expectCacheOverrides = (webpackConfig: Configuration, projectRoot: string)
   expect(cache.cacheDirectory).eq(path.join(projectRoot, '.next', 'cache', 'cypress-webpack'))
 }
 
-const getSwcPagesDirs = (webpackConfig: Configuration) => {
+// Collects the `pagesDir` that Next's SWC or Babel loader uses to decide which files are pages
+const getLoaderPagesDirs = (webpackConfig: Configuration) => {
   const pagesDirs = new Set<string | undefined>()
 
   JSON.stringify(webpackConfig.module, (_key, value) => {
-    if (typeof value?.loader === 'string' && value.loader.includes('next-swc-loader')) {
+    if (typeof value?.loader === 'string' && /next-swc-loader|babel[\\/]loader/.test(value.loader)) {
       pagesDirs.add(value.options?.pagesDir)
     }
 
@@ -56,6 +57,25 @@ const getSwcPagesDirs = (webpackConfig: Configuration) => {
   })
 
   return [...pagesDirs]
+}
+
+const loadAppRouterOnlyProject = async ({ babelConfig }: { babelConfig: boolean }) => {
+  const projectRoot = await scaffoldMigrationProject('next-16')
+
+  await fs.rm(path.join(projectRoot, 'pages'), { recursive: true })
+
+  if (babelConfig) {
+    await fs.writeFile(path.join(projectRoot, '.babelrc'), JSON.stringify({ presets: ['next/babel'] }))
+  }
+
+  process.chdir(projectRoot)
+
+  const { frameworkConfig: webpackConfig } = await nextHandler({
+    framework: 'next',
+    cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
+  } as WebpackDevServerConfig)
+
+  return { projectRoot, webpackConfig }
 }
 
 // can take a while since we install node_modules
@@ -89,23 +109,23 @@ describe('nextHandler', { timeout: 60000 }, function () {
       cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
     } as WebpackDevServerConfig)
 
-    expect(getSwcPagesDirs(webpackConfig)).toEqual([path.join(projectRoot, 'pages')])
+    expect(getLoaderPagesDirs(webpackConfig)).toEqual([path.join(projectRoot, 'pages')])
   })
 
-  // Next.js treats every file under pagesDir as a page, so passing the project root
-  // made dependencies that use `export *`, such as @mui/material, fail to compile.
-  it('does not pass a pages directory to Next.js for an App Router-only project', async () => {
-    const projectRoot = await scaffoldMigrationProject('next-16')
+  // Next treats every file under pagesDir as a page and rejects `export *` in pages, so
+  // pagesDir must not contain any project or node_modules files.
+  it('passes a pages directory with no files to Next.js for an App Router-only project', async () => {
+    const { projectRoot, webpackConfig } = await loadAppRouterOnlyProject({ babelConfig: false })
+    const pagesDir = path.join(projectRoot, 'pages')
 
-    await fs.rm(path.join(projectRoot, 'pages'), { recursive: true })
-    process.chdir(projectRoot)
+    expect(getLoaderPagesDirs(webpackConfig)).toEqual([pagesDir])
+    await expect(fs.access(pagesDir)).rejects.toThrow('ENOENT')
+  })
 
-    const { frameworkConfig: webpackConfig } = await nextHandler({
-      framework: 'next',
-      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-    } as WebpackDevServerConfig)
+  it('loads an App Router-only project that uses a Babel config', async () => {
+    const { projectRoot, webpackConfig } = await loadAppRouterOnlyProject({ babelConfig: true })
 
-    expect(getSwcPagesDirs(webpackConfig)).toEqual([undefined])
+    expect(getLoaderPagesDirs(webpackConfig)).toEqual([path.join(projectRoot, 'pages')])
   })
 
   it('throws if nodeVersion is set to bundled', async () => {
