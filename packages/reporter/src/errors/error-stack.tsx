@@ -7,7 +7,7 @@ import FileNameOpener from '../lib/file-name-opener'
 import type Err from './err-model'
 import type { ParsedStackFileLine, ParsedStackMessageLine } from './err-model'
 
-const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
+const cypressLineRegex = /cypress:\/\/|cypress_runner\.js/
 
 interface Props {
   err: Err

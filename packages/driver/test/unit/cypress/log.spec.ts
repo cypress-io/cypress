@@ -166,6 +166,19 @@ describe('LogUtils.toSerializedJSON', () => {
     })
   })
 
+  it('stringifies a function under any key other than exactly groups or table', () => {
+    const notCalled = () => 'called'
+    const serialized = LogUtils.toSerializedJSON({
+      consoleProps: {
+        tables: notCalled,
+        subgroups: notCalled,
+        'table\ngroups': notCalled,
+      },
+    })
+
+    expect(Object.values(serialized.consoleProps)).toEqual([String(notCalled), String(notCalled), String(notCalled)])
+  })
+
   it('does not subscribe to a promise, so a rejected one is not rejected again unhandled', async () => {
     const rejected = Promise.reject(new Error('handled by the test'))
 
@@ -204,6 +217,25 @@ describe('LogUtils.toSerializedJSON', () => {
 })
 
 describe('LogUtils.toSerializedConsoleProps', () => {
+  it('calls a function only under the groups or table key', () => {
+    const notCalled = () => 'called'
+    const result = LogUtils.toSerializedConsoleProps({
+      groups: () => [{ name: 'group' }],
+      table: () => ({ name: 'table' }),
+      tables: notCalled,
+      subgroups: notCalled,
+      'table\ngroups': notCalled,
+    })
+
+    expect(result).toEqual({
+      groups: [{ name: 'group' }],
+      table: { name: 'table' },
+      tables: String(notCalled),
+      subgroups: String(notCalled),
+      'table\ngroups': String(notCalled),
+    })
+  })
+
   it('projects DOM, tables, functions, cycles, and throwing values into JSON-safe data', () => {
     const button = document.createElement('button')
     const cycle: Record<string, unknown> = { label: 'cycle' }

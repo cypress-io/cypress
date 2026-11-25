@@ -8,7 +8,7 @@ import combineProperties from 'combine-properties'
 
 dayjs.extend(relativeTime)
 
-templateSettings.interpolate = /{{([\s\S]+?)}}/g
+templateSettings.interpolate = /\{\{([\s\S]+?)\}\}/g
 
 let jml
 const setupSeeds = () => {

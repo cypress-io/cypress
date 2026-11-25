@@ -17,6 +17,10 @@ const req = (win) => {
   })
 }
 
+// Opening a database writes its files to disk, which slows down sharply on a
+// busy CI machine, so these steps get a longer timeout than the default.
+const indexedDBTimeout = 15000
+
 const indexedDB = (win) => {
   return new Promise((resolve, reject) => {
     const DBOpenRequest = win.indexedDB.open('toDoList')
@@ -64,8 +68,8 @@ const iframeIndexedDB = (query) => {
 it('makes cached request', () => {
   cy.visit('http://localhost:1515/browser_reset.html')
   .then(req) // this should hit our server even though cached in the first spec
-  .then(indexedDB) // this ensures the indexedDB is empty
+  .then({ timeout: indexedDBTimeout }, indexedDB) // this ensures the indexedDB is empty
   .then(swReq) // this ensures the service worker is not registered
-  .then(iframeIndexedDB('')) // this ensures the never-visited origin's indexedDB is empty
+  .then({ timeout: indexedDBTimeout }, iframeIndexedDB('')) // this ensures the never-visited origin's indexedDB is empty
   .should('be.false')
 })

@@ -104,7 +104,7 @@
     "prestart": "yarn ensure-deps",
     "start": "cypress open --dev --global",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope=cypress --scope=@packages/{agent-info,config,data-context,driver,electron,errors,example,extension,https-proxy,icons,launcher,net-stubbing,network-interception,network,proxy,scaffold-config,socket,telemetry,stderr-filtering,types,vitest-setup}",
+    "test": "yarn lerna exec yarn test --scope=cypress --scope=@packages/{agent-info,config,data-context,driver,electron,errors,example,extension,https-proxy,icons,launcher,net-stubbing,network-interception,network,network-tools,proxy,scaffold-config,socket,telemetry,stderr-filtering,types,vitest-setup}",
     "test-debug": "lerna exec yarn test-debug --ignore=@packages/{driver,root,static,web-config}",
     "test-integration": "lerna exec yarn test-integration --ignore=@packages/{driver,root,static,web-config}",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
