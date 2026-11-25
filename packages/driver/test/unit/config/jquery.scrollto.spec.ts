@@ -54,4 +54,53 @@ describe('src/config/jquery.scrollto', () => {
 
     expect(container.scrollTop).toBe(expected)
   })
+
+  describe('telling a position string from a selector', () => {
+    const scrollAndGetAnimation = (target: string) => {
+      const animate = vi.spyOn($.fn, 'animate').mockImplementation(function (this: JQuery) {
+        return this
+      })
+
+      // `limit` is missing from the plugin's types. Turned off, it keeps the
+      // position strings below from being clamped to the scrollable range.
+      const settings = { axis: 'y' as const, limit: false }
+
+      $(container).scrollTo(target, settings)
+
+      return animate
+    }
+
+    it.each([
+      '50',
+      '50px',
+      '12.5',
+      '12.5px',
+      '+=50',
+      '-=50px',
+      '+50',
+      '-12.5px',
+    ])('scrolls to the position %j', (target) => {
+      const find = vi.spyOn($.fn, 'find')
+
+      expect(scrollAndGetAnimation(target).mock.calls[0][0]).toEqual({ scrollTop: target })
+      expect(find).not.toHaveBeenCalledWith(target)
+    })
+
+    // Stubbing `find` to match nothing keeps jQuery from parsing these as CSS,
+    // where several would be syntax errors, and makes the plugin stop before
+    // animating, as it does for a selector that matches no element.
+    it.each([
+      '#target',
+      '50em',
+      '.5px',
+      '50.px',
+      '*=50',
+      '50px50',
+    ])('looks %j up as a selector instead of scrolling to it', (target) => {
+      const find = vi.spyOn($.fn, 'find').mockReturnValue($())
+
+      expect(scrollAndGetAnimation(target)).not.toHaveBeenCalled()
+      expect(find).toHaveBeenCalledWith(target)
+    })
+  })
 })

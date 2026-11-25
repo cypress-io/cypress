@@ -1,7 +1,8 @@
-import { baseConfig, jsonConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, regexpConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
   ...jsonConfig,
   ...vitestConfig,
   {
