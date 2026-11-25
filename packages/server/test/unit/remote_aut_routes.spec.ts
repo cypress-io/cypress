@@ -11,7 +11,10 @@ describe('lib/remote_aut_routes', () => {
   let server: Server
   let baseUrl: string
   const setCredentials = vi.fn()
-  const setBrowserCookie = vi.fn(async () => {})
+  const browserCookies = {
+    getCookies: vi.fn(async () => []),
+    setCookie: vi.fn(async () => {}),
+  }
   const reportAutError = vi.fn(async () => {})
   const reportBeforeLoad = vi.fn(async () => {})
 
@@ -25,7 +28,7 @@ describe('lib/remote_aut_routes', () => {
       next()
     })
 
-    addRemoteAutRoutes(router, { namespace: '__cypress', getNetworkProxy: () => ({ setCredentials }) as any, setBrowserCookie, reportAutError, reportBeforeLoad })
+    addRemoteAutRoutes(router, { namespace: '__cypress', getNetworkProxy: () => ({ setCredentials }) as any, browserCookies, reportAutError, reportBeforeLoad })
     app.use(router)
 
     server = app.listen(0)
@@ -123,29 +126,34 @@ describe('lib/remote_aut_routes', () => {
   })
 
   describe('POST remote/set-cookie', () => {
-    const cookie = { name: 'key', value: 'value', domain: 'www.foobar.com', path: '/', hostOnly: true, httpOnly: false, secure: false, sameSite: 'lax', expiry: null, maxAge: null }
-
     it('sets a cookie the page sets in the server jar and the browser', async () => {
-      const res = await post('set-cookie', { cookie, url: `${PAGE_ORIGIN}/page` })
+      const res = await post('set-cookie', { cookieString: 'session_id=4f2a9c1e7b; SameSite=Lax', url: `${PAGE_ORIGIN}/page` })
 
       expect(res.status).toBe(204)
-      expect(cookieJar.getCookies(`${PAGE_ORIGIN}/`).map((c) => `${c.key}=${c.value}`)).toEqual(['key=value'])
-      expect(setBrowserCookie).toHaveBeenCalledExactlyOnceWith(cookie)
+      expect(cookieJar.getCookies(`${PAGE_ORIGIN}/`).map((c) => `${c.key}=${c.value}`)).toEqual(['session_id=4f2a9c1e7b'])
+      expect(browserCookies.setCookie).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ name: 'session_id', value: '4f2a9c1e7b', domain: 'www.foobar.com', path: '/', hostOnly: true, sameSite: 'lax' }))
     })
 
     it('sets nothing for a domain the page could not set as top', async () => {
-      const res = await post('set-cookie', { cookie: { ...cookie, domain: 'www.idp.com' }, url: `${PAGE_ORIGIN}/page` })
+      const res = await post('set-cookie', { cookieString: 'session_id=4f2a9c1e7b; Domain=www.idp.com', url: `${PAGE_ORIGIN}/page` })
 
       expect(res.status).toBe(204)
       expect(cookieJar.getAllCookies()).toEqual([])
-      expect(setBrowserCookie).not.toHaveBeenCalled()
+      expect(browserCookies.setCookie).not.toHaveBeenCalled()
     })
 
     it('refuses a cookie reported for another origin\'s page', async () => {
-      const res = await post('set-cookie', { cookie, url: 'http://www.idp.com:3500/' })
+      const res = await post('set-cookie', { cookieString: 'session_id=4f2a9c1e7b', url: 'http://www.idp.com:3500/' })
 
       expect(res.status).toBe(400)
-      expect(setBrowserCookie).not.toHaveBeenCalled()
+      expect(browserCookies.setCookie).not.toHaveBeenCalled()
+    })
+
+    it('refuses a write without a cookie string', async () => {
+      const res = await post('set-cookie', { url: `${PAGE_ORIGIN}/page` })
+
+      expect(res.status).toBe(400)
+      expect(browserCookies.setCookie).not.toHaveBeenCalled()
     })
   })
 })

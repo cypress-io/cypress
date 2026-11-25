@@ -34,6 +34,7 @@
     "globby": "^11.1.0",
     "resolve-package-path": "^4.0.3",
     "semver": "^7.7.3",
+    "tinyglobby": "^0.2.17",
     "zod": "^3.22.5"
   },
   "devDependencies": {

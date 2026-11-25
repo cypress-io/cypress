@@ -11,10 +11,6 @@ export const getPathToV3Extension = (...args: string[]) => {
   return path.join(...[__dirname, '..', 'app-dist', 'v3', ...args])
 }
 
-export const getPathToTheme = () => {
-  return path.join(__dirname, '..', 'theme')
-}
-
 export const setHostAndPath = async (host: string, path: string) => {
   const src = getPathToExtension('background.js')
 

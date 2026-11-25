@@ -581,6 +581,30 @@ describe('createSyntheticProxyCodec', () => {
     expect(ctx.req.headers['accept-encoding']).to.equal('gzip,identity')
   })
 
+  it('carries a request handler\'s responseTimeout on the outbound request', () => {
+    const codec = createSyntheticProxyCodec({
+      createMiddlewareContext: (req, res) => {
+        return {
+          req,
+          res,
+        } as any
+      },
+    })
+
+    const ctx = codec.encodeRequest({
+      id: 'network-3',
+      url: 'https://example.test/',
+      method: 'GET',
+      headers: {},
+    })
+
+    expect(codec.decodeRequest(ctx).responseTimeout).to.equal(undefined)
+
+    ctx.req.responseTimeout = 45000
+
+    expect(codec.decodeRequest(ctx).responseTimeout).to.equal(45000)
+  })
+
   it('copies bodySkipped and captureStream onto the ctx as resBodySkipped and resCaptureStream', () => {
     const codec = createSyntheticProxyCodec({
       createMiddlewareContext: (req, res) => {

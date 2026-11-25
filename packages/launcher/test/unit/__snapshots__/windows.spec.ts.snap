@@ -14,7 +14,7 @@ exports[`windows browser detection > detects Chrome 64-bit install 1`] = `
   "path": "C:/Program Files/Google/Chrome/Application/chrome.exe",
   "validator": [Function],
   "version": "4.4.4",
-  "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
+  "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/,
 }
 `;
 
@@ -27,7 +27,7 @@ exports[`windows browser detection > detects Chrome Beta 64-bit install 1`] = `
   "name": "chrome",
   "path": "C:/Program Files/Google/Chrome Beta/Application/chrome.exe",
   "version": "9.0.1",
-  "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/m,
+  "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/,
 }
 `;
 
@@ -40,7 +40,7 @@ exports[`windows browser detection > detects Chrome for Testing 32-bit install 1
   "name": "chrome-for-testing",
   "path": "C:/Program Files (x86)/Google/Chrome for Testing/chrome.exe",
   "version": "5.5.5",
-  "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/m,
+  "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/,
 }
 `;
 
@@ -56,7 +56,7 @@ exports[`windows browser detection > detects Chromium 32-bit install in Chromium
   "name": "chromium",
   "path": "C:/Program Files (x86)/Google/Chromium/chrome.exe",
   "version": "7.7.7",
-  "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+  "versionRegex": /Chromium \\(\\\\S\\+\\)/,
 }
 `;
 
@@ -72,7 +72,7 @@ exports[`windows browser detection > detects Chromium 64-bit install 1`] = `
   "name": "chromium",
   "path": "C:/Program Files/Google/chrome-win/chrome.exe",
   "version": "6.6.6",
-  "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+  "versionRegex": /Chromium \\(\\\\S\\+\\)/,
 }
 `;
 
@@ -88,7 +88,7 @@ exports[`windows browser detection > detects Chromium 64-bit install in Chromium
   "name": "chromium",
   "path": "C:/Program Files/Google/Chromium/chrome.exe",
   "version": "8.8.8",
-  "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+  "versionRegex": /Chromium \\(\\\\S\\+\\)/,
 }
 `;
 
@@ -117,7 +117,7 @@ exports[`windows browser detection > detects Firefox local installs 1`] = `
     "path": "C:/Users/flotwig/AppData/Local/Firefox Developer Edition/firefox.exe",
     "validator": [Function],
     "version": "300",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\[\\^\\\\sb\\]\\*b\\\\S\\*\\)\\$/m,
   },
   {
     "binary": [
@@ -131,7 +131,7 @@ exports[`windows browser detection > detects Firefox local installs 1`] = `
     "path": "C:/Users/flotwig/AppData/Local/Firefox Nightly/firefox.exe",
     "validator": [Function],
     "version": "200",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+a\\\\S\\*\\)\\$/m,
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\[\\^\\\\sa\\]\\*a\\\\S\\*\\)\\$/m,
   },
 ]
 `;
@@ -151,7 +151,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "path": "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
     "validator": [Function],
     "version": "1.2.3",
-    "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome\\(\\?! for Testing\\) \\(\\\\S\\+\\)/,
   },
   {
     "binary": "google-chrome-beta",
@@ -161,7 +161,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "name": "chrome",
     "path": "C:/Program Files (x86)/Google/Chrome Beta/Application/chrome.exe",
     "version": "6.7.8",
-    "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/m,
+    "versionRegex": /Google Chrome \\(\\\\S\\+\\) beta/,
   },
   {
     "binary": "google-chrome-canary",
@@ -171,7 +171,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "name": "chrome",
     "path": "C:/Users/flotwig/AppData/Local/Google/Chrome SxS/Application/chrome.exe",
     "version": "3.4.5",
-    "versionRegex": /Google Chrome Canary \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome Canary \\(\\\\S\\+\\)/,
   },
   {
     "binary": "chrome",
@@ -181,7 +181,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "name": "chrome-for-testing",
     "path": "C:/Program Files/Google/Chrome for Testing/chrome.exe",
     "version": "1.2.3",
-    "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/m,
+    "versionRegex": /Google Chrome for Testing \\(\\\\S\\+\\)/,
   },
   {
     "binary": [
@@ -194,7 +194,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "name": "chromium",
     "path": "C:/Program Files/Google/chrome-win/chrome.exe",
     "version": "2.3.4",
-    "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
+    "versionRegex": /Chromium \\(\\\\S\\+\\)/,
   },
   {
     "binary": "firefox",
@@ -219,7 +219,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "path": "C:/Program Files (x86)/Firefox Developer Edition/firefox.exe",
     "validator": [Function],
     "version": "73",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\[\\^\\\\sb\\]\\*b\\\\S\\*\\)\\$/m,
   },
   {
     "binary": [
@@ -233,7 +233,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "path": "C:/Program Files/Firefox Nightly/firefox.exe",
     "validator": [Function],
     "version": "74",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+a\\\\S\\*\\)\\$/m,
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\[\\^\\\\sa\\]\\*a\\\\S\\*\\)\\$/m,
   },
   {
     "binary": [
@@ -246,7 +246,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "name": "edge",
     "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
     "version": "11",
-    "versionRegex": /Microsoft Edge \\(\\\\S\\+\\)/im,
+    "versionRegex": /Microsoft Edge \\(\\\\S\\+\\)/i,
   },
   {
     "binary": [
@@ -259,7 +259,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "name": "edge",
     "path": "C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe",
     "version": "12",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= beta\\)\\|\\(\\?<=beta \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= beta\\)\\|\\(\\?<=beta \\)\\\\S\\*\\)/i,
   },
   {
     "binary": [
@@ -272,7 +272,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "name": "edge",
     "path": "C:/Users/flotwig/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe",
     "version": "14",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= canary\\)\\|\\(\\?<=canary \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= canary\\)\\|\\(\\?<=canary \\)\\\\S\\*\\)/i,
   },
   {
     "binary": [
@@ -285,7 +285,7 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "name": "edge",
     "path": "C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe",
     "version": "13",
-    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= dev\\)\\|\\(\\?<=dev \\)\\\\S\\*\\)/im,
+    "versionRegex": /Microsoft Edge\\.\\+\\?\\(\\\\S\\*\\(\\?= dev\\)\\|\\(\\?<=dev \\)\\\\S\\*\\)/i,
   },
 ]
 `;

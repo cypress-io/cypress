@@ -291,19 +291,16 @@ describe('experimental driver: cookies on several origins in one test', () => {
       cy.setCookie('foo', 'bar', { domain: 'www.foobar.com' })
 
       cy.getCookie('foo', { domain: 'www.foobar.com' })
-      .its('domain').should('match', /\.?www\.foobar\.com/)
+      .its('domain').should('match', /^\.?www\.foobar\.com$/)
 
-      // domain is exact
-      cy.getCookie('key', { domain: 'foobar.com' }).should('be.null')
+      // not set on the parent domain
+      cy.getCookie('foo', { domain: 'foobar.com' }).should('be.null')
 
       cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
       cy.setCookie('foo', 'bar', { domain: 'barbaz.com' })
 
       cy.getCookie('foo', { domain: 'barbaz.com' })
-      .its('domain').should('match', /\.?barbaz\.com/)
-
-      // domain is exact
-      cy.getCookie('key', { domain: 'barbaz.com' }).should('be.null')
+      .its('domain').should('match', /^\.?barbaz\.com$/)
     })
   })
 

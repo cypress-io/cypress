@@ -100,7 +100,7 @@ export function getPath (urlToCheck: string) {
   return `${url.pathname}${url.search}`
 }
 
-const localhostIPRegex = /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
+const localhostIPRegex = /^127(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})){3}$/
 
 export function isLocalhost (url: URL) {
   return (
@@ -134,4 +134,9 @@ export function origin (urlStr: string) {
 
     return `${scheme ? scheme[0] : ''}${getAuthority(urlStr)}`
   }
+}
+
+// browsers treat localhost as a secure context, so it sets and reads Secure cookies over http
+export function isSecureUrl (url: URL) {
+  return url.protocol === 'https:' || isLocalhost(url)
 }

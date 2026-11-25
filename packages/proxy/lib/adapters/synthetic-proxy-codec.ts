@@ -166,6 +166,7 @@ export function createSyntheticProxyCodec (
         // match — carried forward for the response pause's stream/materialize
         // classification.
         hadMatchingRoutes: !!ctx.req.matchingRoutes?.length,
+        responseTimeout: ctx.req.responseTimeout,
       }
     },
 

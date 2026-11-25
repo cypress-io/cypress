@@ -11,6 +11,7 @@ import utils from '../../../lib/browsers/utils'
 import chrome from '../../../lib/browsers/chrome'
 import { fs } from '../../../lib/util/fs'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import { CdpAutomation } from '../../../lib/browsers/cdp-protocol/cdp_automation'
 import * as protocol from '../../../lib/browsers/protocol'
 import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
@@ -483,15 +484,13 @@ describe('lib/browsers/chrome', () => {
         })
       })
 
-      const pathToTheme = extension.getPathToTheme()
-
       await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
 
       const args = launchSpy.mock.calls[0][3]
 
       expect(args).toEqual(expect.arrayContaining([
         '--foo=bar',
-        `--load-extension=/foo/bar/baz.js,/path/to/ext,${pathToTheme}`,
+        '--load-extension=/foo/bar/baz.js,/path/to/ext',
         '--user-data-dir=/profile/dir',
         '--disk-cache-dir=/profile/dir/CypressCache',
       ]))
@@ -502,8 +501,6 @@ describe('lib/browsers/chrome', () => {
         return Promise.resolve({ args: ['--foo=bar', '--load-extension=/foo/bar/baz.js,/quux.js'] })
       })
 
-      const pathToTheme = extension.getPathToTheme()
-
       const onWarning = vi.fn()
 
       await chrome.open({ isHeaded: true } as any, 'http://', { onWarning, onError: () => {} } as any, automation)
@@ -512,7 +509,7 @@ describe('lib/browsers/chrome', () => {
 
       expect(args).toEqual(expect.arrayContaining([
         '--foo=bar',
-        `--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,${pathToTheme}`,
+        '--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext',
         '--user-data-dir=/profile/dir',
         '--disk-cache-dir=/profile/dir/CypressCache',
       ]))
@@ -563,6 +560,42 @@ describe('lib/browsers/chrome', () => {
           exit_type: 'Normal',
           exited_cleanly: true,
         },
+      })
+    })
+
+    describe('when the profile has a browser theme saved', () => {
+      const openWithTheme = async (pack: string) => {
+        readJsonByPath['/profile/dir/Default/Preferences'] = () => {
+          return Promise.resolve({
+            extensions: {
+              alerts: { initialized: true },
+              theme: { id: 'pcmgedibbghfeopppnoaogaeancdcnjo', pack },
+            },
+          })
+        }
+
+        await chrome.open({ isHeaded: true } as any, 'http://', openOpts as any, automation)
+
+        const written = callsWith(outputJson, '/profile/dir/Default/Preferences', expect.anything())
+
+        return written.length ? written[written.length - 1][1] : undefined
+      }
+
+      it.each([
+        ['Linux', '/home/jordan.rivera/.cache/Cypress/16.3.0/Cypress/resources/app/packages/extension/theme'],
+        ['Windows', 'C:\\Users\\jordan.rivera\\AppData\\Local\\Cypress\\Cache\\16.3.0\\Cypress\\resources\\app\\packages\\extension\\theme'],
+      ])('removes the theme Cypress loaded on %s and keeps other extension settings', async (_platform, pack) => {
+        const prefs = await openWithTheme(pack)
+
+        expect(prefs.extensions).toEqual({ alerts: { initialized: true } })
+      })
+
+      it('keeps a theme that Cypress did not load', async () => {
+        const pack = '/home/jordan.rivera/.config/chromium/Default/Extensions/iiihlpikmpijkgmkmmnjpkbnmcjeijeh/1.2_0'
+
+        const prefs = await openWithTheme(pack)
+
+        expect(prefs.extensions.theme).toEqual({ id: 'pcmgedibbghfeopppnoaogaeancdcnjo', pack })
       })
     })
 
@@ -819,6 +852,33 @@ describe('lib/browsers/chrome', () => {
 
         expectCalledWith(pageCriClient.send, 'Page.getFrameTree')
       })
+    })
+  })
+
+  describe('#_setAutomation', () => {
+    const bringsPageToFront = async (isTextTerminal: boolean, isHeadless: boolean) => {
+      // Safe because `_setAutomation` only calls `useRemoteTabs` on what `create` returns, and with no
+      // `remoteAutScript` in the options, nothing else
+      const create = vi.spyOn(CdpAutomation, 'create').mockResolvedValue({ useRemoteTabs: vi.fn() } as unknown as CdpAutomation)
+      const client = { send: vi.fn(), on: vi.fn(), off: vi.fn() }
+
+      // Safe because `_setAutomation` only passes these through to the stubbed `create`, and reads
+      // `isTextTerminal` and `isHeadless`, the one field each of the last two provides
+      await chrome._setAutomation(client as any, { use: vi.fn() } as any, vi.fn(), { isTextTerminal } as any, { isHeadless } as any)
+
+      return create.mock.lastCall?.[7]
+    }
+
+    it('brings the page to the front in run mode', async () => {
+      expect(await bringsPageToFront(true, false)).toBe(true)
+    })
+
+    it('brings the page to the front for a headless browser in open mode, which has no extension to ask', async () => {
+      expect(await bringsPageToFront(false, true)).toBe(true)
+    })
+
+    it('asks the extension to activate the tab for a headed browser in open mode', async () => {
+      expect(await bringsPageToFront(false, false)).toBe(false)
     })
   })
 

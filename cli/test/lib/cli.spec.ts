@@ -732,6 +732,11 @@ describe('cli', () => {
       expect(open.start).toBeCalledWith({ port: '7878', global: true })
     })
 
+    it('calls open.start with headless', async () => {
+      await exec('open --headless --e2e --browser chrome')
+      expect(open.start).toBeCalledWith({ headless: true, e2e: true, browser: 'chrome' })
+    })
+
     it('calls open.start + catches errors', async () => {
       const err = new Error('foo')
 

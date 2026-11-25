@@ -1385,6 +1385,49 @@ describe('http/response-middleware', function () {
       ])
     })
 
+    it('blanks Secure cookie values in the simulated cookies of an insecure page', async function () {
+      const cookieJar = new CookieJar()
+
+      cookieJar.setCookie('visible=1', 'http://www.foobar.com/', 'strict')
+      cookieJar.setCookie('session=k3v9x2; Secure', 'https://www.foobar.com/', 'strict')
+
+      const ctx = prepareContext({
+        cookieJar,
+        res: {
+          wantsInjection: 'fullCrossOrigin',
+        },
+      })
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.simulatedCookies.map(({ name, value, secure }) => ({ name, value, secure }))).toEqual([
+        { name: 'visible', value: '1', secure: false },
+        { name: 'session', value: '', secure: true },
+      ])
+    })
+
+    it('keeps Secure cookie values in the simulated cookies of a secure page', async function () {
+      const cookieJar = new CookieJar()
+
+      cookieJar.setCookie('session=k3v9x2; Secure', 'https://www.foobar.com/', 'strict')
+
+      const ctx = prepareContext({
+        cookieJar,
+        req: {
+          proxiedUrl: 'https://www.foobar.com/',
+        },
+        res: {
+          wantsInjection: 'fullCrossOrigin',
+        },
+      })
+
+      await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+      expect(ctx.simulatedCookies.map(({ name, value, secure }) => ({ name, value, secure }))).toEqual([
+        { name: 'session', value: 'k3v9x2', secure: true },
+      ])
+    })
+
     it('records cookie in jar but skips browser automation sync when top does not need simulating', async function () {
       const appendStub = vi.fn()
 

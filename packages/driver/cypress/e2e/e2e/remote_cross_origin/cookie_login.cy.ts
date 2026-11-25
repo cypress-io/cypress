@@ -62,6 +62,14 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
     cy.get('h1').should('have.text', `Welcome, ${username}!`)
   }
 
+  // the idp's redirect page is on the same host as the page the login lands on, so match the path too
+  const waitForIdpPage = (pathname: string) => {
+    cy.location().should((location) => {
+      expect(location.host).to.equal('www.idp.com:3501')
+      expect(location.pathname).to.equal(pathname)
+    })
+  }
+
   const login = (username: string, { cookieProps, localhostCookieProps, cookieKey }: { cookieProps?: string, localhostCookieProps?: string, cookieKey?: string } = {}) => {
     cy.get('[data-cy="username"]').type(username)
 
@@ -382,7 +390,8 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       login(username, { cookieProps: `Expires=${(new Date()).toUTCString()}` })
 
-      cy.location('host').should('equal', 'www.idp.com:3501')
+      // the idp gets no cookie, so the login stops on its redirect page
+      verifyIdpNotLoggedIn()
       // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1000) // give cookie time to expire
       cy.reload()
@@ -425,7 +434,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       login(username, { cookieProps: 'Max-Age=1' })
 
-      cy.location('host').should('equal', 'www.idp.com:3501')
+      waitForIdpPage('/welcome')
       // eslint-disable-next-line cypress/no-unnecessary-waiting -- the cookie has a 1 second lifetime, and the test checks that it expires
       cy.wait(1500) // give cookie time to expire
       cy.reload()
@@ -541,7 +550,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-document-cookie"]').click()
       login(username)
 
-      cy.location('host').should('equal', 'www.idp.com:3501')
+      waitForIdpPage('/fixtures/auth/document-cookie.html')
       cy.get('[data-cy="doc-cookie"]').invoke('text')
       .should('include', `user=${username}`)
     })
@@ -588,9 +597,16 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       documentCookie().should('equal', 'key=value')
     })
 
-    it('does not set cookie when invalid', () => {
+    it('sets a cookie without a name', () => {
       cy.get('[data-cy="cross-origin-secondary-link"]').click()
       setDocumentCookie('=value')
+
+      documentCookie().should('equal', 'value')
+    })
+
+    it('does not set cookie when invalid', () => {
+      cy.get('[data-cy="cross-origin-secondary-link"]').click()
+      setDocumentCookie('=')
 
       documentCookie().should('equal', '')
     })
@@ -616,7 +632,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       login(username)
 
-      cy.location('host').should('equal', 'www.idp.com:3501')
+      waitForIdpPage('/welcome')
       cy.setCookie('foo', 'bar')
       documentCookie().should('include', 'foo=bar')
     })
@@ -625,7 +641,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       login(username)
 
-      cy.location('host').should('equal', 'www.idp.com:3501')
+      waitForIdpPage('/welcome')
       cy.clearCookie('user')
       documentCookie().should('equal', '')
     })
@@ -634,7 +650,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       login(username)
 
-      cy.location('host').should('equal', 'www.idp.com:3501')
+      waitForIdpPage('/welcome')
       cy.clearCookies()
       documentCookie().should('equal', '')
     })
@@ -643,7 +659,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-idp"]').click()
       login(username)
 
-      cy.location('host').should('equal', 'www.idp.com:3501')
+      waitForIdpPage('/welcome')
       setDocumentCookie('key=value')
 
       // order of the cookies differs depending on browser, so just
@@ -662,7 +678,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
           httpOnly: false,
           hostOnly: true,
           name: 'name',
-          path: '/',
+          path: '/fixtures/auth',
           sameSite: 'lax',
           secure: false,
           value: 'value',
@@ -674,8 +690,7 @@ describe('experimental driver: cookie login in a cross-origin AUT', () => {
       cy.get('[data-cy="cookie-login-land-on-document-cookie"]').click()
       login(username)
 
-      // the redirect page before it has this URL in its query string, so match the path exactly
-      cy.location('pathname').should('equal', '/fixtures/auth/document-cookie.html')
+      waitForIdpPage('/fixtures/auth/document-cookie.html')
       setDocumentCookie('key=value1; domain=www.idp.com')
       setDocumentCookie('key=value2; domain=idp.com')
 

@@ -38,10 +38,12 @@ let hasMochaRunEnded: boolean = false
 // Posted by the cross-origin AUT injection before a spec bridge attaches to it.
 const AUT_CROSS_ORIGIN_EVENTS = ['cross:origin:before:unload', 'cross:origin:aut:throw:error']
 
-// The posted url must be the sender's own page.
-const isCookieForOrigin = (data: { url?: unknown } | undefined, origin: string) => {
+// The posted url must be the sender's own page, since the server checks the cookie against it.
+const isCookieForOrigin = (data: { cookieString?: unknown, url?: unknown } | undefined, origin: string) => {
+  if (typeof data?.cookieString !== 'string') return false
+
   try {
-    return new URL(String(data?.url)).origin === origin
+    return new URL(String(data.url)).origin === origin
   } catch {
     return false
   }
@@ -77,7 +79,7 @@ interface AddGlobalListenerOptions {
 
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame dev-server:on-spec-update'.split(' ')
-const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank cypress:in:cypress:runner:event'.split(' ')
+const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed visit:blank spec:load:error cypress:in:cypress:runner:event'.split(' ')
 const socketToDriverEvents = 'net:stubbing:event request:event script:error cross:origin:cookies dev-server:on-spec-updated'.split(' ')
 const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
@@ -792,8 +794,8 @@ export class EventManager {
     })
 
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state.
-    // Prefer `toSource(source)` so replies work even when `crossOriginDriverWindows` was cleared
-    // (e.g. after test isolation); `toSpecBridge(origin)` would no-op without a map entry.
+    // Prefer `toSource(source)` so replies work even when `crossOriginDriverWindows` has no entry
+    // for the origin; `toSpecBridge(origin)` would no-op without one.
     Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (_data, { origin, source, responseEvent }) => {
       const value = cy.state('duringUserTestExecution')
 
@@ -867,15 +869,11 @@ export class EventManager {
     // This message comes from the AUT, not the spec bridge. This is called in
     // the event that cookies are set via document.cookie in a cross origin
     // AUT prior to attaching a spec bridge.
-    Cypress.primaryOriginCommunicator.on(
-      'aut:set:cookie',
-      (options: { cookie, url: string, sameSiteContext: string }) => {
-        // unlikely there will be errors, but ignore them in any case, since
-        // they're not user-actionable
-        Cypress.automation('set:cookie', options.cookie).catch(() => {})
-        Cypress.backend('cross:origin:set:cookie', options).catch(() => {})
-      },
-    )
+    Cypress.primaryOriginCommunicator.on('aut:set:cookie', ({ cookieString, url }: { cookieString: string, url: string }) => {
+      // unlikely there will be errors, but ignore them in any case, since
+      // they're not user-actionable
+      Cypress.backend('cross:origin:set:cookie', { cookieString, url }).catch(() => {})
+    })
 
     Cypress.handlePrimaryOriginSocketEvent(Cypress, 'backend:request')
 
@@ -1057,8 +1055,8 @@ export class EventManager {
 
   notifyCrossOriginBridgeReady (origin) {
     // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit.
-    // When the spec-bridge iframe already exists, the driver may have cleared
-    // `crossOriginDriverWindows` (e.g. after test isolation). Re-run the same
+    // When the spec-bridge iframe already exists, `crossOriginDriverWindows` may
+    // have been cleared by `removeAllListeners()`. Re-run the same
     // path as a real postMessage (`onMessage`) so the map is repopulated before
     // `bridge:ready` listeners run; emitting alone would leave `toSpecBridge` a no-op.
     const id = `Spec Bridge: ${origin}`

@@ -72,7 +72,7 @@ const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
 // retries are needed to move off a port browsers block. The cap keeps a
 // misbehaving port range from looping forever.
 const MAX_PORT_ATTEMPTS = 10
-const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
+const htmlContentTypesRe = /^(?:text\/html|application\/xhtml)/i
 
 const isResponseHtml = function (contentType, responseBuffer) {
   if (contentType) {
@@ -504,11 +504,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       testingType,
       reportAutError: async (uncaught) => this._automation?.push('remote:uncaught:exception', uncaught),
       reportBeforeLoad: async (url) => this._automation?.push('remote:window:before:load', { url }),
-      setBrowserCookie: async (cookie) => {
-        // the browsers the experimental driver supports set cookies in automation middleware, so nothing goes to an automation client
-        return this._automation?.request('set:cookie', cookie, () => {
-          throw new Error('set:cookie is not handled by automation middleware')
-        })
+      // the browsers the experimental driver supports handle cookies in automation middleware, so nothing goes to an automation client
+      browserCookies: {
+        getCookies: async (filter) => {
+          return this._automation?.request('get:cookies', filter, () => {
+            throw new Error('get:cookies is not handled by automation middleware')
+          }) ?? []
+        },
+        setCookie: async (cookie) => {
+          return this._automation?.request('set:cookie', cookie, () => {
+            throw new Error('set:cookie is not handled by automation middleware')
+          })
+        },
       },
     }
 

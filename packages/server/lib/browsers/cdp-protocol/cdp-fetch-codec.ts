@@ -120,6 +120,15 @@ function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protoc
 }
 
 /**
+ * The origin's headers for fulfilling it with its decoded body:
+ * `Content-Encoding` (such as `gzip`), `Content-Length` and `Transfer-Encoding`
+ * are dropped, since they describe the wire body, not the one being sent.
+ */
+export function toUnchangedFulfilledHeaders (headers: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] {
+  return stripHeaderEntries(headers, WIRE_ENCODING_HEADERS)
+}
+
+/**
  * Middleware headers describe the body the pipeline produced — including any
  * re-encoding by CompressBody — so keep their content-encoding and only drop
  * stale length headers. The pause-header fallback describes the wire body, not
@@ -262,7 +271,8 @@ function encodePausedResponse (
     })
 
   // A skipped body was never read, so its placeholder cannot replace the stream.
-  const fulfilled = bodyModified || (contentTypeModified && response.body !== undefined && !pausedResponse.bodySkipped) || redirectModified
+  // A taken body can't be continued, so it is fulfilled even when unchanged.
+  const fulfilled = pausedResponse.bodyTaken === true || bodyModified || (contentTypeModified && response.body !== undefined && !pausedResponse.bodySkipped) || redirectModified
 
   return {
     ...pausedResponse,
@@ -377,6 +387,8 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
       if (httpRequest.hadMatchingRoutes !== undefined) {
         transportRequest.hadMatchingRoutes = httpRequest.hadMatchingRoutes
       }
+
+      transportRequest.responseTimeout = httpRequest.responseTimeout
 
       return transportRequest
     },

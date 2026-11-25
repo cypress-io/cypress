@@ -69,9 +69,8 @@ This changelog describes the **binary**. Validation only considers changed files
     - All other change types, with issues: ``Addresses [#1234](https://github.com/cypress-io/cypress/issues/1234).``
     - All other change types, no issue: ``Addressed in [#1234](https://github.com/cypress-io/cypress/pull/1234).``
     - Multiple issues are sorted ascending and joined with a comma and `and`: ``Fixes [#12](https://github.com/cypress-io/cypress/issues/12), [#13](https://github.com/cypress-io/cypress/issues/13) and [#14](https://github.com/cypress-io/cypress/issues/14).``
-10. When a changelog item references a Cypress command, plugin event, or configuration option, link the first mention to its documentation for consistency with existing entries. Either link form is acceptable: the `https://on.cypress.io/<slug>` short link or an absolute `https://docs.cypress.io/<path>` URL.
-    - _Example (`on.cypress.io`):_ `` [`cy.visit()`](https://on.cypress.io/visit) ``, `` [`before:spec`](https://on.cypress.io/before-spec-api) ``.
-    - _Example (`docs.cypress.io`):_ `` [`before:spec`](https://docs.cypress.io/api/plugins/before-spec-api) ``, `` [`numTestsKeptInMemory`](https://docs.cypress.io/app/references/configuration#Global) ``.
+10. When a changelog item references a Cypress command, plugin event, or configuration option, link the first mention to its documentation for consistency with existing entries. Prefer the `https://on.cypress.io/<slug>` short link, where the slug is the last segment of the docs path (`docs.cypress.io/app/guides/writing-tests` becomes `on.cypress.io/writing-tests`). Check that the short link redirects to the right page, and fall back to an absolute `https://docs.cypress.io/<path>` URL only when it doesn't. Don't add UTM params to changelog links.
+    - _Example:_ `` [`cy.visit()`](https://on.cypress.io/visit) ``, `` [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) ``.
 11. If a change is only observable under a specific run context (e.g. `cypress run` vs. `cypress open`, or behind an experimental flag), state which context is affected so users can tell whether the change applies to them.
 12. A release often ships between the commit that adds an entry and the review that merges it. Re-check placement every time you pull `develop`, and again before marking a pull request ready: if a new `## X.Y.Z` heading has appeared above your entry, move the entry up into the new topmost release, keeping it under the same named section there. This is silent in both directions — the entry still reads correctly in the diff, and validation parses only the topmost release, so an entry stranded under an already-shipped version is simply never seen.
 13. Describe a `perf` entry by its effect, such as "starts running specs sooner", without exact timings or percentages. A benchmark measures one machine and one project, so a number from it reads as a promise to every user. Keep the measurements in the pull request.
@@ -79,6 +78,8 @@ This changelog describes the **binary**. Validation only considers changed files
 ## Dependency Updates and Security Advisories
 
 Most `dependency` entries exist because a security scan reported an advisory, and users (and their own security teams) scan this section for a specific advisory ID. Follow the established shape: **upgraded what, from and to which versions, to address which advisory, as reported in security scans.**
+
+Title the PR with the `dependency` type, such as `dependency: update simple-git to 4.1.0`, even when the upgrade fixes a vulnerability. A `fix` or `fix(deps)` title puts the entry under **Bugfixes** and fails the semantic check against the **Dependency Updates** section.
 
 ```md
 - Upgraded `undici` from `6.26.0` to `6.27.0` to address a [CRLF Injection](https://security.snyk.io/vuln/SNYK-JS-UNDICI-17372658) vulnerability reported in security scans. Addressed in [#34121](https://github.com/cypress-io/cypress/pull/34121).
