@@ -26,7 +26,7 @@ import { getOrigin, privilegedCommandsManager } from './privileged-commands/priv
 import { cypressSessions } from './cypress-sessions'
 import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
 import { addRemoteAutRoutes } from './remote_aut_routes'
-import type { SerializableAutomationCookie } from './automation/cookie/jar'
+import type { DocumentCookieAutomation } from './automation/cookie/document-cookie'
 import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, fullyQualifiedRe, isLoopbackHost, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
@@ -47,7 +47,7 @@ export interface InitializeRoutes {
   isBrowserNetworkMode: () => boolean
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
-  setBrowserCookie: (cookie: SerializableAutomationCookie) => Promise<unknown>
+  browserCookies: DocumentCookieAutomation
   reportAutError: (uncaught: RemoteUncaughtException) => Promise<unknown>
   reportBeforeLoad: (url: string) => Promise<unknown>
 }
@@ -62,7 +62,7 @@ export const createCommonRoutes = ({
   socketAllowed,
   nodeProxy,
   onError,
-  setBrowserCookie,
+  browserCookies,
   reportAutError,
   reportBeforeLoad,
 }: InitializeRoutes) => {
@@ -264,7 +264,7 @@ export const createCommonRoutes = ({
   })
 
   if ('experimentalDriver' in config && config.experimentalDriver === true) {
-    addRemoteAutRoutes(router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError, reportBeforeLoad })
+    addRemoteAutRoutes(router, { namespace, getNetworkProxy, browserCookies, reportAutError, reportBeforeLoad })
   }
 
   router.get(`/${config.namespace}/automation/getLocalStorage`, (req, res) => {

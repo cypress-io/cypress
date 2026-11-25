@@ -1,5 +1,6 @@
 import { tapManagerDataSource } from './tap-manager-data-source'
 import { useSnapshotStore } from '../runner/snapshot-store'
+import { useAutStore } from '../store'
 import type { AutIframe } from '../runner/aut-iframe'
 import type { AutSnapshot } from '../runner/iframe-model'
 
@@ -88,6 +89,30 @@ describe('tap/tap-manager-data-source', () => {
       useSnapshotStore().pinSnapshot({ ...PINNED_PROPS, id: undefined, testId: undefined })
 
       expect(tapManagerDataSource.getPinnedSnapshot()).to.eq(undefined)
+    })
+  })
+
+  // Read against the real AUT store, which the event manager fills as the spec loads
+  describe('getScriptError and getSpecLoadError', () => {
+    const LOAD_ERROR = 'TypeError: Failed to fetch dynamically imported module: http://localhost:8080/src/Bad.cy.jsx'
+
+    it('report nothing for a spec that built and loaded', () => {
+      expect(tapManagerDataSource.getScriptError()).to.eq(undefined)
+      expect(tapManagerDataSource.getSpecLoadError()).to.eq(undefined)
+    })
+
+    it('report a build failure the app shows over the AUT as the script error alone', () => {
+      useAutStore().setScriptError({ type: 'BUNDLE_ERROR', error: 'Error: Webpack Compilation Error' })
+
+      expect(tapManagerDataSource.getScriptError()).to.eq('Error: Webpack Compilation Error')
+      expect(tapManagerDataSource.getSpecLoadError()).to.eq(undefined)
+    })
+
+    it('report a spec that threw while loading, which still has a run, as the load error alone', () => {
+      useAutStore().setSpecLoadError(LOAD_ERROR)
+
+      expect(tapManagerDataSource.getSpecLoadError()).to.eq(LOAD_ERROR)
+      expect(tapManagerDataSource.getScriptError()).to.eq(undefined)
     })
   })
 })

@@ -15,7 +15,7 @@ export const initializeStartTime = (): void => {
     return
   }
 
-  // This needs to be a global since this file is included inside of and outside of the v8 snapshot
+  // A global because index.js and the start bundle each load their own copy of this module
   global.cypressBinaryStartTime = performance.timeOrigin
   global.cypressServerStartTime = performance.now()
 }

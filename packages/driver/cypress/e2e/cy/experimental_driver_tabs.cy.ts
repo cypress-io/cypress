@@ -1,3 +1,5 @@
+/// <reference types="cypress/types/experimental-driver" />
+
 const TABS_PAGE = 'http://localhost:3500/fixtures/experimental-driver-tabs.html'
 
 describe('experimental driver: tabs the AUT opens', { browser: '!electron' }, () => {

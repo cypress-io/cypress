@@ -1,6 +1,6 @@
 {
   "name": "Cypress",
-  "description": "Adds theme and WebExtension APIs for testing with Cypress",
+  "description": "Adds WebExtension APIs for testing with Cypress",
   "permissions": [
     "tabs",
     "storage"

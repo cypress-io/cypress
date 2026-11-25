@@ -587,7 +587,7 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
   // here because mountFragment's auto-mock normalizes nullable list fields
   // to `null` at the GraphQL response boundary, so a true `undefined` state
   // can't be simulated through this mocking layer. Scope-routing for cloud
-  // banner dismissal is unit-tested in `CloudMessageBanner.cy.tsx`.
+  // banner dismissal is unit-tested in `CloudMessageBanner.vue.cy.tsx`.
   describe('cloudAppMessages fallthrough', () => {
     it('renders the onboarding banner when cloudAppMessages resolves to null (cloud error / services not yet deployed)', () => {
       const userProjectStatusStore = useUserProjectStatusStore()

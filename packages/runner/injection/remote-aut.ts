@@ -114,8 +114,8 @@ if (isAut && isHttp && location.origin !== cypressRemoteAutConfig.primaryOrigin)
     }
   }
 
-  const { onCookieCommand } = patchDocumentCookie(getRequestCookies(), (cookie) => {
-    void post('set-cookie', { cookie, url: location.href })
+  const { onCookieCommand } = patchDocumentCookie(getRequestCookies(), (cookieString, url) => {
+    void post('set-cookie', { cookieString, url })
   })
 
   const reportCredentials = (credentials: RequestCredentials) => {

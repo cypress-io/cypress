@@ -1774,9 +1774,7 @@ export default {
   },
 
   experimental_driver: {
-    frame_requires_experimental_driver: `${cmd('frame')} requires the experimental driver. Set \`CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER=1\` when starting Cypress to enable it.`,
     origin_unavailable: `${cmd('origin')} is not available when the experimental driver is enabled. The experimental driver runs commands against a cross-origin AUT directly, so run them without ${cmd('origin')}.`,
-    tab_requires_experimental_driver: `${cmd('tab')} requires the experimental driver. Set \`CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER=1\` when starting Cypress to enable it.`,
     unsupported_option ({ cmd: command, option }) {
       return `${cmd(command)} does not support the \`${option}\` option when the experimental driver is enabled.`
     },

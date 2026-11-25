@@ -10,7 +10,7 @@ import { isRemoteElement, isRemoteSubject, resolveRemoteSubject } from './remote
 const butRe = /,? but\b/
 const bTagOpen = /\*\*/g
 const bTagClosed = /\*\*/g
-const stackTracesRe = / at .*\n/gm
+const stackTracesRe = / at .*\n/g
 
 const IS_DOM_TYPES = [$dom.isElement, $dom.isDocument, $dom.isWindow]
 

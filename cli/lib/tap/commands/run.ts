@@ -13,6 +13,12 @@ export interface TapRunResult {
   spec: string
   /** The spec has been requested; not a live run-state — poll `status` for that. */
   status: 'running'
+  /**
+   * Why the session's plugins process exited, when it has. The spec is still requested, but until
+   * the configuration loads again an end-to-end spec fails to build with this as its error, and a
+   * component spec may not load at all, since the dev server stops with the process.
+   */
+  pluginsError?: string
 }
 
 const RUN_SPEC_TIMEOUT_MS = 60_000
@@ -51,6 +57,7 @@ const runSpec = async (options: TapCliOptions, args: { spec: string }): Promise<
       const launched: TapRunResult = {
         spec: posixify(result.spec.relative),
         status: 'running',
+        ...(session.pluginsError ? { pluginsError: session.pluginsError.message } : {}),
       }
 
       renderOutcome('run', launched, options.json)

@@ -3,8 +3,9 @@ import bodyParser from 'body-parser'
 import type { Request, Router } from 'express'
 import type { NetworkProxy } from '@packages/proxy'
 import type { RemoteUncaughtException } from '@packages/types'
-import { cookieJar, toughCookieToAutomationCookie, automationCookieToToughCookie } from './automation/cookie/jar'
-import type { SerializableAutomationCookie } from './automation/cookie/jar'
+import { cookieJar, toughCookieToAutomationCookie } from './automation/cookie/jar'
+import { setDocumentCookie } from './automation/cookie/document-cookie'
+import type { DocumentCookieAutomation } from './automation/cookie/document-cookie'
 
 const debug = Debug('cypress:server:remote-aut-routes')
 
@@ -19,14 +20,14 @@ const isHttpUrl = (url: unknown) => {
 interface RemoteAutRouteOptions {
   namespace: string
   getNetworkProxy: () => NetworkProxy | undefined
-  setBrowserCookie: (cookie: SerializableAutomationCookie) => Promise<unknown>
+  browserCookies: DocumentCookieAutomation
   reportAutError: (uncaught: RemoteUncaughtException) => Promise<unknown>
   reportBeforeLoad: (url: string) => Promise<unknown>
 }
 
 // The routes the experimental driver's main-world AUT script calls to make a cross-origin page behave as if
 // it were top-level, in place of the postMessage the legacy cross-origin injection sends to the runner.
-export const addRemoteAutRoutes = (router: Router, { namespace, getNetworkProxy, setBrowserCookie, reportAutError, reportBeforeLoad }: RemoteAutRouteOptions) => {
+export const addRemoteAutRoutes = (router: Router, { namespace, getNetworkProxy, browserCookies, reportAutError, reportBeforeLoad }: RemoteAutRouteOptions) => {
   // a page only reaches the cookies of its own origin, as it could as top
   const getPageUrl = (req: Request & { proxiedUrl?: string }, url: unknown) => {
     try {
@@ -103,24 +104,16 @@ export const addRemoteAutRoutes = (router: Router, { namespace, getNetworkProxy,
   })
 
   router.post(`/${namespace}/remote/set-cookie`, bodyParser.json(), async (req, res) => {
-    const { cookie, url } = req.body ?? {}
+    const { cookieString, url } = req.body ?? {}
     const pageUrl = getPageUrl(req, url)
 
-    if (!pageUrl || !cookie) {
+    if (!pageUrl || typeof cookieString !== 'string') {
       return res.sendStatus(400)
     }
 
-    try {
-      // url always matches the cookie's domain, so a strict context lets tough-cookie set it
-      cookieJar.setCookie(automationCookieToToughCookie(cookie, pageUrl.hostname), pageUrl.href, 'strict')
-    } catch (err) {
-      debug('not setting a cookie the page could not set as top: %o', err)
-
-      return res.sendStatus(204)
-    }
-
-    await setBrowserCookie(cookie).catch((err) => {
-      debug('failed to set the page\'s cookie in the browser: %o', err)
+    // keeps only the cookies the page could have set as top, in the server jar and the browser
+    await setDocumentCookie({ cookieString, url: pageUrl.href }, browserCookies).catch((err) => {
+      debug('failed to apply the page\'s document.cookie write: %o', err)
     })
 
     return res.sendStatus(204)

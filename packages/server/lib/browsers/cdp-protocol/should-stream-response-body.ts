@@ -29,8 +29,6 @@ export interface ShouldStreamResponseBodyOptions {
 // the response and wedge.
 const STREAM_CONTENT_TYPES = ['text/event-stream', 'multipart/x-mixed-replace']
 
-const CONTENT_LENGTH_RE = /^\d+$/
-
 const getResponseHeader = (responseHeaders: Protocol.Fetch.HeaderEntry[] | undefined, name: string): string | undefined => {
   return responseHeaders?.find((header) => header.name.toLowerCase() === name)?.value
 }
@@ -101,23 +99,6 @@ const isJsRewriteEligible = (contentType: string | undefined, options: ShouldStr
   return contentTypeIsJavaScript(contentType)
 }
 
-// A malformed content-length proves nothing about the body's length, so it
-// must not count as finite — falling through lets a later rule (or the
-// stream default) decide instead. A parseable content-length is the only
-// proof of boundedness we accept; bodiless statuses and redirects stream
-// harmlessly — their skip marker is unread because MaybeEndWithEmptyBody and
-// MaybeSendRedirectToClient end the middleware chain before the capture
-// stage.
-const isProvablyFinite = (event: Protocol.Fetch.RequestPausedEvent): boolean => {
-  const value = getResponseHeader(event.responseHeaders, 'content-length')
-
-  if (value === undefined) {
-    return false
-  }
-
-  return CONTENT_LENGTH_RE.test(value.trim())
-}
-
 // Middleware that reads or writes into even an empty body must see the real
 // one: HTML injection, obstructive-code rewriting, and cy.intercept route
 // handlers all break silently on the empty stand-in the stream path hands them.
@@ -132,22 +113,16 @@ export const shouldStreamResponseBody = (event: Protocol.Fetch.RequestPausedEven
   // (charset), newline-folded duplicates, and multi-value joins all survive.
   const contentType = getResponseHeader(event.responseHeaders, 'content-type')?.toLowerCase()
 
-  // Provably endless beats everything, including a content-length and a
-  // matched route — materializing hangs getResponseBody (#34470), and a stub
-  // still works via the empty-body digest→fulfill path (#34593).
+  // A response that never ends always streams, even when a cy.intercept route
+  // matches it: reading it would hang (#34470). A route that stubs it still
+  // works, because a changed body is sent with Fetch.fulfillRequest (#34593).
   if (isStreamShaped(event, contentType)) {
     return true
   }
 
-  if (bodyIsNeeded(event, contentType, options)) {
-    return false
-  }
-
-  // Media players read a range's opening bytes and then cancel or seek, so a
-  // content-length covering the whole file must not hold the pause until it arrives.
-  if (event.resourceType === 'Media') {
-    return true
-  }
-
-  return !isProvablyFinite(event)
+  // Reading a body means Fetch.getResponseBody, which returns the whole body
+  // as one base64 CDP message. The server has to receive and decode it before
+  // it can release the pause, so a large file stalls cy.task and every other
+  // request in the meantime.
+  return !bodyIsNeeded(event, contentType, options)
 }

@@ -659,6 +659,22 @@ describe('http/request-middleware', () => {
               expect(ctx.req.headers['cookie']).toEqual('jar=cookie1; jar=cookie2; request=cookie')
             })
 
+            it('attaches a Secure cookie to an http localhost request', async () => {
+              const ctx = await getContext([], ['jar=cookie; Secure'], 'http://app.localhost:3500/generic', 'http://app.localhost:3500/generic')
+
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+              expect(ctx.req.headers['cookie']).toEqual('jar=cookie')
+            })
+
+            it('does not attach a Secure cookie to an http request', async () => {
+              const ctx = await getContext([], ['jar=cookie; Secure'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
+
+              await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+              expect(ctx.req.headers['cookie']).toBeUndefined()
+            })
+
             it('matches hierarchy and gives order to the cookie that was created first', async () => {
               const ctx = await getContext(['jar=cookie', 'request=cookie'], ['jar=cookie1; Domain=app.foobar.com;', 'jar=cookie2; Domain=.foobar.com;'], 'http://app.foobar.com/generic', 'http://app.foobar.com/generic')
 

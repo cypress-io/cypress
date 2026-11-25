@@ -43,7 +43,8 @@ yarn test -- "<glob-pattern>"        # vitest packages: target specs matching a 
 What `yarn test` runs depends on the package:
 
 - **vitest** — `grep`, `puppeteer`, `schematic`, `vite-dev-server`, `webpack-dev-server`, `webpack-batteries-included-preprocessor`
-- **Cypress** — `react` and `vue` (`yarn cy:run -- --spec <path-to-spec>`), `vite-plugin-cypress-esm` (`yarn cypress:run`)
+- **Cypress** — `react` and `vue` (`yarn cy:run -- --spec <path-to-spec>`)
+- **Vitest, then Cypress** — `vite-plugin-cypress-esm`: `yarn test-unit` (the plugin's transforms and the browser client's module proxy, run in Node), then `yarn cypress:run`
 - **Custom script** — `webpack-preprocessor` runs `tsx ./scripts/test-webpack-5.ts` (it also has `test-unit` and `test-e2e`)
 - **No `test` script** — `angular`, `svelte`, `mount-utils`
 

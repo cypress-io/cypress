@@ -299,7 +299,7 @@ async function makeE2ETasks () {
             // we return the resolved data. We then expect that you return the data for the individual row
             //
             for (const [key, val] of Object.entries(result.data as Record<string, any>)) {
-              const re = /^_(\d+)_(.*?)$/.exec(key)
+              const re = /^_(\d+)_(.*)$/.exec(key)
 
               if (!re) {
                 finalVal[key] = val

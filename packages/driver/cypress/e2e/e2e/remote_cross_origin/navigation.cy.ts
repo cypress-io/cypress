@@ -63,7 +63,7 @@ describe('experimental driver: navigation in a cross-origin AUT', () => {
         })
 
         cy.get('a[data-cy="cross-origin-page"]').click()
-        cy.get('a[data-cy="cross-origin-secondary-link').invoke('text').should('equal', SECONDARY_ORIGIN_PAGE)
+        cy.get('a[data-cy="cross-origin-secondary-link"]').invoke('text').should('equal', SECONDARY_ORIGIN_PAGE)
         cy.wrap(null).should(() => {
           expect(loads).to.equal(1)
           expect(logNames).to.include('page load')

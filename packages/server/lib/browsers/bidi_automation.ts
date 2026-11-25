@@ -815,11 +815,13 @@ export class BidiAutomation {
       name,
     } = cookie
     // get the cookie we are clearing from the BiDi API to make sure it exists
-    const cookieToBeCleared = (await this.getAllCookiesMatchingFilter({
+    const matching = await this.getAllCookiesMatchingFilter({
       domain,
       path,
       name,
-    }))[0]
+    })
+    // a cookie at a parent path or domain matches as well, and must not be cleared in place of this one
+    const cookieToBeCleared = matching.find((match) => match.path === path && match.domain === domain) ?? matching[0]
 
     debugCookies(`found cookie matching %o filter: %o`, { domain, name, path }, cookieToBeCleared)
 
