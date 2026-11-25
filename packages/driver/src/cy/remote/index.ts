@@ -143,7 +143,7 @@ export const serializeCallback = (fn: (...args: never[]) => unknown) => {
   const source = fn.toString()
 
   // a method shorthand such as `onLoad (win) {}` is only valid source as an object member
-  if (/^(async\s+)?(function\b|\(|[\w$]+\s*=>)/.test(source)) {
+  if (/^(?:async\s+)?(?:function\b|\(|[\w$]+\s*=>)/.test(source)) {
     return source
   }
 
