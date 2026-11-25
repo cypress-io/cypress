@@ -1038,7 +1038,7 @@ type CommitInfo {
 }
 
 """
-The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
+The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs,mts,cts} file
 """
 type CurrentProject implements Node & ProjectLike {
   """The currently selected browser for the project"""

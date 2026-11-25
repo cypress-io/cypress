@@ -178,7 +178,7 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
   resolveFrom('env', processEnvs)
   resolveFrom('cli', cliEnvs)
 
-  // configEnvs is from cypress.config.{js,ts,mjs,cjs}
+  // configEnvs is from cypress.config.{js,ts,mjs,cjs,mts,cts}
   // envFile is from cypress.env.json
   // processEnvs is from process env vars
   // cliEnvs is from CLI arguments
@@ -204,7 +204,7 @@ function parseExposed (cfg: Record<string, any>, cliExposeVars: Record<string, a
   resolveFrom('config', configExpose)
   resolveFrom('cli', cliExposeVars)
 
-  // configExpose is from cypress.config.{js,ts,mjs,cjs}
+  // configExpose is from cypress.config.{js,ts,mjs,cjs,mts,cts}
   // cliExposedVars is from CLI arguments
   return _.extend(configExpose, cliExposeVars)
 }

@@ -995,6 +995,57 @@ describe('ProjectLifecycleManager', () => {
     })
   })
 
+  describe('#refreshMetaState', () => {
+    let tmpDir: string
+
+    beforeEach(async () => {
+      tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-plm-meta-'))
+
+      // @ts-expect-error - `_projectRoot` is private
+      ctx.lifecycleManager._projectRoot = tmpDir
+      // @ts-expect-error - a partial config manager stub on the private `_configManager`
+      ctx.lifecycleManager._configManager = {
+        configFilePath: '',
+        destroy: () => {},
+      }
+    })
+
+    afterEach(async () => {
+      await fs.remove(tmpDir).catch(() => {})
+    })
+
+    it.each(['ts', 'mts', 'cts', 'js', 'mjs', 'cjs'])('detects cypress.config.%s without --config-file', async (extension) => {
+      const fileName = `cypress.config.${extension}`
+
+      await fs.writeFile(path.join(tmpDir, fileName), 'export default {}\n')
+
+      const metaState = ctx.lifecycleManager.refreshMetaState()
+
+      expect(metaState.hasValidConfigFile).toBe(true)
+      expect(metaState.allFoundConfigFiles).toEqual([fileName])
+      expect(ctx.lifecycleManager.configFilePath).toEqual(path.join(tmpDir, fileName))
+    })
+
+    it('keeps loading cypress.config.ts and reports a conflict when cypress.config.mts sits next to it', async () => {
+      await fs.writeFile(path.join(tmpDir, 'cypress.config.ts'), 'export default {}\n')
+      await fs.writeFile(path.join(tmpDir, 'cypress.config.mts'), 'export default {}\n')
+      const onLoadError = jest.spyOn(ctx.lifecycleManager, 'onLoadError').mockImplementation(() => {})
+
+      ctx.lifecycleManager.refreshMetaState()
+      // @ts-expect-error — private method
+      ctx.lifecycleManager.configFileWarningCheck()
+
+      expect(ctx.lifecycleManager.configFilePath).toEqual(path.join(tmpDir, 'cypress.config.ts'))
+      expect(onLoadError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'CONFIG_FILES_LANGUAGE_CONFLICT',
+          messageMarkdown: expect.stringContaining('cypress.config.ts, cypress.config.mts'),
+        }),
+        { stopsProject: false },
+      )
+    })
+  })
+
   describe('#eventProcessPid', () => {
     it('returns process id from config manager', () => {
       // @ts-expect-error - a partial config manager stub on the private `_configManager`
