@@ -59,10 +59,23 @@ const getLoaderPagesDirs = (webpackConfig: Configuration) => {
   return [...pagesDirs]
 }
 
-const loadAppRouterOnlyProject = async ({ babelConfig }: { babelConfig: boolean }) => {
+const loadNextProject = async ({ layout, babelConfig = false }: { layout: 'pages' | 'src/pages' | 'app', babelConfig?: boolean }) => {
   const projectRoot = await scaffoldMigrationProject('next-16')
 
-  await fs.rm(path.join(projectRoot, 'pages'), { recursive: true })
+  if (layout !== 'pages') {
+    await fs.rm(path.join(projectRoot, 'pages'), { recursive: true })
+  }
+
+  if (layout === 'src/pages') {
+    await fs.mkdir(path.join(projectRoot, 'src', 'pages'), { recursive: true })
+    await fs.writeFile(path.join(projectRoot, 'src', 'pages', 'index.js'), 'export default function Home () { return null }\n')
+  }
+
+  if (layout === 'app') {
+    await fs.mkdir(path.join(projectRoot, 'app'))
+    await fs.writeFile(path.join(projectRoot, 'app', 'layout.js'), 'export default function RootLayout ({ children }) { return children }\n')
+    await fs.writeFile(path.join(projectRoot, 'app', 'page.js'), 'export default function Home () { return null }\n')
+  }
 
   if (babelConfig) {
     await fs.writeFile(path.join(projectRoot, '.babelrc'), JSON.stringify({ presets: ['next/babel'] }))
@@ -100,32 +113,35 @@ describe('nextHandler', { timeout: 60000 }, function () {
   })
 
   it('passes the pages directory to Next.js when the project has one', async () => {
-    const projectRoot = await scaffoldMigrationProject('next-16')
-
-    process.chdir(projectRoot)
-
-    const { frameworkConfig: webpackConfig } = await nextHandler({
-      framework: 'next',
-      cypressConfig: { projectRoot } as Cypress.PluginConfigOptions,
-    } as WebpackDevServerConfig)
+    const { projectRoot, webpackConfig } = await loadNextProject({ layout: 'pages' })
 
     expect(getLoaderPagesDirs(webpackConfig)).toEqual([path.join(projectRoot, 'pages')])
   })
 
-  // Next treats every file under pagesDir as a page and rejects `export *` in pages, so
-  // pagesDir must not contain any project or node_modules files.
-  it('passes a pages directory with no files to Next.js for an App Router-only project', async () => {
-    const { projectRoot, webpackConfig } = await loadAppRouterOnlyProject({ babelConfig: false })
-    const pagesDir = path.join(projectRoot, 'pages')
+  it('passes src/pages to Next.js when the project uses it', async () => {
+    const { projectRoot, webpackConfig } = await loadNextProject({ layout: 'src/pages' })
 
-    expect(getLoaderPagesDirs(webpackConfig)).toEqual([pagesDir])
-    await expect(fs.access(pagesDir)).rejects.toThrow('ENOENT')
+    expect(getLoaderPagesDirs(webpackConfig)).toEqual([path.join(projectRoot, 'src', 'pages')])
+  })
+
+  // Next treats every file whose path starts with pagesDir as a page and rejects
+  // `export *` in pages, so pagesDir must not match any project or node_modules file.
+  it('passes a pages directory that matches no files to Next.js for an App Router-only project', async () => {
+    const { projectRoot, webpackConfig } = await loadNextProject({ layout: 'app' })
+    const [pagesDir] = getLoaderPagesDirs(webpackConfig)
+
+    expect(pagesDir).toEqual(`${path.join(projectRoot, 'pages')}${path.sep}`)
+    await expect(fs.access(pagesDir!)).rejects.toThrow('ENOENT')
+
+    for (const file of ['app/page.js', 'pages-legacy/index.ts', 'pages.ts', 'node_modules/@mui/material/Chip/index.mjs']) {
+      expect(path.join(projectRoot, file).startsWith(pagesDir!), file).toBe(false)
+    }
   })
 
   it('loads an App Router-only project that uses a Babel config', async () => {
-    const { projectRoot, webpackConfig } = await loadAppRouterOnlyProject({ babelConfig: true })
+    const { projectRoot, webpackConfig } = await loadNextProject({ layout: 'app', babelConfig: true })
 
-    expect(getLoaderPagesDirs(webpackConfig)).toEqual([path.join(projectRoot, 'pages')])
+    expect(getLoaderPagesDirs(webpackConfig)).toEqual([`${path.join(projectRoot, 'pages')}${path.sep}`])
   })
 
   it('throws if nodeVersion is set to bundled', async () => {
