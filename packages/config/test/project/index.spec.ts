@@ -89,6 +89,30 @@ describe('config/src/project/index', () => {
       })
     })
 
+    it('derives the urls from a baseUrl returned from setupNodeEvents when the port is fixed', () => {
+      const cfg = {
+        port: 53784,
+        baseUrl: null,
+        clientRoute: '/__/',
+        reporterRoute: '/__cypress/reporter',
+        proxyUrl: 'http://localhost:53784',
+        browserUrl: 'http://localhost:53784/__/',
+        reporterUrl: 'http://localhost:53784/__cypress/reporter',
+        resolved: {
+          baseUrl: { value: null, from: 'default' },
+        },
+      }
+
+      const updated = updateWithPluginValues(cfg as any, { baseUrl: 'http://localhost:9500/app' }, 'e2e')
+
+      expect(updated).toMatchObject({
+        baseUrl: 'http://localhost:9500/app',
+        proxyUrl: 'http://localhost:53784',
+        browserUrl: 'http://localhost:9500/__/',
+        reporterUrl: 'http://localhost:9500/__cypress/reporter',
+      })
+    })
+
     it('keeps the list of browsers if the plugins returns empty object', () => {
       const browser = {
         name: 'fake browser name',

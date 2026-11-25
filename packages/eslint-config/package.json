@@ -38,6 +38,7 @@
     "eslint-plugin-mocha": "^12.0.2",
     "eslint-plugin-n": "^18.5.0",
     "eslint-plugin-package-json": "^1.14.0",
+    "eslint-plugin-regexp": "^3.3.3",
     "eslint-plugin-vue": "^10.12.0",
     "globals": "^17.14.0",
     "graphql": "^16.14.2",

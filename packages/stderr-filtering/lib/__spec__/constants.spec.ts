@@ -38,6 +38,13 @@ describe('DEBUG_PREFIX', () => {
     expect(DEBUG_PREFIX.test(line)).toBe(expected)
   })
 
+  // A `g` or `y` flag would make `test` resume from the last match's `lastIndex`
+  it('gives the same answer for the same line on repeated calls', () => {
+    const [[line]] = realDebugOutput
+
+    expect([DEBUG_PREFIX.test(line), DEBUG_PREFIX.test(line), DEBUG_PREFIX.test(line)]).toEqual([true, true, true])
+  })
+
   describe('adversarial input', () => {
     const cases: [string, string, boolean][] = [
       ['repeated ANSI codes with no colon', `\t${'\u001b[m'.repeat(16_667)}!`, false],

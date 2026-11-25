@@ -55,4 +55,14 @@ describe('e2e browser reset', () => {
       }
     },
   })
+
+  // Electron and Chrome only: Chromium's Storage.clearDataForOrigin closes a
+  // database's open connections before deleting it, but Firefox resets through
+  // the extension's browsingData.remove, which can't delete a database that
+  // still has an open connection (#34216).
+  systemTests.it('clears IndexedDB that a spec leaves with an open connection', {
+    project: 'e2e',
+    spec: 'browser_reset_open_connection_spec.cy.ts,browser_reset_second_spec.cy.js',
+    browser: ['electron', 'chrome'],
+  })
 })

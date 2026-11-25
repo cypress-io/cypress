@@ -9,6 +9,7 @@ export const docsUrl = 'https://on.cypress.io'
 
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
+const packageManagerConfigUrl = `${docsUrl}/app/get-started/install-cypress#Package-Manager`
 
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
@@ -72,6 +73,10 @@ const missingApp = (binaryDir: string): any => {
     )}`,
     solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
+
+    If your package manager blocks install scripts, it may have skipped the postinstall script that downloads the Cypress binary. Allow the cypress package to run its install script so that future installs download the binary:
+
+      ${chalk.blue(packageManagerConfigUrl)}
   `,
   }
 }
@@ -103,8 +108,13 @@ const notInstalledCI = (executable: string): any => {
 
     - You're caching 'node_modules' but are not caching this path: ${state.getCacheDir()}
     - You ran 'npm install' at an earlier build step but did not persist: ${state.getCacheDir()}
+    - Your package manager blocks install scripts, so it skipped the postinstall script that downloads the binary
 
     Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
+
+    If your package manager blocks install scripts, allow the cypress package to run its install script:
+
+      ${chalk.blue(packageManagerConfigUrl)}
 
     Alternatively, you can run 'cypress install' to download the binary again.
 
