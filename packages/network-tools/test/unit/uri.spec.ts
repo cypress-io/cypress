@@ -126,6 +126,26 @@ describe('lib/uri', () => {
       expect(isLocalhost(new URL('http://127.0.0.9'))).toBe(true)
     })
 
+    it('http://127.255.255.255 is localhost', () => {
+      expect(isLocalhost(new URL('http://127.255.255.255'))).toBe(true)
+    })
+
+    it('http://127.200.249.100 is localhost', () => {
+      expect(isLocalhost(new URL('http://127.200.249.100'))).toBe(true)
+    })
+
+    it('http://127.10.99.1:8080 is localhost', () => {
+      expect(isLocalhost(new URL('http://127.10.99.1:8080'))).toBe(true)
+    })
+
+    it('http://127.0.0.1.example.com is NOT localhost', () => {
+      expect(isLocalhost(new URL('http://127.0.0.1.example.com'))).toBe(false)
+    })
+
+    it('http://10.127.0.1 is NOT localhost', () => {
+      expect(isLocalhost(new URL('http://10.127.0.1'))).toBe(false)
+    })
+
     it('http://[::1] is localhost', () => {
       expect(isLocalhost(new URL('http://[::1]'))).toBe(true)
     })

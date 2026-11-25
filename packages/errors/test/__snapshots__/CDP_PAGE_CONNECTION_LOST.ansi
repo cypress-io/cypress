@@ -1,0 +1,5 @@
+[31mCypress lost its connection to the [33mChrome[39m[31m tab running Cypress tests while the tab was still open.[39m
+[31m[39m
+[31mRequests the tab was waiting on can no longer finish, so we have failed the current spec and aborted the run.[39m
+[31m[39m
+[31mIf this keeps happening, please open an issue with the output of running Cypress with [95mDEBUG=cypress:server:browsers:*[39m[31m.[39m

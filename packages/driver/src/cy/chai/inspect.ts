@@ -385,7 +385,7 @@ export function create (chai) {
       }
 
       name = JSON.stringify(`${key}`)
-      if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+      if (name.match(/^"([a-z_]\w*)"$/i)) {
         name = name.substr(1, name.length - 2)
         name = ctx.stylize(name, 'name')
       } else {
@@ -418,7 +418,7 @@ export function create (chai) {
   function isTypedArray (ar) {
     // Unfortunately there's no way to check if an object is a TypedArray
     // We have to check if it's one of these types
-    return (typeof ar === 'object' && /\w+Array]$/.test(objectToString(ar)))
+    return (typeof ar === 'object' && /\w+Array\]$/.test(objectToString(ar)))
   }
 
   function isArray (ar) {
