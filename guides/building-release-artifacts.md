@@ -25,7 +25,7 @@ The steps above:
 
 - Build the `cypress` npm package
 - Transpile the code into ES5 to be compatible with the common Node versions
-- Put the result into the [`cli/build`](../cli/build) folder.
+- Put the result into the `cli/build` folder.
 
 ## Building the binary
 

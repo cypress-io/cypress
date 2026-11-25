@@ -200,7 +200,7 @@ npm run test-watch
 
 ## License
 
-This project is licensed under the terms of the [MIT license](/LICENSE.md).
+This project is licensed under the terms of the [MIT license](./LICENSE.md).
 
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release

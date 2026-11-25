@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeAll, beforeEach, afterEach, jest } from '@jest/globals'
+import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import { scaffoldCommonNodeModules } from '@tooling/system-tests/lib/dep-installer'
@@ -63,8 +64,21 @@ describe('ProjectConfigIpc', () => {
     })
 
     it('reports a SIGKILLed child once and rejects an in-flight node event', async () => {
+      // A handler that never settles keeps the event in flight until the child
+      // is killed, however long the kill signal takes to arrive.
+      const configFile = 'cypress.hanging-after-spec.config.js'
+
+      await fs.writeFile(path.join(projectRoot, configFile), `module.exports = {
+  e2e: {
+    setupNodeEvents (on) {
+      on('after:spec', () => new Promise(() => {}))
+    },
+  },
+}
+`)
+
       const onError = jest.fn()
-      const ipc = new ProjectConfigIpc(undefined, projectRoot, path.join(projectRoot, 'cypress.config.js'), 'cypress.config.js', onError, () => {}, () => {})
+      const ipc = new ProjectConfigIpc(undefined, projectRoot, path.join(projectRoot, configFile), configFile, onError, () => {}, () => {})
       const eventRegistrar = new EventRegistrar()
       const manager: any = new ProjectConfigManager({
         ctx: createTestDataContext('open'),
@@ -87,7 +101,7 @@ describe('ProjectConfigIpc', () => {
         const loadConfigReply = await ipc.loadConfig()
         const reply = await ipc.callSetupNodeEventsWithConfig('e2e', {} as any, [])
 
-        await manager.handleSetupTestingTypeReply(ipc, loadConfigReply, { ...reply, registrations: [{ event: 'after:spec', eventId: 'unknown' }] })
+        await manager.handleSetupTestingTypeReply(ipc, loadConfigReply, reply)
 
         const inFlight = eventRegistrar.executeNodeEvent('after:spec', [])
 

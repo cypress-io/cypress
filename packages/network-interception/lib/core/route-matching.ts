@@ -13,6 +13,17 @@ export type RouteMatchableRequest = {
   resourceType?: string
 }
 
+// Gives a `g` or `y` matcher the same result for every request: with
+// `/^\/api\/users\/\d+$/g`, `/api/users/1042` and then `/api/users/1043` both
+// match. A route reuses one RegExp for every request, and `test()` on its own
+// would start the second search at the `lastIndex` the first match left.
+// https://github.com/cypress-io/cypress/issues/34973
+function regExpMatches (matcher: RegExp, value: string) {
+  matcher.lastIndex = 0
+
+  return matcher.test(value)
+}
+
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
@@ -45,7 +56,7 @@ export function doesRouteMatch (routeMatcher: RouteMatcherOptions, req: RouteMat
     }
 
     if (matcher.test) {
-      if (!matcher.test(value) && (!shouldTryMatchingPath || !matcher.test(matchable.path))) {
+      if (!regExpMatches(matcher, value) && (!shouldTryMatchingPath || !regExpMatches(matcher, matchable.path))) {
         return false
       }
 
