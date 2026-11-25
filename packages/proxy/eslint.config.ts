@@ -1,8 +1,13 @@
-import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, nodeConfig, noFloatingPromisesConfig, regexpConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
+  // The rewriter's regexes run on every proxied script, so changes to them
+  // are reviewed on their own against the rewriter's specs
+  ...regexpConfig.map((block) => {
+    return { ...block, ignores: ['lib/http/util/regex-rewriter.ts', 'lib/http/util/rewriter.ts'] }
+  }),
   ...jsonConfig,
   ...nodeConfig,
   ...vitestConfig,

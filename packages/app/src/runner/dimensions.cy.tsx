@@ -54,5 +54,34 @@ describe('dimensions utilities', () => {
 
       document.body.removeChild(el)
     })
+
+    describe('zIndex', () => {
+      const INT32_MAX = 2147483647
+
+      const zIndexOf = (zIndex: string) => {
+        const el = document.createElement('div')
+
+        el.style.position = 'relative'
+        el.style.zIndex = zIndex
+        document.body.appendChild(el)
+
+        const dimensions = getElementDimensions(el)
+
+        document.body.removeChild(el)
+
+        return dimensions.zIndex
+      }
+
+      it('uses INT32_MAX for auto and 0', () => {
+        expect(zIndexOf('auto')).to.equal(INT32_MAX)
+        expect(zIndexOf('0')).to.equal(INT32_MAX)
+      })
+
+      it('uses the computed value for other z-indexes', () => {
+        expect(zIndexOf('10')).to.equal(10)
+        expect(zIndexOf('100')).to.equal(100)
+        expect(zIndexOf('-1')).to.equal(-1)
+      })
+    })
   })
 })

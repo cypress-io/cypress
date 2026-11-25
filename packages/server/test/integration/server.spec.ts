@@ -562,12 +562,17 @@ describe('Server', () => {
         // invalid, but let's be tolerant
         .get('/d').reply(200, 'notHtml', { 'content-type': 'text/html;' })
         .get('/e').reply(200, 'notHtml', { 'content-type': 'application/xhtml+xml' })
+        // invalid headers are matched as sent rather than parsed and lowercased
+        .get('/f').reply(200, 'notHtml', { 'content-type': 'Text/HTML;' })
+        .get('/g').reply(200, '<html></html>', { 'content-type': 'text/plain; profile=text/html;' })
 
-        const bad = await server._onResolveUrl('http://example.com/a', {}, automationRequest)
+        for (const path of ['/a', '/g']) {
+          const bad = await server._onResolveUrl(`http://example.com${path}`, {}, automationRequest)
 
-        expect(bad.isHtml).toBe(false)
+          expect(bad.isHtml).toBe(false)
+        }
 
-        for (const path of ['/b', '/c', '/d', '/e']) {
+        for (const path of ['/b', '/c', '/d', '/e', '/f']) {
           const details = await server._onResolveUrl(`http://example.com${path}`, {}, automationRequest)
 
           expect(details.isHtml).toBe(true)

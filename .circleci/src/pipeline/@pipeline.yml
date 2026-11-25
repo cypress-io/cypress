@@ -116,6 +116,11 @@ parameters:
   run-npm-schematic-tests:
     type: boolean
     default: true
+  # Set by generate-pipeline-parameters.sh when a PR changes only docs. Defaults
+  # to false so that a continuation that omits it runs everything.
+  docs-only:
+    type: boolean
+    default: false
 
 orbs:
   browser-tools: circleci/browser-tools@2.4.1
@@ -1129,10 +1134,15 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
-      - install-browsers:
-          install-chrome: true
-          install-chrome-for-testing: true
-          install-firefox: true
+      # WebKit runs only launch the WebKit from playwright-webkit (tap_open_spec, which opens Chrome itself, is skipped below)
+      - unless:
+          condition:
+            equal: [ webkit, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-chrome: true
+                install-chrome-for-testing: true
+                install-firefox: true
       - restore_cache:
           name: Restore Bun install cache
           keys:
@@ -1154,6 +1164,11 @@ commands:
               command -v bun
               bun --version
               exit 0
+            fi
+
+            # Bun's installer needs unzip, which the image only gets from install-browsers on non-WebKit jobs
+            if ! command -v unzip >/dev/null 2>&1; then
+              apt-get update && apt-get install -y unzip
             fi
 
             curl -fsSL https://bun.sh/install | bash -s "${BUN_RELEASE}"
@@ -1184,6 +1199,11 @@ commands:
               for file in $ALL_SPECS; do
                 # filter out non_root tests, they have their own stage
                 if [[ "$file" == *"non_root"* ]]; then
+                  echo "Skipping $file"
+                  continue
+                fi
+                # tap_open_spec always opens Chrome, which the WebKit job does not install
+                if [[ "<< parameters.browser >>" == "webkit" && "$file" == *"tap_open_spec"* ]]; then
                   echo "Skipping $file"
                   continue
                 fi
@@ -1576,13 +1596,31 @@ commands:
                         source ./ci-ensure-node.sh
                         <<parameters.command>>
 
+  # A second pipeline on an already-built commit (a rerun, or one triggered
+  # through the API) downloads that commit's binary and npm package instead of
+  # rebuilding them, and hands them to the jobs that test them in the same
+  # workspace paths a build would.
+  # The paths are relative to the working directory so Windows' bash passes
+  # Node a native path rather than an MSYS one such as /c/Users/...
   check-if-binary-exists:
     steps:
       - run:
-          name: Check if binary exists, exit if it does
+          name: Download the binary if this commit already has one
           command: |
             source ./scripts/ensure-node.sh
-            yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --type binary --file cypress.zip
+            yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --out cdn-reuse/cypress
+      - persist_to_workspace:
+          root: cdn-reuse
+          paths:
+            - cypress
+      - run:
+          name: Skip the build if the binary was downloaded
+          command: |
+            if [[ -f cdn-reuse/cypress/cypress.zip ]]; then
+              circleci-agent step halt
+            else
+              rm -rf cdn-reuse
+            fi
 
   build-and-package-binary:
     steps:
@@ -3435,6 +3473,21 @@ jobs:
       - run:
           name: All jobs passed
           command: echo "✅ All required jobs passed"
+
+  docs-check:
+    executor: node-slim
+    resource_class: small
+    working_directory: ~/cypress
+    steps:
+      - checkout
+      # Installs only the pinned checker, not the monorepo, so a docs-only PR
+      # skips the full install.
+      - run:
+          name: Install markdown-link-check
+          command: npm install --global "markdown-link-check@$(node -p "require('./package.json').devDependencies['markdown-link-check']")"
+      - run:
+          name: Check Markdown links 🔗
+          command: yarn check-markdown-links
 
   # Fan-in gate: build complete and contributor PR approved (when applicable).
   ready-to-test:

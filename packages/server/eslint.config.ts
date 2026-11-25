@@ -1,8 +1,9 @@
-import { baseConfig, jsonConfig, mochaConfig, nodeConfig, noFloatingPromisesConfig, userNodeConfig, vitestConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, mochaConfig, nodeConfig, noFloatingPromisesConfig, regexpConfig, userNodeConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
   ...jsonConfig,
   ...nodeConfig,
   {

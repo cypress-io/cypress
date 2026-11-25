@@ -3,6 +3,13 @@ const { fs } = require('@packages/server/lib/util/fs')
 const path = require('path')
 const Fixtures = require('../lib/fixtures')
 
+const BROWSER_DISPLAY_NAMES = {
+  'chrome': 'Chrome',
+  'chrome-for-testing': 'Chrome for Testing',
+  'firefox': 'Firefox',
+  'webkit': 'WebKit',
+}
+
 describe('e2e config', () => {
   systemTests.setup()
 
@@ -201,16 +208,19 @@ describe('e2e config', () => {
     })
   })
 
-  it('launches browser using config.defaultBrowser', async function () {
-    await Fixtures.scaffoldProject('config-defaultBrowser')
-
-    return systemTests.exec(this, {
-      project: 'config-defaultBrowser',
-      command: 'cypress',
-      args: ['run', '--dev', '--project', path.resolve(process.cwd(), './projects/config-defaultBrowser')],
-      onStdout: (stdout) => {
-        expect(stdout).to.include('Browser:        Chrome')
-      },
-    })
+  systemTests.it('launches browser using config.defaultBrowser', {
+    // Electron is what runs without a defaultBrowser, so it can't show the setting was used
+    browser: '!electron',
+    project: 'config-defaultBrowser',
+    command: 'cypress',
+    args: ['run', '--dev', '--project', path.resolve(process.cwd(), './projects/config-defaultBrowser')],
+    onRun (exec, browser) {
+      return exec({
+        processEnv: { SYSTEM_TEST_DEFAULT_BROWSER: browser },
+        onStdout: (stdout) => {
+          expect(stdout).to.match(new RegExp(`Browser:\\s+${BROWSER_DISPLAY_NAMES[browser]} \\d`))
+        },
+      })
+    },
   })
 })
