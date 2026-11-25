@@ -3888,6 +3888,29 @@ describe('CdpFetchTransport', () => {
         expect(Buffer.concat(chunks).toString()).toBe('captured-chunk')
       })
 
+      it('caps the capture only when the response has no valid content-length', async () => {
+        const capped = async (headers: Protocol.Fetch.HeaderEntry[]) => {
+          const client = createClient()
+          const { transport, bodyCapture } = createTransport(client, {
+            shouldStreamBody: () => true,
+            shouldCaptureBody: () => true,
+          })
+          const armSpy = vi.spyOn(bodyCapture, 'arm')
+          const onRequestPaused = await startTransport(transport, client)
+
+          await driveResponsePause(onRequestPaused, {
+            requestId: 'fetch-request',
+            networkId: 'network-1',
+          }, { headers })
+
+          return armSpy.mock.calls[0][2]?.capped
+        }
+
+        expect(await capped([{ name: 'content-type', value: 'application/wasm' }, { name: 'content-length', value: '62914577' }])).toBe(false)
+        expect(await capped([{ name: 'content-type', value: 'application/x-ndjson' }])).toBe(true)
+        expect(await capped([{ name: 'content-length', value: 'abc' }])).toBe(true)
+      })
+
       it('does not arm the capture pump when shouldCaptureBody is unset (default)', async () => {
         const client = createClient()
         const { transport } = createTransport(client, {
