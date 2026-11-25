@@ -135,7 +135,7 @@ describe('addToCypressConfig', () => {
     ['cts', 'a CommonJS', true, cjsConfig],
     ['cjs', 'a CommonJS', true, cjsConfig],
   ])('will create a .%s file as %s config if the file is empty, whether or not the project is ECMA Script', async (extension, _kind, isProjectUsingESModules, expected) => {
-    const result = await addTestingTypeToCypressConfig({
+    const { result: status } = await addTestingTypeToCypressConfig({
       filePath: path.join(__dirname, `../__fixtures__/empty.config.${extension}`),
       info: {
         testingType: 'e2e',
@@ -146,7 +146,7 @@ describe('addToCypressConfig', () => {
 
     expect(getWrittenConfig()).toEqual(expected)
 
-    expect(result.result).toEqual('ADDED')
+    expect(status).toEqual('ADDED')
   })
 
   it('will exclude defineConfig if cypress can\'t be imported from the projectRoot', async () => {
