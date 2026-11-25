@@ -18,9 +18,10 @@ const requestIdOf = (data: unknown): string | undefined => {
  * for, such as a script or stylesheet that no `cy.intercept()` matched.
  *
  * The driver only logs the requests it was told about and drops these events
- * for any other. Receiving each one still takes time on the browser's main
- * thread, which the page under test runs on too, so a page that loads hundreds
- * of modules waits on hundreds of events the driver has no use for.
+ * for any other. Each one is still evaluated on the browser's main thread,
+ * which the page under test runs on too, and leaves garbage behind there, so a
+ * page that loads hundreds of modules pays for hundreds of events the driver
+ * has no use for.
  *
  * A request stays known after its response, since an error for it can still
  * follow, and after its error, since a response can still follow. Forgetting

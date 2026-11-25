@@ -99,8 +99,8 @@ describe('lib/util/request-event-filter', () => {
     ])
   })
 
-  // Request IDs in the format of the captured ones, which Chromium's Network
-  // domain assigns, rather than captured ones.
+  // Not captured: request IDs that follow the format Chromium's Network domain
+  // gave the captured ones.
   it('forgets the earliest requests once it holds 10,000', () => {
     const response = (requestId: string) => ({ eventName: 'response:received', data: { requestId, status: 200, headers: {} } })
 
