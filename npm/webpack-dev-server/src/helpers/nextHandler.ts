@@ -187,9 +187,10 @@ const exists = async (file: string) => {
 /**
  * Next allows the `pages` directory to be located at either
  * `${projectRoot}/pages` or `${projectRoot}/src/pages`.
- * If neither is found, return projectRoot
+ * App Router-only projects have neither, so return undefined: Next treats every
+ * file under `pagesDir` as a page, and rejects any dependency that uses `export *`.
  */
-async function findPagesDir (projectRoot: string) {
+async function findPagesDir (projectRoot: string): Promise<string | undefined> {
   // prioritize ./pages over ./src/pages
   let pagesDir = path.join(projectRoot, 'pages')
 
@@ -202,7 +203,7 @@ async function findPagesDir (projectRoot: string) {
     return pagesDir
   }
 
-  return projectRoot
+  return undefined
 }
 
 // 'next/dist/trace/trace' has been the trace location since Next.js 12.0
