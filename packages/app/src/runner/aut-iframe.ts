@@ -296,7 +296,7 @@ export class AutIframe {
       return
     }
 
-    if (existingStyle.href !== style.href) {
+    if (existingStyle.href !== style.href || (style.media && existingStyle.media !== style.media)) {
       this.$(existingStyle).replaceWith(linkTag)
     }
   }
@@ -320,11 +320,17 @@ export class AutIframe {
   }
 
   _linkTag (style) {
-    return `<link rel="stylesheet" href="${style.href}" />`
+    return `<link rel="stylesheet" href="${style.href}"${this._mediaAttr(style)} />`
   }
 
   _styleTag (style) {
-    return `<style>${style}</style>`
+    // a stylesheet with a media attribute comes as { css, media } instead of a string
+    // https://github.com/cypress-io/cypress/issues/34982
+    return _.isString(style) ? `<style>${style}</style>` : `<style${this._mediaAttr(style)}>${style.css}</style>`
+  }
+
+  _mediaAttr (style) {
+    return style.media ? ` media="${_.escape(style.media)}"` : ''
   }
 
   highlightEl = ({ body }, { $el, coords, highlightAttr, scrollBy }) => {

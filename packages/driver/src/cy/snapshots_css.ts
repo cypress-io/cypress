@@ -6,7 +6,7 @@ import $utils from '../cypress/utils'
 import LimitedMap from '../util/limited_map'
 
 const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/g
-const screenStylesheetRe = /screen|all/
+const screenMediaTypes = ['all', 'screen']
 
 const reduceText = (arr, fn) => {
   return _.reduce(arr, ((memo, item) => {
@@ -14,10 +14,24 @@ const reduceText = (arr, fn) => {
   }), '')
 }
 
+// Snapshots are only shown on screen, so a query that names another media type,
+// such as `print`, can't apply to one. `(min-width: 735px)` names none, `not print`
+// excludes another one and an empty `media` matches every type, so these can.
+// https://github.com/cypress-io/cypress/issues/34982
+const isScreenMediaQuery = (query: string) => {
+  const [first, second] = query.trim().toLowerCase().split(/\s+/)
+
+  if (first === '' || first === 'not' || first.startsWith('(')) {
+    return true
+  }
+
+  return screenMediaTypes.includes(first === 'only' ? second : first)
+}
+
 const isScreenStylesheet = (stylesheet) => {
   const media = stylesheet.getAttribute('media')
 
-  return !_.isString(media) || screenStylesheetRe.test(media)
+  return !_.isString(media) || _.some(media.split(','), isScreenMediaQuery)
 }
 
 const getDocumentStylesheets = (doc) => {
@@ -157,7 +171,7 @@ export const create = ($$, state) => {
 
     styles = _.filter(styles, isScreenStylesheet)
 
-    return _.map(styles, (stylesheet) => {
+    const getElementStyleId = (stylesheet) => {
       // in cases where we can get the CSS as a string, make the paths
       // absolute so that when they're restored by appending them to the page
       // in <style> tags, background images and fonts still properly load
@@ -174,6 +188,15 @@ export const create = ($$, state) => {
       const cssContents = getInlineCssContents(stylesheet, $$)
 
       return makePathsAbsoluteToDoc(cssContents, doc)
+    }
+
+    return _.map(styles, (stylesheet) => {
+      const styleId = getElementStyleId(stylesheet)
+      const media = stylesheet.getAttribute('media')
+
+      // a media query goes with the restored stylesheet so that it applies only where it
+      // did on the page, while `screen` and `all` apply wherever a snapshot is shown
+      return media && !screenMediaTypes.includes(media) ? { media, styleId } : styleId
     })
   }
 
@@ -192,13 +215,23 @@ export const create = ($$, state) => {
     return styleIds
   }
 
+  const getStyleById = (idOrCss) => {
+    if (_.isString(idOrCss)) {
+      return idOrCss
+    }
+
+    return cssIdToContentsMap.get(idOrCss) || { href: idOrCss.href }
+  }
+
   const getStylesByIds = (ids) => {
-    return _.map(ids, (idOrCss) => {
-      if (_.isString(idOrCss)) {
-        return idOrCss
+    return _.map(ids, (id) => {
+      if (!id.media) {
+        return getStyleById(id)
       }
 
-      return cssIdToContentsMap.get(idOrCss) || { href: idOrCss.href }
+      const style = getStyleById(id.styleId)
+
+      return _.isString(style) ? { css: style, media: id.media } : { ...style, media: id.media }
     })
   }
 
