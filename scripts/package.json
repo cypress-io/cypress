@@ -20,7 +20,7 @@
     "fast-json-stable-stringify": "^2.1.0",
     "gulplog": "^1.0.0",
     "js-yaml": "^4.1.0",
-    "simple-git": "^4.0.2",
+    "simple-git": "^4.1.0",
     "temp-dir": "^2.0.0"
   },
   "devDependencies": {

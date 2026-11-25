@@ -519,6 +519,25 @@ describe('util', () => {
     it('is false with file path', () => {
       expect(util.isSemver('0/path/1.2.3/mypath/2.3')).toEqual(false)
     })
+
+    it('is true with a wildcard last segment', () => {
+      expect(util.isSemver('1.2.*')).toEqual(true)
+      expect(util.isSemver('*')).toEqual(true)
+    })
+
+    it('is false with a wildcard before the last segment', () => {
+      expect(util.isSemver('1.*.3')).toEqual(false)
+    })
+
+    it('is false with more than 3 segments', () => {
+      expect(util.isSemver('1.2.3.4')).toEqual(false)
+    })
+
+    it('is false with a prefix or suffix', () => {
+      expect(util.isSemver('v1.2.3')).toEqual(false)
+      expect(util.isSemver('1.2.3-beta.1')).toEqual(false)
+      expect(util.isSemver('1.2.')).toEqual(false)
+    })
   })
 
   describe('.calculateEta', () => {

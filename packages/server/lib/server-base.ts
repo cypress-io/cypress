@@ -72,7 +72,7 @@ const KEEP_ALIVE_TIMEOUT = 60 * 60 * 1000
 // retries are needed to move off a port browsers block. The cap keeps a
 // misbehaving port range from looping forever.
 const MAX_PORT_ATTEMPTS = 10
-const htmlContentTypesRe = /^(text\/html|application\/xhtml)/i
+const htmlContentTypesRe = /^(?:text\/html|application\/xhtml)/i
 
 const isResponseHtml = function (contentType, responseBuffer) {
   if (contentType) {

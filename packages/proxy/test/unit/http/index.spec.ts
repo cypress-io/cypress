@@ -296,6 +296,41 @@ describe('http', function () {
       })
     })
 
+    it.each([
+      ['1234-retry-1', '1234-retry-2'],
+      ['1234-retry-9', '1234-retry-10'],
+      ['1234-retry-10', '1234-retry-11'],
+      ['1234-retry-1-retry-3', '1234-retry-1-retry-4'],
+      ['1234-retry-', '1234-retry--retry-1'],
+      ['1234-retry-1a', '1234-retry-1a-retry-1'],
+    ])('gives the fake pending browser pre request for "%s" the id "%s"', async function (requestId, expectedRequestId) {
+      incomingRequest.mockImplementation(function () {
+        this.req.browserPreRequest = {
+          requestId,
+          errorHandled: false,
+        }
+
+        this.res.destroyed = false
+
+        throw new Error('oops')
+      })
+
+      error.mockImplementation(function () {
+        this.end()
+      })
+
+      const http = createHttp()
+
+      http.addPendingBrowserPreRequest = vi.fn()
+
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      expect(http.addPendingBrowserPreRequest).toHaveBeenCalledExactlyOnceWith({
+        requestId: expectedRequestId,
+        errorHandled: false,
+      })
+    })
+
     it('ensures not to create fake pending browser pre requests on multiple errors', async function () {
       incomingRequest.mockImplementation(function () {
         this.req.browserPreRequest = {

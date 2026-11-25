@@ -1,6 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import { describe, expect, it, vi } from 'vitest'
-import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
+import { CdpBodyCapture, isProvablyFinite } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
 
 // Mirrors CdpBodyCapture's cap (not exported — this pins the contract).
 const CAPTURE_BYTE_CAP = 10 * 1024 * 1024
@@ -206,6 +206,31 @@ describe('CdpBodyCapture', () => {
         dataReceived({ requestId: 'network-1', data: Buffer.from('late').toString('base64') })
       }).not.toThrow()
     })
+
+    it('keeps an uncapped capture open past the cap until loadingFinished ends it', async () => {
+      const { capture, dataReceived, loadingFinished } = createCapture()
+      const stream = (await capture.arm('network-1', undefined, { capped: false }))!
+      let bytes = 0
+
+      stream.on('data', (chunk: Buffer) => {
+        bytes += chunk.length
+      })
+
+      dataReceived({ requestId: 'network-1', data: Buffer.alloc(CAPTURE_BYTE_CAP).toString('base64') })
+      dataReceived({ requestId: 'network-1', data: Buffer.from('tail').toString('base64') })
+
+      await tick()
+
+      expect(stream.writableEnded).toBe(false)
+
+      const ended = onceEvent(stream, 'end')
+
+      loadingFinished({ requestId: 'network-1' })
+
+      await ended
+
+      expect(bytes).toBe(CAPTURE_BYTE_CAP + 'tail'.length)
+    })
   })
 
   describe('loadingFinished / loadingFailed', () => {
@@ -301,4 +326,26 @@ describe('CdpBodyCapture', () => {
 
     expect(second).not.toBe(first)
   })
+})
+
+describe('isProvablyFinite', () => {
+  const cases: [string, Protocol.Fetch.HeaderEntry[] | undefined, boolean][] = [
+    ['a content-length', [{ name: 'content-length', value: '62914577' }], true],
+    ['content-length: 0', [{ name: 'content-length', value: '0' }], true],
+    ['a content-length with surrounding whitespace', [{ name: 'content-length', value: '  123 ' }], true],
+    ['a differently cased header name', [{ name: 'Content-Length', value: '123' }], true],
+    ['no content-length', [{ name: 'content-type', value: 'application/x-ndjson' }], false],
+    ['no response headers', undefined, false],
+    ['the first of multiple content-length headers when it is malformed', [{ name: 'content-length', value: 'abc' }, { name: 'content-length', value: '123' }], false],
+  ]
+
+  for (const malformed of ['abc', '-5', '1e3']) {
+    cases.push([`a malformed content-length "${malformed}"`, [{ name: 'content-length', value: malformed }], false])
+  }
+
+  for (const [name, responseHeaders, expected] of cases) {
+    it(`${expected ? 'is finite' : 'is not finite'} with ${name}`, () => {
+      expect(isProvablyFinite({ responseHeaders })).toBe(expected)
+    })
+  }
 })

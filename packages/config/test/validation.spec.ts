@@ -151,6 +151,24 @@ describe('config/src/validation', () => {
 
       expect(result).not.toBe(true)
     })
+
+    it('accepts spki fingerprints in any letter case', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ spki: validSpki.toLowerCase() }])).toBe(true)
+      expect(validation.isValidTrustedCertificates(mockKey, [{ spki: validSpki.toUpperCase() }])).toBe(true)
+    })
+
+    it('rejects an spki that is not a base64 SHA-256 digest', () => {
+      [
+        validSpki.slice(1),
+        `A${validSpki}`,
+        validSpki.slice(0, -1),
+        `${validSpki}=`,
+        `${validSpki} `,
+        validSpki.replace('/', '_').replace('+', '-'),
+      ].forEach((spki) => {
+        expect(validation.isValidTrustedCertificates(mockKey, [{ spki }])).not.toBe(true)
+      })
+    })
   })
 
   describe('.isValidBrowser', () => {

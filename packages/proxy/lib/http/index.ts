@@ -331,7 +331,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: (error: Error) =
 }
 
 function getUniqueRequestId (requestId: string) {
-  const match = /^(.*)-retry-([\d]+)$/.exec(requestId)
+  const match = /^(.*)-retry-(\d+)$/.exec(requestId)
 
   if (match) {
     return `${match[1]}-retry-${Number(match[2]) + 1}`
