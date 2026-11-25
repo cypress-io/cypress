@@ -5,7 +5,7 @@ import type { CdpEvent, CdpCommand } from '../../../lib/browsers/cdp-protocol/cd
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { CDPConnection } from '../../../lib/browsers/cdp-protocol/cdp-connection'
 import { CDPTerminatedError, CDPAlreadyConnectedError, CDPDisconnectedError } from '../../../lib/browsers/cdp-protocol/cri-errors'
-import { FRAGMENT_MESSAGES_OVER_BYTES } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
+import { FRAGMENT_CHARS } from '../../../lib/browsers/cdp-protocol/send-large-messages-in-fragments'
 import { fireDisconnect as fireDisconnectListeners } from '../../support/helpers/cdp-disconnect'
 import WebSocket from 'ws'
 
@@ -178,12 +178,12 @@ describe('CDPConnection', () => {
         await expect(cdpConnection.connect()).resolves.toBeUndefined()
       })
 
-      it('sends messages over the fragmenting threshold as fragments', async () => {
+      it('sends messages longer than FRAGMENT_CHARS as fragments', async () => {
         const originalSend = stubbedWebSocket.send
 
         await cdpConnection.connect()
 
-        stubbedWebSocket.send('a'.repeat(FRAGMENT_MESSAGES_OVER_BYTES + 1))
+        stubbedWebSocket.send('a'.repeat(FRAGMENT_CHARS + 1))
 
         expect(vi.mocked(originalSend).mock.calls.length).toBeGreaterThan(1)
       })
@@ -243,6 +243,17 @@ describe('CDPConnection', () => {
 
         await expectRejection(cdpConnection.send('Page.enable'), CDPDisconnectedError, 'terminated')
       })
+
+      it('emits cdp-connection-lost after cdp-connection-closed', async () => {
+        const onConnectionLostCb = vi.fn()
+
+        cdpConnection.addConnectionEventListener('cdp-connection-lost', onConnectionLostCb)
+
+        await fireDisconnect()
+
+        expect(onConnectionLostCb).toHaveBeenCalledOnce()
+        expect(onConnectionClosedCb.mock.invocationCallOrder[0]).toBeLessThan(onConnectionLostCb.mock.invocationCallOrder[0])
+      })
     })
   })
 
@@ -278,6 +289,16 @@ describe('CDPConnection', () => {
         await cdpConnection.disconnect()
         await new Promise((resolve) => setImmediate(resolve))
         expect(onConnectionClosedCb).toHaveBeenCalled()
+      })
+
+      it('does not emit cdp-connection-lost', async () => {
+        const onConnectionLostCb = vi.fn()
+
+        cdpConnection.addConnectionEventListener('cdp-connection-lost', onConnectionLostCb)
+
+        await cdpConnection.disconnect()
+        await new Promise((resolve) => setImmediate(resolve))
+        expect(onConnectionLostCb).not.toHaveBeenCalled()
       })
 
       describe('when the connection has already been terminated', () => {

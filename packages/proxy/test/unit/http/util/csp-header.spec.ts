@@ -96,6 +96,50 @@ describe('http/util/csp-header', () => {
         })
       })
 
+      it(`should split each directive's values on spaces for "${headerName}"`, () => {
+        const [policyMap] = parseCspHeaders({
+          [`${headerName}`]: `default-src 'self'; script-src 'self' https://a.example.com 'nonce-abc+/='; upgrade-insecure-requests`,
+        }, headerName)
+
+        expect(policyMap).toEqual(new Map([
+          ['default-src', [`'self'`]],
+          ['script-src', [`'self'`, 'https://a.example.com', `'nonce-abc+/='`]],
+          ['upgrade-insecure-requests', []],
+        ]))
+      })
+
+      it(`should tolerate repeated separators and extra whitespace for "${headerName}"`, () => {
+        const [policyMap] = parseCspHeaders({
+          [`${headerName}`]: `;; default-src  'self'  ;  img-src *;;`,
+        }, headerName)
+
+        expect(policyMap).toEqual(new Map([
+          ['default-src', [`'self'`]],
+          ['img-src', ['*']],
+        ]))
+      })
+
+      it(`should parse a valueless directive followed by another directive for "${headerName}"`, () => {
+        const [policyMap] = parseCspHeaders({
+          [`${headerName}`]: 'block-all-mixed-content;default-src self',
+        }, headerName)
+
+        expect(policyMap).toEqual(new Map([
+          ['block-all-mixed-content', []],
+          ['default-src', ['self']],
+        ]))
+      })
+
+      it(`should merge the values of a repeated directive for "${headerName}"`, () => {
+        const [policyMap] = parseCspHeaders({
+          [`${headerName}`]: 'script-src a.com; script-src b.com c.com',
+        }, headerName)
+
+        expect(policyMap).toEqual(new Map([
+          ['script-src', ['a.com', 'b.com', 'c.com']],
+        ]))
+      })
+
       describe(`Valid CSP Directives`, () => {
         Object.entries(cspDirectiveValues).forEach(([directive, values]) => {
           values.forEach((value) => {

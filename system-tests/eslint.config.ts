@@ -1,5 +1,5 @@
 import { builtinRules } from 'eslint/use-at-your-own-risk'
-import { baseConfig, chaiFriendlyConfig, jsonConfig, mochaConfig, nodeConfig, reactConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, mochaConfig, nodeConfig, reactConfig, regexpConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 const fixtureDirs = ['projects/**', 'project-fixtures/**']
@@ -43,6 +43,7 @@ const layoutRulesOff = (configs: typeof baseConfig) => {
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
   // Fixture package.json files keep the layout and key order of the user
   // projects they stand in for
   ...jsonConfig.map((config) => ({ ...config, ignores: [...(config.ignores ?? []), ...fixtureDirs] })),

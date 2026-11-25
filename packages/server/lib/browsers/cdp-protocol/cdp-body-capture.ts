@@ -8,11 +8,27 @@ const debug = debugModule('cypress:server:browsers:cdp-body-capture')
 
 type CdpBodyCaptureClient = Pick<ICriClient, 'send' | 'on' | 'off'>
 
-// Bounds capture of never-ending bodies (SSE, MJPEG multipart) so Test Replay
-// always receives a finite stream. The browser's own delivery to the page is
-// unaffected — this only ends the side-channel pump. The bound is per capture,
-// not global: N concurrent unconsumed streams hold up to N times this cap.
+// Bounds capture of bodies that may never end (SSE, MJPEG multipart, ndjson,
+// long-polls) so Test Replay always receives a finite stream. The browser's
+// own delivery to the page is unaffected — this only ends the side-channel
+// pump. The bound is per capture, not global: N concurrent unconsumed streams
+// hold up to N times this cap.
 const CAPTURE_BYTE_CAP = 10 * 1024 * 1024
+
+const CONTENT_LENGTH_RE = /^\d+$/
+
+/**
+ * True when the response declares a parseable content-length, so its body
+ * ends on its own. A malformed value (`abc`, `-5`, `1e3`) proves nothing.
+ * Only a body that may never end needs the capture cap: one cut short reaches
+ * Replay as a broken file that looks complete. content-length counts encoded
+ * bytes and the capture holds decoded ones, so it proves an end, not a size.
+ */
+export const isProvablyFinite = (event: Pick<Protocol.Fetch.RequestPausedEvent, 'responseHeaders'>): boolean => {
+  const value = event.responseHeaders?.find((header) => header.name.toLowerCase() === 'content-length')?.value
+
+  return value !== undefined && CONTENT_LENGTH_RE.test(value.trim())
+}
 
 // Arming sits on the critical path: the response pause is not released until
 // it settles. A CDP send to a crashed renderer never resolves and is never
@@ -25,6 +41,11 @@ const ARM_TIMED_OUT = Symbol('arm timed out')
 type CaptureEntry = {
   stream: PassThrough
   bytesReceived: number
+  capped: boolean
+}
+
+type ArmOptions = {
+  capped?: boolean
 }
 
 /**
@@ -56,8 +77,11 @@ export class CdpBodyCapture {
    * Arms the capture pump for a networkId before the response pause is
    * released. Returns undefined on any CDP failure — arm failure must never
    * throw into the caller, it just means this response goes uncaptured.
+   *
+   * `capped` (default true) ends the capture at CAPTURE_BYTE_CAP. Pass false
+   * only when isProvablyFinite holds for the response.
    */
-  async arm (networkId: string, sessionId?: string): Promise<Readable | undefined> {
+  async arm (networkId: string, sessionId?: string, { capped = true }: ArmOptions = {}): Promise<Readable | undefined> {
     const key = this.getCaptureKey(networkId, sessionId)
     let entry: CaptureEntry | undefined
 
@@ -90,7 +114,7 @@ export class CdpBodyCapture {
 
       const stream = new PassThrough()
 
-      entry = { stream, bytesReceived: 0 }
+      entry = { stream, bytesReceived: 0, capped }
 
       // A re-arm for a live key would strand the previous stream un-ended,
       // hanging any consumer holding it — end it before replacing.
@@ -152,7 +176,7 @@ export class CdpBodyCapture {
     entry.bytesReceived += chunk.length
     entry.stream.push(chunk)
 
-    if (entry.bytesReceived >= CAPTURE_BYTE_CAP) {
+    if (entry.capped && entry.bytesReceived >= CAPTURE_BYTE_CAP) {
       debug('capture byte cap reached, ending stream: %s', key)
       entry.stream.end()
       this.captures.delete(key)

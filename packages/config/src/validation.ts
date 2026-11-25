@@ -468,7 +468,7 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
 
 const TRUSTED_CERTIFICATE_KEYS = ['filePath', 'pem', 'spki']
 // Chrome's --ignore-certificate-errors-spki-list format: base64 SHA-256 (32 bytes → 43 chars + '=').
-const SPKI_FINGERPRINT = /^[A-Za-z0-9+/]{43}=$/
+const SPKI_FINGERPRINT = /^[A-Z0-9+/]{43}=$/i
 
 /**
  * Validates the `trustedCertificates` list. Each entry must be an object with

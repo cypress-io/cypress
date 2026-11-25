@@ -25,6 +25,7 @@ src/
   mochaConfig.ts        eslint-plugin-mocha's rules, which `baseConfig` applies to Cypress specs and mocha workspaces add for their Node-side suites
   nodeConfig.ts         Opt-in Node runtime-floor and dependency checks (eslint-plugin-n) for Node-side workspaces, plus `userNodeConfig` for code on the user's Node
   reactConfig.ts        `reactConfig(files)`: opt-in React rules (@eslint-react/eslint-plugin), scoped to the React files given. Requires the plugin on call
+  regexpConfig.ts       Opt-in regular expression checks (eslint-plugin-regexp) for every workspace's JS, TS and .vue scripts
   typeAwareConfig.ts    `noFloatingPromisesConfig(files)`: opt-in `@typescript-eslint/no-floating-promises` with a project service, scoped to the files given
   vitestConfig.ts       Opt-in linting of Vitest specs (@vitest/eslint-plugin), for workspaces whose unit tests run on Vitest
   rules/                Cypress-authored rules, registered under the `@cypress/dev` namespace
@@ -46,13 +47,14 @@ src/
 
 A new workspace lints itself with its own config:
 
-1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), or `compatConfig` if it is one that ships to the supported browsers (see [`compatConfig`](#compatconfig)), `vitestConfig` if its unit tests run on Vitest, and `mochaConfig` narrowed to its specs if they run on mocha (see [`mochaConfig`](#mochaconfig)):
+1. Create `eslint.config.ts` at the workspace root, spreading `baseConfig`, then `regexpConfig` (see [`regexpConfig`](#regexpconfig)), then `jsonConfig` to lint JSON, then `nodeConfig` unless the workspace is a browser bundle (see [`nodeConfig`](#nodeconfig)), or `compatConfig` if it is one that ships to the supported browsers (see [`compatConfig`](#compatconfig)), `vitestConfig` if its unit tests run on Vitest, and `mochaConfig` narrowed to its specs if they run on mocha (see [`mochaConfig`](#mochaconfig)):
 
    ```ts
-   import { baseConfig, jsonConfig, nodeConfig, vitestConfig } from '@packages/eslint-config'
+   import { baseConfig, jsonConfig, nodeConfig, regexpConfig, vitestConfig } from '@packages/eslint-config'
 
    export default [
      ...baseConfig,
+     ...regexpConfig,
      ...jsonConfig,
      ...nodeConfig,
      ...vitestConfig,
@@ -137,6 +139,26 @@ Opted in: `driver`, `app`, `frontend-shared`, `reporter` and `runner`. Not opted
 - It checks API calls, not syntax, and treats an API behind a feature check (`if ('getBattery' in navigator)`) as guarded.
 
 A hit that is intentional, such as an API used only behind a feature check the plugin doesn't recognise, takes `// eslint-disable-next-line compat/compat -- <reason>`.
+
+## `regexpConfig`
+
+`regexpConfig` applies `eslint-plugin-regexp`'s `recommended` rules to every `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.mts`, `.cts` and `.vue` file a workspace lints. Spread it after `baseConfig`. It reports regexes that are wrong, slower than they need to be, or written in a longer form than necessary:
+
+- **Mistakes**: alternatives or character class members that duplicate each other, assertions that can never match, backreferences that can be empty, obscure ranges such as `A-z`, and flags that change nothing (a `g` on a regex passed to `split`).
+- **Run time**: `regexp/no-super-linear-backtracking` reports quantifiers that can trade characters with each other, which makes matching polynomial or exponential on crafted input. Treat a hit as a real bug when the regex runs on user, network or file content.
+- **Capturing groups**: `regexp/no-unused-capturing-group` reports a group nothing reads; make it non-capturing (`(?:…)`). The rule follows match results it can see, so check by hand that no caller reads the group by index before converting one whose result leaves the function. `regexp/no-misleading-capturing-group` reports a group that captures less than its pattern suggests, because a neighbouring quantifier takes the characters first.
+- **Style**, all autofixed: `\d` over `[0-9]`, `\w` over its class, `i` over `[aA]`, sorted flags, and no redundant classes, groups or lazy quantifiers.
+
+The preset also turns on the core rules `no-control-regex`, `no-misleading-character-class`, `no-regex-spaces` and `prefer-regex-literals`, and turns off `no-invalid-regexp`, `no-useless-backreference` and `no-empty-character-class`, whose `regexp/` counterparts cover the same ground.
+
+A hit that is intentional takes `// eslint-disable-next-line <rule> -- <reason>`.
+
+Every workspace opts in. Not covered:
+
+- The repo root's `eslint.config.ts`, which lints only the config and tool files at the top of the repo.
+- `packages/proxy`'s `lib/http/util/regex-rewriter.ts` and `lib/http/util/rewriter.ts`. They rewrite every script the proxy serves, so changes to their regexes are reviewed on their own against the rewriter's specs, and `proxy` passes them in the block's `ignores`.
+
+`eslint-plugin-regexp` is ESM-only and needs ESLint 9.38 or later.
 
 ## `noFloatingPromisesConfig`
 

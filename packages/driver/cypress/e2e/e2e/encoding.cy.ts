@@ -205,7 +205,7 @@ describe('encoding', () => {
             const message = errored.error?.message ?? ''
 
             expect(message.slice(0, failedResponsePrefix.length), 'interception.error.message').to.eq(failedResponsePrefix)
-            expect(message.slice(failedResponsePrefix.length), 'Network.ErrorReason').to.match(/^[A-Za-z]+$/)
+            expect(message.slice(failedResponsePrefix.length), 'Network.ErrorReason').to.match(/^[a-z]+$/i)
           })
         } else {
           expect(interception.response?.statusCode).to.eq(200)
