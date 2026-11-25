@@ -9,6 +9,7 @@ export const docsUrl = 'https://on.cypress.io'
 
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
+const packageManagerConfigUrl = `${docsUrl}/app/get-started/install-cypress#Package-Manager`
 
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
@@ -72,6 +73,10 @@ const missingApp = (binaryDir: string): any => {
     )}`,
     solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
+
+    If your package manager blocks install scripts, it may have skipped the postinstall script that downloads the Cypress binary. Allow the cypress package to run its install script so that future installs download the binary:
+
+      ${chalk.blue(packageManagerConfigUrl)}
   `,
   }
 }
@@ -103,8 +108,13 @@ const notInstalledCI = (executable: string): any => {
 
     - You're caching 'node_modules' but are not caching this path: ${state.getCacheDir()}
     - You ran 'npm install' at an earlier build step but did not persist: ${state.getCacheDir()}
+    - Your package manager blocks install scripts, so it skipped the postinstall script that downloads the binary
 
     Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
+
+    If your package manager blocks install scripts, allow the cypress package to run its install script:
+
+      ${chalk.blue(packageManagerConfigUrl)}
 
     Alternatively, you can run 'cypress install' to download the binary again.
 
@@ -309,6 +319,11 @@ const invalidTestingType = {
   solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan('\'e2e\'')} and ${chalk.cyan('\'component\'')}.`,
 }
 
+const incompleteHeadlessOpen = {
+  description: '`cypress open --headless` starts a session for `cypress tap` to drive, with no Cypress window to choose a project or testing type in, so it needs both up front.',
+  solution: 'Pass `--e2e` or `--component` along with `--headless`. Pass `--project` too if Cypress is installed globally, and do not pass `--global`.',
+}
+
 const incompatibleTestTypeFlags = {
   description: '`--e2e` and `--component` cannot both be passed.',
   solution: 'Either pass `--e2e` or `--component`, but not both.',
@@ -496,6 +511,7 @@ export const errors = {
   incompatibleHeadlessFlags,
   invalidRunProjectPath,
   invalidTestingType,
+  incompleteHeadlessOpen,
   incompatibleTestTypeFlags,
   incompatibleTestingTypeAndFlag,
   invalidConfigFile,

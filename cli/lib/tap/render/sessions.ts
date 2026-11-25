@@ -12,6 +12,24 @@ export interface SessionRow {
   browserAttached?: boolean
   browserSupported?: boolean
   rendererResponsive?: boolean
+  loadError?: string
+  pluginsError?: string
+}
+
+// A project that stopped loading is named as such, since every command but status refuses it.
+// One whose plugins process stopped can still be driven, but nothing that needs the process works.
+const projectState = (session: SessionRow): string | null => {
+  if (session.loadError) {
+    return 'could not load'
+  }
+
+  return session.pluginsError ? 'plugins stopped' : null
+}
+
+const projectCell = (session: SessionRow): string => {
+  const state = projectState(session)
+
+  return state === null ? session.projectRoot : `${session.projectRoot} (${state})`
 }
 
 // An open browser reads by its name alone only when tap can actually drive it;
@@ -61,7 +79,7 @@ export const sessionColumns = (sessions: SessionRow[]): string[] => {
   const rows = sessions.map((session) => {
     return [
       String(session.pid),
-      session.projectRoot,
+      projectCell(session),
       session.testingType ?? '—',
       browserCell(session),
     ]
@@ -70,7 +88,7 @@ export const sessionColumns = (sessions: SessionRow[]): string[] => {
   return columns(['PID', 'PROJECT', 'TYPE', 'BROWSER'], rows, (cells, index) => {
     return [
       chalk.bold(cells[0]),
-      cells[1],
+      projectState(sessions[index]) === null ? cells[1] : color.warn(cells[1]),
       cells[2],
       browserColor(sessions[index])(cells[3]),
     ]

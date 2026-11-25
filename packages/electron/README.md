@@ -219,7 +219,7 @@ When contributing to this package:
 4. **Rebuild after changes** using `yarn build:cjs`
 5. **Test the binary** with `./bin/cypress-electron --install`
 
-For more detailed information about the build system, see [BUILD.md](./BUILD.md).
+For more detailed information about the build system, see [Building Release Artifacts](../../guides/building-release-artifacts.md).
 
 
 ### Common Upgrade Issues

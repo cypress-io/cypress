@@ -25,7 +25,7 @@ If you want to update Data, you use an Action (see below).
 
 ### Sources
 
-The sources directory contains what can be thought of as "read only" and "derived" data. Each one is namespaced based on the kind of data it's associated with, for example Project, Browser, Settings, etc. Sources can access the `ctx` (type `DataContext`, see [`DataContext.ts`](./DataContext.ts)), using `this.ctx`.
+The sources directory contains what can be thought of as "read only" and "derived" data. Each one is namespaced based on the kind of data it's associated with, for example Project, Browser, Settings, etc. Sources can access the `ctx` (type `DataContext`, see [`DataContext.ts`](./src/DataContext.ts)), using `this.ctx`.
 
 If you want to update something in a Source, or in `coreData`, you want to do it using an Action.
 
@@ -37,7 +37,7 @@ Actions are where mutative and destructive operations live. To make this predict
 
 In this example, we will load some specs for a project and persist them. We will use a Source to derive any specs with the characters "foo" in the filename. This shows how Data, Sources and Actions are connected.
 
-### 1. Define Data [data/coreData](./data/coreDataShape.ts)
+### 1. Define Data [data/coreData](./src/data/coreDataShape.ts)
 
 First we define the type in `CoreDataShape` and set the initial value in `makeCoreData`.
 
@@ -78,7 +78,7 @@ export class SpecActions {
 }
 ```
 
-**Note**: If you added a new Action file, you will also need to add it to [`DataActions.ts`](./DataActions.ts), although this isn't very common.
+**Note**: If you added a new Action file, you will also need to add it to [`DataActions.ts`](./src/DataActions.ts), although this isn't very common.
 
 ```ts
 import type { DataContext } from '.'
@@ -116,7 +116,7 @@ export class SpecDataSource {
 }
 ```
 
-If you added a new Source, you need to add it to [`DataContext.ts`](./DataContext.ts). 
+If you added a new Source, you need to add it to [`DataContext.ts`](./src/DataContext.ts). 
 
 ```ts
 import { SpecDataSource } from './sources/SpecDataSource'
@@ -134,7 +134,7 @@ export class DataContext {
 
 ### 4. (Bonus) Expose via GraphQL
 
-You might want to expose your new Data or Source via GraphQL. It's easy, since GraphQL also has access `ctx` as the third argument to the resolvers. For example, we can expose `specs` and `fooSpecs` in [`gql-Query.ts`](../graphql/src/schemaTypes/objectTypes/gql-Query.ts) like this:
+You might want to expose your new Data or Source via GraphQL. It's easy, since GraphQL also has access `ctx` as the third argument to the resolvers. For example, we can expose `specs` and `fooSpecs` in [`gql-Query.ts`](./graphql/schemaTypes/objectTypes/gql-Query.ts) like this:
 
 ```ts
 export const Query = objectType({

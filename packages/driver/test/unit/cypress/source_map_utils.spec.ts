@@ -117,6 +117,51 @@ describe('source_map_utils', () => {
       })
     })
 
+    const toBase64 = (sourceMap: object) => Buffer.from(JSON.stringify(sourceMap)).toString('base64')
+    const mapA = { version: 3, sources: ['a.cy.js'], names: [], mappings: 'AAAA' }
+    const mapB = { version: 3, sources: ['b.cy.js'], names: [], mappings: 'AAAA' }
+
+    it('uses the last inline map when there are several', async () => {
+      await withLinuxPaths((sourceMapUtils) => {
+        const contents = `${withInlineMap(toBase64(mapA))}${withInlineMap(toBase64(mapB))}`
+
+        expect(sourceMapUtils.extractSourceMap(contents)).toEqual(mapB)
+      })
+    })
+
+    it('ignores a later map that is not inline', async () => {
+      await withLinuxPaths((sourceMapUtils) => {
+        const contents = `${withInlineMap(toBase64(mapA))}//# sourceMappingURL=spec.cy.js.map\n`
+
+        expect(sourceMapUtils.extractSourceMap(contents)).toEqual(mapA)
+      })
+    })
+
+    it('accepts the legacy //@ marker and whitespace around the =', async () => {
+      await withLinuxPaths((sourceMapUtils) => {
+        const contents = `it('test', () => {})\n//@ sourceMappingURL = data:application/json;base64,${toBase64(mapA)}`
+
+        expect(sourceMapUtils.extractSourceMap(contents)).toEqual(mapA)
+      })
+    })
+
+    it('ends the inline map at the first whitespace', async () => {
+      await withLinuxPaths((sourceMapUtils) => {
+        const contents = `//# sourceMappingURL=data:application/json;base64,${toBase64(mapA)} trailing text`
+
+        expect(sourceMapUtils.extractSourceMap(contents)).toEqual(mapA)
+      })
+    })
+
+    it.each([
+      `it('test', () => {})\n`,
+      `it('test', () => {})\n//# sourceMappingURL=spec.cy.js.map\n`,
+    ])('returns null when there is no inline map in %j', async (contents) => {
+      await withLinuxPaths((sourceMapUtils) => {
+        expect(sourceMapUtils.extractSourceMap(contents)).toBeNull()
+      })
+    })
+
     it('returns null when the inline map is not valid UTF-8', async () => {
       await withLinuxPaths((sourceMapUtils) => {
         const mapBase64 = Buffer.concat([Buffer.from('{"version":3,"sources":["'), Buffer.from([0xff]), Buffer.from('"]}')]).toString('base64')

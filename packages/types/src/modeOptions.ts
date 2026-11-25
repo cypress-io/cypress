@@ -36,6 +36,7 @@ export interface OpenModeOptions extends CommonModeOptions {
   global?: boolean
   testingType?: TestingType
   updating?: boolean | null
+  headless?: boolean | null
 }
 
 export type AllModeOptions = RunModeOptions & OpenModeOptions

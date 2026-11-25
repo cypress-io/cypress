@@ -132,6 +132,32 @@ describe('transformSpec', () => {
 
     expect(result).toEqual(actual)
   })
+
+  it('removes only the leading slash left after stripping the common root', () => {
+    const result = transformSpec({
+      projectRoot: '/project',
+      testingType: 'e2e',
+      absolute: '/project/cypress/e2e/nested/spec.cy.js',
+      commonRoot: '/project/cypress',
+      platform: 'linux',
+      sep: '/',
+    })
+
+    expect(result.relativeToCommonRoot).toEqual('e2e/nested/spec.cy.js')
+  })
+
+  it('leaves the path alone when the common root already ends in a slash', () => {
+    const result = transformSpec({
+      projectRoot: '/project',
+      testingType: 'e2e',
+      absolute: '/project/cypress/e2e/nested/spec.cy.js',
+      commonRoot: '/project/cypress/',
+      platform: 'linux',
+      sep: '/',
+    })
+
+    expect(result.relativeToCommonRoot).toEqual('e2e/nested/spec.cy.js')
+  })
 })
 
 describe('findSpecs', () => {
@@ -278,6 +304,15 @@ describe('getLongestCommonPrefixFromPaths', () => {
     const lcp = getLongestCommonPrefixFromPaths([
       'src/frontend/MyComponent.cy.ts',
       'src/MyComponent.cy.ts',
+    ])
+
+    expect(lcp).toEqual('src')
+  })
+
+  it('with backslash-separated paths', () => {
+    const lcp = getLongestCommonPrefixFromPaths([
+      'src\\frontend\\MyComponent.cy.ts',
+      'src\\MyComponent.cy.ts',
     ])
 
     expect(lcp).toEqual('src')

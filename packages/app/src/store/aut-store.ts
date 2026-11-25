@@ -13,6 +13,12 @@ interface AutStoreState {
   isLoading: boolean
   isRunning: boolean
   scriptError: ScriptError
+  /**
+   * Why the spec threw while it was loading, such as a component spec its dev server failed
+   * to compile. The runner shows it as a failed test rather than over the AUT, so only
+   * `cypress tap` reads it.
+   */
+  specLoadError: string | null
   viewportUpdateCallback: (() => void) | null
   scale: number
   specRunnerHeaderHeight: number
@@ -37,6 +43,7 @@ export const useAutStore = defineStore({
       isRunning: false,
       viewportUpdateCallback: null,
       scriptError: null,
+      specLoadError: null,
       scale: 1,
       specRunnerHeaderHeight: 64,
     }
@@ -80,6 +87,10 @@ export const useAutStore = defineStore({
 
     setScriptError (err: ScriptError) {
       this.scriptError = err
+    },
+
+    setSpecLoadError (err: string | null) {
+      this.specLoadError = err
     },
 
     setScale (scale: number) {

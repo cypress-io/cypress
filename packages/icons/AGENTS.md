@@ -40,4 +40,4 @@ index.d.ts          TypeScript declarations for the icon path exports
 ## Integration Points
 
 - Consumed by **@packages/electron** for the application Dock/taskbar icon when packaging the binary.
-- Consumed by **@packages/extension** for the browser extension icon and popup theme.
+- Consumed by **@packages/extension** for the browser extension icons and the logo on its popup and new tab page.

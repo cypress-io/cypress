@@ -7,6 +7,7 @@ import { HttpIntercept } from '@packages/network-interception'
 import { digestBody } from '../../../lib/browsers/cdp-protocol/body-digest'
 import { createCdpFetchCodec } from '../../../lib/browsers/cdp-protocol/cdp-fetch-codec'
 import { CdpFetchTransport } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
+import { BODY_READ_CHUNK_BYTES } from '../../../lib/browsers/cdp-protocol/read-response-body'
 import type { CdpFetchTransportRequest } from '../../../lib/browsers/cdp-protocol/cdp-fetch-transport'
 import type { ChromeStoreCookie } from '../../../lib/browsers/cdp-protocol/cdp-set-cookie-sync'
 import { CdpBodyCapture } from '../../../lib/browsers/cdp-protocol/cdp-body-capture'
@@ -126,6 +127,7 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
   onRequestCanceled?: (requestId: string) => void
   shouldStreamBody?: (event: Protocol.Fetch.RequestPausedEvent, context: { hasMatchingRoute: boolean }) => boolean
   shouldCaptureBody?: () => boolean
+  readBodyInChunks?: (event: Protocol.Fetch.RequestPausedEvent) => boolean
   bodyCapture?: CdpBodyCapture
 } = {}) {
   const networkExtraInfo = createNetworkExtraInfo()
@@ -145,6 +147,7 @@ function createTransport (client: ReturnType<typeof createClient>, options: {
     onRequestCanceled: options.onRequestCanceled,
     shouldStreamBody: options.shouldStreamBody ?? defaultShouldStreamBody,
     shouldCaptureBody: options.shouldCaptureBody,
+    readBodyInChunks: options.readBodyInChunks,
   }, networkExtraInfo as any, bodyCapture)
 
   return { transport, networkExtraInfo, bodyCapture }
@@ -1370,6 +1373,248 @@ describe('CdpFetchTransport', () => {
     })
   })
 
+  describe('reading a body in chunks', () => {
+    const scriptBody = 'function frameBusting(){if(window.top!==window.self){window.top.location=window.location}}\n'
+
+    // Answers Fetch.takeResponseBodyAsStream with a stream handle and IO.read
+    // with the body split into two reads, the second one base64-encoded.
+    const serveTakenBody = (client: ReturnType<typeof createClient>, body: string) => {
+      const half = Math.ceil(body.length / 2)
+
+      client.sendWithArgs('Fetch.takeResponseBodyAsStream').resolves({ stream: 'stream-1' })
+      client.sendWithArgs('IO.read').callsFake(vi.fn()
+      .mockResolvedValueOnce({ data: body.slice(0, half), base64Encoded: false, eof: false })
+      .mockResolvedValueOnce({ data: Buffer.from(body.slice(half)).toString('base64'), base64Encoded: true, eof: true }))
+    }
+
+    const driveScriptPause = async (onRequestPaused: Parameters<typeof driveResponsePause>[0]) => {
+      return driveResponsePause(onRequestPaused, {
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        url: 'https://app.example.test/main.js',
+        resourceType: 'Script',
+      }, {
+        headers: [
+          { name: 'Content-Type', value: 'application/javascript' },
+          { name: 'Content-Encoding', value: 'gzip' },
+        ],
+      })
+    }
+
+    it('fulfills an unchanged body with the bytes it read, since Chrome refuses to continue it', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => true })
+
+      serveTakenBody(client, scriptBody)
+
+      const onRequestPaused = await startTransport(transport, client)
+
+      await driveScriptPause(onRequestPaused)
+
+      expectNotCalledWith(client.send, 'Fetch.getResponseBody')
+      expectCalledWith(client.send, 'IO.read', { handle: 'stream-1', size: BODY_READ_CHUNK_BYTES })
+      expectCalledWith(client.send, 'IO.close', { handle: 'stream-1' })
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responsePhrase: 'OK',
+        responseHeaders: [{ name: 'content-type', value: 'application/javascript' }],
+        body: Buffer.from(scriptBody).toString('base64'),
+      })
+
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+    })
+
+    it('hands the whole body to the middleware and fulfills its rewrite', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => true })
+      const seenBodies: string[] = []
+
+      serveTakenBody(client, scriptBody)
+
+      httpIntercept.use(async (req, next) => {
+        const response = await next(req)
+        const body = await readStream(response.bodyStream!)
+
+        seenBodies.push(body)
+
+        return { ...response, body: body.replaceAll('window.top', 'window.self') }
+      })
+
+      const onRequestPaused = await startTransport(transport, client)
+
+      await driveScriptPause(onRequestPaused)
+
+      expect(seenBodies).toEqual([scriptBody])
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responsePhrase: 'OK',
+        responseHeaders: [{ name: 'content-type', value: 'application/javascript' }],
+        body: Buffer.from(scriptBody.replaceAll('window.top', 'window.self')).toString('base64'),
+      })
+    })
+
+    it('fails the request when a read breaks off partway, since it can be neither continued nor fulfilled', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => true })
+
+      client.sendWithArgs('Fetch.takeResponseBodyAsStream').resolves({ stream: 'stream-1' })
+      client.sendWithArgs('IO.read').rejects(new Error('Invalid stream handle'))
+
+      const onRequestPaused = await startTransport(transport, client)
+
+      await driveScriptPause(onRequestPaused)
+
+      expectCalledWith(client.send, 'IO.close', { handle: 'stream-1' })
+      expectCalledWith(client.send, 'Fetch.failRequest', { requestId: 'fetch-request', errorReason: 'Failed' })
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+    })
+
+    it('continues the response when taking the body fails, since the body is still Chrome\'s', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => true })
+
+      client.sendWithArgs('Fetch.takeResponseBodyAsStream').rejects(new Error('Invalid InterceptionId.'))
+
+      const onRequestPaused = await startTransport(transport, client)
+
+      await driveScriptPause(onRequestPaused)
+
+      expectCalledWith(client.send, 'Fetch.continueResponse', { requestId: 'fetch-request' })
+      expectNotCalledWith(client.send, 'Fetch.failRequest')
+    })
+
+    it('drops a taken body once a response handler fails the request, so a later pause with the same id does not get it', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      let bodyInChunks = true
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => bodyInChunks })
+      const handlerErrors = [
+        Object.assign(new Error('forceNetworkError called'), { isForceNetworkError: true }),
+        new Error('handler threw'),
+      ]
+
+      serveTakenBody(client, scriptBody)
+      client.sendWithArgs('Fetch.getResponseBody').resolves({ body: 'b3JpZ2lu', base64Encoded: true })
+
+      httpIntercept.use(async (req, next) => {
+        await next(req)
+
+        throw handlerErrors.shift()
+      })
+
+      const onRequestPaused = await startTransport(transport, client)
+
+      await driveScriptPause(onRequestPaused)
+
+      expectCalledWith(client.send, 'Fetch.failRequest', { requestId: 'fetch-request', errorReason: 'Failed' })
+
+      bodyInChunks = false
+      client.send.mockClear()
+
+      await driveScriptPause(onRequestPaused)
+
+      expectCalledWith(client.send, 'Fetch.continueResponse', { requestId: 'fetch-request' })
+      expectNotCalledWith(client.send, 'Fetch.fulfillRequest')
+    })
+
+    it('fulfills the body it read when a reset rejects the flow during the read', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => true })
+      const read = Promise.withResolvers<{ data: string, base64Encoded: boolean, eof: boolean }>()
+
+      client.sendWithArgs('Fetch.takeResponseBodyAsStream').resolves({ stream: 'stream-1' })
+      client.sendWithArgs('IO.read').returns(read.promise)
+
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'Script' }))
+
+      await tick()
+
+      const responseEvent = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'Script', responseStatusCode: 200 })
+
+      responseEvent.responseHeaders = [{ name: 'Content-Type', value: 'application/javascript' }]
+
+      const responseHandled = onRequestPaused(responseEvent)
+
+      await vi.waitFor(() => expectCalledWith(client.send, 'IO.read'))
+
+      transport.reset()
+      read.resolve({ data: scriptBody, base64Encoded: false, eof: true })
+
+      await responseHandled
+      await handled
+
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responsePhrase: 'OK',
+        responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }],
+        body: Buffer.from(scriptBody).toString('base64'),
+      })
+
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+    })
+
+    it('releases the body it read when the browser cancels the request during the read', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept, readBodyInChunks: () => true })
+      const read = Promise.withResolvers<{ data: string, base64Encoded: boolean, eof: boolean }>()
+
+      // The proxy's error stage runs on Bluebird, which schedules with
+      // setImmediate, so the rejection reaches the transport's catch a turn later.
+      httpIntercept.use(async (req, next) => {
+        try {
+          return await next(req)
+        } catch (err) {
+          await new Promise((resolve) => setImmediate(resolve))
+
+          throw err
+        }
+      })
+
+      client.sendWithArgs('Fetch.takeResponseBodyAsStream').resolves({ stream: 'stream-1' })
+      client.sendWithArgs('IO.read').returns(read.promise)
+
+      const onRequestPaused = await startTransport(transport, client)
+      const handled = onRequestPaused(createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'Script' }))
+
+      await tick()
+
+      const responseEvent = createPausedRequest({ requestId: 'fetch-request', networkId: 'network-1', resourceType: 'Script', responseStatusCode: 200 })
+
+      responseEvent.responseHeaders = [{ name: 'Content-Type', value: 'application/javascript' }]
+
+      const responseHandled = onRequestPaused(responseEvent)
+
+      await vi.waitFor(() => expectCalledWith(client.send, 'IO.read'))
+
+      onLoadingFailed(client, { requestId: 'network-1', canceled: true })
+      read.resolve({ data: scriptBody, base64Encoded: false, eof: true })
+
+      await responseHandled
+      await handled
+
+      expectCalledWith(client.send, 'Fetch.fulfillRequest', {
+        requestId: 'fetch-request',
+        responseCode: 200,
+        responsePhrase: 'OK',
+        responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }],
+        body: Buffer.from(scriptBody).toString('base64'),
+      })
+
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+    })
+  })
+
   describe('request pause handling', () => {
     it('continues the request and resolves the pending flow from a matching response pause', async () => {
       const client = createClient()
@@ -2187,10 +2432,10 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('does not let a timed out redirect hop reject a newer hop with a distinct fetch request id', async () => {
-      vi.useFakeTimers()
+    it('keeps a newer redirect hop cancelable after an older hop sharing its network id finishes', async () => {
       const client = createClient()
-      const { transport } = createTransport(client)
+      const onRequestCanceled = vi.fn()
+      const { transport } = createTransport(client, { onRequestCanceled })
       const onRequestPaused = await startTransport(transport, client)
 
       const firstHandled = onRequestPaused(createPausedRequest({
@@ -2200,7 +2445,6 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      await vi.advanceTimersByTimeAsync(1)
 
       const secondHandled = onRequestPaused(createPausedRequest({
         requestId: 'second-request-pause-id',
@@ -2209,20 +2453,91 @@ describe('CdpFetchTransport', () => {
       }))
 
       await tick()
-      await vi.advanceTimersByTimeAsync(29999)
-      await firstHandled
 
       await onRequestPaused(createPausedRequest({
-        requestId: 'second-request-pause-id',
+        requestId: 'first-request-pause-id',
         networkId: 'shared-network-id',
-        url: 'https://example.test/final',
-        responseStatusCode: 200,
+        url: 'https://example.test/redirect',
+        responseStatusCode: 301,
       }))
+
+      await firstHandled
+
+      onLoadingFailed(client, { requestId: 'shared-network-id', canceled: true })
 
       await secondHandled
 
+      expectCalledOnceWith(onRequestCanceled, 'shared-network-id')
+      expectNotCalledWith(client.send, 'Fetch.continueResponse', { requestId: 'second-request-pause-id' })
+    })
+
+    it('fails the flow with ESOCKETTIMEDOUT when a request handler\'s responseTimeout elapses before headers arrive', async () => {
+      const client = createClient()
+      const httpIntercept = new HttpIntercept(createCdpFetchCodec())
+      const { transport } = createTransport(client, { httpIntercept })
+      const onRequestPaused = await startTransport(transport, client)
+      let upstreamError: (Error & { code?: string }) | undefined
+
+      httpIntercept.use(async (req, next) => {
+        try {
+          return await next({ ...req, responseTimeout: 45000 })
+        } catch (err) {
+          upstreamError = err as Error
+
+          throw err
+        }
+      })
+
+      vi.useFakeTimers({ shouldAdvanceTime: false })
+
+      try {
+        const handled = onRequestPaused(createPausedRequest({
+          requestId: 'fetch-request',
+          networkId: 'network-1',
+          resourceType: 'XHR',
+        }))
+
+        await vi.advanceTimersByTimeAsync(44999)
+
+        expect(upstreamError).toBeUndefined()
+
+        await vi.advanceTimersByTimeAsync(1)
+        await handled
+      } finally {
+        vi.useRealTimers()
+      }
+
+      expect(upstreamError?.code).toBe('ESOCKETTIMEDOUT')
+      expect(transport['inFlightRequests'].size).toBe(0)
+    })
+
+    it('waits for a response pause however long the origin takes to send headers when no responseTimeout is set', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: false })
+      const client = createClient()
+      const { transport } = createTransport(client)
+      const onRequestPaused = await startTransport(transport, client)
+
+      const handled = onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'XHR',
+      }))
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000)
+
+      expectNotCalledWith(client.send, 'Fetch.continueResponse')
+
+      await onRequestPaused(createPausedRequest({
+        requestId: 'fetch-request',
+        networkId: 'network-1',
+        resourceType: 'XHR',
+        responseStatusCode: 200,
+      }))
+
+      await handled
+
       expectCalledWith(client.send, 'Fetch.continueResponse', {
-        requestId: 'second-request-pause-id',
+        requestId: 'fetch-request',
         responseCode: 200,
       })
     })
@@ -3573,6 +3888,29 @@ describe('CdpFetchTransport', () => {
         expect(Buffer.concat(chunks).toString()).toBe('captured-chunk')
       })
 
+      it('caps the capture only when the response has no valid content-length', async () => {
+        const capped = async (headers: Protocol.Fetch.HeaderEntry[]) => {
+          const client = createClient()
+          const { transport, bodyCapture } = createTransport(client, {
+            shouldStreamBody: () => true,
+            shouldCaptureBody: () => true,
+          })
+          const armSpy = vi.spyOn(bodyCapture, 'arm')
+          const onRequestPaused = await startTransport(transport, client)
+
+          await driveResponsePause(onRequestPaused, {
+            requestId: 'fetch-request',
+            networkId: 'network-1',
+          }, { headers })
+
+          return armSpy.mock.calls[0][2]?.capped
+        }
+
+        expect(await capped([{ name: 'content-type', value: 'application/wasm' }, { name: 'content-length', value: '62914577' }])).toBe(false)
+        expect(await capped([{ name: 'content-type', value: 'application/x-ndjson' }])).toBe(true)
+        expect(await capped([{ name: 'content-length', value: 'abc' }])).toBe(true)
+      })
+
       it('does not arm the capture pump when shouldCaptureBody is unset (default)', async () => {
         const client = createClient()
         const { transport } = createTransport(client, {
@@ -3763,7 +4101,7 @@ describe('CdpFetchTransport', () => {
       })
     })
 
-    it('does not charge the response body transfer against the response pause timeout', async () => {
+    it('does not charge the response body transfer against the responseTimeout', async () => {
       const client = createClient()
       const httpIntercept = new HttpIntercept(createCdpFetchCodec())
       const { transport } = createTransport(client, { httpIntercept })
@@ -3772,7 +4110,7 @@ describe('CdpFetchTransport', () => {
 
       client.sendWithArgs('Fetch.getResponseBody').returns(slowBody.promise)
 
-      httpIntercept.use(async (req, next) => next(req))
+      httpIntercept.use(async (req, next) => next({ ...req, responseTimeout: 30000 }))
 
       vi.useFakeTimers({ shouldAdvanceTime: false })
 
@@ -3790,8 +4128,6 @@ describe('CdpFetchTransport', () => {
           responseStatusCode: 200,
         }))
 
-        // the pause already arrived, so a body slower than the 30s pause
-        // timeout must not fail the flow
         await vi.advanceTimersByTimeAsync(31000)
 
         slowBody.resolve({ body: '', base64Encoded: false })

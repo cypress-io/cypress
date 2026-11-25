@@ -2297,29 +2297,6 @@ declare namespace Cypress {
     setCookie(name: string, value: string, options?: Partial<SetCookieOptions>): Chainable<Cookie>
 
     /**
-     * Traverse into the `<body>` of an iframe's document, whatever its origin.
-     * Requires the experimental driver.
-     *
-     * @example
-     *    cy.get('iframe#checkout')
-     *    .frame()
-     *    .find('#card-number')
-     *    .type('4242 4242 4242 4242')
-     */
-    frame(options?: Partial<LogTimeoutOptions>): Chainable<JQuery<HTMLBodyElement>>
-
-    /**
-     * Get the `<body>` of a tab the app opened, such as a login popup. A string matches any
-     * part of the tab's URL, and with no URL the newest tab is used.
-     * Requires the experimental driver.
-     *
-     * @example
-     *    cy.get('#sign-in-with-idp').click()
-     *    cy.tab(/login\.idp/).find('#username').type('ada')
-     */
-    tab(url?: string | RegExp, options?: Partial<LogTimeoutOptions>): Chainable<JQuery<HTMLBodyElement>>
-
-    /**
      * Traverse into an element's shadow root.
      *
      * @example
@@ -6812,10 +6789,12 @@ declare namespace Cypress {
      */
     (action: 'url:changed', fn: (url: string) => void): Cypress
     /**
-     * Fires when the test has failed. It is technically possible to prevent the test
-     * from actually failing by binding to this event and invoking an async `done` callback.
-     * However this is **strongly discouraged**. Tests should never legitimately fail.
-     *  This event exists because it's extremely useful for debugging purposes.
+     * Fires when the test has failed. Binding to this event without rethrowing the error
+     * prevents the test from failing, and Cypress doesn't run the test's remaining commands.
+     * Throw the error, or another error, from the handler to fail the test.
+     * A test that takes a `done` callback still fails with a timeout unless the handler calls `done`.
+     * Preventing a test from failing is **strongly discouraged**. Tests should never legitimately fail.
+     * This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'fail', fn: (error: CypressError, mocha: Mocha.Runnable) => void): Cypress

@@ -8,7 +8,6 @@ import { fs } from '../util/fs'
 import { getCwd } from '../cwd'
 import md5 from 'md5'
 import sanitize from 'sanitize-filename'
-import replace from 'lodash/replace'
 import { resolveDevelopmentCloudWorkspaceNumber } from '@packages/config'
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -105,8 +104,10 @@ const modifyFileIfOutsideProjectDirectory = (projectRoot: string, filePath: stri
   if (!isSubDirectory) {
     const commonDirectoryPath = findCommonAncestor(projectRoot, filePath)
 
-    if (commonDirectoryPath) {
-      filePath = replace(filePath, commonDirectoryPath, '')
+    const commonDirectoryIndex = commonDirectoryPath ? filePath.indexOf(commonDirectoryPath) : -1
+
+    if (commonDirectoryPath && commonDirectoryIndex !== -1) {
+      filePath = filePath.slice(0, commonDirectoryIndex) + filePath.slice(commonDirectoryIndex + commonDirectoryPath.length)
     }
   }
 
