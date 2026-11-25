@@ -1,0 +1,267 @@
+{
+  "interceptedImageRequest": {
+    "eventName": "incoming:request",
+    "data": {
+      "requestId": "7213.145",
+      "method": "GET",
+      "url": "http://localhost:3500/fixtures/media/cypress.png?1795605486658",
+      "headers": {
+        "sec-ch-ua-platform": "\"Linux\"",
+        "Referer": "http://localhost:3500/__cypress/iframes/cypress%2Fe2e%2Fcypress%2Fproxy-logging.cy.ts?browserFamily=chromium",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"153\", \"Not_A Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "resourceType": "image",
+      "originalResourceType": "Image",
+      "initiator": {
+        "type": "other"
+      },
+      "documentURL": "http://localhost:3500/__cypress/iframes/cypress%2Fe2e%2Fcypress%2Fproxy-logging.cy.ts?browserFamily=chromium",
+      "hasRedirectResponse": false,
+      "cdpRequestWillBeSentTimestamp": 1795605486666.556,
+      "cdpRequestWillBeSentReceivedTimestamp": 1795605486666.987,
+      "proxyRequestReceivedTimestamp": 1795605486667.6877,
+      "cdpLagDuration": 0.43115234375,
+      "proxyRequestCorrelationDuration": 0
+    }
+  },
+  "interceptedImageResponse": {
+    "eventName": "response:received",
+    "data": {
+      "requestId": "7213.145",
+      "status": 200,
+      "headers": {
+        "cache-control": "public, max-age=0",
+        "etag": "W/\"2e69-1a1ff6b6430\"",
+        "undefined": "undefined",
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "keep-alive": "timeout=5",
+        "Content-Length": "11881",
+        "date": "Wed, 25 Nov 2026 11:18:06 GMT",
+        "last-modified": "Sat, 21 Nov 2026 18:43:10 GMT",
+        "x-powered-by": "Express",
+        "content-type": "image/png"
+      }
+    }
+  },
+  "forcedNetworkErrorRequest": {
+    "eventName": "incoming:request",
+    "data": {
+      "requestId": "7213.150",
+      "method": "GET",
+      "url": "http://localhost:3500/foo",
+      "headers": {
+        "sec-ch-ua-platform": "\"Linux\"",
+        "Referer": "http://localhost:3500/__cypress/iframes/cypress%2Fe2e%2Fcypress%2Fproxy-logging.cy.ts?browserFamily=chromium",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Chromium\";v=\"153\", \"Not_A Brand\";v=\"8\"",
+        "sec-ch-ua-mobile": "?0"
+      },
+      "resourceType": "fetch",
+      "originalResourceType": "Fetch",
+      "initiator": {
+        "type": "script",
+        "stack": {
+          "callFrames": [
+            {
+              "functionName": "eval",
+              "scriptId": "1402",
+              "url": "http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/proxy-logging.cy.ts",
+              "lineNumber": 14277,
+              "columnNumber": 17
+            },
+            {
+              "functionName": "getRet",
+              "scriptId": "618",
+              "url": "cypress:///../driver/src/cy/commands/connectors.ts",
+              "lineNumber": 89,
+              "columnNumber": 21
+            },
+            {
+              "functionName": "tryCatcher",
+              "scriptId": "67",
+              "url": "cypress:///../../node_modules/bluebird/js/release/util.js",
+              "lineNumber": 16,
+              "columnNumber": 22
+            },
+            {
+              "functionName": "Promise.attempt.Promise.try",
+              "scriptId": "80",
+              "url": "cypress:///../../node_modules/bluebird/js/release/method.js",
+              "lineNumber": 38,
+              "columnNumber": 28
+            },
+            {
+              "functionName": "thenFn",
+              "scriptId": "618",
+              "url": "cypress:///../driver/src/cy/commands/connectors.ts",
+              "lineNumber": 101,
+              "columnNumber": 65
+            },
+            {
+              "functionName": "then",
+              "scriptId": "618",
+              "url": "cypress:///../driver/src/cy/commands/connectors.ts",
+              "lineNumber": 350,
+              "columnNumber": 20
+            },
+            {
+              "functionName": "wrapped",
+              "scriptId": "950",
+              "url": "cypress:///../driver/src/cypress/cy.ts",
+              "lineNumber": 630,
+              "columnNumber": 18
+            },
+            {
+              "functionName": "__stackReplacementMarker",
+              "scriptId": "971",
+              "url": "cypress:///../driver/src/cypress/command_queue.ts",
+              "lineNumber": 26,
+              "columnNumber": 9
+            },
+            {
+              "functionName": "eval",
+              "scriptId": "971",
+              "url": "cypress:///../driver/src/cypress/command_queue.ts",
+              "lineNumber": 285,
+              "columnNumber": 14
+            },
+            {
+              "functionName": "tryCatcher",
+              "scriptId": "67",
+              "url": "cypress:///../../node_modules/bluebird/js/release/util.js",
+              "lineNumber": 16,
+              "columnNumber": 22
+            },
+            {
+              "functionName": "Promise._settlePromiseFromHandler",
+              "scriptId": "66",
+              "url": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+              "lineNumber": 512,
+              "columnNumber": 30
+            },
+            {
+              "functionName": "Promise._settlePromise",
+              "scriptId": "66",
+              "url": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+              "lineNumber": 569,
+              "columnNumber": 17
+            },
+            {
+              "functionName": "Promise._settlePromiseCtx",
+              "scriptId": "66",
+              "url": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+              "lineNumber": 606,
+              "columnNumber": 9
+            },
+            {
+              "functionName": "_drainQueueStep",
+              "scriptId": "69",
+              "url": "cypress:///../../node_modules/bluebird/js/release/async.js",
+              "lineNumber": 142,
+              "columnNumber": 11
+            },
+            {
+              "functionName": "_drainQueue",
+              "scriptId": "69",
+              "url": "cypress:///../../node_modules/bluebird/js/release/async.js",
+              "lineNumber": 131,
+              "columnNumber": 8
+            },
+            {
+              "functionName": "Async._drainQueues",
+              "scriptId": "69",
+              "url": "cypress:///../../node_modules/bluebird/js/release/async.js",
+              "lineNumber": 147,
+              "columnNumber": 4
+            },
+            {
+              "functionName": "Async.drainQueues",
+              "scriptId": "69",
+              "url": "cypress:///../../node_modules/bluebird/js/release/async.js",
+              "lineNumber": 17,
+              "columnNumber": 13
+            }
+          ]
+        }
+      },
+      "documentURL": "http://localhost:3500/__cypress/iframes/cypress%2Fe2e%2Fcypress%2Fproxy-logging.cy.ts?browserFamily=chromium",
+      "hasRedirectResponse": false,
+      "cdpRequestWillBeSentTimestamp": 1795605486894.969,
+      "cdpRequestWillBeSentReceivedTimestamp": 1795605486895.3774,
+      "proxyRequestReceivedTimestamp": 1795605486896.193,
+      "cdpLagDuration": 0.408447265625,
+      "proxyRequestCorrelationDuration": 0
+    }
+  },
+  "forcedNetworkError": {
+    "eventName": "request:error",
+    "data": {
+      "requestId": "7213.150",
+      "error": {
+        "message": "forceNetworkError called",
+        "name": "Error",
+        "stack": "Error: forceNetworkError called\n    at sendStaticResponse (/home/user/cypress/packages/net-stubbing/lib/server/util.ts:212:60)\n    at InterceptedRequest.handleSubscriptions (/home/user/cypress/packages/net-stubbing/lib/server/intercepted-request.ts:201:37)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async handleInterceptRequest (/home/user/cypress/packages/net-stubbing/lib/server/handle-intercept-request.ts:121:23)",
+        "isForceNetworkError": true
+      }
+    }
+  },
+  "interceptedVisitRequest": {
+    "eventName": "incoming:request",
+    "data": {
+      "requestId": "cy.visit-1795605486763",
+      "method": "GET",
+      "url": "http://localhost:3500/fixtures/empty.html",
+      "headers": {
+        "connection": "keep-alive",
+        "accept": "text/html,*/*",
+        "accept-encoding": "gzip,identity",
+        "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "host": "localhost:3500"
+      },
+      "resourceType": "document",
+      "originalResourceType": "document"
+    }
+  },
+  "interceptedVisitResponse": {
+    "eventName": "response:received",
+    "data": {
+      "requestId": "cy.visit-1795605486763",
+      "headers": {
+        "x-powered-by": "Express",
+        "access-control-allow-origin": "*",
+        "accept-ranges": "bytes",
+        "cache-control": "public, max-age=0",
+        "last-modified": "Sat, 21 Nov 2026 18:43:10 GMT",
+        "etag": "W/\"6b-1a1ff6b642e\"",
+        "content-type": "text/html; charset=UTF-8",
+        "vary": "Accept-Encoding",
+        "date": "Wed, 25 Nov 2026 11:18:06 GMT",
+        "keep-alive": "timeout=5",
+        "content-encoding": "gzip"
+      },
+      "status": 200
+    }
+  },
+  "unloggedStylesheetResponse": {
+    "eventName": "response:received",
+    "data": {
+      "requestId": "7213.27",
+      "status": 200,
+      "headers": {
+        "Cache-Control": "public, max-age=0",
+        "ETag": "W/\"3e-1a21268bd79\"",
+        "Connection": "keep-alive",
+        "Accept-Ranges": "bytes",
+        "Content-Length": "62",
+        "Keep-Alive": "timeout=3600",
+        "Date": "Wed, 25 Nov 2026 11:18:04 GMT",
+        "Last-Modified": "Wed, 25 Nov 2026 11:13:03 GMT",
+        "Content-Type": "text/css; charset=UTF-8",
+        "Vary": "Accept-Encoding"
+      }
+    }
+  }
+}

@@ -177,6 +177,29 @@ describe('Proxy Logging', () => {
         })
       })
 
+      it('shows the response status of an intercepted non-xhr/fetch request', () => {
+        const src = `/fixtures/media/cypress.png?${Date.now()}`
+        const imageLogs: any[] = []
+
+        cy.on('log:changed', (log) => {
+          if (log.displayName === 'image') imageLogs.push(log)
+        })
+
+        cy.intercept('/fixtures/**/*.png*')
+        .then(() => {
+          const img = new Image()
+
+          img.src = src
+        })
+
+        cy.wrap(imageLogs).should((logs) => {
+          expect(logs[logs.length - 1]?.renderProps).to.include({
+            indicator: 'successful',
+            message: `GET 200 ${src}`,
+          })
+        })
+      })
+
       it('shows cy.visit if intercepted', () => {
         cy.intercept('/fixtures/empty.html')
         .then(() => {
