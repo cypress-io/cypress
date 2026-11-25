@@ -537,7 +537,7 @@ declare namespace Cypress {
     config(Object: TestConfigOverrides): void
 
     /**
-     * Returns all exposed public configuration variables set with --expose in the CLI or in "expose" object in "cypress.config.{js,ts,mjs,cjs}"
+     * Returns all exposed public configuration variables set with --expose in the CLI or in "expose" object in "cypress.config.{js,ts,mjs,cjs,mts}"
      *
      * @see https://on.cypress.io/expose
      */
@@ -3632,7 +3632,7 @@ declare namespace Cypress {
     retries: Nullable<number | ({ runMode?: Nullable<number>, openMode?: Nullable<number> }) | RetryStrategyWithModeSpecs>
     /**
      * Enables including elements within the shadow DOM when using querying
-     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs},
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs,mts},
      * per-suite or per-test in the test configuration object, or programmatically
      * with Cypress.config()
      * @default false
@@ -3716,7 +3716,7 @@ declare namespace Cypress {
    */
   interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
     /**
-     * Absolute path to the config file (default: <projectRoot>/cypress.config.{js,ts,mjs,cjs})
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{js,ts,mjs,cjs,mts})
      */
     configFile: string
     /**
@@ -4038,7 +4038,7 @@ declare namespace Cypress {
   }
 
   /**
-   * Config options that can be assigned on cypress.config.{js,ts,mjs,cjs} file
+   * Config options that can be assigned on cypress.config.{js,ts,mjs,cjs,mts} file
    */
   type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern' | 'indexHtmlFile'>
 

@@ -7,6 +7,7 @@ describe('cypress config with esm and cjs', function () {
   ;[
     'config-cjs-and-esm/config-with-mjs',
     'config-cjs-and-esm/config-with-cjs',
+    'config-cjs-and-esm/config-with-mts',
     'config-cjs-and-esm/config-with-js-module',
     'config-cjs-and-esm/config-with-ts-module',
     'config-cjs-and-esm/config-node-next',

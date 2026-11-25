@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.5.0
+
+**Features:**
+
+- Cypress now finds a `cypress.config.mts` configuration file without `--config-file`. As with the other configuration file names, Cypress reports an error if your project has more than one. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).
+
 ## 16.4.0
 
 **Features:**
