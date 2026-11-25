@@ -1044,6 +1044,27 @@ describe('ProjectLifecycleManager', () => {
         { stopsProject: false },
       )
     })
+
+    it.each(['mts', 'cts'])('keeps loading cypress.config.js and reports a conflict when cypress.config.%s sits next to it', async (extension) => {
+      const newFileName = `cypress.config.${extension}`
+
+      await fs.writeFile(path.join(tmpDir, 'cypress.config.js'), 'module.exports = {}\n')
+      await fs.writeFile(path.join(tmpDir, newFileName), 'export default {}\n')
+      const onLoadError = jest.spyOn(ctx.lifecycleManager, 'onLoadError').mockImplementation(() => {})
+
+      ctx.lifecycleManager.refreshMetaState()
+      // @ts-expect-error — private method
+      ctx.lifecycleManager.configFileWarningCheck()
+
+      expect(ctx.lifecycleManager.configFilePath).toEqual(path.join(tmpDir, 'cypress.config.js'))
+      expect(onLoadError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'CONFIG_FILES_LANGUAGE_CONFLICT',
+          messageMarkdown: expect.stringContaining(`cypress.config.js, ${newFileName}`),
+        }),
+        { stopsProject: false },
+      )
+    })
   })
 
   describe('#eventProcessPid', () => {
