@@ -39,7 +39,7 @@ vi.mock('../../../injection/patches/integrity', () => {
   }
 })
 
-const MISSING_CYPRESS_MESSAGE = 'Something went terribly wrong and we cannot proceed. We expected to find the global Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.'
+const MISSING_CYPRESS_MESSAGE = 'The script Cypress injects into this page did not find the Cypress runner at `window.parent.Cypress`, so Cypress cannot control this page.\n\nThis is likely a bug in Cypress. Open an issue that includes the steps that led to this error: https://on.cypress.io/new-issue'
 
 // Stands in for the driver's Cypress, which has the event emitter mixed in,
 // recording each call so the spec can assert the order they happen in.

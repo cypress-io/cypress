@@ -15,8 +15,7 @@ import { patchElementIntegrity } from './patches/integrity'
 // `Window.Cypress` typing doesn't reflect, so check for it to narrow.
 function assertParentCypress (Cypress: Cypress.Cypress | undefined): asserts Cypress is typeof globalThis.Cypress {
   if (!Cypress || !('removeAllListeners' in Cypress)) {
-    throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
-Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.')
+    throw new Error('The script Cypress injects into this page did not find the Cypress runner at `window.parent.Cypress`, so Cypress cannot control this page.\n\nThis is likely a bug in Cypress. Open an issue that includes the steps that led to this error: https://on.cypress.io/new-issue')
   }
 }
 
