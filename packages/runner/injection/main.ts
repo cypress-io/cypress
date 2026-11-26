@@ -11,6 +11,14 @@ import { createTimers } from './timers'
 import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 import { patchElementIntegrity } from './patches/integrity'
 
+// Matches the driver's declaration, which only reaches this bundle's
+// type-check when the driver's source is in the same program.
+declare global {
+  interface Window {
+    Cypress: Cypress.Cypress
+  }
+}
+
 // The driver mixes its event emitter onto Cypress at runtime, which the
 // `Window.Cypress` typing doesn't reflect, so check for it to narrow.
 function assertParentCypress (Cypress: Cypress.Cypress | undefined): asserts Cypress is typeof globalThis.Cypress {
