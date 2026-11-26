@@ -113,5 +113,20 @@ describe('binary-cleanup', () => {
       expect(await exists('node_modules/get-tsconfig/index.js')).to.be.true
       expect(await exists('node_modules/lodash/lodash.js')).to.be.false
     })
+
+    it('keeps a reporter loaded from disk that requires mocha', async () => {
+      await fs.outputFile(path.join(buildAppDir, 'node_modules', 'mocha-junit-reporter', 'index.js'), `var Base = require('mocha').reporters.Base\nmodule.exports = require('xml')`)
+      await fs.outputFile(path.join(buildAppDir, 'node_modules', 'xml', 'lib', 'xml.js'), 'module.exports = () => {}')
+      await fs.outputJson(path.join(buildAppDir, 'node_modules', 'xml', 'package.json'), { main: 'lib/xml.js' })
+
+      await removeBundledDependencies(buildAppDir, {
+        bundledDependencies: ['./node_modules/xml/lib/xml.js', './node_modules/lodash/lodash.js'],
+        loadedFromDisk: ['node_modules/mocha-junit-reporter/index.js'],
+      })
+
+      expect(await exists('node_modules/mocha-junit-reporter/index.js')).to.be.true
+      expect(await exists('node_modules/xml/lib/xml.js')).to.be.true
+      expect(await exists('node_modules/lodash/lodash.js')).to.be.false
+    })
   })
 })

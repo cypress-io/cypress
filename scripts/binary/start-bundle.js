@@ -98,9 +98,7 @@ const keepModuleLocation = (buildAppDir, requireResolveTargets) => {
   }
 }
 
-// request-promise loads a private copy of @cypress/request by clearing require.cache, which bundled modules
-// bypass, so in the bundle it would patch the copy that every other request uses and reject non-2xx responses.
-// The bundle requires the exact file resolved here, which is the one kept on disk.
+// The bundle requires the exact file resolved here, which binary cleanup then keeps on disk.
 const loadFromDisk = (bundleDir, filter, loadedFromDisk) => {
   return {
     name: 'load-from-disk',
@@ -140,7 +138,12 @@ const createStartCypressBundle = async (buildAppDir) => {
     external: ['electron'],
     banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
     plugins: [
+      // request-promise loads a private copy of @cypress/request by clearing require.cache, which bundled modules
+      // bypass, so in the bundle it would patch the copy that every other request uses and reject non-2xx responses.
       loadFromDisk(bundleDir, /^@cypress\/request-promise(\/|$)/, loadedFromDisk),
+      // custom reporters require mocha and the built-in junit and teamcity reporters from the binary's node_modules,
+      // so Cypress loads them from there too and both share one instance of each
+      loadFromDisk(bundleDir, /^mocha-(7\.2\.0|junit-reporter|teamcity-reporter)(\/|$)/, loadedFromDisk),
       externalizeUnresolvable(bundleDir, unresolved),
       keepModuleLocation(unixBuildAppDir, loadedFromDisk),
     ],

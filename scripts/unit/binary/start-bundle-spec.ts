@@ -55,6 +55,30 @@ describe('start-bundle', () => {
       expect(loadedFromDisk).to.deep.equal(['node_modules/consumer/node_modules/@cypress/request-promise/index.js'])
     })
 
+    it('loads mocha and the built-in junit and teamcity reporters from disk', async () => {
+      const mochaPath = path.join(appDir, 'node_modules', 'mocha-7.2.0', 'index.js')
+      const mochaReportersPath = path.join(appDir, 'node_modules', 'mocha-7.2.0', 'lib', 'reporters', 'index.js')
+      const junitPath = path.join(appDir, 'node_modules', 'mocha-junit-reporter', 'index.js')
+      const teamcityPath = path.join(appDir, 'node_modules', 'mocha-teamcity-reporter', 'lib', 'teamcity.js')
+
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = [require('mocha-7.2.0'), require('mocha-7.2.0/lib/reporters'), require('mocha-junit-reporter'), require('mocha-teamcity-reporter')]`)
+      await fs.outputFile(mochaPath, `module.exports = __filename`)
+      await fs.outputFile(mochaReportersPath, `module.exports = __filename`)
+      await fs.outputFile(junitPath, `module.exports = __filename`)
+      await fs.outputJson(path.join(appDir, 'node_modules', 'mocha-teamcity-reporter', 'package.json'), { main: 'lib/teamcity.js' })
+      await fs.outputFile(teamcityPath, `module.exports = __filename`)
+
+      const { loadedFromDisk } = await createStartCypressBundle(appDir)
+
+      expect(require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))).to.deep.equal([mochaPath, mochaReportersPath, junitPath, teamcityPath])
+      expect(loadedFromDisk).to.have.members([
+        'node_modules/mocha-7.2.0/index.js',
+        'node_modules/mocha-7.2.0/lib/reporters/index.js',
+        'node_modules/mocha-junit-reporter/index.js',
+        'node_modules/mocha-teamcity-reporter/lib/teamcity.js',
+      ])
+    })
+
     it('keeps "use strict" in modules that use __dirname', async () => {
       await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = require('./lib/strict')`)
       await fs.outputFile(path.join(appDir, 'packages', 'server', 'lib', 'strict.js'), `#!/usr/bin/env node\n// header\n"use strict";\nmodule.exports = { dirname: __dirname, strict: (function () { return this })() === undefined }`)
