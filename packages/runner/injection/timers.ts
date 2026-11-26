@@ -1,17 +1,14 @@
-type TimerFnName = 'setTimeout' | 'setInterval' | 'requestAnimationFrame'
-type CancelFnName = 'clearTimeout' | 'clearInterval'
-
-interface QueuedTimer {
-  timerId: number
-  type: TimerFnName
-  fnOrCode: TimerHandler
-  params: unknown[]
-}
-
 // The runner compiles with Node's types, which merge Node's timer overloads
 // into `window`. The AUT only ever has the DOM ones, so wrap against those.
 type TimerWindow = Pick<WindowOrWorkerGlobalScope, 'setTimeout' | 'setInterval' | 'clearTimeout' | 'clearInterval'>
   & Pick<AnimationFrameProvider, 'requestAnimationFrame'>
+
+interface QueuedTimer {
+  timerId: number
+  type: 'setTimeout' | 'setInterval' | 'requestAnimationFrame'
+  fnOrCode: TimerHandler
+  params: unknown[]
+}
 
 export const createTimers = () => {
   let paused: boolean
@@ -40,8 +37,10 @@ export const createTimers = () => {
     timerQueue.forEach((timer) => {
       const { timerId, type, fnOrCode, params } = timer
 
-      // a setInterval can queue many callbacks while paused, and one of
-      // them may cancel the interval, so skip the rest once that happens
+      // if we are a setInterval and we're been canceled
+      // then just return. this can happen when a setInterval
+      // queues many callbacks, and from within that callback
+      // we would have canceled the original setInterval
       if (type === 'setInterval' && canceledTimerIds[timerId]) {
         return
       }
@@ -61,33 +60,36 @@ export const createTimers = () => {
   }
 
   const wrap = () => {
-    const timerWindow: TimerWindow = window
-
-    const timerOriginals = {
-      setTimeout: timerWindow.setTimeout,
-      setInterval: timerWindow.setInterval,
-      requestAnimationFrame: timerWindow.requestAnimationFrame,
+    const originals = {
+      setTimeout: window.setTimeout,
+      setInterval: window.setInterval,
+      requestAnimationFrame: window.requestAnimationFrame,
+      clearTimeout: window.clearTimeout,
+      clearInterval: window.clearInterval,
     }
 
-    const cancelOriginals = {
-      clearTimeout: timerWindow.clearTimeout,
-      clearInterval: timerWindow.clearInterval,
+    const callThrough = (fnName: keyof typeof originals, args: unknown[]) => {
+      return originals[fnName].apply(window, args)
     }
 
-    const wrapCancel = (fnName: CancelFnName) => {
+    const wrapCancel = (fnName: 'clearTimeout' | 'clearInterval') => {
       return (timerId: number) => {
         if (flushing) {
           canceledTimerIds[timerId] = true
         }
 
-        return cancelOriginals[fnName].apply(window, [timerId])
+        return callThrough(fnName, [timerId])
       }
     }
 
-    const wrapTimer = (fnName: TimerFnName) => {
-      return (fnOrCode: TimerHandler, delay?: number, ...params: unknown[]): number => {
+    const wrapTimer = (fnName: 'setTimeout' | 'setInterval' | 'requestAnimationFrame') => {
+      return (...args: [TimerHandler, number?, ...unknown[]]): number => {
+        const [fnOrCode, delay, ...params] = args
+
         const timerOverride = (...params: unknown[]) => {
-          // while paused, hold the callback so it runs as soon as we unpause
+          // if we're currently paused then we need
+          // to enqueue this timer callback and invoke
+          // it immediately once we're unpaused
           if (paused) {
             timerQueue.push({
               timerId,
@@ -99,14 +101,18 @@ export const createTimers = () => {
             return
           }
 
+          // else go ahead and invoke the real function
+          // the same way the browser otherwise would
           return invoke(fnOrCode, params)
         }
 
-        const timerId: number = timerOriginals[fnName].apply(window, [timerOverride, delay, ...params])
+        const timerId = callThrough(fnName, [timerOverride, delay, ...params])
 
         return timerId
       }
     }
+
+    const timerWindow: TimerWindow = window
 
     timerWindow.setTimeout = wrapTimer('setTimeout')
     timerWindow.setInterval = wrapTimer('setInterval')
@@ -115,11 +121,14 @@ export const createTimers = () => {
     timerWindow.clearInterval = wrapCancel('clearInterval')
   }
 
+  // start with initial values
   reset()
 
   return {
     wrap,
+
     reset,
+
     pause,
   }
 }
