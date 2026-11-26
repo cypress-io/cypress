@@ -14,8 +14,8 @@ import { patchElementIntegrity } from './patches/integrity'
 // The driver mixes its event emitter onto Cypress at runtime, which the
 // `Window.Cypress` typing doesn't reflect, so check for it to narrow.
 function assertParentCypress (Cypress: Cypress.Cypress | undefined): asserts Cypress is typeof globalThis.Cypress {
-  if (!Cypress || !('removeAllListeners' in Cypress)) {
-    throw new Error('The script Cypress injects into this page did not find the Cypress runner at `window.parent.Cypress`, so Cypress cannot control this page.\n\nThis is likely a bug in Cypress. Open an issue that includes the steps that led to this error: https://on.cypress.io/new-issue')
+  if (!Cypress || typeof Cypress !== 'object' || !('removeAllListeners' in Cypress)) {
+    throw new Error('The script Cypress injects into this page did not find a usable Cypress runner at `window.parent.Cypress`, so Cypress cannot control this page.\n\nThis is likely a bug in Cypress. Open an issue that includes the steps that led to this error: https://on.cypress.io/new-issue')
   }
 }
 

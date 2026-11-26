@@ -39,7 +39,7 @@ vi.mock('../../../injection/patches/integrity', () => {
   }
 })
 
-const MISSING_CYPRESS_MESSAGE = 'The script Cypress injects into this page did not find the Cypress runner at `window.parent.Cypress`, so Cypress cannot control this page.\n\nThis is likely a bug in Cypress. Open an issue that includes the steps that led to this error: https://on.cypress.io/new-issue'
+const MISSING_CYPRESS_MESSAGE = 'The script Cypress injects into this page did not find a usable Cypress runner at `window.parent.Cypress`, so Cypress cannot control this page.\n\nThis is likely a bug in Cypress. Open an issue that includes the steps that led to this error: https://on.cypress.io/new-issue'
 
 // Stands in for the driver's Cypress, which has the event emitter mixed in,
 // recording each call so the spec can assert the order they happen in.
@@ -149,6 +149,14 @@ describe('injection/main', () => {
           action: vi.fn(),
         },
       })
+
+      await expect(loadInjection()).rejects.toThrow(MISSING_CYPRESS_MESSAGE)
+      expect(calls).toEqual([])
+      expect(window.Cypress).toBeUndefined()
+    })
+
+    it('throws before patching anything when Cypress is not an object', async () => {
+      vi.stubGlobal('parent', { Cypress: 'loaded' })
 
       await expect(loadInjection()).rejects.toThrow(MISSING_CYPRESS_MESSAGE)
       expect(calls).toEqual([])
