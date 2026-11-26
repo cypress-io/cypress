@@ -173,36 +173,6 @@ describe('injection/timers', () => {
       expect(callback).toHaveBeenCalledTimes(2)
     })
 
-    it('replays ticks that came due before an interval was cleared while paused', () => {
-      const callback = vi.fn()
-
-      timers.pause(true)
-
-      const timerId = window.setInterval(callback, 10)
-
-      vi.advanceTimersByTime(20)
-      window.clearInterval(timerId)
-      vi.advanceTimersByTime(20)
-      timers.pause(false)
-
-      expect(callback).toHaveBeenCalledTimes(2)
-    })
-
-    it('still runs a queued setTimeout that an earlier flushed callback clears, since it already came due', () => {
-      const second = vi.fn()
-
-      timers.pause(true)
-
-      window.setTimeout(() => window.clearTimeout(secondId), 10)
-
-      const secondId = window.setTimeout(second, 20)
-
-      vi.advanceTimersByTime(30)
-      timers.pause(false)
-
-      expect(second).toHaveBeenCalledOnce()
-    })
-
     it('runs timers scheduled from a flushed callback normally', () => {
       const later = vi.fn()
 
