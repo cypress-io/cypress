@@ -35,6 +35,21 @@ const matchesText = (matchers: SelectMatcher[], text: string) => {
 
 const isSelectMatcher = (val) => _.isNumber(val) || _.isString(val) || _.isRegExp(val)
 
+// how many options carry each `value` attribute, the set `option[value="…"]` would find
+const countValueAttributes = (optionEls: Element[]) => {
+  const counts = new Map<string, number>()
+
+  _.each(optionEls, (el) => {
+    const value = el.getAttribute('value')
+
+    if (value !== null) {
+      counts.set(value, (counts.get(value) ?? 0) + 1)
+    }
+  })
+
+  return counts
+}
+
 // every option's selected state, since a multiple select can change without its selectedIndex changing
 const getSelection = (select: HTMLSelectElement) => _.map(select.options, 'selected')
 
@@ -149,7 +164,9 @@ export default (Commands, Cypress, cy) => {
 
         const values: string[] = []
         const optionEls: JQuery<any>[] = []
-        const optionsObjects = options.$el.find('option').map((index, el) => {
+        const $options = options.$el.find('option')
+        const valueAttributeCounts = countValueAttributes($options.get())
+        const optionsObjects = $options.map((index, el) => {
           // push the value in values array if its
           // found within the valueOrText
           const value = $elements.getNativeProp(el, 'value')
@@ -160,7 +177,7 @@ export default (Commands, Cypress, cy) => {
             values.push(value)
 
             // https://github.com/cypress-io/cypress/issues/24739
-            if (options.$el.find(`option[value="${CSS.escape(value)}"]`).length > 1) {
+            if ((valueAttributeCounts.get(value) ?? 0) > 1) {
               notAllUniqueValues = true
             }
           }
