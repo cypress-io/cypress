@@ -1,8 +1,19 @@
+type TimerType = 'setTimeout' | 'setInterval' | 'requestAnimationFrame'
+
+type CancelType = 'clearTimeout' | 'clearInterval'
+
+interface QueuedTimer {
+  timerId: number
+  type: TimerType
+  fnOrCode: TimerHandler
+  params: unknown[]
+}
+
 export const createTimers = () => {
-  let paused
-  let flushing
-  let timerQueue
-  let canceledTimerIds
+  let paused: boolean
+  let flushing: boolean
+  let timerQueue: QueuedTimer[]
+  let canceledTimerIds: Record<number, boolean>
 
   const reset = () => {
     paused = false
@@ -11,7 +22,7 @@ export const createTimers = () => {
     canceledTimerIds = {}
   }
 
-  const invoke = (fnOrCode, params = []) => {
+  const invoke = (fnOrCode: TimerHandler, params: unknown[] = []) => {
     if (typeof fnOrCode === 'function') {
       return fnOrCode.apply(window, params)
     }
@@ -39,7 +50,7 @@ export const createTimers = () => {
     reset()
   }
 
-  const pause = (shouldPause) => {
+  const pause = (shouldPause?: boolean) => {
     paused = Boolean(shouldPause)
 
     if (!paused) {
@@ -56,25 +67,23 @@ export const createTimers = () => {
       clearInterval: window.clearInterval,
     }
 
-    const callThrough = (fnName, args) => {
-      return originals[fnName].apply(window, args)
+    const callThrough = (fnName: TimerType | CancelType, args: unknown[]): number => {
+      return (originals[fnName] as (...args: unknown[]) => number).apply(window, args)
     }
 
-    const wrapCancel = (fnName) => {
-      return (timerId) => {
+    const wrapCancel = (fnName: CancelType) => {
+      return (timerId?: number) => {
         if (flushing) {
           canceledTimerIds[timerId] = true
         }
 
-        return callThrough(fnName, [timerId])
+        callThrough(fnName, [timerId])
       }
     }
 
-    const wrapTimer = (fnName) => {
-      return (...args) => {
-        const [fnOrCode, delay, ...params] = args
-
-        const timerOverride = (...params) => {
+    const wrapTimer = (fnName: TimerType) => {
+      return (fnOrCode: TimerHandler, delay?: number, ...params: unknown[]) => {
+        const timerOverride = (...params: unknown[]) => {
           // if we're currently paused then we need
           // to enqueue this timer callback and invoke
           // it immediately once we're unpaused
@@ -100,11 +109,16 @@ export const createTimers = () => {
       }
     }
 
-    window.setTimeout = wrapTimer('setTimeout')
-    window.setInterval = wrapTimer('setInterval')
-    window.requestAnimationFrame = wrapTimer('requestAnimationFrame')
-    window.clearTimeout = wrapCancel('clearTimeout')
-    window.clearInterval = wrapCancel('clearInterval')
+    // `Object.assign` because the project's Node typings merge
+    // `setTimeout.__promisify__` into `window.setTimeout`, which the browser's
+    // own setTimeout, and so this wrapper, does not have.
+    Object.assign(window, {
+      setTimeout: wrapTimer('setTimeout'),
+      setInterval: wrapTimer('setInterval'),
+      requestAnimationFrame: wrapTimer('requestAnimationFrame'),
+      clearTimeout: wrapCancel('clearTimeout'),
+      clearInterval: wrapCancel('clearInterval'),
+    })
   }
 
   // start with initial values
