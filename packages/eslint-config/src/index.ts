@@ -16,6 +16,8 @@ export * from './nodeConfig'
 
 export * from './reactConfig'
 
+export * from './regexpConfig'
+
 export * from './typeAwareConfig'
 
 export * from './vitestConfig'

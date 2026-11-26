@@ -199,6 +199,52 @@ describe('lib/plugins/util', () => {
         originalMessage: 'Transform failed with 1 error:\n/my/project/root/cypress.config.ts:12:15: ERROR: Unexpected ","',
       })
     })
+
+    it('uses the location of the first of several errors', () => {
+      const err = {
+        name: 'TransformError',
+        message: 'Transform failed with 2 errors:\n/my/project/root/cypress.config.ts:120:15: ERROR: Unexpected ","\n/my/project/root/other.ts:3:4: ERROR: Unexpected "}"',
+      }
+
+      expect(util.buildErrorLocationFromTransformError(err, '/my/project/root').compilerErrorLocation).toStrictEqual({
+        filePath: 'cypress.config.ts',
+        line: 120,
+        column: 15,
+      })
+    })
+
+    it('keeps the drive letter of a windows path', () => {
+      const err = {
+        name: 'TransformError',
+        message: 'Transform failed with 1 error:\nC:\\my\\project\\root\\cypress.config.ts:12:15: ERROR: Unexpected ","',
+      }
+
+      expect(util.buildErrorLocationFromTransformError(err, '/my/project/root').compilerErrorLocation).toMatchObject({
+        filePath: path.relative('/my/project/root', 'C:\\my\\project\\root\\cypress.config.ts'),
+        line: 12,
+        column: 15,
+      })
+    })
+
+    it('returns a null location when the message has no file location', () => {
+      const err = {
+        name: 'TransformError',
+        message: 'Transform failed with 1 error:\nERROR: something went wrong',
+      }
+
+      expect(util.buildErrorLocationFromTransformError(err, '/my/project/root').compilerErrorLocation).toBeNull()
+    })
+
+    it('finds the location again on repeated calls', () => {
+      const err = {
+        name: 'TransformError',
+        message: 'Transform failed with 1 error:\n/my/project/root/cypress.config.ts:12:15: ERROR: Unexpected ","',
+      }
+
+      const locations = [1, 2, 3].map(() => util.buildErrorLocationFromTransformError(err, '/my/project/root').compilerErrorLocation)
+
+      expect(locations).toStrictEqual(Array(3).fill({ filePath: 'cypress.config.ts', line: 12, column: 15 }))
+    })
   })
 
   describe('#buildErrorLocationFromConfigFileError', () => {

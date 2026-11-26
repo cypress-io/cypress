@@ -606,7 +606,7 @@ const mergeCrossOriginUserInvocationStack = (userInvocationStack: string, origin
   const userColumn = Number(userStackMatch[2])
 
   // Note: chrome adds a parenthesis to the end of the stack line and firefox does not
-  const originStackMatch = originStackLines[0].match(/(\d+):(\d+)\)?$/)
+  const originStackMatch = originStackLines[0].match(/(\d+):\d+\)?$/)
 
   if (!originStackMatch) return userInvocationStack
 

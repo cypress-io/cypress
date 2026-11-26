@@ -1167,6 +1167,26 @@ describe('lib/util/ci_provider', () => {
       })
     })
 
+    it.each([
+      ['refs/remotes/origin/feature/foo', 'feature/foo'],
+      ['upstream/feature/foo', 'upstream/feature/foo'],
+      ['refs/remotes/upstream/main', 'refs/remotes/upstream/main'],
+      ['feature/origin/foo', 'feature/origin/foo'],
+      ['origin/origin/foo', 'origin/foo'],
+    ])('strips only a leading origin remote prefix from GIT_BRANCH "%s"', (gitBranch, branch) => {
+      resetEnv = mockedEnv({
+        JENKINS_URL: 'true',
+
+        GIT_COMMIT: 'gitCommit',
+        GIT_BRANCH: gitBranch,
+      }, { clear: true })
+
+      return expectsCommitParams({
+        sha: 'gitCommit',
+        branch,
+      })
+    })
+
     it('prefers the unprefixed BRANCH_NAME (multibranch pipeline) over GIT_BRANCH', () => {
       resetEnv = mockedEnv({
         JENKINS_URL: 'true',
