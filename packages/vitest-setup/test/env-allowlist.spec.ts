@@ -27,5 +27,6 @@ describe('sanitizeEnv', () => {
     expect(isKeptVar('Path')).toBe(true)
     expect(isKeptVar('SystemRoot')).toBe(true)
     expect(isKeptVar('ComSpec')).toBe(true)
+    expect(isKeptVar('AppData')).toBe(true)
   })
 })

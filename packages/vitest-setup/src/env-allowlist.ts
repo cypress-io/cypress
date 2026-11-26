@@ -8,6 +8,8 @@ const KEPT_VARS = new Set([
   'TEMP',
   'TMP',
   'USERPROFILE',
+  // the Cypress app-data folder lives under it
+  'APPDATA',
   'PATHEXT',
   'COMSPEC',
 ])
