@@ -1,6 +1,6 @@
 // structural stand-in for the webworker lib's NavigationPreloadManager — the
 // real lib can't be referenced because lib="webworker" conflicts with the
-// dom lib program-wide (see service-worker-injector.ts for the same trick).
+// dom lib program-wide (see service-worker-instrumentation.injected.ts for the same trick).
 // Declared once and shared by both expressions below: the worker-realm
 // expression only needs `registration`, the window-realm expression only
 // needs `NavigationPreloadManager` and `navigator.serviceWorker`, so every

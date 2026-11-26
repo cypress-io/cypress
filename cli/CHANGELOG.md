@@ -8,6 +8,7 @@
 **Bugfixes:**
 
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
+- Fixed a regression in [16.4.0](#16-4-0) where every page logged `ReferenceError` errors to the browser console, service workers failed to register in Electron and Firefox, and clicking a download link waited longer before the download was detected. Fixes [#35549](https://github.com/cypress-io/cypress/issues/35549).
 
 ## 16.4.0
 

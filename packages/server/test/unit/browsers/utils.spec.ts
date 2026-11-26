@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import utils from '../../../lib/browsers/utils'
-import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload'
+import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload.injected'
 
 describe('lib/browsers/utils', () => {
   describe('#initializeCDP', () => {

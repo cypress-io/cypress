@@ -130,7 +130,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     getRenderedHTMLOrigins: () => ({}),
     // Explicit, like the createServeInternalRoutesMiddleware call just below
     // (which keeps its own isBrowserNetworkMode name): the MITM path never
-    // uses CDP Fetch, so it never needs disable-navigation-preload.ts's seam
+    // uses CDP Fetch, so it never needs disable-navigation-preload.injected.ts's seam
     // (#34652). Left undefined here would still behave the same downstream
     // (falsy), but a general discriminator field should say what a path is,
     // not leave it unset.

@@ -141,6 +141,9 @@ const createStartCypressBundle = async (buildAppDir) => {
     banner: { js: `const __cypressAppDir = require('path').join(__dirname, '..', '..');` },
     plugins: [
       loadFromDisk(bundleDir, /^@cypress\/request-promise(\/|$)/, loadedFromDisk),
+      // `.injected` modules hold functions that are serialized with toString() and run in a page or service worker,
+      // where keepNames' `__name` helper does not exist, so they must keep their compiled source
+      loadFromDisk(bundleDir, /\.injected$/, loadedFromDisk),
       externalizeUnresolvable(bundleDir, unresolved),
       keepModuleLocation(unixBuildAppDir, loadedFromDisk),
     ],
