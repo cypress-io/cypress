@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.5.0
 
+**Performance:**
+
+- [`cy.reload()`](https://on.cypress.io/reload) is faster on pages that load many files the Command Log doesn't show, such as the modules of an app served by a Vite dev server. Fixed in [#35548](https://github.com/cypress-io/cypress/pull/35548).
+
 **Features:**
 
 - Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).
@@ -20,7 +24,6 @@
 **Performance:**
 
 - Cypress starts faster and uses less memory in both `cypress open` and `cypress run`, and takes up less disk space once installed. Fixed in [#35452](https://github.com/cypress-io/cypress/pull/35452).
-- [`cy.reload()`](https://on.cypress.io/reload) is faster on pages that load many files the Command Log doesn't show, such as the modules of an app served by a Vite dev server. Fixed in [#35548](https://github.com/cypress-io/cypress/pull/35548).
 - Cypress now uses less memory in `cypress open` and `cypress run`. Each Cypress process now stores the code it preloads at startup more compactly. Fixed in [#35420](https://github.com/cypress-io/cypress/pull/35420).
 - `cypress run --record` on Linux and macOS now starts recording sooner when the processes that launched Cypress have very large environments, as is common in CI. Fixed in [#35372](https://github.com/cypress-io/cypress/pull/35372).
 - When your config file or a plugin throws an error whose stack trace contains a very long line, Cypress now shows the error and its code frame right away. Previously, finding the error's location in such a line could stop Cypress from responding for seconds or minutes. Fixed in [#35368](https://github.com/cypress-io/cypress/pull/35368).
