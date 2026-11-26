@@ -22,6 +22,11 @@ export const createTimers = () => {
   const flushTimerQueue = () => {
     flushing = true
 
+    // Held rAF callbacks run here, outside any rendering frame, so the
+    // timestamp the browser gave them is stale by the length of the pause.
+    // Give them the time this flush runs instead, shared like a real frame's.
+    const frameTimestamp = window.performance.now()
+
     timerQueue.forEach((timer) => {
       const { timerId, type, fnOrCode, params } = timer
 
@@ -33,7 +38,7 @@ export const createTimers = () => {
         return
       }
 
-      invoke(fnOrCode, params)
+      invoke(fnOrCode, type === 'requestAnimationFrame' ? [frameTimestamp] : params)
     })
 
     reset()
