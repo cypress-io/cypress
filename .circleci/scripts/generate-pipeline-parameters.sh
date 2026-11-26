@@ -322,6 +322,7 @@ while IFS= read -r file; do
       driver_tests=true
       app_ui_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/web-config/*)
       driver_tests=true
