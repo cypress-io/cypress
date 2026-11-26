@@ -1102,7 +1102,7 @@ describe('lib/request', () => {
         })
 
         it('drops the Authorization header on a redirect to another host', async () => {
-          nock.enableNetConnect(/^(localhost|127\.0\.0\.1):/)
+          nock.enableNetConnect(/^(?:localhost|127\.0\.0\.1):/)
 
           server = await startRedirectServer(() => `http://127.0.0.1:${server.port}/./hello`)
 

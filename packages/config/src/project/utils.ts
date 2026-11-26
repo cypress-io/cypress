@@ -446,7 +446,7 @@ export function mergeDefaults (
     // replace multiple slashes at the end of string to single slash
     // so http://localhost/// will be http://localhost/
     // https://regexr.com/48rvt
-    config.baseUrl = url.replace(/\/\/+$/, '/')
+    config.baseUrl = url.replace(/\/{2,}$/, '/')
   }
 
   const defaultsForRuntime = getDefaultValues({

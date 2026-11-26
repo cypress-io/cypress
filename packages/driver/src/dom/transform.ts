@@ -77,7 +77,7 @@ const existsInvisibleBackface = (list: TransformInfo[]) => {
   return !!_.find(list, { backfaceVisibility: 'hidden' })
 }
 
-const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
+const numberRegex = /-?\d+(?:\.\d+)?(?:e[+-]?\d+)?/gi
 const defaultNormal: Vector3 = [0, 0, 1]
 const viewVector: Vector3 = [0, 0, -1]
 const identityMatrix3D: Matrix3D = [
