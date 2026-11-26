@@ -45,7 +45,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@babel/runtime": "^7.28.2",
     "babel-loader": "^10.0.0",
-    "babel-plugin-add-module-exports": "^1.0.2",
+    "babel-plugin-add-module-exports": "^1.0.4",
     "babel-plugin-transform-typescript-metadata": "^0.4.0",
     "buffer": "^6.0.3",
     "debug": "^4.3.4",
