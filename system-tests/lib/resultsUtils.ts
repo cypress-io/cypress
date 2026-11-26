@@ -99,7 +99,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
     expectDurationWithin(
       run,
       'reporterStats.duration',
-      wallClocks,
+      wallClocks - 50, // server-timed, so it can land a few ms short of the browser-timed wallClocks
       wallClocks + 400, // add 400ms to account for padding
       1234,
     )
