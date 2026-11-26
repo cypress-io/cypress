@@ -11,12 +11,20 @@ import { createTimers } from './timers'
 import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 import { patchElementIntegrity } from './patches/integrity'
 
-const Cypress = window.Cypress = parent.Cypress
-
-if (!Cypress) {
-  throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
+// The driver mixes its event emitter onto Cypress at runtime, which the
+// `Window.Cypress` typing doesn't reflect, so check for it to narrow.
+function assertParentCypress (Cypress: Cypress.Cypress | undefined): asserts Cypress is typeof globalThis.Cypress {
+  if (!Cypress || !('removeAllListeners' in Cypress)) {
+    throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
 Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.')
+  }
 }
+
+const Cypress = parent.Cypress
+
+assertParentCypress(Cypress)
+
+window.Cypress = Cypress
 
 patchXmlHttpRequest(window)
 
@@ -26,11 +34,9 @@ if (Cypress.config('removeSRIAttributes')) {
   patchElementIntegrity(window)
 }
 
-// We wrap timers in the injection code because if we do it in the driver (like
-// we used to do), any uncaught errors thrown in the timer callbacks would
-// get picked up by the top frame's 'error' handler instead of the AUT's.
-// We need to wrap the timer callbacks in the AUT itself for errors to
-// propagate properly.
+// Timers are wrapped here rather than in the driver so that uncaught errors
+// thrown in timer callbacks reach the AUT's 'error' handler instead of the
+// top frame's.
 const timers = createTimers()
 
 Cypress.removeAllListeners('app:timers:reset')
