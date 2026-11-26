@@ -1,7 +1,8 @@
-import { baseConfig, frontendOverrides, graphqlConfig, jsonConfig } from '@packages/eslint-config'
+import { baseConfig, frontendOverrides, graphqlConfig, jsonConfig, regexpConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
   ...jsonConfig,
   ...frontendOverrides,
   ...graphqlConfig(),
