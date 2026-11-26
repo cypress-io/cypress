@@ -38,6 +38,17 @@ describe('component testing projects', function () {
     browser: 'chrome',
     expectedExitCode: 0,
   })
+
+  // App Router-only projects with `export *` barrels, including one in a `pages-legacy/` sibling
+  for (const project of ['next-15-tsconfig-tailwind', 'next-16-tsconfig-tailwind'] as const) {
+    systemTests.it(`${project} with export * barrels`, {
+      project,
+      testingType: 'component',
+      spec: 'components/export-star.cy.tsx',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
+  }
 })
 
 const REACT_MAJOR_VERSIONS = ['18', '19'] as const

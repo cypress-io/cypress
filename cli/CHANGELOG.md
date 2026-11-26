@@ -8,6 +8,7 @@
 **Bugfixes:**
 
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
+- Fixed an issue where Next.js component tests with webpack failed with "Using `export * from '...'` in a page is disallowed" when the project had no `pages` directory, as in App Router projects, and a dependency such as `@mui/material` used `export *`. Fixes [#31385](https://github.com/cypress-io/cypress/issues/31385).
 
 ## 16.4.0
 
