@@ -75,7 +75,7 @@ export async function notifyResponseStreamReceived (mw: ResponseInterceptionMidd
 
   if (!resultingStream) {
     // With no tee, nothing will read a capture stream; drain it so the pump's
-    // bytes are discarded instead of buffering to the capture cap.
+    // bytes are discarded instead of buffering in memory.
     captureStream?.resume()
     mw.resCaptureStream = undefined
     endSpan()

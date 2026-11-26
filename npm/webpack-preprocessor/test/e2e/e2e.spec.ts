@@ -29,7 +29,7 @@ const runTest = async (options: { spec?: string } = {}) => {
 
   if (!_.isArray(options.spec)) {
     const fileStr = (await fs.readFile(options.spec)).toString()
-    const match = /\/\*\s*EXPECT:\s*({.*})\s*\*\//s.exec(fileStr)
+    const match = /\/\*\s*EXPECT:\s*(\{.*\})\s*\*\//s.exec(fileStr)
 
     if (match) {
       console.log(match[1])

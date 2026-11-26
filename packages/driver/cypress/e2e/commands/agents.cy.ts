@@ -622,6 +622,29 @@ describe('src/cy/commands/agents', () => {
       cy.get('@Notification').should('have.been.calledWith', 'Hello')
     })
 
+    // https://github.com/cypress-io/cypress/issues/15005
+    it('reports a failed calledWith on a spy called with a JSON string', (done) => {
+      const events = Array.from({ length: 5 }, (_, i) => {
+        return { type: 'ui', message: `Payment form shown at step ${i + 1}`, sessionId: 'c9f1e2a4-7b3d-4e8a-9c61-2f5d8a0b7e13' }
+      })
+      const beacon = { send (_url: string, _body: string) {} }
+      const start = Date.now()
+
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('expected send to have been called with arguments "/log", "flush"')
+        expect(err.message).to.include('The following calls were made:')
+        // a backtracking stack parser takes minutes over the JSON call the
+        // message lists, so the failure has to arrive soon after the timeout
+        expect(Date.now() - start).to.be.lessThan(10000)
+
+        done()
+      })
+
+      cy.spy(beacon, 'send').as('send')
+      cy.then(() => beacon.send('/log', JSON.stringify(events)))
+      cy.get('@send', { timeout: 100 }).should('have.been.calledWith', '/log', 'flush')
+    })
+
     context('#as', () => {
       // same as cy.stub(), so just some smoke tests here
       beforeEach(function () {

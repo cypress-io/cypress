@@ -79,6 +79,8 @@ This changelog describes the **binary**. Validation only considers changed files
 
 Most `dependency` entries exist because a security scan reported an advisory, and users (and their own security teams) scan this section for a specific advisory ID. Follow the established shape: **upgraded what, from and to which versions, to address which advisory, as reported in security scans.**
 
+Title the PR with the `dependency` type, such as `dependency: update simple-git to 4.1.0`, even when the upgrade fixes a vulnerability. A `fix` or `fix(deps)` title puts the entry under **Bugfixes** and fails the semantic check against the **Dependency Updates** section.
+
 ```md
 - Upgraded `undici` from `6.26.0` to `6.27.0` to address a [CRLF Injection](https://security.snyk.io/vuln/SNYK-JS-UNDICI-17372658) vulnerability reported in security scans. Addressed in [#34121](https://github.com/cypress-io/cypress/pull/34121).
 ```

@@ -36,4 +36,23 @@ describe('driver/src/cypress/utils', () => {
       expect($utils.decodeBase64Unicode('77u/e30=')).toBe('﻿{}')
     })
   })
+
+  describe('.stripCustomProtocol', () => {
+    it.each([
+      ['webpack://_N_E/./pages/index.cy.js', 'pages/index.cy.js'],
+      ['webpack:///./cypress/e2e/spec.cy.js', 'cypress/e2e/spec.cy.js'],
+      ['webpack://my-app/./src/a.cy.ts', 'src/a.cy.ts'],
+      ['webpack://./src/a.cy.ts', 'src/a.cy.ts'],
+    ])('removes the webpack namespace from %s', (filePath, expected) => {
+      expect($utils.stripCustomProtocol(filePath)).toBe(expected)
+    })
+
+    it.each([
+      ['webpack:///../driver/src/cy.ts', '../driver/src/cy.ts'],
+      ['webpack://_N_E/../shared/a.js', '_N_E/../shared/a.js'],
+      ['cypress:///./cypress/e2e/spec.cy.js', './cypress/e2e/spec.cy.js'],
+    ])('only removes the protocol from %s', (filePath, expected) => {
+      expect($utils.stripCustomProtocol(filePath)).toBe(expected)
+    })
+  })
 })

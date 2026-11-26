@@ -13,7 +13,7 @@ import { getSuperDomain, getSuperDomainOrigin } from '@packages/network-tools'
 const reHttp = /^https?:\/\//
 const reWww = /^www/
 const reFile = /^file:\/\//
-const reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
+const reLocalHost = /^(?:localhost|0\.0\.0\.0|127\.0\.0\.1)/
 const reQueryParam = /\?[^/]+/
 
 export interface LocationObject {

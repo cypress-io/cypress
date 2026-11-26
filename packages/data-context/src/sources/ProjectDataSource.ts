@@ -99,7 +99,7 @@ export function transformSpec ({
     name = name.slice(1)
   }
 
-  const LEADING_SLASH = /^\/|/g
+  const LEADING_SLASH = /^\//
   const relativeToCommonRoot = absolute.replace(commonRoot, '').replace(LEADING_SLASH, '')
 
   return {
@@ -119,7 +119,7 @@ export function getLongestCommonPrefixFromPaths (paths: string[]): string {
   if (!paths[0]) return ''
 
   function getPathParts (pathname: string) {
-    return pathname.split(/[/\\]/g)
+    return pathname.split(/[/\\]/)
   }
 
   const lcp = getPathParts(paths[0])
@@ -164,7 +164,7 @@ export function getPathFromSpecPattern ({
   }
 
   // Remove double-slashes from dirname (like if specPattern has /**/*/)
-  let dirname = parsedGlob.path.dirname.replaceAll(/\/\/+/g, '/')
+  let dirname = parsedGlob.path.dirname.replaceAll(/\/{2,}/g, '/')
 
   // If a spec can be in any root dir, go ahead and use "cypress/"
   if (dirname.startsWith('**')) dirname = dirname.replace('**', 'cypress')
