@@ -74,6 +74,12 @@ const isDroneCi = () => {
   return process.env.DRONE || _.some(process.env, (val, key) => /^DRONE_/.test(key))
 }
 
+// Woodpecker also sets DRONE_* env vars for Drone plugin compatibility.
+// Ref: https://woodpecker-ci.org/docs/usage/environment
+const isWoodpecker = () => {
+  return process.env.CI === 'woodpecker'
+}
+
 const isConcourse = () => {
   return _.some(process.env, (val, key) => {
     return /^CONCOURSE_/.test(key)
@@ -142,8 +148,9 @@ const CI_PROVIDERS = {
   cloudbeesUnify: 'CLOUDBEES_WORKSPACE',
   'concourse': isConcourse,
   codeFresh: 'CF_BUILD_ID',
-  // Harness CI check must be before Drone CI check
+  // Harness CI and Woodpecker checks must be before Drone CI check
   harness: isHarnessCi,
+  woodpecker: isWoodpecker,
   'drone': isDroneCi,
   githubActions: 'GITHUB_ACTIONS',
   'gitlab': isGitlab,
@@ -395,6 +402,17 @@ const _providerCiParams = () => {
       'DRONE_BUILD_LINK',
       'DRONE_BUILD_NUMBER',
       'DRONE_PULL_REQUEST',
+    ]),
+    // https://woodpecker-ci.org/docs/usage/environment
+    woodpecker: extract([
+      'CI_REPO',
+      'CI_PIPELINE_NUMBER',
+      // a restart is a new pipeline; this holds the number of the one it restarted
+      'CI_PIPELINE_PARENT',
+      'CI_PIPELINE_EVENT',
+      'CI_PIPELINE_URL',
+      'CI_WORKFLOW_NAME',
+      'CI_COMMIT_PULL_REQUEST',
     ]),
     // https://docs.github.com/en/actions/reference/workflows-and-actions/variables
     githubActions: extract([
@@ -678,6 +696,16 @@ const _providerCommitParams = () => {
       authorEmail: env.DRONE_COMMIT_AUTHOR_EMAIL,
       remoteOrigin: env.DRONE_GIT_HTTP_URL,
       defaultBranch: env.DRONE_REPO_BRANCH,
+    },
+    woodpecker: {
+      sha: env.CI_COMMIT_SHA,
+      // CI_COMMIT_BRANCH is the target branch on pull requests
+      branch: env.CI_COMMIT_SOURCE_BRANCH || env.CI_COMMIT_BRANCH,
+      message: env.CI_COMMIT_MESSAGE,
+      authorName: env.CI_COMMIT_AUTHOR,
+      authorEmail: env.CI_COMMIT_AUTHOR_EMAIL,
+      remoteOrigin: env.CI_REPO_CLONE_URL,
+      defaultBranch: env.CI_REPO_DEFAULT_BRANCH,
     },
     githubActions: {
       sha: env.GITHUB_SHA,

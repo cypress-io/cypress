@@ -129,6 +129,7 @@ describe('lib/util/ci_provider', () => {
       'semaphore',
       'teamcity',
       'travis',
+      'woodpecker',
     ])
 
     // Confirm the returned list is already sorted (not just matching this test's ordering).
@@ -871,6 +872,88 @@ describe('lib/util/ci_provider', () => {
       authorEmail: 'droneCommitAuthorEmail',
       defaultBranch: 'droneRepoBranch',
       remoteOrigin: 'droneRemoteOrigin',
+    })
+  })
+
+  describe('woodpecker', () => {
+    // Woodpecker also sets DRONE_* variables for Drone plugin compatibility,
+    // so these must not make it detect as Drone.
+    const woodpeckerEnv = {
+      CI: 'woodpecker',
+      CI_SYSTEM_NAME: 'woodpecker',
+      CI_REPO: 'john-doe/my-repo',
+      CI_REPO_CLONE_URL: 'https://git.example.com/john-doe/my-repo.git',
+      CI_REPO_DEFAULT_BRANCH: 'main',
+      CI_PIPELINE_NUMBER: '8',
+      CI_PIPELINE_PARENT: '0',
+      CI_PIPELINE_EVENT: 'push',
+      CI_PIPELINE_URL: 'https://ci.example.com/repos/7/pipeline/8',
+      CI_WORKFLOW_NAME: 'e2e',
+      CI_COMMIT_SHA: '3f786850e387550fdab836ed7e6dc881de23001b',
+      CI_COMMIT_BRANCH: 'main',
+      CI_COMMIT_MESSAGE: 'Add checkout flow',
+      CI_COMMIT_AUTHOR: 'john-doe',
+      CI_COMMIT_AUTHOR_EMAIL: 'john-doe@example.com',
+      DRONE_BUILD_NUMBER: '8',
+      DRONE_BUILD_LINK: 'https://ci.example.com/repos/7/pipeline/8',
+      DRONE_COMMIT_SHA: '3f786850e387550fdab836ed7e6dc881de23001b',
+      DRONE_REPO: 'john-doe/my-repo',
+      DRONE_REPO_BRANCH: 'main',
+    }
+
+    it('push', () => {
+      resetEnv = mockedEnv(woodpeckerEnv, { clear: true })
+
+      expectsName('woodpecker')
+      expectsCiParams({
+        ciRepo: 'john-doe/my-repo',
+        ciPipelineNumber: '8',
+        ciPipelineParent: '0',
+        ciPipelineEvent: 'push',
+        ciPipelineUrl: 'https://ci.example.com/repos/7/pipeline/8',
+        ciWorkflowName: 'e2e',
+      })
+
+      return expectsCommitParams({
+        sha: '3f786850e387550fdab836ed7e6dc881de23001b',
+        branch: 'main',
+        message: 'Add checkout flow',
+        authorName: 'john-doe',
+        authorEmail: 'john-doe@example.com',
+        remoteOrigin: 'https://git.example.com/john-doe/my-repo.git',
+        defaultBranch: 'main',
+      })
+    })
+
+    it('pull request uses the source branch, not the target branch', () => {
+      resetEnv = mockedEnv({
+        ...woodpeckerEnv,
+        CI_PIPELINE_EVENT: 'pull_request',
+        CI_COMMIT_BRANCH: 'main',
+        CI_COMMIT_SOURCE_BRANCH: 'checkout-flow',
+        CI_COMMIT_TARGET_BRANCH: 'main',
+        CI_COMMIT_PULL_REQUEST: '42',
+      }, { clear: true })
+
+      expectsName('woodpecker')
+      expect(ciProvider.ciParams()).toMatchObject({
+        ciPipelineEvent: 'pull_request',
+        ciCommitPullRequest: '42',
+      })
+
+      expect(ciProvider.commitParams()).toMatchObject({ branch: 'checkout-flow' })
+    })
+
+    it('does not claim Drone runs, which set CI to true', () => {
+      resetEnv = mockedEnv({
+        CI: 'true',
+        DRONE: 'true',
+        DRONE_BUILD_NUMBER: '8',
+        DRONE_BUILD_LINK: 'https://drone.example.com/john-doe/my-repo/8',
+        DRONE_COMMIT_SHA: '3f786850e387550fdab836ed7e6dc881de23001b',
+      }, { clear: true })
+
+      expectsName('drone')
     })
   })
 

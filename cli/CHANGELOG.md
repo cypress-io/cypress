@@ -4,6 +4,7 @@
 **Features:**
 
 - Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).
+- Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Woodpecker CI. These runs were previously reported as Drone CI runs. Addressed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 
 **Bugfixes:**
 
