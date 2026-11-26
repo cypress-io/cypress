@@ -9,7 +9,7 @@
 
 **Performance:**
 
-- Pages that request many files, such as an app served by a Vite dev server, now load faster. Fixes [#22968](https://github.com/cypress-io/cypress/issues/22968).
+- Pages that request many files, such as an app served by a Vite dev server, now load faster. Fixed in [#35547](https://github.com/cypress-io/cypress/pull/35547).
 - Cypress starts faster and uses less memory in both `cypress open` and `cypress run`, and takes up less disk space once installed. Fixed in [#35452](https://github.com/cypress-io/cypress/pull/35452).
 - Cypress now uses less memory in `cypress open` and `cypress run`. Each Cypress process now stores the code it preloads at startup more compactly. Fixed in [#35420](https://github.com/cypress-io/cypress/pull/35420).
 - `cypress run --record` on Linux and macOS now starts recording sooner when the processes that launched Cypress have very large environments, as is common in CI. Fixed in [#35372](https://github.com/cypress-io/cypress/pull/35372).
