@@ -26,7 +26,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'stable',
     displayName: 'Chrome',
-    versionRegex: /Google Chrome(?! for Testing) (\S+)/m,
+    versionRegex: /Google Chrome(?! for Testing) (\S+)/,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
     validator: (browser: FoundBrowser, platform: NodeJS.Platform): BrowserValidatorResult => {
       // a validator method can be defined to mark a browser as unsupported
@@ -48,7 +48,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'beta',
     displayName: 'Chrome Beta',
-    versionRegex: /Google Chrome (\S+) beta/m,
+    versionRegex: /Google Chrome (\S+) beta/,
     binary: 'google-chrome-beta',
   },
   {
@@ -56,7 +56,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'canary',
     displayName: 'Chrome Canary',
-    versionRegex: /Google Chrome Canary (\S+)/m,
+    versionRegex: /Google Chrome Canary (\S+)/,
     binary: 'google-chrome-canary',
   },
   {
@@ -64,7 +64,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'stable',
     displayName: 'Chrome for Testing',
-    versionRegex: /Google Chrome for Testing (\S+)/m,
+    versionRegex: /Google Chrome for Testing (\S+)/,
     binary: 'chrome',
   },
   {
@@ -73,7 +73,7 @@ export const knownBrowsers: Browser[] = [
     // technically Chromium is always in development
     channel: 'stable',
     displayName: 'Chromium',
-    versionRegex: /Chromium (\S+)/m,
+    versionRegex: /Chromium (\S+)/,
     binary: ['chromium-browser', 'chromium'],
   },
   {
@@ -92,7 +92,7 @@ export const knownBrowsers: Browser[] = [
     channel: 'dev',
     displayName: 'Firefox Developer Edition',
     // Mozilla Firefox 73.0b12
-    versionRegex: /^Mozilla Firefox (\S+b\S*)$/m,
+    versionRegex: /^Mozilla Firefox (\S[^\sb]*b\S*)$/m,
     // ubuntu PPAs install it as firefox
     binary: ['firefox-developer-edition', 'firefox'],
     validator: firefoxValidatorFn,
@@ -103,7 +103,7 @@ export const knownBrowsers: Browser[] = [
     channel: 'nightly',
     displayName: 'Firefox Nightly',
     // Mozilla Firefox 74.0a1
-    versionRegex: /^Mozilla Firefox (\S+a\S*)$/m,
+    versionRegex: /^Mozilla Firefox (\S[^\sa]*a\S*)$/m,
     // ubuntu PPAs install it as firefox-trunk
     binary: ['firefox-nightly', 'firefox-trunk'],
     validator: firefoxValidatorFn,
@@ -113,7 +113,7 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'stable',
     displayName: 'Edge',
-    versionRegex: /Microsoft Edge (\S+)/mi,
+    versionRegex: /Microsoft Edge (\S+)/i,
     binary: ['edge', 'microsoft-edge'],
   },
   {
@@ -121,7 +121,8 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'beta',
     displayName: 'Edge Beta',
-    versionRegex: /Microsoft Edge.+?(\S*(?= beta)|(?<=beta )\S*)/mi,
+    // eslint-disable-next-line regexp/no-super-linear-backtracking -- runs on one line of an installed browser's --version output
+    versionRegex: /Microsoft Edge.+?(\S*(?= beta)|(?<=beta )\S*)/i,
     binary: ['edge-beta', 'microsoft-edge-beta'],
   },
   {
@@ -129,7 +130,8 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'canary',
     displayName: 'Edge Canary',
-    versionRegex: /Microsoft Edge.+?(\S*(?= canary)|(?<=canary )\S*)/mi,
+    // eslint-disable-next-line regexp/no-super-linear-backtracking -- runs on one line of an installed browser's --version output
+    versionRegex: /Microsoft Edge.+?(\S*(?= canary)|(?<=canary )\S*)/i,
     binary: ['edge-canary', 'microsoft-edge-canary'],
   },
   {
@@ -137,7 +139,8 @@ export const knownBrowsers: Browser[] = [
     family: 'chromium',
     channel: 'dev',
     displayName: 'Edge Dev',
-    versionRegex: /Microsoft Edge.+?(\S*(?= dev)|(?<=dev )\S*)/mi,
+    // eslint-disable-next-line regexp/no-super-linear-backtracking -- runs on one line of an installed browser's --version output
+    versionRegex: /Microsoft Edge.+?(\S*(?= dev)|(?<=dev )\S*)/i,
     binary: ['edge-dev', 'microsoft-edge-dev'],
   },
 ]

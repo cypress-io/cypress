@@ -450,7 +450,7 @@ describe('lib/util/replace_stream', function () {
         ]
 
         return new Promise<void>((resolve) => {
-          const replace = replaceStream(/<\/P>/gm, ', world</P>')
+          const replace = replaceStream(/<\/P>/g, ', world</P>')
 
           replace.pipe(concatStream({ encoding: 'string' }, function (data) {
             const expected = [

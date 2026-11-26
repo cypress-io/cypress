@@ -24,7 +24,7 @@ const extract = (envKeys) => {
 // Cypress Cloud, so strip the default "origin" remote prefix.
 // https://github.com/cypress-io/cypress/issues/20833
 const stripGitRemotePrefix = (branch?: string) => {
-  return branch && branch.replace(/^(refs\/remotes\/)?origin\//, '')
+  return branch && branch.replace(/^(?:refs\/remotes\/)?origin\//, '')
 }
 
 /**

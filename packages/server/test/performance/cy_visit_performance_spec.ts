@@ -20,7 +20,7 @@ context('cy.visit performance tests', function () {
   })
 
   const onStdout = (stdout) => {
-    return stdout.replace(/^\d+%\s+of visits to [^\s]+ finished in less than.*$/gm, 'histogram line')
+    return stdout.replace(/^\d+%\s+of visits to \S+ finished in less than.*$/gm, 'histogram line')
   }
 
   systemTests.it('passes', {
