@@ -1,8 +1,13 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.5.0
 
+**Features:**
+
+- Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).
+
 **Bugfixes:**
 
+- Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
 - Fixed an issue where [`cy.visit()`](https://on.cypress.io/visit) and [`cy.request()`](https://on.cypress.io/request) followed a redirect to a full URL containing `.` or `..` path segments, such as `Location: http://localhost:3000/./hello`, by requesting that path as written instead of `/hello` as browsers do. Servers that route by exact path answered with a 404. Fixes [#31890](https://github.com/cypress-io/cypress/issues/31890).
 
 ## 16.4.0
