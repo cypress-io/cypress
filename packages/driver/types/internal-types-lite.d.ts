@@ -30,6 +30,8 @@ declare namespace Cypress {
     (action: 'cy:protocol-snapshot', fn: () => void)
     (action: 'test:before:after:run:async', fn: (attributes: ObjectLike, test: Mocha.Test, options: ObjectLike) => void | Promise<any>): Cypress
     (action: 'paused', fn: (nextCommandName: string) => void)
+    (action: 'app:timers:reset', fn: () => void)
+    (action: 'app:timers:pause', fn: (shouldPause: boolean) => void)
   }
 
   interface Backend {

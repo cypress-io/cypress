@@ -7,16 +7,30 @@
  * dependencies.
  */
 
-// Globals defined in inject.ts
-/* global cypressConfig */
-
+import type { SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import { createTimers } from './timers'
 import { patchDocumentCookie } from './patches/cross-origin/cookies'
 import { patchElementIntegrity } from './patches/integrity'
 import { patchFetch } from './patches/cross-origin/fetch'
 import { patchXmlHttpRequest } from './patches/cross-origin/xmlHttpRequest'
 
-const findCypress = () => {
+interface CrossOriginInjectionConfig {
+  modifyObstructiveCode: boolean
+  modifyObstructiveThirdPartyCode: boolean
+  simulatedCookies: SerializableAutomationCookie[]
+}
+
+// `fullCrossOrigin` in packages/proxy/lib/http/util/inject.ts wraps this
+// bundle in a function that receives the config as `cypressConfig`
+declare const cypressConfig: CrossOriginInjectionConfig
+
+interface ErrorEventData {
+  href: string
+  message?: unknown
+  stack?: string
+}
+
+const findCypress = (): Cypress.Cypress | undefined => {
   for (let index = 0; index < window.parent.frames.length; index++) {
     const frame = window.parent.frames[index]
 
@@ -33,10 +47,12 @@ const findCypress = () => {
       }
     }
   }
+
+  return undefined
 }
 
 // Event listener to echo back the current location of the iframe
-window.addEventListener('message', (event) => {
+window.addEventListener('message', (event: MessageEvent) => {
   if (event.data === 'aut:cypress:location') {
     event.ports[0].postMessage(window.location.href)
   }
@@ -51,9 +67,9 @@ window.addEventListener('beforeunload', () => {
 
 // This error could also be handled by creating and attaching a spec bridge and re-throwing the error.
 // If this approach proves to be an issue we could try the new solution.
-const handleErrorEvent = (event) => {
+const handleErrorEvent = (event: ErrorEvent) => {
   const { error } = event
-  const data = { href: window.location.href }
+  const data: ErrorEventData = { href: window.location.href }
 
   if (error && error.stack && error.message) {
     data.message = error.message
@@ -95,7 +111,7 @@ patchFetch(window)
 patchXmlHttpRequest(window)
 
 // Add a function to window for the spec bridge to call after it has attached.
-window.__attachToCypress = (Cypress) => {
+window.__attachToCypress = (Cypress: InternalCypress.Cypress) => {
   // A spec bridge has attached so we don't need to forward errors to top anymore.
   window.removeEventListener('error', handleErrorEvent)
 

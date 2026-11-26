@@ -21,7 +21,7 @@ Cypress in the parent window but it is missing. This should never happen and lik
 patchXmlHttpRequest(window)
 
 // Strip SRI from <script>/<link> in the primary AUT frame so proxy-rewritten first-party
-// resources aren't blocked. Cross-origin frames are handled in cross-origin.js.
+// resources aren't blocked. Cross-origin frames are handled in cross-origin.ts.
 if (Cypress.config('removeSRIAttributes')) {
   patchElementIntegrity(window)
 }
