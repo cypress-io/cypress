@@ -14,11 +14,9 @@ const stateFiles: Record<string, FileUtil> = {}
 
 // With no `projectRoot`, state goes to `__global__/state.json`. Callers leave it
 // out on purpose for state that isn't tied to one project, such as
-// `getSavedState({ type: 'global' })` and the preferences behind
-// `localSettingsApi`, so don't try to work out a project here. Neither
-// `process.cwd()` nor `getCwd()`, which is Cypress's own server folder, is the
-// user's project, so a config file found in either would point at the wrong
-// state file.
+// `getSavedState({ type: 'global' })` and `localSettingsApi` preferences.
+// Don't guess a project by looking for a config file: neither `process.cwd()`
+// nor `getCwd()` (Cypress's own server folder) is the user's project.
 export const formStatePath = async (projectRoot?: string) => {
   if (projectRoot) {
     debug('making saved state for project path %s', projectRoot)
