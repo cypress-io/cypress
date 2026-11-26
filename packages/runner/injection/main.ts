@@ -11,8 +11,9 @@ import { createTimers } from './timers'
 import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 import { patchElementIntegrity } from './patches/integrity'
 
-// Matches the driver's declaration, which only reaches this bundle's
-// type-check when the driver's source is in the same program.
+// The driver declares `Window.Cypress` in packages/driver/src/cypress.ts,
+// which this bundle doesn't import. Keep the type identical to that one:
+// TypeScript rejects merged declarations of a property that disagree.
 declare global {
   interface Window {
     Cypress: Cypress.Cypress
