@@ -140,6 +140,7 @@
     "**/deepmerge-ts": "^8.0.2",
     "**/editorconfig/minimatch": "9.0.7",
     "**/form-data": "^4.0.6",
+    "**/get-uri/basic-ftp": "^6.2.4",
     "**/graphql-config/minimatch": "3.1.5",
     "**/jquery": "3.7.1",
     "**/lerna/minimatch": "3.1.5",
