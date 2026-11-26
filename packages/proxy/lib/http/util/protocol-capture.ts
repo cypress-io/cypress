@@ -1,4 +1,4 @@
-const requestIdRegEx = /^(.*)-retry-([\d]+)$/
+const requestIdRegEx = /^(.*)-retry-\d+$/
 
 /**
  * Strip synthetic retry suffixes from CDP request IDs before protocol capture.

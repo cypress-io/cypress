@@ -132,21 +132,19 @@ describe('shouldStreamResponseBody', () => {
     ])
   })
 
-  describe('provably finite (content-length)', () => {
-    const cases: Case[] = [
-      ['materializes content-length: 0', { responseHeaders: [{ name: 'content-length', value: '0' }] }, undefined, false],
-      ['materializes a content-length with surrounding whitespace', { responseHeaders: [{ name: 'content-length', value: '  123 ' }] }, undefined, false],
+  // #35209: the repro's 60 MiB .wasm, fetched by the page with nothing reading its body
+  describe('content-length', () => {
+    const wasmResponse: Protocol.Fetch.HeaderEntry[] = [
+      { name: 'content-type', value: 'application/wasm' },
+      { name: 'content-length', value: '62914577' },
     ]
 
-    for (const malformed of ['abc', '-5', '1e3']) {
-      cases.push([`treats "${malformed}" as not finite and falls through`, { responseHeaders: [{ name: 'content-length', value: malformed }] }, undefined, true])
-    }
-
-    cases.push(
-      ['uses the first of multiple content-length headers', { responseHeaders: [{ name: 'content-length', value: 'abc' }, { name: 'content-length', value: '123' }] }, undefined, true],
-    )
-
-    runCases(cases)
+    runCases([
+      ['streams a large body nothing reads', { resourceType: 'XHR', responseHeaders: wasmResponse }, undefined, true],
+      ['streams content-length: 0', { responseHeaders: [{ name: 'content-length', value: '0' }] }, undefined, true],
+      ['materializes the same body when a cy.intercept route matches it', { resourceType: 'XHR', responseHeaders: wasmResponse }, { hasMatchingRoute: () => true }, false],
+      ['materializes an html body that has a content-length', { responseHeaders: [{ name: 'content-type', value: 'text/html' }, { name: 'content-length', value: '2048' }] }, undefined, false],
+    ])
   })
 
   describe('Media resourceType', () => {
@@ -160,7 +158,6 @@ describe('shouldStreamResponseBody', () => {
       ['streams a 206 range response despite a content-length', { resourceType: 'Media', responseStatusCode: 206, responseHeaders: rangeResponse }, undefined, true],
       ['streams a 200 response despite a content-length', { resourceType: 'Media', responseStatusCode: 200, responseHeaders: [{ name: 'content-length', value: '1024' }] }, undefined, true],
       ['materializes when hasMatchingRoute returns true', { resourceType: 'Media', responseStatusCode: 206, responseHeaders: rangeResponse }, { hasMatchingRoute: () => true }, false],
-      ['materializes the same headers on a Fetch resourceType', { resourceType: 'Fetch', responseStatusCode: 206, responseHeaders: rangeResponse }, undefined, false],
     ])
   })
 

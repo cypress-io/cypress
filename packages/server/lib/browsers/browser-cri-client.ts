@@ -952,6 +952,11 @@ export class BrowserCriClient {
         protocolManager: this.protocolManager,
         fullyManageTabs: this.fullyManageTabs,
         browserClient: this.browserClient,
+        onCriConnectionLost: () => {
+          this._onPageConnectionLost(target.targetId).catch((err) => {
+            debug('error handling page connection loss for %s: %o', target.targetId, err)
+          })
+        },
       })
 
       // Clone the target here so that we separate the protocol client and the main client.
@@ -962,6 +967,63 @@ export class BrowserCriClient {
 
       return this.currentlyAttachedTarget
     }, this.browserName, this.port)
+  }
+
+  /**
+   * The page target's connection doesn't reconnect, so once its socket closes,
+   * every request Chrome paused for interception stays paused: the page never
+   * loads, `pageLoadTimeout` never fires, and the run waits forever. Ends the
+   * run instead.
+   *
+   * A closed tab or browser also closes this socket, but _onTargetDestroyed
+   * reports those, so this waits as long as that handler does and then only
+   * acts if the tab is still open and nothing else has closed the client.
+   */
+  private _onPageConnectionLost = async (targetId: string): Promise<void> => {
+    debug('page connection lost for target %s', targetId)
+
+    const isStillUnexplained = () => {
+      return targetId === this.currentlyAttachedTarget?.targetId
+        && !this.currentlyAttachedTarget.closed
+        && !this.currentlyAttachedTarget.crashed
+        && !this.browserClient.crashed
+        && !this.closing
+        && !this.closed
+        && !this.resettingBrowserTargets
+        && this.gracefulShutdown === undefined
+    }
+
+    await Bluebird.delay(500)
+
+    if (!isStillUnexplained()) {
+      debug('page connection loss for target %s is expected or already handled', targetId)
+
+      return
+    }
+
+    let targets: Protocol.Target.TargetInfo[]
+
+    try {
+      ({ targetInfos: targets } = await this.browserClient.send('Target.getTargets'))
+    } catch (err) {
+      // The browser connection's own error handling reports a dead browser.
+      debug('could not list targets after page connection loss for %s: %o', targetId, err)
+
+      return
+    }
+
+    if (!isStillUnexplained() || !targets.some((target) => target.targetId === targetId)) {
+      debug('page target %s is gone or was closed; leaving it to Target.targetDestroyed', targetId)
+
+      return
+    }
+
+    const err = errors.get('CDP_PAGE_CONNECTION_LOST', this.browserName)
+
+    // stop the run instead of moving to the next spec, which would hang too
+    err.isFatalApiErr = true
+
+    this.onAsynchronousError(err)
   }
 
   /**
@@ -1049,6 +1111,11 @@ export class BrowserCriClient {
         protocolManager: this.protocolManager,
         fullyManageTabs: this.fullyManageTabs,
         browserClient: this.browserClient,
+        onCriConnectionLost: () => {
+          this._onPageConnectionLost(target.targetId).catch((err) => {
+            debug('error handling page connection loss for %s: %o', target.targetId, err)
+          })
+        },
       })
 
       const currentTarget = this.currentlyAttachedTarget
