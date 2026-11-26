@@ -38,24 +38,59 @@ const isOptionDisabled = (option: OptionInfo) => {
   return !!option.$el.prop('disabled') || !!option.$el.closest('optgroup').prop('disabled')
 }
 
-// Strings and indexes match an option's value or index, and fall back to its
-// text only when no option matched by value or index. A pattern matches every
-// option whose value or text it matches, whatever the strings matched.
-const findMatchingOptions = (optionInfos: OptionInfo[], matchers: SelectMatcher[]) => {
-  const literals = _.reject(matchers, _.isRegExp)
-  const patterns = _.filter(matchers, _.isRegExp)
+const getOptionInfos = ($select: JQuery<HTMLSelectElement>): OptionInfo[] => {
+  return $select.find('option').map((index, el) => {
+    const $option = $dom.wrap(el)
 
-  let literalMatches = _.filter(optionInfos, (option) => _.some(literals, (m) => m === option.value || m === option.index))
+    return {
+      index,
+      value: $elements.getNativeProp(el, 'value'),
+      // replace new line chars, then trim spaces
+      text: $option.text().replace(newLineRe, '').trim(),
+      $el: $option,
+    }
+  }).get()
+}
 
-  if (!literalMatches.length) {
-    literalMatches = _.filter(optionInfos, (option) => _.includes(literals, option.text))
+// Returns the options to select, in document order:
+// - A string or index matches options by value or index, and by text only
+//   when it matched none that way, so `['apoc', 'Blade Runner']` selects both.
+// - A pattern matches every enabled option whose value or text it matches,
+//   or with `firstOnly`, the first of them. A pattern whose every match is
+//   disabled keeps its first match, so the caller can report it as disabled.
+const findMatchingOptions = (optionInfos: OptionInfo[], matchers: SelectMatcher[], firstOnly: boolean) => {
+  const toSelect = new Set<OptionInfo>()
+
+  _.each(matchers, (matcher) => {
+    if (_.isRegExp(matcher)) {
+      const matches = _.filter(optionInfos, (option) => testPattern(matcher, option.value) || testPattern(matcher, option.text))
+      const enabled = _.reject(matches, isOptionDisabled)
+      const chosen = enabled.length ? enabled : matches
+
+      _.each(firstOnly ? chosen.slice(0, 1) : chosen, (option) => toSelect.add(option))
+
+      return
+    }
+
+    let matches = _.filter(optionInfos, (option) => matcher === option.value || matcher === option.index)
+
+    if (!matches.length) {
+      matches = _.filter(optionInfos, (option) => matcher === option.text)
+    }
+
+    _.each(matches, (option) => toSelect.add(option))
+  })
+
+  return _.filter(optionInfos, (option) => toSelect.has(option))
+}
+
+// JSON.stringify prints a RegExp as `{}`, so print patterns as `/source/flags`
+const formatArgument = (value) => {
+  if (_.isArray(value)) {
+    return `[${_.map(value, formatArgument).join(',')}]`
   }
 
-  const literalMatchSet = new Set(literalMatches)
-
-  return _.filter(optionInfos, (option) => {
-    return literalMatchSet.has(option) || _.some(patterns, (p) => testPattern(p, option.value) || testPattern(p, option.text))
-  })
+  return _.isRegExp(value) ? String(value) : JSON.stringify(value)
 }
 
 // every option's selected state, since a multiple select can change without its selectedIndex changing
@@ -73,7 +108,7 @@ export default (Commands, Cypress, cy) => {
         && valueOrTextOrIndex.length > 0
         && !_.every(valueOrTextOrIndex, isSelectMatcher)
       ) {
-        $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
+        $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: formatArgument(valueOrTextOrIndex) } })
       }
 
       const options: InternalSelectOptions = _.defaults({}, userOptions, {
@@ -170,23 +205,7 @@ export default (Commands, Cypress, cy) => {
           Cypress.ensure.isNotDisabled(options.$el, 'select', options._log)
         }
 
-        const optionInfos: OptionInfo[] = options.$el.find('option').map((index, el) => {
-          const $option = $dom.wrap(el)
-
-          return {
-            index,
-            value: $elements.getNativeProp(el, 'value'),
-            // replace new line chars, then trim spaces
-            text: $option.text().replace(newLineRe, '').trim(),
-            $el: $option,
-          }
-        }).get()
-
-        let matches = findMatchingOptions(optionInfos, matchers)
-
-        if (selectFirstMatch && matches.length) {
-          matches = [_.find(matches, (option) => !isOptionDisabled(option)) ?? matches[0]]
-        }
+        const matches = findMatchingOptions(getOptionInfos(options.$el), matchers, selectFirstMatch)
 
         // if we didnt set multiple to true and
         // we have more than 1 option to set then blow up
@@ -289,7 +308,14 @@ export default (Commands, Cypress, cy) => {
             // Select exactly the matched <option> elements rather than setting
             // the select's value, which can't tell options with the same value apart.
             const select: HTMLSelectElement = options.$el.get(0)
-            const matched = new Set(_.map(optionEls, ($el) => $el.get(0)))
+            let matched = new Set<HTMLOptionElement>(_.map(optionEls, ($el) => $el.get(0)))
+            const liveOptions = new Set(Array.from(select.options))
+
+            // the page can replace its options while they're clicked, such as
+            // re-rendering them on focus, so match against the options it has now
+            if (_.some(Array.from(matched), (option) => !liveOptions.has(option))) {
+              matched = new Set(_.map(findMatchingOptions(getOptionInfos(options.$el), matchers, selectFirstMatch), ({ $el }) => $el.get(0)))
+            }
 
             _.each(select.options, (option) => {
               option.selected = matched.has(option)

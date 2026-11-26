@@ -330,6 +330,20 @@ describe('src/cy/commands/actions/select', () => {
       .invoke('val').should('eq', 'bar')
     })
 
+    it('selects the right option when the page re-renders the options on mousedown', () => {
+      const $select = cy.$$('select[name=maps]')
+
+      $select.one('mousedown', () => {
+        $select.html($select.html())
+      })
+
+      cy.get('select[name=maps]').select('nuke').should('have.value', 'de_nuke')
+    })
+
+    it('selects every option named by value or text in one array', () => {
+      cy.get('select[name=movies]').select(['apoc', 'The Human Condition']).invoke('val').should('deep.eq', ['apoc', 'thc'])
+    })
+
     it('selects items with the value which has &nbsp;', () => {
       cy.get('select[name=movies]').select('gone&nbsp;with&nbsp;the&nbsp;wind')
     })
@@ -380,6 +394,22 @@ describe('src/cy/commands/actions/select', () => {
         cy.$$('select[name=opt-disabled]').append('<option value="baz">baz</option>')
 
         cy.get('select[name=opt-disabled]').select(/^ba/).should('have.value', 'baz')
+      })
+
+      it('skips disabled options in a multiple select', () => {
+        cy.$$('select[name=movies]').prepend('<option value="" disabled>The movie to watch</option>')
+
+        cy.get('select[name=movies]').select(/^The/).invoke('val').should('deep.eq', ['thc', 'twbb'])
+      })
+
+      it('selects the right option when the page re-renders the options on focus', () => {
+        const $select = cy.$$('select[name=starwars]')
+
+        $select.one('focus', () => {
+          $select.html($select.html())
+        })
+
+        cy.get('select[name=starwars]').select(/^Rey$/).should('have.value', 'rey')
       })
 
       it('skips options in a disabled optgroup when picking the first match', () => {
@@ -783,13 +813,25 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws invalid array argument error when an array mixes valid and invalid values', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings, numbers, and/or regular expressions. You passed: `[{},{}]`')
+          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings, numbers, and/or regular expressions. You passed: `[/^The/,{}]`')
 
           done()
         })
 
         // @ts-expect-error - testing invalid arguments
         cy.get('select[name=movies]').select([/^The/, {}])
+      })
+
+      it('throws when every option a pattern matches in a multiple select is disabled', (done) => {
+        cy.$$('select[name=movies]').append('<option value="zz" disabled>Zardoz</option>')
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because this `<option>` you are trying to select is currently disabled')
+
+          done()
+        })
+
+        cy.get('select[name=movies]').select(['apoc', /^Zardoz$/])
       })
 
       it('throws when every option a pattern matches is disabled', (done) => {
