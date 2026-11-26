@@ -15,7 +15,8 @@ import { telemetry } from '@packages/telemetry'
 import { fs } from '../util/fs'
 import * as extension from '@packages/extension'
 import getPort from 'get-port'
-import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload'
+import { DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '@packages/proxy/lib/http/util/disable-navigation-preload.injected'
+import { listenForDownload, overrideServiceWorkerRegistration } from './page-bootstrap.injected'
 
 declare global {
   interface Window {
@@ -433,7 +434,7 @@ const initializeCDP = async (criClient: CriClient, automation: Automation, useBr
   })
 
   // Window-realm half of the #34652 fix. The worker-realm half, the shared
-  // mechanism, and its limits are documented in disable-navigation-preload.ts.
+  // mechanism, and its limits are documented in disable-navigation-preload.injected.ts.
   //
   // This neutralizes navigationPreload.enable() called from page JS, and
   // best-effort disables preload on registrations persisted from an earlier
@@ -460,73 +461,6 @@ const initializeCDP = async (criClient: CriClient, automation: Automation, useBr
     ;(${overrideServiceWorkerRegistration.toString()})(binding)
     `,
   })
-}
-
-const overrideServiceWorkerRegistration = (binding) => {
-  // The service worker container won't be available in different situations (like in the placeholder iframes we create
-  // in open mode). So only override the register function if it exists.
-  if (window.ServiceWorkerContainer) {
-    const oldRegister = window.ServiceWorkerContainer.prototype.register
-
-    window.ServiceWorkerContainer.prototype.register = function (scriptURL, options) {
-      const anchor = document.createElement('a')
-
-      let resolvedHref: URL
-
-      if (typeof scriptURL === 'string') {
-        anchor.setAttribute('href', scriptURL)
-        resolvedHref = new URL(anchor.href)
-      } else {
-        resolvedHref = scriptURL
-      }
-
-      anchor.remove()
-      const resolvedUrl = `${resolvedHref.origin}${resolvedHref.pathname}`
-
-      const serviceWorkerRegistrationEvent = {
-        type: 'service-worker-registration',
-        scriptURL: resolvedUrl,
-        initiatorOrigin: window.location.origin,
-      }
-
-      binding(JSON.stringify(serviceWorkerRegistrationEvent))
-
-      return oldRegister.apply(this, [scriptURL, options])
-    }
-  }
-}
-
-// The most efficient way to do this is to listen for the navigate event. However, this is only available in chromium browsers (after 102).
-// For older versions and for webkit, we need to listen for click events on anchor tags with the download attribute.
-const listenForDownload = (binding) => {
-  if (binding) {
-    const createDownloadEvent = (destination) => {
-      return JSON.stringify({
-        type: 'download',
-        destination,
-      })
-    }
-
-    if (window.navigation) {
-      window.navigation.addEventListener('navigate', (event) => {
-        if (typeof event.downloadRequest === 'string') {
-          binding(createDownloadEvent(event.destination.url))
-        }
-      })
-    } else {
-      document.addEventListener('click', (event) => {
-        if (event.target instanceof HTMLAnchorElement && typeof event.target.download === 'string') {
-          binding(createDownloadEvent(event.target.href))
-        }
-      })
-
-      document.addEventListener('keydown', (event) => {
-        if (event.target instanceof HTMLAnchorElement && event.key === 'Enter' && typeof event.target.download === 'string') {
-          binding(createDownloadEvent(event.target.href))
-        }
-      })
-    }
-  }
 }
 
 const browserUtils = {

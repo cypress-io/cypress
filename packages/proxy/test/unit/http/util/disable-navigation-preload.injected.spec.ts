@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION, DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '../../../../lib/http/util/disable-navigation-preload'
+import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION, DISABLE_NAVIGATION_PRELOAD_WINDOW_EXPRESSION } from '../../../../lib/http/util/disable-navigation-preload.injected'
 
 // Runs an injected expression the same way Runtime.evaluate / a prepended
 // script body / addScriptToEvaluateOnNewDocument does: as a standalone
@@ -15,7 +15,7 @@ async function flush () {
   await new Promise((resolve) => setImmediate(resolve))
 }
 
-describe('lib/http/util/disable-navigation-preload', () => {
+describe('lib/http/util/disable-navigation-preload.injected', () => {
   describe('DISABLE_NAVIGATION_PRELOAD_EXPRESSION (worker realm)', () => {
     // A prototype-backed fake so patches can be told apart from an instance's
     // own properties, the same shape the real NavigationPreloadManager has.

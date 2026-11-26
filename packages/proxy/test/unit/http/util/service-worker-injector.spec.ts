@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { getServiceWorkerInstrumentationExpression, injectIntoServiceWorker } from '../../../../lib/http/util/service-worker-injector'
-import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../../lib/http/util/disable-navigation-preload'
+import { DISABLE_NAVIGATION_PRELOAD_EXPRESSION } from '../../../../lib/http/util/disable-navigation-preload.injected'
 
 const APP_SERVICE_WORKER_BODY = `
 self.__appFetchCalls = [];

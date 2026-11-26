@@ -7,7 +7,7 @@ const e2ePath = Fixtures.projectPath('e2e')
 // #34652: on the browser network (CDP Fetch) path, a service worker's
 // navigation preload request bypasses Fetch.requestPaused (verified
 // empirically), so the renderer keeps raw framebusting headers and the AUT
-// iframe refuses to load. disable-navigation-preload.ts disables preload in
+// iframe refuses to load. disable-navigation-preload.injected.ts disables preload in
 // both the worker and window realms so the SW's fetch handler falls back to
 // fetch(e.request), which CDP Fetch does intercept. This spec asserts that
 // mechanism directly rather than a full navigation-level repro — #34674

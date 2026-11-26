@@ -3,6 +3,7 @@ import { expect } from 'chai'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
+import vm from 'vm'
 
 const { createServerEntryPointBundle, createStartCypressBundle } = require('../../binary/start-bundle')
 
@@ -53,6 +54,19 @@ describe('start-bundle', () => {
 
       expect(require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))).to.equal(nestedPath)
       expect(loadedFromDisk).to.deep.equal(['node_modules/consumer/node_modules/@cypress/request-promise/index.js'])
+    })
+
+    it('loads .injected modules from disk so their functions serialize without bundler helpers', async () => {
+      const injectedPath = path.join(appDir, 'packages', 'server', 'lib', 'page-script.injected.js')
+
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = require('./lib/page-script.injected').pageScript`)
+      await fs.outputFile(injectedPath, `exports.pageScript = () => { const createEvent = (type) => ({ type }); return createEvent('download') }`)
+
+      const { loadedFromDisk } = await createStartCypressBundle(appDir)
+      const pageScript = require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))
+
+      expect(vm.runInNewContext(`(${pageScript})()`)).to.deep.equal({ type: 'download' })
+      expect(loadedFromDisk).to.deep.equal(['packages/server/lib/page-script.injected.js'])
     })
 
     it('keeps "use strict" in modules that use __dirname', async () => {

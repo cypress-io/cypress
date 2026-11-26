@@ -228,7 +228,7 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkProxy.http.netStubbingState).toBe(deps.netStubbingState)
   })
 
-  // See disable-navigation-preload.ts (#34652) for the mechanism; only the
+  // See disable-navigation-preload.injected.ts (#34652) for the mechanism; only the
   // CDP Fetch runtime sets this flag. Explicitly false, not merely absent -
   // ServerCtx.useBrowserNetworkInterception is a general discriminator other
   // consumers may branch on, so this path must say what it is, not leave it
