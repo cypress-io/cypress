@@ -164,6 +164,15 @@ describe('detectLanguage', () => {
       expect(actual).toEqual('ts')
     })
 
+    it('with `cypress.config.cts` should return `ts`', async () => {
+      const projectRoot = await scaffoldMigrationProject('config-with-ts')
+
+      fs.moveSync(path.join(projectRoot, 'cypress.config.ts'), path.join(projectRoot, 'cypress.config.cts'))
+      const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
+
+      expect(actual).toEqual('ts')
+    })
+
     it('with `cypress.config.js` should return `js`', async () => {
       const projectRoot = await scaffoldMigrationProject('config-with-js')
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
@@ -194,7 +203,7 @@ describe('detectLanguage', () => {
 
       await fs.rm(path.join(projectRoot, 'cypress.config.ts'))
 
-      ;['ts', 'mts', 'TS', 'MTS'].forEach((extension) => {
+      ;['ts', 'mts', 'cts', 'TS', 'MTS', 'CTS'].forEach((extension) => {
         const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
 
         expect(actual).toEqual('ts')

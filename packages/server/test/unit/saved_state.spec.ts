@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import path from 'path'
+import os from 'os'
+import fsPromises from 'fs/promises'
 import { fs } from '../../lib/util/fs'
 import { File as FileUtil } from '../../lib/util/file'
 import * as appData from '../../lib/util/app_data'
@@ -62,6 +64,21 @@ describe('lib/saved_state', () => {
 
         expect(state.path).toBe(expected)
       })
+    })
+
+    it('sets path __global__ if no projectRoot, even when the working directory has a cypress.config.js', async () => {
+      const originalCwd = process.cwd()
+      const projectDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'cy-saved-state-'))
+
+      try {
+        await fsPromises.writeFile(path.join(projectDir, 'cypress.config.js'), 'module.exports = {}\n')
+        process.chdir(projectDir)
+
+        expect(await savedState.formStatePath()).toBe(path.join('__global__', 'state.json'))
+      } finally {
+        process.chdir(originalCwd)
+        await fsPromises.rm(projectDir, { recursive: true, force: true })
+      }
     })
 
     it('has an empty state by default', () => {

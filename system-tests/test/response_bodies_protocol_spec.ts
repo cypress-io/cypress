@@ -126,15 +126,29 @@ const recordedFor = (recorded: RecordedResponseBody[], pathname: string) => {
   return matches[0]
 }
 
+// The force-http1 jobs export this, which puts chrome on the HTTP/1 proxy
+// instead of the CDP capture pump.
+const forceHttp1 = process.env.CYPRESS_forceHttp1 === 'true'
+
 const expectCapturedBody = (recorded: RecordedResponseBody[], pathname: string) => {
   const entry = recordedFor(recorded, pathname)
   const expected = assets[pathname].body
   const summary = JSON.stringify(entry)
 
+  if (forceHttp1 && expected.length === 0) {
+    expect(entry.kind, summary).to.equal('emptyBody')
+
+    return
+  }
+
   expect(entry.kind, summary).to.equal('stream')
-  // Only the capture pump hands Replay already-decoded bytes; a body read in
-  // full arrives with this false, and would leave the pump untested.
-  expect(entry.isAlreadyGunzipped, summary).to.be.true
+
+  if (!forceHttp1) {
+    // Only the capture pump hands Replay already-decoded bytes; a body read in
+    // full arrives with this false, and would leave the pump untested.
+    expect(entry.isAlreadyGunzipped, summary).to.be.true
+  }
+
   expect(entry.error, summary).to.be.undefined
   expect(entry.ended, summary).to.be.true
   expect(entry.decodedBytes, summary).to.equal(expected.length)
