@@ -18,21 +18,19 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/v/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&label=npm&color=CB3837" alt="npm version"/></a>
-  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/dm/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&color=CB3837" alt="npm downloads"/></a>
-  <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=for-the-badge&labelColor=1B1E2E&logo=github&color=181717" alt="GitHub stars"/></a>
-  <a href="https://hub.docker.com/r/cypress/browsers"><img src="https://img.shields.io/docker/pulls/cypress/browsers?style=for-the-badge&labelColor=1B1E2E&logo=docker&logoColor=white&color=2496ED" alt="Docker pulls"/></a>
+  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/v/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&label=npm&color=CB3837&cacheSeconds=86400" alt="npm version"/></a>
+  <a href="https://www.npmjs.com/package/cypress"><img src="https://img.shields.io/npm/dm/cypress?style=for-the-badge&labelColor=1B1E2E&logo=npm&color=CB3837&cacheSeconds=86400" alt="npm downloads"/></a>
+  <a href="https://github.com/cypress-io/cypress"><img src="https://img.shields.io/github/stars/cypress-io/cypress?style=for-the-badge&labelColor=1B1E2E&logo=github&color=181717&cacheSeconds=86400" alt="GitHub stars"/></a>
+  <a href="https://hub.docker.com/r/cypress/browsers"><img src="https://img.shields.io/docker/pulls/cypress/browsers?style=for-the-badge&labelColor=1B1E2E&logo=docker&logoColor=white&color=2496ED&cacheSeconds=86400" alt="Docker pulls"/></a>
 </p>
 
 <p align="center">
-  <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Fv10%2Finvites%2Fcypress%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&label=Discord&suffix=%20members&color=5865F2&style=for-the-badge&labelColor=1B1E2E&logo=discord&logoColor=white" alt="Discord members"/></a>
+  <a href="https://on.cypress.io/discord"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Fv10%2Finvites%2Fcypress%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&label=Discord&suffix=%20members&color=5865F2&style=for-the-badge&labelColor=1B1E2E&logo=discord&logoColor=white&cacheSeconds=86400" alt="Discord members"/></a>
   <a href="https://skills.sh/cypress-io/ai-toolkit"><img src="https://skills.sh/b/cypress-io/ai-toolkit?style=for-the-badge" alt="skills.sh"/></a>
   <a href="https://deepwiki.com/cypress-io/cypress"><img src="https://img.shields.io/badge/Ask-DeepWiki-3B82F6?style=for-the-badge&labelColor=1B1E2E" alt="Ask DeepWiki"/></a>
 </p>
 
-<p align="center">
-  <img alt="A tour of Cypress: end-to-end and component tests running in the Cypress App, rewinding a failed step with time-travel debugging, driving Cypress from the terminal with cypress tap, running tests in CI, and Cypress Cloud features" src="./assets/cypress-overview.gif" width="100%" />
-</p>
+https://github.com/user-attachments/assets/076e0f06-0529-43de-9ce8-b64209f8e859
 
 ## What is Cypress?
 
@@ -90,8 +88,8 @@ Extend Cypress with plugins built by the community and the Cypress team, coverin
 
 ## Contributing
 
-[![cypress](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/ypt4pf/develop&style=for-the-badge&labelColor=1B1E2E&logo=cypress)](https://cloud.cypress.io/projects/ypt4pf/runs?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=contributing-tests-badge)
-[![CircleCI](https://img.shields.io/circleci/build/github/cypress-io/cypress/develop?style=for-the-badge&labelColor=1B1E2E&logo=circleci)](https://circleci.com/gh/cypress-io/cypress/tree/develop)
+[![cypress](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/ypt4pf/develop&style=for-the-badge&labelColor=1B1E2E&logo=cypress&cacheSeconds=3600)](https://cloud.cypress.io/projects/ypt4pf/runs?utm_source=github&utm_medium=readme&utm_campaign=cypress-repo&utm_content=contributing-tests-badge)
+[![CircleCI](https://img.shields.io/circleci/build/github/cypress-io/cypress/develop?style=for-the-badge&labelColor=1B1E2E&logo=circleci&cacheSeconds=3600)](https://circleci.com/gh/cypress-io/cypress/tree/develop)
 
 Please see our [Contributing Guideline](./CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 

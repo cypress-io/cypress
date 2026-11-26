@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MockInstance } from 'vitest'
-import { createTimers } from '../../injection/timers'
+import { createTimers } from '../../../injection/timers'
 
 // String handlers can only report back through a global
 const timerWindow: Window & { codeRan?: boolean } = window
