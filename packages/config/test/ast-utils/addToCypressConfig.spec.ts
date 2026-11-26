@@ -105,6 +105,50 @@ describe('addToCypressConfig', () => {
     expect(result.result).toEqual('ADDED')
   })
 
+  const esmConfig = dedent`
+    import { defineConfig } from "cypress";
+
+    export default defineConfig({
+      e2e: {
+        setupNodeEvents(on, config) {
+          // implement node event listeners here
+        },
+      },
+    });
+  `
+
+  const cjsConfig = dedent`
+    const { defineConfig } = require("cypress");
+
+    module.exports = defineConfig({
+      e2e: {
+        setupNodeEvents(on, config) {
+          // implement node event listeners here
+        },
+      },
+    });
+  `
+
+  it.each([
+    ['mts', 'an ESM', false, esmConfig],
+    ['mjs', 'an ESM', false, esmConfig],
+    ['cts', 'a CommonJS', true, cjsConfig],
+    ['cjs', 'a CommonJS', true, cjsConfig],
+  ])('will create a .%s file as %s config if the file is empty, whether or not the project is ECMA Script', async (extension, _kind, isProjectUsingESModules, expected) => {
+    const { result: status } = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, `../__fixtures__/empty.config.${extension}`),
+      info: {
+        testingType: 'e2e',
+      },
+      isProjectUsingESModules,
+      projectRoot: __dirname,
+    })
+
+    expect(getWrittenConfig()).toEqual(expected)
+
+    expect(status).toEqual('ADDED')
+  })
+
   it('will exclude defineConfig if cypress can\'t be imported from the projectRoot', async () => {
     const result = await addTestingTypeToCypressConfig({
       filePath: path.join(__dirname, '../__fixtures__/empty.config.js'),
