@@ -427,6 +427,35 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=movies]').select(['apoc', 'br'])
         cy.then(() => expect(changedTo).to.deep.eq(['apoc', 'br']))
       })
+
+      it('fires the mouse events for every selected option before a single `input` and `change`', () => {
+        const values = _.times(100, (i) => `item-${i}`)
+        const $select = $('<select id="select-many" multiple />').prependTo(cy.$$('body'))
+
+        _.each(values, (value, i) => {
+          $('<option />').val(value).text(`Item ${i}`).appendTo($select)
+        })
+
+        const fired: string[] = []
+
+        _.each(['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'input', 'change'], (event) => {
+          $select.on(event, () => {
+            fired.push(event)
+          })
+        })
+
+        const clickSequence = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']
+
+        cy.get('#select-many').select(values).then(($el) => {
+          expect($el.val()).to.deep.eq(values)
+          // one click on the <select>, then one per selected <option>
+          expect(fired).to.deep.eq([
+            ..._.flatten(_.times(values.length + 1, () => clickSequence)),
+            'input',
+            'change',
+          ])
+        })
+      })
     })
 
     describe('errors', {

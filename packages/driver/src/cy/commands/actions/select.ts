@@ -254,12 +254,17 @@ export default (Commands, Cypress, cy) => {
 
           return Promise
           .resolve(optionEls) // why cant we just pass these directly to .each?
-          .each((optEl) => {
+          .each((optEl, index, length) => {
             return cy.now('click', optEl, {
               $el: optEl,
               log: false,
               verify: false,
               force: true, // always force the click to happen on the <option>
+              // Each click dispatches its events synchronously, so waiting out the
+              // post-click delay after every <option> only makes .select() slower per
+              // selected option. Waiting once, after the last one, still gives the app
+              // time to react before `input` and `change`.
+              _skipDelay: index < length - 1,
               timeout: options.timeout,
               interval: options.interval,
             })

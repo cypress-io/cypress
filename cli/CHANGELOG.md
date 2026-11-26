@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.5.0
 
+**Performance:**
+
+- [`.select()`](https://on.cypress.io/select) no longer pauses after each option it selects in a `<select multiple>`, so selecting many options at once finishes much sooner. Fixed in [#00000](https://github.com/cypress-io/cypress/pull/00000).
+
 **Features:**
 
 - Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).
