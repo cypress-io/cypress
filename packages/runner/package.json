@@ -17,6 +17,7 @@
     "cypress:run": "echo \"These tests have been moved to @packages/app. \" && exit 1",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "lint": "eslint",
+    "test": "vitest run",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "node ../../scripts/run-webpack --watch --progress"
   },
@@ -40,11 +41,13 @@
     "cross-env": "7.0.3",
     "eslint": "^10.14.0",
     "jiti": "^2.4.2",
+    "jsdom": "^26.0.0",
     "lodash": "^4.17.21",
     "mobx": "6.13.6",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "rimraf": "^6.1.1",
+    "vitest": "^3.2.4",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   },
