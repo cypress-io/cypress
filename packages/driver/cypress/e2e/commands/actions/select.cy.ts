@@ -130,6 +130,32 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
+    describe('in a multiple select whose options share values', () => {
+      const selectedTexts = ($select: JQuery) => $select.find('option:selected').map((_i, option) => $(option).text()).get()
+
+      beforeEach(() => {
+        cy.$$('select[name=startrek-same]').attr('multiple', 'multiple')
+      })
+
+      it('selects every option chosen by text', () => {
+        cy.get('select[name=startrek-same]').select(['Kirk', 'Spock']).then(($select) => {
+          expect(selectedTexts($select)).to.deep.eq(['Kirk', 'Spock'])
+        })
+      })
+
+      it('selects every option chosen by index', () => {
+        cy.get('select[name=startrek-same]').select([0, 3]).then(($select) => {
+          expect(selectedTexts($select)).to.deep.eq(['Kirk', 'Sulu'])
+        })
+      })
+
+      it('selects every option chosen by a pattern', () => {
+        cy.get('select[name=startrek-same]').select(/u/).then(($select) => {
+          expect(selectedTexts($select)).to.deep.eq(['Uhura', 'Sulu'])
+        })
+      })
+    })
+
     it('can select an array of texts', () => {
       cy.get('select[name=movies]').select(['The Human Condition', 'There Will Be Blood']).then(($select) => {
         expect($select.val()).to.deep.eq(['thc', 'twbb'])
@@ -318,9 +344,9 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=maps]').select(/^ital/).should('have.value', 'cs_italy')
       })
 
-      it('prioritizes value over text', () => {
-        // matches the value `cs_italy` and the text `train`
-        cy.get('select[name=maps]').select(/^(cs_|train)/).should('have.value', 'cs_italy')
+      it('selects the first option in document order whose value or text matches', () => {
+        // matches the text `train` of the 4th option and the value `cs_italy` of the 5th
+        cy.get('select[name=maps]').select(/^(cs_|train)/).should('have.value', 'de_train')
       })
 
       it('selects the first matching option in a single select', () => {
@@ -341,9 +367,30 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=movies]').select([0, 'br', /^20/]).invoke('val').should('deep.eq', ['apoc', 'br', '2001'])
       })
 
+      it('matches by text in a multiple select even when it also matches a value', () => {
+        // matches the value `apoc` and the texts of `thc` and `twbb`
+        cy.get('select[name=movies]').select(/^(apoc|The)/).invoke('val').should('deep.eq', ['apoc', 'thc', 'twbb'])
+      })
+
+      it('matches by text even when a string in the same array matches a value', () => {
+        cy.get('select[name=movies]').select(['apoc', /^The/]).invoke('val').should('deep.eq', ['apoc', 'thc', 'twbb'])
+      })
+
+      it('skips disabled options when picking the first match', () => {
+        cy.$$('select[name=opt-disabled]').append('<option value="baz">baz</option>')
+
+        cy.get('select[name=opt-disabled]').select(/^ba/).should('have.value', 'baz')
+      })
+
+      it('skips options in a disabled optgroup when picking the first match', () => {
+        cy.$$('select[name=optgroup-disabled]').append('<option value="baz">baz</option>')
+
+        cy.get('select[name=optgroup-disabled]').select(/^(bar|baz)$/).should('have.value', 'baz')
+      })
+
       it('does not match indexes', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `/^1$/`')
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value or text matching: `/^1$/`')
 
           done()
         })
@@ -715,7 +762,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('throws when a pattern matches no option', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `/^udon$/i`')
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value or text matching: `/^udon$/i`')
           expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
@@ -724,7 +771,28 @@ describe('src/cy/commands/actions/select', () => {
         cy.get('select[name=foods]').select(/^udon$/i)
       })
 
-      it('throws when a pattern matches a disabled option first', (done) => {
+      it('mentions indexes when a mixed array matches no option', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `udon, /^soba$/`')
+
+          done()
+        })
+
+        cy.get('select[name=movies]').select(['udon', /^soba$/])
+      })
+
+      it('throws invalid array argument error when an array mixes valid and invalid values', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` must be passed an array containing only strings, numbers, and/or regular expressions. You passed: `[{},{}]`')
+
+          done()
+        })
+
+        // @ts-expect-error - testing invalid arguments
+        cy.get('select[name=movies]').select([/^The/, {}])
+      })
+
+      it('throws when every option a pattern matches is disabled', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.select()` failed because this `<option>` you are trying to select is currently disabled')
 

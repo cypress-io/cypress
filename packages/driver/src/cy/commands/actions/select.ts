@@ -25,29 +25,37 @@ const testPattern = (pattern: RegExp, str: string) => {
   return pattern.test(str)
 }
 
-const matchesValueOrIndex = (matchers: SelectMatcher[], value: string, index: number) => {
-  return _.some(matchers, (m) => _.isRegExp(m) ? testPattern(m, value) : m === value || m === index)
-}
-
-const matchesText = (matchers: SelectMatcher[], text: string) => {
-  return _.some(matchers, (m) => _.isRegExp(m) ? testPattern(m, text) : m === text)
-}
-
 const isSelectMatcher = (val) => _.isNumber(val) || _.isString(val) || _.isRegExp(val)
 
-// how many options carry each `value` attribute, the set `option[value="…"]` would find
-const countValueAttributes = (optionEls: Element[]) => {
-  const counts = new Map<string, number>()
+interface OptionInfo {
+  index: number
+  value: string
+  text: string
+  $el: JQuery<HTMLOptionElement>
+}
 
-  _.each(optionEls, (el) => {
-    const value = el.getAttribute('value')
+const isOptionDisabled = (option: OptionInfo) => {
+  return !!option.$el.prop('disabled') || !!option.$el.closest('optgroup').prop('disabled')
+}
 
-    if (value !== null) {
-      counts.set(value, (counts.get(value) ?? 0) + 1)
-    }
+// Strings and indexes match an option's value or index, and fall back to its
+// text only when no option matched by value or index. A pattern matches every
+// option whose value or text it matches, whatever the strings matched.
+const findMatchingOptions = (optionInfos: OptionInfo[], matchers: SelectMatcher[]) => {
+  const literals = _.reject(matchers, _.isRegExp)
+  const patterns = _.filter(matchers, _.isRegExp)
+
+  let literalMatches = _.filter(optionInfos, (option) => _.some(literals, (m) => m === option.value || m === option.index))
+
+  if (!literalMatches.length) {
+    literalMatches = _.filter(optionInfos, (option) => _.includes(literals, option.text))
+  }
+
+  const literalMatchSet = new Set(literalMatches)
+
+  return _.filter(optionInfos, (option) => {
+    return literalMatchSet.has(option) || _.some(patterns, (p) => testPattern(p, option.value) || testPattern(p, option.text))
   })
-
-  return counts
 }
 
 // every option's selected state, since a multiple select can change without its selectedIndex changing
@@ -63,7 +71,7 @@ export default (Commands, Cypress, cy) => {
       if (
         _.isArray(valueOrTextOrIndex)
         && valueOrTextOrIndex.length > 0
-        && !_.some(valueOrTextOrIndex, isSelectMatcher)
+        && !_.every(valueOrTextOrIndex, isSelectMatcher)
       ) {
         $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
@@ -141,8 +149,9 @@ export default (Commands, Cypress, cy) => {
       const multiple = options.$el.prop('multiple')
 
       // a pattern can match several options, so like cy.contains(), a pattern
-      // passed to a select without `multiple` picks the first option it matches
+      // passed to a select without `multiple` picks the first enabled option it matches
       const selectFirstMatch = !multiple && matchers.length === 1 && _.isRegExp(matchers[0])
+      const onlyPatterns = matchers.length > 0 && _.every(matchers, _.isRegExp)
 
       // throw if we're not a multiple select and we've
       // passed an array of values
@@ -154,7 +163,6 @@ export default (Commands, Cypress, cy) => {
 
       const getOptions = () => {
         options.$el = cy.getSubjectFromChain(subjectChain)
-        let notAllUniqueValues
 
         // throw if <select> is disabled
         if (!options.force) {
@@ -162,78 +170,39 @@ export default (Commands, Cypress, cy) => {
           Cypress.ensure.isNotDisabled(options.$el, 'select', options._log)
         }
 
-        const values: string[] = []
-        const optionEls: JQuery<any>[] = []
-        const $options = options.$el.find('option')
-        const valueAttributeCounts = countValueAttributes($options.get())
-        const optionsObjects = $options.map((index, el) => {
-          // push the value in values array if its
-          // found within the valueOrText
-          const value = $elements.getNativeProp(el, 'value')
-          const optEl = $dom.wrap(el)
+        const optionInfos: OptionInfo[] = options.$el.find('option').map((index, el) => {
+          const $option = $dom.wrap(el)
 
-          if (matchesValueOrIndex(matchers, value, index)) {
-            optionEls.push(optEl)
-            values.push(value)
-
-            // https://github.com/cypress-io/cypress/issues/24739
-            if ((valueAttributeCounts.get(value) ?? 0) > 1) {
-              notAllUniqueValues = true
-            }
-          }
-
-          // replace new line chars, then trim spaces
-          const trimmedText = optEl.text().replace(newLineRe, '').trim()
-
-          // return the elements text + value
           return {
-            value,
-            originalText: optEl.text(),
-            text: trimmedText,
-            $el: optEl,
+            index,
+            value: $elements.getNativeProp(el, 'value'),
+            // replace new line chars, then trim spaces
+            text: $option.text().replace(newLineRe, '').trim(),
+            $el: $option,
           }
         }).get()
 
-        // if we couldn't find anything by value then attempt
-        // to find it by text and insert its value into values arr
-        if (!values.length) {
-          // if any of the values are the same and the user is trying to
-          // select based on the text, setting the value won't work
-          // `notAllUniqueValues` is used later to do the right thing
-          const uniqueValues = _.chain(optionsObjects).map('value').uniq().value()
+        let matches = findMatchingOptions(optionInfos, matchers)
 
-          notAllUniqueValues = uniqueValues.length !== optionsObjects.length
-
-          _.each(optionsObjects, (obj) => {
-            if (matchesText(matchers, obj.text)) {
-              optionEls.push(obj.$el)
-              const objValue = obj.value
-
-              values.push(objValue)
-            }
-          })
-        }
-
-        if (selectFirstMatch) {
-          optionEls.splice(1)
-          values.splice(1)
+        if (selectFirstMatch && matches.length) {
+          matches = [_.find(matches, (option) => !isOptionDisabled(option)) ?? matches[0]]
         }
 
         // if we didnt set multiple to true and
         // we have more than 1 option to set then blow up
-        if (!multiple && (values.length > 1)) {
+        if (!multiple && (matches.length > 1)) {
           $errUtils.throwErrByPath('select.multiple_matches', {
             args: { value: matchers.join(', ') },
           })
         }
 
-        if (!values.length && matchers.length > 0) {
-          $errUtils.throwErrByPath('select.no_matches', {
+        if (!matches.length && matchers.length > 0) {
+          $errUtils.throwErrByPath(onlyPatterns ? 'select.no_pattern_matches' : 'select.no_matches', {
             args: { value: matchers.join(', ') },
           })
         }
 
-        _.each(optionEls, ($el) => {
+        _.each(matches, ({ $el }) => {
           if ($el.prop('disabled')) {
             node = $dom.stringify($el)
 
@@ -251,7 +220,7 @@ export default (Commands, Cypress, cy) => {
           }
         })
 
-        return { values, optionEls, optionsObjects, notAllUniqueValues }
+        return { values: _.map(matches, 'value'), optionEls: _.map(matches, '$el') }
       }
 
       const retryOptions = () => {
@@ -267,7 +236,7 @@ export default (Commands, Cypress, cy) => {
       return Promise
       .try(retryOptions)
       .then((obj = {}) => {
-        const { values, optionEls, optionsObjects, notAllUniqueValues } = obj
+        const { values, optionEls } = obj
 
         // preserve the selected values
         consoleProps.Selected = values
@@ -317,31 +286,17 @@ export default (Commands, Cypress, cy) => {
           }).then(() => {
             const oldSelection = getSelection(options.$el.get(0))
 
-            // reset the selects value after we've
-            // fired all the proper click events
-            // for the options
-            // TODO: shouldn't we be updating the values
-            // as we click the <option> instead of
-            // all afterwards?
-            options.$el.val(values)
+            // Select exactly the matched <option> elements rather than setting
+            // the select's value, which can't tell options with the same value apart.
+            const select: HTMLSelectElement = options.$el.get(0)
+            const matched = new Set(_.map(optionEls, ($el) => $el.get(0)))
 
-            if (notAllUniqueValues) {
-              // if all the values are the same and the user is trying to
-              // select based on the text or index, setting the val() will just
-              // select the first one
-              let selectedIndex = 0
+            _.each(select.options, (option) => {
+              option.selected = matched.has(option)
+            })
 
-              _.each(optionEls, ($el) => {
-                const index = _.findIndex(optionsObjects, (optionObject: any) => {
-                  return $el.text() === optionObject.originalText
-                })
-
-                selectedIndex = index
-
-                return $el.prop('selected', 'selected')
-              })
-
-              options.$el[0].selectedIndex = selectedIndex
+            if (!matched.size) {
+              select.selectedIndex = -1
             }
 
             // https://github.com/cypress-io/cypress/issues/19494

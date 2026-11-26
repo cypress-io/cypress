@@ -2270,8 +2270,8 @@ declare namespace Cypress {
 
     /**
      * Select an `<option>` with specific text, value, or index within a `<select>`.
-     * A regular expression is matched against each option's value, then its text.
-     * Within a single `<select>`, it selects the first option it matches.
+     * A regular expression selects every option whose value or text it matches,
+     * or the first enabled one when the `<select>` doesn't have the `multiple` attribute.
      *
      * @see https://on.cypress.io/select
      */

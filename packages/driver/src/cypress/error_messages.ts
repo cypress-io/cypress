@@ -1739,6 +1739,10 @@ export default {
       message: `${cmd('select')} failed because it could not find a single \`<option>\` with value, index, or text matching: \`{{value}}\``,
       docsUrl: 'https://on.cypress.io/select',
     },
+    no_pattern_matches: {
+      message: `${cmd('select')} failed because it could not find a single \`<option>\` with value or text matching: \`{{value}}\``,
+      docsUrl: 'https://on.cypress.io/select',
+    },
     option_disabled: {
       message: `${cmd('select')} failed because this \`<option>\` you are trying to select is currently disabled:\n\n\`{{node}}\``,
       docsUrl: 'https://on.cypress.io/select',

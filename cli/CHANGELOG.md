@@ -3,7 +3,7 @@
 
 **Features:**
 
-- [`.select()`](https://on.cypress.io/select) now accepts a regular expression, alone or in an array, to select an `<option>` whose value or text matches it. In a `<select>` without the `multiple` attribute, it selects the first matching option; in a `multiple` select, it selects every matching option. Addresses [#31552](https://github.com/cypress-io/cypress/issues/31552).
+- [`.select()`](https://on.cypress.io/select) now accepts a regular expression, alone or in an array, to select every `<option>` whose value or text matches it. In a `<select>` without the `multiple` attribute, it selects the first enabled option that matches. Addresses [#31552](https://github.com/cypress-io/cypress/issues/31552).
 - Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).
 
 **Bugfixes:**
