@@ -8,6 +8,9 @@ yarn workspace @packages/runner build
 
 # Build for production (minified)
 yarn workspace @packages/runner build-prod
+
+# Run the Vitest unit specs under test/unit
+yarn workspace @packages/runner test
 ```
 
 **Architecture**
@@ -22,7 +25,7 @@ yarn workspace @packages/runner build-prod
 **Gotchas / Notes**
 
 - This package is deprecated in favor of `@packages/app`. Do not add new features here; migrate to `@packages/app` instead.
-- Tests were moved to `@packages/app`; running `cypress:open` or `cypress:run` from this package will error.
+- Cypress tests were moved to `@packages/app`; running `cypress:open` or `cypress:run` from this package will error. The Vitest specs under `test/unit` cover code that can run in jsdom, such as the AUT timer wrapper in `injection/timers.ts`, whose end-to-end coverage lives in `@packages/driver`'s `cypress/e2e/cy/timers.cy.ts`.
 - Nx implicit dependencies on `@packages/driver`, `@packages/reporter`, and `@packages/config` mean any change in those packages invalidates the runner's Nx cache and triggers a rebuild.
 - `dom.js` uses webpack-specific loaders and cannot be imported directly by Vite.
 
