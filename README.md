@@ -30,11 +30,7 @@
   <a href="https://deepwiki.com/cypress-io/cypress"><img src="https://img.shields.io/badge/Ask-DeepWiki-3B82F6?style=for-the-badge&labelColor=1B1E2E" alt="Ask DeepWiki"/></a>
 </p>
 
-<p align="center">
-  <video src="./assets/cypress-overview.mp4" poster="./assets/cypress-overview-poster.jpg" aria-label="A tour of Cypress: end-to-end and component tests running in the Cypress App, rewinding a failed step with time-travel debugging, driving Cypress from the terminal with cypress tap, running tests in CI, and Cypress Cloud features" width="100%" autoplay loop muted playsinline controls>
-    <a href="./assets/cypress-overview.mp4"><img alt="A tour of Cypress: end-to-end and component tests running in the Cypress App, rewinding a failed step with time-travel debugging, driving Cypress from the terminal with cypress tap, running tests in CI, and Cypress Cloud features" src="./assets/cypress-overview-poster.jpg" width="100%" /></a>
-  </video>
-</p>
+https://github.com/user-attachments/assets/076e0f06-0529-43de-9ce8-b64209f8e859
 
 ## What is Cypress?
 
