@@ -31,7 +31,9 @@
 </p>
 
 <p align="center">
-  <img alt="A tour of Cypress: end-to-end and component tests running in the Cypress App, rewinding a failed step with time-travel debugging, driving Cypress from the terminal with cypress tap, running tests in CI, and Cypress Cloud features" src="./assets/cypress-overview.gif" width="100%" />
+  <video src="./assets/cypress-overview.mp4" poster="./assets/cypress-overview-poster.jpg" aria-label="A tour of Cypress: end-to-end and component tests running in the Cypress App, rewinding a failed step with time-travel debugging, driving Cypress from the terminal with cypress tap, running tests in CI, and Cypress Cloud features" width="100%" autoplay loop muted playsinline controls>
+    <a href="./assets/cypress-overview.mp4"><img alt="A tour of Cypress: end-to-end and component tests running in the Cypress App, rewinding a failed step with time-travel debugging, driving Cypress from the terminal with cypress tap, running tests in CI, and Cypress Cloud features" src="./assets/cypress-overview-poster.jpg" width="100%" /></a>
+  </video>
 </p>
 
 ## What is Cypress?
