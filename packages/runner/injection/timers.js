@@ -22,9 +22,11 @@ export const createTimers = () => {
   const flushTimerQueue = () => {
     flushing = true
 
-    // Held rAF callbacks run here, outside any rendering frame, so the
-    // timestamp the browser gave them is stale by the length of the pause.
-    // Give them the time this flush runs instead, shared like a real frame's.
+    // Held rAF callbacks receive the time this flush runs: one that came due
+    // at 16 and replays at 5016 is called with 5016, not 16. The replay runs
+    // outside any rendering frame, so the timestamp the browser passed is
+    // stale by the length of the pause. Callbacks in one real frame share a
+    // timestamp, so every callback in this flush gets the same one.
     const frameTimestamp = window.performance.now()
 
     timerQueue.forEach((timer) => {
