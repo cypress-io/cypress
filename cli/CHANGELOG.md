@@ -9,6 +9,10 @@
 
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
 
+**Dependency Updates:**
+
+- Upgraded `babel-plugin-add-module-exports` from `1.0.2` to `1.0.4`, which removes the transitive `braces`, `micromatch`, `glob-parent` and `decode-uri-component` dependencies of `chokidar` from the default preprocessor, to address [Excessive Platform Resource Consumption within a Loop](https://security.snyk.io/vuln/SNYK-JS-BRACES-6838727) (CVE-2024-4068), [ReDoS](https://security.snyk.io/vuln/SNYK-JS-DECODEURICOMPONENT-21802484) (CVE-2026-118664), [ReDoS](https://security.snyk.io/vuln/SNYK-JS-GLOBPARENT-1016905) (CVE-2020-28469), and [Inefficient Regular Expression Complexity](https://security.snyk.io/vuln/SNYK-JS-MICROMATCH-6838728) (CVE-2024-4067) vulnerabilities reported in security scans. Addressed in [#35558](https://github.com/cypress-io/cypress/pull/35558).
+
 ## 16.4.0
 
 **Features:**
