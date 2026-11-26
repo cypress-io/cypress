@@ -116,14 +116,14 @@ const seedRequireCache = () => {
   })
 }
 
-// Strings match as substrings, objects match the listed keys recursively,
-// asymmetric matchers apply, anything else is deep-equal.
-const argMatches = (expectation: unknown, actual: unknown): boolean => {
+// A top-level string matches as a substring, objects match the listed keys recursively,
+// asymmetric matchers apply, anything else (nested strings included) is deep-equal.
+const argMatches = (expectation: unknown, actual: unknown, nested = false): boolean => {
   if (expectation && typeof (expectation as any).asymmetricMatch === 'function') {
     return (expectation as any).asymmetricMatch(actual)
   }
 
-  if (typeof expectation === 'string') {
+  if (typeof expectation === 'string' && !nested) {
     return typeof actual === 'string' && actual.includes(expectation)
   }
 
@@ -132,7 +132,7 @@ const argMatches = (expectation: unknown, actual: unknown): boolean => {
       return false
     }
 
-    return Object.keys(expectation).every((key) => argMatches(expectation[key], actual[key]))
+    return Object.keys(expectation).every((key) => argMatches(expectation[key], actual[key], true))
   }
 
   return _.isEqual(expectation, actual)
@@ -249,8 +249,8 @@ function mockEE () {
     },
   }
 
-  ee.maximize = vi.fn
-  ee.setSize = vi.fn
+  ee.maximize = vi.fn()
+  ee.setSize = vi.fn()
 
   return ee
 }
