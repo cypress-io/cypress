@@ -746,7 +746,7 @@ export class ProjectBase extends EE {
     return this._cfg
   }
 
-  // returns project config (user settings + defaults + cypress.config.{js,ts,mjs,cjs})
+  // returns project config (user settings + defaults + cypress.config.{js,ts,mjs,cjs,mts,cts})
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
   getConfig (): Cfg {
