@@ -29,6 +29,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "@packages/icons": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
+    "@packages/network-tools": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
     "@packages/reporter": "0.0.0-development",
     "@packages/server": "0.0.0-development",

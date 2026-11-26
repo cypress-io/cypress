@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { URL } from 'url'
 
-import { addDefaultPort, getPath, isLocalhost, origin, removeDefaultPort, stripProtocolAndDefaultPorts } from '../../lib'
+import { addDefaultPort, getPath, isLocalhost, isSecureUrl, origin, removeDefaultPort, stripProtocolAndDefaultPorts } from '../../lib'
 
 describe('lib/uri', () => {
   describe('.getPath', () => {
@@ -95,6 +95,20 @@ describe('lib/uri', () => {
     })
   })
 
+  describe('.isSecureUrl', () => {
+    it('is true for an https url', () => {
+      expect(isSecureUrl(new URL('https://www.foobar.com'))).toBe(true)
+    })
+
+    it('is true for localhost over http', () => {
+      expect(isSecureUrl(new URL('http://localhost:3500'))).toBe(true)
+    })
+
+    it('is false for any other host over http', () => {
+      expect(isSecureUrl(new URL('http://www.foobar.com'))).toBe(false)
+    })
+  })
+
   describe('.isLocalhost', () => {
     it('http://localhost is localhost', () => {
       expect(isLocalhost(new URL('http://localhost'))).toBe(true)
@@ -110,6 +124,26 @@ describe('lib/uri', () => {
 
     it('http://127.0.0.9 is localhost', () => {
       expect(isLocalhost(new URL('http://127.0.0.9'))).toBe(true)
+    })
+
+    it('http://127.255.255.255 is localhost', () => {
+      expect(isLocalhost(new URL('http://127.255.255.255'))).toBe(true)
+    })
+
+    it('http://127.200.249.100 is localhost', () => {
+      expect(isLocalhost(new URL('http://127.200.249.100'))).toBe(true)
+    })
+
+    it('http://127.10.99.1:8080 is localhost', () => {
+      expect(isLocalhost(new URL('http://127.10.99.1:8080'))).toBe(true)
+    })
+
+    it('http://127.0.0.1.example.com is NOT localhost', () => {
+      expect(isLocalhost(new URL('http://127.0.0.1.example.com'))).toBe(false)
+    })
+
+    it('http://10.127.0.1 is NOT localhost', () => {
+      expect(isLocalhost(new URL('http://10.127.0.1'))).toBe(false)
     })
 
     it('http://[::1] is localhost', () => {

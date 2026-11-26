@@ -40,13 +40,24 @@ describe('driver/src/cypress/utils', () => {
   describe('.stripCustomProtocol', () => {
     it.each([
       ['webpack://_N_E/./pages/index.cy.js', 'pages/index.cy.js'],
-      ['webpack:///./cypress/e2e/checkout.cy.ts', 'cypress/e2e/checkout.cy.ts'],
-      ['webpack://checkout-app/../shared/src/format.ts', 'checkout-app/../shared/src/format.ts'],
+      ['webpack:///./cypress/e2e/spec.cy.js', 'cypress/e2e/spec.cy.js'],
+      ['webpack://my-app/./src/a.cy.ts', 'src/a.cy.ts'],
+      ['webpack://./src/a.cy.ts', 'src/a.cy.ts'],
+    ])('removes the webpack namespace from %s', (filePath, expected) => {
+      expect($utils.stripCustomProtocol(filePath)).toBe(expected)
+    })
+
+    it.each([
+      ['webpack:///../driver/src/cy.ts', '../driver/src/cy.ts'],
+      ['webpack://_N_E/../shared/a.js', '_N_E/../shared/a.js'],
       ['webpack://checkout-app/node_modules/.pnpm/lodash@4.17.21/./lodash.js', 'checkout-app/node_modules/.pnpm/lodash@4.17.21/./lodash.js'],
-      ['cypress:///../driver/src/cypress/cy.ts', '../driver/src/cypress/cy.ts'],
-      ['http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts', undefined],
-    ])('strips %j to %j', (filePath, expected) => {
-      expect($utils.stripCustomProtocol(filePath)).toEqual(expected)
+      ['cypress:///./cypress/e2e/spec.cy.js', './cypress/e2e/spec.cy.js'],
+    ])('only removes the protocol from %s', (filePath, expected) => {
+      expect($utils.stripCustomProtocol(filePath)).toBe(expected)
+    })
+
+    it('returns nothing for an http URL', () => {
+      expect($utils.stripCustomProtocol('http://localhost:3500/__cypress/tests?p=cypress/e2e/checkout.cy.ts')).toBeUndefined()
     })
 
     it('handles 200,000 characters of repeated webpack protocols with no namespace', () => {

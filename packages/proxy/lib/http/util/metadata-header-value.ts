@@ -1,8 +1,5 @@
 import { randomUUID } from 'crypto'
 
-let value: string | undefined
+const value = randomUUID()
 
-// Created on first use so the V8 snapshot does not bake in one value for every install
-export const getMetadataHeaderValue = () => {
-  return value ??= randomUUID()
-}
+export const getMetadataHeaderValue = () => value

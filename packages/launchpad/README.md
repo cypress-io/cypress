@@ -68,7 +68,7 @@ This starts the GraphQL Server, and opens Cypress. By running this separate from
 
 You can access the GraphQL inspector on `http://localhost:52200/graphql`.
 
-![graphql](../graphql/gql.png)
+![graphql](../data-context/graphql/gql.png)
 
 If you notice your IDE has not updated and is showing errors, even after `yarn watch` has run, you might need to reload your IDE. With the amount of code generation running, sometimes the IDE does not recognize that the code has changed.
 

@@ -58,7 +58,10 @@ const config = makeConfig({
 }, {
   plugins: [
     Layouts(),
-    Pages({ extensions: ['vue'] }),
+    // Without an explicit resolver, the plugin switches to React routes as
+    // soon as any `vite:react*` plugin is present and stops serving
+    // `virtual:generated-pages`.
+    Pages({ extensions: ['vue'], resolver: 'vue' }),
     Copy({
       targets: [{
         src: resolve(__dirname, '../frontend-shared/src/assets/logos/favicon.png'),
