@@ -19,11 +19,11 @@ function assertParentCypress (Cypress: Cypress.Cypress | undefined): asserts Cyp
   }
 }
 
-const Cypress = parent.Cypress
+assertParentCypress(parent.Cypress)
 
-assertParentCypress(Cypress)
-
-window.Cypress = Cypress
+// Keep this as one statement: the server's integration specs detect full
+// injection by finding `window.Cypress=parent.Cypress` in the minified bundle.
+const Cypress = window.Cypress = parent.Cypress
 
 patchXmlHttpRequest(window)
 
