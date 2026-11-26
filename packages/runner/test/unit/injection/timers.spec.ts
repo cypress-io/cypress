@@ -36,19 +36,33 @@ const createFrames = () => {
 describe('injection/timers', () => {
   let timers: Timers
   let frames: ReturnType<typeof createFrames>
-  let natives: Partial<Record<typeof WRAPPED[number], unknown>>
+  let originals: Partial<Record<typeof WRAPPED[number], unknown>>
+  let nativeClearTimeout: ReturnType<typeof vi.fn>
   let calls: string[]
 
   beforeEach(() => {
+    originals = {}
+    WRAPPED.forEach((name) => {
+      originals[name] = window[name]
+    })
+
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] })
 
-    frames = createFrames()
-    window.requestAnimationFrame = frames.request
-    window.cancelAnimationFrame = frames.cancel
+    // Fake timers hand back Node-style Timeout objects. Browsers return
+    // numbers, which is what lets a frame id collide with a timeout id.
+    const fakeSetTimeout = window.setTimeout
+    const fakeSetInterval = window.setInterval
+    const fakeClearTimeout = window.clearTimeout
 
-    natives = {}
-    WRAPPED.forEach((name) => {
-      natives[name] = window[name]
+    nativeClearTimeout = vi.fn((id?: number) => fakeClearTimeout(id))
+
+    frames = createFrames()
+    Object.assign(window, {
+      setTimeout: (...args: Parameters<typeof setTimeout>) => Number(fakeSetTimeout(...args)),
+      setInterval: (...args: Parameters<typeof setInterval>) => Number(fakeSetInterval(...args)),
+      clearTimeout: nativeClearTimeout,
+      requestAnimationFrame: frames.request,
+      cancelAnimationFrame: frames.cancel,
     })
 
     calls = []
@@ -57,11 +71,11 @@ describe('injection/timers', () => {
   })
 
   afterEach(() => {
-    WRAPPED.forEach((name) => {
-      Object.assign(window, { [name]: natives[name] })
-    })
-
     vi.useRealTimers()
+
+    WRAPPED.forEach((name) => {
+      Object.assign(window, { [name]: originals[name] })
+    })
   })
 
   const record = (name: string) => {
@@ -160,7 +174,7 @@ describe('injection/timers', () => {
       expect(calls).toEqual(['tick'])
     })
 
-    it('replays ticks that came due before an interval was cleared while paused', () => {
+    it('drops ticks that came due before an interval was cleared while paused', () => {
       timers.pause(true)
 
       const id = window.setInterval(record('tick'), 10)
@@ -169,10 +183,23 @@ describe('injection/timers', () => {
       window.clearInterval(id)
       timers.pause(false)
 
-      expect(calls).toEqual(['tick', 'tick'])
+      expect(calls).toEqual([])
     })
 
-    it('still runs a queued setTimeout that an earlier flushed callback clears, since it already came due', () => {
+    it('drops a queued setTimeout that is cleared while paused', () => {
+      timers.pause(true)
+
+      const id = window.setTimeout(record('cleared'), 10)
+
+      window.setTimeout(record('kept'), 10)
+      vi.advanceTimersByTime(10)
+      window.clearTimeout(id)
+      timers.pause(false)
+
+      expect(calls).toEqual(['kept'])
+    })
+
+    it('does not run a queued setTimeout that an earlier flushed callback clears', () => {
       timers.pause(true)
 
       let laterId: number
@@ -187,7 +214,122 @@ describe('injection/timers', () => {
       vi.advanceTimersByTime(20)
       timers.pause(false)
 
-      expect(calls).toEqual(['first', 'later'])
+      expect(calls).toEqual(['first'])
+    })
+
+    it('lets clearInterval cancel a queued setTimeout, and clearTimeout a queued interval, as browsers do', () => {
+      timers.pause(true)
+
+      const timeoutId = window.setTimeout(record('timeout'), 10)
+      const intervalId = window.setInterval(record('tick'), 10)
+
+      vi.advanceTimersByTime(10)
+      window.clearInterval(timeoutId)
+      window.clearTimeout(intervalId)
+      timers.pause(false)
+
+      expect(calls).toEqual([])
+    })
+
+    it('does not run a queued requestAnimationFrame callback that an earlier flushed callback cancels', () => {
+      timers.pause(true)
+
+      let frameId: number
+
+      window.setTimeout(() => {
+        calls.push('timeout')
+        window.cancelAnimationFrame(frameId)
+      }, 10)
+
+      vi.advanceTimersByTime(10)
+      frameId = window.requestAnimationFrame(record('frame'))
+      frames.run()
+      timers.pause(false)
+
+      expect(calls).toEqual(['timeout'])
+      expect(frames.cancel).toHaveBeenCalledWith(frameId)
+    })
+
+    it('keeps requestAnimationFrame ids apart from setTimeout ids when they collide', () => {
+      timers.pause(true)
+
+      const timeoutId = window.setTimeout(record('timeout'), 10)
+
+      frames.nextId = timeoutId
+
+      const frameId = window.requestAnimationFrame(record('frame'))
+
+      expect(frameId).toBe(timeoutId)
+
+      const otherTimeoutId = window.setTimeout(record('other timeout'), 10)
+      const otherFrameId = window.requestAnimationFrame(record('other frame'))
+
+      vi.advanceTimersByTime(10)
+      frames.run()
+
+      window.clearTimeout(timeoutId)
+      window.cancelAnimationFrame(otherFrameId)
+      timers.pause(false)
+
+      expect(otherFrameId).toBe(otherTimeoutId)
+      expect(calls).toEqual(['other timeout', 'frame'])
+    })
+
+    it('ignores a cancel for an id with nothing queued, and still calls the native cancel', () => {
+      timers.pause(true)
+      window.setTimeout(record('timeout'), 10)
+      window.requestAnimationFrame(record('frame'))
+      vi.advanceTimersByTime(10)
+      frames.run()
+
+      window.clearTimeout(987654321)
+      window.clearInterval(undefined)
+      window.cancelAnimationFrame(987654321)
+      timers.pause(false)
+
+      expect(calls).toEqual(['timeout', 'frame'])
+      expect(nativeClearTimeout).toHaveBeenCalledWith(987654321)
+      expect(frames.cancel).toHaveBeenCalledWith(987654321)
+    })
+
+    it('neither replays earlier entries again nor nests the next one when a replayed callback unpauses', () => {
+      timers.pause(true)
+
+      window.setTimeout(() => {
+        calls.push('first start')
+        timers.pause(false)
+        calls.push('first end')
+      }, 10)
+
+      window.setTimeout(record('second'), 20)
+      vi.advanceTimersByTime(20)
+      timers.pause(false)
+
+      expect(calls).toEqual(['first start', 'first end', 'second'])
+    })
+
+    it('keeps the remaining entries queued until the next unpause when a replayed callback pauses', () => {
+      timers.pause(true)
+
+      window.setTimeout(() => {
+        calls.push('first')
+        timers.pause(true)
+      }, 10)
+
+      window.setTimeout(record('second'), 20)
+      vi.advanceTimersByTime(20)
+      timers.pause(false)
+
+      expect(calls).toEqual(['first'])
+
+      window.setTimeout(record('third'), 10)
+      vi.advanceTimersByTime(10)
+
+      expect(calls).toEqual(['first'])
+
+      timers.pause(false)
+
+      expect(calls).toEqual(['first', 'second', 'third'])
     })
 
     it('runs new callbacks directly once unpaused', () => {
