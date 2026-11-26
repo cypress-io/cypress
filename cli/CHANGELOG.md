@@ -1,4 +1,15 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 16.5.0
+
+**Features:**
+
+- Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).
+
+**Bugfixes:**
+
+- Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
+- Fixed an issue where Next.js component tests with webpack failed with "Using `export * from '...'` in a page is disallowed" when the project had no `pages` directory, as in App Router projects, and a dependency such as `@mui/material` used `export *`. Fixes [#31385](https://github.com/cypress-io/cypress/issues/31385).
+
 ## 16.4.0
 
 **Features:**
@@ -60,7 +71,6 @@
 - Fixed an issue where run mode durations of 24 hours or more dropped the whole days, so a run that took exactly 24 hours was reported as `0ms` and a run of 26 hours as `2:00:00`. Fixes [#34976](https://github.com/cypress-io/cypress/issues/34976).
 - Fixed a regression in [16.3.0](#16-3-0) where privileged commands such as [`cy.task()`](https://on.cypress.io/task) and [`cy.origin()`](https://on.cypress.io/origin) failed with "must only be invoked from the spec file or support file" when the project set a fixed [`port`](https://on.cypress.io/configuration#Global) and `setupNodeEvents` returned a `baseUrl`. Fixed in [#35513](https://github.com/cypress-io/cypress/pull/35513).
 - Fixed an issue where Angular component tests with webpack failed with "`<spec>` is missing from the TypeScript compilation" when [`specPattern`](https://on.cypress.io/configuration#component) was left at its default or used braces, such as `{src,projects}/**/*.cy.ts`. Fixed in [#35531](https://github.com/cypress-io/cypress/pull/35531).
-- Fixed an issue where Next.js component tests with webpack failed with "Using `export * from '...'` in a page is disallowed" when the project had no `pages` directory, as in App Router projects, and a dependency such as `@mui/material` used `export *`. Fixes [#31385](https://github.com/cypress-io/cypress/issues/31385).
 
 **Misc:**
 
