@@ -9,6 +9,7 @@
 
 - Fixed an issue where your application could still run a `setTimeout()`, `setInterval()` or `requestAnimationFrame()` callback that it had canceled with `clearTimeout()`, `clearInterval()` or `cancelAnimationFrame()` while [`cy.screenshot()`](https://on.cypress.io/screenshot) was taking a screenshot. Cypress holds back your application's timer callbacks during a screenshot and runs them afterwards, and now skips any that your application canceled before they ran. Fixed in [#00000](https://github.com/cypress-io/cypress/pull/00000).
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
+- Fixed an issue where the `junit` reporter, and custom reporters that use `mocha-junit-reporter`, printed `Couldn't determine Mocha version` on every run. Fixed in [#35561](https://github.com/cypress-io/cypress/pull/35561).
 
 ## 16.4.0
 

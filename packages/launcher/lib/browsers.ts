@@ -30,7 +30,7 @@ export function launch (
     env: { ...browserEnv, ...process.env },
   }
 
-  debug('spawning browser with opts %o', { browser, url, spawnOpts })
+  debug('spawning browser with opts %o', { browser, url, stdio: spawnOpts.stdio, browserEnvNames: Object.keys(browserEnv) })
 
   const proc = utils.spawnWithArch(browser.path, args, spawnOpts)
 
