@@ -35,6 +35,7 @@
     "@packages/reporter": "0.0.0-development",
     "@packages/server": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
