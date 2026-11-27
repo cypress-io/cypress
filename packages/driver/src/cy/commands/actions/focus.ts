@@ -6,6 +6,8 @@ import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
 import $selection from '../../../dom/selection'
 import type { Log } from '../../../cypress/log'
+import { isRemoteSubject } from '../../remote'
+import { remoteBlur, remoteFocus } from '../../remote/actions'
 
 interface InternalFocusOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
@@ -33,6 +35,10 @@ export default (Commands, Cypress, cy) => {
         log: true,
         verify: true,
       })
+
+      if (isRemoteSubject(subject)) {
+        return remoteFocus(Cypress, cy, subject, options)
+      }
 
       const isWin = $dom.isWindow(options.$el)
 
@@ -109,6 +115,10 @@ export default (Commands, Cypress, cy) => {
     },
 
     blur (subject, userOptions: Partial<Cypress.BlurOptions> = {}) {
+      if (isRemoteSubject(subject)) {
+        return remoteBlur(Cypress, cy, subject, _.defaults({}, userOptions, { log: true, force: false }))
+      }
+
       // we should throw errors by default!
       // but allow them to be silenced
       const options: InternalBlurOptions = _.defaults({}, userOptions, {

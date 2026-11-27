@@ -27,6 +27,12 @@ describe('config/src/project/index', () => {
       })
     })
 
+    it('ignores experimentalDriver from setupNodeEvents', () => {
+      expect(updateWithPluginValues({ experimentalDriver: false } as any, { experimentalDriver: true }, 'e2e')).toEqual({
+        experimentalDriver: false,
+      })
+    })
+
     it('updates resolved config values and returns config with overrides', () => {
       const cfg = {
         foo: 'bar',

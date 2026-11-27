@@ -326,6 +326,18 @@ describe('lib/browsers/firefox', () => {
       }))
     })
 
+    it('leaves the AUT\'s dialogs for the experimental driver to answer', async () => {
+      await firefox.open(browser as any, 'http://', { ...options, experimentalDriver: true } as any, automation as any)
+
+      expectCalledWith(vi.mocked(webdriver.newSession), matchSubset({
+        capabilities: {
+          alwaysMatch: {
+            unhandledPromptBehavior: 'ignore',
+          },
+        },
+      }))
+    })
+
     it('sets preferences if returned by before:browser:launch', async () => {
       vi.mocked(plugins.has).mockImplementation((event) => event === 'before:browser:launch' ? true : undefined as any)
       vi.mocked(plugins.execute).mockResolvedValue({
@@ -417,7 +429,12 @@ describe('lib/browsers/firefox', () => {
           'network.fetchError',
           'browsingContext.contextCreated',
           'browsingContext.contextDestroyed',
+          'browsingContext.userPromptOpened',
+          'script.message',
         ] })
+
+        expectCalledWith(wdInstance.sessionSubscribe, { events: ['browsingContext.navigationStarted'] })
+        expectCalledWith(wdInstance.sessionSubscribe, { events: ['browsingContext.historyUpdated'] })
 
         expectCalledWith(wdInstance.browsingContextGetTree, {})
 
@@ -430,6 +447,15 @@ describe('lib/browsers/firefox', () => {
         expectCalledWith(vi.mocked(BidiAutomation.create), wdInstance, automation)
         expectCalledWith(automation.use, bidiAutomationClient.automationMiddleware)
         expectCalledWith(bidiAutomationClient.setTopLevelContextId as Mock, mockContextId)
+        expect(bidiAutomationClient.addRemoteAutScript).not.toHaveBeenCalled()
+      })
+
+      it('adds the remote AUT script to every frame with experimentalDriver', async () => {
+        browser.family = 'firefox'
+        browser.majorVersion = '135'
+        await firefox.open(browser as any, 'http://', { ...options, experimentalDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } } as any, automation as any)
+
+        expect(bidiAutomationClient.addRemoteAutScript).toHaveBeenCalledExactlyOnceWith({ primaryOrigin: 'http://localhost:3500', namespace: '__cypress' })
       })
 
       afterEach(() => {

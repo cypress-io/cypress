@@ -1,5 +1,6 @@
 import $dom from '../../dom'
 import $ from 'jquery'
+import { isRemoteElement } from '../../cy/remote/remote_element'
 
 export const selectors = {
   visible: 'visible',
@@ -35,10 +36,10 @@ export interface Callbacks {
 // to be re-wrapped in our own
 // jquery, so we can control
 // the methods on it
-export const wrap = (ctx) => $(ctx._obj)
+export const wrap = (ctx) => (isRemoteElement(ctx._obj) ? ctx._obj : $(ctx._obj))
 
 export function assertDom (ctx: Chai.AssertionStatic, utils: Chai.ChaiUtils, callbacks: Callbacks, method: Methods, ...args: PartialAssertionArgs) {
-  if (!$dom.isDom(ctx._obj) && !$dom.isJquery(ctx._obj)) {
+  if (!$dom.isDom(ctx._obj) && !$dom.isJquery(ctx._obj) && !isRemoteElement(ctx._obj)) {
     try {
       // always fail the assertion
       // if we aren't a DOM like object

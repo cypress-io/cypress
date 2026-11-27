@@ -48,9 +48,8 @@ export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: GetF
 // TODO: update types from data-context/src/data/ProjectLifecycleManager.ts
 // updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>, testingType: TestingType): FullConfig
 export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, testingType: TestingType): FullConfig {
-  if (!modifiedConfig) {
-    modifiedConfig = {}
-  }
+  // only CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER switches the experimental driver, so setupNodeEvents can't
+  modifiedConfig = _.omit(modifiedConfig ?? {}, 'experimentalDriver')
 
   debug('updateWithPluginValues %o', { cfg, modifiedConfig })
 

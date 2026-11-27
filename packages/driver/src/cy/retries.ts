@@ -8,6 +8,7 @@ import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import type { Log } from '../cypress/log'
+import { isExperimentalDriverEnabled } from './remote'
 
 const { errByPath, modifyErrMsg, throwErr, mergeErrProps } = $errUtils
 
@@ -165,6 +166,11 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
     const retryValue = () => {
       return Promise
       .try(() => {
+        // the experimental driver works with cookies through automation, whatever the AUT's origin
+        if (isExperimentalDriverEnabled(Cypress)) {
+          return
+        }
+
         // If command is not same origin, this will throw an error. also, in this instance, this is cy
         // @ts-expect-error - cy is typed as the public cy, not $Cy
         Cypress.ensure.commandCanCommunicateWithAUT(cy)

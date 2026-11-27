@@ -802,6 +802,23 @@ class $Cypress {
       case 'app:uncaught:exception':
         return this.emitMap('uncaught:exception', ...args)
 
+      // the server reports these for the AUT whatever the driver, so one can arrive between specs, when there's no cy
+      case 'app:remote:uncaught:exception':
+        return this.cy?.onRemoteUncaughtException(args[0])
+
+      // the AUT's window is cross-origin to the runner, so the handler gets it as cy.state('window') holds it
+      case 'app:remote:window:before:load':
+        return this.emit('window:before:load', this.state('window'))
+
+      case 'app:remote:stub:call':
+        return this.emit('internal:remote:stub:call', args[0])
+
+      case 'app:remote:dialog':
+        return this.cy?.onRemoteDialog(args[0])
+
+      case 'app:remote:navigation':
+        return this.cy?.onRemoteNavigation(args[0])
+
       case 'app:window:alert':
         return this.emit('window:alert', args[0])
 

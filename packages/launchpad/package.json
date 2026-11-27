@@ -54,7 +54,6 @@
     "@vue/compiler-dom": "3.2.47",
     "@vueuse/core": "7.7.1",
     "cross-env": "7.0.3",
-    "cypress-plugin-tab": "1.0.5",
     "cypress-real-events": "1.15.0",
     "dedent": "^0.7.0",
     "disparity": "^3.2.0",

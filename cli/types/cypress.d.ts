@@ -2380,6 +2380,9 @@ declare namespace Cypress {
     spy(func: (...args: any[]) => any): Agent<sinon.SinonSpy>
     /**
      * Spy on a method.
+     *
+     * With the experimental driver, a method on the window from `cy.window()` is spied on inside the page,
+     * and the calls the page reports are recorded here, with copies of their arguments.
      * @see https://on.cypress.io/spy
      * @example
      *    // assume App.start calls util.addListeners
@@ -2421,6 +2424,11 @@ declare namespace Cypress {
     stub(obj: any): Agent<sinon.SinonStub>
     /**
      * Stubs single method of an object.
+     *
+     * With the experimental driver, a method on the window from `cy.window()` is stubbed inside the page:
+     * `returns()` and `resolves()` take serializable values, `callsFake()` runs in the page without access to the
+     * test's variables, and calls are recorded here with copies of their arguments. A stub made before `cy.visit()`
+     * applies to every page the test loads, before the page's own scripts run.
      *
      * @see https://on.cypress.io/stub
      * @example
@@ -2772,6 +2780,9 @@ declare namespace Cypress {
 
     /**
      * Get the window object of the page that is currently active.
+     *
+     * With the experimental driver, it yields a stand-in for the page's window that only `cy.stub()` and
+     * `cy.spy()` can use, such as `cy.stub(win, 'open')` or `cy.spy(win.console, 'log')`.
      *
      * @see https://on.cypress.io/window
      * @example
@@ -4402,16 +4413,30 @@ declare namespace Cypress {
     /**
      * Called before your page has loaded all of its resources.
      *
+     * With the experimental driver, it runs inside the page itself, so it can't use values from the test
+     * other than `args`, or commands such as `cy.stub()`.
+     *
      * @param {AUTWindow} win the remote page's window object
+     * @param args the `args` option
      */
-    onBeforeLoad(win: AUTWindow): void
+    onBeforeLoad(win: AUTWindow, args?: any): void
 
     /**
      * Called once your page has fired its load event.
      *
+     * With the experimental driver, it runs inside the page itself, so it can't use values from the test
+     * other than `args`, or commands such as `cy.stub()`.
+     *
      * @param {AUTWindow} win the remote page's window object
+     * @param args the `args` option
      */
-    onLoad(win: AUTWindow): void
+    onLoad(win: AUTWindow, args?: any): void
+
+    /**
+     * With the experimental driver, values passed as the second argument to `onBeforeLoad` and `onLoad`.
+     * They must be serializable as JSON.
+     */
+    args: any
 
     /**
      * Cypress will automatically apply the right authorization headers
@@ -6887,7 +6912,8 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
-     * @returns The clock's new `now`, in ms since the unix epoch
+     * @returns The clock's new `now`, in ms since the unix epoch. With the experimental driver the clock runs in the
+     * page, so this returns a promise of it instead; use `cy.tick()`, which waits for it.
      * @see https://on.cypress.io/tick
      */
     tick(time: number): number

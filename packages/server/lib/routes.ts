@@ -10,7 +10,7 @@ import type { Cfg } from './project-base'
 import type { SocketAllowed } from './util/socket_allowed'
 import { runner } from './controllers/runner'
 import { iframesController } from './controllers/iframes'
-import type { FoundSpec } from '@packages/types'
+import type { FoundSpec, RemoteUncaughtException } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { tapGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { RemoteStates } from '@packages/network-tools'
@@ -25,6 +25,8 @@ import * as plugins from './plugins'
 import { getOrigin, privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { cypressSessions } from './cypress-sessions'
 import { SESSIONS_ROUTE_PREFIX, TAP_GRAPHQL_ROUTE_PREFIX } from '@packages/cypress-sessions'
+import { addRemoteAutRoutes } from './remote_aut_routes'
+import type { DocumentCookieAutomation } from './automation/cookie/document-cookie'
 import { CYPRESS_CY_PROMPT_ROUTE, CYPRESS_STUDIO_ROUTE, fullyQualifiedRe, isLoopbackHost, isTrustedInternalLoopback, resolveProxyUrlBase } from './adapters/internal-routes'
 
 const debug = Debug('cypress:server:routes')
@@ -45,6 +47,9 @@ export interface InitializeRoutes {
   isBrowserNetworkMode: () => boolean
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
+  browserCookies: DocumentCookieAutomation
+  reportAutError: (uncaught: RemoteUncaughtException) => Promise<unknown>
+  reportBeforeLoad: (url: string) => Promise<unknown>
 }
 
 export const createCommonRoutes = ({
@@ -57,6 +62,9 @@ export const createCommonRoutes = ({
   socketAllowed,
   nodeProxy,
   onError,
+  browserCookies,
+  reportAutError,
+  reportBeforeLoad,
 }: InitializeRoutes) => {
   const router = Router()
   const { clientRoute, namespace } = config
@@ -254,6 +262,10 @@ export const createCommonRoutes = ({
   router.get(`/${config.namespace}/socket.io.js`, (req, res) => {
     client.handle(req, res)
   })
+
+  if ('experimentalDriver' in config && config.experimentalDriver === true) {
+    addRemoteAutRoutes(router, { namespace, getNetworkProxy, browserCookies, reportAutError, reportBeforeLoad })
+  }
 
   router.get(`/${config.namespace}/automation/getLocalStorage`, (req, res) => {
     res.render(path.join(__dirname, './html/get-local-storage.html'), {

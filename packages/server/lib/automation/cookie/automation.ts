@@ -89,6 +89,9 @@ const normalizeCookieProps = function (automationCookie: SerializableAutomationC
   return cookie as AutomationCookie
 }
 
+// Firefox and WebKit return a cookie past its expiry until they purge it, though they no longer send it
+const isExpired = (cookie: AutomationCookie | null) => cookie?.expiry != null && cookie.expiry * 1000 <= Date.now()
+
 const normalizeGetCookies = (cookies: (AutomationCookie | null)[]): (AutomationCookie | null)[] => {
   return _.chain(cookies)
   .map(normalizeGetCookieProps)
@@ -144,7 +147,7 @@ export class Cookies {
     let cookies = await automate('get:cookies', data)
 
     cookies = normalizeGetCookies(cookies)
-    cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie)) as AutomationCookie[]
+    cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie) || isExpired(cookie)) as AutomationCookie[]
 
     debug('received get:cookies %o', cookies)
 
@@ -169,7 +172,7 @@ export class Cookies {
 
         debug('received get:cookie %o', cookie)
 
-        return cookie
+        return isExpired(cookie) ? null : cookie
       }
   }
 

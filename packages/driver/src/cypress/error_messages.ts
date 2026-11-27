@@ -1773,6 +1773,26 @@ export default {
     },
   },
 
+  experimental_driver: {
+    origin_unavailable: `${cmd('origin')} is not available when the experimental driver is enabled. The experimental driver runs commands against a cross-origin AUT directly, so run them without ${cmd('origin')}.`,
+    unsupported_option ({ cmd: command, option }) {
+      return `${cmd(command)} does not support the \`${option}\` option when the experimental driver is enabled.`
+    },
+    confirm_answered: `A \`window:confirm\` handler returned \`false\`, but with the experimental driver the confirm \`{{message}}\` was already accepted. Stub it instead: \`cy.window().then((win) => cy.stub(win, 'confirm').returns(false))\`.`,
+    stub_not_applied: `Cypress could not apply \`{{method}}\` in the AUT: {{message}}`,
+    visit_before_load_did_not_run: `${cmd('visit')} could not run its \`onBeforeLoad\` callback in the page before it loaded.`,
+    unsupported_argument ({ cmd: command }) {
+      return `${cmd(command)} only takes arguments that can be sent to the AUT as JSON, such as selectors, numbers and plain objects, when the experimental driver is enabled, since it runs there.`
+    },
+    awaiting_aut ({ cmd: command }) {
+      return `${cmd(command)} is waiting for the AUT to answer.`
+    },
+    unsupported_jquery: `\`cy.$$('{{selector}}')\` and \`Cypress.$('{{selector}}')\` can't query the AUT when the experimental driver is enabled, since it's cross-origin to the test. Use \`cy.get('{{selector}}')\` instead.`,
+    unsupported_subject ({ cmd: command }) {
+      return `${cmd(command)} does not support this subject when the experimental driver is enabled. A remote subject only chains queries such as \`.get()\`, \`.find()\`, \`.contains()\` and the traversals, \`.frame()\`, \`.shadow()\`, and actions and assertions.`
+    },
+  },
+
   query_command: {
     docsUrl: 'https://on.cypress.io/custom-commands',
 

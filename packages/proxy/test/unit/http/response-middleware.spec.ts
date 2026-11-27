@@ -719,6 +719,56 @@ describe('http/response-middleware', function () {
       expect(ctx.res.wantsInjection).toEqual('fullCrossOrigin')
     })
 
+    it('doesn\'t inject anything into the AUT with experimentalDriver', async function () {
+      prepareContext({
+        config: { experimentalDriver: true },
+        req: {
+          isAUTFrame: true,
+          cookies: {
+            '__cypress.initial': 'true',
+          },
+          headers: {},
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+      expect(ctx.res.wantsInjection).toBe(false)
+    })
+
+    it('doesn\'t inject anything into frames inside the AUT with experimentalDriver', async function () {
+      prepareContext({
+        config: { experimentalDriver: true },
+        renderedHTMLOrigins: {},
+        getRenderedHTMLOrigins () {
+          return this.renderedHTMLOrigins
+        },
+        req: {
+          proxiedUrl: 'http://127.0.0.1:3501/iframe',
+          isAUTFrame: false,
+          cookies: {},
+          headers: {
+            'accept': [
+              'text/html',
+              'application/xhtml+xml',
+            ],
+          },
+        },
+        incomingRes: {
+          headers: {
+            'content-type': 'text/html',
+          },
+        },
+      })
+
+      await testMiddleware([SetInjectionLevel], ctx)
+      expect(ctx.res.wantsInjection).toBe(false)
+    })
+
     it('performs full injection on initial AUT html origin', async function () {
       prepareContext({
         req: {
@@ -2217,6 +2267,27 @@ describe('http/response-middleware', function () {
       responseEndedWithEmptyBodyStub = vi.fn()
     })
 
+    it('records the AUT url for a cached document the AUT frame commits', async function () {
+      const setAUTUrl = vi.fn()
+
+      prepareContext({ setAUTUrl, req: { isAUTFrame: true, proxiedUrl: 'http://www.foobar.com/page' }, incomingRes: { statusCode: 304 } })
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+
+      expect(setAUTUrl).toHaveBeenCalledExactlyOnceWith('http://www.foobar.com/page')
+    })
+
+    it('does not record the AUT url for a response the AUT frame does not commit', async function () {
+      const setAUTUrl = vi.fn()
+
+      prepareContext({ setAUTUrl, req: { isAUTFrame: true, proxiedUrl: 'http://www.foobar.com/page' }, incomingRes: { statusCode: 204 } })
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+
+      prepareContext({ setAUTUrl, req: { isAUTFrame: false, proxiedUrl: 'http://www.foobar.com/image' }, incomingRes: { statusCode: 304 } })
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+
+      expect(setAUTUrl).not.toHaveBeenCalled()
+    })
+
     it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and request is correlated and response must have empty body and response is cached', async function () {
       prepareContext({
         protocolManager: {
@@ -2509,6 +2580,7 @@ describe('http/response-middleware', function () {
         incomingRes: props.incomingRes,
         protocolManager: props.protocolManager,
         req: props.req,
+        setAUTUrl: props.setAUTUrl,
         incomingResHadEmptyBody: props.incomingResHadEmptyBody,
         netStubbingState: props.netStubbingState,
         res: props.res || {

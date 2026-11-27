@@ -5,6 +5,7 @@ import $dom from '../dom'
 import $errUtils from '../cypress/error_utils'
 import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
+import { isRemoteElement, isRemoteSubject, resolveRemoteSubject } from './remote'
 
 const butRe = /,? but\b/
 const bTagOpen = /\*\*/g
@@ -281,6 +282,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
     onFail?: (err?, isDefaultAssertionErr?: boolean, cmds?: any[]) => void
     onRetry?: () => any
     subjectFn?: () => any
+    _remoteSubjectResolved?: boolean
   }
 
   return {
@@ -306,6 +308,10 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         switch (callbacks.ensureExistenceFor) {
           case 'dom': {
             const $el = determineEl(options.$el, subject)
+
+            if (isRemoteElement($el)) {
+              return elExists($el, cy)
+            }
 
             if (!$dom.isJquery($el)) {
               return
@@ -391,6 +397,25 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         } catch (err) {
           return onFailFn(err)
         }
+      }
+
+      // A remote subject is only a locator, so every attempt asks the agent for
+      // the current elements before running the assertions against them.
+      if (isRemoteSubject(subject) && !callbacks._remoteSubjectResolved) {
+        options._remoteReads ??= { styles: [], descendants: [] }
+
+        return resolveRemoteSubject(Cypress, subject, options._log, options._remoteReads)
+        .then((resolved) => {
+          if (options.$el !== undefined) {
+            options.$el = resolved
+          }
+
+          return cy.verifyUpcomingAssertions(resolved, options, {
+            ...callbacks,
+            subjectFn: undefined,
+            _remoteSubjectResolved: true,
+          })
+        }, onFailFn)
       }
 
       // bail if we have no assertions and apply

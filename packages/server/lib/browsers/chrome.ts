@@ -441,6 +441,20 @@ const _setAutomation = async (client: CriClient, automation: Automation, resetBr
   const bringsPageToFront = options.isTextTerminal || browser.isHeadless
   const cdpAutomation = await CdpAutomation.create(client.send, client.on, client.off, resetBrowserTargets, automation, options.protocolManager, true, bringsPageToFront, storageOrigins)
 
+  cdpAutomation.useRemoteTabs(() => {
+    return Array.from(browserCriClient?.extraTargetClients ?? [], ([targetId, { client: tabClient }]) => {
+      return {
+        targetId,
+        send: (command, params) => tabClient.send(command, params),
+        on: (event, cb) => tabClient.on(event, cb),
+      }
+    })
+  })
+
+  if (options.remoteAutScript) {
+    await cdpAutomation.addRemoteAutScript(options.remoteAutScript)
+  }
+
   automation.use(cdpAutomation)
 
   return cdpAutomation

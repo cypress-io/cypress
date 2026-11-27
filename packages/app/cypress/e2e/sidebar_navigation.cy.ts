@@ -13,13 +13,27 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
 
     it('can tab through navigation', () => {
       cy.get('body').focus()
-      .tab().should('have.attr', 'data-cy', 'toggle-sidebar').should('have.prop', 'tagName', 'BUTTON')
-      .tab().should('have.attr', 'data-cy', 'sidebar-header').should('have.attr', 'role', 'button')
-      .tab().should('have.attr', 'href', '#/specs').should('have.prop', 'tagName', 'A')
-      .tab().should('have.attr', 'href', '#/runs').should('have.prop', 'tagName', 'A')
-      .tab().should('have.attr', 'href', '#/debug').should('have.prop', 'tagName', 'A')
-      .tab().should('have.attr', 'href', '#/settings').should('have.prop', 'tagName', 'A')
-      .tab().should('have.attr', 'data-cy', 'keyboard-modal-trigger').should('have.prop', 'tagName', 'BUTTON')
+
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.focused().should('have.attr', 'data-cy', 'toggle-sidebar').should('have.prop', 'tagName', 'BUTTON')
+
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.focused().should('have.attr', 'data-cy', 'sidebar-header').should('have.attr', 'role', 'button')
+
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.focused().should('have.attr', 'href', '#/specs').should('have.prop', 'tagName', 'A')
+
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.focused().should('have.attr', 'href', '#/runs').should('have.prop', 'tagName', 'A')
+
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.focused().should('have.attr', 'href', '#/debug').should('have.prop', 'tagName', 'A')
+
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.focused().should('have.attr', 'href', '#/settings').should('have.prop', 'tagName', 'A')
+
+      cy.press(Cypress.Keyboard.Keys.TAB)
+      cy.focused().should('have.attr', 'data-cy', 'keyboard-modal-trigger').should('have.prop', 'tagName', 'BUTTON')
     })
 
     it('has appropriate aria attributes', () => {

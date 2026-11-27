@@ -24,6 +24,9 @@ import { create as createLocation } from '../cy/location'
 import type { IAssertions } from '../cy/assertions'
 import { create as createAssertions } from '../cy/assertions'
 import { bindToListeners } from '../cy/listeners'
+import { isExperimentalDriverEnabled } from '../cy/remote'
+import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
+import type { RemoteDialog, RemoteNavigation, RemoteUncaughtException } from '@packages/types'
 import { $Chainer } from './chainer'
 import type { ITimer } from '../cy/timers'
 import { create as createTimer } from '../cy/timers'
@@ -262,6 +265,9 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.now = this.now.bind(this)
     this.onBeforeAppWindowLoad = this.onBeforeAppWindowLoad.bind(this)
     this.onUncaughtException = this.onUncaughtException.bind(this)
+    this.onRemoteUncaughtException = this.onRemoteUncaughtException.bind(this)
+    this.onRemoteDialog = this.onRemoteDialog.bind(this)
+    this.onRemoteNavigation = this.onRemoteNavigation.bind(this)
     this.setRunnable = this.setRunnable.bind(this)
     this.getSubjectFromChain = this.getSubjectFromChain.bind(this)
     this.setSubjectForChainer = this.setSubjectForChainer.bind(this)
@@ -297,7 +303,15 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     const jquery = createJQuery(state)
 
-    this.$$ = jquery.$$
+    this.$$ = (selector, context?) => {
+      // without a context jQuery searches the runner's document, since the AUT's is cross-origin
+      if (context == null && typeof selector === 'string' && !selector.trim().startsWith('<') && isExperimentalDriverEnabled(this.Cypress) && !isRunnerAbleToCommunicateWithAut()) {
+        $errUtils.throwErrByPath('experimental_driver.unsupported_jquery', { args: { selector } })
+      }
+
+      return jquery.$$(selector, context)
+    }
+
     this.getRemotejQueryInstance = jquery.getRemotejQueryInstance
 
     const location = createLocation(state)
@@ -341,7 +355,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     this.aliasNotFoundFor = aliases.aliasNotFoundFor
     this.getXhrTypeByAlias = aliases.getXhrTypeByAlias
 
-    const snapshots = createSnapshots(this.$$, state)
+    const snapshots = createSnapshots(jquery.$$, state)
 
     this.createSnapshot = snapshots.createSnapshot
     this.detachDom = snapshots.detachDom
@@ -965,6 +979,67 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     }
 
     return
+  }
+
+  // The server has already answered a dialog from the experimental driver's AUT; the dialog blocks the
+  // runner too while it's open. A window:confirm handler can't change that answer, so it's flagged.
+  onRemoteDialog ({ type, message, accepted }: RemoteDialog) {
+    if (!isExperimentalDriverEnabled(this.Cypress)) {
+      return
+    }
+
+    if (type === 'alert') {
+      this.Cypress.action('app:window:alert', message)
+    }
+
+    if (type === 'confirm') {
+      if (_.some(this.Cypress.action('app:window:confirm', message), returnedFalse)) {
+        $errUtils.warnByPath('experimental_driver.confirm_answered', { args: { message } })
+      }
+
+      this.Cypress.action('app:window:confirmed', message, accepted)
+    }
+  }
+
+  // stands in for the beforeunload and history listeners the runner can't add to a cross-origin AUT;
+  // page loads still arrive through the AUT iframe's load event
+  onRemoteNavigation (navigation: RemoteNavigation) {
+    if (!isExperimentalDriverEnabled(this.Cypress) || isRunnerAbleToCommunicateWithAut()) {
+      return
+    }
+
+    if (navigation.event === 'started') {
+      this.isStable(false, 'beforeunload')
+      this.resetTimer()
+
+      return
+    }
+
+    // ends a navigation with no load event (a download or a 204), or one reported before the runner sees its load,
+    // so commands waiting on it must see the new location
+    if (navigation.event === 'stopped') {
+      return this.getCrossOriginRemoteLocation()
+      .then((remoteLocation) => {
+        this.state('autLocation', remoteLocation)
+      })
+      .finally(() => {
+        this.isStable(true, 'load')
+      })
+    }
+
+    return this.Cypress.action('app:navigation:changed', navigation.source)
+  }
+
+  // the server reports errors from an AUT the runner can't listen to itself
+  onRemoteUncaughtException ({ handlerType, error }: RemoteUncaughtException) {
+    if (!isExperimentalDriverEnabled(this.Cypress) || isRunnerAbleToCommunicateWithAut()) {
+      return
+    }
+
+    const err = $errUtils.makeErrFromObj(error)
+    const handled = this.onUncaughtException({ err, handlerType, frameType: 'app', promise: undefined })
+
+    $errUtils.logError(this.Cypress, handlerType, err, handled)
   }
 
   setRunnable (runnable, hookId) {

@@ -203,6 +203,37 @@ describe('config/src/project/utils', () => {
     })
   })
 
+  describe('CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER', () => {
+    const getFilesByGlob = vi.fn().mockReturnValue(['path/to/file'])
+
+    beforeEach(() => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
+    })
+
+    it('enables the experimental driver when set', async () => {
+      vi.stubEnv('CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER', '1')
+
+      const cfg = await mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false, baseUrl: 'http://shop.example.com' }, {}, {}, getFilesByGlob)
+
+      expect(cfg.experimentalDriver).toBe(true)
+      expect(cfg.env).not.toHaveProperty('INTERNAL_EXPERIMENTAL_DRIVER')
+    })
+
+    it('ignores experimentalDriver in the config file', async () => {
+      const cfg = await mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false, experimentalDriver: true }, {}, {}, getFilesByGlob)
+
+      expect(cfg.experimentalDriver).toBe(false)
+    })
+
+    it('requires baseUrl', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER', 'true')
+
+      expect(() => mergeDefaults({ projectRoot: '/foo/bar/', supportFile: false }, {}, {}, getFilesByGlob)).toThrow()
+
+      expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_VALIDATION_MSG_ERROR', null, null, '`CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER` requires `baseUrl`. Set `baseUrl` to the URL of the app under test.')
+    })
+  })
+
   describe('environment name check', () => {
     it('throws an error for unknown CYPRESS_INTERNAL_ENV', () => {
       vi.stubEnv('CYPRESS_INTERNAL_ENV', 'foo-bar')

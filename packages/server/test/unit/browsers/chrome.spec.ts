@@ -16,6 +16,10 @@ import * as protocol from '../../../lib/browsers/protocol'
 import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 import { clearCtx, getCtx, makeDataContext, setCtx } from '../../../lib/makeDataContext'
 
+vi.mock('../../../lib/automation/commands/remote_aut_script', async (importOriginal) => {
+  return { ...await importOriginal<typeof import('../../../lib/automation/commands/remote_aut_script')>(), getRemoteAutScript: vi.fn(async () => 'remote AUT script') }
+})
+
 // Building the real schemas in this worker loads a second `graphql` realm, which
 // `graphql` rejects. The plugin lifecycle these specs drive never queries either schema.
 vi.mock('@packages/data-context/graphql/schema', () => {
@@ -225,6 +229,12 @@ describe('lib/browsers/chrome', () => {
       expectCalledWith(pageCriClient.send, 'ServiceWorker.enable')
 
       expectCalledOnceWith(utils.initializeCDP as any, pageCriClient, automation, false)
+    })
+
+    it('adds the remote AUT script to every frame with experimentalDriver', async () => {
+      await chrome.open({ isHeadless: true } as any, 'http://', { ...mitmOpts, experimentalDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } } as any, automation)
+
+      expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: 'remote AUT script' })
     })
 
     it('leaves Fetch to the network runtime on the browser (CDP) network path', async () => {
@@ -847,7 +857,9 @@ describe('lib/browsers/chrome', () => {
 
   describe('#_setAutomation', () => {
     const bringsPageToFront = async (isTextTerminal: boolean, isHeadless: boolean) => {
-      const create = vi.spyOn(CdpAutomation, 'create').mockResolvedValue({} as CdpAutomation)
+      // Safe because `_setAutomation` only calls `useRemoteTabs` on what `create` returns, and with no
+      // `remoteAutScript` in the options, nothing else
+      const create = vi.spyOn(CdpAutomation, 'create').mockResolvedValue({ useRemoteTabs: vi.fn() } as unknown as CdpAutomation)
       const client = { send: vi.fn(), on: vi.fn(), off: vi.fn() }
 
       // Safe because `_setAutomation` only passes these through to the stubbed `create`, and reads

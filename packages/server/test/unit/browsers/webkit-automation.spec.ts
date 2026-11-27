@@ -4,6 +4,11 @@ import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 import { WebKitCDPBridge } from '../../../lib/browsers/webkit-cdp-bridge'
 import type { RunModeVideoApi } from '@packages/types'
 import { REPORTER_FRAME_NAME, AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER, SPEC_FRAME_NAME_IDENTIFIER } from '@packages/types'
+import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
+
+vi.mock('../../../lib/automation/commands/remote_aut_script', async (importOriginal) => {
+  return { ...await importOriginal<typeof import('../../../lib/automation/commands/remote_aut_script')>(), getRemoteAutScript: vi.fn(async () => 'remote AUT script') }
+})
 
 // sinon's calledBefore: the first call of `first` precedes the last call of `second`
 const expectCalledBefore = (first: Mock, second: Mock) => {
@@ -23,6 +28,7 @@ function createMockBrowser () {
       name: () => `Your project: 'some-project'`,
       url: () => 'http://localhost:3000/index.html',
       title: vi.fn(async () => 'My App'),
+      evaluate: vi.fn(async () => undefined),
       childFrames: () => [],
     }
 
@@ -93,7 +99,7 @@ describe('lib/browsers/webkit-automation', () => {
     } as unknown as RunModeVideoApi
   })
 
-  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any }> = { videoApi }) => {
+  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string, isHeadless: boolean, cdpSocketServer: any, experimentalDriver: boolean, remoteAutScript: any }> = { videoApi }) => {
     return WebKitAutomation.create({
       automation,
       browser: mock.browser as any,
@@ -103,6 +109,8 @@ describe('lib/browsers/webkit-automation', () => {
       userAgent: opts.userAgent,
       isHeadless: opts.isHeadless ?? true,
       cdpSocketServer: opts.cdpSocketServer,
+      experimentalDriver: opts.experimentalDriver,
+      remoteAutScript: opts.remoteAutScript,
     })
   }
 
@@ -208,6 +216,193 @@ describe('lib/browsers/webkit-automation', () => {
       mock.getLastContext().pages = () => []
 
       await wk.onRequest('focus:browser:window', {})
+    })
+  })
+
+  describe('AUT request marking', () => {
+    const getRouteHandler = () => mock.getLastContext().route.mock.calls[0][1]
+
+    it('marks requests for the AUT iframe', async () => {
+      await createAutomation()
+
+      const route = { continue: vi.fn() }
+      const runnerFrame = { parentFrame: () => null }
+      const request = {
+        resourceType: () => 'document',
+        url: () => 'http://localhost:3000/index.html',
+        headers: () => ({ accept: 'text/html' }),
+        frame: () => ({ parentFrame: () => runnerFrame }),
+      }
+
+      await getRouteHandler()(route, request)
+
+      expect(route.continue).toHaveBeenCalledWith({ headers: { 'accept': 'text/html', 'X-Cypress-Is-AUT-Frame': getMetadataHeaderValue() } })
+    })
+
+    it('lets a new tab\'s first navigation through, though its frame does not exist yet', async () => {
+      await createAutomation()
+
+      const route = { continue: vi.fn() }
+      const request = {
+        resourceType: () => 'document',
+        url: () => 'http://localhost:3000/help.html',
+        headers: () => ({}),
+        frame: () => {
+          throw new Error('Frame for this navigation request is not available')
+        },
+      }
+
+      await getRouteHandler()(route, request)
+
+      expect(route.continue).toHaveBeenCalledWith()
+    })
+  })
+
+  describe('experimental driver dialogs and stubs', () => {
+    const listenersFor = (event: string) => mock.getLastPage().on.mock.calls.filter(([name]) => name === event).map(([, listener]) => listener)
+    const bindingFor = (name: string) => mock.getLastContext().exposeBinding.mock.calls.find(([bindingName]) => bindingName === name)?.[1]
+
+    beforeEach(() => {
+      automation.push = vi.fn(async () => {})
+    })
+
+    it('leaves dialogs to Playwright and exposes no binding without the experimental driver', async () => {
+      await createAutomation()
+
+      expect(listenersFor('dialog')).toHaveLength(0)
+      expect(bindingFor('__cypressRemoteStubCall')).toBeUndefined()
+    })
+
+    it('answers a dialog, then reports it', async () => {
+      await createAutomation({ experimentalDriver: true })
+
+      const dialog = { type: () => 'confirm', message: () => 'sure?', accept: vi.fn(async () => {}), dismiss: vi.fn(async () => {}) }
+
+      await listenersFor('dialog')[0](dialog)
+
+      expect(dialog.accept).toHaveBeenCalledOnce()
+      expect(automation.push).toHaveBeenCalledWith('remote:dialog', { type: 'confirm', message: 'sure?', accepted: true })
+    })
+
+    it('pushes a stub call from the AUT frame only', async () => {
+      await createAutomation({ experimentalDriver: true })
+
+      const binding = bindingFor('__cypressRemoteStubCall')
+      const autFrame = mock.getLastPage().mainFrame().childFrames()[0]
+
+      await binding({ frame: autFrame }, '{"id":"stub-1","args":[]}')
+      await binding({ frame: mock.getLastPage().mainFrame() }, '{"id":"stub-1","args":[1]}')
+
+      expect(automation.push).toHaveBeenCalledExactlyOnceWith('remote:stub:call', { id: 'stub-1', args: [] })
+    })
+  })
+
+  it('adds the remote AUT script to every frame with the experimental driver only', async () => {
+    await createAutomation()
+    expect(mock.getLastPage().addInitScript).not.toHaveBeenCalledWith({ content: 'remote AUT script' })
+
+    await createAutomation({ experimentalDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } })
+    expect(mock.getLastPage().addInitScript).toHaveBeenCalledWith({ content: 'remote AUT script' })
+  })
+
+  describe('experimental driver navigation', () => {
+    const listenersFor = (event: string) => mock.getLastPage().on.mock.calls.filter(([name]) => name === event).map(([, listener]) => listener)
+    // the navigation listeners are added after the network ones
+    const emit = (event: string, arg: unknown) => listenersFor(event).at(-1)(arg)
+    const navigationRequest = (frame: unknown, status = 200) => ({ isNavigationRequest: () => true, frame: () => frame, response: async () => ({ status: () => status }) })
+    const navigations = () => vi.mocked(automation.push).mock.calls.filter(([message]) => message === 'remote:navigation').map(([, data]) => data)
+
+    let autFrame: any
+
+    beforeEach(async () => {
+      automation.push = vi.fn(async () => {})
+      await createAutomation({ experimentalDriver: true })
+      autFrame = mock.getLastPage().mainFrame().childFrames()[0]
+      autFrame.waitForLoadState = vi.fn(async () => {})
+    })
+
+    it('pushes a document load of the AUT frame, ending it once the frame loads', async () => {
+      await emit('request', navigationRequest(mock.getLastPage().mainFrame()))
+      await emit('request', navigationRequest(autFrame))
+      await emit('framenavigated', autFrame)
+      await new Promise((resolve) => setImmediate(resolve))
+
+      expect(autFrame.waitForLoadState).toHaveBeenCalledWith('load')
+      expect(navigations()).toEqual([{ event: 'started' }, { event: 'stopped' }])
+    })
+
+    it('ends a navigation that leaves the document in place', async () => {
+      const noContent = navigationRequest(autFrame, 204)
+
+      await emit('request', noContent)
+      await emit('requestfinished', noContent)
+
+      expect(navigations()).toEqual([{ event: 'started' }, { event: 'stopped' }])
+    })
+
+    it('takes a frame navigation with no request in flight as a URL change within the document', async () => {
+      const urls = ['http://localhost:3000/index.html', 'http://localhost:3000/index.html#a', 'http://localhost:3000/b']
+
+      autFrame.url = () => urls.shift()
+
+      await emit('framenavigated', autFrame)
+      await emit('framenavigated', autFrame)
+      await emit('framenavigated', autFrame)
+
+      expect(navigations()).toEqual([
+        { event: 'withinDocument', source: 'history' },
+        { event: 'withinDocument', source: 'hashchange' },
+        { event: 'withinDocument', source: 'history' },
+      ])
+    })
+  })
+
+  describe('tabs the app opened', () => {
+    const makePage = (url: string) => {
+      return {
+        url: () => url,
+        close: vi.fn(async () => {}),
+        mainFrame: () => ({}),
+      }
+    }
+
+    it('closes every page but the runner\'s', async () => {
+      const wk = await createAutomation()
+      const runner = mock.getLastPage()
+      const popup = makePage('http://login.idp.test/popup')
+
+      mock.getLastContext().pages = () => [runner, popup]
+      await wk.closeExtraPages()
+
+      expect(popup.close).toHaveBeenCalled()
+      expect(runner.close).not.toHaveBeenCalled()
+    })
+
+    it('fails a call in a matching tab clearly when WebKit was not launched in-process', async () => {
+      const wk = await createAutomation()
+      const popup = makePage('http://login.idp.test/popup')
+
+      mock.getLastContext().pages = () => [mock.getLastPage(), popup]
+
+      await expect(wk.onRequest('remote:agent', { method: 'click', context: {}, args: {}, tab: { url: 'idp' } })).rejects.toThrow('could not reach Playwright\'s isolated world')
+    })
+  })
+
+  describe('reload:aut:frame / navigate:aut:history', () => {
+    it('reloads the AUT frame', async () => {
+      const wk = await createAutomation()
+
+      await wk.onRequest('reload:aut:frame', { forceReload: true })
+
+      expect(mock.getLastPage().mainFrame().childFrames()[0].evaluate).toHaveBeenCalledWith('window.location.reload(true)')
+    })
+
+    it('navigates the AUT frame history', async () => {
+      const wk = await createAutomation()
+
+      await wk.onRequest('navigate:aut:history', { historyNumber: -1 })
+
+      expect(mock.getLastPage().mainFrame().childFrames()[0].evaluate).toHaveBeenCalledWith('window.history.go(-1)')
     })
   })
 

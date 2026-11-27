@@ -20,6 +20,7 @@ const EventSource = require('eventsource')
 const { setupFullConfigWithDefaults } = require('@packages/config')
 const config = require(`../../lib/config`)
 const { ServerBase } = require(`../../lib/server-base`)
+const ensureUrl = require(`../../lib/util/ensure-url`)
 const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`).default
 const resolve = require(`../../lib/util/resolve`)
@@ -533,6 +534,40 @@ describe('Routes', () => {
 
       expect(res.statusCode).to.eq(200)
       expect(res.body).to.include('cypress_cross_origin_runner.js')
+      expect(res.body).not.to.include('add-verified-command')
+    })
+  })
+
+  context('privileged channel with the experimental driver', () => {
+    beforeEach(function () {
+      process.env.CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER = '1'
+
+      // the experimental driver requires baseUrl, which the server checks it can connect to
+      sinon.stub(ensureUrl, 'isListening').resolves()
+
+      return this.setup('http://www.foobar.com:8080', {
+        config: {
+          port: 2000,
+          baseUrl: 'http://www.foobar.com:8080',
+        },
+      })
+    })
+
+    afterEach(() => {
+      delete process.env.CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER
+    })
+
+    it('includes the privileged channel in the spec frame on the runner\'s origin', async function () {
+      const res = await this.rp('http://cypress-runner.foobar.com:8080/__cypress/iframes/cypress/e2e/spec.cy.js')
+
+      expect(res.statusCode).to.eq(200)
+      expect(res.body).to.include('add-verified-command')
+    })
+
+    it('omits the privileged channel from the spec frame on another origin', async function () {
+      const res = await this.rp('http://www.other.com:8080/__cypress/iframes/cypress/e2e/spec.cy.js')
+
+      expect(res.statusCode).to.eq(200)
       expect(res.body).not.to.include('add-verified-command')
     })
   })

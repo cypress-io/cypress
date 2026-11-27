@@ -85,8 +85,10 @@ export const isSvg = function (el): el is SVGElement {
 }
 
 export const isValueNumberTypeElement = (el: HTMLElement): el is HTMLValueIsNumberTypeElement => {
-  return valueIsNumberTypeRe.test(getTagName(el))
+  return isValueNumberTypeTagName(getTagName(el))
 }
+
+export const isValueNumberTypeTagName = (tagName: string) => valueIsNumberTypeRe.test(tagName)
 
 export const isNeedSingleValueChangeInputElement = (el: HTMLElement): el is HTMLSingleValueChangeInputElement => {
   if (!isInput(el)) {

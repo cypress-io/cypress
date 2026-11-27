@@ -16,6 +16,10 @@ import * as savedState from '../../../lib/saved_state'
 import type { BrowserLaunchOpts } from '@packages/types'
 import { getMetadataHeaderValue } from '../../../lib/browsers/constants'
 
+vi.mock('../../../lib/automation/commands/remote_aut_script', async (importOriginal) => {
+  return { ...await importOriginal<typeof import('../../../lib/automation/commands/remote_aut_script')>(), getRemoteAutScript: vi.fn(async () => 'remote AUT script') }
+})
+
 vi.mock('electron', async () => {
   const { default: electronStub } = await import('../../support/helpers/electron_stub')
 
@@ -331,6 +335,22 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expectNotCalledWith(plugins.execute, 'after:browser:launch')
       })
+    })
+  })
+
+  describe('._getAutomation', () => {
+    it('adds the remote AUT script to every frame with experimentalDriver', async () => {
+      // @ts-expect-error - partial launch options
+      await electron._getAutomation({}, { onError: () => {}, experimentalDriver: true, remoteAutScript: { primaryOrigin: 'http://localhost:3500', namespace: '__cypress' } }, {})
+
+      expectCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: 'remote AUT script' })
+    })
+
+    it('adds no script without it', async () => {
+      // @ts-expect-error - partial launch options
+      await electron._getAutomation({}, { onError: () => {} }, {})
+
+      expectNotCalledWith(pageCriClient.send, 'Page.addScriptToEvaluateOnNewDocument', { source: 'remote AUT script' })
     })
   })
 

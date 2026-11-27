@@ -13,7 +13,9 @@ declare global {
 
 export function tabUntil (fn: (el: JQuery<HTMLElement>) => boolean, limit: number = 10) {
   function _tabUntil (step: number) {
-    return cy.tab().focused({ log: false }).then((el) => {
+    cy.press(Cypress.Keyboard.Keys.TAB)
+
+    return cy.focused({ log: false }).then((el) => {
       const pass = fn(el)
 
       if (pass) {

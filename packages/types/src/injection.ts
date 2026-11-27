@@ -10,7 +10,7 @@ export const SPEC_FRAME_NAME_IDENTIFIER = 'Your Spec'
 
 export const SPEC_BRIDGE_FRAME_NAME_IDENTIFIER = 'Spec Bridge'
 
-const RUNNER_FRAME_NAME_IDENTIFIERS = [
+export const RUNNER_FRAME_NAME_IDENTIFIERS = [
   REPORTER_FRAME_NAME,
   AUT_SNAPSHOT_FRAME_NAME_IDENTIFIER,
   SPEC_FRAME_NAME_IDENTIFIER,
@@ -24,4 +24,18 @@ const RUNNER_FRAME_NAME_IDENTIFIERS = [
  */
 export const isRunnerFrameName = (name?: string) => {
   return !!name && RUNNER_FRAME_NAME_IDENTIFIERS.some((identifier) => name.startsWith(identifier))
+}
+
+// the experimental driver's main-world AUT script exposes its controls here, for the driver to call over the automation protocol
+export const REMOTE_AUT_API = '__cypressRemoteAut'
+
+export interface RemoteAutScriptConfig {
+  // the origin the proxy treats as top: an AUT on any other origin gets simulated top-level cookies
+  primaryOrigin: string
+  namespace: string
+}
+
+export interface RemoteAutScriptSettings extends RemoteAutScriptConfig {
+  // set for a browser whose protocol can't report the AUT's uncaught errors faithfully
+  reportErrors: boolean
 }

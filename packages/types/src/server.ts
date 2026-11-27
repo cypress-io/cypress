@@ -5,6 +5,7 @@ import type { RunModeVideoApi } from './video'
 import type { ProtocolManagerShape } from './protocol'
 import type Protocol from 'devtools-protocol'
 import type { SupportedKey } from './automation'
+import type { RemoteAutScriptConfig } from './injection'
 
 export type CdpClientShape = {
   send: (...args: any[]) => Promise<any>
@@ -139,6 +140,10 @@ export type BrowserLaunchOpts = {
    * no suite-level override can be known yet.
    */
   shouldClearPersistedServiceWorkers?: boolean
+  // From the project config, since a per-test override can't change how the browser was launched
+  experimentalDriver?: boolean
+  // set with experimentalDriver: configures the script added to the main world of every frame
+  remoteAutScript?: RemoteAutScriptConfig
   /**
    * Source evaluated in each service worker while it is paused for the debugger,
    * ahead of its own script, on the browser network path. It replaces rewriting
@@ -187,6 +192,89 @@ export interface KeyPressParams {
   key: SupportedKey
 }
 
+export interface RemoteAgentFrameOwner {
+  steps: unknown
+  selector: string
+}
+
+export interface RemoteAgentRequest {
+  method: string
+  context: unknown
+  args: unknown
+  // iframes to enter, outermost first, before calling `method`
+  frames?: RemoteAgentFrameOwner[]
+  // a tab the app opened to run in, instead of the AUT
+  tab?: { url?: string | { source: string, flags: string } }
+}
+
+// cy.visit's onBeforeLoad / onLoad, serialized to run in the AUT's own window
+export interface RemoteVisitCallbacks {
+  token: string
+  args: unknown
+  onBeforeLoad?: string
+  onLoad?: string
+}
+
+export interface RemoteVisitBeforeLoad extends RemoteVisitCallbacks {
+  // the AUT iframe's name, which scopes the preload script to the AUT's document
+  frameName: string
+}
+
+export interface RemoteVisitResult {
+  beforeLoadRan: boolean
+  error?: { phase: 'onBeforeLoad' | 'onLoad', name?: string, message: string, stack?: string }
+}
+
+export interface RemoteUncaughtException {
+  handlerType: 'error' | 'unhandledrejection'
+  error: { name?: string, message: string, stack?: string }
+}
+
+// what a cy.stub or cy.spy on the AUT's window does when the app calls it; `args` limits it to matching calls
+export type RemoteStubBehavior = { args?: unknown[] } & (
+  | { kind: 'returns' | 'resolves', value: unknown }
+  | { kind: 'throws' | 'rejects', error: { name?: string, message: string } }
+  // a function's source, run in the AUT
+  | { kind: 'callsFake', source: string }
+  | { kind: 'callThrough' }
+)
+
+export interface RemoteStubSpec {
+  id: string
+  type: 'spy' | 'stub'
+  // property path from the AUT's window, such as ['console', 'log']
+  path: string[]
+  behaviors: RemoteStubBehavior[]
+}
+
+export interface RemoteStubCall {
+  id: string
+  args: unknown[]
+  returned?: unknown
+}
+
+export interface RemoteDialog {
+  type: 'alert' | 'confirm' | 'prompt' | 'beforeunload'
+  message: string
+  accepted: boolean
+}
+
+// a navigation of the AUT frame: a document load starting or ending, or a URL change within the document
+export type RemoteNavigation =
+  | { event: 'started' }
+  | { event: 'stopped' }
+  | { event: 'withinDocument', source: 'hashchange' | 'history' }
+
+// a call into the experimental driver's AUT script: a cookie command for its document.cookie jar, or pausing its timers
+export type RemoteAutCall =
+  | { method: 'cookies', args: ['set:cookie', unknown] | ['clear:cookie', string] | ['clear:cookies'] }
+  | { method: 'timers', args: ['pause', boolean] | ['reset'] }
+
+export interface RemoteClockDetails {
+  now: number
+  methods: string[]
+}
+
 export interface AutomationCommands {
   'take:screenshot': CommandSignature
   'get:cookies': CommandSignature
@@ -214,6 +302,23 @@ export interface AutomationCommands {
   'reload:aut:frame': CommandSignature<{ forceReload: boolean }, void>
   'navigate:aut:history': CommandSignature<{ historyNumber: number }, void>
   'get:aut:title': CommandSignature<void, string>
+  'remote:agent': CommandSignature<RemoteAgentRequest, unknown>
+  'remote:visit:before:load': CommandSignature<RemoteVisitBeforeLoad, void>
+  'remote:visit:on:load': CommandSignature<RemoteVisitCallbacks, RemoteVisitResult>
+  'remote:uncaught:exception': CommandSignature<RemoteUncaughtException, void>
+  'remote:window:before:load': CommandSignature<{ url: string }, void>
+  'remote:stub:add': CommandSignature<RemoteStubSpec, void>
+  'remote:stub:update': CommandSignature<Pick<RemoteStubSpec, 'id' | 'behaviors'>, void>
+  'remote:stubs:reset': CommandSignature<void, void>
+  'remote:stub:call': CommandSignature<RemoteStubCall, void>
+  'remote:dialog': CommandSignature<RemoteDialog, void>
+  'remote:navigation': CommandSignature<RemoteNavigation, void>
+  'remote:errors:flush': CommandSignature<Record<string, never>, void>
+  'remote:aut:call': CommandSignature<RemoteAutCall, void>
+  'remote:clock:install': CommandSignature<{ now?: number, methods?: string[] }, RemoteClockDetails>
+  'remote:clock:tick': CommandSignature<{ ms: number }, RemoteClockDetails>
+  'remote:clock:set:system:time': CommandSignature<{ now: number }, RemoteClockDetails>
+  'remote:clock:restore': CommandSignature<Record<string, never>, void>
 }
 
 export type OnRequestEvent = <T extends keyof AutomationCommands>(message: T, data: AutomationCommands[T]['dataType']) => Promise<AutomationCommands[T]['returnType']>

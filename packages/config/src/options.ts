@@ -573,6 +573,12 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     defaultValue: (options: Record<string, any> = {}) => !options.isTextTerminal,
     validation: validate.isBoolean,
   }, {
+    // set from CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER, never from the config file
+    name: 'experimentalDriver',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    isInternal: true,
+  }, {
     name: 'isTextTerminal',
     defaultValue: false,
     validation: validate.isBoolean,

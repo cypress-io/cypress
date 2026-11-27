@@ -260,7 +260,7 @@ const defaultPreferences = {
   'browser.EULA.override': true,
   'browser.EULA.3.accepted': true,
   'browser.link.open_external': 2,
-  'browser.link.open_newwindow': 2,
+  'browser.link.open_newwindow': 3,
   'browser.offline': false,
   'browser.reader.detectedFirstArticle': true,
   'browser.selfsupport.url': '',
@@ -303,6 +303,8 @@ const defaultPreferences = {
   'media.navigator.permission.disabled': true,
 
   'dom.min_background_timeout_value': 4,
+  // the floor Firefox applies instead, since budget throttling is off below
+  'dom.min_background_timeout_value_without_budget_throttling': 4,
   'dom.timeout.enable_budget_timer_throttling': false,
 
   // allow getUserMedia APIs on insecure domains
@@ -739,6 +741,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
           browserName: 'firefox',
           acceptInsecureCerts: true,
           webSocketUrl: true,
+          // the experimental driver answers the AUT's dialogs over BiDi, so Firefox must not dismiss them first
+          ...(options.experimentalDriver ? { unhandledPromptBehavior: 'ignore' } : {}),
           // @see https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
           'moz:firefoxOptions': {
             profile: base64EncodedProfile,
@@ -844,7 +848,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     }))
 
     debug('setting up firefox utils')
-    browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient })
+    browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient, remoteAutScript: options.remoteAutScript })
   } catch (err: unknown) {
     // delete the session so it doesn't leak into the next launch
     if (launchedSession) {
@@ -859,8 +863,5 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 }
 
 export async function closeExtraTargets () {
-  // we're currently holding off on implementing Firefox support in order
-  // to release Chromium support as soon as possible and may add Firefox
-  // support in the future
-  debug('Closing extra targets is not currently supported in Firefox')
+  await browserBidiClient?.closeExtraTabs()
 }

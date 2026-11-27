@@ -35,6 +35,10 @@ export function shouldHonorNumTestsKeptInMemory () {
   return process.env.CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY === 'true'
 }
 
+function isExperimentalDriverEnabled () {
+  return ['1', 'true'].includes(process.env.CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER ?? '')
+}
+
 const hideSpecialVals = function (val: string, key: string) {
   if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
     return hideKeys(val)
@@ -95,6 +99,7 @@ const CYPRESS_ENV_PREFIX_LENGTH = CYPRESS_ENV_PREFIX.length
 const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
   'CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM',
+  'CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER',
   'CYPRESS_AGENT_MODE',
 ]
 
@@ -479,6 +484,8 @@ export function mergeDefaults (
     throw errors.throwErr('INVALID_CYPRESS_INTERNAL_ENV', config.cypressEnv)
   }
 
+  config.experimentalDriver = isExperimentalDriverEnabled()
+
   delete config.envFile
 
   // when headless
@@ -509,6 +516,10 @@ export function mergeDefaults (
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   }, testingType)
+
+  if (config.experimentalDriver === true && !config.baseUrl) {
+    return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, '`CYPRESS_INTERNAL_EXPERIMENTAL_DRIVER` requires `baseUrl`. Set `baseUrl` to the URL of the app under test.')
+  }
 
   // `browsers` is omitted from the validation above because it is typically an empty
   // array at this point and is populated with the list of detected browsers later (see
