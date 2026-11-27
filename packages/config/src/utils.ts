@@ -24,8 +24,9 @@ const getRootUrl = (obj: any, proxyUrl: string) => {
     return proxyUrl
   }
 
-  // the experimental driver serves the runner on the app's site and never moves it
-  if (obj.experimentalDriver === true) {
+  // the experimental driver serves the runner on the app's site and never moves it. Component testing
+  // keeps it on the dev server's origin, since the spec runs in the AUT and reads `parent.Cypress`
+  if (obj.experimentalDriver === true && obj.testingType !== 'component') {
     return getRemoteRunnerOrigin(obj.baseUrl, obj.port)
   }
 
