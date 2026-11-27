@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import path from 'path'
 import launchEditor from 'launch-editor'
 import type { DataContext } from '../../../src'
 import { FileActions } from '../../../src/actions/FileActions'
 import { createTestDataContext } from '../helper'
 
-jest.mock('launch-editor')
+vi.mock('launch-editor')
 
 describe('FileActions', () => {
   let ctx: DataContext
@@ -19,8 +19,8 @@ describe('FileActions', () => {
       { id: 'code', name: 'Visual Studio Code', binary: 'code' },
     ]
 
-    ctx._apis.electronApi.showItemInFolder = jest.fn()
-    jest.mocked(launchEditor).mockClear()
+    ctx._apis.electronApi.showItemInFolder = vi.fn()
+    vi.mocked(launchEditor).mockClear()
 
     actions = new FileActions(ctx)
   })

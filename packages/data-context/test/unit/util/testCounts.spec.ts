@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { SpecWithRelativeRoot } from '@packages/types'
 import fs from 'fs-extra'
 import { scaffoldMigrationProject } from '../helper'

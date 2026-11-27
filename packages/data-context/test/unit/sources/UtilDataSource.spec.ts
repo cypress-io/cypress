@@ -1,13 +1,12 @@
-// Jest globals are available without import in this environment
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import fetch from 'cross-fetch'
 import { createTestDataContext } from '../helper'
 import { UtilDataSource } from '../../../src/sources/UtilDataSource'
 import type { DataContext } from '../../../src'
 import { strictAgent } from '@packages/network'
 
-// Mock cross-fetch
-jest.mock('cross-fetch')
-const mockedFetch = jest.mocked(fetch)
+vi.mock('cross-fetch')
+const mockedFetch = vi.mocked(fetch)
 
 describe('UtilDataSource', () => {
   let ctx: DataContext
@@ -18,7 +17,7 @@ describe('UtilDataSource', () => {
     utilDataSource = new UtilDataSource(ctx)
 
     // Reset all mocks
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
@@ -30,7 +29,7 @@ describe('UtilDataSource', () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValue({ data: 'test' }),
+        json: vi.fn().mockResolvedValue({ data: 'test' }),
       } as any
 
       mockedFetch.mockResolvedValue(mockResponse)
@@ -53,7 +52,7 @@ describe('UtilDataSource', () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValue({ data: 'test' }),
+        json: vi.fn().mockResolvedValue({ data: 'test' }),
       } as any
 
       mockedFetch.mockResolvedValue(mockResponse)

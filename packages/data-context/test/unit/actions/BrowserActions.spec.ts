@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { describe, expect, it, vi } from 'vitest'
 import type { FoundBrowser } from '@packages/types'
 import { createTestDataContext } from '../helper'
 
@@ -7,7 +7,7 @@ const browser: FoundBrowser = { name: 'firefox', family: 'firefox', channel: 'st
 function createDataContext (mode: 'run' | 'open') {
   const ctx = createTestDataContext(mode)
 
-  ctx._apis.projectApi.insertProjectPreferencesToCache = jest.fn()
+  ctx._apis.projectApi.insertProjectPreferencesToCache = vi.fn()
   // @ts-expect-error - `_projectRoot` is private
   ctx.lifecycleManager._projectRoot = '/path/to/my-project'
 

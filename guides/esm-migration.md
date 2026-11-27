@@ -92,7 +92,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 ##### Binary Packages
 
 - [x] packages/config ✅ **COMPLETED**
-- [x] packages/data-context **COMPLETED** (migrated from `mocha`/`sinon`/`chai` to `jest`). See package README for more details as to why `jest` over `vitest`
+- [x] packages/data-context ✅ **COMPLETED**
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/error ✅ **COMPLETED**

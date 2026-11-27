@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { describe, expect, it, vi } from 'vitest'
 import type { FullConfig } from '@packages/types'
 import { createTestDataContext } from '../helper'
 import { userBrowser, foundBrowserChrome } from '../../fixtures/browsers'
@@ -13,7 +13,7 @@ describe('BrowserDataSource', () => {
 
       const ctx = createTestDataContext('run')
 
-      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
       ctx.coreData.machineBrowsers = Promise.resolve([foundBrowserChrome])
 
       const result = await ctx.browser.allBrowsers()
@@ -29,7 +29,7 @@ describe('BrowserDataSource', () => {
 
       const ctx = createTestDataContext('run')
 
-      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
       ctx.coreData.machineBrowsers = Promise.resolve([foundBrowserChrome])
 
       const result = await ctx.browser.allBrowsers()
@@ -49,7 +49,7 @@ describe('BrowserDataSource', () => {
 
       const ctx = createTestDataContext('run')
 
-      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
       ctx.coreData.machineBrowsers = Promise.resolve([machineBrowser])
 
       const result = await ctx.browser.allBrowsers()

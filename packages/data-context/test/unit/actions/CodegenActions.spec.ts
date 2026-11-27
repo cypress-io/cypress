@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import type { DataContext } from '../../../src'
 import { CodegenActions } from '../../../src/actions/CodegenActions'
 import { createTestDataContext } from '../helper'
@@ -18,7 +18,7 @@ describe('CodegenActions', () => {
 
     actions = new CodegenActions(ctx)
 
-    reactDocgen = await eval('import("react-docgen")')
+    reactDocgen = await import('react-docgen')
   })
 
   describe('getReactComponentsFromFile', () => {
@@ -33,7 +33,7 @@ describe('CodegenActions', () => {
     })
 
     it('does not read a file outside of the project', async () => {
-      const readFile = jest.spyOn(ctx.fs, 'readFile')
+      const readFile = vi.spyOn(ctx.fs, 'readFile')
       const result = await actions.getReactComponentsFromFile(path.join(__dirname, 'CodegenActions.spec.ts'), reactDocgen)
 
       expect(result).toEqual({ errored: true, components: [] })
@@ -130,6 +130,7 @@ describe('CodegenActions', () => {
     })
 
     // TODO: "react-docgen" will resolve HOCs but our export detection does not. Can fall back to displayName here
+    // eslint-disable-next-line vitest/no-disabled-tests
     it.skip('handles higher-order-components', async () => {
       const { components } = await actions.getReactComponentsFromFile(`${absolutePathPrefix}/counter-hoc.jsx`, reactDocgen)
 
@@ -193,10 +194,10 @@ describe('CodegenActions', () => {
         s.currentProject = projectRoot
       })
 
-      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/e2e/**/*.cy.{js,ts}'] })
-      jest.spyOn(ctx.project, 'getIsDefaultSpecPattern').mockResolvedValue(true)
+      vi.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/e2e/**/*.cy.{js,ts}'] })
+      vi.spyOn(ctx.project, 'getIsDefaultSpecPattern').mockResolvedValue(true)
       // Safe because codeGenSpec only refreshes the spec list when a config is loaded
-      jest.spyOn(ctx.project, 'getConfig').mockResolvedValue(undefined as unknown as FullConfig)
+      vi.spyOn(ctx.project, 'getConfig').mockResolvedValue(undefined as unknown as FullConfig)
     })
 
     afterEach(async () => {
@@ -210,7 +211,7 @@ describe('CodegenActions', () => {
         throw new Error('React framework definition not found')
       }
 
-      jest.spyOn(actions, 'getWizardFrameworkFromConfig').mockReturnValue(resolveComponentFrameworkDefinition(react))
+      vi.spyOn(actions, 'getWizardFrameworkFromConfig').mockReturnValue(resolveComponentFrameworkDefinition(react))
     }
 
     it('generates an e2e spec inside the project', async () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { defaultSpecPattern } from '@packages/config'
 import { CT_FRAMEWORKS } from '@packages/scaffold-config'
 import fs from 'fs-extra'
@@ -97,7 +97,7 @@ describe('spec-options', () => {
         })
 
         it('creates copy file if spec already exists', async () => {
-          jest.spyOn(fs, 'access').mockImplementationOnce(() => Promise.resolve()).mockImplementationOnce(() => Promise.reject())
+          vi.spyOn(fs, 'access').mockImplementationOnce(() => Promise.resolve()).mockImplementationOnce(() => Promise.reject())
 
           const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
@@ -158,7 +158,7 @@ describe('spec-options', () => {
         })
 
         it('creates copy file if spec already exists', async () => {
-          jest.spyOn(fs, 'access')
+          vi.spyOn(fs, 'access')
           .mockImplementationOnce(() => Promise.resolve())
           .mockImplementationOnce(() => Promise.reject())
 
@@ -197,7 +197,7 @@ describe('spec-options', () => {
           it(testName, async () => {
             // This stub simulates the spec file already existing the first time we try, which should cause a copy to be created
             if (makeCopy) {
-              jest.spyOn(fs, 'access')
+              vi.spyOn(fs, 'access')
               .mockImplementationOnce(() => Promise.resolve())
               .mockImplementationOnce(() => Promise.reject())
             }
@@ -205,10 +205,10 @@ describe('spec-options', () => {
             // This stub simulates that the component we are generating a spec from is using Typescript.
             if (isTypescriptComponent) {
               // @ts-expect-error - the mock resolves a string, as the utf8 `readFile` overload does
-              jest.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
+              vi.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
             } else {
               // @ts-expect-error - the mock resolves a string, as the utf8 `readFile` overload does
-              jest.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
+              vi.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
             }
 
             const currentProject = 'path/to/myProject'

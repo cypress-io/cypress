@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import { graphqlSchema } from '../../../graphql/schema'
 import dedent from 'dedent'
 import type { FieldNode, GraphQLObjectType, OperationDefinitionNode } from 'graphql'

@@ -310,6 +310,5 @@ graphql-eslint's processor refuses `.vue` files under flat config, and its docum
 ## Known gaps
 
 - No rule reports a duplicate JSX prop, such as two `className`s, in `.js` or `.jsx` files. `eslint-plugin-react`'s `jsx-no-duplicate-props` did; `@eslint-react/eslint-plugin` has no counterpart, and TypeScript only checks `.tsx`.
-- Nothing reports a committed `.only` in `data-context`'s Jest specs. They import `describe`, `it` and `test` from `@jest/globals`, which `mocha/no-exclusive-tests` doesn't recognise, and no Jest lint plugin is installed.
 - Vitest specs get no check for duplicate test titles, exported helpers, nested tests or empty titles. `vitest/no-identical-title` covers the first once the existing duplicates are renamed; `@vitest/eslint-plugin` has no counterpart for `mocha/no-exports` or `mocha/no-nested-tests`, and `vitest/valid-title`, which reports empty titles, is off.
 - `jsonConfig` does not collapse `{ }` to `{}`. `jsonc/object-curly-spacing` skips empty objects, and no off-the-shelf rule covers them.

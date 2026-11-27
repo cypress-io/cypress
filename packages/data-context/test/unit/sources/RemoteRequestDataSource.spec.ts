@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import crypto from 'crypto'
 
 import type { DataContext } from '../../../src'

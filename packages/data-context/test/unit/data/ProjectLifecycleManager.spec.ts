@@ -1,4 +1,5 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import type { DataContext } from '../../../src'
 import fs from 'fs-extra'
 import os from 'os'
@@ -18,10 +19,10 @@ let ctx: DataContext
 function createDataContext (modeOptions?: Parameters<typeof createTestDataContext>[1], mode: Parameters<typeof createTestDataContext>[0] = 'open') {
   const context = createTestDataContext(mode, modeOptions)
 
-  jest.spyOn(context._apis.browserApi, 'getBrowsers').mockResolvedValue(browsers)
-  context._apis.projectApi.insertProjectPreferencesToCache = jest.fn()
-  jest.spyOn(context.actions.project, 'launchProject').mockResolvedValue(undefined)
-  jest.spyOn(context.project, 'getProjectPreferences').mockResolvedValue(null)
+  vi.spyOn(context._apis.browserApi, 'getBrowsers').mockResolvedValue(browsers)
+  context._apis.projectApi.insertProjectPreferencesToCache = vi.fn()
+  vi.spyOn(context.actions.project, 'launchProject').mockResolvedValue(undefined)
+  vi.spyOn(context.project, 'getProjectPreferences').mockResolvedValue(null)
 
   // @ts-expect-error - `_projectRoot` is private
   context.lifecycleManager._projectRoot = 'foo'
@@ -37,7 +38,7 @@ const fullConfig: FullConfig = {
 describe('ProjectLifecycleManager', () => {
   beforeEach(() => {
     ctx = createDataContext()
-    jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+    vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
   })
 
   afterEach(() => {
@@ -48,11 +49,11 @@ describe('ProjectLifecycleManager', () => {
   describe('#onLoadError', () => {
     const loadErrorCtx = () => {
       const context = createDataContext({ project: 'foo' })
-      const setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined)
+      const setSessionLoadError = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
 
       context._apis.projectApi.setSessionLoadError = setSessionLoadError as any
       context.coreData.currentProject = '/projects/foo'
-      jest.spyOn(context, 'onError').mockImplementation(() => {})
+      vi.spyOn(context, 'onError').mockImplementation(() => {})
 
       return { context, setSessionLoadError }
     }
@@ -77,8 +78,8 @@ describe('ProjectLifecycleManager', () => {
 
   describe('#initializeProjectSetup', () => {
     const originalEnv = process.env
-    let consoleError: ReturnType<typeof jest.spyOn>
-    let consoleLog: ReturnType<typeof jest.spyOn>
+    let consoleError: ReturnType<typeof vi.spyOn>
+    let consoleLog: ReturnType<typeof vi.spyOn>
 
     const scaffolded = (...statuses: Array<'valid' | 'changes' | 'skipped' | 'error'>) => {
       return statuses.map((status, index) => ({ status, description: '', file: { absolute: `/projects/foo/file-${index}.js`, contents: '' } }))
@@ -87,11 +88,11 @@ describe('ProjectLifecycleManager', () => {
     const setupCtx = (files: ReturnType<typeof scaffolded>, modeOptions: Parameters<typeof createDataContext>[0] = { project: 'foo', testingType: 'e2e' }, mode: Parameters<typeof createDataContext>[1] = 'open') => {
       const setup = createDataContext(modeOptions, mode)
 
-      jest.spyOn(setup.lifecycleManager, 'isTestingTypeConfigured').mockReturnValue(false)
-      jest.spyOn(setup.actions.wizard, 'completeSetup').mockResolvedValue(undefined)
-      jest.spyOn(setup.actions.wizard, 'detectFrameworks').mockResolvedValue(undefined)
-      jest.spyOn(setup.actions.wizard, 'initialize').mockResolvedValue(undefined)
-      jest.spyOn(setup.actions.wizard, 'scaffoldTestingType').mockImplementation(async () => {
+      vi.spyOn(setup.lifecycleManager, 'isTestingTypeConfigured').mockReturnValue(false)
+      vi.spyOn(setup.actions.wizard, 'completeSetup').mockResolvedValue(undefined)
+      vi.spyOn(setup.actions.wizard, 'detectFrameworks').mockResolvedValue(undefined)
+      vi.spyOn(setup.actions.wizard, 'initialize').mockResolvedValue(undefined)
+      vi.spyOn(setup.actions.wizard, 'scaffoldTestingType').mockImplementation(async () => {
         setup.coreData.scaffoldedFiles = files
       })
 
@@ -100,8 +101,8 @@ describe('ProjectLifecycleManager', () => {
 
     beforeEach(() => {
       process.env = { PATH: originalEnv.PATH }
-      consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
-      consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {})
+      consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {})
     })
 
     afterEach(() => {
@@ -120,8 +121,8 @@ describe('ProjectLifecycleManager', () => {
       expect(setup.actions.wizard.scaffoldTestingType).toHaveBeenCalledTimes(1)
       expect(setup.actions.wizard.completeSetup).toHaveBeenCalledTimes(1)
 
-      const scaffoldOrder = (setup.actions.wizard.scaffoldTestingType as jest.Mock).mock.invocationCallOrder[0]
-      const completeOrder = (setup.actions.wizard.completeSetup as jest.Mock).mock.invocationCallOrder[0]
+      const scaffoldOrder = (setup.actions.wizard.scaffoldTestingType as Mock).mock.invocationCallOrder[0]
+      const completeOrder = (setup.actions.wizard.completeSetup as Mock).mock.invocationCallOrder[0]
 
       expect(scaffoldOrder).toBeLessThan(completeOrder)
     })
@@ -163,7 +164,7 @@ describe('ProjectLifecycleManager', () => {
         const setup = setupCtx(files, { project: 'foo', testingType, headless: true })
 
         setup.coreData.currentProject = '/projects/foo'
-        setup._apis.projectApi.setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined) as any
+        setup._apis.projectApi.setSessionLoadError = vi.fn<() => Promise<void>>().mockResolvedValue(undefined) as any
 
         return setup
       }
@@ -260,9 +261,9 @@ describe('ProjectLifecycleManager', () => {
       const setup = setupCtx(scaffolded('valid'))
       const failure = new Error('Cannot find module cypress')
 
-      jest.spyOn(setup.actions.wizard, 'completeSetup').mockRejectedValue(failure)
+      vi.spyOn(setup.actions.wizard, 'completeSetup').mockRejectedValue(failure)
 
-      const onLoadError = jest.spyOn(setup.lifecycleManager, 'onLoadError').mockImplementation(() => {})
+      const onLoadError = vi.spyOn(setup.lifecycleManager, 'onLoadError').mockImplementation(() => {})
 
       await expect(setup.lifecycleManager.initializeProjectSetup('e2e')).resolves.toBeUndefined()
 
@@ -273,7 +274,7 @@ describe('ProjectLifecycleManager', () => {
       process.env.CLAUDECODE = '1'
 
       const setup = setupCtx(scaffolded('valid', 'changes'))
-      const setSessionLoadError = jest.fn<() => Promise<void>>().mockResolvedValue(undefined)
+      const setSessionLoadError = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
 
       setup._apis.projectApi.setSessionLoadError = setSessionLoadError as any
       setup.coreData.currentProject = '/projects/foo'
@@ -322,7 +323,7 @@ describe('ProjectLifecycleManager', () => {
 
       const setup = setupCtx(scaffolded('valid'))
 
-      jest.spyOn(setup.lifecycleManager, 'isTestingTypeConfigured').mockReturnValue(true)
+      vi.spyOn(setup.lifecycleManager, 'isTestingTypeConfigured').mockReturnValue(true)
 
       await setup.lifecycleManager.initializeProjectSetup('e2e')
 
@@ -343,7 +344,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('uses cli --browser option if one is set', async () => {
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'electron') {
           return Promise.resolve(browsers[0])
         }
@@ -367,7 +368,7 @@ describe('ProjectLifecycleManager', () => {
         testingType: 'e2e',
       })
 
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'electron') {
           return Promise.resolve(browsers[0])
         }
@@ -391,9 +392,9 @@ describe('ProjectLifecycleManager', () => {
       const agentCtx = (modeOptions: Parameters<typeof createDataContext>[0] = { project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true }) => {
         const agent = createDataContext(modeOptions)
 
-        jest.spyOn(agent.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-        jest.spyOn(agent._apis.localSettingsApi, 'getPreferences').mockResolvedValue({})
-        jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[0])
+        vi.spyOn(agent.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        vi.spyOn(agent._apis.localSettingsApi, 'getPreferences').mockResolvedValue({})
+        vi.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[0])
         agent.coreData.activeBrowser = null
         agent.coreData.cliBrowser = 'electron'
 
@@ -433,8 +434,8 @@ describe('ProjectLifecycleManager', () => {
 
         const agent = agentCtx()
 
-        jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
-        jest.spyOn(agent.project, 'getProjectPreferences').mockResolvedValue(null)
+        vi.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+        vi.spyOn(agent.project, 'getProjectPreferences').mockResolvedValue(null)
 
         await agent.lifecycleManager.setInitialActiveBrowser()
 
@@ -467,7 +468,7 @@ describe('ProjectLifecycleManager', () => {
 
         agent.coreData.cliBrowser = null
 
-        jest.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'electron' } as unknown as FullConfig)
+        vi.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'electron' } as unknown as FullConfig)
 
         await agent.lifecycleManager.setInitialActiveBrowser()
 
@@ -479,7 +480,7 @@ describe('ProjectLifecycleManager', () => {
 
         const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
 
-        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
+        vi.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
 
         expect(agent.lifecycleManager.loadedFullConfig).toBeNull()
         expect(agent.lifecycleManager.isWelcomeBypassed).toBe(true)
@@ -490,7 +491,7 @@ describe('ProjectLifecycleManager', () => {
 
         const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
 
-        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ e2e: { defaultBrowser: 'electron' } })
+        vi.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ e2e: { defaultBrowser: 'electron' } })
 
         expect(agent.lifecycleManager.isWelcomeBypassed).toBe(true)
       })
@@ -500,8 +501,8 @@ describe('ProjectLifecycleManager', () => {
 
         const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
 
-        jest.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
-        jest.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: null } as unknown as FullConfig)
+        vi.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
+        vi.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: null } as unknown as FullConfig)
 
         expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
       })
@@ -573,7 +574,7 @@ describe('ProjectLifecycleManager', () => {
         it('reports the browser it was given when it cannot be found, and keeps the window hidden', async () => {
           const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'nope', isBrowserGivenByCli: true, headless: true })
 
-          jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          vi.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
           headless.coreData.currentProject = '/projects/foo'
 
           await headless.lifecycleManager.setInitialActiveBrowser()
@@ -590,7 +591,7 @@ describe('ProjectLifecycleManager', () => {
         // have the reload launch it in place of the one asked for, and withdraw the error
         it('falls back to no other browser, so a reload asks for the same one again and keeps the error', async () => {
           const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'chrome', isBrowserGivenByCli: true, headless: true })
-          const ensure = jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          const ensure = vi.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
 
           headless.coreData.currentProject = '/projects/foo'
           headless.coreData.cliBrowser = 'chrome'
@@ -619,7 +620,7 @@ describe('ProjectLifecycleManager', () => {
         it('launches nothing, and reports why, for a browser cypress tap cannot drive', async () => {
           const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true, headless: true })
 
-          jest.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+          vi.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
           headless.coreData.currentProject = '/projects/foo'
 
           await headless.lifecycleManager.setInitialActiveBrowser()
@@ -637,7 +638,7 @@ describe('ProjectLifecycleManager', () => {
         it('launches the defaultBrowser from the config when --browser is not given', async () => {
           const headless = agentCtx({ project: 'foo', testingType: 'e2e', headless: true })
 
-          jest.spyOn(headless.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'electron' } as unknown as FullConfig)
+          vi.spyOn(headless.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'electron' } as unknown as FullConfig)
           headless.coreData.cliBrowser = null
           headless.coreData.currentProject = '/projects/foo'
 
@@ -669,7 +670,7 @@ describe('ProjectLifecycleManager', () => {
 
           const agent = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true })
 
-          jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+          vi.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
 
           await agent.lifecycleManager.setInitialActiveBrowser()
 
@@ -681,7 +682,7 @@ describe('ProjectLifecycleManager', () => {
 
           const agent = agentCtx()
 
-          jest.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          vi.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
           agent.coreData.currentProject = '/projects/foo'
 
           await agent.lifecycleManager.setInitialActiveBrowser()
@@ -692,7 +693,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('uses lastBrowser if available', async () => {
-      jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
+      vi.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
@@ -703,7 +704,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('falls back to browsers[0] if lastBrowser does not exist', async () => {
-      jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'dev' } })
+      vi.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'dev' } })
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
@@ -720,7 +721,7 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: false,
       })
 
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'chrome') {
           return Promise.resolve(browsers[1])
         }
@@ -728,7 +729,7 @@ describe('ProjectLifecycleManager', () => {
         throw new Error('Browser not found')
       })
 
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
 
       expect(ctx.modeOptions.browser).toEqual(undefined)
       expect(ctx.coreData.cliBrowser).toEqual(null)
@@ -749,8 +750,8 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: true,
       })
 
-      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'firefox') {
           return Promise.resolve(browsers[3])
         }
@@ -758,7 +759,7 @@ describe('ProjectLifecycleManager', () => {
         throw new Error('Browser not found')
       })
 
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
 
       expect(ctx.modeOptions.browser).toEqual('firefox')
       expect(ctx.coreData.cliBrowser).toEqual('firefox')
@@ -778,8 +779,8 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: false,
       })
 
-      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'chrome:beta') {
           return Promise.resolve(browsers[2])
         }
@@ -788,7 +789,7 @@ describe('ProjectLifecycleManager', () => {
       })
 
       // the default browser will be ignored since we have an active browser
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'firefox' } as unknown as FullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'firefox' } as unknown as FullConfig)
 
       // set the active browser to chrome:beta
       ctx.actions.browser.setActiveBrowser(browsers[2] as FoundBrowser)
@@ -819,8 +820,8 @@ describe('ProjectLifecycleManager', () => {
     describe('in run mode', () => {
       it('uses lastBrowser without writing it back to the cache', async () => {
         ctx = createDataContext({}, 'run')
-        jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-        jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
+        vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        vi.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
 
         await ctx.lifecycleManager.setInitialActiveBrowser()
 
@@ -836,8 +837,8 @@ describe('ProjectLifecycleManager', () => {
           isBrowserGivenByCli: true,
         }, 'run')
 
-        jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-        jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+        vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
 
         await ctx.lifecycleManager.setInitialActiveBrowser()
 
@@ -858,8 +859,8 @@ describe('ProjectLifecycleManager', () => {
       const configManager = ctx.lifecycleManager.createConfigManager()
       const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
 
-      const setSpecsSpy = jest.spyOn(ctx.actions.project, 'setSpecsFoundBySpecPattern').mockResolvedValue(undefined)
-      const setInitialActiveBrowserSpy = jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+      const setSpecsSpy = vi.spyOn(ctx.actions.project, 'setSpecsFoundBySpecPattern').mockResolvedValue(undefined)
+      const setInitialActiveBrowserSpy = vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
 
       // @ts-expect-error - private field
       ctx.lifecycleManager._projectRoot = undefined
@@ -881,9 +882,9 @@ describe('ProjectLifecycleManager', () => {
       // Safe because the config manager keeps the options it was created with, private, as `options`
       const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
 
-      const initialize = jest.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
-      const chooseBrowser = jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
-      const cleared = ctx._apis.projectApi.clearSessionLoadError as jest.Mock
+      const initialize = vi.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
+      const chooseBrowser = vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+      const cleared = ctx._apis.projectApi.clearSessionLoadError as Mock
 
       ctx.coreData.currentProject = '/projects/foo'
       ctx.reportLoadError('Your configFile is invalid')
@@ -904,11 +905,11 @@ describe('ProjectLifecycleManager', () => {
       // Safe because the config manager keeps the options it was created with, private, as `options`
       const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
 
-      const initialize = jest.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
+      const initialize = vi.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
 
-      jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+      vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
 
-      const setPluginsError = ctx._apis.projectApi.setSessionPluginsError as jest.Mock
+      const setPluginsError = ctx._apis.projectApi.setSessionPluginsError as Mock
 
       ctx.coreData.currentProject = '/projects/foo'
 
@@ -1029,7 +1030,7 @@ describe('ProjectLifecycleManager', () => {
     it('keeps loading cypress.config.ts and reports a conflict when cypress.config.mts sits next to it', async () => {
       await fs.writeFile(path.join(tmpDir, 'cypress.config.ts'), 'export default {}\n')
       await fs.writeFile(path.join(tmpDir, 'cypress.config.mts'), 'export default {}\n')
-      const onLoadError = jest.spyOn(ctx.lifecycleManager, 'onLoadError').mockImplementation(() => {})
+      const onLoadError = vi.spyOn(ctx.lifecycleManager, 'onLoadError').mockImplementation(() => {})
 
       ctx.lifecycleManager.refreshMetaState()
       // @ts-expect-error — private method
@@ -1050,7 +1051,7 @@ describe('ProjectLifecycleManager', () => {
 
       await fs.writeFile(path.join(tmpDir, 'cypress.config.js'), 'module.exports = {}\n')
       await fs.writeFile(path.join(tmpDir, newFileName), 'export default {}\n')
-      const onLoadError = jest.spyOn(ctx.lifecycleManager, 'onLoadError').mockImplementation(() => {})
+      const onLoadError = vi.spyOn(ctx.lifecycleManager, 'onLoadError').mockImplementation(() => {})
 
       ctx.lifecycleManager.refreshMetaState()
       // @ts-expect-error — private method
@@ -1090,7 +1091,7 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._projectMetaState = { hasValidConfigFile: false }
 
-      const getConfigSpy = jest.spyOn(ctx.project, 'getConfig')
+      const getConfigSpy = vi.spyOn(ctx.project, 'getConfig')
 
       await expect(ctx.lifecycleManager.getProjectId()).resolves.toBeNull()
       expect(getConfigSpy).not.toHaveBeenCalled()
@@ -1100,7 +1101,7 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._projectMetaState = { hasValidConfigFile: true }
 
-      const getConfigSpy = jest.spyOn(ctx.project, 'getConfig').mockResolvedValue({ projectId: 'abc123' } as FullConfig)
+      const getConfigSpy = vi.spyOn(ctx.project, 'getConfig').mockResolvedValue({ projectId: 'abc123' } as FullConfig)
 
       await expect(ctx.lifecycleManager.getProjectId()).resolves.toEqual('abc123')
       expect(getConfigSpy).toHaveBeenCalledTimes(1)
@@ -1125,11 +1126,11 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._configManager = { destroy: () => {} }
       // @ts-expect-error - private method
-      jest.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
+      vi.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
     }
 
     it('skips when the project is not ready to initialize', async () => {
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
 
       // _projectRoot is set in createDataContext, but _configManager is undefined
       // and readyToInitialize will be false in this state
@@ -1140,7 +1141,7 @@ describe('ProjectLifecycleManager', () => {
 
     it('runs the refresh exactly once for a single call', async () => {
       setupReady()
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
 
       await ctx.lifecycleManager.refreshLifecycle()
 
@@ -1154,7 +1155,7 @@ describe('ProjectLifecycleManager', () => {
       const second = deferred()
       const calls: Array<Deferred> = [first, second]
 
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
       .mockImplementation(() => calls.shift()?.promise ?? Promise.resolve())
 
       // First call kicks off the refresh
@@ -1190,7 +1191,7 @@ describe('ProjectLifecycleManager', () => {
       const calls = [first, second]
       const resolved: string[] = []
 
-      jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
       .mockImplementation(() => calls.shift()?.promise ?? Promise.resolve())
 
       const a = ctx.lifecycleManager.refreshLifecycle().then(() => resolved.push('a'))
@@ -1221,16 +1222,16 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._configManager = { destroy: () => {}, resetLoadingState: () => {} }
       // @ts-expect-error - private method
-      jest.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
+      vi.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
       ctx._apis.projectApi.getRemoteStates = (() => undefined) as any
-      jest.spyOn(ctx.lifecycleManager, 'setAndLoadCurrentTestingType').mockImplementation(() => {})
+      vi.spyOn(ctx.lifecycleManager, 'setAndLoadCurrentTestingType').mockImplementation(() => {})
 
       let inFlight = 0
       let maxInFlight = 0
       const gates = [deferred(), deferred()]
       let callIndex = 0
 
-      jest.spyOn(ctx.lifecycleManager, 'initializeConfig').mockImplementation(async () => {
+      vi.spyOn(ctx.lifecycleManager, 'initializeConfig').mockImplementation(async () => {
         inFlight++
         maxInFlight = Math.max(maxInFlight, inFlight)
         await gates[callIndex++]?.promise
@@ -1263,7 +1264,7 @@ describe('ProjectLifecycleManager', () => {
       const oldRefresh = deferred()
       const newRefresh = deferred()
 
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
       .mockImplementationOnce(() => oldRefresh.promise)
       .mockImplementationOnce(() => newRefresh.promise)
       .mockImplementation(() => Promise.resolve())
@@ -1293,7 +1294,7 @@ describe('ProjectLifecycleManager', () => {
       await a.catch(() => {})
 
       // The new chain is still in flight, so a follow-up call should reuse
-      // it (no new `_doRefreshLifecycle` call). Without the ownership-check
+      // that chain without a new `_doRefreshLifecycle` call. Without the ownership-check
       // guard, the old IIFE's finally would have nulled
       // `_activeLifecycleRefresh` and this call would synchronously kick
       // off a third chain.
@@ -1311,7 +1312,7 @@ describe('ProjectLifecycleManager', () => {
       const failing = deferred()
       const succeeding = deferred()
 
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
       .mockImplementationOnce(() => failing.promise)
       .mockImplementationOnce(() => succeeding.promise)
 
