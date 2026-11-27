@@ -11,6 +11,15 @@ import { createTimers } from './timers'
 import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 import { patchElementIntegrity } from './patches/integrity'
 
+// The driver declares `Window.Cypress` in packages/driver/src/cypress.ts,
+// which this bundle doesn't import. Keep the type identical to that one:
+// TypeScript rejects merged declarations of a property that disagree.
+declare global {
+  interface Window {
+    Cypress: Cypress.Cypress
+  }
+}
+
 // The driver mixes its event emitter onto Cypress at runtime, which the
 // `Window.Cypress` typing doesn't reflect, so check for it to narrow.
 function assertParentCypress (Cypress: Cypress.Cypress | undefined): asserts Cypress is typeof globalThis.Cypress {

@@ -1,83 +1,255 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { MockInstance } from 'vitest'
 import { createTimers } from '../../../injection/timers'
 
-const WRAPPED = ['setTimeout', 'setInterval', 'requestAnimationFrame', 'clearTimeout', 'clearInterval'] as const
+// String handlers can only report back through a global
+const timerWindow: Window & { codeRan?: boolean } = window
 
 describe('injection/timers', () => {
-  let originals: Record<typeof WRAPPED[number], unknown>
   let timers: ReturnType<typeof createTimers>
+  let unwrapped: Pick<Window, 'setTimeout' | 'setInterval' | 'requestAnimationFrame' | 'clearTimeout' | 'clearInterval'>
+  let nativeSetTimeout: MockInstance<typeof window.setTimeout>
 
   beforeEach(() => {
+    // Fake the browser timers before wrapping, so the wrapper calls through to
+    // timers the spec can advance deterministically
     vi.useFakeTimers({
-      toFake: [...WRAPPED, 'cancelAnimationFrame', 'performance'],
+      toFake: ['setTimeout', 'setInterval', 'requestAnimationFrame', 'clearTimeout', 'clearInterval', 'cancelAnimationFrame', 'performance', 'Date'],
     })
 
-    originals = Object.fromEntries(WRAPPED.map((name) => [name, window[name]])) as typeof originals
+    unwrapped = {
+      setTimeout: window.setTimeout,
+      setInterval: window.setInterval,
+      requestAnimationFrame: window.requestAnimationFrame,
+      clearTimeout: window.clearTimeout,
+      clearInterval: window.clearInterval,
+    }
 
+    nativeSetTimeout = vi.spyOn(window, 'setTimeout')
     timers = createTimers()
     timers.wrap()
   })
 
   afterEach(() => {
-    Object.assign(window, originals)
-    vi.restoreAllMocks()
+    Object.assign(window, unwrapped)
     vi.useRealTimers()
+    delete timerWindow.codeRan
   })
 
-  it('passes the frame timestamp through when not paused', () => {
-    const callback = vi.fn()
+  describe('while not paused', () => {
+    it('calls setTimeout through with its arguments, bound to window', () => {
+      const callback = vi.fn(function (this: unknown) {
+        return this
+      })
 
-    window.requestAnimationFrame(callback)
-    vi.advanceTimersToNextFrame()
+      window.setTimeout(callback, 10, 'Ada', 'Lovelace')
 
-    expect(callback).toHaveBeenCalledExactlyOnceWith(16)
+      vi.advanceTimersByTime(9)
+      expect(callback).not.toHaveBeenCalled()
+
+      vi.advanceTimersByTime(1)
+      expect(callback).toHaveBeenCalledExactlyOnceWith('Ada', 'Lovelace')
+      expect(callback.mock.results[0].value).toBe(window)
+    })
+
+    it('returns the native timer id, so clearTimeout cancels it', () => {
+      const callback = vi.fn()
+      const timerId = window.setTimeout(callback, 10)
+
+      expect(timerId).toBe(nativeSetTimeout.mock.results[0].value)
+      expect(window.clearTimeout(timerId)).toBeUndefined()
+
+      vi.advanceTimersByTime(20)
+      expect(callback).not.toHaveBeenCalled()
+    })
+
+    it('repeats setInterval until clearInterval', () => {
+      const callback = vi.fn()
+      const timerId = window.setInterval(callback, 10, 'tick')
+
+      vi.advanceTimersByTime(30)
+      expect(callback).toHaveBeenCalledTimes(3)
+      expect(callback).toHaveBeenLastCalledWith('tick')
+
+      window.clearInterval(timerId)
+      vi.advanceTimersByTime(30)
+      expect(callback).toHaveBeenCalledTimes(3)
+    })
+
+    it('passes requestAnimationFrame its timestamp', () => {
+      const callback = vi.fn()
+
+      window.requestAnimationFrame(callback)
+      vi.advanceTimersToNextFrame()
+
+      expect(callback).toHaveBeenCalledExactlyOnceWith(expect.any(Number))
+    })
+
+    it('evaluates a string handler on window', () => {
+      window.setTimeout('window.codeRan = true', 10)
+      vi.advanceTimersByTime(10)
+
+      expect(timerWindow.codeRan).toBe(true)
+    })
   })
 
-  it('replays a held requestAnimationFrame callback with the time it runs, not the time it came due', () => {
-    const callback = vi.fn()
+  describe('while paused', () => {
+    it('holds due callbacks and runs them in order with their arguments on unpause', () => {
+      const calls: string[] = []
 
-    timers.pause(true)
-    window.requestAnimationFrame(callback)
-    vi.advanceTimersToNextFrame()
-    vi.advanceTimersByTime(5000)
+      timers.pause(true)
 
-    expect(callback).not.toHaveBeenCalled()
+      window.setTimeout((name: string) => calls.push(`timeout:${name}`), 10, 'Grace')
+      window.requestAnimationFrame((timestamp) => calls.push(`frame:${typeof timestamp}`))
+      window.setTimeout('window.codeRan = true', 30)
 
-    timers.pause(false)
+      vi.advanceTimersByTime(100)
+      expect(calls).toEqual([])
+      expect(timerWindow.codeRan).toBeUndefined()
 
-    expect(callback).toHaveBeenCalledExactlyOnceWith(5016)
+      timers.pause(false)
+
+      expect(calls).toEqual(['timeout:Grace', 'frame:number'])
+      expect(timerWindow.codeRan).toBe(true)
+    })
+
+    it('replays a held requestAnimationFrame callback with the time it runs, not the time it came due', () => {
+      const callback = vi.fn()
+
+      timers.pause(true)
+      window.requestAnimationFrame(callback)
+      vi.advanceTimersToNextFrame()
+      vi.advanceTimersByTime(5000)
+
+      expect(callback).not.toHaveBeenCalled()
+
+      timers.pause(false)
+
+      expect(callback).toHaveBeenCalledExactlyOnceWith(5016)
+    })
+
+    it('gives every requestAnimationFrame callback held in one flush the same timestamp', () => {
+      const first = vi.fn()
+      const second = vi.fn()
+
+      timers.pause(true)
+      window.requestAnimationFrame(first)
+      window.requestAnimationFrame(second)
+      vi.advanceTimersToNextFrame()
+
+      const now = vi.spyOn(performance, 'now')
+      .mockReturnValueOnce(5016)
+      .mockReturnValueOnce(5020)
+
+      timers.pause(false)
+      now.mockRestore()
+
+      expect(first).toHaveBeenCalledExactlyOnceWith(5016)
+      expect(second).toHaveBeenCalledExactlyOnceWith(5016)
+    })
+
+    it('holds a timer scheduled before pausing that comes due while paused', () => {
+      const callback = vi.fn()
+
+      window.setTimeout(callback, 10)
+      timers.pause(true)
+
+      vi.advanceTimersByTime(20)
+      expect(callback).not.toHaveBeenCalled()
+
+      timers.pause(false)
+      expect(callback).toHaveBeenCalledOnce()
+    })
+
+    it('does not run a timer cleared before it came due', () => {
+      const callback = vi.fn()
+
+      timers.pause(true)
+
+      const timerId = window.setTimeout(callback, 10)
+
+      window.clearTimeout(timerId)
+      vi.advanceTimersByTime(20)
+      timers.pause(false)
+
+      expect(callback).not.toHaveBeenCalled()
+    })
+
+    it('queues every setInterval tick and replays them all on unpause', () => {
+      const callback = vi.fn()
+
+      timers.pause(true)
+      window.setInterval(callback, 10)
+
+      vi.advanceTimersByTime(30)
+      expect(callback).not.toHaveBeenCalled()
+
+      timers.pause(false)
+      expect(callback).toHaveBeenCalledTimes(3)
+    })
+
+    it.each(['clearInterval', 'clearTimeout'] as const)('skips the remaining queued ticks of an interval canceled by %s during the flush', (cancelFnName) => {
+      const callback = vi.fn(() => {
+        if (callback.mock.calls.length === 2) {
+          window[cancelFnName](timerId)
+        }
+      })
+
+      timers.pause(true)
+
+      const timerId = window.setInterval(callback, 10)
+
+      vi.advanceTimersByTime(50)
+      timers.pause(false)
+
+      expect(callback).toHaveBeenCalledTimes(2)
+
+      vi.advanceTimersByTime(50)
+      expect(callback).toHaveBeenCalledTimes(2)
+    })
+
+    it('runs timers scheduled from a flushed callback normally', () => {
+      const later = vi.fn()
+
+      timers.pause(true)
+      window.setTimeout(() => window.setTimeout(later, 10), 10)
+
+      vi.advanceTimersByTime(10)
+      timers.pause(false)
+      expect(later).not.toHaveBeenCalled()
+
+      vi.advanceTimersByTime(10)
+      expect(later).toHaveBeenCalledOnce()
+    })
+
+    it('treats a falsy argument as unpause', () => {
+      const callback = vi.fn()
+
+      timers.pause(true)
+      window.setTimeout(callback, 10)
+      vi.advanceTimersByTime(10)
+
+      timers.pause(undefined)
+      expect(callback).toHaveBeenCalledOnce()
+    })
   })
 
-  it('gives every requestAnimationFrame callback held in one flush the same timestamp', () => {
-    const first = vi.fn()
-    const second = vi.fn()
+  describe('reset', () => {
+    it('discards queued callbacks and unpauses', () => {
+      const queued = vi.fn()
+      const afterReset = vi.fn()
 
-    timers.pause(true)
-    window.requestAnimationFrame(first)
-    window.requestAnimationFrame(second)
-    vi.advanceTimersToNextFrame()
+      timers.pause(true)
+      window.setTimeout(queued, 10)
+      vi.advanceTimersByTime(10)
 
-    vi.spyOn(performance, 'now')
-    .mockReturnValueOnce(5016)
-    .mockReturnValueOnce(5020)
+      timers.reset()
+      timers.pause(false)
+      expect(queued).not.toHaveBeenCalled()
 
-    timers.pause(false)
-
-    expect(first).toHaveBeenCalledExactlyOnceWith(5016)
-    expect(second).toHaveBeenCalledExactlyOnceWith(5016)
-  })
-
-  it('replays a held setTimeout callback with the arguments it was scheduled with', () => {
-    const callback = vi.fn()
-
-    timers.pause(true)
-    window.setTimeout(callback, 100, 'Ada Lovelace', 'ada.lovelace@example.com')
-    vi.advanceTimersByTime(100)
-
-    expect(callback).not.toHaveBeenCalled()
-
-    timers.pause(false)
-
-    expect(callback).toHaveBeenCalledExactlyOnceWith('Ada Lovelace', 'ada.lovelace@example.com')
+      window.setTimeout(afterReset, 10)
+      vi.advanceTimersByTime(10)
+      expect(afterReset).toHaveBeenCalledOnce()
+    })
   })
 })
