@@ -1,14 +1,28 @@
 {
   "extends": "../ts/tsconfig.json",
+  // React `.tsx` files are checked by tsconfig.react.json
   "include": [
-    "src/**/*",
-    "cypress/**/*",
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "src/**/*.vue.tsx",
+    "src/**/*.vue.cy.tsx",
+    "src/**/*.vue.spec.tsx",
+    "cypress/**/*.ts",
+    "cypress/**/*.vue.tsx",
+    "cypress/**/*.vue.cy.tsx",
+    "cypress/**/*.vue.spec.tsx",
     "*.d.ts"
+  ],
+  "exclude": [
+    "vue-sfc.react.d.ts"
   ],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "ESNext"],
     "jsx": "preserve",
+    // Vue doesn't register a global JSX namespace, so Vue JSX reads its types
+    // from vue/jsx-runtime
+    "jsxImportSource": "vue",
     "preserveWatchOutput": true,
     "noImplicitThis": false,
     "noErrorTruncation": true,

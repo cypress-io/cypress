@@ -16,7 +16,7 @@ import { gql, useQuery } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
 
 import { DebugDocument, Debug_SpecsChangeDocument } from '../generated/graphql'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref, watch, watchEffect } from 'vue'
 import { useRelevantRun } from '../composables/useRelevantRun'
 import { useRecordEvent } from '../composables/useRecordEvent'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
@@ -81,6 +81,15 @@ const shouldPauseQuery = computed(() => {
 const cachedProject = ref<DebugSpecsFragment>()
 
 const query = useQuery({ query: DebugDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })
+
+// The relevant-runs subscription reports each change to the selected run, such
+// as it finishing, but the query's variables only change when another run is
+// selected, so refetch the run when the same one is reported again.
+watch(relevantRuns, (current, previous) => {
+  if (!shouldPauseQuery.value && current.selectedRun?.runNumber === previous?.selectedRun?.runNumber) {
+    query.executeQuery()
+  }
+})
 
 const isLoading = computed(() => {
   const relevantRunsHaveNotLoaded = !relevantRuns.value.all

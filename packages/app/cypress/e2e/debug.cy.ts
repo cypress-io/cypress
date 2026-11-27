@@ -158,6 +158,59 @@ describe('App - Debug Page', () => {
     })
   })
 
+  it('loads the selected run when switching runs', () => {
+    cy.remoteGraphQLIntercept((obj, _testState, options) => {
+      // Both runs are on the checked-out commit, so either can be selected
+      if (obj.operationName === 'RelevantRunsDataSource_RunsByCommitShas') {
+        const data = JSON.parse(JSON.stringify(options.RelevantRunsDataSource_RunsByCommitShas.data))
+
+        data.cloudProjectBySlug.runsByCommitShas[1].commitInfo.sha = 'commit2'
+        obj.result.data = data
+      }
+
+      if (obj.operationName === 'Debug_currentProject_cloudProject_cloudProjectBySlug' && obj.result.data) {
+        const instanceCounts = { totalInstanceCount: 1, completedInstanceCount: 1 }
+        const run136 = { ...options.DebugDataFailing.data.currentProject.cloudProject.runByNumber, ...instanceCounts }
+        const passingRun = options.DebugDataPassing.data.currentProject.cloudProject.runByNumber
+        const run134 = {
+          ...passingRun,
+          ...instanceCounts,
+          id: 'Q2xvdWRSdW46ckdXb2wzbzJHVg==',
+          runNumber: 134,
+          commitInfo: { ...passingRun.commitInfo, sha: 'commit2' },
+        }
+        const isRequestForRun134 = Object.values(obj.variables ?? {}).includes(134)
+
+        obj.result.data.cloudProjectBySlug.runByNumber = isRequestForRun134 ? run134 : run136
+        obj.result.data.cloudProjectBySlug.allRuns = [run136, run134]
+      }
+
+      return obj.result
+    }, { RelevantRunsDataSource_RunsByCommitShas, DebugDataFailing, DebugDataPassing })
+
+    cy.visitApp()
+    cy.specsPageIsVisible()
+
+    cy.findByTestId('sidebar-link-debug-page').click()
+    cy.findByTestId('debug-header').findByTestId('runNumber-status-FAILED').contains('#136')
+
+    cy.findByTestId('debug-toggle').click()
+    cy.findByTestId('run-134').click()
+
+    cy.findByTestId('debug-header').within(() => {
+      cy.findByTestId('runNumber-status-PASSED').contains('#134')
+      cy.findByTestId('runNumber-status-FAILED').should('not.exist')
+    })
+
+    // The selected run outlives the test, so switch back for the tests after this one
+    cy.findByTestId('switch-to-latest').click()
+
+    cy.findByTestId('debug-header').within(() => {
+      cy.findByTestId('runNumber-status-FAILED').contains('#136')
+      cy.findByTestId('runNumber-status-PASSED').should('not.exist')
+    })
+  })
+
   it('shows running and updating build', () => {
     cy.remoteGraphQLIntercept((obj, testState, options) => {
       if (obj.operationName === 'RelevantRunsDataSource_RunsByCommitShas') {

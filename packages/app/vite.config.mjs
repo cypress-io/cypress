@@ -77,10 +77,10 @@ const config = makeConfig({
 })
 
 // See src/runner/react-untyped.d.ts
-config.resolve.alias = {
+config.resolve.alias = [
   ...config.resolve.alias,
-  '#host/react': 'react',
-  '#host/react-dom': 'react-dom',
-}
+  { find: '#host/react', replacement: 'react' },
+  { find: '#host/react-dom', replacement: 'react-dom' },
+]
 
 export default config

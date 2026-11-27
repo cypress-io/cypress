@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/**/*.tsx",
+    "cypress/**/*.tsx",
+    "*.d.ts",
+    "cypress/component/support/*.ts",
+    "../frontend-shared/src/**/*.tsx",
+    "../frontend-shared/vue-sfc.react.d.ts",
+    "../frontend-shared/cypress/support/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.vue.tsx",
+    "**/*.vue.cy.tsx",
+    "**/*.vue.spec.tsx",
+    "../frontend-shared/**/*.vue.tsx",
+    "../frontend-shared/**/*.vue.cy.tsx",
+    "../frontend-shared/**/*.vue.spec.tsx"
+  ],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  }
+}

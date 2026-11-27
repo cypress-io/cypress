@@ -39,9 +39,8 @@ declare global {
        * the host modules and re-exports here. The reporter, Studio and cy.prompt
        * mount through them.
        *
-       * Unfortunately, attempting to have React in a project
-       * using Vue causes mad conflicts because React'S JSX type
-       * is ambient, so we cannot actually type it.
+       * TODO: type them as `typeof React` and `typeof ReactDOMClient` from
+       * @types/react and @types/react-dom.
        */
       React: any
       ReactDOM: any

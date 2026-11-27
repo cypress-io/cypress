@@ -20,10 +20,15 @@ const __dirname = path.dirname(__filename)
 
 const base = './'
 
-const alias = {
-  '@cy/components': path.resolve(__dirname, './src/components'),
-  '@cy/gql-components': path.resolve(__dirname, './src/gql-components'),
-}
+const alias = [
+  { find: '@cy/components', replacement: path.resolve(__dirname, './src/components') },
+  { find: '@cy/gql-components', replacement: path.resolve(__dirname, './src/gql-components') },
+  // `require('vue')` in a CommonJS-only dependency (vue3-file-selector) becomes
+  // the runtime build `import 'vue'` already resolves to. The require condition
+  // would pick vue/index.js, Vue's full CJS build, which bundles the template
+  // compiler that the app's precompiled templates never use.
+  { find: /^vue$/, replacement: 'vue/dist/vue.runtime.esm-bundler.js' },
+]
 
 const vueJsxIds = [
   /\.vue(?:\.(?:cy|spec))?\.tsx$/,

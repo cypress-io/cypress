@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { FunctionalComponent, SVGAttributes } from 'vue'
+import type { Component } from 'vue'
 import { ref, computed } from 'vue'
 import Icon from '@cy/components/Icon.vue'
 import Select from '@cy/components/Select.vue'
@@ -70,7 +70,7 @@ const launchEditorHintLink = getUrlWithParams({
   },
 })
 
-const icons: Record<string, FunctionalComponent<SVGAttributes>> = {
+const icons: Record<string, Component> = {
   'code': VSCode,
   'cursor': Cursor,
   'webstorm': Webstorm,

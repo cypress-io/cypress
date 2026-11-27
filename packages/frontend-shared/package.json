@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "node ./script/build.js",
-    "check-ts": "vue-tsc --noEmit && yarn -s tslint",
+    "check-ts": "vue-tsc --noEmit && tsc --noEmit -p tsconfig.react.json && yarn -s tslint",
     "clean": "rimraf --glob dist ./node_modules/.vite 'src/*.js' 'src/**/*.js' && echo 'cleaned'",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --component --project .",
@@ -24,7 +24,7 @@
     "postinstall": "patch-package",
     "lint": "eslint",
     "test": "yarn cypress:run",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "tslint": "tslint --config ../ts/tslint.json --project . && tslint --config ../ts/tslint.json --project tsconfig.react.json"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,mjs,cjs,json,vue}": "eslint --fix"
@@ -71,9 +71,9 @@
     "@vitejs/plugin-react": "6.2.1",
     "@vitejs/plugin-vue": "6.0.6",
     "@vitejs/plugin-vue-jsx": "5.1.5",
-    "@vue/compiler-core": "3.2.47",
-    "@vue/compiler-dom": "3.2.47",
-    "@vue/compiler-sfc": "3.2.47",
+    "@vue/compiler-core": "3.5.44",
+    "@vue/compiler-dom": "3.5.44",
+    "@vue/compiler-sfc": "3.5.44",
     "@vue/test-utils": "2.4.6",
     "@vueuse/core": "7.7.1",
     "autoprefixer": "^10.4.23",
@@ -111,7 +111,7 @@
     "vite": "^8.0.9",
     "vite-plugin-package-config": "0.1.1",
     "vite-svg-loader": "5.1.0",
-    "vue": "3.2.47",
+    "vue": "3.5.44",
     "vue-i18n": "9.14.5",
     "vue-router": "4",
     "vue-toastification": "2.0.0-rc.1",
