@@ -18,8 +18,9 @@ export const createTimers = () => {
   let timerQueue: QueuedTimer[]
   let canceledTimerIds: Record<number, boolean>
 
-  // Held rAF callbacks are timed by the clock real frames use, even after the
-  // app or a test replaces `performance.now`, as `cy.clock(now, ['performance'])` does
+  // Bound when the timers are created, before any app or test code runs, so
+  // held rAF callbacks keep the clock real frames use even after
+  // `performance.now` is replaced, as `cy.clock(now, ['performance'])` does
   const { performance } = window
   const frameClock = performance.now.bind(performance)
 

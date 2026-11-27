@@ -194,8 +194,8 @@ describe('driver/src/cy/timers', () => {
 
         cy.window().its('bar').should('eq', 'bar')
         .and(() => {
-          // The frame that held the callback came due during the wait, so a
-          // timestamp from before unpausing would be the stale one
+          // The callback's frame came due during the wait, so a timestamp from
+          // before unpausing means it was given that frame's stale time
           expect(rafStub).to.be.calledOnce
           expect(rafStub.firstCall.args[0]).to.be.at.least(unpausedAt)
         })
