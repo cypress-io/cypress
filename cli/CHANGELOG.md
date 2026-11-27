@@ -9,6 +9,7 @@
 
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
 - Fixed a regression in [16.4.0](#16-4-0) where a custom reporter could no longer `require` the `mocha-junit-reporter` or `mocha-teamcity-reporter` package that ships with Cypress and failed with `Cannot find module`. Fixes [#35552](https://github.com/cypress-io/cypress/issues/35552).
+- Fixed an issue where the `junit` reporter, and custom reporters that use `mocha-junit-reporter`, printed `Couldn't determine Mocha version` on every run. Fixed in [#35561](https://github.com/cypress-io/cypress/pull/35561).
 
 ## 16.4.0
 
