@@ -231,7 +231,7 @@ while IFS= read -r file; do
   case "$file" in
     .circleci/*|yarn.lock|package.json|packages/types/*|packages/config/*|\
     packages/errors/*|packages/socket/*|packages/network/*|packages/ts/*|scripts/*|\
-    patches/*|packages/root/*|vitest.config.ts|gulpfile.js)
+    patches/*|packages/root/*|packages/vitest-setup/*|vitest.config.ts|gulpfile.js)
       echo "Global trigger matched: '$file' — running all tests" >&2
       emit_all_true
       exit 0
@@ -240,6 +240,9 @@ while IFS= read -r file; do
 done <<< "$CHANGED"
 
 # ----- targeted path mapping --------------------------------------------------
+# The unit-tests job runs the root `yarn test`, so every workspace in that
+# script's --scope list must set unit_tests=true here.
+# scripts/unit/generate-pipeline-parameters-spec.ts fails when one doesn't.
 while IFS= read -r file; do
   case "$file" in
     # Documentation, assets, and repo-metadata — must be first so that e.g.
@@ -256,6 +259,7 @@ while IFS= read -r file; do
     packages/driver/*)
       driver_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/server/*)
       server_tests=true
@@ -265,20 +269,24 @@ while IFS= read -r file; do
     packages/proxy/*)
       server_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/net-stubbing/*)
       server_tests=true
       driver_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/network-interception/*)
       server_tests=true
       driver_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/https-proxy/*)
       server_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/app/*)
       app_ui_tests=true
@@ -332,19 +340,23 @@ while IFS= read -r file; do
     packages/electron/*)
       driver_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/extension/*)
       # Extension is a browser WebExtension; driver tests only need to run in Firefox.
       # TODO: introduce a run-firefox-driver-tests parameter to avoid running all browser variants.
       driver_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/launcher/*)
       system_tests=true
+      unit_tests=true
       ;;
     packages/scaffold-config/*)
       launchpad_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/resolve-dist/*)
       app_ui_tests=true
@@ -355,23 +367,27 @@ while IFS= read -r file; do
       server_tests=true
       app_ui_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/network-tools/*)
       driver_tests=true
       server_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/stderr-filtering/*)
       server_tests=true
       app_ui_tests=true
       launchpad_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/icons/*)
       driver_tests=true
       server_tests=true
       app_ui_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     cli/*)
       cli_tests=true
