@@ -19,8 +19,20 @@ const VERBOSE_REQUEST_OPTS = 'followRedirect strictSSL'.split(' ')
 const HTTP_CLIENT_REQUEST_EVENTS = 'abort connect continue information socket timeout upgrade'.split(' ')
 const TLS_VERSION_ERROR_RE = /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 const SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
+const ABSOLUTE_HTTP_URL_RE = /^https?:/
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+// `Location: http://localhost:3000/./hello` is followed to `http://localhost:3000/hello`,
+// as browsers do. `@cypress/request` requests an absolute Location's path as written,
+// so a server that routes by exact path answers 404, but it follows a string returned
+// from `followRedirect` in place of the Location. `resolvedUrl` comes from `url.resolve`,
+// which removes dot segments. A relative Location is left to `@cypress/request`, which
+// removes them too and resolves against the URL it actually requested. That can differ
+// from the URL Cypress tracks, such as for a file from the file server.
+const redirectTarget = (location: string, resolvedUrl: string): string | true => {
+  return ABSOLUTE_HTTP_URL_RE.test(location) ? resolvedUrl : true
+}
 
 const convertSameSiteToughToExtension = (sameSite, setCookie) => {
   // tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
@@ -716,7 +728,7 @@ export class Request {
       .then(() => {
         currentUrl = newUrl
 
-        return true
+        return redirectTarget(incomingRes.headers.location, newUrl)
       })
     }
 
@@ -828,7 +840,7 @@ export class Request {
           .then(() => {
             currentUrl = newUrl
 
-            return true
+            return redirectTarget(incomingRes.headers.location, newUrl)
           })
         }
       }

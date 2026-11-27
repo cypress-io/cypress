@@ -42,6 +42,36 @@ const makeAutomationFn = () => {
   return Object.assign(fn, { resolves })
 }
 
+// Routes by exact path, so a request for `/./hello` gets a 404 instead of `/hello`
+const startRedirectServer = async (location: (origin: string) => string) => {
+  const requests: { path: string, headers: http.IncomingHttpHeaders }[] = []
+
+  const srv = http.createServer((req, res) => {
+    requests.push({ path: req.url!, headers: req.headers })
+
+    const pathname = req.url!.split('?')[0]
+
+    if (pathname === '/start') {
+      res.writeHead(302, { location: location(`http://localhost:${(srv.address() as any).port}`) })
+    } else {
+      res.writeHead(pathname === '/hello' ? 200 : 404)
+    }
+
+    res.end()
+  })
+
+  await new Promise<void>((resolve) => srv.listen(0, resolve))
+
+  const { port } = srv.address() as any
+
+  return {
+    port,
+    origin: `http://localhost:${port}`,
+    requests,
+    close: () => new Promise((resolve) => srv.close(resolve)),
+  }
+}
+
 const testAttachingCookiesWith = async function (fn) {
   const set = vi.spyOn(request as any, 'setCookiesOnBrowser')
   const get = vi.spyOn(request as any, 'setRequestCookieHeader')
@@ -1036,6 +1066,58 @@ describe('lib/request', () => {
 
         expect(resp.status).toBe(200)
       })
+
+      describe('Location with dot segments', () => {
+        let server: Awaited<ReturnType<typeof startRedirectServer>>
+
+        afterEach(async () => {
+          await server?.close()
+        })
+
+        it.each([
+          { location: '{origin}/./hello', path: '/hello', redirect: '{origin}/hello' },
+          { location: '{origin}/redirect/../hello', path: '/hello', redirect: '{origin}/hello' },
+          // the query and fragment keep their dots, as in a browser
+          { location: '{origin}/./hello?next=./account#./top', path: '/hello?next=./account', redirect: '{origin}/hello?next=./account#./top' },
+          { location: '/./hello', path: '/hello', redirect: '{origin}/hello' },
+        ])('follows `Location: $location` to $path', async ({ location, path, redirect }) => {
+          server = await startRedirectServer((origin) => location.replace('{origin}', origin))
+
+          const resp = await request.sendPromise({}, automationFn, { url: `${server.origin}/start` })
+
+          expect(server.requests.map((r) => r.path)).toStrictEqual(['/start', path])
+          expect(resp.status).toBe(200)
+          expect(resp.redirects).toStrictEqual([`302: ${redirect.replace('{origin}', server.origin)}`])
+        })
+
+        it('keeps the Authorization header on a redirect to the same host', async () => {
+          server = await startRedirectServer((origin) => `${origin}/./hello`)
+
+          await request.sendPromise({}, automationFn, {
+            url: `${server.origin}/start`,
+            headers: { authorization: 'Bearer 3f8c2b1e9d7a4c6f' },
+          })
+
+          expect(server.requests.map((r) => r.headers.authorization)).toStrictEqual(['Bearer 3f8c2b1e9d7a4c6f', 'Bearer 3f8c2b1e9d7a4c6f'])
+        })
+
+        it('drops the Authorization header on a redirect to another host', async () => {
+          nock.enableNetConnect(/^(?:localhost|127\.0\.0\.1):/)
+
+          server = await startRedirectServer(() => `http://127.0.0.1:${server.port}/./hello`)
+
+          const resp = await request.sendPromise({}, automationFn, {
+            url: `${server.origin}/start`,
+            headers: { authorization: 'Bearer 3f8c2b1e9d7a4c6f' },
+          })
+
+          expect(resp.status).toBe(200)
+          expect(server.requests.map((r) => [r.path, r.headers.authorization])).toStrictEqual([
+            ['/start', 'Bearer 3f8c2b1e9d7a4c6f'],
+            ['/hello', undefined],
+          ])
+        })
+      })
     })
 
     describe('form=true', () => {
@@ -1272,6 +1354,47 @@ describe('lib/request', () => {
       })
 
       expect(res.statusCode).toBe(200)
+    })
+
+    describe('Location with dot segments', () => {
+      let server: Awaited<ReturnType<typeof startRedirectServer>>
+
+      const send = async (followRedirect: (res: any) => boolean) => {
+        const fn = await request.sendStream({}, automationFn, {
+          url: `${server.origin}/start`,
+          followRedirect,
+        })
+
+        const res: any = await new Promise((resolve, reject) => {
+          fn().on('response', resolve).on('error', reject)
+        })
+
+        res.resume()
+
+        return res
+      }
+
+      beforeEach(async () => {
+        server = await startRedirectServer((origin) => `${origin}/./hello`)
+      })
+
+      afterEach(async () => {
+        await server.close()
+      })
+
+      it('requests an absolute Location without its dot segments', async () => {
+        const res = await send(_.stubTrue)
+
+        expect(server.requests.map((r) => r.path)).toStrictEqual(['/start', '/hello'])
+        expect(res.statusCode).toBe(200)
+      })
+
+      it('does not follow the redirect when followRedirect returns false', async () => {
+        const res = await send(_.stubFalse)
+
+        expect(server.requests.map((r) => r.path)).toStrictEqual(['/start'])
+        expect(res.statusCode).toBe(302)
+      })
     })
 
     it('gets + attaches the cookies at each redirect', () => {
