@@ -1,4 +1,4 @@
-export const patchXmlHttpRequest = (window: Window) => {
+export const patchXmlHttpRequest = (window: Window & typeof globalThis) => {
   const originalXmlHttpRequestOpen = window.XMLHttpRequest.prototype.open
 
   window.XMLHttpRequest.prototype.open = function (...args) {

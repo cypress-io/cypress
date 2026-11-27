@@ -31,16 +31,10 @@ exports['e2e launching browsers by path works with an installed browser path 1']
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple.cy.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started compressing:  Compressing to 32 CRF                                                     
-  -  Finished compressing: /XXX/XXX/XXX/cypress/videos/simple.cy.js.mp4                    (X second)
 
 
 ====================================================================================================

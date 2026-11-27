@@ -1,4 +1,5 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import type { MockInstance } from 'vitest'
 import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { getPathToDist } from '@packages/resolve-dist'
@@ -6,7 +7,7 @@ import { getPathToDist } from '@packages/resolve-dist'
 describe('HtmlDataSource', () => {
   describe('#fetchAppHtml', () => {
     let ctx: DataContext
-    let readFile: jest.SpiedFunction<any>
+    let readFile: MockInstance<any>
     let originalViteDev: string | undefined
 
     const appIndexHtml = getPathToDist('app', 'index.html')
@@ -17,16 +18,16 @@ describe('HtmlDataSource', () => {
       delete process.env.CYPRESS_INTERNAL_VITE_DEV
 
       ctx = createTestDataContext('open')
-      jest.spyOn(ctx.project, 'projectTitle').mockReturnValue('my-project')
-      readFile = jest.spyOn(ctx.fs, 'readFile')
+      vi.spyOn(ctx.project, 'projectTitle').mockReturnValue('my-project')
+      readFile = vi.spyOn(ctx.fs, 'readFile')
 
       // After creating the context, so only timers started by fetchAppHtml are faked
-      jest.useFakeTimers()
+      vi.useFakeTimers()
     })
 
     afterEach(() => {
-      jest.useRealTimers()
-      jest.restoreAllMocks()
+      vi.useRealTimers()
+      vi.restoreAllMocks()
 
       if (originalViteDev === undefined) {
         delete process.env.CYPRESS_INTERNAL_VITE_DEV
@@ -43,7 +44,7 @@ describe('HtmlDataSource', () => {
 
       const html = ctx.html.fetchAppHtml()
 
-      await jest.advanceTimersByTimeAsync(2000)
+      await vi.advanceTimersByTimeAsync(2000)
 
       await expect(html).resolves.toBe('<html><head><title>my-project</title></head></html>')
       expect(readFile).toHaveBeenCalledTimes(3)
@@ -52,7 +53,7 @@ describe('HtmlDataSource', () => {
     })
 
     it('inserts the project title literally and HTML-escaped', async () => {
-      jest.mocked(ctx.project.projectTitle).mockReturnValue(`a$&b$'<i>&"`)
+      vi.mocked(ctx.project.projectTitle).mockReturnValue(`a$&b$'<i>&"`)
       readFile.mockResolvedValueOnce('<title>Cypress</title>')
 
       await expect(ctx.html.fetchAppHtml()).resolves.toBe('<title>a$&amp;b$&#39;&lt;i&gt;&amp;&quot;</title>')
@@ -65,7 +66,7 @@ describe('HtmlDataSource', () => {
 
       await expect(ctx.html.fetchAppHtml()).rejects.toBe(eacces)
       expect(readFile).toHaveBeenCalledTimes(1)
-      expect(jest.getTimerCount()).toBe(0)
+      expect(vi.getTimerCount()).toBe(0)
     })
 
     it('rejects with the last error after 5 failed attempts without waiting after the last one', async () => {
@@ -74,19 +75,21 @@ describe('HtmlDataSource', () => {
       }
 
       const html = ctx.html.fetchAppHtml()
+      // awaited below, once the fake timers have let every retry run
+      // eslint-disable-next-line vitest/valid-expect
       const assertion = expect(html).rejects.toThrow('ENOENT 5')
 
       // 4 waits of 1s between 5 attempts
-      await jest.advanceTimersByTimeAsync(4000)
+      await vi.advanceTimersByTimeAsync(4000)
       await assertion
 
       expect(readFile).toHaveBeenCalledTimes(5)
-      expect(jest.getTimerCount()).toBe(0)
+      expect(vi.getTimerCount()).toBe(0)
     })
 
     it('fetches from the Vite dev server when CYPRESS_INTERNAL_VITE_DEV is set', async () => {
       process.env.CYPRESS_INTERNAL_VITE_DEV = '1'
-      const fetch = jest.spyOn(ctx.util, 'fetch').mockResolvedValue({ text: async () => '<html>dev</html>' } as any)
+      const fetch = vi.spyOn(ctx.util, 'fetch').mockResolvedValue({ text: async () => '<html>dev</html>' } as any)
 
       await expect(ctx.html.fetchAppHtml()).resolves.toBe('<html>dev</html>')
       expect(fetch).toHaveBeenCalledTimes(1)
@@ -96,7 +99,7 @@ describe('HtmlDataSource', () => {
 
   describe('#launchpadHtml', () => {
     let ctx: DataContext
-    let readFile: jest.SpiedFunction<any>
+    let readFile: MockInstance<any>
     const envKeys = ['CYPRESS_INTERNAL_VITE_DEV', 'CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY'] as const
     let originalEnv: Partial<Record<typeof envKeys[number], string>>
 
@@ -106,11 +109,11 @@ describe('HtmlDataSource', () => {
       process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY = 'true'
 
       ctx = createTestDataContext('open')
-      readFile = jest.spyOn(ctx.fs, 'readFile').mockResolvedValue('<html><body><div id="app"></div></body></html>' as never)
+      readFile = vi.spyOn(ctx.fs, 'readFile').mockResolvedValue('<html><body><div id="app"></div></body></html>' as never)
     })
 
     afterEach(() => {
-      jest.restoreAllMocks()
+      vi.restoreAllMocks()
 
       for (const key of envKeys) {
         if (originalEnv[key] === undefined) {
@@ -132,7 +135,7 @@ describe('HtmlDataSource', () => {
     it('fetches the launchpad page from the Vite dev server when CYPRESS_INTERNAL_VITE_DEV is set', async () => {
       process.env.CYPRESS_INTERNAL_VITE_DEV = '1'
       process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT = '3333'
-      const fetch = jest.spyOn(ctx.util, 'fetch').mockResolvedValue({ text: async () => '<body>dev</body>' } as any)
+      const fetch = vi.spyOn(ctx.util, 'fetch').mockResolvedValue({ text: async () => '<body>dev</body>' } as any)
 
       await expect(ctx.html.launchpadHtml()).resolves.toContain('__CYPRESS_TELEMETRY__')
       expect(fetch).toHaveBeenCalledWith('http://localhost:3333/__launchpad/index.html', { method: 'GET' })
@@ -164,11 +167,11 @@ describe('HtmlDataSource', () => {
         },
       }
 
-      ctx._apis.projectApi.getConfig = jest.fn().mockReturnValue({}) as any
-      ctx._apis.projectApi.getCurrentBrowser = jest.fn().mockReturnValue(undefined) as any
-      ctx._apis.projectApi.getRemoteStates = jest.fn().mockReturnValue(undefined) as any
-      jest.spyOn(ctx.lifecycleManager, 'projectTitle', 'get').mockReturnValue('project')
-      jest.spyOn(ctx.project, 'getConfig').mockResolvedValue({ ...cachedConfig } as any)
+      ctx._apis.projectApi.getConfig = vi.fn().mockReturnValue({}) as any
+      ctx._apis.projectApi.getCurrentBrowser = vi.fn().mockReturnValue(undefined) as any
+      ctx._apis.projectApi.getRemoteStates = vi.fn().mockReturnValue(undefined) as any
+      vi.spyOn(ctx.lifecycleManager, 'projectTitle', 'get').mockReturnValue('project')
+      vi.spyOn(ctx.project, 'getConfig').mockResolvedValue({ ...cachedConfig } as any)
     })
 
     it('omits env, rawJson, and resolved from the served config', async () => {

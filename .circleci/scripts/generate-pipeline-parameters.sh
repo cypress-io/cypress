@@ -39,6 +39,10 @@ npm_vite_plugin_esm_tests=false
 npm_mount_utils_tests=false
 npm_grep_tests=false
 npm_schematic_tests=false
+# True when a PR changes only docs, so the pull-request workflow can skip the
+# install, build, lint, type-check and Knip jobs, none of which read them. Never
+# set on a branch push or an all-true run, which keep the full sweep.
+docs_only=false
 
 # run-force-http1-tests and percy-enabled are NOT forwarded here: each is
 # already a pipeline parameter declared in both the setup config and
@@ -59,7 +63,7 @@ echo "Pushed by '${CIRCLE_USERNAME:-<unset>}' (trigger source '${TRIGGER_SOURCE:
 
 emit_json() {
   cat <<EOF
-{"bot-approval-required": $bot_approval_required, "run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-schematic-tests": $npm_schematic_tests}
+{"bot-approval-required": $bot_approval_required, "run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-schematic-tests": $npm_schematic_tests, "docs-only": $docs_only}
 EOF
 }
 
@@ -318,6 +322,7 @@ while IFS= read -r file; do
       driver_tests=true
       app_ui_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/web-config/*)
       driver_tests=true
@@ -450,6 +455,28 @@ while IFS= read -r file; do
       ;;
   esac
 done <<< "$CHANGED"
+
+# ----- docs-only detection ----------------------------------------------------
+# Narrower than the documentation case above, which also covers config files
+# that lint and Knip do read (eslint.config.ts, knip.json). Markdown under a
+# src/, test/, fixtures or templates directory can be read by code, such as a
+# codegen template, so it doesn't count.
+if [[ "$filtering_branch_push" == "false" ]]; then
+  docs_only=true
+  while IFS= read -r file; do
+    case "$file" in
+      */src/*|src/*|*/test/*|test/*|*/__fixtures__/*|*/fixtures/*|*/templates/*)
+        docs_only=false
+        ;;
+      *.md|*.mdx|assets/*|guides/*|LICENSE)
+        ;;
+      *)
+        docs_only=false
+        ;;
+    esac
+  done <<< "$CHANGED"
+  echo "docs-only=$docs_only" >&2
+fi
 
 # ----- emit result ------------------------------------------------------------
 echo "Emitting pipeline parameters" >&2

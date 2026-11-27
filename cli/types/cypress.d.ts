@@ -537,7 +537,7 @@ declare namespace Cypress {
     config(Object: TestConfigOverrides): void
 
     /**
-     * Returns all exposed public configuration variables set with --expose in the CLI or in "expose" object in "cypress.config.{js,ts,mjs,cjs}"
+     * Returns all exposed public configuration variables set with --expose in the CLI or in "expose" object in "cypress.config.{js,ts,mjs,cjs,mts,cts}"
      *
      * @see https://on.cypress.io/expose
      */
@@ -3632,7 +3632,7 @@ declare namespace Cypress {
     retries: Nullable<number | ({ runMode?: Nullable<number>, openMode?: Nullable<number> }) | RetryStrategyWithModeSpecs>
     /**
      * Enables including elements within the shadow DOM when using querying
-     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs},
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.config.{js,ts,mjs,cjs,mts,cts},
      * per-suite or per-test in the test configuration object, or programmatically
      * with Cypress.config()
      * @default false
@@ -3716,7 +3716,7 @@ declare namespace Cypress {
    */
   interface RuntimeConfigOptions extends Partial<RuntimeServerConfigOptions> {
     /**
-     * Absolute path to the config file (default: <projectRoot>/cypress.config.{js,ts,mjs,cjs})
+     * Absolute path to the config file (default: <projectRoot>/cypress.config.{js,ts,mjs,cjs,mts,cts})
      */
     configFile: string
     /**
@@ -4038,7 +4038,7 @@ declare namespace Cypress {
   }
 
   /**
-   * Config options that can be assigned on cypress.config.{js,ts,mjs,cjs} file
+   * Config options that can be assigned on cypress.config.{js,ts,mjs,cjs,mts,cts} file
    */
   type UserConfigOptions<ComponentDevServerOpts = any> = Omit<ResolvedConfigOptions<ComponentDevServerOpts>, 'baseUrl' | 'excludeSpecPattern' | 'supportFile' | 'specPattern' | 'indexHtmlFile'>
 
@@ -6764,10 +6764,12 @@ declare namespace Cypress {
      */
     (action: 'url:changed', fn: (url: string) => void): Cypress
     /**
-     * Fires when the test has failed. It is technically possible to prevent the test
-     * from actually failing by binding to this event and invoking an async `done` callback.
-     * However this is **strongly discouraged**. Tests should never legitimately fail.
-     *  This event exists because it's extremely useful for debugging purposes.
+     * Fires when the test has failed. Binding to this event without rethrowing the error
+     * prevents the test from failing, and Cypress doesn't run the test's remaining commands.
+     * Throw the error, or another error, from the handler to fail the test.
+     * A test that takes a `done` callback still fails with a timeout unless the handler calls `done`.
+     * Preventing a test from failing is **strongly discouraged**. Tests should never legitimately fail.
+     * This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
     (action: 'fail', fn: (error: CypressError, mocha: Mocha.Runnable) => void): Cypress

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll } from '@jest/globals'
+import { describe, expect, it, beforeAll } from 'vitest'
 import type { WizardBundler } from '@packages/scaffold-config'
 import { WIZARD_BUNDLERS, CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
 import { createTestDataContext, scaffoldMigrationProject, removeCommonNodeModules } from '../helper'

@@ -27,36 +27,39 @@ describe('e2e launching browsers by path', () => {
     return systemTests.exec(this, {
       project: 'e2e',
       spec: 'simple.cy.js',
-      browser: '/this/aint/gonna/be/found',
+      browserPath: '/this/aint/gonna/be/found',
       expectedExitCode: 1,
     })
     .then((res) => {
-      expect(res.stdout).to.contain('We could not identify a known browser at the path you provided: `/this/aint/gonna/be/found`')
+      expect(res.stdout).to.contain('We could not identify a known browser at the path you provided: /this/aint/gonna/be/found')
 
       expect(res.code).to.eq(1)
     })
   })
 
-  it('works with an installed browser path', function () {
-    return launcher.detect().then((browsers) => {
-      return browsers.find((browser) => {
-        return browser.family === 'chromium'
-      })
-    }).tap((browser) => {
-      if (!browser) {
-        throw new Error('A \'chromium\' family browser must be installed for this test')
-      }
-    }).get('path')
-    // turn binary browser names ("google-chrome") into their absolute paths
-    // so that server recognizes them as a path, not as a browser name
-    .then((absPath))
-    .then((foundPath) => {
-      return systemTests.exec(this, {
-        project: 'e2e',
-        spec: 'simple.cy.js',
-        browser: foundPath,
-        snapshot: true,
-      })
+  it('works with an installed browser path', async function () {
+    const browserName = process.env.BROWSER || 'chrome'
+
+    // NOTE: Electron ships inside Cypress and WebKit comes from playwright-webkit, so neither has an installed path
+    if (browserName === 'electron' || browserName === 'webkit') {
+      return this.skip()
+    }
+
+    // Beta, Dev and Canary share the name, but the snapshot only normalizes the stable display name
+    const browser = (await launcher.detect()).find(({ name, channel }) => name === browserName && channel === 'stable')
+
+    if (!browser) {
+      throw new Error(`${browserName} must be installed for this test`)
+    }
+
+    return systemTests.exec(this, {
+      project: 'e2e',
+      spec: 'simple.cy.js',
+      browser: browserName,
+      // turn binary browser names ("google-chrome") into their absolute paths
+      // so that server recognizes them as a path, not as a browser name
+      browserPath: await absPath(browser.path),
+      snapshot: true,
     })
   })
 })

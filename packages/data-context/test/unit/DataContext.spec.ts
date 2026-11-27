@@ -1,4 +1,5 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import type { DataContext } from '../../src'
 import { getError } from '@packages/errors'
 import { createTestDataContext } from './helper'
@@ -9,12 +10,12 @@ const requireError = (message: string) => {
 
 describe('DataContext open mode error output', () => {
   let ctx: DataContext
-  let consoleError: ReturnType<typeof jest.spyOn>
+  let consoleError: ReturnType<typeof vi.spyOn>
 
   const printed = () => consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
 
   beforeEach(() => {
-    consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     ctx = createTestDataContext('open')
   })
 
@@ -112,7 +113,7 @@ describe('DataContext open mode error output', () => {
       return projectCtx
     }
 
-    const recorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionLoadError as jest.Mock
+    const recorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionLoadError as Mock
 
     it('sends the error, with its stack trace and without color codes, for the open project', () => {
       const projectCtx = openProject('/projects/foo')
@@ -120,7 +121,7 @@ describe('DataContext open mode error output', () => {
 
       error.details = `\u001b[31m${error.details}\u001b[39m`
 
-      projectCtx.reportLoadErrorToTap(error)
+      projectCtx.reportLoadError(error)
 
       const [args] = recorded(projectCtx).mock.calls[0] as [{ projectRoot: string, testingType: string, loadError: string }]
 
@@ -146,10 +147,34 @@ describe('DataContext open mode error output', () => {
       expect(recorded(projectCtx)).not.toHaveBeenCalled()
     })
 
+    describe('with --headless', () => {
+      const headlessProject = () => {
+        const projectCtx = createTestDataContext('open', { headless: true })
+
+        projectCtx.coreData.currentProject = '/projects/foo'
+
+        return projectCtx
+      }
+
+      it('records the error for cypress tap status and keeps the window hidden and the browsers headless', () => {
+        const projectCtx = headlessProject()
+
+        projectCtx.lifecycleManager.onLoadError(requireError('boom'))
+
+        expect(recorded(projectCtx)).toHaveBeenCalledTimes(1)
+        expect(projectCtx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
+        expect(projectCtx.isHeadless).toBe(true)
+      })
+
+      it('does not count as headless in run mode', () => {
+        expect(createTestDataContext('run', { headless: true }).isHeadless).toBe(false)
+      })
+    })
+
     it('has nothing to record before a project is open', () => {
       const noProject = openProject(undefined)
 
-      noProject.reportLoadErrorToTap(requireError('boom'))
+      noProject.reportLoadError(requireError('boom'))
 
       expect(recorded(noProject)).not.toHaveBeenCalled()
     })
@@ -158,7 +183,7 @@ describe('DataContext open mode error output', () => {
       const runCtx = createTestDataContext('run')
 
       runCtx.coreData.currentProject = '/projects/foo'
-      runCtx.reportLoadErrorToTap(requireError('boom'))
+      runCtx.reportLoadError(requireError('boom'))
 
       expect(recorded(runCtx)).not.toHaveBeenCalled()
     })
@@ -168,66 +193,126 @@ describe('DataContext open mode error output', () => {
 
       recorded(projectCtx).mockImplementation(() => Promise.reject(new Error('disk full')))
 
-      expect(() => projectCtx.reportLoadErrorToTap(requireError('boom'))).not.toThrow()
+      expect(() => projectCtx.reportLoadError(requireError('boom'))).not.toThrow()
       await new Promise((resolve) => setImmediate(resolve))
     })
 
-    describe('withdrawing the record', () => {
-      const cleared = (projectCtx: DataContext) => projectCtx._apis.projectApi.clearSessionLoadError as jest.Mock
+    describe('a plugins process that exited after the session started', () => {
+      const pluginsRecorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionPluginsError as Mock
 
-      it('happens when the load error on display is dismissed', () => {
+      it('is recorded apart from the load errors, without color codes', () => {
         const projectCtx = openProject('/projects/foo')
+        const error = getError('CONFIG_PROCESS_EXITED_UNEXPECTEDLY', 1, null, 'e2e')
 
-        projectCtx.lifecycleManager.onLoadError(requireError('boom'))
-        projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
+        error.details = '\u001b[31msegfault\u001b[39m'
 
-        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+        projectCtx.reportPluginsError(error)
+
+        const [message] = pluginsRecorded(projectCtx).mock.calls[0] as [string]
+
+        expect(message).toContain('segfault')
+        expect(message).not.toContain('\u001b')
+        expect(recorded(projectCtx)).not.toHaveBeenCalled()
       })
 
-      it('does not happen when a different error is dismissed', () => {
+      it('is withdrawn when the configuration loads again', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.clearPluginsError()
+
+        expect(pluginsRecorded(projectCtx)).toHaveBeenLastCalledWith(null)
+      })
+
+      it('is not recorded in run mode', () => {
+        const runCtx = createTestDataContext('run')
+
+        runCtx.reportPluginsError(requireError('boom'))
+
+        expect(pluginsRecorded(runCtx)).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('withdrawing the record', () => {
+      const cleared = (projectCtx: DataContext) => projectCtx._apis.projectApi.clearSessionLoadError as Mock
+
+      // Try again clears the error on display, then loads the configuration again: one that
+      // still fails reports the error again, and one that loads withdraws it once the project starts
+      it('does not happen when the load error on display is cleared to try loading again', () => {
         const projectCtx = openProject('/projects/foo')
 
         projectCtx.lifecycleManager.onLoadError(requireError('boom'))
-        projectCtx.onError(requireError('something else'))
         projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
 
+        expect(projectCtx.coreData.diagnostics.error).toBeNull()
         expect(cleared(projectCtx)).not.toHaveBeenCalled()
       })
 
       it('happens when the project is cleared', async () => {
         const projectCtx = openProject('/projects/foo')
 
-        jest.spyOn(projectCtx.lifecycleManager, 'clearCurrentProject').mockResolvedValue(undefined)
-        projectCtx._apis.projectApi.closeActiveProject = jest.fn(() => Promise.resolve(undefined)) as any
+        vi.spyOn(projectCtx.lifecycleManager, 'clearCurrentProject').mockResolvedValue(undefined)
+        projectCtx._apis.projectApi.closeActiveProject = vi.fn(() => Promise.resolve(undefined)) as any
 
         await projectCtx.actions.project.clearCurrentProject()
 
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
       })
 
-      it('does not happen for an error that is not on display', () => {
+      // `tap run` sets the testing type for a moment to pick a browser for it, then sets it back.
+      // Loading the testing type is what can resolve the error, and withdraws it then.
+      it('does not happen when the testing type is only set, without loading it', () => {
         const projectCtx = openProject('/projects/foo')
 
-        projectCtx.actions.error.clearError('Error-not-shown')
+        // @ts-expect-error - only the call that switches the testing type is needed
+        projectCtx.lifecycleManager._configManager = { setTestingType: vi.fn() }
+
+        projectCtx.reportLoadError('Your configFile is invalid')
+        projectCtx.lifecycleManager.setCurrentTestingType('component')
+        projectCtx.lifecycleManager.setCurrentTestingType('e2e')
 
         expect(cleared(projectCtx)).not.toHaveBeenCalled()
       })
 
-      it('happens when a testing type is chosen and the diagnostics start over', () => {
+      it('happens for a given kind only when the error is of that kind', () => {
         const projectCtx = openProject('/projects/foo')
 
-        // @ts-expect-error - only the call that switches the testing type is needed
-        projectCtx.lifecycleManager._configManager = { setTestingType: jest.fn() }
+        projectCtx.reportLoadError('component testing is not set up', 'setup')
+        projectCtx.clearLoadError(['config'])
 
-        projectCtx.lifecycleManager.setCurrentTestingType('component')
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+
+        projectCtx.clearLoadError(['config', 'setup'])
 
         expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+      })
+
+      it('reports the older error again when the newer one of another kind is withdrawn', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.reportLoadError('no browser was given', 'browser')
+        projectCtx.reportLoadError('Your configFile is invalid', 'config')
+        projectCtx.clearLoadError(['config', 'setup'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+        expect(recorded(projectCtx)).toHaveBeenLastCalledWith(expect.objectContaining({ loadError: 'no browser was given' }))
+
+        projectCtx.clearLoadError(['browser'])
+
+        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+      })
+
+      it('does not happen for a given kind when no error is recorded', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.clearLoadError(['config'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
       })
 
       it('is not done in run mode', () => {
         const runCtx = createTestDataContext('run')
 
-        runCtx.clearLoadErrorForTap()
+        runCtx.clearLoadError()
 
         expect(cleared(runCtx)).not.toHaveBeenCalled()
       })
@@ -254,7 +339,7 @@ describe('DataContext open mode error output', () => {
   describe('in run mode', () => {
     it('leaves error output to the run mode exit path', () => {
       const runCtx = createTestDataContext('run')
-      const runModeExitEarly = jest.fn()
+      const runModeExitEarly = vi.fn()
 
       // @ts-expect-error - only the exit hook is needed
       runCtx.lifecycleManager.runModeExitEarly = runModeExitEarly

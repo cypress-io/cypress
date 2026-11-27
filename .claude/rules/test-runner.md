@@ -8,8 +8,8 @@ paths:
 # Picking the right test command
 
 Read the package's own scripts before running anything — the runner is per package,
-and assuming vitest is wrong often enough to matter (`@packages/data-context` is on
-jest, several are on mocha, several run Cypress itself):
+and assuming vitest is wrong often enough to matter (several are on mocha, several run
+Cypress itself):
 
 ```bash
 node -e "console.log(require('./packages/server/package.json').scripts)"

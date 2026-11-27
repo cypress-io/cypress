@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import dedent from 'dedent'
 import path from 'path'
 import type { ExecutionResult } from 'graphql'

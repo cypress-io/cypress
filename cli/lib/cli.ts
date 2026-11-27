@@ -119,19 +119,20 @@ const descriptions: any = {
   cacheSize: 'Used with the list command to show the sizes of the cached folders',
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
   component: 'runs component tests',
-  config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
-  configFile: 'path to script file where configuration values are set. defaults to "cypress.config.{js,ts,mjs,cjs}".',
+  config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs,mts,cts}.',
+  configFile: 'path to script file where configuration values are set. defaults to "cypress.config.{js,ts,mjs,cjs,mts,cts}".',
   detached: 'runs Cypress application in detached mode',
   dev: 'runs cypress in development and bypasses binary check',
   e2e: 'runs end to end tests',
-  env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs} or cypress.env.json',
-  expose: 'sets exposed public configuration variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs}',
+  env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs,mts,cts} or cypress.env.json',
+  expose: 'sets exposed public configuration variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs,mts,cts}',
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if it were globally installed',
   group: 'a named group for recorded runs in Cypress Cloud',
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
+  openHeadless: 'starts a session for cypress tap to drive, with the browser headless and the Cypress window hidden so neither takes focus. requires --e2e or --component, and a browser from --browser or defaultBrowser in the config. the session runs until its process is stopped',
   inspect: 'enable the Node.js inspector to debug the Cypress development process. only available when used with --dev',
   inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
   session: 'target a local Cypress session by its process id (PID)',
@@ -140,7 +141,7 @@ const descriptions: any = {
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   passWithNoTests: 'pass when no tests are found',
-  port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
+  port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs,mts,cts}.',
   project: 'path to the project',
   posixExitCodes: 'use POSIX exit codes for error handling',
   quiet: 'run quietly, using only the configured reporter',
@@ -303,6 +304,7 @@ const addCypressOpenCommand = (program: any): any => {
   .option('-e, --env <env>', text('env'))
   .option('-x, --expose <expose>', text('expose'))
   .option('--global', text('global'))
+  .option('--headless', text('openHeadless'))
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))
 }

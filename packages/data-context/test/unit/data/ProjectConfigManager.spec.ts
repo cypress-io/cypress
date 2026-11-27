@@ -1,11 +1,17 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
+import globby from 'globby'
 import { createTestDataContext } from '../helper'
 import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 import { EventRegistrar } from '../../../src/data/EventRegistrar'
-import * as FileDataSourceModule from '../../../src/sources/FileDataSource'
+
+vi.mock('globby', async (importOriginal) => {
+  const { default: actualGlobby } = await importOriginal<typeof import('globby')>()
+
+  return { default: vi.fn(actualGlobby) }
+})
 
 let configManager: ProjectConfigManager
 let eventRegistrar: EventRegistrar
@@ -147,7 +153,7 @@ describe('ProjectConfigManager', () => {
         process.env.CYPRESS_INTERNAL_ENV = originalCypressInternalEnv
       }
 
-      jest.restoreAllMocks()
+      vi.restoreAllMocks()
       await fs.remove(projectRoot)
     })
 
@@ -170,8 +176,8 @@ describe('ProjectConfigManager', () => {
 
       projectConfigManager.configFilePath = path.join(projectRoot, 'cypress.config.js')
       projectConfigManager.setTestingType('e2e')
-      jest.spyOn(projectConfigManager, 'getConfigFileContents').mockResolvedValue({ e2e: { supportFile: 'cypress/support/**/e2e.js' } })
-      jest.spyOn(projectConfigManager, 'reloadCypressEnvFile').mockResolvedValue({})
+      vi.spyOn(projectConfigManager, 'getConfigFileContents').mockResolvedValue({ e2e: { supportFile: 'cypress/support/**/e2e.js' } })
+      vi.spyOn(projectConfigManager, 'reloadCypressEnvFile').mockResolvedValue({})
 
       // globby rejects like this when a `**` support file pattern walks into a directory it cannot read
       const unreadableDir = path.join(projectRoot, 'cypress', 'support', 'private')
@@ -182,15 +188,15 @@ describe('ProjectConfigManager', () => {
         path: unreadableDir,
       })
 
-      jest.spyOn(FileDataSourceModule, 'matchGlobs')
+      vi.mocked(globby)
       .mockRejectedValueOnce(eaccesError)
       .mockResolvedValueOnce([supportFile])
 
       const config = await projectConfigManager.getFullInitialConfig({}, false)
 
       expect(config.supportFile).toEqual(supportFile)
-      expect(FileDataSourceModule.matchGlobs).toHaveBeenCalledTimes(2)
-      expect(FileDataSourceModule.matchGlobs).toHaveBeenNthCalledWith(2, expect.any(Array), expect.objectContaining({ suppressErrors: true }))
+      expect(globby).toHaveBeenCalledTimes(2)
+      expect(globby).toHaveBeenNthCalledWith(2, expect.any(Array), expect.objectContaining({ suppressErrors: true }))
     })
   })
 })

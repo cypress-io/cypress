@@ -7,7 +7,7 @@
         "scripts/after-pack-hook.js",
         "scripts/after-sign-hook.js",
         "scripts/gulp/tasks/gulpGraphql.ts",
-        "scripts/add-install-comment.js",
+        "scripts/add-install-comment.mts",
         "scripts/semantic-commits/get-binary-release-data.js"
       ],
       "ignoreDependencies": [
@@ -409,6 +409,11 @@
       ]
     },
     "packages/eslint-config": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/vitest-setup": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
       ]

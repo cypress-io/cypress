@@ -105,7 +105,7 @@ describe('e2e forms', () => {
       config: { screenshotOnRunFailure: false },
       onStdout: (stdout) => {
         return stdout
-        .replace(/((?: {6}-)+[^\n]+\n)/gm, '')
+        .replace(/( {6}-[^\n]+\n)/g, '')
       }, // remove variable diff
     })
   })

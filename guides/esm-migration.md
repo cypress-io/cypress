@@ -12,7 +12,7 @@
 
 #### Notes
 
-When migrating some of these projects away from the `ts-node` entry [see `@packages/scaffold-config` example](https://github.com/cypress-io/cypress/blob/v15.2.0/packages/scaffold-config/index.js), it is somewhat difficult to make separate browser/node entries as the v8-snapshot [tsconfig.json](https://github.com/cypress-io/cypress/blob/v15.2.0/tooling/v8-snapshot/tsconfig.json) is using an older style of module resolution where the `exports` key inside a package's `package.json` is not well supported. Because of this, we need to find ways to bundle code that is needed internally in the browser vs in node without them being a part of the same bundle. This is a temporary work around until we are able to get every package being able to build as an ES Module, which as that point we can re assess how the Cypress binary is being built as well as v8-snapshots, and will allow us to reconfigure this packages to export content in a more proper fashion. We are currently doing something similar in the following packages:
+When migrating some of these projects away from the `ts-node` entry [see `@packages/scaffold-config` example](https://github.com/cypress-io/cypress/blob/v15.2.0/packages/scaffold-config/index.js), some packages bundle the code needed in the browser separately from the code needed in Node instead of declaring separate entries with the `exports` key in `package.json`, because the base `@packages/ts` tsconfig uses `node` module resolution, which ignores `exports`. The following packages still use separate bundles:
 
 * `@packages/scaffold-config`
 * `@packages/socket`
@@ -92,7 +92,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 ##### Binary Packages
 
 - [x] packages/config ✅ **COMPLETED**
-- [x] packages/data-context **COMPLETED** (migrated from `mocha`/`sinon`/`chai` to `jest`). See package README for more details as to why `jest` over `vitest`
+- [x] packages/data-context ✅ **COMPLETED**
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/error ✅ **COMPLETED**

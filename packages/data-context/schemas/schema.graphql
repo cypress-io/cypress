@@ -1038,7 +1038,7 @@ type CommitInfo {
 }
 
 """
-The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs} file
+The currently opened Cypress project, represented by a cypress.config.{js,ts,mjs,cjs,mts,cts} file
 """
 type CurrentProject implements Node & ProjectLike {
   """The currently selected browser for the project"""
@@ -1205,6 +1205,7 @@ enum ErrorTypeEnum {
   CDP_BROWSER_EXITED_BEFORE_CONNECT
   CDP_COULD_NOT_CONNECT
   CDP_COULD_NOT_RECONNECT
+  CDP_PAGE_CONNECTION_LOST
   CDP_RETRYING_CONNECTION
   CHROME_137_LOAD_EXTENSION_NOT_SUPPORTED
   CHROME_WEB_SECURITY_NOT_SUPPORTED

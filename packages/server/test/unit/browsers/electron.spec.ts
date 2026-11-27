@@ -751,6 +751,17 @@ describe('lib/browsers/electron', () => {
       })
     })
 
+    it('does not show a headless browser window when requesting to be focused', async () => {
+      vi.spyOn(automation, 'use')
+      options.browser.isHeadless = true
+
+      await electron._launch(win, url, automation, options, undefined, undefined, { attachCDPClient: vi.fn() })
+
+      automation.use.mock.lastCall[0].onRequest('focus:browser:window')
+
+      expect(win.show).not.toHaveBeenCalled()
+    })
+
     it('registers onRequest automation middleware and calls destroy when requesting to close the browser tabs', () => {
       vi.spyOn(automation, 'use')
 
@@ -1086,12 +1097,54 @@ describe('lib/browsers/electron', () => {
       expect(captureScreenshot.mock.invocationCallOrder[0]).toBeLessThan(pageCriClient.send.mock.invocationCallOrder[1])
     })
 
-    it('leaves the run-mode screencast running when video is disabled', async () => {
+    it('swaps the run-mode no-op screencast for a real one around the screenshot and restores it when video is disabled', async () => {
       const result = await takeScreenshot({ isTextTerminal: true })
 
       expect(result).toBe('data:image/png;base64,iVBORw0KGgo=')
-      expectNotCalledWith(pageCriClient.send, 'Page.startScreencast', anyArg)
-      expectNotCalledWith(pageCriClient.send, 'Page.stopScreencast')
+      expect(pageCriClient.send.mock.calls).toStrictEqual([
+        ['Page.stopScreencast'],
+        ['Page.startScreencast', screencastOpts()],
+        ['Page.stopScreencast'],
+        ['Page.startScreencast', { format: 'jpeg', everyNthFrame: 2 ** 31 - 1, quality: 0 }],
+      ])
+
+      expect(pageCriClient.send.mock.invocationCallOrder[1]).toBeLessThan(captureScreenshot.mock.invocationCallOrder[0])
+      expect(captureScreenshot.mock.invocationCallOrder[0]).toBeLessThan(pageCriClient.send.mock.invocationCallOrder[2])
+    })
+
+    it('keeps the real screencast running until the last overlapping screenshot finishes', async () => {
+      let finishFirstCapture: (dataUrl: string) => void = () => {}
+
+      captureScreenshot
+      .mockImplementationOnce(() => new Promise((resolve) => finishFirstCapture = resolve))
+      .mockResolvedValueOnce('data:image/png;base64,c2Vjb25k')
+
+      // @ts-expect-error - partial launch options
+      const automationInstance = await electron._getAutomation(win, { onError: () => {}, isTextTerminal: true }, automation)
+      const firstScreenshot = automationInstance.onRequest('take:screenshot', {} as any)
+
+      await vi.waitFor(() => expect(captureScreenshot).toHaveBeenCalledTimes(1))
+
+      await expect(automationInstance.onRequest('take:screenshot', {} as any)).resolves.toBe('data:image/png;base64,c2Vjb25k')
+
+      finishFirstCapture('data:image/png;base64,Zmlyc3Q=')
+
+      await expect(firstScreenshot).resolves.toBe('data:image/png;base64,Zmlyc3Q=')
+      expect(pageCriClient.send.mock.calls).toStrictEqual([
+        ['Page.stopScreencast'],
+        ['Page.startScreencast', screencastOpts()],
+        ['Page.stopScreencast'],
+        ['Page.startScreencast', { format: 'jpeg', everyNthFrame: 2 ** 31 - 1, quality: 0 }],
+      ])
+
+      expect(captureScreenshot.mock.invocationCallOrder[1]).toBeLessThan(pageCriClient.send.mock.invocationCallOrder[2])
+    })
+
+    it('restores the run-mode no-op screencast when the screenshot fails', async () => {
+      captureScreenshot.mockRejectedValue(new Error('The browser responded with an error when Cypress attempted to take a screenshot.'))
+
+      await expect(takeScreenshot({ isTextTerminal: true })).rejects.toThrow('attempted to take a screenshot')
+      expect(pageCriClient.send.mock.calls.at(-1)).toStrictEqual(['Page.startScreencast', { format: 'jpeg', everyNthFrame: 2 ** 31 - 1, quality: 0 }])
     })
 
     it('leaves the video screencast running when video is enabled', async () => {
@@ -1284,6 +1337,32 @@ describe('lib/browsers/electron', () => {
           })
         })
       })
+    })
+  })
+
+  describe('._launchChild window visibility', () => {
+    const childShow = async (isTextTerminal: boolean, isHeadless: boolean) => {
+      const parent = { getPosition: () => [4, 2] }
+      // Safe because only the options `create` was called with are read, never the window it returns
+      const create = vi.spyOn(Windows, 'create').mockReturnValue({} as any)
+
+      vi.spyOn(electron, '_launch').mockResolvedValue({} as any)
+
+      await electron._launchChild('http://child', parent, '/project', {}, { isTextTerminal, browser: { isHeadless } }, automation)
+
+      return create.mock.lastCall?.[1].show
+    }
+
+    it('shows a child window of a headed browser in open mode', async () => {
+      expect(await childShow(false, false)).toBe(true)
+    })
+
+    it('hides a child window of a headless browser in open mode', async () => {
+      expect(await childShow(false, true)).toBe(false)
+    })
+
+    it('hides a child window in run mode', async () => {
+      expect(await childShow(true, false)).toBe(false)
     })
   })
 

@@ -35,7 +35,7 @@ System tests cover the entire Cypress run, so they are good for testing features
 
 There are two parts to a system test:
 
-1. A test written using the [`systemTests`](./lib/system-tests) Mocha wrapper that lives in [`./test`](./test), and
+1. A test written using the [`systemTests`](./lib/system-tests.ts) Mocha wrapper that lives in [`./test`](./test), and
 2. A matching Cypress [test project](#Test-Projects) that lives in the [`./projects`](./projects) directory.
 
 For example, if you initialized a new project in `./projects/my-new-project`, and you wanted to assert that 2 tests fail and take a snapshot of the `stdout`, you'd write a test like this:
@@ -60,7 +60,7 @@ describe('my new project', () => {
 
 From here, you could run this test with `yarn test my-new-project`.
 
-There are many more options available for `systemTests.it` and `systemTests.setup`. You can massage the stdout, do pre-run tasks, set up HTTP/S servers, and more. Explore the typedocs in [`./lib/system-tests`](./lib/system-tests) for more information.
+There are many more options available for `systemTests.it` and `systemTests.setup`. You can massage the stdout, do pre-run tasks, set up HTTP/S servers, and more. Explore the typedocs in [`./lib/system-tests`](./lib/system-tests.ts) for more information.
 
 These tests run in the `system-tests-*` CI jobs.
 
@@ -118,7 +118,7 @@ If you are on a Retina device, you may get mismatching screenshot dimensions whe
 
 ### Test Projects
 
-Every folder in [`./projects`](./lib/projects) represents a self-contained Cypress project. When you pass the `project` property to `systemTests.it` or `systemTests.exec`, Cypress launches using this project.
+Every folder in [`./projects`](./projects) represents a self-contained Cypress project. When you pass the `project` property to `systemTests.it` or `systemTests.exec`, Cypress launches using this project.
 
 If a test project has a `package.json` file, the `systemTests.exec` helper will attempt to install the correct `node_modules` by running `yarn install` or `npm install` (depending on which lockfile is present) against the project. This is cached in CI and locally to speed up test times.
 

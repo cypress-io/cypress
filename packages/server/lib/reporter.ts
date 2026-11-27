@@ -8,7 +8,7 @@ import Mocha from 'mocha-7.2.0'
 import mochaReporters from 'mocha-7.2.0/lib/reporters'
 import mochaCreateStatsCollector from 'mocha-7.2.0/lib/stats-collector'
 import Debug from 'debug'
-import { overrideRequire } from './override_require'
+import { overrideResolve } from './override_resolve'
 import type {
   CypressTestStatusInfo,
   InternalRunnable,
@@ -30,7 +30,7 @@ const debug = Debug('cypress:server:reporter')
 const mochaColor = mochaReporters.Base.color
 const mochaSymbols = mochaReporters.Base.symbols
 
-// override calls to `require('mocha*')` when to always resolve with a mocha we control
+// override `require('mocha*')` and `require.resolve('mocha*')` to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
 const customReporterMochaPath = path.dirname(require.resolve('mocha-7.2.0'))
 
@@ -75,10 +75,12 @@ const getIconStatus = (status: RunnableState | undefined): IconStatus => {
   }
 }
 
-overrideRequire((depPath, _load) => {
-  if ((depPath === 'mocha') || depPath.startsWith('mocha/')) {
-    return _load(depPath.replace('mocha', customReporterMochaPath))
+overrideResolve((request) => {
+  if ((request === 'mocha') || request.startsWith('mocha/')) {
+    return request.replace('mocha', customReporterMochaPath)
   }
+
+  return undefined
 })
 
 // if Mocha.Suite.prototype.titlePath
@@ -781,14 +783,13 @@ export class Reporter {
 
     debug('trying to load reporter:', reporterName)
 
-    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    // Built-in reporters are required by name so the start bundle includes them
     if (reporterName === 'teamcity') {
       debug(`${reporterName} is built-in reporter`)
 
       return require('mocha-teamcity-reporter')
     }
 
-    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
     if (reporterName === 'junit') {
       debug(`${reporterName} is built-in reporter`)
 
