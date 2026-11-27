@@ -115,7 +115,7 @@ describe('binary-cleanup', () => {
     })
 
     it('keeps a reporter loaded from disk that requires mocha', async () => {
-      await fs.outputFile(path.join(buildAppDir, 'node_modules', 'mocha-junit-reporter', 'index.js'), `var Base = require('mocha').reporters.Base\nmodule.exports = require('xml')`)
+      await fs.outputFile(path.join(buildAppDir, 'node_modules', 'mocha-junit-reporter', 'index.js'), `var Base = require('mocha').reporters.Base\nrequire.resolve('mocha')\nrequire('mocha/lib/stats-collector')\nmodule.exports = require('xml')`)
       await fs.outputFile(path.join(buildAppDir, 'node_modules', 'xml', 'lib', 'xml.js'), 'module.exports = () => {}')
       await fs.outputJson(path.join(buildAppDir, 'node_modules', 'xml', 'package.json'), { main: 'lib/xml.js' })
 
