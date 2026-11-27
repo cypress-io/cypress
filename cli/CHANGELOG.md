@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.5.0
 
+**Performance:**
+
+- [`cy.reload()`](https://on.cypress.io/reload) is faster on pages that load many files the Command Log doesn't show, such as the modules of an app served by a Vite dev server. Fixed in [#35548](https://github.com/cypress-io/cypress/pull/35548).
+
 **Features:**
 
 - Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).

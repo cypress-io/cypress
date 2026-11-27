@@ -24,6 +24,8 @@ import { subscriptionOnlyRule } from '@packages/data-context/graphql/subscriptio
 import { SocketE2E } from '../../lib/socket-e2e'
 import * as ensureUrl from '../../lib/util/ensure-url'
 import { GracefulExit } from '../../lib/util/graceful-exit'
+// Captured from `proxy-logging.cy.ts` in Chromium.
+import requestEvents from '../support/fixtures/server/driver-request-events.json'
 
 // Loading the real module here builds the GraphQL schema a second time in this
 // worker and `graphql` rejects the duplicate realm. No test asserts on the
@@ -604,6 +606,22 @@ describe('lib/server-base', () => {
       // observes.
       expect(server._networkProxy).toBe(server._cdpFetchRuntime.networkProxy)
       expect(server._networkProxy.http.networkInterceptionCore).toBe(server._cdpFetchRuntime.networkInterceptionCore)
+    })
+
+    it('sends the driver a browser response only for a request the runtime announced', async () => {
+      const { interceptedImageRequest, interceptedImageResponse, unloggedStylesheetResponse } = requestEvents
+
+      await server.createCdpFetchNetworkRuntime(createClient())
+
+      // as the proxy's SendToDriver middleware announces a request it logs
+      server._networkProxy.http.socket.toDriver('request:event', interceptedImageRequest.eventName, interceptedImageRequest.data)
+      server.emitRequestEvent(interceptedImageResponse.eventName, interceptedImageResponse.data)
+      server.emitRequestEvent(unloggedStylesheetResponse.eventName, unloggedStylesheetResponse.data)
+
+      expect(server._socket.toDriver.mock.calls).toStrictEqual([
+        ['request:event', interceptedImageRequest.eventName, interceptedImageRequest.data],
+        ['request:event', interceptedImageResponse.eventName, interceptedImageResponse.data],
+      ])
     })
 
     // Publishing the mode any earlier would point the request-time gates at a
@@ -1325,6 +1343,19 @@ describe('lib/server-base', () => {
       server.reset()
 
       expect(buffers.reset).toHaveBeenCalled()
+    })
+
+    it('forgets the requests announced to the driver', () => {
+      const { interceptedImageRequest, interceptedImageResponse } = requestEvents
+      const toDriver = vi.spyOn(server.socket, 'toDriver').mockReturnValue(undefined)
+
+      server._networkProxy.http.socket.toDriver('request:event', interceptedImageRequest.eventName, interceptedImageRequest.data)
+      server.reset()
+      server.emitRequestEvent(interceptedImageResponse.eventName, interceptedImageResponse.data)
+
+      expect(toDriver.mock.calls).toStrictEqual([
+        ['request:event', interceptedImageRequest.eventName, interceptedImageRequest.data],
+      ])
     })
 
     it('restores the project-level blockHosts so an override cannot leak into the next spec', () => {

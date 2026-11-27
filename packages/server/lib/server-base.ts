@@ -60,6 +60,7 @@ import type { AutomationCookie } from './automation/cookie/automation'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { stripCypressCookies } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
+import { RequestEventFilter } from './util/request-event-filter'
 import { createCdpFetchRuntime, createProxyRuntime } from './network-runtime'
 import type { CreateProxyRuntimeDeps, CdpFetchNetworkRuntime, ProxyNetworkRuntime } from './network-runtime'
 import type { ICriClient } from './browsers/cdp-protocol/cri-client'
@@ -257,6 +258,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _cdpFetchRuntime?: CdpFetchNetworkRuntime
   protected _proxyRuntime?: ProxyNetworkRuntime
+
+  // Every network runtime announces requests to the driver through this, so it
+  // knows which browser request events the driver has a use for.
+  protected readonly requestEvents = new RequestEventFilter({
+    toDriver: (event, ...args) => this.socket.toDriver(event, ...args),
+  })
+
   protected _openConfig?: Cfg
   // Resolved per launch, not at open: the browser is unknown until then (Chrome
   // with `forceHttp1: false` takes the browser path, Firefox the proxy path).
@@ -679,7 +687,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       remoteStates,
       getFileServerToken,
       getCookieJar: () => cookieJar,
-      socket: this.socket,
+      socket: this.requestEvents,
       request: this.request,
       serverBus: this._eventBus,
       getCurrentBrowser,
@@ -732,7 +740,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       remoteStates: this._remoteStates,
       getFileServerToken: () => this._fileServer?.token,
       getCookieJar: () => cookieJar,
-      socket: this.socket,
+      socket: this.requestEvents,
       request: this.request,
       serverBus: this._eventBus,
       getCurrentBrowser: this.getCurrentBrowser ?? (() => {
@@ -908,7 +916,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   emitRequestEvent (eventName, data) {
-    this.socket.toDriver('request:event', eventName, data)
+    this.requestEvents.toDriver('request:event', eventName, data)
   }
 
   addPendingUrlWithoutPreRequest (downloadUrl: string) {
@@ -1113,6 +1121,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   reset () {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
     this.resetCdpFetchRuntime()
+    this.requestEvents.reset()
     this._networkProxy?.clearCredentials()
 
     // discard any per-test blockHosts override so it can't leak into the next spec
