@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "include": [
+    "unit",
+    "../vitest.config.ts"
+  ],
+  "exclude": [],
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["es2021", "es2022.error", "esnext.promise", "dom"]
+  }
+}

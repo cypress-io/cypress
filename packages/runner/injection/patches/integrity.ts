@@ -36,7 +36,7 @@ const patchIntegrityProperty = (prototype) => {
   })
 }
 
-export const patchElementIntegrity = (window: Window) => {
+export const patchElementIntegrity = (window: Window & typeof globalThis) => {
   const ctors = [window.HTMLScriptElement, window.HTMLLinkElement]
 
   ctors.forEach((ctor) => {

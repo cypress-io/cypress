@@ -1907,6 +1907,8 @@ jobs:
 
   lint:
     <<: *defaults
+    # Two workspaces linting at once (e.g. server and system-tests) peak above 4 GB
+    resource_class: medium+.gen2
     steps:
       - restore_cached_workspace
       - run:
