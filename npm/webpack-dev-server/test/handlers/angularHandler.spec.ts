@@ -173,6 +173,23 @@ describe('generateTsConfig', () => {
       toPosix(path.join(projectRoot, 'projects/**/*.cy.ts')),
     ])
   })
+
+  it('sets its own exclude so specs excluded from the app build stay in the component test compilation', async () => {
+    const devServerConfig = {
+      framework: 'angular',
+      cypressConfig: {
+        projectRoot,
+        specPattern: 'src/**/*.cy.ts',
+        supportFile: path.join(projectRoot, 'cypress', 'support', 'component.ts'),
+      } as Cypress.PluginConfigOptions,
+    } as AngularWebpackDevServerConfig
+
+    const tsConfigPath = await generateTsConfig(devServerConfig, { tsConfig: 'tsconfig.app.json' })
+    const tsConfig = JSON.parse(await fs.readFile(tsConfigPath, 'utf8'))
+
+    expect(tsConfig.extends).toEqual(toPosix(path.join(projectRoot, 'tsconfig.app.json')))
+    expect(tsConfig.exclude).toEqual([toPosix(path.join(projectRoot, 'out-tsc/cy'))])
+  })
 })
 
 describe('getTempDir', () => {
@@ -261,6 +278,9 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
       ...(hasPolyfillsConfigured ? [toPosix(path.join(projectRoot, 'src/polyfills.ts'))] : []),
     ],
+    exclude: [
+      toPosix(path.join(projectRoot, 'out-tsc/cy')),
+    ],
   })
 
   const modifiedBuildOptions = cloneDeep(buildOptions)
@@ -293,6 +313,9 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
       toPosix(supportFile),
+    ],
+    exclude: [
+      toPosix(path.join(projectRoot, 'out-tsc/cy')),
     ],
   })
 }
