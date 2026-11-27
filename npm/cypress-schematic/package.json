@@ -39,6 +39,7 @@
     "@angular-devkit/schematics": "^21.2.7",
     "@angular-devkit/schematics-cli": "^21.2.7",
     "@packages/eslint-config": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@schematics/angular": "^21.2.7",
     "@tooling/system-tests": "0.0.0-development",
     "@types/mocha": "8.0.3",
