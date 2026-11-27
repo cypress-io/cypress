@@ -1,4 +1,4 @@
-import { describe, expect, jest, it, beforeEach } from '@jest/globals'
+import { describe, expect, vi, it, beforeEach } from 'vitest'
 import { execute, parse } from 'graphql'
 import type { DataContext } from '../../../src'
 import { AuthActions } from '../../../src/actions/AuthActions'
@@ -14,8 +14,8 @@ describe('AuthActions', () => {
 
     beforeEach(() => {
       ctx = createTestDataContext('open')
-      jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
-      jest.mocked(ctx._apis.authApi.signUp).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      vi.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      vi.mocked(ctx._apis.authApi.signUp).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
 
       actions = new AuthActions(ctx)
     })
@@ -27,7 +27,7 @@ describe('AuthActions', () => {
     })
 
     it('kicks off a checkAuth to backfill the cloud user id', async () => {
-      const checkAuth = jest.spyOn(actions, 'checkAuth').mockResolvedValue(undefined)
+      const checkAuth = vi.spyOn(actions, 'checkAuth').mockResolvedValue(undefined)
 
       // @ts-expect-error - incorrect number of arguments
       await actions.login()
@@ -48,7 +48,7 @@ describe('AuthActions', () => {
     it('focuses the main window if the activeBrowser does not support focus', async () => {
       const browser = ctx.coreData.activeBrowser = { name: 'foo' } as FoundBrowser
 
-      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+      vi.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
           return Promise.resolve(false)
         }
@@ -68,7 +68,7 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'closed'
 
-      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+      vi.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
           return Promise.resolve(true)
         }
@@ -88,7 +88,7 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'opening'
 
-      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+      vi.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
           return Promise.resolve(true)
         }
@@ -108,7 +108,7 @@ describe('AuthActions', () => {
 
       ctx.coreData.app.browserStatus = 'open'
 
-      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+      vi.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
           return Promise.resolve(true)
         }
@@ -126,7 +126,7 @@ describe('AuthActions', () => {
     it('does not focus anything if the activeBrowser does support focus but the main window is focused', async () => {
       const browser = ctx.coreData.activeBrowser = { name: 'foo' } as FoundBrowser
 
-      jest.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
+      vi.spyOn(ctx.browser, 'isFocusSupported').mockImplementation((args) => {
         if (args === browser) {
           return Promise.resolve(true)
         }
@@ -134,7 +134,7 @@ describe('AuthActions', () => {
         return Promise.resolve(false)
       })
 
-      jest.spyOn(ctx._apis.electronApi, 'isMainWindowFocused').mockReturnValue(true)
+      vi.spyOn(ctx._apis.electronApi, 'isMainWindowFocused').mockReturnValue(true)
 
       // @ts-expect-error - incorrect number of arguments
       await actions.login()
@@ -146,7 +146,7 @@ describe('AuthActions', () => {
     it('ignores a login that completes after resetAuthState', async () => {
       let completeLogin: (user: AuthenticatedUserShape) => void = () => {}
 
-      jest.mocked(ctx._apis.authApi.logIn).mockImplementation(
+      vi.mocked(ctx._apis.authApi.logIn).mockImplementation(
         () => new Promise<AuthenticatedUserShape>((resolve) => completeLogin = resolve),
       )
 
@@ -166,8 +166,8 @@ describe('AuthActions', () => {
 
     beforeEach(() => {
       ctx = createTestDataContext('open')
-      jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
-      jest.mocked(ctx._apis.authApi.signUp).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      vi.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      vi.mocked(ctx._apis.authApi.signUp).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
 
       actions = new AuthActions(ctx)
     })
@@ -194,7 +194,7 @@ describe('AuthActions', () => {
     })
 
     it('rejects and does not set coreData.user when signUp rejects', async () => {
-      jest.mocked(ctx._apis.authApi.signUp).mockRejectedValue(new Error('signup error'))
+      vi.mocked(ctx._apis.authApi.signUp).mockRejectedValue(new Error('signup error'))
 
       await expect(actions.signup('Binary: App', 'Studio', 'Signup')).rejects.toThrow('signup error')
       expect(ctx.coreData.user).toBeNull()
@@ -207,7 +207,7 @@ describe('AuthActions', () => {
 
     beforeEach(() => {
       ctx = createTestDataContext('open')
-      jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({
+      vi.mocked(ctx._apis.authApi.logIn).mockResolvedValue({
         name: 'steve',
         email: 'steve@apple.com',
         authToken: 'foo',
@@ -218,7 +218,7 @@ describe('AuthActions', () => {
     })
 
     it('calls setProjectIdInConfigFile with the projectSlug on successful login', async () => {
-      const setProjectIdSpy = jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
+      const setProjectIdSpy = vi.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
 
       // @ts-expect-error - incorrect number of arguments
       await actions.login()
@@ -229,8 +229,8 @@ describe('AuthActions', () => {
 
     it('clears a stale autoProvisionedProjectId and refreshes lifecycle when setProjectIdInConfigFile succeeds', async () => {
       ctx.coreData.autoProvisionedProjectId = 'my-project'
-      jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
-      const refreshLifecycleSpy = jest.spyOn(ctx.lifecycleManager, 'refreshLifecycle').mockResolvedValue(undefined)
+      vi.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
+      const refreshLifecycleSpy = vi.spyOn(ctx.lifecycleManager, 'refreshLifecycle').mockResolvedValue(undefined)
 
       // @ts-expect-error - incorrect number of arguments
       await actions.login()
@@ -240,7 +240,7 @@ describe('AuthActions', () => {
     })
 
     it('sets autoProvisionedProjectId when setProjectIdInConfigFile fails', async () => {
-      jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockRejectedValue(new Error('write error'))
+      vi.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockRejectedValue(new Error('write error'))
       // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
@@ -254,7 +254,7 @@ describe('AuthActions', () => {
 
     beforeEach(() => {
       ctx = createTestDataContext('open')
-      jest.mocked(ctx._apis.authApi.signUp).mockResolvedValue({
+      vi.mocked(ctx._apis.authApi.signUp).mockResolvedValue({
         name: 'steve',
         email: 'steve@apple.com',
         authToken: 'foo',
@@ -265,7 +265,7 @@ describe('AuthActions', () => {
     })
 
     it('calls setProjectIdInConfigFile with the projectSlug on successful signup', async () => {
-      const setProjectIdSpy = jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
+      const setProjectIdSpy = vi.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
 
       await actions.signup('Binary: App', 'Studio', 'Signup')
 
@@ -275,8 +275,8 @@ describe('AuthActions', () => {
 
     it('clears a stale autoProvisionedProjectId and refreshes lifecycle when setProjectIdInConfigFile succeeds during signup', async () => {
       ctx.coreData.autoProvisionedProjectId = 'my-project'
-      jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
-      const refreshLifecycleSpy = jest.spyOn(ctx.lifecycleManager, 'refreshLifecycle').mockResolvedValue(undefined)
+      vi.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
+      const refreshLifecycleSpy = vi.spyOn(ctx.lifecycleManager, 'refreshLifecycle').mockResolvedValue(undefined)
 
       await actions.signup('Binary: App', 'Studio', 'Signup')
 
@@ -285,7 +285,7 @@ describe('AuthActions', () => {
     })
 
     it('sets autoProvisionedProjectId when setProjectIdInConfigFile fails during signup', async () => {
-      jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockRejectedValue(new Error('write error'))
+      vi.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockRejectedValue(new Error('write error'))
       await actions.signup('Binary: App', 'Studio', 'Signup')
 
       expect(ctx.coreData.autoProvisionedProjectId).toBe('my-project')
@@ -296,8 +296,8 @@ describe('AuthActions', () => {
     it('does not call setProjectIdInConfigFile when projectSlug is absent', async () => {
       const ctx = createTestDataContext('open')
 
-      jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
-      const setProjectIdSpy = jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile')
+      vi.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      const setProjectIdSpy = vi.spyOn(ctx.actions.project, 'setProjectIdInConfigFile')
 
       // @ts-expect-error - incorrect number of arguments
       await new AuthActions(ctx).login()
@@ -346,7 +346,7 @@ describe('AuthActions', () => {
     })
 
     it('backfills the cloud user id onto the cached user', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({
         data: { cloudViewer: { id: 'cloud-user-1', email: 'steve@apple.com', fullName: 'steve' } },
       } as any)
 
@@ -356,7 +356,7 @@ describe('AuthActions', () => {
     })
 
     it('logs out instead when the cloud reports no viewer', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({ data: { cloudViewer: null } } as any)
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({ data: { cloudViewer: null } } as any)
 
       await actions.checkAuth()
 
@@ -364,7 +364,7 @@ describe('AuthActions', () => {
     })
 
     it('keeps the user logged in and id-less on a network error', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({
         data: null,
         error: { networkError: new Error('offline') },
       } as any)
@@ -385,8 +385,8 @@ describe('AuthActions', () => {
     })
 
     it('clears autoProvisionedProjectId and notifies both app and launchpad', async () => {
-      const toAppSpy = jest.spyOn(ctx.emitter, 'toApp')
-      const toLaunchpadSpy = jest.spyOn(ctx.emitter, 'toLaunchpad')
+      const toAppSpy = vi.spyOn(ctx.emitter, 'toApp')
+      const toLaunchpadSpy = vi.spyOn(ctx.emitter, 'toLaunchpad')
 
       await execute({
         schema: graphqlSchema,

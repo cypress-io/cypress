@@ -68,9 +68,6 @@ yarn workspace @packages/server test-unit -- <path-to-spec>
 # Filter mocha tests by name pattern
 yarn workspace @packages/server test-unit -- --grep "<pattern>"
 
-# @packages/data-context is the one package on jest, not vitest or mocha
-yarn workspace @packages/data-context test-unit -- <path-to-spec>
-
 # Run system test specs whose file name contains a fragment (not a path);
 # see system-tests/AGENTS.md
 yarn test-system go_spec --browser electron

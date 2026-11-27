@@ -1,5 +1,5 @@
 import path from 'path'
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 import { isInsideDir } from '../../../src/util/isInsideDir'
 
 describe('isInsideDir', () => {

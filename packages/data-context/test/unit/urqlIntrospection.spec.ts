@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import fs from 'fs-extra'
 import path from 'path'
 import { buildSchema, introspectionFromSchema } from 'graphql'

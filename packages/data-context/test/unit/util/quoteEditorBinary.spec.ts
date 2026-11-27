@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 // @ts-expect-error - no types available
 import guessEditor from 'launch-editor/guess'
 import { quoteEditorBinary } from '../../../src/util/quoteEditorBinary'

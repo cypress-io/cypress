@@ -1,4 +1,5 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import os from 'os'
 import { Response } from 'cross-fetch'
 
@@ -12,8 +13,8 @@ import pkg from '@packages/root'
 describe('VersionsDataSource', () => {
   describe('.versions', () => {
     let ctx: DataContext
-    let fetchMock: jest.Mock
-    let isDependencyInstalledByNameStub: jest.Mock
+    let fetchMock: Mock
+    let isDependencyInstalledByNameStub: Mock
     const mockNow: Date = new Date()
     const currentCypressVersion: string = pkg.version
 
@@ -34,29 +35,29 @@ describe('VersionsDataSource', () => {
       ctx.coreData.currentProject = '/abc'
       ctx.coreData.currentTestingType = 'e2e'
 
-      fetchMock = jest.fn()
+      fetchMock = vi.fn()
 
-      isDependencyInstalledByNameStub = jest.fn()
+      isDependencyInstalledByNameStub = vi.fn()
 
-      // @ts-expect-error - a bare `jest.fn()` doesn't match the `fetch` signature
-      jest.spyOn(ctx.util, 'fetch').mockImplementation(fetchMock)
-      // @ts-expect-error - a bare `jest.fn()` doesn't match the `isDependencyInstalledByName` signature
-      jest.spyOn(ctx.util, 'isDependencyInstalledByName').mockImplementation(isDependencyInstalledByNameStub)
-      jest.spyOn(os, 'platform').mockReturnValue('darwin')
-      jest.spyOn(os, 'arch').mockReturnValue('x64')
-      jest.useFakeTimers({ now: mockNow })
+      // @ts-expect-error - a bare `vi.fn()` doesn't match the `fetch` signature
+      vi.spyOn(ctx.util, 'fetch').mockImplementation(fetchMock)
+      // @ts-expect-error - a bare `vi.fn()` doesn't match the `isDependencyInstalledByName` signature
+      vi.spyOn(ctx.util, 'isDependencyInstalledByName').mockImplementation(isDependencyInstalledByNameStub)
+      vi.spyOn(os, 'platform').mockReturnValue('darwin')
+      vi.spyOn(os, 'arch').mockReturnValue('x64')
+      vi.useFakeTimers({ now: mockNow })
     })
 
     afterEach(() => {
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('loads the manifest for the latest version with all headers and queries npm for release dates', async () => {
       fetchMock.mockImplementation((url: string, options: { headers: Record<string, string> }) => {
         if (url === NPM_CYPRESS_REGISTRY_URL) {
           return Promise.resolve({
-            // @ts-expect-error - a bare `jest.fn()` resolves `never`
-            json: jest.fn().mockResolvedValue({
+            // @ts-expect-error - a bare `vi.fn()` resolves `never`
+            json: vi.fn().mockResolvedValue({
               'time': {
                 modified: '2022-01-31T21:14:41.593Z',
                 created: '2014-03-09T01:07:35.219Z',
@@ -78,8 +79,8 @@ describe('VersionsDataSource', () => {
           options.headers['x-testing-type'] === 'e2e' &&
           options.headers['x-logged-in'] === 'false') {
           return Promise.resolve({
-            // @ts-expect-error - a bare `jest.fn()` resolves `never`
-            json: jest.fn().mockResolvedValue({
+            // @ts-expect-error - a bare `vi.fn()` resolves `never`
+            json: vi.fn().mockResolvedValue({
               name: 'Cypress',
               version: '18.0.0',
             }),
@@ -114,8 +115,8 @@ describe('VersionsDataSource', () => {
       fetchMock.mockImplementation((url: string, options: { headers: Record<string, string> }) => {
         if (url === NPM_CYPRESS_REGISTRY_URL) {
           return Promise.resolve({
-            // @ts-expect-error - a bare `jest.fn()` resolves `never`
-            json: jest.fn().mockResolvedValue({
+            // @ts-expect-error - a bare `vi.fn()` resolves `never`
+            json: vi.fn().mockResolvedValue({
               'time': {
                 modified: '2022-01-31T21:14:41.593Z',
                 created: '2014-03-09T01:07:35.219Z',
@@ -137,8 +138,8 @@ describe('VersionsDataSource', () => {
           options.headers['x-testing-type'] === 'component' &&
           options.headers['x-logged-in'] === 'false') {
           return Promise.resolve({
-            // @ts-expect-error - a bare `jest.fn()` resolves `never`
-            json: jest.fn().mockResolvedValue({
+            // @ts-expect-error - a bare `vi.fn()` resolves `never`
+            json: vi.fn().mockResolvedValue({
               name: 'Cypress',
               version: '15.0.0',
             }),
@@ -157,8 +158,8 @@ describe('VersionsDataSource', () => {
           options.headers['x-logged-in'] === 'false' &&
           options.headers['x-initial-launch'] === String(false)) {
           return Promise.resolve({
-            // @ts-expect-error - a bare `jest.fn()` resolves `never`
-            json: jest.fn().mockResolvedValue({
+            // @ts-expect-error - a bare `vi.fn()` resolves `never`
+            json: vi.fn().mockResolvedValue({
               name: 'Cypress',
               version: '16.0.0',
             }),
@@ -309,7 +310,7 @@ describe('VersionsDataSource', () => {
     })
 
     it('generates x-notifications header', async () => {
-      (ctx.config.localSettingsApi.getPreferences as jest.Mock<typeof ctx.config.localSettingsApi.getPreferences>).mockImplementation(() => {
+      (ctx.config.localSettingsApi.getPreferences as Mock<typeof ctx.config.localSettingsApi.getPreferences>).mockImplementation(() => {
         return Promise.resolve({
           notifyWhenRunCompletes: ['errored'],
           notifyWhenRunStarts: true,

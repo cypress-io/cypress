@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Response } from 'cross-fetch'
 import { CloudDataSource } from '../../../src/sources/CloudDataSource'
 import { FAKE_USER_QUERY, FAKE_USER_RESPONSE } from './fixtures/graphqlFixtures'
@@ -17,7 +17,7 @@ describe('CloudDataSource development workspace', () => {
   })
 
   const createSource = () => {
-    const fetch = jest.fn<() => Promise<Response>>()
+    const fetch = vi.fn<() => Promise<Response>>()
 
     fetch.mockResolvedValue(new Response(JSON.stringify(FAKE_USER_RESPONSE), { status: 200 }))
 
@@ -26,8 +26,8 @@ describe('CloudDataSource development workspace', () => {
       source: new CloudDataSource({
         fetch,
         getUser: () => ({ authToken: 'test-token' }),
-        logout: jest.fn(),
-        invalidateClientUrqlCache: jest.fn(),
+        logout: vi.fn(),
+        invalidateClientUrqlCache: vi.fn(),
       }),
     }
   }

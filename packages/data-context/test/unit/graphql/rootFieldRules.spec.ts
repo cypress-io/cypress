@@ -1,4 +1,5 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock, MockInstance } from 'vitest'
 import express from 'express'
 import fetch from 'cross-fetch'
 import WebSocket from 'ws'
@@ -142,7 +143,7 @@ describe('tapOperationRule', () => {
 
 describe('runner GraphQL transports', () => {
   let ctx: DataContext
-  let openDirectoryInIDE: jest.SpiedFunction<typeof ctx.actions.project.openDirectoryInIDE>
+  let openDirectoryInIDE: MockInstance<typeof ctx.actions.project.openDirectoryInIDE>
 
   beforeAll(() => {
     ctx = createTestDataContext('open')
@@ -154,7 +155,7 @@ describe('runner GraphQL transports', () => {
   })
 
   beforeEach(() => {
-    openDirectoryInIDE = jest.spyOn(ctx.actions.project, 'openDirectoryInIDE').mockImplementation(() => {})
+    openDirectoryInIDE = vi.spyOn(ctx.actions.project, 'openDirectoryInIDE').mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -162,10 +163,10 @@ describe('runner GraphQL transports', () => {
   })
 
   describe('socket', () => {
-    const errorMessages = (callback: jest.Mock) => (callback.mock.calls[0][0] as { errors: Error[] }).errors.map((error) => error.message)
+    const errorMessages = (callback: Mock) => (callback.mock.calls[0][0] as { errors: Error[] }).errors.map((error) => error.message)
 
     it('rejects a disallowed mutation on the runner without running it', async () => {
-      const callback = jest.fn()
+      const callback = vi.fn()
 
       await handleRunnerGraphQLSocketRequest('gql1', JSON.stringify({ query: DISALLOWED_MUTATION }), callback)
 
@@ -174,7 +175,7 @@ describe('runner GraphQL transports', () => {
     })
 
     it('ignores extra arguments a client emits after the callback', async () => {
-      const callback = jest.fn()
+      const callback = vi.fn()
 
       await (handleRunnerGraphQLSocketRequest as (...args: unknown[]) => Promise<void>)('gql1', JSON.stringify({ query: DISALLOWED_MUTATION }), callback, [])
 
@@ -183,7 +184,7 @@ describe('runner GraphQL transports', () => {
     })
 
     it('rejects an operation that is invalid against the schema', async () => {
-      const callback = jest.fn()
+      const callback = vi.fn()
 
       await handleRunnerGraphQLSocketRequest('gql1', JSON.stringify({ query: '{ notAField }' }), callback)
 
@@ -191,7 +192,7 @@ describe('runner GraphQL transports', () => {
     })
 
     it('replies with the error message when the payload is malformed', async () => {
-      const callback = jest.fn()
+      const callback = vi.fn()
 
       await handleRunnerGraphQLSocketRequest('gql1', '{', callback)
 
@@ -201,7 +202,7 @@ describe('runner GraphQL transports', () => {
     })
 
     it('replies with an error when validation overflows the stack', async () => {
-      const callback = jest.fn()
+      const callback = vi.fn()
       const fragments = Array.from({ length: 20_000 }, (_, i) => `fragment F${i} on Query { __typename ...F${i + 1} }`)
       const query = `{ ...F0 } ${fragments.join(' ')} fragment F20000 on Query { __typename }`
 
@@ -211,7 +212,7 @@ describe('runner GraphQL transports', () => {
     })
 
     it('runs an operation the runner sends', async () => {
-      const callback = jest.fn()
+      const callback = vi.fn()
 
       await handleRunnerGraphQLSocketRequest('gql1', JSON.stringify({ query: '{ __typename }' }), callback)
 
@@ -226,7 +227,7 @@ describe('runner GraphQL transports', () => {
     })
 
     it('does not restrict the launchpad handler', async () => {
-      const callback = jest.fn()
+      const callback = vi.fn()
 
       await handleGraphQLSocketRequest('gql1', JSON.stringify({ query: DISALLOWED_MUTATION }), callback)
 

@@ -1,10 +1,10 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import childProcess from 'child_process'
 import path from 'path'
 import { scaffoldMigrationProject as scaffoldProject } from '../helper'
 import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
 
-jest.mock('child_process')
+vi.mock('child_process')
 
 describe('ProjectConfigIpc', () => {
   describe('#eventProcessPid', () => {
@@ -16,11 +16,11 @@ describe('ProjectConfigIpc', () => {
       // @ts-expect-error - mock
       childProcess.fork.mockImplementation(() => {
         return {
-          on: jest.fn(),
-          once: jest.fn(),
-          emit: jest.fn(),
-          kill: jest.fn(),
-          removeAllListeners: jest.fn(),
+          on: vi.fn(),
+          once: vi.fn(),
+          emit: vi.fn(),
+          kill: vi.fn(),
+          removeAllListeners: vi.fn(),
         }
       })
 
@@ -37,7 +37,7 @@ describe('ProjectConfigIpc', () => {
 
     afterEach(() => {
       projectConfigIpc.cleanupIpc()
-      jest.clearAllMocks()
+      vi.clearAllMocks()
     })
 
     it('returns id for child process', () => {
@@ -66,11 +66,11 @@ describe('ProjectConfigIpc', () => {
         // @ts-expect-error - mock
         childProcess.fork.mockImplementation(() => {
           return {
-            on: jest.fn(),
-            once: jest.fn(),
-            emit: jest.fn(),
-            kill: jest.fn(),
-            removeAllListeners: jest.fn(),
+            on: vi.fn(),
+            once: vi.fn(),
+            emit: vi.fn(),
+            kill: vi.fn(),
+            removeAllListeners: vi.fn(),
           }
         })
       })
@@ -179,11 +179,11 @@ describe('ProjectConfigIpc', () => {
         // @ts-expect-error - mock
         childProcess.fork.mockImplementation(() => {
           return {
-            on: jest.fn(),
-            once: jest.fn(),
-            emit: jest.fn(),
-            kill: jest.fn(),
-            removeAllListeners: jest.fn(),
+            on: vi.fn(),
+            once: vi.fn(),
+            emit: vi.fn(),
+            kill: vi.fn(),
+            removeAllListeners: vi.fn(),
           }
         })
       })
@@ -241,11 +241,11 @@ describe('ProjectConfigIpc', () => {
         // @ts-expect-error - mock
         childProcess.fork.mockImplementation(() => {
           return {
-            on: jest.fn(),
-            once: jest.fn(),
-            emit: jest.fn(),
-            kill: jest.fn(),
-            removeAllListeners: jest.fn(),
+            on: vi.fn(),
+            once: vi.fn(),
+            emit: vi.fn(),
+            kill: vi.fn(),
+            removeAllListeners: vi.fn(),
           }
         })
       })

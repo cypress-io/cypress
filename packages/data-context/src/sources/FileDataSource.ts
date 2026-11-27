@@ -18,7 +18,7 @@ export interface GlobOptions {
   suppressErrors?: boolean
 }
 
-export const matchGlobs = async (globs: string | string[], options?: GlobOptions & { cwd?: string, onlyFiles?: boolean }) => {
+const matchGlobs = async (globs: string | string[], options?: GlobOptions & { cwd?: string, onlyFiles?: boolean }) => {
   return await globby(globs, options)
 }
 

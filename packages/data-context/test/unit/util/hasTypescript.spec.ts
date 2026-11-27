@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import path from 'path'
 import { hasTypeScriptInstalled } from '../../../src/util'
 import { scaffoldMigrationProject } from '../helper'
