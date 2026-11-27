@@ -44,6 +44,7 @@
     "@packages/eslint-config": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@types/concat-stream": "1.6.1",
     "@types/node": "24.10.1",
     "@types/proxy-from-env": "1.0.4",

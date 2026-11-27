@@ -1,6 +1,47 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { EventEmitter } from 'events'
+import { PassThrough } from 'stream'
+import { format } from 'util'
+import type { ChildProcessByStdio } from 'child_process'
+import type { Readable } from 'stream'
+import type { FoundBrowser } from '@packages/types'
 import { knownBrowsers } from '../../lib/known-browsers'
 import { getVersionNumber } from '../../lib/linux'
+import { launch, debug } from '../../lib/browsers'
+import { utils } from '../../lib/utils'
+
+describe('launch', () => {
+  const recordKey = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d'
+  const apiToken = 'tok_7Hq2LmR9vXc4NpZ8sWd3'
+  const { enabled, log } = debug
+
+  afterEach(() => {
+    debug.enabled = enabled
+    debug.log = log
+    vi.unstubAllEnvs()
+    vi.restoreAllMocks()
+  })
+
+  it('writes the names of the browser env vars to the debug log, but no env var values', () => {
+    const browserProcess = Object.assign(new EventEmitter(), { stdout: new PassThrough(), stderr: new PassThrough() })
+    const lines: string[] = []
+
+    // Safe because launch only listens to stdout, stderr and 'exit' on the returned process
+    vi.spyOn(utils, 'spawnWithArch').mockReturnValue(browserProcess as unknown as ChildProcessByStdio<null, Readable, Readable>)
+    vi.stubEnv('CYPRESS_RECORD_KEY', recordKey)
+    debug.enabled = true
+    debug.log = (...args: unknown[]) => lines.push(format(...args))
+
+    launch({ name: 'chrome', path: '/usr/bin/google-chrome' } as FoundBrowser, 'about:blank', 9222, [], { MY_API_TOKEN: apiToken })
+
+    const output = lines.join('\n')
+
+    expect(output).toContain('spawning browser')
+    expect(output).toContain('MY_API_TOKEN')
+    expect(output).not.toContain(recordKey)
+    expect(output).not.toContain(apiToken)
+  })
+})
 
 const knownBrowser = (displayName: string) => {
   const browser = knownBrowsers.find((b) => b.displayName === displayName)
