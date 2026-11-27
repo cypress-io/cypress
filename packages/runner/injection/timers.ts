@@ -1,13 +1,12 @@
-type TimerType = 'setTimeout' | 'setInterval' | 'requestAnimationFrame'
-
-type CancelType = 'clearTimeout' | 'clearInterval' | 'cancelAnimationFrame'
+type TimerFn = 'setTimeout' | 'setInterval' | 'requestAnimationFrame'
+type CancelFn = 'clearTimeout' | 'clearInterval' | 'cancelAnimationFrame'
 
 // Browsers number animation frames separately from timeouts and intervals, so
 // a frame and a timeout can share an id. clearTimeout and clearInterval share
 // a namespace and can each cancel the other's timers.
 type IdNamespace = 'timer' | 'frame'
 
-const NAMESPACES: Record<TimerType | CancelType, IdNamespace> = {
+const NAMESPACES: Record<TimerFn | CancelFn, IdNamespace> = {
   setTimeout: 'timer',
   setInterval: 'timer',
   clearTimeout: 'timer',
@@ -15,6 +14,10 @@ const NAMESPACES: Record<TimerType | CancelType, IdNamespace> = {
   requestAnimationFrame: 'frame',
   cancelAnimationFrame: 'frame',
 }
+
+// The runner compiles with Node's types, which merge Node's timer overloads
+// into `window`. The AUT only ever has the DOM ones, so wrap against those.
+type TimerWindow = Pick<WindowOrWorkerGlobalScope & AnimationFrameProvider, TimerFn | CancelFn>
 
 interface QueuedTimer {
   timerId: number
@@ -65,7 +68,7 @@ export const createTimers = () => {
     }
   }
 
-  const pause = (shouldPause?: boolean) => {
+  const pause = (shouldPause: unknown) => {
     paused = Boolean(shouldPause)
 
     if (!paused) {
@@ -83,34 +86,31 @@ export const createTimers = () => {
       cancelAnimationFrame: window.cancelAnimationFrame,
     }
 
-    const callThrough = (fnName: TimerType | CancelType, args: unknown[]): number => {
-      // Safe because each wrapper passes the arguments its own native expects,
-      // and only the scheduling natives' return values are used.
-      return (originals[fnName] as (...args: unknown[]) => number).apply(window, args)
+    const callThrough = (fnName: keyof typeof originals, args: unknown[]) => {
+      return originals[fnName].apply(window, args)
     }
 
-    const wrapCancel = (fnName: CancelType) => {
+    const wrapCancel = (fnName: CancelFn) => {
       const namespace = NAMESPACES[fnName]
 
-      return (timerId?: number) => {
+      return (timerId: number) => {
         // A browser never runs a callback that was canceled before it ran,
         // even one that already came due while timers were paused.
         timerQueue = timerQueue.filter((timer) => {
           return timer.namespace !== namespace || timer.timerId !== timerId
         })
 
-        callThrough(fnName, [timerId])
+        return callThrough(fnName, [timerId])
       }
     }
 
-    const wrapTimer = (fnName: TimerType) => {
+    const wrapTimer = (fnName: TimerFn) => {
       const namespace = NAMESPACES[fnName]
 
-      return (fnOrCode: TimerHandler, delay?: number, ...params: unknown[]) => {
+      return (...args: [TimerHandler, number?, ...unknown[]]): number => {
+        const [fnOrCode, delay, ...params] = args
+
         const timerOverride = (...params: unknown[]) => {
-          // if we're currently paused then we need
-          // to enqueue this timer callback and invoke
-          // it immediately once we're unpaused
           if (paused) {
             timerQueue.push({
               timerId,
@@ -122,8 +122,6 @@ export const createTimers = () => {
             return
           }
 
-          // else go ahead and invoke the real function
-          // the same way the browser otherwise would
           return invoke(fnOrCode, params)
         }
 
@@ -133,20 +131,16 @@ export const createTimers = () => {
       }
     }
 
-    // `Object.assign` because the project's Node typings merge
-    // `setTimeout.__promisify__` into `window.setTimeout`, which the browser's
-    // own setTimeout, and so this wrapper, does not have.
-    Object.assign(window, {
-      setTimeout: wrapTimer('setTimeout'),
-      setInterval: wrapTimer('setInterval'),
-      requestAnimationFrame: wrapTimer('requestAnimationFrame'),
-      clearTimeout: wrapCancel('clearTimeout'),
-      clearInterval: wrapCancel('clearInterval'),
-      cancelAnimationFrame: wrapCancel('cancelAnimationFrame'),
-    })
+    const timerWindow: TimerWindow = window
+
+    timerWindow.setTimeout = wrapTimer('setTimeout')
+    timerWindow.setInterval = wrapTimer('setInterval')
+    timerWindow.requestAnimationFrame = wrapTimer('requestAnimationFrame')
+    timerWindow.clearTimeout = wrapCancel('clearTimeout')
+    timerWindow.clearInterval = wrapCancel('clearInterval')
+    timerWindow.cancelAnimationFrame = wrapCancel('cancelAnimationFrame')
   }
 
-  // start with initial values
   reset()
 
   return {
