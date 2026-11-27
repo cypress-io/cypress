@@ -7,6 +7,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where component tests using `@cypress/vite-dev-server` could intermittently fail with `TypeError: Failed to fetch dynamically imported module` while loading a support or spec file. Transient module-loading failures no longer fail the test run. Fixes [#34158](https://github.com/cypress-io/cypress/issues/34158).
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
 - Fixed an issue where the `junit` reporter, and custom reporters that use `mocha-junit-reporter`, printed `Couldn't determine Mocha version` on every run. Fixed in [#35561](https://github.com/cypress-io/cypress/pull/35561).
 

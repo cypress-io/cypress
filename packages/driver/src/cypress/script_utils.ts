@@ -3,6 +3,53 @@ import Bluebird from 'bluebird'
 import $networkUtils from './network_utils'
 import $sourceMapUtils from './source_map_utils'
 
+const DYNAMIC_IMPORT_FETCH_ERROR = 'Failed to fetch dynamically imported module'
+const viteImportsReloaded = new Set<string>()
+
+type ViteScriptLoader = (() => Promise<unknown>) & {
+  isViteDevServerImport?: boolean
+}
+
+const isViteDynamicImportFetchError = (error: unknown) => {
+  if (typeof error !== 'object' || error === null) {
+    return false
+  }
+
+  const possibleError = error as { message?: unknown, name?: unknown }
+
+  return possibleError.name === 'TypeError'
+    && typeof possibleError.message === 'string'
+    && possibleError.message.includes(DYNAMIC_IMPORT_FETCH_ERROR)
+}
+
+const loadScript = (specWindow: Window, script: Script, load: ViteScriptLoader) => {
+  return load()
+  .then((value) => {
+    viteImportsReloaded.delete(script.relativeUrl)
+
+    return value
+  })
+  .catch((error) => {
+    if (!load.isViteDevServerImport || !isViteDynamicImportFetchError(error)) {
+      throw error
+    }
+
+    // A failed ES module remains cached in the document's module map, so another
+    // import() in this iframe cannot recover it. Reload the spec document once;
+    // if the same entry fails again, surface the original error instead of looping.
+    if (viteImportsReloaded.delete(script.relativeUrl)) {
+      throw error
+    }
+
+    viteImportsReloaded.add(script.relativeUrl)
+    specWindow.location.reload()
+
+    // Navigation discards this document. Keep its load chain pending so Cypress
+    // does not initialize or report an error from the iframe being replaced.
+    return new Promise(() => {})
+  })
+}
+
 const fetchScript = (scriptWindow, script) => {
   return $networkUtils.fetch(script.relativeUrl, scriptWindow)
   .then((contents) => {
@@ -36,7 +83,7 @@ const evalScripts = (specWindow, scripts: any = []) => {
     const [script, contents] = _script
 
     if (script.load) {
-      return script.load()
+      return loadScript(specWindow, script, script.load)
     }
 
     return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
@@ -74,6 +121,7 @@ interface Script {
   absolute: string
   relative: string
   relativeUrl: string
+  load?: ViteScriptLoader
 }
 
 interface RunScriptsOptions {
