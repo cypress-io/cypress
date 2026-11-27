@@ -95,7 +95,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     //   - Text/Data/Markup/Markdown files
     //   - Styles
     // Other asset types like audio/video are unlikely to be imported into a JS file thus are not considered here
-    return /\.(svg|png|jpe?g|gif|tiff|webp|json|md|txt|xml|x?html?|css|less|s[c|a]ss?)(\?|$)/gi.test(importTarget)
+    return /\.(?:svg|png|jpe?g|gif|tiff|webp|json|md|txt|xml|x?html?|css|less|s[ac]ss?)(?:\?|$)/i.test(importTarget)
   }
 
   /**
@@ -117,7 +117,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
     debug(`Remapping imports for module ${moduleId}`)
     let counter = 0
 
-    const moduleIdentifier = moduleId.replace(/[^a-zA-Z\d]/g, '_')
+    const moduleIdentifier = moduleId.replace(/[^a-z\d]/gi, '_')
 
     // Ensure import comes at start of line *or* is prefixed by a space so we don't capture things like
     // `Refresh.__hmr_import('')
@@ -146,7 +146,7 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
         // e.g.: import TheDefault, { Named }, * as Everything from 'module'
         // ======> ['TheDefault', '{ Named }', 'Everything']
         importVars
-        .split(/(?:(?<=})\s*,\s*)|(?:\s*,\s*(?={))/g)
+        .split(/(?<=\})\s*,\s*|\s*,\s*(?=\{)/g)
         .forEach((importVar) => {
           const declarations = []
 

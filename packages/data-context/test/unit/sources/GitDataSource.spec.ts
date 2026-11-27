@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import path from 'path'
 import os from 'os'
 import { simpleGit } from 'simple-git'
@@ -43,7 +43,7 @@ describe('GitDataSource', () => {
   })
 
   it(`gets correct status for files on ${os.platform()}`, async function () {
-    const onBranchChange = jest.fn()
+    const onBranchChange = vi.fn()
     const dfd = Promise.withResolvers()
 
     // create a file and modify a file to express all
@@ -75,19 +75,19 @@ describe('GitDataSource', () => {
     const unmodified = gitInfo.gitInfoFor(aRecordSpec)!
     const modified = gitInfo.gitInfoFor(xhrSpec)!
 
-    expect(created.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(created.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(created.statusType).toEqual('created')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(created.author).not.toBeUndefined()
     expect(created.lastModifiedTimestamp).not.toBeUndefined()
 
-    expect(unmodified.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(unmodified.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(unmodified.statusType).toEqual('unmodified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(unmodified.author).not.toBeUndefined()
     expect(unmodified.lastModifiedTimestamp).not.toBeUndefined()
 
-    expect(modified.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(modified.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(modified.statusType).toEqual('modified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(modified.author).not.toBeUndefined()
@@ -124,9 +124,9 @@ describe('GitDataSource', () => {
     gitInfo = new GitDataSource({
       isRunMode: false,
       projectRoot: projectPath,
-      onBranchChange: jest.fn(),
+      onBranchChange: vi.fn(),
       onGitInfoChange: dfd.resolve,
-      onError: jest.fn(),
+      onError: vi.fn(),
     })
 
     await Promise.all(
@@ -146,7 +146,7 @@ describe('GitDataSource', () => {
     filepaths.forEach((filepath, index) => {
       const result = results[index]
 
-      expect(result?.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+      expect(result?.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
       expect(result?.statusType).toEqual('created')
     })
   })
@@ -184,9 +184,9 @@ describe('GitDataSource', () => {
     gitInfo = new GitDataSource({
       isRunMode: false,
       projectRoot: projectPath,
-      onBranchChange: jest.fn(),
+      onBranchChange: vi.fn(),
       onGitInfoChange: dfd.resolve,
-      onError: jest.fn(),
+      onError: vi.fn(),
     })
 
     gitInfo.setSpecs(specs)
@@ -227,9 +227,9 @@ describe('GitDataSource', () => {
       gitInfo = new GitDataSource({
         isRunMode: false,
         projectRoot: projectPath,
-        onBranchChange: jest.fn(),
+        onBranchChange: vi.fn(),
         onGitInfoChange: dfd.resolve,
-        onError: jest.fn(),
+        onError: vi.fn(),
       })
 
       gitInfo.setSpecs(specs)
@@ -295,7 +295,7 @@ describe('GitDataSource', () => {
   })
 
   it(`watches switching branches on ${os.platform()}`, async () => {
-    const stub = jest.fn()
+    const stub = vi.fn()
     const dfd = Promise.withResolvers()
 
     stub.mockImplementationOnce(dfd.resolve)
@@ -304,8 +304,8 @@ describe('GitDataSource', () => {
       isRunMode: false,
       projectRoot: projectPath,
       onBranchChange: stub,
-      onGitInfoChange: jest.fn(),
-      onError: jest.fn(),
+      onGitInfoChange: vi.fn(),
+      onError: vi.fn(),
     })
 
     const result = await dfd.promise
@@ -321,7 +321,7 @@ describe('GitDataSource', () => {
   })
 
   it(`handles error while watching .git on ${os.platform()}`, async () => {
-    jest.spyOn(chokidar, 'watch').mockImplementation(() => {
+    vi.spyOn(chokidar, 'watch').mockImplementation(() => {
       const mockWatcher = {
         on: (event, fn) => {
           if (event === 'error') {
@@ -334,8 +334,8 @@ describe('GitDataSource', () => {
       return mockWatcher as chokidar.FSWatcher
     })
 
-    const errorStub = jest.fn()
-    const stub = jest.fn()
+    const errorStub = vi.fn()
+    const stub = vi.fn()
     const dfd = Promise.withResolvers()
 
     stub.mockImplementationOnce(dfd.resolve)
@@ -344,7 +344,7 @@ describe('GitDataSource', () => {
       isRunMode: false,
       projectRoot: projectPath,
       onBranchChange: stub,
-      onGitInfoChange: jest.fn(),
+      onGitInfoChange: vi.fn(),
       onError: errorStub,
     })
 
@@ -359,7 +359,7 @@ describe('GitDataSource', () => {
     it('does not include commits that are part of the Git tree from a merge', async () => {
       const dfd = Promise.withResolvers()
 
-      const logCallback = jest.fn()
+      const logCallback = vi.fn()
 
       logCallback.mockImplementationOnce(dfd.resolve)
 
@@ -393,9 +393,9 @@ describe('GitDataSource', () => {
       gitInfo = new GitDataSource({
         isRunMode: false,
         projectRoot: projectPath,
-        onBranchChange: jest.fn(),
-        onGitInfoChange: jest.fn(),
-        onError: jest.fn(),
+        onBranchChange: vi.fn(),
+        onGitInfoChange: vi.fn(),
+        onError: vi.fn(),
         onGitLogChange: logCallback,
       })
 

@@ -1,4 +1,5 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import type { DataContext } from '../../src'
 import { getError } from '@packages/errors'
 import { createTestDataContext } from './helper'
@@ -9,12 +10,12 @@ const requireError = (message: string) => {
 
 describe('DataContext open mode error output', () => {
   let ctx: DataContext
-  let consoleError: ReturnType<typeof jest.spyOn>
+  let consoleError: ReturnType<typeof vi.spyOn>
 
   const printed = () => consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
 
   beforeEach(() => {
-    consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     ctx = createTestDataContext('open')
   })
 
@@ -112,7 +113,7 @@ describe('DataContext open mode error output', () => {
       return projectCtx
     }
 
-    const recorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionLoadError as jest.Mock
+    const recorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionLoadError as Mock
 
     it('sends the error, with its stack trace and without color codes, for the open project', () => {
       const projectCtx = openProject('/projects/foo')
@@ -197,7 +198,7 @@ describe('DataContext open mode error output', () => {
     })
 
     describe('a plugins process that exited after the session started', () => {
-      const pluginsRecorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionPluginsError as jest.Mock
+      const pluginsRecorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionPluginsError as Mock
 
       it('is recorded apart from the load errors, without color codes', () => {
         const projectCtx = openProject('/projects/foo')
@@ -232,7 +233,7 @@ describe('DataContext open mode error output', () => {
     })
 
     describe('withdrawing the record', () => {
-      const cleared = (projectCtx: DataContext) => projectCtx._apis.projectApi.clearSessionLoadError as jest.Mock
+      const cleared = (projectCtx: DataContext) => projectCtx._apis.projectApi.clearSessionLoadError as Mock
 
       // Try again clears the error on display, then loads the configuration again: one that
       // still fails reports the error again, and one that loads withdraws it once the project starts
@@ -249,8 +250,8 @@ describe('DataContext open mode error output', () => {
       it('happens when the project is cleared', async () => {
         const projectCtx = openProject('/projects/foo')
 
-        jest.spyOn(projectCtx.lifecycleManager, 'clearCurrentProject').mockResolvedValue(undefined)
-        projectCtx._apis.projectApi.closeActiveProject = jest.fn(() => Promise.resolve(undefined)) as any
+        vi.spyOn(projectCtx.lifecycleManager, 'clearCurrentProject').mockResolvedValue(undefined)
+        projectCtx._apis.projectApi.closeActiveProject = vi.fn(() => Promise.resolve(undefined)) as any
 
         await projectCtx.actions.project.clearCurrentProject()
 
@@ -263,7 +264,7 @@ describe('DataContext open mode error output', () => {
         const projectCtx = openProject('/projects/foo')
 
         // @ts-expect-error - only the call that switches the testing type is needed
-        projectCtx.lifecycleManager._configManager = { setTestingType: jest.fn() }
+        projectCtx.lifecycleManager._configManager = { setTestingType: vi.fn() }
 
         projectCtx.reportLoadError('Your configFile is invalid')
         projectCtx.lifecycleManager.setCurrentTestingType('component')
@@ -338,7 +339,7 @@ describe('DataContext open mode error output', () => {
   describe('in run mode', () => {
     it('leaves error output to the run mode exit path', () => {
       const runCtx = createTestDataContext('run')
-      const runModeExitEarly = jest.fn()
+      const runModeExitEarly = vi.fn()
 
       // @ts-expect-error - only the exit hook is needed
       runCtx.lifecycleManager.runModeExitEarly = runModeExitEarly

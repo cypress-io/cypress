@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import { stripIndent } from 'common-tags'
 import { parse } from '@babel/parser'
 import { insertValueInJSString } from '../../src/util/config-file-updater'

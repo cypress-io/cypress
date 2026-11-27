@@ -18,11 +18,12 @@
   ],
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
+    "check-ts": "tsc --noEmit && tsc -p test/tsconfig.json",
     "cypress:open": "node ../../scripts/cypress open --project . --component",
     "cypress:run": "node ../../scripts/cypress run --project . --component",
     "lint": "eslint",
-    "test": "npm run cypress:run",
+    "test": "npm run test-unit && npm run cypress:run",
+    "test-unit": "vitest run",
     "watch": "tsc -w"
   },
   "lint-staged": {
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@tanstack/react-query": "4.36.1",
     "@types/picomatch": "2.3.0",
     "@vitejs/plugin-react": "4.6.0",
@@ -43,7 +45,8 @@
     "react-dom": "18.3.1",
     "react-router": "6.30.6",
     "react-router-dom": "6.30.6",
-    "vite": "^8.0.9"
+    "vite": "^8.0.9",
+    "vitest": "3.2.7"
   },
   "publishConfig": {
     "access": "public"

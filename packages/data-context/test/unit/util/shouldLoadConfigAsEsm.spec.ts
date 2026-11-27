@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach } from 'vitest'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'

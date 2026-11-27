@@ -8,14 +8,15 @@ import type { ResourceType } from '@packages/proxy'
 import type { BodyDigest } from './body-digest'
 import { digestBody } from './body-digest'
 import type { ICriClient } from './cri-client'
-import { createCdpFetchCodec } from './cdp-fetch-codec'
+import { createCdpFetchCodec, toUnchangedFulfilledHeaders } from './cdp-fetch-codec'
 import { CDPNetworkExtraInfo } from './cdp-network-extra-info'
-import { CdpBodyCapture } from './cdp-body-capture'
+import { CdpBodyCapture, isProvablyFinite } from './cdp-body-capture'
 import { toNetworkError } from './cdp-network-error'
 import { AUT_FRAME_HEADER, EXTRA_TARGET_HEADER, getMetadataHeaderValue } from '../constants'
 import { normalizeResourceType } from './normalize-resource-type'
 import type { CookiesBeforeIntercept } from './cdp-set-cookie-sync'
 import { planSetCookieSync } from './cdp-set-cookie-sync'
+import { isTakenBodyReadError, readResponseBody } from './read-response-body'
 
 const debug = debugModule('cypress:server:browsers:cdp-fetch-transport')
 
@@ -133,6 +134,13 @@ type CdpFetchTransportOptions = {
    */
   shouldStreamBody?: (event: Protocol.Fetch.RequestPausedEvent, context: { hasMatchingRoute: boolean }) => boolean
   /**
+   * True when a body the transport reads should be read in chunks with
+   * Fetch.takeResponseBodyAsStream instead of one Fetch.getResponseBody. A
+   * taken body is then always fulfilled, never continued. False (the default)
+   * reads it whole.
+   */
+  readBodyInChunks?: (event: Protocol.Fetch.RequestPausedEvent) => boolean
+  /**
    * Gates whether a stream-classified response arms CdpBodyCapture. False
    * (the default) when Test Replay is not recording — arming would just pump
    * bytes nobody reads.
@@ -161,6 +169,9 @@ export interface CdpFetchTransportRequest extends CdpFetchRequest {
 export interface CdpFetchTransportResponse extends CdpFetchTransportRequest {
   body?: string
   bodySkipped?: boolean
+  // The body was read with Fetch.takeResponseBodyAsStream, after which Chrome
+  // only accepts Fetch.fulfillRequest or Fetch.failRequest for this pause.
+  bodyTaken?: boolean
   bodyStream?: Readable
   // Side-channel capture of the bytes the browser delivered for a
   // stream-classified response (origin bytes when continued, the stubbed body
@@ -234,6 +245,12 @@ export class CdpFetchTransport {
    *   arrives (navigation away) has nothing else to remove its entry.
    */
   private readonly originRedirectedRequests = new Set<string>()
+
+  // Bodies read with Fetch.takeResponseBodyAsStream, by Fetch request id, kept
+  // until their pause is released: an error path that would otherwise continue
+  // the response fulfills it with the origin's body instead. Not cleared by
+  // reset(), since the flows reset() rejects still release their pauses after.
+  private readonly takenBodies = new Map<string, { body: Buffer, event: Protocol.Fetch.RequestPausedEvent, sessionId?: string }>()
 
   private isStarted = false
 
@@ -437,6 +454,8 @@ export class CdpFetchTransport {
       this.client.off('Fetch.requestPaused', this.resolveResponse)
       this.client.off('Network.loadingFailed', this.onLoadingFailed)
       this.rejectAll(new Error('CDP Fetch transport stopped'))
+      // Fetch.disable has released every pause, taken or not.
+      this.takenBodies.clear()
       this.networkExtraInfo.stop()
       this.bodyCapture.stop()
       debug('CDP Fetch transport stopped')
@@ -717,7 +736,9 @@ export class CdpFetchTransport {
           // codes with the phrase "unknown"; mirror that.
           responsePhrase: STATUS_CODES[response.responseCode] ?? 'unknown',
           ...(response.responseHeaders ? { responseHeaders: response.responseHeaders } : {}),
-          ...(response.body !== undefined ? { body: response.body } : {}),
+          ...(response.body !== undefined
+            ? { body: response.body }
+            : response.bodyTaken ? { body: this.takenBodies.get(response.requestId)?.body.toString('base64') ?? '' } : {}),
         }, response.sessionId)
       } else {
         debug('continuing response %s: status %s', event.request.url, response.responseCode)
@@ -733,6 +754,7 @@ export class CdpFetchTransport {
         }, response.sessionId)
       }
 
+      this.takenBodies.delete(response.requestId)
       this.cleanup(fetchRequestId, deferred)
     } catch (err) {
       if (requestContinued) {
@@ -766,17 +788,19 @@ export class CdpFetchTransport {
         // (res.send({ forceNetworkError: true })) must reach the page as one
         // too. The request stage already continued, so the pause in hand is the
         // response — fail it rather than releasing the origin's response.
+        const failRequestId = response?.requestId ?? responseRequestId ?? event.requestId
+
+        this.takenBodies.delete(failRequestId)
+
         await this.safeSend('Fetch.failRequest', {
-          requestId: response?.requestId ?? responseRequestId ?? event.requestId,
+          requestId: failRequestId,
           errorReason: 'Failed',
         }, response?.sessionId ?? responseSessionId ?? sessionId)
       } else {
         const continueRequestId = response?.requestId ?? responseRequestId
 
         if (continueRequestId) {
-          await this.safeSend('Fetch.continueResponse', {
-            requestId: continueRequestId,
-          }, response?.sessionId ?? responseSessionId ?? sessionId)
+          await this.releaseResponseUnchanged(continueRequestId, response?.sessionId ?? responseSessionId ?? sessionId)
         }
       }
 
@@ -872,6 +896,7 @@ export class CdpFetchTransport {
     const bodySkipped = this.options.shouldStreamBody?.(event, { hasMatchingRoute: deferred.hadMatchingRoutes ?? false }) ?? false
     const redirectPause = isRedirectPause(event)
     let originalBody: Buffer
+    let bodyTaken = false
     let captureStream: Readable | undefined
 
     if (bodySkipped) {
@@ -883,7 +908,7 @@ export class CdpFetchTransport {
       // Redirect pauses never arm: their hop emits no loadingFinished, so an
       // armed entry would sit unread until the transport resets.
       if (event.networkId && !redirectPause && this.options.shouldCaptureBody?.()) {
-        captureStream = await this.bodyCapture.arm(event.networkId, sessionId)
+        captureStream = await this.bodyCapture.arm(event.networkId, sessionId, { capped: !isProvablyFinite(event) })
 
         // The flow may have been rejected while arming awaited CDP, by
         // reset()/stop() or by a browser cancel. Those leave different traces:
@@ -913,26 +938,40 @@ export class CdpFetchTransport {
       originalBody = Buffer.alloc(0)
     } else {
       try {
-        originalBody = await this.fetchResponseBody(event, redirectPause, sessionId)
+        ({ body: originalBody, taken: bodyTaken } = await this.fetchResponseBody(event, redirectPause, sessionId))
       } catch (err) {
         deferred.reject(new Error(`CDP Fetch response body unavailable for ${event.request.url}: ${(err as Error).message}`))
 
-        await this.safeSend('Fetch.continueResponse', {
-          requestId: event.requestId,
-        }, sessionId)
+        if (isTakenBodyReadError(err)) {
+          await this.safeSend('Fetch.failRequest', {
+            requestId: event.requestId,
+            errorReason: 'Failed',
+          }, sessionId)
+        } else {
+          await this.safeSend('Fetch.continueResponse', {
+            requestId: event.requestId,
+          }, sessionId)
+        }
 
         return
       }
+
+      if (bodyTaken) {
+        this.takenBodies.set(event.requestId, { body: originalBody, event, sessionId })
+      }
     }
 
-    // reset() may have rejected this flow while the awaits above were pending.
-    // The resolve below would be a no-op and nothing else owns this pause —
-    // release it, or the browser stays paused (reset keeps Fetch enabled).
-    if (this.inFlightRequests.get(fetchRequestId) !== deferred) {
+    // reset() or a browser cancel may have rejected this flow while the awaits
+    // above were pending. The resolve below would be a no-op and nothing else
+    // owns this pause — release it, or the browser stays paused (reset keeps
+    // Fetch enabled) and a taken body stays in takenBodies. A cancel only drops
+    // the network key, and the fetch-id entry lingers until the proxy's error
+    // stage finishes. `.has` rather than `!== deferred`, because redirect hops
+    // share a network id and a newer hop's entry replaces an older hop's.
+    if (this.inFlightRequests.get(fetchRequestId) !== deferred ||
+      (deferred.networkKey !== undefined && !this.inFlightByNetworkId.has(deferred.networkKey))) {
       debug('releasing response pause rejected while awaiting CDP: %s', event.request.url)
-      await this.safeSend('Fetch.continueResponse', {
-        requestId: event.requestId,
-      }, sessionId)
+      await this.releaseResponseUnchanged(event.requestId, sessionId)
 
       return
     }
@@ -954,6 +993,7 @@ export class CdpFetchTransport {
       ...(cookiesBeforeIntercept ? { cookiesBeforeIntercept } : {}),
       sessionId,
       ...(bodySkipped ? { bodySkipped: true } : {}),
+      ...(bodyTaken ? { bodyTaken: true } : {}),
       ...(redirectPause ? { redirectPause: true } : {}),
       ...(captureStream ? { captureStream } : {}),
     })
@@ -1074,16 +1114,36 @@ export class CdpFetchTransport {
     })
   }
 
-  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, redirectPause: boolean, sessionId?: string): Promise<Buffer> => {
+  private fetchResponseBody = async (event: Protocol.Fetch.RequestPausedEvent, redirectPause: boolean, sessionId?: string): Promise<{ body: Buffer, taken: boolean }> => {
     if (redirectPause) {
-      return Buffer.alloc(0)
+      return { body: Buffer.alloc(0), taken: false }
     }
 
-    const response = await this.client.send('Fetch.getResponseBody', {
-      requestId: event.requestId,
-    }, sessionId) as Protocol.Fetch.GetResponseBodyResponse
+    return readResponseBody(this.client, event, { inChunks: this.options.readBodyInChunks?.(event) ?? false, sessionId })
+  }
 
-    return Buffer.from(response.body, response.base64Encoded ? 'base64' : 'utf8')
+  /**
+   * Releases a response pause without the middleware's changes: continued, or,
+   * when its body was taken, fulfilled with the origin's body and headers.
+   */
+  private releaseResponseUnchanged = async (requestId: string, sessionId?: string): Promise<void> => {
+    const taken = this.takenBodies.get(requestId)
+
+    if (!taken) {
+      await this.safeSend('Fetch.continueResponse', { requestId }, sessionId)
+
+      return
+    }
+
+    this.takenBodies.delete(requestId)
+
+    await this.safeSend('Fetch.fulfillRequest', {
+      requestId,
+      responseCode: taken.event.responseStatusCode ?? 200,
+      responsePhrase: STATUS_CODES[taken.event.responseStatusCode ?? 200] ?? 'unknown',
+      ...(taken.event.responseHeaders ? { responseHeaders: toUnchangedFulfilledHeaders(taken.event.responseHeaders) } : {}),
+      body: taken.body.toString('base64'),
+    }, taken.sessionId ?? sessionId)
   }
 
   private toContinueRequestHeaders (headers: Protocol.Network.Headers): Protocol.Fetch.HeaderEntry[] {

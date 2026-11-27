@@ -86,6 +86,19 @@ describe('e2e config', () => {
     })
   })
 
+  ;[
+    ['an ES module JavaScript', 'mjs'],
+    ['a CommonJS JavaScript', 'cjs'],
+    ['an ES module TypeScript', 'mts'],
+    ['a CommonJS TypeScript', 'cts'],
+  ].forEach(([kind, extension]) => {
+    it(`supports ${kind} config in a default cypress.config.${extension} file`, function () {
+      return systemTests.exec(this, {
+        project: `config-with-${extension}`,
+      })
+    })
+  })
+
   it('throws error when multiple default config file are found in project', async function () {
     await Fixtures.scaffoldProject('pristine-with-e2e-testing')
 

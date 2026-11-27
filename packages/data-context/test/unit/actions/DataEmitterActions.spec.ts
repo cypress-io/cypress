@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, jest } from '@jest/globals'
+import { describe, expect, it, beforeAll, vi } from 'vitest'
 import type { DataContext } from '../../../src'
 import { DataEmitterActions } from '../../../src/actions/DataEmitterActions'
 import { createTestDataContext } from '../helper'
@@ -125,7 +125,7 @@ describe('DataEmitterActions', () => {
     it('handles multiple subscriptions', async () => {
       const actions = new DataEmitterActions(ctx)
 
-      const unsubscribe1 = jest.fn()
+      const unsubscribe1 = vi.fn()
 
       const subscription1 = actions.subscribeTo('specsChange', { sendInitial: true, onUnsubscribe: unsubscribe1 })
 
@@ -141,7 +141,7 @@ describe('DataEmitterActions', () => {
       let subscription2
       let iteratorFactory2
       let iteratorPromise2
-      const unsubscribe2 = jest.fn()
+      const unsubscribe2 = vi.fn()
 
       setImmediate(() => {
         subscription2 = actions.subscribeTo('specsChange', { sendInitial: true, onUnsubscribe: unsubscribe2 })

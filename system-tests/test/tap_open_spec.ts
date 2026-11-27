@@ -601,7 +601,7 @@ describe('tap CLI against a settled run', function () {
     snapshotRendering('specs listing', [heading, ...rows.sort()].join('\n'), [
       // Each row trails git's relative last-modified time, which drifts with the
       // clock — "a few seconds ago" the moment after scaffolding, more later.
-      [/ {2,}[\w ]+ ago$/gm, '  <modified>'],
+      [/ {2}[\w ]+ ago$/gm, '  <modified>'],
     ])
   })
 
@@ -1635,7 +1635,7 @@ describe('tap CLI debugging a failed run end to end', function () {
     )
 
     snapshotRendering('complete failed run debugging journey', journeyOutput.join('\n\n'), [
-      [/ {2,}[\w ]+ ago$/gm, '  <modified>'],
+      [/ {2}[\w ]+ ago$/gm, '  <modified>'],
       [new RegExp(pid, 'g'), '<pid>'],
       [/x \d+ {3}y \d+/, 'x <x>   y <y>'],
       [/ {2,}/g, '  '],

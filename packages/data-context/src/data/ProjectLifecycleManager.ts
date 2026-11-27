@@ -34,6 +34,8 @@ const POTENTIAL_CONFIG_FILES = [
   'cypress.config.mjs',
   'cypress.config.cjs',
   'cypress.config.js',
+  'cypress.config.mts',
+  'cypress.config.cts',
 ]
 
 interface ProjectMetaState {

@@ -40,6 +40,9 @@ type CDPConnectionEventListeners = {
   'cdp-connection-reconnect-error': (err: CypressError) => void
   'cdp-connection-reconnect': () => void
   'cdp-connection-closed': () => void
+  // Only for a socket that closed without disconnect() being called, which
+  // 'cdp-connection-closed' can't tell apart from one Cypress closed itself.
+  'cdp-connection-lost': () => void
   'cdp-connection-reconnect-attempt': (attemptNumber: number) => void
 }
 export type CDPConnectionEvent = keyof CDPConnectionEventListeners
@@ -131,6 +134,7 @@ export class CDPConnection {
     }
 
     this._emitter.emit('cdp-connection-closed')
+    this._emitter.emit('cdp-connection-lost')
   }
 
   async disconnect () {

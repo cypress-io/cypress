@@ -1589,7 +1589,7 @@ describe('lib/exec/spawn', function () {
       const filteredOut = Buffer.from('ERROR:dbus/bus.cc:123: noise')
       const passedThrough = Buffer.from('Some other error message')
 
-      const FILTER_PATTERN = /ERROR:dbus\/(bus|object_proxy)\.cc/
+      const FILTER_PATTERN = /ERROR:dbus\/(?:bus|object_proxy)\.cc/
 
       // Return a real stream (with .on) so sourceStream.pipe(filter(...)) works; apply same filter logic
       vi.mocked(stderrFilter).mockImplementation((dest: NodeJS.WritableStream) => {

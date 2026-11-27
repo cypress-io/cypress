@@ -1,18 +1,15 @@
 // this build utility script posts on the commit in the default branch "develop"
 // telling the user how they can install pre-release build of the Test Runner
 
-const la = require('lazy-ass')
-const is = require('check-more-types')
-const os = require('os')
-const {
-  getNameAndBinary,
-  getShortCommit,
-  getCIName,
-  getCIBuildUrl,
-} = require('./utils')
-const { Octokit } = require('@octokit/core')
-const { createAppAuth } = require('@octokit/auth-app')
-const { stripIndent } = require('common-tags')
+import la from 'lazy-ass'
+import is from 'check-more-types'
+import os from 'node:os'
+import { Octokit } from '@octokit/core'
+import { createAppAuth } from '@octokit/auth-app'
+import { stripIndent } from 'common-tags'
+import utils from './utils.js'
+
+const { getNameAndBinary, getShortCommit, getCIName, getCIBuildUrl } = utils
 
 const { npm, binary } = getNameAndBinary(process.argv)
 
@@ -50,7 +47,7 @@ const ciName = getCIName() || 'Unknown CI'
 const buildUrl = getCIBuildUrl()
 const ciBuildLink = buildUrl ? `[${ciName} has built](${buildUrl})` : `${ciName} has built`
 
-const getInstallMessage = () => {
+const getInstallMessage = (): string => {
   return stripIndent`
     ${ciBuildLink} the \`${platform} ${arch}\` version of the Test Runner.
 
@@ -73,7 +70,7 @@ const appOctokit = new Octokit({
   },
 })
 
-appOctokit.request(
+const response = await appOctokit.request(
   'POST /repos/{owner}/{repo}/commits/{commit_sha}/comments',
   {
     owner: 'cypress-io',
@@ -81,4 +78,6 @@ appOctokit.request(
     commit_sha: sha,
     body: getInstallMessage(),
   },
-).then((response) => console.log(response))
+)
+
+console.log(response)

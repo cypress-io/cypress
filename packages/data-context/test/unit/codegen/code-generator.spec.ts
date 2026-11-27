@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
+import { describe, expect, it, beforeEach } from 'vitest'
 import { parse } from '@babel/parser'
 import dedent from 'dedent'
 import fs from 'fs-extra'
@@ -110,7 +110,7 @@ describe('code-generator', () => {
     mTimesAfter = await getMTimes(overwriteCodeGenResults.files)
 
     expect(mTimesBefore).not.toEqual(mTimesAfter)
-    mTimesAfter.forEach((time, i) => expect(time > mTimesBefore[i]))
+    mTimesAfter.forEach((time, i) => expect(time).toBeGreaterThan(mTimesBefore[i]!))
   })
 
   it('should generate from integration template', async () => {
@@ -339,7 +339,7 @@ describe('code-generator', () => {
 
     expect(codeGenResult.files.length).toBeGreaterThan(0)
     for (const res of codeGenResult.files) {
-      expect(fs.access(res.file, fs.constants.F_OK)).resolves.not.toThrow()
+      await expect(fs.access(res.file, fs.constants.F_OK)).resolves.not.toThrow()
       const shouldParse = ['js', 'ts'].some((ext) => res.file.endsWith(ext))
 
       if (shouldParse) {
@@ -429,8 +429,8 @@ describe('code-generator', () => {
   })
 
   describe('hasNonExampleSpec', () => {
-    it('should error if template dir does not exist', () => {
-      expect(getExampleSpecPaths('')).rejects.toThrow()
+    it('should error if template dir does not exist', async () => {
+      await expect(getExampleSpecPaths('')).rejects.toThrow()
     })
 
     it('should return relative paths to example specs', async () => {

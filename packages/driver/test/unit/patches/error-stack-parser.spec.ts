@@ -3,6 +3,7 @@ import errorStackParser from 'error-stack-parser'
 
 // The regex that patches/error-stack-parser+2.0.6.dev.patch replaces. Here it
 // only runs on short lines, where its backtracking stays cheap.
+// eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/optimal-quantifier-concatenation, regexp/no-useless-non-capturing-group -- a verbatim copy of the upstream regex, kept as-is so the spec compares against the parser's real unpatched behavior
 const functionNameRegex = /((.*".+"[^@]*)?[^@]*)(?:@)/
 
 const parseLine = (line: string) => {

@@ -1,4 +1,5 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import childProcess from 'child_process'
 import EventEmitter from 'events'
 import { createTestDataContext } from '../helper'
@@ -6,7 +7,7 @@ import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
 import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 import { EventRegistrar } from '../../../src/data/EventRegistrar'
 
-jest.mock('child_process')
+vi.mock('child_process')
 
 class FakeChild extends EventEmitter {
   pid = 1234
@@ -14,8 +15,8 @@ class FakeChild extends EventEmitter {
   connected = true
   stdout = null
   stderr = null
-  send = jest.fn(() => true)
-  kill = jest.fn(() => {
+  send = vi.fn(() => true)
+  kill = vi.fn(() => {
     this.killed = true
 
     return true
@@ -24,20 +25,20 @@ class FakeChild extends EventEmitter {
 
 describe('config process exit', () => {
   let child: FakeChild
-  let onError: jest.Mock
+  let onError: Mock
   let ipc: ProjectConfigIpc
 
   beforeEach(() => {
     child = new FakeChild()
     // @ts-expect-error - mock
     childProcess.fork.mockImplementation(() => child)
-    onError = jest.fn()
+    onError = vi.fn()
     ipc = new ProjectConfigIpc(undefined, '/project', '/project/cypress.config.js', 'cypress.config.js', onError, () => {}, () => {})
   })
 
   afterEach(() => {
     ipc.cleanupIpc()
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   const finishSetup = async () => {
@@ -246,10 +247,10 @@ describe('config process exit', () => {
   describe('a crash reported through ProjectConfigManager', () => {
     const crash = async (state: 'ready' | 'loadingNodeEvents') => {
       const ctx = createTestDataContext('open')
-      const reportLoadError = jest.spyOn(ctx, 'reportLoadError').mockImplementation(() => {})
-      const reportPluginsError = jest.spyOn(ctx, 'reportPluginsError').mockImplementation(() => {})
+      const reportLoadError = vi.spyOn(ctx, 'reportLoadError').mockImplementation(() => {})
+      const reportPluginsError = vi.spyOn(ctx, 'reportPluginsError').mockImplementation(() => {})
 
-      jest.spyOn(ctx, 'onError').mockImplementation(() => {})
+      vi.spyOn(ctx, 'onError').mockImplementation(() => {})
 
       const configManager = new ProjectConfigManager({
         ctx,

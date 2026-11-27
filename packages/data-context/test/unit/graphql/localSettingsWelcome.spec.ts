@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import { execute, parse } from 'graphql'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { graphqlSchema } from '../../../graphql/schema'
@@ -15,8 +15,8 @@ describe('LocalSettingsPreferences.majorVersionWelcomeDismissed', () => {
     // isBrowserGivenByCli (or a defaultBrowser) counts.
     const ctx = createTestDataContext('open', { isBrowserGivenByCli: true, ...modeOptions })
 
-    jest.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({ majorVersionWelcomeDismissed: saved })
-    jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue({ name: 'electron' } as any)
+    vi.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({ majorVersionWelcomeDismissed: saved })
+    vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue({ name: 'electron' } as any)
     ctx.coreData.cliBrowser = 'electron'
 
     const result = await execute({ schema: graphqlSchema, document: query, contextValue: ctx })

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { defaultSpecPattern } from '@packages/config'
 import { CT_FRAMEWORKS } from '@packages/scaffold-config'
 import fs from 'fs-extra'
@@ -97,7 +97,7 @@ describe('spec-options', () => {
         })
 
         it('creates copy file if spec already exists', async () => {
-          jest.spyOn(fs, 'access').mockImplementationOnce(() => Promise.resolve()).mockImplementationOnce(() => Promise.reject())
+          vi.spyOn(fs, 'access').mockImplementationOnce(() => Promise.resolve()).mockImplementationOnce(() => Promise.reject())
 
           const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
@@ -158,7 +158,7 @@ describe('spec-options', () => {
         })
 
         it('creates copy file if spec already exists', async () => {
-          jest.spyOn(fs, 'access')
+          vi.spyOn(fs, 'access')
           .mockImplementationOnce(() => Promise.resolve())
           .mockImplementationOnce(() => Promise.reject())
 
@@ -197,7 +197,7 @@ describe('spec-options', () => {
           it(testName, async () => {
             // This stub simulates the spec file already existing the first time we try, which should cause a copy to be created
             if (makeCopy) {
-              jest.spyOn(fs, 'access')
+              vi.spyOn(fs, 'access')
               .mockImplementationOnce(() => Promise.resolve())
               .mockImplementationOnce(() => Promise.reject())
             }
@@ -205,10 +205,10 @@ describe('spec-options', () => {
             // This stub simulates that the component we are generating a spec from is using Typescript.
             if (isTypescriptComponent) {
               // @ts-expect-error - the mock resolves a string, as the utf8 `readFile` overload does
-              jest.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
+              vi.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
             } else {
               // @ts-expect-error - the mock resolves a string, as the utf8 `readFile` overload does
-              jest.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
+              vi.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
             }
 
             const currentProject = 'path/to/myProject'
@@ -322,6 +322,9 @@ describe('spec-options', () => {
           { condition: 'dollar', fileName: '$MyComponent.js', expectedFileName: '$MyComponent.cy.js', expectedComponentName: '$MyComponent' },
           { condition: 'underscores', fileName: 'My_Component.js', expectedFileName: 'My_Component.cy.js', expectedComponentName: 'My_Component' },
           { condition: 'mixed period- and hyphen-delimited', fileName: 'about-us.component.js', expectedFileName: 'about-us.component.cy.js', expectedComponentName: 'AboutUsComponent' },
+          { condition: 'two periods in a row', fileName: 'my..component.js', expectedFileName: 'my..component.cy.js', expectedComponentName: 'Mycomponent' },
+          { condition: 'digits', fileName: 'step2-form.vue', expectedFileName: 'step2-form.cy.js', expectedComponentName: 'Step2Form' },
+          { condition: 'non-ASCII letters', fileName: 'MyÜberComponent.js', expectedFileName: 'MyÜberComponent.cy.js', expectedComponentName: 'MyberComponent' },
         ].forEach(({ condition, fileName, expectedFileName, expectedComponentName }) => {
           it(`generates options for ${condition}`, async () => {
             const testSpecOptions = new SpecOptions({

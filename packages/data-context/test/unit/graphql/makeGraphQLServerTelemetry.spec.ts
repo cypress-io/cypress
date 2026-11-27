@@ -1,4 +1,5 @@
-import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import fetch from 'cross-fetch'
 import { client } from '@packages/socket/lib/client'
 import type { SocketShape } from '@packages/socket/lib/client'
@@ -12,24 +13,24 @@ import { createTestDataContext } from '../helper'
 describe('makeGraphQLServer with telemetry enabled', () => {
   let ctx: DataContext
   let port: number
-  let send: jest.Mock<(payload: string, onSuccess: () => void, onError: (err: Error) => void) => void>
+  let send: Mock<(payload: string, onSuccess: () => void, onError: (err: Error) => void) => void>
 
   beforeAll(async () => {
     delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
     process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY = 'true'
 
-    send = jest.fn()
-    jest.spyOn(telemetry, 'exporter').mockReturnValue({ send } as any)
+    send = vi.fn()
+    vi.spyOn(telemetry, 'exporter').mockReturnValue({ send } as any)
 
     ctx = createTestDataContext('open')
     setCtx(ctx)
-    jest.spyOn(ctx.html, 'launchpadHtml').mockResolvedValue('<body>launchpad with telemetry</body>')
+    vi.spyOn(ctx.html, 'launchpadHtml').mockResolvedValue('<body>launchpad with telemetry</body>')
     port = await makeGraphQLServer()
   })
 
   afterAll(async () => {
     delete process.env.CYPRESS_INTERNAL_ENABLE_TELEMETRY
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
 
     await new Promise<void>((resolve) => {
       const srv = ctx.coreData.servers.gqlServer

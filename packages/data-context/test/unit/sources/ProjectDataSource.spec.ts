@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import os from 'os'
 import fs from 'fs-extra'
 
@@ -131,6 +131,32 @@ describe('transformSpec', () => {
     }
 
     expect(result).toEqual(actual)
+  })
+
+  it('removes only the leading slash left after stripping the common root', () => {
+    const result = transformSpec({
+      projectRoot: '/project',
+      testingType: 'e2e',
+      absolute: '/project/cypress/e2e/nested/spec.cy.js',
+      commonRoot: '/project/cypress',
+      platform: 'linux',
+      sep: '/',
+    })
+
+    expect(result.relativeToCommonRoot).toEqual('e2e/nested/spec.cy.js')
+  })
+
+  it('leaves the path alone when the common root already ends in a slash', () => {
+    const result = transformSpec({
+      projectRoot: '/project',
+      testingType: 'e2e',
+      absolute: '/project/cypress/e2e/nested/spec.cy.js',
+      commonRoot: '/project/cypress/',
+      platform: 'linux',
+      sep: '/',
+    })
+
+    expect(result.relativeToCommonRoot).toEqual('e2e/nested/spec.cy.js')
   })
 })
 
@@ -278,6 +304,15 @@ describe('getLongestCommonPrefixFromPaths', () => {
     const lcp = getLongestCommonPrefixFromPaths([
       'src/frontend/MyComponent.cy.ts',
       'src/MyComponent.cy.ts',
+    ])
+
+    expect(lcp).toEqual('src')
+  })
+
+  it('with backslash-separated paths', () => {
+    const lcp = getLongestCommonPrefixFromPaths([
+      'src\\frontend\\MyComponent.cy.ts',
+      'src\\MyComponent.cy.ts',
     ])
 
     expect(lcp).toEqual('src')
@@ -645,9 +680,9 @@ describe('startSpecWatcher', () => {
     })
 
     it('early return specWatcher', () => {
-      const onStub = jest.fn()
+      const onStub = vi.fn()
 
-      jest.spyOn(chokidar, 'watch').mockImplementation(() => {
+      vi.spyOn(chokidar, 'watch').mockImplementation(() => {
         const mockWatcher = {
           on: onStub,
           close: () => ({ catch: () => {} }),
@@ -658,7 +693,7 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
+      vi.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
         return handleFsChange as _.DebouncedFunc<any>
@@ -708,9 +743,9 @@ describe('startSpecWatcher', () => {
     })
 
     it('creates file watcher based on given config properties', async () => {
-      const onStub = jest.fn()
+      const onStub = vi.fn()
 
-      jest.spyOn(chokidar, 'watch').mockImplementation(() => {
+      vi.spyOn(chokidar, 'watch').mockImplementation(() => {
         const mockWatcher = {
           on: onStub,
           close: () => ({ catch: () => {} }),
@@ -721,7 +756,7 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
+      vi.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
         return handleFsChange as _.DebouncedFunc<any>
@@ -756,10 +791,10 @@ describe('startSpecWatcher', () => {
       ] as FoundSpec[]
 
       // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
-      jest.spyOn(ctx.project, 'findSpecs').mockResolvedValue(mockFoundSpecs)
-      jest.spyOn(ctx.actions.project, 'setSpecs')
+      vi.spyOn(ctx.project, 'findSpecs').mockResolvedValue(mockFoundSpecs)
+      vi.spyOn(ctx.actions.project, 'setSpecs')
 
-      jest.spyOn(chokidar, 'watch').mockImplementation(() => {
+      vi.spyOn(chokidar, 'watch').mockImplementation(() => {
         const mockWatcher = {
           on: () => {},
           close: () => ({ catch: () => {} }),
@@ -770,7 +805,7 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
+      vi.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
         return handleFsChange as _.DebouncedFunc<any>
@@ -822,7 +857,7 @@ describe('ProjectDataSource', () => {
 
   describe('#defaultSpecFilename', () => {
     it('yields default if no spec pattern is set', async () => {
-      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [] })
+      vi.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [] })
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
@@ -830,14 +865,14 @@ describe('ProjectDataSource', () => {
     })
 
     it('yields default if the spec pattern is default', async () => {
-      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [defaultSpecPattern.e2e] })
+      vi.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [defaultSpecPattern.e2e] })
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
       expect(defaultSpecFileName).toEqual('cypress/e2e/spec.cy.js')
     })
 
     it('yields common prefix if there are existing specs', async () => {
-      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/e2e/**/*'] })
+      vi.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/e2e/**/*'] })
       // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
       ctx.project.setSpecs([
         { relative: 'cypress/e2e/foo/spec.js' },
@@ -850,7 +885,7 @@ describe('ProjectDataSource', () => {
     })
 
     it('yields spec pattern guess if there are no existing specs', async () => {
-      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/integration/**/*'] })
+      vi.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/integration/**/*'] })
 
       const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
@@ -858,10 +893,10 @@ describe('ProjectDataSource', () => {
     })
 
     it('yields correct filename from specpattern if there are existing specs', async () => {
-      jest.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({})
+      vi.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({})
 
       ctx.coreData.currentTestingType = 'component'
-      jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/component-tests/*.spec.js'] })
+      vi.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/component-tests/*.spec.js'] })
       // @ts-expect-error - the mocks are `FoundSpec`s without `relativeToCommonRoot`
       ctx.project.setSpecs([
         { relative: 'cypress/component-tests/foo/spec.spec.js' },
@@ -880,8 +915,8 @@ describe('ProjectDataSource', () => {
       })
 
       it('yields correct jsx extension if there are jsx files and specPattern allows', async () => {
-        jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [defaultSpecPattern.component] })
-        jest.spyOn(ctx.project, 'specPatternsByTestingType').mockResolvedValue({ specPattern: [defaultSpecPattern.component] })
+        vi.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: [defaultSpecPattern.component] })
+        vi.spyOn(ctx.project, 'specPatternsByTestingType').mockResolvedValue({ specPattern: [defaultSpecPattern.component] })
 
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
@@ -889,8 +924,8 @@ describe('ProjectDataSource', () => {
       })
 
       it('yields non-jsx extension if there are jsx files but specPattern disallows', async () => {
-        jest.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/component/*.cy.js'] })
-        jest.spyOn(ctx.project, 'specPatternsByTestingType').mockResolvedValue({ specPattern: ['cypress/component/*.cy.js'] })
+        vi.spyOn(ctx.project, 'specPatterns').mockResolvedValue({ specPattern: ['cypress/component/*.cy.js'] })
+        vi.spyOn(ctx.project, 'specPatternsByTestingType').mockResolvedValue({ specPattern: ['cypress/component/*.cy.js'] })
 
         const defaultSpecFileName = await ctx.project.defaultSpecFileName()
 
@@ -903,7 +938,7 @@ describe('ProjectDataSource', () => {
   describe('specPatternsByTestingType', () => {
     describe('when custom patterns configured', () => {
       beforeEach(() => {
-        jest.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({
+        vi.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({
           e2e: {
             specPattern: 'abc',
             excludeSpecPattern: 'def',
@@ -936,7 +971,7 @@ describe('ProjectDataSource', () => {
       }
 
       beforeEach(() => {
-        jest.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({})
+        vi.spyOn(ctx.lifecycleManager, 'getConfigFileContents').mockResolvedValue({})
       })
 
       it('should return default e2e patterns', async () => {
@@ -1044,7 +1079,7 @@ describe('getResolvedConfigFields', () => {
 
   beforeEach(() => {
     ctx = createTestDataContext('open')
-    jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({
+    vi.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({
       resolved: {
         baseUrl: { value: 'http://localhost:3000', from: 'config' },
         env: {

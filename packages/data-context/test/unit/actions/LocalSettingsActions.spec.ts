@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LocalSettingsActions } from '../../../src/actions/LocalSettingsActions'
 import { createTestDataContext } from '../helper'
 import type { DataContext } from '../../../src'
@@ -79,7 +79,7 @@ describe('LocalSettingsActions', () => {
 
   describe('refreshLocalSettings', () => {
     it('settles and allows a retry when detecting editors fails', async () => {
-      jest.mocked(ctx._apis.localSettingsApi.getAvailableEditors).mockRejectedValueOnce(new Error('detection failed'))
+      vi.mocked(ctx._apis.localSettingsApi.getAvailableEditors).mockRejectedValueOnce(new Error('detection failed'))
 
       const refreshing = actions.refreshLocalSettings()
       const pending = ctx.coreData.localSettings.refreshing
@@ -88,7 +88,7 @@ describe('LocalSettingsActions', () => {
       await expect(pending).resolves.toEqual([])
       expect(ctx.coreData.localSettings.refreshing).toBeNull()
 
-      jest.mocked(ctx._apis.localSettingsApi.getAvailableEditors).mockResolvedValueOnce([{ id: 'code', name: 'Visual Studio Code', binary: 'code' }])
+      vi.mocked(ctx._apis.localSettingsApi.getAvailableEditors).mockResolvedValueOnce([{ id: 'code', name: 'Visual Studio Code', binary: 'code' }])
 
       await actions.refreshLocalSettings()
 
@@ -97,7 +97,7 @@ describe('LocalSettingsActions', () => {
 
     describe('notifyWhenRunCompletes', () => {
       it('should fix false value', async () => {
-        jest.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({
+        vi.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({
           // @ts-expect-error - incorrect return type
           notifyWhenRunCompletes: false,
         })
@@ -108,7 +108,7 @@ describe('LocalSettingsActions', () => {
       })
 
       it('should fix true value', async () => {
-        jest.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({
+        vi.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({
           // @ts-expect-error - incorrect return type
           notifyWhenRunCompletes: true,
         })
@@ -119,7 +119,7 @@ describe('LocalSettingsActions', () => {
       })
 
       it('should leave value alone if value is an array', async () => {
-        jest.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({
+        vi.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({
           notifyWhenRunCompletes: ['errored'],
         })
 
@@ -129,7 +129,7 @@ describe('LocalSettingsActions', () => {
       })
 
       it('should pass through default value if not set ', async () => {
-        jest.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({})
+        vi.spyOn(ctx._apis.localSettingsApi, 'getPreferences').mockResolvedValue({})
 
         await actions.refreshLocalSettings()
 

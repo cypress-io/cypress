@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from '@jest/globals'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { createServer, request } from 'http'
 import type { ClientRequest, IncomingMessage, Server } from 'http'
 import type { AddressInfo } from 'net'
