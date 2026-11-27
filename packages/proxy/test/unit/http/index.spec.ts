@@ -230,6 +230,41 @@ describe('http', function () {
       })
     })
 
+    it.each([
+      ['1234-retry-1', '1234-retry-2'],
+      ['1234-retry-9', '1234-retry-10'],
+      ['1234-retry-10', '1234-retry-11'],
+      ['1234-retry-1-retry-3', '1234-retry-1-retry-4'],
+      ['1234-retry-', '1234-retry--retry-1'],
+      ['1234-retry-1a', '1234-retry-1a-retry-1'],
+    ])('gives the fake pending browser pre request for "%s" the id "%s"', async function (requestId, expectedRequestId) {
+      incomingRequest.mockImplementation(function () {
+        this.req.browserPreRequest = {
+          requestId,
+          errorHandled: false,
+        }
+
+        this.res.destroyed = false
+
+        throw new Error('oops')
+      })
+
+      error.mockImplementation(function () {
+        this.end()
+      })
+
+      const http = createHttp()
+
+      http.addPendingBrowserPreRequest = vi.fn()
+
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      expect(http.addPendingBrowserPreRequest).toHaveBeenCalledExactlyOnceWith({
+        requestId: expectedRequestId,
+        errorHandled: false,
+      })
+    })
+
     it('ensures not to create fake pending browser pre requests on multiple errors', async function () {
       incomingRequest.mockImplementation(function () {
         this.req.browserPreRequest = {
@@ -738,6 +773,40 @@ describe('http', function () {
       // "Never received pre-request" warning and inflates unmatchedRequests
       expect(http.preRequests.pendingRequests.length).toEqual(0)
       expect(next, 'origin fetch').not.toHaveBeenCalled()
+    })
+
+    it('reports a cancel while awaiting the response as a closed connection', async function () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => false,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {},
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+
+      const next = vi.fn(() => {
+        codec.abortRequest('network-1')
+
+        return Promise.reject(new Error('CDP Fetch request canceled by the browser: root:network-1'))
+      })
+
+      const handled = http.createLegacyProxyPipeline(codec)(request, next)
+
+      await expect(handled).rejects.toMatchObject({
+        code: 'ERR_BROWSER_CONNECTION_CLOSED',
+        message: 'The browser closed the connection before the response completed.',
+      })
     })
 
     it('keeps waiting on the pre-request while the request is not aborted', async function () {

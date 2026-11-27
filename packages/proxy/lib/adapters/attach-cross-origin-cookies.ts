@@ -1,4 +1,5 @@
 import { telemetry } from '@packages/telemetry'
+import { isSecureUrl } from '@packages/network-tools'
 import { getSameSiteContext, shouldAttachAndSetCookies, addCookieJarCookiesToRequest } from '../http/util/cookies'
 import { doesBrowserSendAllCookies, doesTopNeedToBeSimulated } from '../http/util/top-simulation'
 import { isVerboseTelemetry as isVerbose } from '../http'
@@ -58,7 +59,8 @@ export function attachCrossOriginCookies (mw: RequestInterceptionMiddlewareCtx):
     isAUTFrame: mw.req.isAUTFrame,
   })
 
-  const applicableCookiesInCookieJar = mw.getCookieJar().getCookies(mw.req.proxiedUrl, sameSiteContext)
+  const url = new URL(mw.req.proxiedUrl)
+  const applicableCookiesInCookieJar = mw.getCookieJar().getCookies(mw.req.proxiedUrl, sameSiteContext, { secure: isSecureUrl(url) })
   const cookiesOnRequest = (mw.req.headers['cookie'] || '').split('; ')
 
   const existingCookiesInJar = applicableCookiesInCookieJar.join('; ')

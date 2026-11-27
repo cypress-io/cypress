@@ -75,7 +75,7 @@ export function scrollTo (target, duration, settings) {
     // A number, or a string of pixels or a percentage, is a position for both
     // axes. Any other string is a selector for the element to scroll to.
     if (typeof targ === 'number' || typeof targ === 'string') {
-      if (/^([+-]=?)?\d+(\.\d+)?(px|%)?$/.test(String(targ))) {
+      if (/^(?:[+-]=?)?\d+(?:\.\d+)?(?:px|%)?$/.test(String(targ))) {
         targ = both(targ)
       } else if (typeof targ === 'string') {
         targ = win ? $(targ) : $(targ, elem)

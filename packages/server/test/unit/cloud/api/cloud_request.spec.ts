@@ -518,6 +518,13 @@ describe('CloudRequest', () => {
     })
   })
 
+  // The API URL is read when routes loads, so each environment needs a fresh import
+  const freshCreateCloudRequest = async () => {
+    vi.resetModules()
+
+    return (await import('../../../../lib/cloud/api/cloud_request')).createCloudRequest
+  }
+
   ;[undefined, 'development', 'test', 'staging', 'production'].forEach((env) => {
     describe(`base url for CYPRESS_CONFIG_ENV "${env}"`, () => {
       let prevEnv
@@ -539,11 +546,8 @@ describe('CloudRequest', () => {
         }
       })
 
-      it('sets to the value defined in app config', () => {
-        createCloudRequest()
-        const cfg = getCreatedConfig()
-
-        expect(cfg.baseURL).toBe(app_config[env ?? 'development']?.api_url)
+      it('sets to the value defined in app config', async () => {
+        expect((await freshCreateCloudRequest())().defaults.baseURL).toBe(app_config[env ?? 'development']?.api_url)
       })
     })
 
@@ -567,11 +571,8 @@ describe('CloudRequest', () => {
         }
       })
 
-      it('sets to the value defined in app config', () => {
-        createCloudRequest()
-        const cfg = getCreatedConfig()
-
-        expect(cfg.baseURL).toBe(app_config[env ?? 'development']?.api_url)
+      it('sets to the value defined in app config', async () => {
+        expect((await freshCreateCloudRequest())().defaults.baseURL).toBe(app_config[env ?? 'development']?.api_url)
       })
     })
   })

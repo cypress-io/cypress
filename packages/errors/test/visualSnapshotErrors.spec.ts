@@ -967,6 +967,11 @@ describe('visual error templates', () => {
         default: [err],
       }
     },
+    CDP_PAGE_CONNECTION_LOST: () => {
+      return {
+        default: ['Chrome'],
+      }
+    },
     CDP_RETRYING_CONNECTION: () => {
       return {
         default: [1, 'chrome', 62],

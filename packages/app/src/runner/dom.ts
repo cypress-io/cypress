@@ -5,7 +5,7 @@ export const INT32_MAX = 2147483647
 function getZIndex (el) {
   const value = getComputedStyle(el, null).getPropertyValue('z-index')
 
-  if (/^(auto|0)$/.test(value)) {
+  if (/^(?:auto|0)$/.test(value)) {
     return INT32_MAX
   }
 

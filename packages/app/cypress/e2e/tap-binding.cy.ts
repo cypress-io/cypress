@@ -177,6 +177,33 @@ describe('tap binding', () => {
     })
   })
 
+  it('reports a spec that throws while loading with the counts of its run, and the reason', () => {
+    const throwingSpec = 'cypress/e2e/throws-while-loading.spec.js'
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `it('passes before the error', () => {})\n\nthrow new Error('this-spec-throws-while-loading')\n`)
+    }, { path: throwingSpec })
+
+    cy.contains('throws-while-loading.spec').click()
+    cy.waitForSpecToFinish({ failCount: 1 })
+
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run-state')
+
+      expect('result' in outcome, `run-state answered ${JSON.stringify(outcome)}`).to.eq(true)
+
+      // Safe because the assertion above fails the test unless the outcome carries a result
+      const result = (outcome as { result: Record<string, any> }).result
+
+      expect(result.spec).to.eq(throwingSpec)
+      expect(result.state).to.eq('failed')
+      // The run is the failing test the runner generated for the error
+      expect(result.results.failed).to.eq(1)
+      expect(result.results.passed).to.eq(0)
+      expect(result.error).to.contain('this-spec-throws-while-loading')
+    })
+  })
+
   it('reads the reporter view and run-state for a completed run', () => {
     cy.visitApp('/specs/runner?file=cypress/e2e/dom-content.spec.js')
 
@@ -1081,6 +1108,48 @@ describe('tap binding run lifecycle', () => {
       expect(settled.startedAt, 'the reruns share a start time').to.not.eq(firstRun.startedAt)
       expect(settled.totalTests).to.eq(3)
       expect(settled.results).to.deep.eq({ passed: 3, failed: 0, pending: 0, skipped: 0 })
+    })
+  })
+})
+
+// A component spec its dev server cannot compile fails to import, which the runner shows
+// as a generated failing test rather than over the AUT, unlike an e2e build failure.
+describe('tap binding against a component spec that does not compile', () => {
+  const BAD_SPEC = 'src/BadSyntax.cy.jsx'
+
+  beforeEach(() => {
+    cy.scaffoldProject('cypress-in-cypress')
+    cy.findBrowsers()
+    cy.openProject('cypress-in-cypress', ['--component'])
+    cy.startAppServer('component')
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, `describe('Bad spec', () => { it('has a syntax error', () => { expect(true).to.be.true }) }`)
+    }, { path: BAD_SPEC })
+  })
+
+  it('reports the spec as failed, carrying why it could not load beside the generated failure', () => {
+    // Opened from the list, since a runner URL can arrive before the list has the new spec
+    cy.visitApp()
+    cy.specsPageIsVisible()
+    cy.contains('BadSyntax.cy').click()
+    cy.waitForSpecToFinish({ failCount: 1 })
+
+    cy.window().then(async (win) => {
+      const outcome = await getBinding(win).exec('run-state')
+
+      expect('result' in outcome, `run-state answered ${JSON.stringify(outcome)}`).to.eq(true)
+
+      // Safe because the assertion above fails the test unless the outcome carries a result
+      const result = (outcome as { result: Record<string, any> }).result
+
+      expect(Object.keys(result)).to.deep.eq(['spec', 'totalSpecs', 'state', 'startedAt', 'totalTests', 'results', 'error'])
+      expect(result.spec).to.eq(BAD_SPEC)
+      expect(result.state).to.eq('failed')
+      // Only the test the runner generated for the error ran
+      expect(result.results).to.deep.eq({ passed: 0, failed: 1, pending: 0, skipped: 0 })
+      expect(result.error).to.contain('SyntaxError')
+      expect(result.error, 'the stack is dropped').not.to.contain('\n    at ')
     })
   })
 })

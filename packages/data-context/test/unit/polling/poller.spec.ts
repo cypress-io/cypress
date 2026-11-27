@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import type { DataContext } from '../../../src'
 
 import { Poller } from '../../../src/polling'
@@ -8,16 +8,16 @@ describe('Poller', () => {
   let ctx: DataContext
 
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     ctx = createTestDataContext('open')
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('polls', async () => {
-    const callback = jest.fn()
+    const callback = vi.fn()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
@@ -26,19 +26,19 @@ describe('Poller', () => {
 
     expect(callback).toHaveBeenCalledTimes(1)
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     expect(callback).toHaveBeenCalledTimes(2)
 
     //stop iterator
     iterator.return(undefined)
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     // should not be called again after iterator stopped
     expect(callback).toHaveBeenCalledTimes(2)
   })
 
   it('can change interval', async () => {
-    const callback = jest.fn()
+    const callback = vi.fn()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
@@ -47,20 +47,20 @@ describe('Poller', () => {
 
     expect(callback).toHaveBeenCalledTimes(1)
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     expect(callback).toHaveBeenCalledTimes(2)
 
     poller.interval = 10
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     // should be called at one original interval after interval change'
     expect(callback).toHaveBeenCalledTimes(3)
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     // should not be called yet with longer interval
     expect(callback).toHaveBeenCalledTimes(3)
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     // should be called after longer interval
     expect(callback).toHaveBeenCalledTimes(4)
 
@@ -69,7 +69,7 @@ describe('Poller', () => {
   })
 
   it('handles multiple pollers for the same event', async () => {
-    const callback = jest.fn()
+    const callback = vi.fn()
     const interval = 5
 
     const poller = new Poller(ctx, 'relevantRunChange', interval, callback)
@@ -77,23 +77,23 @@ describe('Poller', () => {
 
     expect(callback).toHaveBeenCalledTimes(1)
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     expect(callback).toHaveBeenCalledTimes(2)
 
     const iterator2 = poller.start()
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     expect(callback).toHaveBeenCalledTimes(3)
 
     iterator1.return(undefined)
     iterator2.return(undefined)
 
-    await jest.advanceTimersByTimeAsync(interval * 1000)
+    await vi.advanceTimersByTimeAsync(interval * 1000)
     expect(callback).toHaveBeenCalledTimes(3)
   })
 
   it('returns initial value', async () => {
-    const callback = jest.fn()
+    const callback = vi.fn()
     const interval = 5
 
     const initialValue = { foo: true }
@@ -109,7 +109,7 @@ describe('Poller', () => {
   })
 
   it('stores and returns meta values for each subscription', async () => {
-    const callback = jest.fn()
+    const callback = vi.fn()
     const interval = 5
 
     const poller = new Poller<'relevantRunChange', { name: string }, { name: string }>(ctx, 'relevantRunChange', interval, callback)

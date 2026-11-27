@@ -1,5 +1,5 @@
 // necessary to have mocha types working correctly
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import path from 'path'
 import fs from 'fs-extra'
 import { Response } from 'cross-fetch'
@@ -48,46 +48,47 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
     modeOptions,
     appApi: {} as AppApiShape,
     localSettingsApi: {
-      getPreferences: jest.fn().mockResolvedValue({
+      getPreferences: vi.fn().mockResolvedValue({
         majorVersionWelcomeDismissed: { [GET_MAJOR_VERSION_FOR_CONTENT()]: 123456 },
         notifyWhenRunCompletes: ['failed'],
       }),
-      getAvailableEditors: jest.fn(),
-      setPreferences: jest.fn(),
+      getAvailableEditors: vi.fn(),
+      setPreferences: vi.fn(),
     } as unknown as LocalSettingsApiShape,
     authApi: {
-      logIn: jest.fn().mockImplementation(() => {
+      logIn: vi.fn().mockImplementation(() => {
         throw new Error('not stubbed')
       }),
-      signUp: jest.fn().mockImplementation(() => {
+      signUp: vi.fn().mockImplementation(() => {
         throw new Error('not stubbed')
       }),
-      resetAuthState: jest.fn(),
+      resetAuthState: vi.fn(),
     } as unknown as AuthApiShape,
     projectApi: {
-      setSessionLoadError: jest.fn().mockResolvedValue(undefined),
-      clearSessionLoadError: jest.fn().mockResolvedValue(undefined),
-      closeActiveProject: jest.fn(),
-      insertProjectToCache: jest.fn().mockResolvedValue(undefined),
-      getProjectRootsFromCache: jest.fn().mockResolvedValue([]),
-      runSpec: jest.fn(),
-      routeToDebug: jest.fn(),
+      setSessionLoadError: vi.fn().mockResolvedValue(undefined),
+      clearSessionLoadError: vi.fn().mockResolvedValue(undefined),
+      setSessionPluginsError: vi.fn(),
+      closeActiveProject: vi.fn(),
+      insertProjectToCache: vi.fn().mockResolvedValue(undefined),
+      getProjectRootsFromCache: vi.fn().mockResolvedValue([]),
+      runSpec: vi.fn(),
+      routeToDebug: vi.fn(),
     } as unknown as ProjectApiShape,
     electronApi: {
-      isMainWindowFocused: jest.fn().mockReturnValue(false),
-      focusMainWindow: jest.fn(),
+      isMainWindowFocused: vi.fn().mockReturnValue(false),
+      focusMainWindow: vi.fn(),
       copyTextToClipboard: (text: string) => {},
     } as unknown as ElectronApiShape,
     browserApi: {
-      ensureAndGetByNameOrPath: jest.fn(),
-      focusActiveBrowserWindow: jest.fn(),
-      getBrowsers: jest.fn().mockResolvedValue([]),
+      ensureAndGetByNameOrPath: vi.fn(),
+      focusActiveBrowserWindow: vi.fn(),
+      getBrowsers: vi.fn().mockResolvedValue([]),
     } as unknown as BrowserApiShape,
     cohortsApi: {
-      getCohorts: jest.fn().mockResolvedValue(undefined),
-      getCohort: jest.fn().mockResolvedValue(undefined),
-      insertCohort: jest.fn(),
-      determineCohort: jest.fn().mockResolvedValue(undefined),
+      getCohorts: vi.fn().mockResolvedValue(undefined),
+      getCohort: vi.fn().mockResolvedValue(undefined),
+      insertCohort: vi.fn(),
+      determineCohort: vi.fn().mockResolvedValue(undefined),
     } as unknown as CohortsApiShape,
   })
 

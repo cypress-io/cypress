@@ -1353,6 +1353,14 @@ export const AllCypressErrors = {
 
       We have failed the current spec and aborted the run.`
   },
+  CDP_PAGE_CONNECTION_LOST: (browserName: string) => {
+    return errTemplate`\
+      Cypress lost its connection to the ${fmt.highlight(browserName)} tab running Cypress tests while the tab was still open.
+
+      Requests the tab was waiting on can no longer finish, so we have failed the current spec and aborted the run.
+
+      If this keeps happening, please open an issue with the output of running Cypress with ${fmt.highlightSecondary('DEBUG=cypress:server:browsers:*')}.`
+  },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
         The ${fmt.highlight('launchOptions')} object returned by your plugin's ${fmt.highlightSecondary(`before:browser:launch`)} handler contained unexpected properties:

@@ -64,6 +64,15 @@ describe('start-bundle', () => {
       expect(require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))).to.deep.equal({ dirname: path.join(appDir, 'packages', 'server', 'lib'), strict: true })
     })
 
+    it('keeps __filename in modules that use only __filename', async () => {
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = require('./lib/location')`)
+      await fs.outputFile(path.join(appDir, 'packages', 'server', 'lib', 'location.js'), `module.exports = __filename`)
+
+      await createStartCypressBundle(appDir)
+
+      expect(require(path.join(appDir, 'packages', 'server', 'start-cypress.bundle.js'))).to.equal(path.join(appDir, 'packages', 'server', 'lib', 'location.js'))
+    })
+
     it('resolves an aliased require.resolve from the module that calls it', async () => {
       await fs.outputFile(path.join(appDir, 'packages', 'server', 'start-cypress.js'), `module.exports = require('data-package')`)
       await fs.outputFile(path.join(appDir, 'node_modules', 'data-package', 'index.js'), `const resolve = require.resolve\nmodule.exports = resolve('./data.json')`)

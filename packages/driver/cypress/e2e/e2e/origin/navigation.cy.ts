@@ -519,3 +519,28 @@ describe('errors', { browser: '!webkit' }, () => {
     })
   })
 })
+
+// https://github.com/cypress-io/cypress/issues/35475
+// Each test sets up state for the next, so run them together.
+describe('spec bridge page load started outside of cy.origin', { browser: '!webkit', pageLoadTimeout: 5000, retries: 0 }, () => {
+  it('creates the spec bridge', () => {
+    cy.origin('http://www.foobar.com:3500', () => {})
+  })
+
+  it('leaves a page of the spec bridge origin without cy.origin', () => {
+    cy.visit('/fixtures/primary-origin.html')
+    cy.get('a[data-cy="cross-origin-secondary-link"]')
+    .invoke('attr', 'href', 'http://www.foobar.com:3500/fixtures/js-redirect-to-primary-origin.html')
+    .click()
+
+    cy.location('origin').should('equal', 'http://localhost:3500')
+    cy.get('a[data-cy="cross-origin-secondary-link"]')
+  })
+
+  it('does not time out a later cy.origin block that runs past pageLoadTimeout', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- the block has to outlast the 5000ms pageLoadTimeout
+      cy.wait(6000)
+    })
+  })
+})

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   isCompatibleRecord,
+  isLoadError,
   isStartingRecord,
   isTapSupportedBrowser,
   recordFileName,
@@ -102,6 +103,20 @@ describe('cypress-sessions contract', () => {
 
   it('exposes the sessions dir name', () => {
     expect(SESSIONS_DIRNAME).toBe('sessions')
+  })
+
+  describe('isLoadError', () => {
+    it('accepts an error with a message', () => {
+      expect(isLoadError({ message: 'Your configFile is invalid' })).toBe(true)
+    })
+
+    it('rejects anything without a string message', () => {
+      expect(isLoadError(undefined)).toBe(false)
+      expect(isLoadError(null)).toBe(false)
+      expect(isLoadError('Your configFile is invalid')).toBe(false)
+      expect(isLoadError({})).toBe(false)
+      expect(isLoadError({ message: 42 })).toBe(false)
+    })
   })
 
   describe('isTapSupportedBrowser', () => {

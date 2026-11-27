@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@types/fs-extra": "^9.0.13",
     "@types/glob": "7.1.1",
     "cypress-example-kitchensink": "7.0.2",

@@ -13,7 +13,7 @@ import { RUNNABLE_LOGS, RUNNABLE_PROPS } from '@packages/types'
 import type { Emissions, SerializedTest, TestFilter } from '@packages/types'
 import { SKIPPED_DUE_TO_BROWSER_MESSAGE } from './mocha'
 
-const mochaCtxKeysRe = /^(_runnable|test)$/
+const mochaCtxKeysRe = /^(?:_runnable|test)$/
 const betweenQuotesRe = /"(.+?)"/
 
 const HOOKS = ['beforeAll', 'beforeEach', 'afterEach', 'afterAll'] as const
@@ -548,9 +548,6 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
           // This will navigate to about:blank if test isolation is on
           await testBeforeAfterRunAsync(test, Cypress, { nextTestHasTestIsolationOn })
-          // Clear cached spec-bridge targets after isolation; the runner must serve
-          // a current app build so `notifyCrossOriginBridgeReady` re-binds the iframe.
-          Cypress.primaryOriginCommunicator.clearCrossOriginDriverWindows()
         }
 
         testAfterRun(test, Cypress)

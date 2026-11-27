@@ -116,7 +116,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     // gracefully by adding some default code to use as the AST here, based on the extension
     if (!result || result.trim() === '') {
       resultStatus = 'ADDED'
-      result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules, projectRoot: options.projectRoot })
+      result = getEmptyCodeBlock({ useEsm: emptyConfigUsesEsm(pathExt, options.isProjectUsingESModules), projectRoot: options.projectRoot })
     }
 
     const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
@@ -152,13 +152,27 @@ export function defineConfigAvailable (projectRoot: string) {
   }
 }
 
-type OutputExtension = '.ts' | '.mjs' | '.js'
+// `.mjs` and `.mts` get `import`/`export default`, and `.cjs` and `.cts` get
+// `require`/`module.exports`, whatever the package.json `type`, because Node.js
+// always loads those extensions that way. A `.ts` config also gets ESM syntax,
+// which TypeScript compiles to either module system.
+function emptyConfigUsesEsm (extension: string, isProjectUsingESModules: boolean) {
+  if (extension === '.mjs' || extension === '.mts') {
+    return true
+  }
+
+  if (extension === '.cjs' || extension === '.cts') {
+    return false
+  }
+
+  return extension === '.ts' || isProjectUsingESModules
+}
 
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string }) {
+function getEmptyCodeBlock ({ useEsm, projectRoot }: { useEsm: boolean, projectRoot: string }) {
   if (defineConfigAvailable(projectRoot)) {
-    if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
+    if (useEsm) {
       return dedent`
         import { defineConfig } from 'cypress'
 
@@ -173,7 +187,7 @@ function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }
     `
   }
 
-  if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
+  if (useEsm) {
     return dedent`
       export default {}
     `

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from '@jest/globals'
+import { afterEach, describe, expect, it } from 'vitest'
 import { resolveCloudEnv, resolveCloudUrl } from '../../../src/util/cloudUrls'
 
 describe('resolveCloudUrl', () => {

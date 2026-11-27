@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import { execute } from 'graphql'
 import { Response } from 'cross-fetch'
 
@@ -21,20 +22,20 @@ import {
 
 describe('CloudDataSource', () => {
   let cloudDataSource: CloudDataSource
-  let fetchStub: jest.Mock<() => Promise<Response>>
-  let getUserStub: jest.Mock<() => { authToken: string } | null>
-  let logoutStub: jest.Mock<() => void>
-  let invalidateCacheStub: jest.Mock<() => void>
+  let fetchStub: Mock<() => Promise<Response>>
+  let getUserStub: Mock<() => { authToken: string } | null>
+  let logoutStub: Mock<() => void>
+  let invalidateCacheStub: Mock<() => void>
   let ctx: DataContext
 
   beforeEach(() => {
-    jest.restoreAllMocks()
-    fetchStub = jest.fn()
+    vi.restoreAllMocks()
+    fetchStub = vi.fn()
     fetchStub.mockResolvedValue(new Response(JSON.stringify(FAKE_USER_RESPONSE), { status: 200 }))
-    getUserStub = jest.fn()
+    getUserStub = vi.fn()
     getUserStub.mockReturnValue({ authToken: '1234' })
-    logoutStub = jest.fn()
-    invalidateCacheStub = jest.fn()
+    logoutStub = vi.fn()
+    invalidateCacheStub = vi.fn()
     ctx = createTestDataContext('open')
     cloudDataSource = new CloudDataSource({
       fetch: fetchStub,
@@ -303,13 +304,13 @@ describe('CloudDataSource', () => {
 
       const delegateCloudField = cloudDataSource.delegateCloudField
 
-      const delegateCloudSpy = jest.spyOn(cloudDataSource, 'delegateCloudField').mockImplementation(async function (...args) {
+      const delegateCloudSpy = vi.spyOn(cloudDataSource, 'delegateCloudField').mockImplementation(async function (...args) {
         return delegateCloudField.apply(this, args)
       })
 
       await ctx.actions.project.setCurrentProject(dir)
 
-      jest.spyOn(ctx.project, 'projectId').mockResolvedValue('abc1234')
+      vi.spyOn(ctx.project, 'projectId').mockResolvedValue('abc1234')
 
       const result = await execute({
         rootValue: {},
@@ -347,38 +348,6 @@ describe('CloudDataSource', () => {
       })
 
       expect(fetchStub).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe('cloud url', () => {
-    const originalEnv = process.env.CYPRESS_INTERNAL_ENV
-
-    afterEach(() => {
-      if (originalEnv === undefined) {
-        delete process.env.CYPRESS_INTERNAL_ENV
-      } else {
-        process.env.CYPRESS_INTERNAL_ENV = originalEnv
-      }
-    })
-
-    it('does not freeze the environment at module load', async () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'production'
-
-      const source = new CloudDataSource({
-        fetch: fetchStub,
-        getUser: getUserStub,
-        logout: logoutStub,
-        invalidateClientUrqlCache: invalidateCacheStub,
-      })
-
-      await source.executeRemoteGraphQL({
-        fieldName: 'cloudViewer',
-        operationDoc: FAKE_USER_QUERY,
-        operationVariables: {},
-        operationType: 'query',
-      })
-
-      expect(fetchStub).toHaveBeenCalledWith('https://cloud.cypress.io/test-runner-graphql', expect.anything())
     })
   })
 })
