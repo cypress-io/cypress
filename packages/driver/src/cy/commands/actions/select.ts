@@ -84,13 +84,56 @@ const findMatchingOptions = (optionInfos: OptionInfo[], matchers: SelectMatcher[
   return _.filter(optionInfos, (option) => toSelect.has(option))
 }
 
-// JSON.stringify prints a RegExp as `{}`, so print patterns as `/source/flags`
+// Finds each matched option again after the page replaced the options: the
+// one at the same position if its value is unchanged, otherwise an unused one
+// with the same value. Returns null when an option has no replacement.
+const findReplacementOptions = (originals: OptionInfo[], current: OptionInfo[]) => {
+  const used = new Set<OptionInfo>()
+  const replacements: OptionInfo[] = []
+
+  for (const original of originals) {
+    const atIndex = current[original.index]
+    const replacement = atIndex && atIndex.value === original.value && !used.has(atIndex)
+      ? atIndex
+      : _.find(current, (option) => option.value === original.value && !used.has(option))
+
+    if (!replacement) {
+      return null
+    }
+
+    used.add(replacement)
+    replacements.push(replacement)
+  }
+
+  return _.sortBy(replacements, 'index')
+}
+
+const ensureOptionsSelectable = (optionInfos: OptionInfo[], onFail?: Log) => {
+  _.each(optionInfos, ({ $el }) => {
+    if ($el.prop('disabled')) {
+      $errUtils.throwErrByPath('select.option_disabled', {
+        onFail,
+        args: { node: $dom.stringify($el) },
+      })
+    }
+
+    if ($el.closest('optgroup').prop('disabled')) {
+      $errUtils.throwErrByPath('select.optgroup_disabled', {
+        onFail,
+        args: { node: $dom.stringify($el) },
+      })
+    }
+  })
+}
+
+// JSON.stringify prints a RegExp as `{}` and drops `undefined`, so print
+// patterns as `/source/flags` and anything JSON can't encode with String()
 const formatArgument = (value) => {
   if (_.isArray(value)) {
     return `[${_.map(value, formatArgument).join(',')}]`
   }
 
-  return _.isRegExp(value) ? String(value) : JSON.stringify(value)
+  return _.isRegExp(value) ? String(value) : (JSON.stringify(value) ?? String(value))
 }
 
 // every option's selected state, since a multiple select can change without its selectedIndex changing
@@ -196,6 +239,13 @@ export default (Commands, Cypress, cy) => {
 
       const subjectChain = cy.subjectChain()
 
+      const throwNoMatches = (onFail?: Log): never => {
+        return $errUtils.throwErrByPath(onlyPatterns ? 'select.no_pattern_matches' : 'select.no_matches', {
+          onFail,
+          args: { value: matchers.join(', ') },
+        })
+      }
+
       const getOptions = () => {
         options.$el = cy.getSubjectFromChain(subjectChain)
 
@@ -216,30 +266,12 @@ export default (Commands, Cypress, cy) => {
         }
 
         if (!matches.length && matchers.length > 0) {
-          $errUtils.throwErrByPath(onlyPatterns ? 'select.no_pattern_matches' : 'select.no_matches', {
-            args: { value: matchers.join(', ') },
-          })
+          throwNoMatches()
         }
 
-        _.each(matches, ({ $el }) => {
-          if ($el.prop('disabled')) {
-            node = $dom.stringify($el)
+        ensureOptionsSelectable(matches)
 
-            $errUtils.throwErrByPath('select.option_disabled', {
-              args: { node },
-            })
-          }
-
-          if ($el.closest('optgroup').prop('disabled')) {
-            node = $dom.stringify($el)
-
-            $errUtils.throwErrByPath('select.optgroup_disabled', {
-              args: { node },
-            })
-          }
-        })
-
-        return { values: _.map(matches, 'value'), optionEls: _.map(matches, '$el') }
+        return matches
       }
 
       const retryOptions = () => {
@@ -254,11 +286,11 @@ export default (Commands, Cypress, cy) => {
 
       return Promise
       .try(retryOptions)
-      .then((obj = {}) => {
-        const { values, optionEls } = obj
+      .then((matches: OptionInfo[]) => {
+        const optionEls = _.map(matches, '$el')
 
         // preserve the selected values
-        consoleProps.Selected = values
+        consoleProps.Selected = _.map(matches, 'value')
 
         return cy.now('click', options.$el, {
           $el: options.$el,
@@ -308,14 +340,23 @@ export default (Commands, Cypress, cy) => {
             // Select exactly the matched <option> elements rather than setting
             // the select's value, which can't tell options with the same value apart.
             const select: HTMLSelectElement = options.$el.get(0)
-            let matched = new Set<HTMLOptionElement>(_.map(optionEls, ($el) => $el.get(0)))
             const liveOptions = new Set(Array.from(select.options))
+            let toSelect = matches
 
             // the page can replace its options while they're clicked, such as
-            // re-rendering them on focus, so match against the options it has now
-            if (_.some(Array.from(matched), (option) => !liveOptions.has(option))) {
-              matched = new Set(_.map(findMatchingOptions(getOptionInfos(options.$el), matchers, selectFirstMatch), ({ $el }) => $el.get(0)))
+            // re-rendering them on focus, so find the same options among the new ones
+            if (_.some(matches, ({ $el }) => !liveOptions.has($el.get(0)))) {
+              const replacements = findReplacementOptions(matches, getOptionInfos(options.$el))
+
+              if (!replacements) {
+                return throwNoMatches(options._log)
+              }
+
+              ensureOptionsSelectable(replacements, options._log)
+              toSelect = replacements
             }
+
+            const matched = new Set(_.map(toSelect, ({ $el }) => $el.get(0)))
 
             _.each(select.options, (option) => {
               option.selected = matched.has(option)

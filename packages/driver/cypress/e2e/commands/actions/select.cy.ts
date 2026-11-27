@@ -340,6 +340,27 @@ describe('src/cy/commands/actions/select', () => {
       cy.get('select[name=maps]').select('nuke').should('have.value', 'de_nuke')
     })
 
+    it('follows the matched value when the page re-renders the options with new text', () => {
+      const $select = cy.$$('select[name=maps]')
+
+      $select.one('mousedown', () => {
+        $select.find('option[value=de_nuke]').text('Nuke (2024)')
+        $select.html($select.html())
+      })
+
+      cy.get('select[name=maps]').select('nuke').should('have.value', 'de_nuke')
+    })
+
+    it('keeps the matched option among duplicate values when the page re-renders the options', () => {
+      const $select = cy.$$('select[name=startrek-same]')
+
+      $select.one('mousedown', () => {
+        $select.html($select.html())
+      })
+
+      cy.get('select[name=startrek-same]').select('Uhura').find('option:selected').should('have.text', 'Uhura')
+    })
+
     it('selects every option named by value or text in one array', () => {
       cy.get('select[name=movies]').select(['apoc', 'The Human Condition']).invoke('val').should('deep.eq', ['apoc', 'thc'])
     })
@@ -368,9 +389,7 @@ describe('src/cy/commands/actions/select', () => {
       })
 
       it('selects the first matching option among options with the same value', () => {
-        cy.get('select[name=startrek-same]').select(/u/).then(($select) => {
-          expect(($select[0] as HTMLSelectElement).selectedOptions[0].text).to.eq('Uhura')
-        })
+        cy.get('select[name=startrek-same]').select(/u/).find('option:selected').should('have.text', 'Uhura')
       })
 
       it('selects every matching option in a multiple select', () => {
@@ -820,6 +839,51 @@ describe('src/cy/commands/actions/select', () => {
 
         // @ts-expect-error - testing invalid arguments
         cy.get('select[name=movies]').select([/^The/, {}])
+      })
+
+      it('throws when the page re-renders the matched option as disabled', (done) => {
+        const $select = cy.$$('select[name=maps]')
+
+        $select.one('mousedown', () => {
+          $select.html($select.html())
+          $select.find('option[value=de_nuke]').prop('disabled', true)
+        })
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because this `<option>` you are trying to select is currently disabled')
+
+          done()
+        })
+
+        cy.get('select[name=maps]').select('nuke')
+      })
+
+      it('throws when the page re-renders the options without the matched value', (done) => {
+        const $select = cy.$$('select[name=maps]')
+
+        $select.one('mousedown', () => {
+          $select.find('option[value=de_nuke]').remove()
+          $select.html($select.html())
+        })
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.select()` failed because it could not find a single `<option>` with value, index, or text matching: `nuke`')
+
+          done()
+        })
+
+        cy.get('select[name=maps]').select('nuke')
+      })
+
+      it('prints undefined in an invalid array', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('You passed: `["apoc",undefined]`')
+
+          done()
+        })
+
+        // @ts-expect-error - testing invalid arguments
+        cy.get('select[name=movies]').select(['apoc', undefined])
       })
 
       it('throws when every option a pattern matches in a multiple select is disabled', (done) => {
