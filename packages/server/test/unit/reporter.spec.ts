@@ -126,6 +126,16 @@ describe('lib/reporter', () => {
     })
   })
 
+  // mocha-junit-reporter reads the version from `require.resolve('mocha')` to pick its mocha 6+ code path
+  it('resolves mocha to mocha-7.2.0 from a reporter', () => {
+    const requireFromJunit = createRequire(requireFromReporter.resolve('mocha-junit-reporter'))
+    const mochaDir = path.dirname(requireFromReporter.resolve('mocha-7.2.0'))
+
+    expect(path.dirname(requireFromJunit.resolve('mocha'))).toBe(mochaDir)
+    expect(requireFromJunit.resolve('mocha/lib/stats-collector')).toBe(path.join(mochaDir, 'lib/stats-collector.js'))
+    expect(requireFromJunit('mocha/package.json').version).toBe('7.2.0')
+  })
+
   describe('createSuite', () => {
     it('recursively creates suites for fullTitle', () => {
       const args = reporter.parseArgs('fail', testObj)
