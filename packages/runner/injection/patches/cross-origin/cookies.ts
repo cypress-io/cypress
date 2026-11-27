@@ -137,7 +137,7 @@ export const patchDocumentCookie = (requestCookies: SerializableAutomationCookie
     cookieJar.removeAllCookies()
   }
 
-  const bindCypressListeners = (Cypress: Cypress.Cypress) => {
+  const bindCypressListeners = (Cypress: typeof globalThis.Cypress) => {
     Cypress.on('test:before:run', reset)
 
     // the following listeners are called from Cypress cookie commands, so that

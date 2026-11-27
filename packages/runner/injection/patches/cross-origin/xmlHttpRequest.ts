@@ -1,6 +1,6 @@
 import { captureFullRequestUrl, requestSentWithCredentials } from './utils'
 
-export const patchXmlHttpRequest = (window: Window) => {
+export const patchXmlHttpRequest = (window: Window & typeof globalThis) => {
   // intercept method calls and add cypress headers to determine cookie applications in the proxy
   // for simulated top
 

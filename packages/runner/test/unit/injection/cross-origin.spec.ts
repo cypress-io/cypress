@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+/// <reference types="vitest/jsdom" />
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 
 // The patches and timers each have their own behavior covered by the driver's
@@ -104,6 +105,11 @@ const throwInAut = (error: unknown) => {
 const reportedByBrowser = () => {}
 
 describe('injection/cross-origin', () => {
+  // The cross-origin injection only runs in an AUT on a secondary origin
+  beforeAll(() => {
+    jsdom.reconfigure({ url: AUT_URL })
+  })
+
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
@@ -274,6 +280,16 @@ describe('injection/cross-origin', () => {
       window.__attachToCypress?.(createFakeCypress() as unknown as Cypress.Cypress)
 
       expect(window).not.toHaveProperty('__attachToCypress')
+    })
+
+    it('refuses a Cypress without the event emitter the driver mixes in', async () => {
+      const { documentCookiePatch } = await loadInjection()
+      const { removeAllListeners: _removeAllListeners, ...withoutEmitter } = createFakeCypress()
+
+      expect(() => window.__attachToCypress?.(withoutEmitter as unknown as Cypress.Cypress))
+      .toThrow('The spec bridge passed a Cypress without an event emitter to `window.__attachToCypress`')
+
+      expect(documentCookiePatch.onCypress).not.toHaveBeenCalled()
     })
   })
 

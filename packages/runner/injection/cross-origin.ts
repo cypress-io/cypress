@@ -24,6 +24,16 @@ interface CrossOriginInjectionConfig {
 // bundle in a function that receives the config as `cypressConfig`
 declare const cypressConfig: CrossOriginInjectionConfig
 
+// The driver declares these in packages/driver/src/cypress.ts, which this
+// bundle doesn't import. Keep the types identical to those: TypeScript rejects
+// merged declarations of a property that disagree.
+declare global {
+  interface Window {
+    Cypress: Cypress.Cypress
+    __attachToCypress?: (Cypress: Cypress.Cypress) => void
+  }
+}
+
 interface ErrorEventData {
   href: string
   message?: unknown
@@ -78,7 +88,8 @@ const handleErrorEvent = (event: ErrorEvent) => {
     data.message = error
   }
 
-  window.top.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
+  // The AUT runs in an iframe, so it always has a top window
+  window.top!.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
 }
 
 window.addEventListener('error', handleErrorEvent)
@@ -110,10 +121,19 @@ timers.wrap()
 patchFetch(window)
 patchXmlHttpRequest(window)
 
-// Add a function to window for the spec bridge to call after it has attached.
-window.__attachToCypress = (Cypress: InternalCypress.Cypress) => {
+// The driver mixes its event emitter onto Cypress at runtime, which the
+// `Cypress.Cypress` typing doesn't reflect, so check for it to narrow.
+function assertSpecBridgeCypress (Cypress: Cypress.Cypress): asserts Cypress is typeof globalThis.Cypress {
+  if (!('removeAllListeners' in Cypress)) {
+    throw new Error('The spec bridge passed a Cypress without an event emitter to `window.__attachToCypress`, so Cypress cannot control this page.\n\nThis is likely a bug in Cypress. Open an issue that includes the steps that led to this error: https://on.cypress.io/new-issue')
+  }
+}
+
+const attachToCypress = (Cypress: Cypress.Cypress) => {
   // A spec bridge has attached so we don't need to forward errors to top anymore.
   window.removeEventListener('error', handleErrorEvent)
+
+  assertSpecBridgeCypress(Cypress)
 
   documentCookiePatch.onCypress(Cypress)
 
@@ -127,10 +147,13 @@ window.__attachToCypress = (Cypress: InternalCypress.Cypress) => {
   delete window.__attachToCypress
 }
 
+// Add a function to window for the spec bridge to call after it has attached.
+window.__attachToCypress = attachToCypress
+
 const Cypress = findCypress()
 
 // Check for cy too to prevent a race condition for attaching.
-if (Cypress && Cypress.cy) {
-  window.__attachToCypress(Cypress)
+if (Cypress && 'cy' in Cypress && Cypress.cy) {
+  attachToCypress(Cypress)
   Cypress.action('app:window:before:load', window)
 }
