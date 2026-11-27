@@ -142,13 +142,20 @@ function toFulfilledHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], p
   return pauseHeaders ? stripHeaderEntries(pauseHeaders, WIRE_ENCODING_HEADERS) : undefined
 }
 
+// The pipeline drops Connection from the responses it passes on, since it is
+// hop-by-hop on the proxy path, so the middleware view of a keep-alive
+// HTTP/1.1 response lacks the origin's Connection line.
+const CONTINUED_FROM_PAUSE_HEADERS = new Set([...WIRE_ENCODING_HEADERS, 'connection'])
+
 /**
  * The browser replays the origin's own wire body on continueResponse, so the
  * pause's wire encoding headers still describe it and are carried over the
- * middleware view, which only ever saw the decoded body. An unchanged set is
- * omitted entirely so CDP keeps the browser's original headers rather than a
- * lowercased, re-folded reconstruction — the same "don't override what you
- * didn't touch" rule continueRequestHeaders applies at the request stage.
+ * middleware view, which only ever saw the decoded body. Connection is carried
+ * over the same way, or every keep-alive response would read as changed. An
+ * unchanged set is omitted entirely so CDP keeps the browser's original
+ * headers rather than a lowercased, re-folded reconstruction — the same "don't
+ * override what you didn't touch" rule continueRequestHeaders applies at the
+ * request stage.
  */
 function toContinuedHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
   if (!middlewareHeaders) {
@@ -156,8 +163,8 @@ function toContinuedHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], p
   }
 
   const continuedHeaders = [
-    ...stripHeaderEntries(middlewareHeaders, WIRE_ENCODING_HEADERS),
-    ...pickHeaderEntries(pauseHeaders ?? [], WIRE_ENCODING_HEADERS),
+    ...stripHeaderEntries(middlewareHeaders, CONTINUED_FROM_PAUSE_HEADERS),
+    ...pickHeaderEntries(pauseHeaders ?? [], CONTINUED_FROM_PAUSE_HEADERS),
   ]
 
   if (!headerEntriesChanged(continuedHeaders, pauseHeaders ?? [])) {

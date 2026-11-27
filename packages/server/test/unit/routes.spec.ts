@@ -8,7 +8,7 @@ import path from 'path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { clearCtx, getCtx, setCtx } from '@packages/data-context'
-import { createCommonRoutes } from '../../lib/routes'
+import { createCommonRoutes, isNetworkProxyResponse } from '../../lib/routes'
 import { CYPRESS_INTERNAL_LOOPBACK_TOKEN_HEADER, cypressInternalLoopbackToken } from '../../lib/adapters/internal-routes'
 import { tapGraphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
 import { cypressSessions } from '../../lib/cypress-sessions'
@@ -602,6 +602,8 @@ describe('lib/routes', () => {
       await handler(req, res, next)
 
       expect(handleHttpRequest).toHaveBeenCalledWith(req, res)
+      // so the app-wide compression middleware leaves it as the pipeline wrote it
+      expect(isNetworkProxyResponse(res)).toBe(true)
     })
 
     it('follows the network path in effect when it flips on the same router', async () => {
@@ -764,12 +766,14 @@ describe('lib/routes', () => {
         remoteState: { strategy: 'http', origin: 'http://localhost:3500', props: null },
       })
       const req = { url: '/anything', method: 'GET', headers: {} }
+      const res = {}
       const next = vi.fn()
 
-      await handler(req, {}, next)
+      await handler(req, res, next)
 
       expect(next).toHaveBeenCalled()
       expect(handleHttpRequest).not.toHaveBeenCalled()
+      expect(isNetworkProxyResponse(res)).toBe(false)
     })
   })
 

@@ -135,7 +135,7 @@ export type ServerCtx = Readonly<{
   useBrowserNetworkInterception?: boolean
 }>
 
-const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<unknown>)[] = [
+const READONLY_MIDDLEWARE_KEYS: ReadonlySet<string> = new Set<keyof HttpMiddlewareThis<unknown>>([
   'buffers',
   'config',
   'getFileServerToken',
@@ -148,7 +148,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<unknown>)[] = [
   'onError',
   'skipMiddleware',
   'onlyRunMiddleware',
-]
+])
 
 export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
   buffers: HttpBuffers
@@ -169,9 +169,17 @@ export function _runStage (type: HttpStages, ctx: any, onError: (error: Error) =
 
   const runMiddlewareStack = (): Promise<void> => {
     const middlewares = ctx.middleware[type]
+    const remainingMiddlewares: Record<string, HttpMiddleware<any>> = {}
+    let middlewareName: string | undefined
 
     // pop the first pair off the middleware
-    const middlewareName = _.keys(middlewares)[0]
+    for (const name in middlewares) {
+      if (middlewareName === undefined) {
+        middlewareName = name
+      } else {
+        remainingMiddlewares[name] = middlewares[name]
+      }
+    }
 
     if (!middlewareName) {
       return Promise.resolve()
@@ -179,20 +187,19 @@ export function _runStage (type: HttpStages, ctx: any, onError: (error: Error) =
 
     const middleware = middlewares[middlewareName]
 
-    ctx.middleware[type] = _.omit(middlewares, middlewareName)
+    ctx.middleware[type] = remainingMiddlewares
 
     return new Bluebird((resolve) => {
       let ended = false
 
+      // Runs up to twice for every middleware of every request, so it compares
+      // keys in place rather than copying the ctx first.
       function copyChangedCtx () {
-        _.chain(fullCtx)
-        .omit(READONLY_MIDDLEWARE_KEYS)
-        .forEach((value, key) => {
-          if (ctx[key] !== value) {
-            ctx[key] = value
+        for (const key in fullCtx) {
+          if (!READONLY_MIDDLEWARE_KEYS.has(key) && ctx[key] !== fullCtx[key]) {
+            ctx[key] = fullCtx[key]
           }
-        })
-        .value()
+        }
       }
 
       function _onError (error: Error) {
@@ -521,7 +528,9 @@ export class Http {
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
-      middleware: _.cloneDeep(this.middleware),
+      // Each stage is replaced as its middleware runs, never edited in place,
+      // so copying the stages is enough to keep requests from sharing them.
+      middleware: _.mapValues(this.middleware, (stage) => ({ ...stage })),
       netStubbingState: this.netStubbingState,
       networkInterceptionCore: this.networkInterceptionCore,
       networkInterception: this.networkInterception,

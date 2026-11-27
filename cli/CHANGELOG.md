@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.5.0
 
+**Performance:**
+
+- Pages that request many files, such as an app served by a Vite dev server, now load faster. Fixed in [#35547](https://github.com/cypress-io/cypress/pull/35547).
+
 **Features:**
 
 - Cypress now finds a `cypress.config.mts` or `cypress.config.cts` configuration file without `--config-file`. Addresses [#24962](https://github.com/cypress-io/cypress/issues/24962).

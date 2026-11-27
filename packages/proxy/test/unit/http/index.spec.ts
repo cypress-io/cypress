@@ -113,6 +113,72 @@ describe('http', function () {
 
       expect(onError).not.toHaveBeenCalled()
     })
+
+    it('passes what a middleware sets on this to the next middleware, except read-only keys', async function () {
+      const config = { modifyObstructiveCode: true }
+      const incomingRes = { statusCode: 200, headers: { 'content-type': 'text/javascript' } }
+      const seenByNext = vi.fn()
+
+      const bufferResponse = vi.fn().mockImplementation(function () {
+        this.incomingRes = incomingRes
+        this.config = { modifyObstructiveCode: false }
+        this.next()
+      })
+
+      const readCtx = vi.fn().mockImplementation(function () {
+        seenByNext(this.incomingRes, this.config)
+        this.end()
+      })
+
+      const ctx: Record<string, unknown> = {
+        req: { method: 'GET', proxiedUrl: 'http://localhost:5173/src/main.ts' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        config,
+        middleware: {
+          [HttpStages.IncomingRequest]: { bufferResponse, readCtx },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingRequest, ctx, vi.fn())
+
+      expect(seenByNext).toHaveBeenCalledWith(incomingRes, config)
+      expect(ctx.incomingRes).toBe(incomingRes)
+      expect(ctx.config).toBe(config)
+    })
+
+    it('does not run a middleware that an earlier one skipped', async function () {
+      const calls: string[] = []
+      const middlewareNamed = (name: string, run: (this: any) => void = function () {
+        this.next()
+      }) => {
+        return function (this: any) {
+          calls.push(name)
+          run.call(this)
+        }
+      }
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'http://localhost:5173/src/main.ts' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingRequest]: {
+            first: middlewareNamed('first', function () {
+              this.skipMiddleware('second')
+              this.next()
+            }),
+            second: middlewareNamed('second'),
+            third: middlewareNamed('third'),
+          },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingRequest, ctx, vi.fn())
+
+      expect(calls).toEqual(['first', 'third'])
+      expect(ctx.middleware[HttpStages.IncomingRequest]).toEqual({})
+    })
   })
 
   describe('Http.handle', function () {
@@ -426,6 +492,39 @@ describe('http', function () {
 
       expect(on).toHaveBeenCalledTimes(2)
       expect(off).toHaveBeenCalledTimes(10)
+    })
+
+    it('gives each request its own copy of the middleware stacks', async function () {
+      const incomingRequest2 = vi.fn().mockImplementation(function () {
+        this.end()
+      })
+
+      incomingRequest.mockImplementationOnce(function () {
+        this.skipMiddleware('incomingRequest2')
+        this.incomingRes = {}
+        this.next()
+      }).mockImplementation(function () {
+        this.incomingRes = {}
+        this.next()
+      })
+
+      incomingResponse.mockImplementation(function () {
+        this.end()
+      })
+
+      middleware[HttpStages.IncomingRequest].incomingRequest2 = incomingRequest2
+
+      const http = createHttp()
+
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+
+      expect(incomingRequest).toHaveBeenCalledTimes(2)
+      expect(incomingRequest2).toHaveBeenCalledOnce()
+      expect(incomingResponse).toHaveBeenCalledTimes(2)
+      expect(Object.keys(http.middleware[HttpStages.IncomingRequest])).toEqual(['incomingRequest', 'incomingRequest2'])
     })
 
     it('does not forward to origin when request middleware already ended the client response', async function () {
