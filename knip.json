@@ -413,6 +413,11 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ]
     },
+    "packages/vitest-setup": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/network-tools": {
       "entry": [
         "lib/index.ts"
