@@ -18,6 +18,11 @@ export const createTimers = () => {
   let timerQueue: QueuedTimer[]
   let canceledTimerIds: Record<number, boolean>
 
+  // Held rAF callbacks are timed by the clock real frames use, even after the
+  // app or a test replaces `performance.now`, as `cy.clock(now, ['performance'])` does
+  const { performance } = window
+  const frameClock = performance.now.bind(performance)
+
   const reset = () => {
     paused = false
     flushing = false
@@ -36,12 +41,12 @@ export const createTimers = () => {
   const flushTimerQueue = () => {
     flushing = true
 
-    // Held rAF callbacks receive the time this flush runs: one that came due
-    // at 16 and replays at 5016 is called with 5016, not 16. The replay runs
-    // outside any rendering frame, so the timestamp the browser passed is
-    // stale by the length of the pause. Callbacks in one real frame share a
-    // timestamp, so every callback in this flush gets the same one.
-    const frameTimestamp = window.performance.now()
+    // Held rAF callbacks receive the time the first of them runs: one that came
+    // due at 16 and replays at 5016 is called with 5016, not 16. The replay
+    // runs outside any rendering frame, so the timestamp the browser passed is
+    // stale by the length of the pause. Like callbacks in one real frame, every
+    // rAF callback in this flush shares that timestamp.
+    let frameTimestamp: number | undefined
 
     timerQueue.forEach((timer) => {
       const { timerId, type, fnOrCode, params } = timer
@@ -53,7 +58,17 @@ export const createTimers = () => {
         return
       }
 
-      invoke(fnOrCode, type === 'requestAnimationFrame' ? [frameTimestamp] : params)
+      if (type === 'requestAnimationFrame') {
+        if (frameTimestamp === undefined) {
+          frameTimestamp = frameClock()
+        }
+
+        invoke(fnOrCode, [frameTimestamp])
+
+        return
+      }
+
+      invoke(fnOrCode, params)
     })
 
     reset()

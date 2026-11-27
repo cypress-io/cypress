@@ -7,7 +7,7 @@
 
 **Bugfixes:**
 
-- `requestAnimationFrame()` callbacks that your application schedules while [`cy.screenshot()`](https://on.cypress.io/screenshot) takes a screenshot now receive the time they run, as they would in a real frame, instead of the time they were due before the screenshot started. Callbacks held during the same screenshot all receive the same time. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
+- `requestAnimationFrame()` callbacks in your application that come due while [`cy.screenshot()`](https://on.cypress.io/screenshot) takes a screenshot now receive the time they run once the screenshot finishes, as they would in a real frame, instead of the time they came due. Fixed in [#TBD](https://github.com/cypress-io/cypress/pull/TBD).
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
 
 ## 16.4.0
