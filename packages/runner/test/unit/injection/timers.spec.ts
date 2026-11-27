@@ -320,10 +320,9 @@ describe('injection/timers', () => {
     })
   })
 
-  // Browsers number animation frames separately from timeouts, so their ids
-  // can collide. Fake timers draw both from one counter, so these specs
-  // re-wrap natives that number frames on their own, and return numbers from
-  // setTimeout the way browsers do.
+  // Fake timers draw frame and timeout ids from one counter, so they never
+  // collide the way browser ids can. These specs re-wrap natives that number
+  // frames on their own and return numeric timeout ids, as browsers do.
   describe('with browser-style timer ids', () => {
     let frameCallbacks: Map<number, FrameRequestCallback>
     let nextFrameId: number

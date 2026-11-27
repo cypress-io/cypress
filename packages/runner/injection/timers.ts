@@ -45,12 +45,12 @@ export const createTimers = () => {
     return window.eval(fnOrCode)
   }
 
-  // Takes entries off the queue one at a time rather than iterating over it,
-  // so a replayed callback that cancels a queued timer, pauses again, or
-  // resets is reflected before the next entry runs.
+  // Shifts one entry at a time, so a replayed callback that cancels a queued
+  // timer, pauses again, or resets takes effect before the next entry runs.
   const flushTimerQueue = () => {
-    // A replayed callback that unpauses lets this loop carry on instead of
-    // starting a second one over the same queue.
+    // A replayed callback that unpauses returns here, and the replay already
+    // running moves on to the next entry, as a browser runs one callback at a
+    // time.
     if (flushing) {
       return
     }
@@ -64,6 +64,8 @@ export const createTimers = () => {
         invoke(fnOrCode, params)
       }
     } finally {
+      // An app callback that throws would otherwise leave `flushing` set, and
+      // every later unpause would skip its replay.
       flushing = false
     }
   }
