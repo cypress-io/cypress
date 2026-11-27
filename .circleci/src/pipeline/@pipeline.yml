@@ -1243,7 +1243,7 @@ commands:
       - run:
           name: Post pre-release install comment
           command: |
-            node scripts/add-install-comment.js \
+            node scripts/add-install-comment.mts \
               --npm << parameters.package_url_path >> \
               --binary << parameters.binary_url_path >>
 
