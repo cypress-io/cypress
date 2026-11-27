@@ -21,11 +21,12 @@ export const flushRemoteErrors = (Cypress: AgentCypress) => {
 }
 
 // what callAgent uses of Cypress
-type AgentCypress = Pick<ICypress, 'config' | 'browser' | 'action'> & { automation: (message: string, data: unknown) => PromiseLike<unknown> }
+type AgentCypress = Pick<ICypress, 'config' | 'browser' | 'action' | 'state'> & { automation: (message: string, data: unknown) => PromiseLike<unknown> }
 
 const getContext = (Cypress: AgentCypress): AgentContext => {
   return {
     browser: Cypress.browser,
+    isProtocolEnabled: !!Cypress.state('isProtocolEnabled'),
     config: {
       visibilityStrategy: Cypress.config('visibilityStrategy'),
       scrollBehavior: Cypress.config('scrollBehavior'),

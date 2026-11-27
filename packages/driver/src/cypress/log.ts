@@ -19,7 +19,7 @@ const groupsOrTableRe = /^(?:groups|table)$/
 const parentOrChildRe = /parent|child|system/
 const SNAPSHOT_PROPS = 'id testId snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount defaultCollapsedState displayName end err event functionName groupLevel hookId instrument isStubbed group hidden message method name numElements numResponses referencesAlias renderProps sessionInfo state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
-const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'createdAtTimestamp', 'updatedAtTimestamp', 'scrollBy', 'coords', 'highlightAttr'])
+const PROTOCOL_PROPS = DISPLAY_PROPS.concat(['snapshots', 'createdAtTimestamp', 'updatedAtTimestamp', 'scrollBy', 'coords', 'highlightAttr', 'protocolElementIds'])
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 const PROTOCOL_MESSAGE_TRUNCATION_LENGTH = 3000
@@ -734,13 +734,15 @@ export class Log {
       return
     }
 
-    // a remote element has nothing in the runner to highlight, only a snapshot to count
+    // a remote element has nothing in the runner to highlight, only a snapshot to count, and
+    // the IDs Test Replay gave its elements, for highlighting them in a replay
     if (isRemoteElement($el)) {
       this.unset('$el')
 
       return this.set({
         numElements: $el.length,
         visible: this.isVisible($el.length, () => $el.elements.filter((el) => el.visible).length),
+        protocolElementIds: _.compact(_.map($el.elements, 'protocolElementId')),
       })
     }
 

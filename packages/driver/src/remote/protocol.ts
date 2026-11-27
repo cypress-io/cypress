@@ -28,8 +28,16 @@ export interface FrameOwner {
   selector: string
 }
 
+// Test Replay's capture code in the AUT's main world answers this event, dispatched on an element,
+// with the ID it gave that element, so the agent's elements can be highlighted in a replay
+export const PROTOCOL_ELEMENT_ID_REQUEST = 'cypress:protocol:element-id'
+
+export const PROTOCOL_ELEMENT_ID_RESPONSE = 'cypress:protocol:element-id:response'
+
 export interface AgentContext {
   browser: Cypress.Browser
+  // whether Test Replay is recording, so elements carry their protocolElementId
+  isProtocolEnabled: boolean
   config: {
     visibilityStrategy: Cypress.Config['visibilityStrategy']
     scrollBehavior: Cypress.Config['scrollBehavior']
@@ -54,6 +62,8 @@ export interface RemoteElementProps {
   empty: boolean
   // why the element isn't visible, for a failed visibility assertion's message
   hiddenReason?: string
+  // the ID Test Replay gave the element, while it's recording
+  protocolElementId?: string
   // only what a retrying assertion asked for in RemoteReads
   styles?: Record<string, string>
   descendants?: Record<string, boolean>
@@ -206,7 +216,7 @@ export interface EvaluateResult {
 }
 
 export interface ActionResult {
-  coords: { x: number, y: number }
+  coords: { top: number, left: number, topCenter: number, leftCenter: number, x: number, y: number }
 }
 
 export type AgentMethods = {

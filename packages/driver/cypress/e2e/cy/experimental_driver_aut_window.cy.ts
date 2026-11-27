@@ -191,4 +191,72 @@ describe('experimental driver: the AUT window', () => {
       })
     })
   })
+
+  describe('Test Replay element IDs', () => {
+    // stands in for Test Replay's capture code, which answers in the page's main world with the ID it
+    // gave the element. It counts the requests on <html>, where the test can read them.
+    const visitAnsweringElementIdRequests = () => {
+      cy.visit(AUT_PAGE, {
+        onBeforeLoad (win) {
+          let requests = 0
+
+          win.addEventListener('cypress:protocol:element-id', (event) => {
+            const element = event.composedPath()[0] as HTMLElement
+
+            event.stopImmediatePropagation()
+            win.document.documentElement.setAttribute('data-element-id-requests', String(++requests))
+            element.dispatchEvent(new win.CustomEvent('cypress:protocol:element-id:response', { detail: `id-${element.id || element.localName}` }))
+          }, true)
+        },
+      })
+    }
+
+    const lastLog = (logs: any[], name: string) => logs.filter((log) => log.get('name') === name).pop()
+
+    let logs: any[]
+
+    beforeEach(() => {
+      logs = []
+      cy.on('log:added', (attrs, log) => {
+        logs.push(log)
+      })
+    })
+
+    afterEach(() => {
+      Cypress.state('isProtocolEnabled', undefined)
+    })
+
+    it('puts the IDs of a query\'s elements on its log while Test Replay records', () => {
+      Cypress.state('isProtocolEnabled', true)
+      visitAnsweringElementIdRequests()
+
+      cy.get('#dbl').then(() => {
+        expect(lastLog(logs, 'get').get('protocolElementIds')).to.deep.eq(['id-dbl'])
+      })
+
+      cy.get('button').then(($buttons) => {
+        expect(lastLog(logs, 'get').get('protocolElementIds')).to.have.length($buttons.length)
+      })
+    })
+
+    it('puts the ID of the element an action acted on on its log', () => {
+      Cypress.state('isProtocolEnabled', true)
+      visitAnsweringElementIdRequests()
+
+      cy.get('#dbl').click().then(() => {
+        expect(lastLog(logs, 'click').get('protocolElementIds')).to.deep.eq(['id-dbl'])
+      })
+    })
+
+    it('doesn\'t ask for IDs when Test Replay isn\'t recording', () => {
+      visitAnsweringElementIdRequests()
+
+      cy.get('#dbl').click().then(() => {
+        expect(lastLog(logs, 'get').get('protocolElementIds')).to.be.empty
+        expect(lastLog(logs, 'click').get('protocolElementIds')).to.be.empty
+      })
+
+      cy.get('html').should('not.have.attr', 'data-element-id-requests')
+    })
+  })
 })
