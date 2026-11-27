@@ -17,7 +17,7 @@ This workspace (`internal-scripts`) contains the monorepo's build tooling, relea
 - `binary/` — Cypress binary lifecycle: `build.ts` (electron-builder packaging), `upload.js` / `upload-build-artifact.js` (S3 upload), `move-binaries.ts` (post-release artifact moves), `smoke.js` (smoke-test the built binary), `zip.js` (zip/unzip), `util/` (packages manifest, upload helpers, CloudFlare cache purge)
 - `semantic-commits/` — Conventional commit helpers: `get-current-release-data.js`, `get-linked-issues.js`, `validate-binary-changelog.js`
 - `github-actions/semantic-pull-request/` — GitHub Action that validates PR titles against the conventional commit format
-- `unit/` — Mocha unit tests for the scripts themselves (mirrors the top-level directory structure)
+- `unit/` — Unit tests for the scripts themselves (mirrors the top-level directory structure). The root `yarn test-scripts` runs both runners: `*.spec.ts` on Vitest (`vitest.config.ts`) and `*-spec.{js,ts}` on mocha. Write new specs as `*.spec.ts`.
 - Top-level loose scripts — one-off utilities: `circle-env.js`, `circle-cache.js`, `sanitize-mocha-results.js`, `verify-mocha-results.js`, `windows-sign.js`, `after-sign-hook.js`, `after-pack-hook.js`, `sync-exported-npm-with-cli.js`, etc.
 
 **Gotchas / Notes**
