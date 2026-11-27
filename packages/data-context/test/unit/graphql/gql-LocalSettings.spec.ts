@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from '@jest/globals'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { execute, parse } from 'graphql'
 import type { DataContext } from '../../../src'
 import { graphqlSchema } from '../../../graphql/schema'

@@ -243,6 +243,17 @@ describe('CDPConnection', () => {
 
         await expectRejection(cdpConnection.send('Page.enable'), CDPDisconnectedError, 'terminated')
       })
+
+      it('emits cdp-connection-lost after cdp-connection-closed', async () => {
+        const onConnectionLostCb = vi.fn()
+
+        cdpConnection.addConnectionEventListener('cdp-connection-lost', onConnectionLostCb)
+
+        await fireDisconnect()
+
+        expect(onConnectionLostCb).toHaveBeenCalledOnce()
+        expect(onConnectionClosedCb.mock.invocationCallOrder[0]).toBeLessThan(onConnectionLostCb.mock.invocationCallOrder[0])
+      })
     })
   })
 
@@ -278,6 +289,16 @@ describe('CDPConnection', () => {
         await cdpConnection.disconnect()
         await new Promise((resolve) => setImmediate(resolve))
         expect(onConnectionClosedCb).toHaveBeenCalled()
+      })
+
+      it('does not emit cdp-connection-lost', async () => {
+        const onConnectionLostCb = vi.fn()
+
+        cdpConnection.addConnectionEventListener('cdp-connection-lost', onConnectionLostCb)
+
+        await cdpConnection.disconnect()
+        await new Promise((resolve) => setImmediate(resolve))
+        expect(onConnectionLostCb).not.toHaveBeenCalled()
       })
 
       describe('when the connection has already been terminated', () => {

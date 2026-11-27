@@ -48,6 +48,7 @@
     "@packages/telemetry": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "@packages/vitest-setup": "0.0.0-development",
     "@sinonjs/fake-timers": "14.0.0",
     "@types/aria-query": "5.0.4",
     "@types/chai": "5.0.1",

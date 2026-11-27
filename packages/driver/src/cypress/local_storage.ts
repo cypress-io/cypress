@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-const specialKeywords = /(debug)/
+const specialKeywords = /debug/
 
 const $LocalStorage = {
   localStorage: null,

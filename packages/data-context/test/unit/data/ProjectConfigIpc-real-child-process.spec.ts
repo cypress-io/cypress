@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeAll, beforeEach, afterEach, vi } from 'vitest'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
@@ -8,22 +8,22 @@ import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
 import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
 import { EventRegistrar } from '../../../src/data/EventRegistrar'
 
-jest.mock('debug', () => {
-  globalThis.debugMessages = []
-  const originalDebugModule = jest.requireActual('debug')
+const debugMessages = vi.hoisted(() => [] as string[])
 
-  const debug = (namespace) => {
-    // @ts-expect-error - mock
+vi.mock('debug', async (importOriginal) => {
+  const { default: originalDebugModule } = await importOriginal<typeof import('debug')>()
+
+  const debug = (namespace: string) => {
     const originalDebug = originalDebugModule(namespace)
 
-    // other namespaces get the real debugger, since dependencies such as
-    // simple-git call instance methods like `extend` when they're imported
+    // other namespaces get the real debugger, since callers such as
+    // simple-git call instance methods like `extend` on it
     if (namespace !== 'cypress:lifecycle:ProjectConfigIpc') {
       return originalDebug
     }
 
     return ((message) => {
-      globalThis.debugMessages.push(message)
+      debugMessages.push(message)
 
       originalDebug(message)
     })
@@ -31,7 +31,7 @@ jest.mock('debug', () => {
 
   debug.formatters = {}
 
-  return debug
+  return { default: debug }
 })
 
 describe('ProjectConfigIpc', () => {
@@ -77,7 +77,7 @@ describe('ProjectConfigIpc', () => {
 }
 `)
 
-      const onError = jest.fn()
+      const onError = vi.fn()
       const ipc = new ProjectConfigIpc(undefined, projectRoot, path.join(projectRoot, configFile), configFile, onError, () => {}, () => {})
       const eventRegistrar = new EventRegistrar()
       const manager: any = new ProjectConfigManager({
@@ -143,8 +143,8 @@ describe('ProjectConfigIpc', () => {
 
       projectConfigIpc._childProcess.emit('error', err)
 
-      expect(globalThis.debugMessages.at(-2)).toEqual('EPIPE error in loadConfig() of child process %s')
-      expect(globalThis.debugMessages.at(-1)).toEqual('EPIPE error in registerSetupIpcHandlers() of child process %s')
+      expect(debugMessages.at(-2)).toEqual('EPIPE error in loadConfig() of child process %s')
+      expect(debugMessages.at(-1)).toEqual('EPIPE error in registerSetupIpcHandlers() of child process %s')
     }, 20_000)
   })
 })

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import debugLib from 'debug'
 
 import type { DataContext } from '../../../src'
@@ -28,7 +28,7 @@ describe('RelevantRunsDataSource', () => {
   beforeEach(() => {
     ctx = createTestDataContext('open')
     dataSource = new RelevantRunsDataSource(ctx)
-    jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockReset()
+    vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockReset()
   })
 
   it('returns empty with no shas', async () => {
@@ -38,7 +38,7 @@ describe('RelevantRunsDataSource', () => {
   })
 
   it('returns empty with no project set', async () => {
-    jest.spyOn(ctx.project, 'projectId').mockResolvedValue(undefined)
+    vi.spyOn(ctx.project, 'projectId').mockResolvedValue(undefined)
 
     const result = await dataSource.getRelevantRuns([FAKE_SHAS[0]])
 
@@ -46,7 +46,7 @@ describe('RelevantRunsDataSource', () => {
   })
 
   it('returns empty if error', async () => {
-    jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT_WITH_ERROR)
+    vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT_WITH_ERROR)
     const result = await dataSource.getRelevantRuns([])
 
     expect(result).toEqual([])
@@ -54,7 +54,7 @@ describe('RelevantRunsDataSource', () => {
 
   describe('cloud responses', () => {
     beforeEach(() => {
-      jest.spyOn(ctx.project, 'projectId').mockResolvedValue('test123')
+      vi.spyOn(ctx.project, 'projectId').mockResolvedValue('test123')
     })
 
     const getShasForTestData = (testData: TestProject) => {
@@ -63,7 +63,7 @@ describe('RelevantRunsDataSource', () => {
 
     const testScenario = async (testData: TestProject, expectedResult: RelevantRunInfo[]) => {
       // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(testData)
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(testData)
 
       const testShas: string[] = getShasForTestData(testData)
 
@@ -105,7 +105,7 @@ describe('RelevantRunsDataSource', () => {
     })
 
     it('returns the same current if current already set only one running', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL')
       // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
       // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
@@ -127,7 +127,7 @@ describe('RelevantRunsDataSource', () => {
     })
 
     it('returns the same current if current already set and updates after movesToNext is called', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL')
       // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
       // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
@@ -135,7 +135,7 @@ describe('RelevantRunsDataSource', () => {
       // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_MULTIPLE_COMPLETED)
 
-      const maybeSendRunNotificationStub = jest.spyOn(ctx.actions.notification, 'maybeSendRunNotification')
+      const maybeSendRunNotificationStub = vi.spyOn(ctx.actions.notification, 'maybeSendRunNotification')
 
       const subscription = ctx.emitter.subscribeTo('relevantRunChange')
       const subValues: any[] = []
@@ -212,7 +212,7 @@ describe('RelevantRunsDataSource', () => {
     })
 
     it('moves to new sha once completed', async () => {
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL')
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL')
       // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
       .mockResolvedValueOnce(FAKE_PROJECT_ONE_RUNNING_RUN)
       // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`

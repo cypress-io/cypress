@@ -63,11 +63,11 @@ interface ShortcutDetails {
 const dateRe = /^\d{4}-\d{2}-\d{2}/
 const monthRe = /^\d{4}-(0\d|1[0-2])/
 const weekRe = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
-const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
-const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(\.[0-9]{1,3})?/
-const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
-const charsBetweenCurlyBracesRe = /({.+?})/
-const isValidNumberInputChar = /[-+eE\d.]/
+const timeRe = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.\d{1,3})?/
+const dateTimeRe = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d{1,3})?/
+const numberRe = /^-?(?:\d+|\d+\.\d+|\.\d+)(?:e[-+]?\d+)?$/i
+const charsBetweenCurlyBracesRe = /(\{.+?\})/
+const isValidNumberInputChar = /[-+e\d.]/i
 // Unanchored at the end so that each arrow in a run such as
 // {upArrow}{upArrow} is accepted on its own as typing reaches it
 const arrowKeysRe = /^\{(ArrowUp|ArrowDown)\}/
@@ -298,7 +298,7 @@ const getKeyDetails = (onKeyNotFound) => {
  * @example '{foo}' => 'foo'
  */
 const parseCharsBetweenCurlyBraces = (chars: string) => {
-  return /{(.+?)}/.exec(chars)![1]
+  return /\{(.+?)\}/.exec(chars)![1]
 }
 
 const shouldIgnoreEvent = <

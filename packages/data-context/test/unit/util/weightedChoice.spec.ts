@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { describe, expect, it, vi } from 'vitest'
 
 import { WEIGHTED, WEIGHTED_EVEN } from '../../../src/util/weightedChoice'
 
@@ -60,7 +60,7 @@ describe('weightedChoice', () => {
     // Sampling it instead only pins the split to within a few standard
     // deviations of the weights, which flakes at CI volume.
     const tally = (algorithm: { pick: (values: string[]) => string }, options: string[], draws = 1000) => {
-      const random = jest.spyOn(Math, 'random')
+      const random = vi.spyOn(Math, 'random')
       const results: Record<string, number> = Object.fromEntries(options.map((option) => [option, 0]))
 
       try {

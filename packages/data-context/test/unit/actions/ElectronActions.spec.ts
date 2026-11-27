@@ -1,11 +1,11 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { describe, expect, it, vi } from 'vitest'
 import type { App, BrowserWindow } from 'electron'
 import { createTestDataContext } from '../helper'
 
 describe('ElectronActions', () => {
   describe('#showBrowserWindow', () => {
     const fakeWindow = () => {
-      const win = { show: jest.fn(), setSkipTaskbar: jest.fn() }
+      const win = { show: vi.fn(), setSkipTaskbar: vi.fn() }
 
       // Safe because `showBrowserWindow` only calls `show` and `setSkipTaskbar`
       return { win, browserWindow: win as unknown as BrowserWindow }
@@ -24,7 +24,7 @@ describe('ElectronActions', () => {
     it('leaves the window and its Dock icon hidden with --headless', () => {
       const ctx = createTestDataContext('open', { headless: true })
       const { win, browserWindow } = fakeWindow()
-      const dockShow = jest.fn<() => Promise<void>>().mockResolvedValue(undefined)
+      const dockShow = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
 
       // Safe because only `dock.show` is read
       ctx.config.electronApp = { dock: { show: dockShow } } as unknown as App

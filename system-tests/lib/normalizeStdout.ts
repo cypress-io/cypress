@@ -13,6 +13,7 @@ export const pathUpToProjectName = Fixtures.projectPath('')
 // a single placeholder. They are kept as separate groups (rather than a single
 // repeating group) so the `headless` capture stays `undefined` when absent —
 // the harness asserts on it directly in system-tests.ts.
+// eslint-disable-next-line regexp/no-empty-alternative -- `replaceBrowserName` concatenates the group, so it must be '' rather than undefined when absent
 export const browserNameVersionRe = /(Browser:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(headless\))?(\s\(deprecated\))?(\s+)/
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
@@ -31,12 +32,12 @@ const forceHttp1DeprecationWarningRe = /Warning: The forceHttp1 option is deprec
 // Chrome or Firefox sometimes take longer to connect. Matches the CDP_RETRYING_CONNECTION
 // template in packages/errors/src/errors.ts.
 const browserConnectRetryRe = /^Still waiting to connect to .+, retrying in 1 second \(attempt \d+\/\d+\)\r?\n/gm
-const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
+const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/g
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
 const escapedRetryDuration = /TORA(\d+)/g
 
-export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
+export const STDOUT_DURATION_IN_TABLES_RE = /(\s+)(\d+ms|\d+:\d+:?\d+)/g
 
 const replaceBrowserName = function (str: string, key: string, customBrowserPath: string, browserName: string, version: string, headless: boolean, deprecated: boolean, whitespace: string) {
   // get the padding for the existing browser string
@@ -97,7 +98,7 @@ const replaceUploadActivityIndicator = function (str: string, preamble: string, 
 // so that the stdout can contain stack traces of different lengths
 export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
   // matches the newline preceding the stack and any leading whitespace
-  const leadingNewLinesAndWhitespace = `(?:\\n?[^\\S\\n\\r]*)`
+  const leadingNewLinesAndWhitespace = `\\n?[^\\S\\n\\r]*`
   // matches against the potential file location patterns, including:
   // foo.js:1:2 - file locations including line/column numbers
   // <unknown> - rendered when location cannot be determined
@@ -112,8 +113,9 @@ export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'f
   const condensedStyleLine = `.*@${location}`
   // matches against remainder of stack trace until blank lines found.
   // includes group to normalize whitespace between newlines in Firefox
-  const remainderOfStack = `[\\n\\S\\s]*?(\\n\\s*?\\n|$)`
+  const remainderOfStack = `[\\s\\S]*?(\\n\\s*?\\n|$)`
 
+  // eslint-disable-next-line regexp/no-super-linear-backtracking -- only runs on Cypress's own stdout in system tests, and the lazy scan to the next blank line is what finds the end of a stack
   const stackTraceRegex = new RegExp(`${leadingNewLinesAndWhitespace}(?:${verboseStyleLine}|${condensedStyleLine})${remainderOfStack}`, 'g')
 
   return str.replace(stackTraceRegex, (match: string, trailingWhitespace: string | undefined, offset: number) => {
@@ -182,7 +184,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // duration='1589' -> duration='XXXX'
   .replace(/(duration=')(\d+)(')/g, replaceDurationFromReporter)
   // (in|after) (1m)|(1m, 10s)|(10s)|(10.12ms) 1/1 => '(in|after) XXm, YYs, ZZ.ZZms 1/1
-  .replace(/((in)|(after)) ((?:\d+m)|(?:\d+m, \d+s)|(?:\d+s)|(?:\d+\.\d+ms)) (\d+\/\d+)/g, replaceShortDuration)
+  .replace(/((in)|(after)) (\d+m|\d+m, \d+s|\d+s|\d+\.\d+ms) (\d+\/\d+)/g, replaceShortDuration)
   // 15 seconds -> XX seconds
   .replace(/((\d+ minutes?,\s+)?\d+ seconds? *)/g, replaceTime)
   .replace(/\r/g, '')
@@ -204,8 +206,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Strip the forceHttp1 deprecation warning so run-mode snapshots don't need to capture it
   .replace(forceHttp1DeprecationWarningRe, '')
   // Replaces "new dependencies optimized" message from vite as it does not respect the logLevel='silent' option
-  .replace(/^.*Re-optimizing dependencies.*?\n$/gm, '')
-  .replace(/\).*new dependencies optimized.*?\n/gm, ')\n')
+  .replace(/^.*Re-optimizing dependencies.*\n$/gm, '')
+  .replace(/\).*new dependencies optimized.*\n/g, ')\n')
 
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"

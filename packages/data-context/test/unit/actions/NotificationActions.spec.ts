@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import type { DataContext } from '../../../src'
 import { NotificationActions } from '../../../src/actions/NotificationActions'
 import type { CloudRunStatus, RelevantRunInfo } from '../../../src/gen/graphcache-config.gen'
@@ -16,9 +16,9 @@ describe('NotificationActions', () => {
 
     ctx.coreData.currentProject = '/cy-project'
 
-    showSystemNotificationStub = jest.spyOn(ctx.actions.electron, 'showSystemNotification')
+    showSystemNotificationStub = vi.spyOn(ctx.actions.electron, 'showSystemNotification')
 
-    jest.spyOn(ctx.actions.cloudProject, 'fetchMetadata').mockResolvedValue({
+    vi.spyOn(ctx.actions.cloudProject, 'fetchMetadata').mockResolvedValue({
       id: 'project-local-id',
       name: 'cy-project',
     })
@@ -28,9 +28,9 @@ describe('NotificationActions', () => {
     it('focuses the active browser window and calls debugCloudRun', async () => {
       const run = createRelevantRun(12)
 
-      const focusActiveBrowserWindowSpy = jest.spyOn(ctx.actions.browser, 'focusActiveBrowserWindow')
+      const focusActiveBrowserWindowSpy = vi.spyOn(ctx.actions.browser, 'focusActiveBrowserWindow')
 
-      const debugCloudRunSpy = jest.spyOn(ctx.actions.project, 'debugCloudRun')
+      const debugCloudRunSpy = vi.spyOn(ctx.actions.project, 'debugCloudRun')
 
       await actions.onNotificationClick(run)
 
@@ -123,7 +123,7 @@ describe('NotificationActions', () => {
     })
 
     it('sends run started notification if there is a new run with RUNNING status that is different from the previously cached run', () => {
-      const sendRunStartedNotificationStub = jest.spyOn(actions, 'sendRunStartedNotification')
+      const sendRunStartedNotificationStub = vi.spyOn(actions, 'sendRunStartedNotification')
 
       ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true
       const run1 = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 1 } as const
@@ -137,7 +137,7 @@ describe('NotificationActions', () => {
     })
 
     it('sends run started failing notification if status is RUNNING and totalFailed was 0 but is now greater than 0', () => {
-      const sendRunFailingNotificationStub = jest.spyOn(actions, 'sendRunFailingNotification')
+      const sendRunFailingNotificationStub = vi.spyOn(actions, 'sendRunFailingNotification')
       const run1 = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0 } as const
       const run2 = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 3 } as const
 
@@ -153,7 +153,7 @@ describe('NotificationActions', () => {
         it(`sends run completed notification if new run has completed - ${status}`, () => {
           const run1: RelevantRunInfo = { ...createRelevantRun(141), status: 'RUNNING', sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0, branch: 'branch123', organizationId: '1' }
           const run2: RelevantRunInfo = { ...createRelevantRun(142), status: status as CloudRunStatus, sha: 'f909139209c8351cfaa737c7fd122ad4f17fdaa5', totalFailed: 0, branch: 'branch123', organizationId: '1' }
-          const sendRunCompletedNotificationStub = jest.spyOn(actions, 'sendRunCompletedNotification')
+          const sendRunCompletedNotificationStub = vi.spyOn(actions, 'sendRunCompletedNotification')
 
           ctx.coreData.localSettings.preferences.desktopNotificationsEnabled = true
 

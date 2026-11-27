@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import type { DataContext } from '../../../src'
 import { CohortsActions } from '../../../src/actions/CohortsActions'
 import { createTestDataContext } from '../helper'
@@ -29,7 +29,7 @@ describe('CohortsActions', () => {
         cohort: 'A',
       }
 
-      jest.spyOn(ctx._apis.cohortsApi, 'getCohort').mockResolvedValue(cohort)
+      vi.spyOn(ctx._apis.cohortsApi, 'getCohort').mockResolvedValue(cohort)
 
       const cohortReturned = await actions.getCohort(cohort.name)
 

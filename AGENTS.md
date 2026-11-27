@@ -68,9 +68,6 @@ yarn workspace @packages/server test-unit -- <path-to-spec>
 # Filter mocha tests by name pattern
 yarn workspace @packages/server test-unit -- --grep "<pattern>"
 
-# @packages/data-context is the one package on jest, not vitest or mocha
-yarn workspace @packages/data-context test-unit -- <path-to-spec>
-
 # Run system test specs whose file name contains a fragment (not a path);
 # see system-tests/AGENTS.md
 yarn test-system go_spec --browser electron
@@ -175,6 +172,7 @@ Orientation, not a registry — the directories under `packages/` and `npm/` are
 - **`@packages/ts`** — Shared TypeScript configuration and `ts-node` register helper.
 - **`@packages/eslint-config`** — Shared ESLint configuration preset used across packages.
 - **`@packages/resolve-dist`** — Resolves paths to compiled distribution artifacts.
+- **`@packages/vitest-setup`** — Global setup every `vitest.config` runs; strips the inherited environment to an allowlist so host secrets and settings stay out of unit tests.
 
 ### Component Testing Adapters (published via `npm/`)
 

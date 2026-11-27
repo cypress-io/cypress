@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import debugLib from 'debug'
 import { format } from 'util'
 import { autoBindDebug } from '../../../src/util/autoBindDebug'
@@ -35,13 +35,13 @@ describe('autoBindDebug', () => {
     logged = []
     debugLib.disable()
     // debug leaves `%s` for its default log function, which formats with util.format
-    jest.spyOn(debugLib, 'log').mockImplementation((...args: unknown[]) => {
+    vi.spyOn(debugLib, 'log').mockImplementation((...args: unknown[]) => {
       logged.push(format(...args))
     })
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('returns the object untouched when tracing is off', () => {

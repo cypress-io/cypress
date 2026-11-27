@@ -1,8 +1,22 @@
+type TimerFn = 'setTimeout' | 'setInterval' | 'requestAnimationFrame'
+type CancelFn = 'clearTimeout' | 'clearInterval'
+
+// The runner compiles with Node's types, which merge Node's timer overloads
+// into `window`. The AUT only ever has the DOM ones, so wrap against those.
+type TimerWindow = Pick<WindowOrWorkerGlobalScope & AnimationFrameProvider, TimerFn | CancelFn>
+
+interface QueuedTimer {
+  timerId: number
+  type: TimerFn
+  fnOrCode: TimerHandler
+  params: unknown[]
+}
+
 export const createTimers = () => {
-  let paused
-  let flushing
-  let timerQueue
-  let canceledTimerIds
+  let paused: boolean
+  let flushing: boolean
+  let timerQueue: QueuedTimer[]
+  let canceledTimerIds: Record<number, boolean>
 
   const reset = () => {
     paused = false
@@ -11,7 +25,7 @@ export const createTimers = () => {
     canceledTimerIds = {}
   }
 
-  const invoke = (fnOrCode, params = []) => {
+  const invoke = (fnOrCode: TimerHandler, params: unknown[] = []) => {
     if (typeof fnOrCode === 'function') {
       return fnOrCode.apply(window, params)
     }
@@ -25,8 +39,7 @@ export const createTimers = () => {
     timerQueue.forEach((timer) => {
       const { timerId, type, fnOrCode, params } = timer
 
-      // if we are a setInterval and we're been canceled
-      // then just return. this can happen when a setInterval
+      // skip a canceled setInterval. a paused setInterval
       // queues many callbacks, and from within that callback
       // we would have canceled the original setInterval
       if (type === 'setInterval' && canceledTimerIds[timerId]) {
@@ -39,7 +52,7 @@ export const createTimers = () => {
     reset()
   }
 
-  const pause = (shouldPause) => {
+  const pause = (shouldPause: unknown) => {
     paused = Boolean(shouldPause)
 
     if (!paused) {
@@ -56,12 +69,12 @@ export const createTimers = () => {
       clearInterval: window.clearInterval,
     }
 
-    const callThrough = (fnName, args) => {
+    const callThrough = (fnName: keyof typeof originals, args: unknown[]) => {
       return originals[fnName].apply(window, args)
     }
 
-    const wrapCancel = (fnName) => {
-      return (timerId) => {
+    const wrapCancel = (fnName: CancelFn) => {
+      return (timerId: number) => {
         if (flushing) {
           canceledTimerIds[timerId] = true
         }
@@ -70,14 +83,11 @@ export const createTimers = () => {
       }
     }
 
-    const wrapTimer = (fnName) => {
-      return (...args) => {
+    const wrapTimer = (fnName: TimerFn) => {
+      return (...args: [TimerHandler, number?, ...unknown[]]): number => {
         const [fnOrCode, delay, ...params] = args
 
-        const timerOverride = (...params) => {
-          // if we're currently paused then we need
-          // to enqueue this timer callback and invoke
-          // it immediately once we're unpaused
+        const timerOverride = (...params: unknown[]) => {
           if (paused) {
             timerQueue.push({
               timerId,
@@ -89,8 +99,6 @@ export const createTimers = () => {
             return
           }
 
-          // else go ahead and invoke the real function
-          // the same way the browser otherwise would
           return invoke(fnOrCode, params)
         }
 
@@ -100,14 +108,15 @@ export const createTimers = () => {
       }
     }
 
-    window.setTimeout = wrapTimer('setTimeout')
-    window.setInterval = wrapTimer('setInterval')
-    window.requestAnimationFrame = wrapTimer('requestAnimationFrame')
-    window.clearTimeout = wrapCancel('clearTimeout')
-    window.clearInterval = wrapCancel('clearInterval')
+    const timerWindow: TimerWindow = window
+
+    timerWindow.setTimeout = wrapTimer('setTimeout')
+    timerWindow.setInterval = wrapTimer('setInterval')
+    timerWindow.requestAnimationFrame = wrapTimer('requestAnimationFrame')
+    timerWindow.clearTimeout = wrapCancel('clearTimeout')
+    timerWindow.clearInterval = wrapCancel('clearInterval')
   }
 
-  // start with initial values
   reset()
 
   return {
