@@ -42,8 +42,7 @@ export default class Err {
   parsedStack: ParsedStackLine[] | null = null
   docsUrl = '' as string | string[]
   templateType = ''
-  // @ts-ignore
-  codeFrame: CodeFrame
+  codeFrame?: CodeFrame
   isRecovered: boolean = false
   docsUrlTitle: string | null = null
   triggerAction: 'loginModal' | 'projectConnectModal' | null = null
@@ -71,7 +70,7 @@ export default class Err {
   }
 
   get isCommandErr () {
-    return /(AssertionError|CypressError)/.test(this.name)
+    return /AssertionError|CypressError/.test(this.name)
   }
 
   update (props?: Partial<ErrProps>) {

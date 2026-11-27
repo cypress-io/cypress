@@ -1,3 +1,0 @@
-# packherd
-
-@AGENTS.md

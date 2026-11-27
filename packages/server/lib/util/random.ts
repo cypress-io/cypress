@@ -1,9 +1,6 @@
-import random from 'randomstring'
+import crypto from 'crypto'
 
 // return a random id
 export const id = (length = 5): string => {
-  return random.generate({
-    length,
-    capitalization: 'lowercase',
-  })
+  return Array.from({ length }, () => crypto.randomInt(36).toString(36)).join('')
 }

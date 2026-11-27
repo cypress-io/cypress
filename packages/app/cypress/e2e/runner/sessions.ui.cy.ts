@@ -35,7 +35,6 @@ describe('runner/cypress sessions.ui.spec', {
   viewportHeight: 1000,
 }, () => {
   afterEach(function () {
-    // @ts-ignore
     if (cy.state('test').state === 'passed') {
       snapshotReporter()
     }
@@ -577,7 +576,7 @@ describe('runner/cypress sessions.ui.spec', {
               failCount: 0,
               setup () {
                 cy.window().then((win) => {
-                // @ts-ignore
+                // @ts-expect-error - CYPRESS_TEST_DATA is a test-only global that the fixture app reads
                   return win.CYPRESS_TEST_DATA = {
                     restoreSessionWithValidationFailure: true,
                     successfullyRecreatedSession: true,
@@ -657,7 +656,7 @@ describe('runner/cypress sessions.ui.spec', {
               failCount: 7,
               setup () {
                 cy.window().then((win) => {
-                // @ts-ignore
+                // @ts-expect-error - CYPRESS_TEST_DATA is a test-only global that the fixture app reads
                   return win.CYPRESS_TEST_DATA = {
                     restoreSessionWithValidationFailure: true,
                     successfullyRecreatedSession: false,

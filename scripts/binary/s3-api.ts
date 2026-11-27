@@ -1,7 +1,8 @@
 const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
 import is from 'check-more-types'
-import { CopyObjectCommandInput, CopyObjectCommandOutput, ObjectCannedACL, S3 } from '@aws-sdk/client-s3'
+import type { CopyObjectCommandInput, CopyObjectCommandOutput, ObjectCannedACL } from '@aws-sdk/client-s3'
+import { S3 } from '@aws-sdk/client-s3'
 
 export const hasOnlyStringValues = (o) => {
   return Object.values(o).every((v) => is.unemptyString(v))
@@ -75,7 +76,8 @@ export const s3helpers = {
         debug('AWS result in %s %s', bucket, prefix)
         debug('%o', result)
 
-        resolve(result.CommonPrefixes.map((val) => val.Prefix))
+        // S3 omits CommonPrefixes for an empty prefix, and the SDK swallows a throw from this callback
+        resolve((result.CommonPrefixes ?? []).map((val) => val.Prefix))
       })
     })
   },

@@ -1,3 +1,18 @@
+# [@[secure]/mount-utils-v5.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/mount-utils-v4.1.2...@[secure]/mount-utils-v5.0.0) (2026-08-26)
+
+
+### breaking
+
+* merge @[secure]/angular-zoneless upstream into @[secure]/angular and remove angular support for angular 18, 19 and 20. ([4d8e35c](https://github.com/[secure]-io/[secure]/commit/4d8e35ca7b49e732a05742ae2e410e173b8d89f2))
+* release version 5.0.0 of @[secure]/mount-utils ([c5f0889](https://github.com/[secure]-io/[secure]/commit/c5f08897bfaf71319c7b51f4c7203ea7f455bf7a))
+
+
+### BREAKING CHANGES
+
+* merge @[secure]/angular-zoneless upstream into @[secure]/angular and remove angular support for angular 18, 19, and 20. Additionally, @[secure]/schematic only supports Cypress 16 and doesnt scaffold the angular-zoneless mount handler any longer. This is a breaking change to Cypress, @[secure]/angular, and @[secure]/schematic. Additionally, @[secure]/angular-zoneless will be deprecated on NPM due to the upstream move
+i
+* updates build target of @[secure]/mount-utils from es2015 to es2022.
+
 # [@cypress/mount-utils-v4.1.2](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v4.1.1...@cypress/mount-utils-v4.1.2) (2025-01-08)
 
 # [@cypress/mount-utils-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/mount-utils-v4.1.0...@cypress/mount-utils-v4.1.1) (2024-06-07)

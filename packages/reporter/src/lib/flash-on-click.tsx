@@ -1,7 +1,7 @@
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Children, cloneElement, MouseEvent, ReactElement, ReactNode, useCallback, useState } from 'react'
-// @ts-ignore
+import type { MouseEvent, ReactElement, ReactNode } from 'react'
+import React, { Children, cloneElement, useCallback, useState } from 'react'
 import Tooltip from './tooltip'
 
 interface Props {

@@ -28,8 +28,8 @@ const getTags = async () => {
 }
 
 const parseSemanticReleaseOutput = (output) => {
-  const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d+-?\S*)/) || [])[1]
-  const nextVersion = (output.match(/next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
+  const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d\S*)/) || [])[1]
+  const nextVersion = (output.match(/next release version is (\d+\.\d+\.\d\S*)/) || [])[1]
 
   return {
     currentVersion,
@@ -139,7 +139,7 @@ const injectVersions = (packagesToRelease, versions, packages) => {
 const releasePackages = async (packages) => {
   console.log(`\nReleasing packages`)
 
-  let failures = []
+  const failures = []
 
   // it would make sense to run each release simultaneously with something like Promise.all()
   // however this can cause a race condition within git (git lock throws an error)

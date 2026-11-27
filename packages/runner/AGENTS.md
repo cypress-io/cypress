@@ -8,12 +8,15 @@ yarn workspace @packages/runner build
 
 # Build for production (minified)
 yarn workspace @packages/runner build-prod
+
+# Unit-test the AUT injection code (vitest + jsdom)
+yarn workspace @packages/runner test
 ```
 
 **Architecture**
 
-- `src/main.jsx` — Entry point; assembles reporter and driver into the runner iframe
-- `src/cross-origin.js` — Handles cross-origin iframe communication
+- `src/main.ts` — Entry point; assembles reporter and driver into the runner iframe
+- `src/cross-origin.ts` — Handles cross-origin iframe communication
 - `src/main.scss` — Runner-level styles (including legacy Cypress styles)
 - `unified-runner.tsx` — Unified runner entry used in some Cypress app contexts
 - `webpack.config.ts` — Webpack configuration for the runner bundle
@@ -22,7 +25,7 @@ yarn workspace @packages/runner build-prod
 **Gotchas / Notes**
 
 - This package is deprecated in favor of `@packages/app`. Do not add new features here; migrate to `@packages/app` instead.
-- Tests were moved to `@packages/app`; running `cypress:open` or `cypress:run` from this package will error.
+- The runner's Cypress tests were moved to `@packages/app`; running `cypress:open` or `cypress:run` from this package will error. `test/unit/injection` holds vitest specs for the AUT injection. The `main.ts` specs mock its collaborators, while the `timers.ts` specs run the real timer wrapper against fake timers. The driver's Cypress specs, such as `aut_window_patches.cy.ts`, `cy/timers.cy.ts` and `origin/integrity.cy.ts`, exercise the injection end to end.
 - Nx implicit dependencies on `@packages/driver`, `@packages/reporter`, and `@packages/config` mean any change in those packages invalidates the runner's Nx cache and triggers a rebuild.
 - `dom.js` uses webpack-specific loaders and cannot be imported directly by Vite.
 

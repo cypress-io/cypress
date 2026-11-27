@@ -4,19 +4,15 @@
     data-cy="settings-specPatterns"
   >
     <template #title>
-      {{ t('settingsPage.specPattern.title') }}
+      Spec patterns
     </template>
     <template #description>
-      <i18n-t
-        scope="global"
-        keypath="settingsPage.specPattern.description"
+      The globs pointing Cypress to your spec files configured for this project.
+      <ExternalLink
+        href="https://on.cypress.io/test-type-options"
       >
-        <ExternalLink
-          href="https://on.cypress.io/test-type-options"
-        >
-          {{ t('links.learnMore') }}
-        </ExternalLink>
-      </i18n-t>
+        Learn more.
+      </ExternalLink>
     </template>
     <SpecPatterns
       v-if="props.gql"
@@ -27,14 +23,11 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from '@cy/i18n'
 import SettingsSection from '../SettingsSection.vue'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import { gql } from '@urql/core'
 import type { SpecPatterns_SettingsFragment } from '../../generated/graphql'
 import SpecPatterns from '../../components/SpecPatterns.vue'
-
-const { t } = useI18n()
 
 gql`
 fragment SpecPatterns_Settings on CurrentProject {

@@ -12,7 +12,6 @@ describe('runner/cypress retries.ui.spec', {
   numTestsKeptInMemory: 1,
 }, () => {
   afterEach(() => {
-    // @ts-ignore
     if (cy.state('test').state === 'passed') {
       snapshotReporter()
     }
@@ -36,6 +35,17 @@ describe('runner/cypress retries.ui.spec', {
     })
 
     cy.reporter().find('.runnable-err-print').should('be.visible')
+  })
+
+  it('passes on the retry after a beforeEach command timed out', () => {
+    loadSpec({
+      filePath: 'retries/before-each-command-timeout.retries.cy.ts',
+      passCount: 1,
+      failCount: 0,
+    })
+
+    cy.reporter().contains('Attempt 1').click()
+    cy.reporter().find('.attempt-1').contains('Cypress test was stopped while running this command.')
   })
 
   it('can toggle failed prev attempt open and log its error', { viewportHeight: 1200 }, () => {
@@ -67,7 +77,7 @@ describe('runner/cypress retries.ui.spec', {
         try {
           fn()
         } catch (e) {
-          // @ts-ignore
+          // @ts-expect-error - the internal cy.fail type requires an options argument this call does not need
           cy.fail(e)
         }
       }
@@ -86,7 +96,7 @@ describe('runner/cypress retries.ui.spec', {
         }))
 
         cy.window().then((win) => {
-          // @ts-ignore
+          // @ts-expect-error - Screenshot.onAfterScreenshot is internal and missing from the public Cypress type
           win.Cypress.Screenshot.onAfterScreenshot = stub
         })
       },
@@ -286,7 +296,7 @@ describe('runner/cypress retries.ui.spec', {
 
   describe('can configure retries', () => {
     after(() => {
-      // @ts-ignore
+      // @ts-expect-error - window.top may be null, and it does not declare the test-only __cySkipValidateConfig flag
       window.top.__cySkipValidateConfig = false
     })
 
@@ -303,7 +313,7 @@ describe('runner/cypress retries.ui.spec', {
       })
     }
 
-    // @ts-ignore
+    // @ts-expect-error - window.top may be null, and it does not declare the test-only __cySkipValidateConfig flag
     window.top.__cySkipValidateConfig = true
 
     it('via config value', () => {

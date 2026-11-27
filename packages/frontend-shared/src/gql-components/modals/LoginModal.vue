@@ -10,7 +10,7 @@
       <div class="bg-white rounded mx-auto min-w-[480px] max-w-[600px] relative">
         <StandardModalHeader
           help-link="https://on.cypress.io"
-          :help-text="t('links.needHelp')"
+          help-text="Need help"
           @close="cancelLogin"
         >
           {{ title }}
@@ -24,37 +24,26 @@
           v-else-if="isOnline"
           class="font-normal p-[24px] text-gray-700"
         >
-          <i18n-t
-            v-if="!viewer && !error"
-            scope="global"
-            keypath="topNav.login.bodyInitial"
-          >
-            <ExternalLink
-              href="https://on.cypress.io/dashboard-introduction"
-            >
-              {{ t('topNav.login.cloud') }}
-            </ExternalLink>
-          </i18n-t>
-          <i18n-t
-            v-else-if="viewer"
-            scope="global"
-            keypath="topNav.login.bodySuccess"
-          >
-            <ExternalLink
-              href="https://on.cypress.io/dashboard/profile"
+          <template v-if="!viewer && !error">
+            <!-- eslint-disable-next-line vue/singleline-html-element-content-newline -->
+            Logging in gives you access to <ExternalLink :href="cloudIntroductionUrl">Cypress Cloud</ExternalLink>. You can set up projects to be recorded and see test data from your project.
+          </template>
+          <template v-else-if="viewer">
+            You are now logged in as <ExternalLink
+              :href="cloudProfileUrl"
               class="font-medium text-indigo-500"
             >
               {{ viewer.fullName || viewer.email }}
-            </ExternalLink>
-          </i18n-t>
+            </ExternalLink>.
+          </template>
           <div v-else-if="error === 'AUTH_COULD_NOT_LAUNCH_BROWSER'">
             <div
               class="rounded flex font-medium bg-red-100 mb-[20px] p-[16px] text-red-600 gap-[8px] items-center"
             >
               <i-cy-errored-outline_x16 class="h-[16px] min-w-[16px] w-[16px] icon-dark-red-400" />
-              {{ t('topNav.login.bodyBrowserError') }}
+              The browser could not be opened.
             </div>
-            {{ t('topNav.login.bodyBrowserErrorDetails') }}
+            Cypress was unable to open your installed browser. To continue logging in, please paste this URL into your web browser:
 
             <CopyText
               v-if="props.gql.authState.message"
@@ -63,7 +52,7 @@
             />
           </div>
           <div v-else-if="error === 'AUTH_ERROR_DURING_LOGIN'">
-            {{ t('topNav.login.bodyError') }}
+            An error occurred while attempting to log in:
             <div
               class="rounded flex bg-red-100 mt-[16px] p-[16px] text-red-600 gap-[8px] items-center"
             >
@@ -78,7 +67,7 @@
         >
           <Auth
             :gql="props.gql"
-            :auth-flow="authFlow"
+            :auth-flow="props.authFlow"
             :auto-start-auth="props.autoStartAuth"
             :show-retry="!!error"
             :utm-medium="props.utmMedium"
@@ -92,7 +81,6 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/core'
 import { computed } from 'vue'
 import Auth from '../Auth.vue'
@@ -102,6 +90,7 @@ import NoInternetConnection from '../../components/NoInternetConnection.vue'
 import CopyText from '@cy/components/CopyText.vue'
 import StandardModalHeader from '@cy/components/StandardModalHeader.vue'
 import { hideAllPoppers } from 'floating-vue'
+import { getUrlWithParams } from '../../utils/getUrlWithParams'
 
 import {
   Dialog,
@@ -126,6 +115,8 @@ const props = withDefaults(defineProps<{
   utmContent?: string
   autoStartAuth?: boolean
 }>(), {
+  authFlow: 'login',
+  utmContent: undefined,
   autoStartAuth: true,
 })
 
@@ -137,10 +128,28 @@ fragment LoginModal on Query {
 
 hideAllPoppers()
 
-const { t } = useI18n()
-const authFlow = computed(() => props.authFlow || 'login')
-
 const viewer = computed(() => props.gql?.cloudViewer)
+
+const utmParams = computed(() => {
+  return {
+    utm_medium: props.utmMedium,
+    ...(props.utmContent ? { utm_content: props.utmContent } : {}),
+  }
+})
+
+const cloudIntroductionUrl = computed(() => {
+  return getUrlWithParams({
+    url: 'https://on.cypress.io/dashboard-introduction',
+    params: { ...utmParams.value, utm_campaign: 'Cypress Cloud' },
+  })
+})
+
+const cloudProfileUrl = computed(() => {
+  return getUrlWithParams({
+    url: 'https://on.cypress.io/dashboard/profile',
+    params: { ...utmParams.value, utm_campaign: 'Profile' },
+  })
+})
 
 const error = computed(() => {
   const { name } = props.gql.authState
@@ -156,18 +165,18 @@ const showFooter = computed(() => error.value !== 'AUTH_COULD_NOT_LAUNCH_BROWSER
 
 const title = computed(() => {
   if (viewer.value) {
-    return t('topNav.login.titleSuccess')
+    return 'Login successful'
   }
 
   if (error.value === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
-    return t('topNav.login.titleBrowserError')
+    return 'Browser error'
   }
 
   if (error.value === 'AUTH_ERROR_DURING_LOGIN') {
-    return t('topNav.login.titleFailed')
+    return 'Login failed'
   }
 
-  return t('topNav.login.titleInitial')
+  return 'Continue in your browser'
 })
 
 const isOnline = computed(() => online.value)

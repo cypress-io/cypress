@@ -1,10 +1,10 @@
-import crypto, { BinaryLike } from 'crypto'
+import type { BinaryLike } from 'crypto'
+import crypto from 'crypto'
 import { TextEncoder, promisify } from 'util'
-import { DecryptOptions, generalDecrypt, GeneralJWE } from 'jose'
+import type { DecryptOptions, GeneralJWE } from 'jose'
 import base64Url from 'base64url'
 import type { CypressRequestOptions } from './api'
 import { deflateRaw as deflateRawCb, inflateRaw as inflateRawCb } from 'zlib'
-import fs from 'fs'
 
 const deflateRaw = promisify(deflateRawCb)
 const inflateRaw = promisify(inflateRawCb)
@@ -115,6 +115,8 @@ export async function encryptRequest (params: Pick<CypressRequestOptions, 'body'
  * decrypts the response payload, which is assumed to be JSON
  */
 export async function decryptResponse (jwe: GeneralJWE, encryptionKey: crypto.KeyObject): Promise<any> {
+  // loaded on first use, since start-cypress loads this module during startup
+  const { generalDecrypt } = await import('jose')
   const result = await generalDecrypt(jwe, encryptionKey, DECRYPT_OPTIONS)
   const plaintext = Buffer.from(result.plaintext).toString('utf8')
 

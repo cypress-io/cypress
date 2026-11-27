@@ -5,7 +5,7 @@
   >
     <component
       :is="isCurrentRun ? 'div': 'button'"
-      :aria-label="t('debugPage.switchToRun', {runNumber: gql.runNumber})"
+      :aria-label="`Switch to run number ${props.gql.runNumber}`"
       class="rounded flex w-full p-[10px] pl-[35px] relative hocus:bg-indigo-50 focus:outline focus:outline-indigo-500"
       :class="{ 'bg-indigo-50': isCurrentRun }"
       @click="$emit('changeRun')"
@@ -50,12 +50,10 @@ import RunNumber from '../runs/RunNumber.vue'
 import RunResults from '../runs/RunResults.vue'
 import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
 import type { DebugProgress_DebugTestsFragment } from '../generated/graphql'
-import { computed, FunctionalComponent, h } from 'vue'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import { useDebugRunSummary } from './useDebugRunSummary'
 import { useRunDateTimeInterval } from './useRunDateTimeInterval'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   gql: DebugProgress_DebugTestsFragment
@@ -93,10 +91,14 @@ const run = computed(() => props.gql)
 const { relativeCreatedAt, totalDuration } = useRunDateTimeInterval(run)
 
 const specsCompleted = computed(() => {
+  const total = props.gql.totalInstanceCount || 0
+
   if (props.gql.status === 'RUNNING') {
-    return t('debugPage.specCounts.whenRunning', { n: props.gql.totalInstanceCount || 0, completed: props.gql.completedInstanceCount || 0, total: props.gql.totalInstanceCount || 0 })
+    const completed = props.gql.completedInstanceCount || 0
+
+    return `${completed} of ${total} ${total === 1 ? 'spec' : 'specs'} completed`
   }
 
-  return t('debugPage.specCounts.whenCompleted', { n: props.gql.totalInstanceCount || 0 })
+  return `${total} ${total === 1 ? 'spec' : 'specs'}`
 })
 </script>

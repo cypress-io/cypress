@@ -1,0 +1,37 @@
+import { InvalidValueTapError } from '@packages/cypress-sessions'
+
+const WHOLE_NUMBER = /^\d+$/
+
+const parseWholeNumber = (raw: unknown): number | undefined => {
+  if (typeof raw !== 'string' || !WHOLE_NUMBER.test(raw)) {
+    return undefined
+  }
+
+  const value = Number(raw)
+
+  return Number.isSafeInteger(value) ? value : undefined
+}
+
+export const parseIndex = (raw: string | undefined): number | undefined => {
+  if (raw === undefined) {
+    return undefined
+  }
+
+  const value = parseWholeNumber(raw)
+
+  if (value === undefined) {
+    throw new InvalidValueTapError('--at', 'a whole number, 0 or greater', raw)
+  }
+
+  return value
+}
+
+export const parsePositiveInt = (raw: string, label: string): number => {
+  const value = parseWholeNumber(raw)
+
+  if (value === undefined || value <= 0) {
+    throw new InvalidValueTapError(`--${label}`, 'a positive integer', raw)
+  }
+
+  return value
+}

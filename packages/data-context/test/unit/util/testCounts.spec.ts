@@ -1,5 +1,5 @@
-import { describe, expect, it } from '@jest/globals'
-import { SpecWithRelativeRoot } from '@packages/types'
+import { beforeEach, describe, expect, it } from 'vitest'
+import type { SpecWithRelativeRoot } from '@packages/types'
 import fs from 'fs-extra'
 import { scaffoldMigrationProject } from '../helper'
 import { getTestCounts } from '../../../src/util/testCounts'
@@ -14,6 +14,31 @@ describe('getTestCounts', () => {
     expect(counts).toEqual({
       totalSpecs: 0,
       totalTests: 0,
+      exampleSpecs: 0,
+      exampleTests: 0,
+    })
+  })
+
+  it('counts lines with it( at the start or after a space', async () => {
+    const cwd = await scaffoldMigrationProject('e2e')
+    const absolute = path.join(cwd, 'cypress/e2e/counted.cy.js')
+
+    await fs.outputFile(absolute, [
+      'it(\'at the start of a line\', () => {})',
+      'describe(\'suite\', () => {',
+      '  it(\'indented with spaces\', () => {})',
+      '  xit(\'skipped with xit\', () => {})',
+      '  it.skip(\'skipped with it.skip\', () => {})',
+      '\tit(\'indented with a tab\', () => {})',
+      '  submit(\'not a test\')',
+      '})',
+    ].join('\n'))
+
+    const counts = await getTestCounts([{ absolute, relativeToCommonRoot: 'cypress/e2e/counted.cy.js' } as SpecWithRelativeRoot])
+
+    expect(counts).toEqual({
+      totalSpecs: 1,
+      totalTests: 2,
       exampleSpecs: 0,
       exampleTests: 0,
     })

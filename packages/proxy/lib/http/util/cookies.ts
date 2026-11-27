@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import type Debug from 'debug'
 import { URL } from 'url'
-import { SerializableAutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
+import type { SerializableAutomationCookie, Cookie } from '@packages/server/lib/automation/cookie/jar'
+import { CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import type { RequestCredentialLevel, ResourceType } from '../../resourceTypeAndCredentialManager'
 
 import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network-tools'
@@ -113,6 +114,18 @@ export const addCookieJarCookiesToRequest = (applicableCookieJarCookies: Cookie[
   const requestCookiesThatNeedToBeAdded = Array.from(cookieMap).map(([key, cookie]) => cookie)
 
   return applicableCookieJarCookies.concat(requestCookiesThatNeedToBeAdded).map((cookie) => cookie.cookieString()).join('; ')
+}
+
+// `session_id=8f2c; __cypress.unload=true` becomes `session_id=8f2c`, and a
+// header holding only Cypress's cookies becomes `undefined`.
+export const stripCypressCookies = (cookieHeader: string | undefined): string | undefined => {
+  if (!cookieHeader?.includes('__cypress.')) {
+    return cookieHeader
+  }
+
+  const appCookies = cookieHeader.split(/;\s*/).filter((pair) => pair && !pair.startsWith('__cypress.'))
+
+  return appCookies.length ? appCookies.join('; ') : undefined
 }
 
 // sameSiteContext is a concept for tough-cookie's cookie jar that helps it

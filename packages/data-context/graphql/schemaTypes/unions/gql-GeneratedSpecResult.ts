@@ -9,7 +9,7 @@ export const GeneratedSpecResult = unionType({
     )
   },
   resolveType: (obj) => {
-    // @ts-expect-error
+    // @ts-expect-error - only `GeneratedSpecError` has `fileName`, which is what this check relies on
     if (obj.fileName) {
       return 'GeneratedSpecError'
     }

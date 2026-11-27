@@ -39,14 +39,8 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
   state.routes.push(route)
 }
 
-function getRequest (state: NetStubbingState, requestId: string) {
-  return Object.values(state.requests).find(({ id }) => {
-    return requestId === id
-  })
-}
-
 function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscribe) {
-  const request = getRequest(state, options.requestId)
+  const request = state.requests[options.requestId]
 
   if (!request) {
     return
@@ -56,7 +50,7 @@ function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscrib
 }
 
 async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
-  const request = getRequest(state, options.requestId)
+  const request = state.requests[options.requestId]
 
   if (!request) {
     return
@@ -85,7 +79,8 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
       return
     }
 
-    let { value, type } = obj
+    const { type } = obj
+    let { value } = obj
 
     if (type === 'regex') {
       const lastSlashI = value.lastIndexOf('/')

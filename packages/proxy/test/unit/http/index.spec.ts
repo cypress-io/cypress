@@ -1,9 +1,14 @@
-import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
-import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx, _runStage } from '../../../lib/http'
-import { BrowserPreRequest } from '../../../lib'
+import type { Mock } from 'vitest'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
+import type { HttpMiddleware, HttpMiddlewareStacks, ServerCtx } from '../../../lib/http'
+import { Http, HttpStages, _runStage } from '../../../lib/http'
+import type { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
 import { HttpIntercept } from '@packages/network-interception'
 import { proxyHttpCodec } from '../../../lib/adapters/http-codec'
+import { correlateBrowserPreRequest } from '../../../lib/adapters/correlate-browser-pre-request'
+import { createSyntheticProxyCodec } from '../../../lib/adapters/synthetic-proxy-codec'
+import RequestMiddleware from '../../../lib/http/request-middleware'
 import * as sendRequestOutgoingModule from '../../../lib/http/send-request-outgoing'
 
 describe('http', function () {
@@ -164,7 +169,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({}, { on, off })
 
       expect(incomingRequest, 'incomingRequest').toHaveBeenCalledOnce()
@@ -184,7 +189,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -214,13 +219,48 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
       expect(error).toHaveBeenCalledOnce()
       expect(http.addPendingBrowserPreRequest).toHaveBeenCalledExactlyOnceWith({
         requestId: '1234-retry-1',
+        errorHandled: false,
+      })
+    })
+
+    it.each([
+      ['1234-retry-1', '1234-retry-2'],
+      ['1234-retry-9', '1234-retry-10'],
+      ['1234-retry-10', '1234-retry-11'],
+      ['1234-retry-1-retry-3', '1234-retry-1-retry-4'],
+      ['1234-retry-', '1234-retry--retry-1'],
+      ['1234-retry-1a', '1234-retry-1a-retry-1'],
+    ])('gives the fake pending browser pre request for "%s" the id "%s"', async function (requestId, expectedRequestId) {
+      incomingRequest.mockImplementation(function () {
+        this.req.browserPreRequest = {
+          requestId,
+          errorHandled: false,
+        }
+
+        this.res.destroyed = false
+
+        throw new Error('oops')
+      })
+
+      error.mockImplementation(function () {
+        this.end()
+      })
+
+      const http = createHttp()
+
+      http.addPendingBrowserPreRequest = vi.fn()
+
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
+      expect(http.addPendingBrowserPreRequest).toHaveBeenCalledExactlyOnceWith({
+        requestId: expectedRequestId,
         errorHandled: false,
       })
     })
@@ -243,7 +283,7 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -273,7 +313,7 @@ describe('http', function () {
 
       http.addPendingBrowserPreRequest = vi.fn()
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).not.toHaveBeenCalled()
@@ -298,7 +338,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       expect(incomingRequest).toHaveBeenCalledOnce()
       expect(incomingResponse).toHaveBeenCalledOnce()
@@ -312,7 +352,7 @@ describe('http', function () {
       const resAdded = {}
       const errorAdded = {}
 
-      let expectedKeys = ['req', 'res', 'config', 'middleware']
+      const expectedKeys = ['req', 'res', 'config', 'middleware']
 
       incomingRequest.mockImplementation(function () {
         const keys = Object.keys(this)
@@ -372,7 +412,7 @@ describe('http', function () {
       middleware[HttpStages.IncomingResponse].incomingResponse2 = incomingResponse2
       middleware[HttpStages.Error].error2 = error2
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
       const middlewareFunctions = [
         incomingRequest, incomingRequest2,
@@ -397,7 +437,7 @@ describe('http', function () {
         this.end()
       })
 
-      // @ts-expect-error
+      // @ts-expect-error - partial request stub, not a full CypressIncomingRequest
       await createHttp().handleHttpRequest({ method: 'GET', proxiedUrl: 'url' }, { on, off })
 
       expect(incomingRequest).toHaveBeenCalledOnce()
@@ -405,6 +445,58 @@ describe('http', function () {
       expect(sendOutgoing).not.toHaveBeenCalled()
 
       sendOutgoing.mockRestore()
+    })
+
+    it('writes a request-stage short-circuit response to the client (#34810)', async function () {
+      // Models serveInternalRoutes answering an unowned reserved path without
+      // calling next(). Before the codec wrote synthesized responses on the
+      // Express transport, the 404 was produced and then silently discarded,
+      // so the client never received a response.
+      const http = new Http(httpOpts)
+      const httpIntercept = new HttpIntercept(proxyHttpCodec)
+      const written: { statusCode?: number, body?: unknown } = {}
+      const shortCircuit = vi.fn().mockImplementation((request) => {
+        return Promise.resolve({
+          id: request.id,
+          url: request.url,
+          statusCode: 404,
+          headers: { 'content-type': 'text/plain' },
+          body: 'Not Found',
+        })
+      })
+
+      httpIntercept.use(shortCircuit)
+      httpIntercept.use(http.createLegacyProxyPipeline(proxyHttpCodec))
+      http.networkInterception = httpIntercept
+
+      const res = {
+        headersSent: false,
+        writableFinished: false,
+        on,
+        off,
+        status (statusCode: number) {
+          written.statusCode = statusCode
+
+          return this
+        },
+        set () {
+          return this
+        },
+        end (body?: unknown) {
+          written.body = body
+          this.writableFinished = true
+
+          return this
+        },
+      }
+
+      // @ts-expect-error - partial request and response stubs, not a full CypressIncomingRequest / CypressOutgoingResponse
+      await http.handleHttpRequest({ method: 'GET', proxiedUrl: 'http://localhost:1234/__/does-not-exist', headers: {} }, res)
+
+      expect(shortCircuit).toHaveBeenCalledOnce()
+      expect(written.statusCode).toBe(404)
+      expect(written.body).toBe('Not Found')
+      expect(res.writableFinished).toBe(true)
     })
   })
 
@@ -433,6 +525,37 @@ describe('http', function () {
       http.reset({ resetBetweenSpecs: false })
 
       expect(http.preRequests.reset).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('createMiddlewareContext', function () {
+    function createHttpWithFlag (useBrowserNetworkInterception?: boolean) {
+      return new Http({
+        config: {} as CyServer.Config,
+        middleware: {},
+        request: { rp: vi.fn() },
+        ...(useBrowserNetworkInterception !== undefined ? { useBrowserNetworkInterception } : {}),
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+    }
+
+    function createCtx (http: Http) {
+      return http.createMiddlewareContext({ proxiedUrl: 'http://example.test/', headers: {} } as any, {} as any)
+    }
+
+    // Pins the opts -> instance property -> ctx plumbing for
+    // useBrowserNetworkInterception (#34652) — MaybeInjectServiceWorker
+    // reads it off the middleware ctx (`this.useBrowserNetworkInterception`),
+    // which only exists if createMiddlewareContext copies it from the Http instance.
+    it('carries useBrowserNetworkInterception from the constructor opts onto the ctx', function () {
+      const ctx = createCtx(createHttpWithFlag(true))
+
+      expect(ctx.useBrowserNetworkInterception).toBe(true)
+    })
+
+    it('leaves useBrowserNetworkInterception undefined on the ctx when omitted from opts', function () {
+      const ctx = createCtx(createHttpWithFlag())
+
+      expect(ctx.useBrowserNetworkInterception).toBeUndefined()
     })
   })
 
@@ -593,6 +716,148 @@ describe('http', function () {
       http.handleServiceWorkerClientEvent(event)
 
       expect(handleServiceWorkerClientEventStub).toHaveBeenCalledWith(event)
+    })
+  })
+
+  // The synthetic exchange has no socket, so browser cancellation reaches the
+  // pipeline out of band (the CDP Fetch transport calls abortRequest) rather
+  // than through a dying connection the way the MITM path does.
+  describe('createLegacyProxyPipeline over a synthetic exchange', function () {
+    function createSyntheticPipeline () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => true,
+        networkInterceptionCore: { correlateBrowserPreRequest } as any,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {
+            CorrelateBrowserPreRequest: RequestMiddleware.CorrelateBrowserPreRequest,
+          },
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+
+      return { http, codec, pipeline: http.createLegacyProxyPipeline(codec) }
+    }
+
+    const request = {
+      id: 'network-1',
+      url: 'http://localhost:3500/1mb',
+      method: 'GET',
+      headers: {},
+    }
+
+    it('releases the pending pre-request when the request is aborted', async function () {
+      const { http, codec, pipeline } = createSyntheticPipeline()
+      const next = vi.fn()
+      const handled = pipeline(request, next)
+
+      await vi.waitFor(() => {
+        expect(http.preRequests.pendingRequests.length).toEqual(1)
+      })
+
+      codec.abortRequest('network-1')
+
+      await expect(handled).rejects.toThrow('The browser closed the connection before the response completed.')
+
+      // the pre-request timer is cleared with it — an expiry is what logs the
+      // "Never received pre-request" warning and inflates unmatchedRequests
+      expect(http.preRequests.pendingRequests.length).toEqual(0)
+      expect(next, 'origin fetch').not.toHaveBeenCalled()
+    })
+
+    it('reports a cancel while awaiting the response as a closed connection', async function () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => false,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {},
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+
+      const next = vi.fn(() => {
+        codec.abortRequest('network-1')
+
+        return Promise.reject(new Error('CDP Fetch request canceled by the browser: root:network-1'))
+      })
+
+      const handled = http.createLegacyProxyPipeline(codec)(request, next)
+
+      await expect(handled).rejects.toMatchObject({
+        code: 'ERR_BROWSER_CONNECTION_CLOSED',
+        message: 'The browser closed the connection before the response completed.',
+      })
+    })
+
+    it('keeps waiting on the pre-request while the request is not aborted', async function () {
+      const { http, pipeline } = createSyntheticPipeline()
+
+      pipeline(request, vi.fn())
+
+      await vi.waitFor(() => {
+        expect(http.preRequests.pendingRequests.length).toEqual(1)
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 20))
+
+      expect(http.preRequests.pendingRequests.length).toEqual(1)
+    })
+
+    // The synthetic res auto-destroys once a middleware finishes it. If the pipeline
+    // reads that as a browser cancel, the CDP transport releases the paused request
+    // to the origin.
+    it('resolves a response finished by request middleware instead of treating it as canceled', async function () {
+      const http = new Http({
+        config: {} as CyServer.Config,
+        shouldCorrelatePreRequests: () => false,
+        request: { rp: vi.fn() },
+        middleware: {
+          [HttpStages.IncomingRequest]: {
+            EndRequest () {
+              this.res.set('x-cypress-matched-blocked-host', 'localhost:3500')
+              this.res.status(503).end()
+              this.end()
+            },
+          },
+          [HttpStages.IncomingResponse]: {},
+          [HttpStages.Error]: {
+            error () {
+              this.end()
+            },
+          },
+        },
+      } as unknown as ServerCtx & { middleware?: HttpMiddlewareStacks })
+
+      const codec = createSyntheticProxyCodec({
+        createMiddlewareContext: (req, res) => http.createMiddlewareContext(req, res),
+      })
+      const next = vi.fn()
+
+      const response = await http.createLegacyProxyPipeline(codec)(request, next)
+
+      expect(response.statusCode).toEqual(503)
+      expect(response.headers).toEqual({ 'x-cypress-matched-blocked-host': 'localhost:3500' })
+      expect(next, 'origin fetch').not.toHaveBeenCalled()
     })
   })
 })

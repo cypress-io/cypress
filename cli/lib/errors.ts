@@ -5,9 +5,11 @@ import assert from 'assert'
 import util from './util'
 import state from './tasks/state'
 
-const docsUrl = 'https://on.cypress.io'
+export const docsUrl = 'https://on.cypress.io'
+
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 const runDocumentationUrl = `${docsUrl}/cypress-run`
+const packageManagerConfigUrl = `${docsUrl}/app/get-started/install-cypress#Package-Manager`
 
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
@@ -71,6 +73,10 @@ const missingApp = (binaryDir: string): any => {
     )}`,
     solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
+
+    If your package manager blocks install scripts, it may have skipped the postinstall script that downloads the Cypress binary. Allow the cypress package to run its install script so that future installs download the binary:
+
+      ${chalk.blue(packageManagerConfigUrl)}
   `,
   }
 }
@@ -100,10 +106,15 @@ const notInstalledCI = (executable: string): any => {
 
     Reasons it may be missing:
 
-    - You're caching 'node_modules' but are not caching this path: ${util.getCacheDir()}
-    - You ran 'npm install' at an earlier build step but did not persist: ${util.getCacheDir()}
+    - You're caching 'node_modules' but are not caching this path: ${state.getCacheDir()}
+    - You ran 'npm install' at an earlier build step but did not persist: ${state.getCacheDir()}
+    - Your package manager blocks install scripts, so it skipped the postinstall script that downloads the binary
 
     Properly caching the binary will fix this error and avoid downloading and unzipping Cypress.
+
+    If your package manager blocks install scripts, allow the cypress package to run its install script:
+
+      ${chalk.blue(packageManagerConfigUrl)}
 
     Alternatively, you can run 'cypress install' to download the binary again.
 
@@ -124,7 +135,11 @@ const nonZeroExitCodeXvfb = {
 const missingXvfb = {
   description: 'Your system is missing the dependency: Xvfb',
   solution: stripIndent`
-    Install Xvfb and run Cypress again.
+    Install Xvfb and run Cypress again. On Debian and Ubuntu:
+
+    ${chalk.cyan('apt-get install -y xvfb')}
+
+    Or run Cypress on a display that already exists by setting the DISPLAY environment variable.
 
     Read our documentation on dependencies for more information:
 
@@ -132,6 +147,23 @@ const missingXvfb = {
 
     If you are using Docker, we provide containers with all required dependencies installed.
     `,
+}
+
+const xvfbFailedToStart = (timeoutSeconds: number) => {
+  return {
+    description: 'Xvfb is installed but could not start.',
+    solution: stripIndent`
+      Cypress could not start Xvfb, the virtual display it uses on Linux when DISPLAY is not set.
+
+      Common causes:
+
+      - The display number is already in use, for example by an Xvfb left running from an earlier run. Stop that Xvfb, or set the XVFB_DISPLAY_NUM environment variable to a free number.
+      - Xvfb did not create its display within ${timeoutSeconds} seconds.
+      - The Xvfb binary cannot be run by the user running Cypress, or that user cannot write to /tmp.
+
+      Run Cypress again with DEBUG=cypress:xvfb to see what Xvfb printed.
+      `,
+  }
 }
 
 const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): any => {
@@ -149,7 +181,7 @@ const smokeTestFailure = (smokeTestCommand: string, timedOut: boolean): any => {
 const invalidSmokeTestDisplayError = {
   code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR',
   description: 'Cypress verification failed.',
-  solution (msg: string): string {
+  solution (msg?: string): string {
     return stripIndent`
       Cypress failed to start after spawning a new Xvfb server.
 
@@ -168,14 +200,75 @@ const invalidSmokeTestDisplayError = {
   },
 }
 
+// Where each library the dynamic linker names comes from on Debian and Ubuntu
+const APT_PACKAGES: Record<string, string> = {
+  'libnss3.so': 'libnss3',
+  'libgtk-3.so.0': 'libgtk-3-0',
+  'libgbm.so.1': 'libgbm1',
+  // The package was renamed in Debian 13 and Ubuntu 24.04, so the line falls back to the old name
+  'libasound.so.2': 'libasound2t64 || apt-get install -y libasound2',
+  'libXss.so.1': 'libxss1',
+  'libXtst.so.6': 'libxtst6',
+  'libX11-xcb.so.1': 'libx11-xcb1',
+  'libxkbcommon.so.0': 'libxkbcommon0',
+  'libatk-1.0.so.0': 'libatk1.0-0',
+  'libatk-bridge-2.0.so.0': 'libatk-bridge2.0-0',
+  'libcups.so.2': 'libcups2',
+  'libdrm.so.2': 'libdrm2',
+  'libnspr4.so': 'libnspr4',
+  'libXcomposite.so.1': 'libxcomposite1',
+  'libXdamage.so.1': 'libxdamage1',
+  'libXrandr.so.2': 'libxrandr2',
+  'libcairo.so.2': 'libcairo2',
+  'libpango-1.0.so.0': 'libpango-1.0-0',
+}
+
+export const parseMissingLibraries = (output: string = ''): string[] => {
+  const libraries = Array.from(output.matchAll(/error while loading shared libraries: ([^:\s]+):/g), (match) => match[1])
+
+  return _.uniq(libraries)
+}
+
+const missingLibrariesSolution = (libraries: string[]): string => {
+  const known = libraries.filter((library) => APT_PACKAGES[library])
+  const unknown = libraries.filter((library) => !APT_PACKAGES[library])
+
+  const lines = [
+    `Cypress could not start because the system ${libraries.length === 1 ? 'library' : 'libraries'} below could not be loaded:`,
+    '',
+    ...libraries.map((library) => `  ${library}`),
+  ]
+
+  if (known.length) {
+    lines.push('', 'On Debian and Ubuntu, install the packages that provide them:', '', ...known.map((library) => `  apt-get install -y ${APT_PACKAGES[library]}`))
+  }
+
+  if (unknown.length) {
+    lines.push('', 'Find the package that provides each of these with apt-file, or your distribution\'s equivalent:', '', ...unknown.map((library) => `  apt-file search ${library}`))
+  }
+
+  lines.push('', `More about the required dependencies: ${chalk.blue(requiredDependenciesUrl)}`)
+
+  return lines.join('\n')
+}
+
 const missingDependency = {
   description: 'Cypress failed to start.',
-  // this message is too Linux specific
-  solution: stripIndent`
-    This may be due to a missing library or dependency. ${chalk.blue(requiredDependenciesUrl)}
+  // A function is given the error output, and when it is, it is responsible for printing it
+  solution: (msg?: string) => {
+    const libraries = parseMissingLibraries(msg)
 
-    Please refer to the error below for more details.
-  `,
+    // this message is too Linux specific
+    const advice = libraries.length ? missingLibrariesSolution(libraries) : stripIndent`
+      This may be due to a missing library or dependency. ${chalk.blue(requiredDependenciesUrl)}
+    `
+
+    if (!msg) {
+      return advice
+    }
+
+    return [advice, '', 'Please refer to the error below for more details.', '', hr, '', msg].join('\n')
+  },
 }
 
 const invalidCacheDirectory = {
@@ -226,6 +319,11 @@ const invalidTestingType = {
   solution: `Please provide a valid testingType. Valid test types are ${chalk.cyan('\'e2e\'')} and ${chalk.cyan('\'component\'')}.`,
 }
 
+const incompleteHeadlessOpen = {
+  description: '`cypress open --headless` starts a session for `cypress tap` to drive, with no Cypress window to choose a project or testing type in, so it needs both up front.',
+  solution: 'Pass `--e2e` or `--component` along with `--headless`. Pass `--project` too if Cypress is installed globally, and do not pass `--global`.',
+}
+
 const incompatibleTestTypeFlags = {
   description: '`--e2e` and `--component` cannot both be passed.',
   solution: 'Either pass `--e2e` or `--component`, but not both.',
@@ -266,19 +364,6 @@ const CYPRESS_RUN_BINARY = {
  */
 export async function getError (errorObject: any): Promise<Error> {
   const errorMessage = await formErrorText(errorObject)
-
-  const err: any = new Error(errorMessage)
-
-  err.known = true
-
-  return err
-}
-
-export function getErrorSync (errorObject: any, platform: string): Error {
-  const errorMessage = syncFormErrorText({
-    ...errorObject,
-    platform,
-  })
 
   const err: any = new Error(errorMessage)
 
@@ -407,6 +492,7 @@ export const errors = {
   unknownError,
   nonZeroExitCodeXvfb,
   missingXvfb,
+  xvfbFailedToStart,
   missingApp,
   notInstalledCI,
   missingDependency,
@@ -425,6 +511,7 @@ export const errors = {
   incompatibleHeadlessFlags,
   invalidRunProjectPath,
   invalidTestingType,
+  incompleteHeadlessOpen,
   incompatibleTestTypeFlags,
   incompatibleTestingTypeAndFlag,
   invalidConfigFile,

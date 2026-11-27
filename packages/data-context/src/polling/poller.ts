@@ -25,7 +25,7 @@ export class Poller<E extends EventType, T = never, M = never> {
     this.pollingInterval = interval
   }
 
-  start (config: {initialValue?: T, meta?: M, filter?: (val: any) => boolean} = {}) {
+  start (config: { initialValue?: T, meta?: M, filter?: (val: any) => boolean } = {}) {
     const subscriptionId = ++this.#subscriptionId
 
     debug(`subscribing to ${this.event} with initial value %o and meta %o`, config?.initialValue, config?.meta)

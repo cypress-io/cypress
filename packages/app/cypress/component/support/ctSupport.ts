@@ -15,7 +15,7 @@ beforeEach(() => {
 
   // this is always undefined, since we only define it when
   // running CT with a project that sets `experimentalSingleTabRunMode: true`
-  // @ts-ignore - dynamically defined during tests using
+  // @ts-expect-error - autDestroyedCount is not declared on the EventManager type
   expect(window.top.getEventManager().autDestroyedCount).to.be.undefined
 })
 
@@ -24,9 +24,6 @@ beforeEach(() => {
 export const createEventManager = () => {
   return new EventManager(
     null, // packages/driver, not needed for CT tests
-    // @ts-ignore
-    null, // MobX, also not needed in Vue CT tests,
-    null, // selectorPlaygroundModel,
     StubWebsocket,
   )
 }

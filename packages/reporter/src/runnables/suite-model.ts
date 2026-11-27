@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { computed, observable, makeObservable } from 'mobx'
-import Runnable, { RunnableProps } from './runnable-model'
+import type { RunnableProps } from './runnable-model'
+import Runnable from './runnable-model'
 import type TestModel from '../test/test-model'
 import type { TestProps } from '../test/test-model'
 import type { TestState } from '@packages/types'

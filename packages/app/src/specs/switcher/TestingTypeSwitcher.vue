@@ -10,11 +10,11 @@
 
 <script setup lang="ts">
 
-import { computed, h, FunctionalComponent } from 'vue'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import Tabs from '@cypress-design/vue-tabs'
 import type { Tab } from '@cypress-design/constants-tabs'
 import { IconTestingTypeComponent, IconTestingTypeE2E, IconActionQuestionMarkOutline } from '@cypress-design/vue-icon'
-import { useI18n } from '@cy/i18n'
 import { useWindowSize } from '@vueuse/core'
 
 const { width } = useWindowSize()
@@ -29,8 +29,6 @@ const emits = defineEmits<{
   (event: 'selectTestingType', value: 'e2e' | 'component'): void
 }>()
 
-const { t } = useI18n()
-
 const shouldUseLongText = computed(() => width.value > 1140)
 
 const StyledQuestionMarkIcon: FunctionalComponent = (props, ...args) => {
@@ -41,23 +39,23 @@ const StyledQuestionMarkIcon: FunctionalComponent = (props, ...args) => {
 // Not doing this results in layout issues as icons get added/removed
 const key = computed(() => `${props.isE2eConfigured}-${props.isCtConfigured}-${shouldUseLongText.value}`)
 
-const tabs = computed(() => {
+const tabs = computed((): Tab[] => {
   return [
     {
       id: 'e2e',
       iconBefore: IconTestingTypeE2E,
-      label: shouldUseLongText.value ? t('specPage.e2eSpecsHeader') : t('specPage.e2eSpecsHeaderShort'),
+      label: shouldUseLongText.value ? 'E2E specs' : 'E2E',
       iconAfter: props.isE2eConfigured === false ? StyledQuestionMarkIcon : undefined,
       active: props.viewedTestingType === 'e2e',
     },
     {
       id: 'component',
       iconBefore: IconTestingTypeComponent,
-      label: shouldUseLongText.value ? t('specPage.componentSpecsHeader') : t('specPage.componentSpecsHeaderShort'),
+      label: shouldUseLongText.value ? 'Component specs' : 'Component',
       iconAfter: props.isCtConfigured === false ? StyledQuestionMarkIcon : undefined,
       active: props.viewedTestingType === 'component',
     },
-  ]
+  ] as Tab[]
 })
 
 function handleSwitch (tab: Tab) {

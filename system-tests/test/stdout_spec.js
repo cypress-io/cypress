@@ -18,7 +18,6 @@ describe('e2e stdout', () => {
         '*.cypress.io': '127.0.0.1',
       },
       e2e: {
-        allowCypressEnv: false,
       },
     },
   })

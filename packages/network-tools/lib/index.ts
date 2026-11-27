@@ -10,4 +10,6 @@ export * from './types'
 
 export * from './document-domain-injection'
 
+export * from './serialize-for-inline-script'
+
 export * from './remote-states'

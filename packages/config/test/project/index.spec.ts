@@ -3,11 +3,10 @@ import errors from '@packages/errors'
 import { updateWithPluginValues } from '../../src/project'
 
 vi.mock('@packages/errors', async (importActual) => {
-  const actual = await importActual()
+  const actual = await importActual<typeof import('@packages/errors')>()
 
   return {
     default: {
-      // @ts-expect-error
       ...actual.default,
       throwErr: vi.fn(),
     },
@@ -81,6 +80,30 @@ describe('config/src/project/index', () => {
             c: { value: 'c', from: 'plugin' },
           },
         },
+      })
+    })
+
+    it('derives the urls from a baseUrl returned from setupNodeEvents when the port is fixed', () => {
+      const cfg = {
+        port: 53784,
+        baseUrl: null,
+        clientRoute: '/__/',
+        reporterRoute: '/__cypress/reporter',
+        proxyUrl: 'http://localhost:53784',
+        browserUrl: 'http://localhost:53784/__/',
+        reporterUrl: 'http://localhost:53784/__cypress/reporter',
+        resolved: {
+          baseUrl: { value: null, from: 'default' },
+        },
+      }
+
+      const updated = updateWithPluginValues(cfg as any, { baseUrl: 'http://localhost:9500/app' }, 'e2e')
+
+      expect(updated).toMatchObject({
+        baseUrl: 'http://localhost:9500/app',
+        proxyUrl: 'http://localhost:53784',
+        browserUrl: 'http://localhost:9500/__/',
+        reporterUrl: 'http://localhost:9500/__cypress/reporter',
       })
     })
 

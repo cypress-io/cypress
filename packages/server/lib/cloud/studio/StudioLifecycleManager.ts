@@ -214,7 +214,6 @@ export class StudioLifecycleManager {
 
         hashLoadingPromise = ensureStudioBundle({
           studioUrl: studioSession.studioUrl,
-          projectId: currentProjectOptions.projectSlug,
         })
 
         StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)

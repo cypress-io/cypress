@@ -1,4 +1,4 @@
-import { Writable } from 'stream'
+import type { Writable } from 'stream'
 
 export async function writeWithBackpressure<T> (toStream: Writable, chunk: T): Promise<void> {
   return new Promise((resolve, reject) => {

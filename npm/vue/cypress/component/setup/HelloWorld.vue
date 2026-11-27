@@ -12,7 +12,7 @@
 import { ref } from 'vue'
 
 defineProps<{
-  msg: String
+  msg: string
 }>()
 
 const count = ref(0)

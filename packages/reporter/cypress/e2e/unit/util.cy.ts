@@ -43,7 +43,7 @@ describe('utils', () => {
     it('splits basic filenames', () => {
       compare('something.foo.ts', ['something.foo', '.ts'])
       compare('first-user.js', ['first-user', '.js'])
-      compare('model.coffee', ['model', '.coffee'])
+      compare('model.ts', ['model', '.ts'])
     })
 
     it('handles .spec, .test, and .cy', () => {

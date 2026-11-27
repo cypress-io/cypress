@@ -14,8 +14,6 @@ import type { BackendRoute } from '../types/backend-route'
 import type { CyHttpMessages } from '../types/external-types'
 import { mergeIncomingRequestChanges } from './merge-handler-result'
 import type { MergeIncomingRequestChangesOptions } from './merge-handler-result'
-import { planSubscriptions } from './plan-subscriptions'
-import type { PlanSubscriptionsOptions, PlannedRouteSubscriptions } from './plan-subscriptions'
 import { matchRoutes, matchesRoutePreflight } from './route-matching'
 import type { RouteMatchableRequest } from './route-matching'
 
@@ -33,7 +31,7 @@ export type NetworkInterceptionCoreOptions = {
 export type HandleInterceptRequestFn = (core: NetworkInterceptionCore) => Promise<void>
 
 /**
- * Orchestrates route matching, subscription planning, and handler merge logic.
+ * Orchestrates route matching and handler merge logic.
  * Side-effectful proxy/driver I/O stays in net-stubbing adapters until Stage 4+.
  */
 export class NetworkInterceptionCore {
@@ -45,10 +43,6 @@ export class NetworkInterceptionCore {
 
   matchesRoutePreflight (routes: BackendRoute[], req: RouteMatchableRequest): boolean {
     return matchesRoutePreflight(routes, req)
-  }
-
-  planSubscriptions (options: PlanSubscriptionsOptions): PlannedRouteSubscriptions[] {
-    return planSubscriptions(options)
   }
 
   mergeIncomingRequestChanges (
@@ -221,29 +215,5 @@ export class NetworkInterceptionCore {
     }
 
     return port.notifyResponseEndedWithEmptyBody(ctx, options)
-  }
-
-  get requestInterception (): ForRequestInterception | undefined {
-    return this.options.requestInterception
-  }
-
-  get responseInterception (): ForResponseInterception | undefined {
-    return this.options.responseInterception
-  }
-
-  get documentPreparation (): ForDocumentPreparation | undefined {
-    return this.options.documentPreparation
-  }
-
-  get networkCapture (): ForNetworkCapture | undefined {
-    return this.options.networkCapture
-  }
-
-  get cookieState (): ForCookieState | undefined {
-    return this.options.cookieState
-  }
-
-  get commandLog (): ForCommandLog | undefined {
-    return this.options.commandLog
   }
 }

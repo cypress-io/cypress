@@ -1,6 +1,14 @@
 // @ts-expect-error - this is declared multiple times
 const { _, $ } = Cypress
 
+// `client*` leaves out visible scrollbars, which CSS sizes include
+const scrollRange = (el: HTMLElement) => {
+  return {
+    x: el.scrollWidth - el.clientWidth,
+    y: el.scrollHeight - el.clientHeight,
+  }
+}
+
 describe('src/cy/commands/actions/scroll', () => {
   beforeEach(() => {
     cy.visit('/fixtures/scrolling.html')
@@ -29,15 +37,10 @@ describe('src/cy/commands/actions/scroll', () => {
       this.scrollBoth.scrollTop = 0
       this.scrollBoth.scrollLeft = 0
 
-      // width or height of DOM in pixels
-      this.scrollableContainerWidthHeight = 500
-      this.elementWidthHeight = 100
-      this.scrollBarWidthHeight = 15
-
-      // divide by 2 to get the center
-      // browsers round up the pixel value so we need to round it
-      this.halfScroll = Math.round((this.scrollableContainerWidthHeight - this.elementWidthHeight) / 2)
-      this.fullScroll = Math.round(this.scrollableContainerWidthHeight - this.elementWidthHeight)
+      // #scroll-to-both is square, so one range covers both axes
+      this.fullScroll = scrollRange(this.scrollBoth.get(0)).y
+      // jQuery.scrollTo rounds each step to whole pixels
+      this.halfScroll = Math.round(this.fullScroll / 2)
     })
 
     describe('subject', () => {
@@ -96,9 +99,7 @@ describe('src/cy/commands/actions/scroll', () => {
 
         cy.get('#scroll-to-horizontal').scrollTo('50%').then(function () {
           expect(this.scrollHoriz.get(0).scrollTop).to.eq(0)
-          // since there is no veritical scrollbar to take into account
-          // this is just half of the basic width
-          expect(this.scrollHoriz.get(0).scrollLeft).to.eq(this.halfScroll)
+          expect(this.scrollHoriz.get(0).scrollLeft).to.eq(Math.round(scrollRange(this.scrollHoriz.get(0)).x / 2))
         })
       })
     })
@@ -267,6 +268,51 @@ describe('src/cy/commands/actions/scroll', () => {
       })
     })
 
+    describe('element with visible scrollbars and padding', () => {
+      beforeEach(function () {
+        this.el = cy.$$('#scroll-to-visible-scrollbars').get(0)
+        this.range = scrollRange(this.el)
+
+        expect(this.el.scrollTop).to.eq(0)
+        expect(this.el.scrollLeft).to.eq(0)
+      })
+
+      it('scrolls to bottom', function () {
+        cy.get('#scroll-to-visible-scrollbars').scrollTo('bottom').then(function () {
+          expect(this.el.scrollTop).to.eq(this.range.y)
+          expect(this.el.scrollLeft).to.eq(Math.round(this.range.x / 2))
+        })
+      })
+
+      it('scrolls to right', function () {
+        cy.get('#scroll-to-visible-scrollbars').scrollTo('right').then(function () {
+          expect(this.el.scrollTop).to.eq(Math.round(this.range.y / 2))
+          expect(this.el.scrollLeft).to.eq(this.range.x)
+        })
+      })
+
+      it('scrolls to bottomRight', function () {
+        cy.get('#scroll-to-visible-scrollbars').scrollTo('bottomRight').then(function () {
+          expect(this.el.scrollTop).to.eq(this.range.y)
+          expect(this.el.scrollLeft).to.eq(this.range.x)
+        })
+      })
+
+      it('scrolls to center', function () {
+        cy.get('#scroll-to-visible-scrollbars').scrollTo('center').then(function () {
+          expect(this.el.scrollTop).to.eq(Math.round(this.range.y / 2))
+          expect(this.el.scrollLeft).to.eq(Math.round(this.range.x / 2))
+        })
+      })
+
+      it('scrolls to 100%', function () {
+        cy.get('#scroll-to-visible-scrollbars').scrollTo('100%', '100%').then(function () {
+          expect(this.el.scrollTop).to.eq(this.range.y)
+          expect(this.el.scrollLeft).to.eq(this.range.x)
+        })
+      })
+    })
+
     describe('scrolls with options', () => {
       it('calls jQuery scroll to', () => {
         const scrollTo = cy.spy($.fn, 'scrollTo')
@@ -305,11 +351,19 @@ describe('src/cy/commands/actions/scroll', () => {
         })
       })
 
-      it('accepts duration string option', () => {
-        const scrollTo = cy.spy($.fn, 'scrollTo')
+      it('animates for a duration given as a numeric string', () => {
+        const animate = cy.spy($.fn, 'animate')
 
         cy.get('#scroll-to-both').scrollTo('25px', { duration: '500' }).then(() => {
-          expect(scrollTo.args[0][1].duration).to.eq('500')
+          expect(animate).to.be.calledWithMatch({}, { duration: 500 })
+        })
+      })
+
+      it('scrolls instantly for a duration of \'0\'', () => {
+        const animate = cy.spy($.fn, 'animate')
+
+        cy.get('#scroll-to-both').scrollTo('25px', { duration: '0' }).then(() => {
+          expect(animate).to.be.calledWithMatch({}, { duration: 0 })
         })
       })
 
@@ -770,6 +824,40 @@ describe('src/cy/commands/actions/scroll', () => {
       })
     })
 
+    describe('element at the end of a container with visible scrollbars', () => {
+      beforeEach(function () {
+        this.container = cy.$$('#scroll-into-view-visible-scrollbars').get(0)
+        this.range = scrollRange(this.container)
+
+        expect(this.container.scrollTop).to.eq(0)
+        expect(this.container.scrollLeft).to.eq(0)
+      })
+
+      const expectFullyInView = (container: HTMLElement, el: HTMLElement) => {
+        const containerRect = container.getBoundingClientRect()
+        const elRect = el.getBoundingClientRect()
+
+        expect(elRect.bottom, 'element bottom').to.be.at.most(containerRect.top + container.clientTop + container.clientHeight)
+        expect(elRect.right, 'element right').to.be.at.most(containerRect.left + container.clientLeft + container.clientWidth)
+      }
+
+      it('scrolls an element smaller than the scrollbar fully into view', function () {
+        cy.get('#end-small').scrollIntoView().then(function ($el) {
+          expect(this.container.scrollTop).to.eq(this.range.y)
+          expect(this.container.scrollLeft).to.eq(this.range.x)
+          expectFullyInView(this.container, $el.get(0))
+        })
+      })
+
+      it('scrolls a larger element fully into view', function () {
+        cy.get('#end-large').scrollIntoView().then(function ($el) {
+          expect(this.container.scrollTop).to.eq(this.range.y)
+          expect(this.container.scrollLeft).to.eq(this.range.x)
+          expectFullyInView(this.container, $el.get(0))
+        })
+      })
+    })
+
     it('calls jQuery scroll to', () => {
       const scrollTo = cy.spy($.fn, 'scrollTo')
 
@@ -807,11 +895,19 @@ describe('src/cy/commands/actions/scroll', () => {
       })
     })
 
-    it('accepts duration string option', () => {
-      const scrollTo = cy.spy($.fn, 'scrollTo')
+    it('animates for a duration given as a numeric string', () => {
+      const animate = cy.spy($.fn, 'animate')
 
       cy.get('#scroll-into-view-both h5').scrollIntoView({ duration: '500' }).then(() => {
-        expect(scrollTo.args[0][1].duration).to.eq('500')
+        expect(animate).to.be.calledWithMatch({}, { duration: 500 })
+      })
+    })
+
+    it('scrolls instantly for a duration of \'0\'', () => {
+      const animate = cy.spy($.fn, 'animate')
+
+      cy.get('#scroll-into-view-both h5').scrollIntoView({ duration: '0' }).then(() => {
+        expect(animate).to.be.calledWithMatch({}, { duration: 0 })
       })
     })
 

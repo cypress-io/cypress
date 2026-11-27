@@ -1,6 +1,7 @@
 import type { AllModeOptions } from '@packages/types'
 import fsExtra from 'fs-extra'
 import path from 'path'
+import { stripVTControlCharacters } from 'util'
 import chalk from 'chalk'
 import assert from 'assert'
 import str from 'underscore.string'
@@ -8,12 +9,14 @@ import _ from 'lodash'
 
 import 'server-destroy'
 
-import { AppApiShape, CohortsApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
+import { DataEmitterActions } from './actions'
+import type { AppApiShape, CohortsApiShape, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from './gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
 import debugLib from 'debug'
-import { CoreDataShape, makeCoreData } from './data/coreDataShape'
+import { makeCoreData } from './data/coreDataShape'
+import type { CoreDataShape } from './data/coreDataShape'
 import { DataActions } from './DataActions'
 import {
   FileDataSource,
@@ -24,7 +27,6 @@ import {
   EnvDataSource,
   HtmlDataSource,
   UtilDataSource,
-  BrowserApiShape,
   RelevantRunsDataSource,
   RelevantRunSpecsDataSource,
   VersionsDataSource,
@@ -32,6 +34,7 @@ import {
   GraphQLDataSource,
   RemoteRequestDataSource,
 } from './sources'
+import type { BrowserApiShape } from './sources'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
 import type { IncomingHttpHeaders } from 'http'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
@@ -45,6 +48,26 @@ import { resetIssuedWarnings } from '@packages/config'
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
+
+/**
+ * What kept the project from loading: its configuration (including a dev server or
+ * `setupNodeEvents` that failed with it), a testing type that is not set up, or a
+ * browser that cannot be found or driven
+ */
+type LoadErrorKind = 'config' | 'setup' | 'browser'
+
+// A Cypress error keeps the first paragraph in `message` and the rest, such as the
+// stack trace of a config file that failed to load, in `details`. An error that did not
+// come from a template has only its stack to say where it came from.
+const formatForOutput = (err: CypressError) => {
+  if (!err.isCypressErr && err.stack) {
+    return err.stack
+  }
+
+  const message = err.message ?? String(err)
+
+  return err.details ? `${message}\n\n${err.details}` : message
+}
 
 export interface DataContextConfig {
   schema: GraphQLSchema
@@ -208,6 +231,7 @@ export class DataContext {
   get cloud () {
     return this._cloud
   }
+
   get env () {
     return this._env
   }
@@ -288,6 +312,101 @@ export class DataContext {
     logError(e)
   }
 
+  /**
+   * Whether `--headless` keeps the Cypress window hidden for the whole session and launches its browsers headless
+   */
+  get isHeadless () {
+    return this.isOpenMode && Boolean(this.modeOptions.headless)
+  }
+
+  // The load errors still unresolved, by kind, so an error of one kind replacing another does not
+  // lose it: each step of loading withdraws only the kind it resolves, and a configuration that
+  // loads does not finish a setup or find a browser. The last one reported is what `cypress tap`
+  // is shown.
+  private _loadErrors = new Map<LoadErrorKind, string>()
+
+  /**
+   * Records that the project could not load, for `cypress tap status` to report, whether it
+   * never started a session or its configuration broke during one. That record, and the error
+   * printed by the caller, are how a `--headless` session reports a problem, since its window
+   * stays hidden. Only errors that stop the project from loading belong here, which is why
+   * `onError`, also used for errors from a project that is running normally, does not call it.
+   * Without a project there is nothing for a session to describe.
+   */
+  reportLoadError (error: CypressError | string, kind: LoadErrorKind = 'config') {
+    if (!this.isOpenMode || !this.currentProject) {
+      return
+    }
+
+    this._loadErrors.delete(kind)
+    this._loadErrors.set(kind, stripVTControlCharacters(typeof error === 'string' ? error : formatForOutput(error)))
+    this.recordLoadErrorForTap()
+  }
+
+  private recordLoadErrorForTap () {
+    const projectRoot = this.currentProject
+    const loadError = [...this._loadErrors.values()].pop()
+
+    if (!projectRoot || loadError === undefined) {
+      this._apis.projectApi.clearSessionLoadError().catch((err) => this.debug('could not clear the load error for cypress tap: %o', err))
+
+      return
+    }
+
+    this._apis.projectApi.setSessionLoadError({
+      projectRoot,
+      testingType: this.coreData.currentTestingType,
+      loadError,
+    }).catch((err) => this.debug('could not record the load error for cypress tap: %o', err))
+  }
+
+  /**
+   * Withdraws the record of a load error once whatever caused it is resolved, so `cypress tap
+   * status` does not keep reporting it. Given `kinds`, only errors of those kinds are
+   * withdrawn, and an older error of another kind is reported again; without them, all are,
+   * as when another project replaces them.
+   */
+  clearLoadError (kinds?: LoadErrorKind[]) {
+    if (!this.isOpenMode) {
+      return
+    }
+
+    if (kinds) {
+      const withdrawn = kinds.filter((kind) => this._loadErrors.delete(kind))
+
+      if (!withdrawn.length) {
+        return
+      }
+    } else {
+      this._loadErrors.clear()
+    }
+
+    this.recordLoadErrorForTap()
+  }
+
+  /**
+   * Records, for `cypress tap status`, that the plugins process exited after the session
+   * started. It is kept apart from the load errors because the project is still loaded and
+   * its browser still drivable, so tap keeps working, but anything that needs the process,
+   * such as `cy.task`, fails until the configuration loads again.
+   */
+  reportPluginsError (error: CypressError) {
+    if (!this.isOpenMode) {
+      return
+    }
+
+    this._apis.projectApi.setSessionPluginsError(stripVTControlCharacters(formatForOutput(error)))
+  }
+
+  /** Withdraws the record `reportPluginsError` made, once the configuration loads again and restarts the process */
+  clearPluginsError () {
+    if (!this.isOpenMode) {
+      return
+    }
+
+    this._apis.projectApi.setSessionPluginsError(null)
+  }
+
   onError = (cypressError: CypressError, title: string = 'Unexpected Error') => {
     if (this.isRunMode) {
       if (this.lifecycleManager?.runModeExitEarly) {
@@ -300,6 +419,16 @@ export class DataContext {
         id: _.uniqueId('Error'),
         title,
         cypressError,
+      }
+
+      // The Launchpad only shows this error to a person looking at its window, so
+      // print it for a caller reading the process output. A repeat of the error
+      // already on display is skipped, since one failed load can report it
+      // several times.
+      const shown = this.coreData.diagnostics?.error?.cypressError
+
+      if (!shown || formatForOutput(shown) !== formatForOutput(cypressError)) {
+        logError(formatForOutput(cypressError))
       }
 
       this.update((d) => {
@@ -321,6 +450,10 @@ export class DataContext {
         id: _.uniqueId('Warning'),
         title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
         cypressError: err,
+      }
+
+      if (!this.coreData.diagnostics.warnings.some((existing) => formatForOutput(existing.cypressError) === formatForOutput(err))) {
+        logError(formatForOutput(err))
       }
 
       this.update((d) => {
@@ -347,6 +480,9 @@ export class DataContext {
 
     this._modeOptions = modeOptions
     this._coreData = makeCoreData(modeOptions)
+    // DataActions is created once in the constructor and is not rebuilt here, so
+    // its launch counter has to be reset explicitly or it leaks between tests
+    this.actions.project.launchCount = 0
     // @ts-expect-error - we've already cleaned up, this is for testing only
     this.lifecycleManager = new ProjectLifecycleManager(this)
 
@@ -404,7 +540,7 @@ export class DataContext {
   }
 
   static #activeRequestCount = 0
-  static #awaitingEmptyRequestCount: Function[] = []
+  static #awaitingEmptyRequestCount: Array<() => void> = []
 
   static addActiveRequest () {
     this.#activeRequestCount++
@@ -424,7 +560,7 @@ export class DataContext {
       return
     }
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       this.#awaitingEmptyRequestCount.push(resolve)
     })
   }

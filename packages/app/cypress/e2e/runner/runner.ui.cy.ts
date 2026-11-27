@@ -1,5 +1,4 @@
 import { loadSpec } from './support/spec-loader'
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 describe('src/cypress/runner', () => {
   describe('tests finish with correct state', () => {
@@ -111,10 +110,8 @@ describe('src/cypress/runner', () => {
       .click()
       .should('have.class', 'command-is-pinned')
 
-      const { highlightsLabel } = defaultMessages.runner.snapshot
-
       // disable highlights
-      cy.findByLabelText(highlightsLabel)
+      cy.findByLabelText('Highlights')
       .should('have.attr', 'aria-checked', 'true')
       .click()
       .should('have.attr', 'aria-checked', 'false')
@@ -126,7 +123,7 @@ describe('src/cypress/runner', () => {
       .click()
       .should('have.class', 'command-is-pinned')
 
-      cy.findByLabelText(highlightsLabel)
+      cy.findByLabelText('Highlights')
       .should('have.attr', 'aria-checked', 'true')
     })
 
@@ -176,7 +173,7 @@ describe('src/cypress/runner', () => {
       cy.reporter().find('[data-cy="runnable-popover-open-ide"]').click()
 
       cy.withCtx((ctx, o) => {
-        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`simple-cy-assert\.runner\.cy\.js$`)), 1, 1)
+        expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(/simple-cy-assert\.runner\.cy\.js$/), 1, 1)
       })
 
       cy.reporter().find('[data-cy="runnable-header"] [data-cy="spec-duration"]').should('exist')
@@ -307,6 +304,44 @@ describe('src/cypress/runner', () => {
       cy.reporter().find('.runnable-err-message', { timeout: 5000 })
       .should('not.contain', 'ran afterEach even though specs were stopped')
       .and('contain', 'Cypress test was stopped while running this command.')
+    })
+
+    it('leaves the aut in place after stopping mid-run, and can still pin a snapshot', () => {
+      // set up by hand rather than with loadSpec/runSpec: both settle on the run's final
+      // state, and this spec deliberately hangs until it is stopped
+      cy.scaffoldProject('runner-e2e-specs')
+      cy.openProject('runner-e2e-specs')
+      cy.startAppServer()
+      cy.visitApp('specs/runner?file=cypress/e2e/runner/stop-preserves-aut.runner.cy.js')
+
+      cy.reporter({ timeout: 30000 }).find('[data-cy="runnable-header"]', { timeout: 30000 }).should('contain', 'stop-preserves-aut.runner.cy.js')
+
+      // the spec stops itself. The reset-page decision is made while the stopped test runs its
+      // after-run hooks, so wait for that error before asserting on the page — otherwise this
+      // passes on a page that simply has not been reset yet
+      cy.reporter().find('.runnable-err-message', { timeout: 30000 })
+      .should('contain', 'Cypress test was stopped while running this command.')
+
+      cy.reporter().find('.restart', { timeout: 30000 }).should('be.visible')
+
+      // the stopped test is not the last one in the suite, but nothing runs after a stop, so
+      // the page is kept rather than reset to about:blank for test isolation
+      cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
+        cy.get('input').should('exist')
+      })
+
+      // only the running test is expanded, so open the completed one to reach its commands
+      cy.reporter().find('.runnable-title:contains(completed test)').click()
+      cy.reporter().find('.command-name-type .command-number-column').first().click()
+      cy.reporter().find('.command-pin').should('exist')
+
+      // the pin lands on the command's "before" snapshot; the typed value is what distinguishes
+      // the restored "after" snapshot from the live page, which is also on the fixture
+      cy.contains('[data-testid="snapshot-controls"] button', 'after').click()
+
+      cy.get('iframe.aut-iframe').its('0.contentDocument.body').then(cy.wrap).within(() => {
+        cy.get('input').should('have.value', 'pinned')
+      })
     })
   })
 })

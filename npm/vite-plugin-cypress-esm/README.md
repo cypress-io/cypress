@@ -12,6 +12,7 @@ Run Cypress with `DEBUG=cypress:vite-plugin-cypress-esm`. You will get logs in t
 | @cypress/vite-plugin-cypress-esm | cypress |
 | -------------------------------- | ------- |
 | >= v1                            | >= v12  |
+| >= v2 (ESM only module)          | >= v16  |
 
 ## Usage
 

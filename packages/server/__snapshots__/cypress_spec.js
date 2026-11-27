@@ -331,7 +331,7 @@ exports['CLOUD_RECOMMENDATION_MESSAGE'] = `
   │ Skipped:      undefined                                                                        │
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
-  │ Duration:     undefined seconds                                                                │
+  │ Duration:     X seconds                                                                        │
   │ Spec Ran:     test1.js                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 

@@ -1,9 +1,8 @@
 import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
-import { TestState } from '../test/test-model'
 import type { IntervalID } from '../lib/types'
 
-import type { StatsStoreStartInfo } from '@packages/types'
+import type { StatsStoreStartInfo, TestState } from '@packages/types'
 
 const defaults = {
   numPassed: 0,

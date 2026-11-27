@@ -4,7 +4,6 @@ describe('Browser Crash Handling', () => {
   systemTests.setup({
     settings: {
       e2e: {
-        allowCypressEnv: false,
       },
     },
   })

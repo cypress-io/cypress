@@ -7,9 +7,10 @@ import type {
   ResolvedFromConfig,
   ResolvedConfigurationOptionSource,
 } from '@packages/types'
-import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
+import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
+import errors from '@packages/errors'
 
-import type { Config } from './types'
+import type { Config, GetFilesByGlob } from './types'
 
 import {
   allowed,
@@ -90,9 +91,11 @@ const CYPRESS_ENV_PREFIX = 'CYPRESS_'
 
 const CYPRESS_ENV_PREFIX_LENGTH = CYPRESS_ENV_PREFIX.length
 
+// Names the app reads itself, which are not settings for the project's tests
 const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
-  'CYPRESS_INTERNAL_DISABLE_PROXY',
+  'CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM',
+  'CYPRESS_AGENT_MODE',
 ]
 
 const CYPRESS_SPECIAL_ENV_VARS = [
@@ -175,7 +178,7 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
   resolveFrom('env', processEnvs)
   resolveFrom('cli', cliEnvs)
 
-  // configEnvs is from cypress.config.{js,ts,mjs,cjs}
+  // configEnvs is from cypress.config.{js,ts,mjs,cjs,mts,cts}
   // envFile is from cypress.env.json
   // processEnvs is from process env vars
   // cliEnvs is from CLI arguments
@@ -201,7 +204,7 @@ function parseExposed (cfg: Record<string, any>, cliExposeVars: Record<string, a
   resolveFrom('config', configExpose)
   resolveFrom('cli', cliExposeVars)
 
-  // configExpose is from cypress.config.{js,ts,mjs,cjs}
+  // configExpose is from cypress.config.{js,ts,mjs,cjs,mts,cts}
   // cliExposedVars is from CLI arguments
   return _.extend(configExpose, cliExposeVars)
 }
@@ -315,13 +318,13 @@ export function relativeToProjectRoot (projectRoot: string, file: string) {
   }
 
   // captures leading slash(es), both forward slash and back slash
-  const leadingSlashRe = /^[\/|\\]*(?![\/|\\])/
+  const leadingSlashRe = /^[/|\\]*(?![/|\\])/
 
   return file.replace(projectRoot, '').replace(leadingSlashRe, '')
 }
 
 // async function
-export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any) {
+export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: GetFilesByGlob) {
   if (!obj.supportFile) {
     return Promise.resolve(obj)
   }
@@ -407,7 +410,7 @@ export function mergeDefaults (
   config: Config = {},
   options: Record<string, any> = {},
   cliConfig: Record<string, any> = {},
-  getFilesByGlob: any,
+  getFilesByGlob: GetFilesByGlob,
 ) {
   const resolved: any = {}
   const { testingType } = options
@@ -437,13 +440,13 @@ export function mergeDefaults (
     }
   }).value()
 
-  let url = config.baseUrl
+  const url = config.baseUrl
 
   if (url) {
     // replace multiple slashes at the end of string to single slash
     // so http://localhost/// will be http://localhost/
     // https://regexr.com/48rvt
-    config.baseUrl = url.replace(/\/\/+$/, '/')
+    config.baseUrl = url.replace(/\/{2,}$/, '/')
   }
 
   const defaultsForRuntime = getDefaultValues({
@@ -462,14 +465,6 @@ export function mergeDefaults (
     ...config,
     ...config[testingType],
     additionalIgnorePattern,
-  }
-
-  // we want the allowCypressEnv option to be inherited by e2e/component config when evaluating
-  // breaking options in order to correctly hide the error that Cypress.env() is deprecated when allowCypressEnv is false
-  // unless the value is explicitly set
-  config.allowCypressEnv = config.allowCypressEnv ?? true
-  if (!_.has(config[testingType], 'allowCypressEnv') && _.isObject(config[testingType])) {
-    config[testingType].allowCypressEnv = config.allowCypressEnv
   }
 
   // split out our own app wide env from user env variables

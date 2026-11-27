@@ -13,11 +13,11 @@ vi.mock('path', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual returns unknown, which cannot be spread
     ...actual,
     cwd: vi.fn(),
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       resolve: vi.fn(),
     },
@@ -28,11 +28,11 @@ vi.mock('process', async (importActual) => {
   const actual = await importActual()
 
   return {
-    // @ts-expect-error
+    // @ts-expect-error - importActual returns unknown, which cannot be spread
     ...actual,
     cwd: vi.fn(),
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       cwd: vi.fn(),
     },
@@ -44,7 +44,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
     },
@@ -56,7 +56,7 @@ vi.mock('fs-extra', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       pathExists: vi.fn(),
       readJson: vi.fn(),
@@ -71,7 +71,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       pkgVersion: vi.fn(),
       pkgBuildInfo: vi.fn(),
@@ -121,7 +121,7 @@ describe('lib/tasks/state', function () {
     const actualPath = (await vi.importActual<typeof import('path')>('path')).default
 
     vi.mocked(path.resolve).mockImplementation((...args) => {
-      return actualPath.resolve.apply(actualPath, args)
+      return actualPath.resolve(...args)
     })
   })
 
@@ -232,7 +232,7 @@ describe('lib/tasks/state', function () {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, so .default is untyped
           default: actual.default.win32,
         }
       })

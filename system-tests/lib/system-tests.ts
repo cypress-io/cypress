@@ -8,12 +8,14 @@ import { dockerSpawner } from './docker'
 import Express from 'express'
 import Fixtures from './fixtures'
 import * as DepInstaller from './dep-installer'
+import { isVideoSnapshotError } from './videoSnapshotError'
 import {
   DEFAULT_BROWSERS,
   replaceStackTraceLines,
   pathUpToProjectName,
   normalizeStdout,
   browserNameVersionRe,
+  teardownBudgetNoticeRe,
 } from './normalizeStdout'
 
 const isCi = require('ci-info').isCI
@@ -21,13 +23,12 @@ const isCi = require('ci-info').isCI
 require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
-let cp = require('child_process')
+const cp = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
 const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
-const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
 const treeKill = require('tree-kill')
 const { once } = require('events')
@@ -62,7 +63,7 @@ export type ItOptions = ExecOptions & {
   onRun?: (
     this: Mocha.Context,
     execFn: ExecFn,
-    browser: BrowserName
+    browser: BrowserName,
   ) => Promise<any> | any
   /**
    * Same as using `systemTests.it.only`.
@@ -99,6 +100,11 @@ type ExecOptions = {
    * The browser to run the system tests on. By default, runs on all.
    */
   browser?: BrowserName | Array<BrowserName>
+  /**
+   * Launch the browser from this path instead of by name. `browser` still names it,
+   * so the test only runs in the matching browser's job.
+   */
+  browserPath?: string
   /**
    * Test timeout in milliseconds.
    */
@@ -211,9 +217,9 @@ type ExecOptions = {
    */
   env?: string
   /**
-   * Set OS-level env vars.
+   * Set OS-level env vars. `undefined` unsets one inherited from the test process.
    */
-  processEnv?: { [key: string]: string | number }
+  processEnv?: { [key: string]: string | number | undefined }
   /**
    * Set an output path.
    */
@@ -519,8 +525,8 @@ function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) 
     args.push(`--reporter-options=${options.reporterOptions}`)
   }
 
-  if (options.browser) {
-    args.push(`--browser=${options.browser}`)
+  if (options.browserPath || options.browser) {
+    args.push(`--browser=${options.browserPath || options.browser}`)
   }
 
   if (options.config) {
@@ -566,63 +572,31 @@ function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) 
 
 const serverPath = path.dirname(require.resolve('@packages/server'))
 
-cp = Bluebird.promisifyAll(cp)
-
 const processEnvCache = _.clone(process.env)
 
-Bluebird.config({
-  longStackTraces: true,
-})
+// The budget notices are stripped from snapshots (see normalizeStdout) because whether teardown fits in
+// its budget depends on how loaded the machine is, not on the run. Tally them here so the trend stays
+// visible in the job output, and so a root-cause fix can be told apart from a quiet machine.
+const teardownBudget = { runs: 0, runsOverBudget: 0, notices: 0 }
 
-// extract the 'Difference' section from a snap-shot-it error message
-const diffRe = /Difference\n-{10}\n([\s\S]*)\n-{19}\nSaved snapshot text/m
-const videoRe = /\-\s\sVideo\soutput:\s.*.mp4/gm
-const expectedAddedVideoSnapshotLines = [
-  'Warning: We failed capturing this video.',
-  'This error will not affect or change the exit code.',
-  'TimeoutError: operation timed out',
-  '[stack trace lines]',
-]
-const expectedDeletedVideoSnapshotLines = [
-  '(Video)',
-  '-  Started compressing: Compressing to 32 CRF',
-]
-const sometimesAddedSpacingLine = ''
-const sometimesAddedVideoSnapshotLine = '│ Video:        false                                                                            │'
-const sometimesDeletedVideoSnapshotLine = '│ Video:        true                                                                             │'
+const recordTeardownBudget = (output: string) => {
+  const notices = output.match(teardownBudgetNoticeRe())
 
-const isVideoSnapshotError = (err: Error) => {
-  const [added, deleted] = [[], []]
-  const matches = diffRe.exec(err.message)
+  teardownBudget.runs++
 
-  if (!matches || !matches.length) {
-    return false
+  if (notices) {
+    teardownBudget.runsOverBudget++
+    teardownBudget.notices += notices.length
   }
-
-  const lines = matches[1].split('\n')
-
-  for (const line of lines) {
-    // past this point, the content is variable - mp4 path length
-    if (line.includes('Finished compressing:')) break
-
-    if (line.charAt(0) === '+') added.push(line.slice(1).trim())
-
-    if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
-  }
-
-  _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
-  _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
-
-  // If a video line exists after removing other static matches, remove it
-  const deletedVideoLine = _.remove(deleted, (remainingDeleted) => !!videoRe.exec(remainingDeleted))
-
-  // If we did indeed remove a video line, also remove the (Video) text that preceded it
-  if (deletedVideoLine) {
-    _.pull(deleted, '(Video)')
-  }
-
-  return _.isEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || _.isEqual(deleted, expectedDeletedVideoSnapshotLines))
 }
+
+process.on('exit', () => {
+  if (!teardownBudget.runs) {
+    return
+  }
+
+  console.log(`[teardown-budget] exceeded in ${teardownBudget.runsOverBudget} of ${teardownBudget.runs} Cypress runs (${teardownBudget.notices} process notices)`)
+})
 
 /**
  * Takes normalized runner STDOUT, finds the "Run Finished" line
@@ -673,7 +647,7 @@ const startServer = function (obj) {
     app.use(Express.static(path.join(__dirname, '../projects/e2e'), {}) as Express.RequestHandler)
   }
 
-  return new Bluebird((resolve) => {
+  return new Promise((resolve) => {
     return srv.listen(port, () => {
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
@@ -699,7 +673,11 @@ const copy = function (projectPath: string) {
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
     const copy = (src, dest) => {
-      return fs.copyAsync(src, dest, { overwrite: true }).catch({ code: 'ENOENT' }, () => { })
+      return fs.copy(src, dest, { overwrite: true }).catch((err) => {
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      })
     }
 
     // copy each of the screenshots and videos
@@ -738,16 +716,12 @@ function getBrowsers (browserPattern) {
     return DEFAULT_BROWSERS
   }
 
-  let selected = []
-
   const addBrowsers = _.clone(browserPattern)
   const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
 
-  if (removeBrowsers.length) {
-    selected = _.without(DEFAULT_BROWSERS, ...removeBrowsers)
-  } else {
-    selected = _.intersection(DEFAULT_BROWSERS, addBrowsers)
-  }
+  const selected = removeBrowsers.length
+    ? _.without(DEFAULT_BROWSERS, ...removeBrowsers)
+    : _.intersection(DEFAULT_BROWSERS, addBrowsers)
 
   if (!selected.length) {
     throw new Error(`options.browser: "${browserPattern}" matched no browsers`)
@@ -812,14 +786,12 @@ const localItFn = function (title: string, opts: ItOptions) {
 
       const originalTitle = this.test.parent.titlePath().concat(title).join(' / ')
 
-      const ctx = this
-
       const execFn = (overrides = {}) => {
-        return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+        return systemTests.exec(this, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
       // pass Mocha's this context to onRun
-      return options.onRun.call(this, execFn, browser, ctx)
+      return options.onRun.call(this, execFn, browser, this)
     })
   }
 
@@ -862,10 +834,9 @@ const systemTests = {
     args = _.compact(args)
 
     // avoid snapshot cwd issue - see /patches/snap-shot* for more information
-    // @ts-ignore
     global.CACHED_CWD_FOR_SNAP_SHOT_IT = path.join(__dirname, '..')
 
-    return snapshot.apply(null, args)
+    return snapshot(...args)
   },
 
   setup (options: SetupOptions = {}) {
@@ -879,7 +850,7 @@ const systemTests = {
       if (options.servers) {
         const optsServers = [].concat(options.servers)
 
-        const servers = await Bluebird.map(optsServers, startServer)
+        const servers = await Promise.all(optsServers.map((server) => startServer(server)))
 
         this.servers = servers
       } else {
@@ -896,7 +867,7 @@ const systemTests = {
 
       if (s) {
         try {
-          await Bluebird.map(s, stopServer)
+          await Promise.all(s.map((srv) => stopServer(srv)))
         } catch (err) {
           console.error('Error stopping server', err)
           throw err
@@ -1062,6 +1033,8 @@ const systemTests = {
         }
       }
 
+      recordTeardownBudget(stdout)
+
       const { expectedExitCode, skipExitSignalAssertion } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
@@ -1106,7 +1079,6 @@ const systemTests = {
         const matches = browserNameVersionRe.exec(stdout)
 
         if (matches) {
-          // eslint-disable-next-line no-unused-vars
           const [, , customBrowserPath, browserName, version, headless] = matches
 
           const { browser } = options

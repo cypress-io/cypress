@@ -14,8 +14,8 @@ describe('Integrity Preservation', { browser: '!webkit' }, () => {
   // See https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity on SRI integrity.
 
   const availableDigests = ['SHA256', 'SHA384', 'SHA512']
-  const integrityJSDigests: {[key: string]: string} = {}
-  const integrityCSSDigests: {[key: string]: string} = {}
+  const integrityJSDigests: { [key: string]: string } = {}
+  const integrityCSSDigests: { [key: string]: string } = {}
   let templateExecutor: TemplateExecutor
 
   before(() => {

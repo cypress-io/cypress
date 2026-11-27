@@ -1,4 +1,4 @@
-import mockery from 'mockery'
+import type mockery from 'mockery'
 import path from 'path'
 
 export const mockElectron = (mockeryInstance: typeof mockery) => {

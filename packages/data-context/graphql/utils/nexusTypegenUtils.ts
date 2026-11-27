@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable no-restricted-syntax */
 import { spawn, execSync } from 'child_process'
 import chalk from 'chalk'

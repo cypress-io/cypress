@@ -2,7 +2,7 @@ import debugModule from 'debug'
 import _ from 'lodash'
 import semverLt from 'semver/functions/lt'
 
-import { CompilerOptions, CreateProgramOptions } from 'typescript'
+import type { CompilerOptions, CreateProgramOptions } from 'typescript'
 import { getTypescript } from './get-typescript'
 
 const debug = debugModule('cypress:webpack')

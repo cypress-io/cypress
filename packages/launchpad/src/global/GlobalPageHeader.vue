@@ -11,9 +11,7 @@
       for="project-search"
       class="transition-opacity left-[42px] text-gray-400 duration-50 absolute"
       :class="{'opacity-0': localValue.length}"
-    >
-      {{ t('globalPage.searchPlaceholder') }}
-    </label>
+    >Search projects</label>
     <Button
       aria-controls="dropzone"
       class="h-full text-[16px]"
@@ -28,7 +26,7 @@
         :class="showDropzone ?
           'icon-dark-gray-100 rotate-45' : 'icon-dark-indigo-300'"
       />
-      {{ t('globalPage.addProjectButton') }}
+      Add project
     </Button>
   </div>
 
@@ -38,7 +36,7 @@
     data-cy="dropzone"
     class="mb-[24px]"
     close-button
-    @addProject="emit('addProject', $event)"
+    @add-project="emit('addProject', $event)"
     @close="toggleDropzone"
   />
 
@@ -46,7 +44,7 @@
     v-if="!projectCount"
     class="mt-[80px]"
     :search-term="localValue"
-    :message="t('globalPage.noResultsMessage')"
+    message="No projects matched your search:"
     @clear="handleClear"
   />
 </template>
@@ -57,11 +55,9 @@ import Button from '@cypress-design/vue-button'
 import Input from '@cy/components/Input.vue'
 import FileDropzone from './FileDropzone.vue'
 import { useModelWrapper } from '@packages/frontend-shared/src/composables'
-import { useI18n } from '@cy/i18n'
 import NoResults from '@cy/components/NoResults.vue'
 
 const showDropzone = ref(false)
-const { t } = useI18n()
 
 const props = defineProps<{
   modelValue: string

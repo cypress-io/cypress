@@ -1,4 +1,4 @@
-/* eslint-disable mocha/no-global-tests, no-undef */
+/* eslint-disable mocha/no-top-level-tests, no-undef */
 beforeEach(() => {
   cy.visit('/visit_error.html')
 })

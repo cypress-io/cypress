@@ -2,10 +2,12 @@ import { expect, it, describe } from 'vitest'
 import * as fs from 'fs-extra'
 import cloneDeep from 'lodash/cloneDeep'
 import * as path from 'path'
-import {
-  angularHandler,
+import type {
   AngularWebpackDevServerConfig,
   BuildOptions,
+} from '../../src/helpers/angularHandler'
+import {
+  angularHandler,
   generateTsConfig,
   getAngularBuildOptions,
   getAngularCliModules,
@@ -17,8 +19,8 @@ import {
 import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 
 describe('angularHandler', { timeout: 60000 }, function () {
-  it('sources the config from angular-20', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-20')
+  it('sources the config from angular-21', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-21')
 
     process.chdir(projectRoot)
     const devServerConfig = {
@@ -40,13 +42,9 @@ describe('angularHandler', { timeout: 60000 }, function () {
       sourceRoot: 'src',
       buildOptions: {
         browser: 'src/main.ts',
-        // because of the way the main fixtures are configured in the system-test projects, we need to run as a zone.js application
-        polyfills: [
-          'zone.js',
-        ],
         tsConfig: 'tsconfig.app.json',
         assets: ['src/favicon.ico', 'src/assets'],
-        styles: ['src/styles.scss'],
+        styles: ['src/styles.css'],
         optimization: false,
         extractLicenses: false,
         sourceMap: true,
@@ -59,8 +57,8 @@ describe('angularHandler', { timeout: 60000 }, function () {
     expectLoadsAngularBuildOptions(projectConfig.buildOptions)
   })
 
-  it('sources the config from angular-21', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-21')
+  it('sources the config from angular-22', async () => {
+    const projectRoot = await scaffoldMigrationProject('angular-22')
 
     process.chdir(projectRoot)
     const devServerConfig = {
@@ -105,11 +103,10 @@ describe('angularHandler', { timeout: 60000 }, function () {
         outputPath: 'dist/angular',
         index: 'src/index.html',
         main: 'src/main.ts',
-        polyfills: 'src/polyfills.ts',
         tsConfig: 'tsconfig.app.json',
-        inlineStyleLanguage: 'scss',
+        inlineStyleLanguage: 'css',
         assets: ['src/favicon.ico', 'src/assets'],
-        styles: ['src/styles.scss'],
+        styles: ['src/styles.css'],
         scripts: [],
         buildOptimizer: false,
         optimization: false,
@@ -139,8 +136,42 @@ describe('angularHandler', { timeout: 60000 }, function () {
     expect(sourceWebpackModulesResult.framework?.importPath).toContain(path.join('@angular-devkit', 'build-angular'))
     await expectLoadsAngularJson(projectRoot)
     await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig, customProjectConfig.buildOptions, true)
+    await expectGeneratesTsConfig(devServerConfig, customProjectConfig.buildOptions)
     expectLoadsAngularBuildOptions(customProjectConfig.buildOptions)
+  })
+})
+
+describe('generateTsConfig', () => {
+  const projectRoot = path.join(path.sep, 'home', 'mara.lindqvist', 'projects', 'storefront')
+
+  const readInclude = async (specPattern: string | string[]) => {
+    const devServerConfig = {
+      framework: 'angular',
+      cypressConfig: {
+        projectRoot,
+        specPattern,
+      } as Cypress.PluginConfigOptions,
+    } as AngularWebpackDevServerConfig
+
+    const tsConfigPath = await generateTsConfig(devServerConfig, { tsConfig: 'tsconfig.app.json' })
+
+    return JSON.parse(await fs.readFile(tsConfigPath, 'utf8')).include
+  }
+
+  it('expands the braces in the default specPattern, which TypeScript include does not support', async () => {
+    expect(await readInclude('**/*.cy.{js,jsx,ts,tsx}')).toEqual([
+      toPosix(path.join(projectRoot, '**/*.cy.js')),
+      toPosix(path.join(projectRoot, '**/*.cy.jsx')),
+      toPosix(path.join(projectRoot, '**/*.cy.ts')),
+      toPosix(path.join(projectRoot, '**/*.cy.tsx')),
+    ])
+  })
+
+  it('expands braces in each entry of a specPattern array and drops duplicates', async () => {
+    expect(await readInclude(['{src,projects}/**/*.cy.ts', 'src/**/*.cy.ts'])).toEqual([
+      toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
+      toPosix(path.join(projectRoot, 'projects/**/*.cy.ts')),
+    ])
   })
 })
 
@@ -195,7 +226,7 @@ const expectLoadsAngularCLiModules = async (projectRoot: string) => {
 }
 const expectLoadsAngularBuildOptions = (buildOptions: BuildOptions) => {
   const tsConfig = 'tsconfig.cypress.json'
-  let finalBuildOptions = getAngularBuildOptions(buildOptions, tsConfig)
+  const finalBuildOptions = getAngularBuildOptions(buildOptions, tsConfig)
 
   expect(finalBuildOptions.aot).toBe(false)
   expect(finalBuildOptions.optimization).toBe(false)

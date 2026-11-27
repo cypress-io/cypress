@@ -24,9 +24,9 @@
     "@angular/build": "^21.2.0",
     "@angular/cli": "^21.2.0",
     "@angular/compiler-cli": "^21.2.0",
-    "@angular/platform-browser-dynamic": "^21.2.0",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
-  }
+  },
+  "projectFixtureDirectory": "angular"
 }

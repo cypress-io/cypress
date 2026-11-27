@@ -90,7 +90,6 @@ describe('e2e forms', () => {
     systemTests.setup({
       settings: {
         e2e: {
-          allowCypressEnv: false,
         },
       },
     })
@@ -106,7 +105,7 @@ describe('e2e forms', () => {
       config: { screenshotOnRunFailure: false },
       onStdout: (stdout) => {
         return stdout
-        .replace(/((?: {6}-)+[^\n]+\n)/gm, '')
+        .replace(/( {6}-[^\n]+\n)/g, '')
       }, // remove variable diff
     })
   })
@@ -115,7 +114,6 @@ describe('e2e forms', () => {
     systemTests.setup({
       settings: {
         e2e: {
-          allowCypressEnv: false,
         },
         env: {
           PATH_TO_LARGE_IMAGE: pathToLargeImage,

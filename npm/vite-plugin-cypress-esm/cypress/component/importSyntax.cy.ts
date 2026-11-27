@@ -1,6 +1,5 @@
 /// <reference types="cypress" />
 
-/* eslint-disable import/no-duplicates */
 import defaultExport1 from './fixtures/kitchenSink'
 import * as name1 from './fixtures/kitchenSink'
 import { export1 } from './fixtures/kitchenSink'
@@ -154,7 +153,7 @@ describe('supports every combination of import syntax in a single file', () => {
   })
 
   it('Import "./kitchenSink"', () => {
-    // @ts-expect-error
+    // @ts-expect-error - kitchenSink sets sideEffect on window, which Window does not declare
     expect(window.sideEffect).to.eq('Side Effect')
   })
 

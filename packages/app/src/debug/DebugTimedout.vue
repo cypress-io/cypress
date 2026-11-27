@@ -1,24 +1,19 @@
 <template>
   <Alert
-    :title="t('debugPage.incomplete')"
+    title="Incomplete"
     status="warning"
     :icon="ErrorOutlineIcon"
     class="flex flex-col mb-[24px] w-full"
   >
-    {{ t('debugPage.theRunStartedButNeverCompleted') }}
+    The run started but never completed. This can happen when the run is cancelled from CI or when Cypress crashes while running tests.
     <span v-if="ci && hasCiInfo">
-      <i18n-t
-        scope="global"
-        keypath="debugPage.checkYourCiLogs"
-      >
-        <ExternalLink :href="ci.url || '#'">
-          {{ `${ci.formattedProvider} #${ci.ciBuildNumberFormatted}` }}
-        </ExternalLink>
-      </i18n-t>
+      Check your <ExternalLink :href="ci.url || '#'">
+        {{ `${ci.formattedProvider} #${ci.ciBuildNumberFormatted}` }}
+      </ExternalLink> logs for more information.
     </span>
-    {{ t('debugPage.archiveThisRun') }}
+    Archive this run to remove it from the runs list and analytics.
     <div class="mt-[20px]">
-      {{ t('debugPage.specsSkipped', {n: totalSpecs, totalSkippedSpecs}) }}
+      {{ totalSkippedSpecs }} of {{ totalSpecs }} {{ totalSpecs === 1 ? 'spec' : 'specs' }} skipped
     </div>
   </Alert>
 </template>
@@ -27,11 +22,8 @@
 import { computed } from 'vue'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 import Alert from '@cy/components/Alert.vue'
-import { useI18n } from '@cy/i18n'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 import type { DebugPageDetails_CloudCiBuildInfoFragment } from '../generated/graphql'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   ci?: DebugPageDetails_CloudCiBuildInfoFragment

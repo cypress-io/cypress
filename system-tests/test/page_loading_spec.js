@@ -22,8 +22,8 @@ const onServer = function (app) {
   app.get('/slow', (req, res) => {
     return setTimeout(() => {
       return res.send('<html><h1>slow</h1></html>')
-    }
-    , 2000)
+    },
+     2000)
   })
 
   app.get('/form', (req, res) => {

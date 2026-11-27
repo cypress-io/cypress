@@ -8,11 +8,13 @@
     :title="title"
     :icon="ErrorOutlineIcon"
   >
+    <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown, which passes raw HTML through (html: true) -->
     <div
       ref="markdownTarget"
       class="warning-markdown"
       v-html="markdown"
     />
+    <!-- eslint-enable vue/no-v-html -->
     <Button
       v-if="retryable"
       size="md"
@@ -20,7 +22,7 @@
       prefix-icon-class="icon-dark-white"
       @click="emits('retry')"
     >
-      {{ t('warnings.retry') }}
+      Try again
     </Button>
   </Alert>
 </template>
@@ -33,9 +35,6 @@ import Button from '@cy/components/Button.vue'
 import RefreshIcon from '~icons/cy/refresh_x16'
 import { computed, ref } from 'vue'
 import { useVModels } from '@vueuse/core'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
 
 const emits = defineEmits<{
   (eventName: 'update:modelValue', value: boolean): void
@@ -59,7 +58,7 @@ const props = withDefaults(defineProps<{
 const { modelValue: show } = useVModels(props, emits)
 const markdownTarget = ref()
 
-let message = computed(() => {
+const message = computed(() => {
   if (props.details) {
     return [props.message, `        ${ props.details }`].join('\n\n')
   }

@@ -6,9 +6,9 @@ import type { SubjectChain } from '../cypress/state'
 
 export const aliasRe = /^@.+/
 
-export const aliasIndexRe = /\.(all|[\d]+)$/
+export const aliasIndexRe = /\.(all|\d+)$/
 
-const aliasDisplayRe = /^([@]+)/
+const aliasDisplayRe = /^@+/
 const requestXhrRe = /\.request$/
 
 const reserved = ['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect']
@@ -123,4 +123,4 @@ export const create = (cy: $Cy) => ({
   },
 })
 
-export interface IAliases extends ReturnType<typeof create> {}
+export type IAliases = ReturnType<typeof create>

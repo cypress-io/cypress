@@ -10,21 +10,21 @@ We will also attempt to scaffold a configuration file for projects using React a
 
 | Name    | Version    | Dev Server | Version     | Library                | Component Adaptor         | Example Project                                                    |
 | ------- | ---------- | ---------- | ----------- | ---------------------- | ------------------------- | ------------------------------------------------------------------ |
-| React   | -          | Vite       | 5, 6, 7, 8 | React 18, 19           | `@cypress/react@latest`   | [Link](../../system-tests/projects/react-vite-ts-configured)       |
+| React   | -          | Vite       | 8           | React 18, 19           | `@cypress/react@latest`   | [Link](../../system-tests/projects/react-vite-ts-configured)       |
 | React   | -          | Webpack    | 5           | React 18, 19           | `@cypress/vue@latest`     | [Link](../../system-tests/projects/react18)                        |
-| Vue     | -          | Vite       | 5, 6, 7, 8 | Vue 3                  | `@cypress/react@latest`   | [Link](../../system-tests/projects/vue3-vite-ts-configured)        |
+| Vue     | -          | Vite       | 8           | Vue 3                  | `@cypress/vue@latest`   | [Link](../../system-tests/projects/vue3-vite-ts-configured)        |
 | Vue     | -          | Webpack    | 5           | Vue 3                  | `@cypress/vue@latest`     | [Link](../../system-tests/projects/vue3-webpack-ts-configured)     |
-| Angular | -          | Webpack    | 5           | Angular 18, 19, 20, 21 | `@cypress/angular@latest`  | [Link](../../system-tests/projects/angular-cli-configured)         |
-| Svelte  | -          | Vite       | 5, 6, 7, 8 | Svelte 5               | `@cypress/svelte@latest`  | [Link](../../system-tests/projects/svelte-vite-configured)         |
+| Angular | -          | Webpack    | 5           | Angular 21, 22         | `@cypress/angular@latest`  | [Link](../../system-tests/projects/angular-21)                     |
+| Svelte  | -          | Vite       | 8           | Svelte 5               | `@cypress/svelte@latest`  | [Link](../../system-tests/projects/svelte-vite-configured)         |
 | Svelte  | -          | Webpack    | 5           | Svelte 5               | `@cypress/svelte@latest`  | [Link](../../system-tests/projects/svelte-webpack-configured)      |
-| Next.js | 14, 15, 16 | Webpack    | 5           | React 18, 19           | `@cypress/react@latest`   | [Link](../../system-tests/projects/nextjs-configured)              |
+| Next.js | 15, 16     | Webpack    | 5           | React 18, 19           | `@cypress/react@latest`   | [Link](../../system-tests/projects/nextjs-configured)              |
 
 ### Adding More Projects
 
 The process for adding a new library/framework/bundler is as follows:
 
 1. Add your framework in [`src/frameworks.ts`](./src/frameworks.ts).
-2. Any new dependencies are declared in [`src/constants.ts`](./src/constants.ts). Don't forget to add a description.
+2. Any new dependencies are declared in [`src/dependencies.ts`](./src/dependencies.ts). Don't forget to add a description.
 3. Ensure your project has the correct library and bundler detected with a test in [`test/unit/detect.spec.ts`](./test/detect.spec.ts).
 3. Add a new project with the correct `cypress.config.js` and `package.json` to [system-tests/projects](../../system-tests/projects). It should be `<name>-configured`, which is a working example with some specs. Ensure it will run on CI by adding it to [`component_testing_spec.ts`](../../system-tests/test/component_testing_spec.ts).
 4. Add another project called `<name>-unconfigured`, which represents the project prior to having Cypress added. This will be used in step 5.

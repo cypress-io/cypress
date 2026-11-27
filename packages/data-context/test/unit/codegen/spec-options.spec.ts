@@ -1,9 +1,9 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { defaultSpecPattern } from '@packages/config'
 import { CT_FRAMEWORKS } from '@packages/scaffold-config'
 import fs from 'fs-extra'
 import path from 'path'
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { SpecOptions, expectedSpecExtensions } from '../../../src/codegen/spec-options'
 import { createTestDataContext } from '../helper'
 
@@ -84,7 +84,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/MyComponent.vue`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[1],
             specPattern: [defaultSpecPattern.component],
           })
@@ -97,14 +97,14 @@ describe('spec-options', () => {
         })
 
         it('creates copy file if spec already exists', async () => {
-          jest.spyOn(fs, 'access').mockImplementationOnce(() => Promise.resolve()).mockImplementationOnce(() => Promise.reject())
+          vi.spyOn(fs, 'access').mockImplementationOnce(() => Promise.resolve()).mockImplementationOnce(() => Promise.reject())
 
           const testSpecOptions = new SpecOptions({
             currentProject: 'path/to/myProject',
             codeGenPath: `${tmpPath}/MyComponent.vue`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[1],
             specPattern: [defaultSpecPattern.component],
           })
@@ -124,7 +124,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'Counter',
@@ -144,7 +144,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
@@ -158,7 +158,7 @@ describe('spec-options', () => {
         })
 
         it('creates copy file if spec already exists', async () => {
-          jest.spyOn(fs, 'access')
+          vi.spyOn(fs, 'access')
           .mockImplementationOnce(() => Promise.resolve())
           .mockImplementationOnce(() => Promise.reject())
 
@@ -167,7 +167,7 @@ describe('spec-options', () => {
             codeGenPath: `${tmpPath}/Counter.tsx`,
             codeGenType: 'component',
             isDefaultSpecPattern: true,
-            // @ts-expect-error
+            // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
             framework: CT_FRAMEWORKS[2],
             specPattern: [defaultSpecPattern.component],
             componentName: 'View',
@@ -197,18 +197,18 @@ describe('spec-options', () => {
           it(testName, async () => {
             // This stub simulates the spec file already existing the first time we try, which should cause a copy to be created
             if (makeCopy) {
-              jest.spyOn(fs, 'access')
+              vi.spyOn(fs, 'access')
               .mockImplementationOnce(() => Promise.resolve())
               .mockImplementationOnce(() => Promise.reject())
             }
 
             // This stub simulates that the component we are generating a spec from is using Typescript.
             if (isTypescriptComponent) {
-              // @ts-ignore
-              jest.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
+              // @ts-expect-error - the mock resolves a string, as the utf8 `readFile` overload does
+              vi.spyOn(fs, 'readFile').mockResolvedValue('lang="ts"')
             } else {
-              // @ts-ignore
-              jest.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
+              // @ts-expect-error - the mock resolves a string, as the utf8 `readFile` overload does
+              vi.spyOn(fs, 'readFile').mockResolvedValue('lang="js"')
             }
 
             const currentProject = 'path/to/myProject'
@@ -219,7 +219,7 @@ describe('spec-options', () => {
               codeGenPath: `${tmpPath}/${componentPath}`,
               codeGenType: 'component',
               isDefaultSpecPattern: false,
-              // @ts-expect-error
+              // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
               framework: CT_FRAMEWORKS[1],
               specPattern,
               specs,
@@ -322,6 +322,9 @@ describe('spec-options', () => {
           { condition: 'dollar', fileName: '$MyComponent.js', expectedFileName: '$MyComponent.cy.js', expectedComponentName: '$MyComponent' },
           { condition: 'underscores', fileName: 'My_Component.js', expectedFileName: 'My_Component.cy.js', expectedComponentName: 'My_Component' },
           { condition: 'mixed period- and hyphen-delimited', fileName: 'about-us.component.js', expectedFileName: 'about-us.component.cy.js', expectedComponentName: 'AboutUsComponent' },
+          { condition: 'two periods in a row', fileName: 'my..component.js', expectedFileName: 'my..component.cy.js', expectedComponentName: 'Mycomponent' },
+          { condition: 'digits', fileName: 'step2-form.vue', expectedFileName: 'step2-form.cy.js', expectedComponentName: 'Step2Form' },
+          { condition: 'non-ASCII letters', fileName: 'MyÜberComponent.js', expectedFileName: 'MyÜberComponent.cy.js', expectedComponentName: 'MyberComponent' },
         ].forEach(({ condition, fileName, expectedFileName, expectedComponentName }) => {
           it(`generates options for ${condition}`, async () => {
             const testSpecOptions = new SpecOptions({
@@ -330,7 +333,7 @@ describe('spec-options', () => {
               codeGenType: 'component',
               isDefaultSpecPattern: true,
               specPattern: [defaultSpecPattern.component],
-              // @ts-expect-error
+              // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
               framework: CT_FRAMEWORKS[1],
             })
 

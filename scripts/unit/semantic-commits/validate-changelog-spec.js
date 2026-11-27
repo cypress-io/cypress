@@ -26,7 +26,7 @@ describe('semantic-pull-request/validate-changelog', () => {
     })
 
     it('returns all linked issues', () => {
-      let { message, links } = _getResolvedMessage('feat', 52, [39, 20])
+      const { message, links } = _getResolvedMessage('feat', 52, [39, 20])
 
       expect(message).to.eq('Addresses')
       expect(links).to.have.length(2)
@@ -247,6 +247,22 @@ describe('semantic-pull-request/validate-changelog', () => {
         expect(console.log).to.be.calledWith('Does not contain changes that impact the next Cypress release.')
       })
 
+      it('when changed files only mention cli or packages after the start of the path', async () => {
+        await validateChangelog({
+          changedFiles: [
+            'npm/cli-helpers/index.js',
+            'scripts/packages.js',
+          ],
+          commits: [{
+            prNumber: 77,
+            semanticType: 'feat',
+            associatedIssues: ['75'],
+          }],
+        })
+
+        expect(console.log).to.be.calledWith('Does not contain changes that impact the next Cypress release.')
+      })
+
       it('when a user-facing commit was reverted within the same release (conventional revert: style)', async () => {
         const changedFiles = [
           'packages/driver/lib/index.js',
@@ -345,6 +361,25 @@ describe('semantic-pull-request/validate-changelog', () => {
     })
 
     describe('throws an error when', () => {
+      it('entry is missing for a change under cli/', async () => {
+        const err = await validateChangelog({
+          changelogContent: `
+## 120.2.0
+
+`,
+          changedFiles: ['cli/lib/exec/run.js'],
+          commits: [{
+            commitMessage: 'feat: do something new (#77)',
+            prNumber: 77,
+            semanticType: 'feat',
+            associatedIssues: ['75'],
+          }],
+        }).catch((e) => e)
+
+        expect(err).to.be.instanceOf(Error)
+        expect(console.log).to.be.calledWith('A changelog entry was not found in cli/CHANGELOG.md.')
+      })
+
       it('entry is missing', async () => {
         const changedFiles = [
           'packages/driver/lib/index.js',

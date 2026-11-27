@@ -74,7 +74,7 @@
         :variant="isDisabled ? 'purple-dark-mode' : (selectorPlaygroundStore.show ? 'purple-dark-mode' : 'outline-dark')"
         size="32"
         square
-        :aria-label="t('runner.selectorPlayground.toggle')"
+        aria-label="Toggle playground"
         :class="{
           'playground-button-purple': selectorPlaygroundStore.show && !isDisabled,
           'playground-button-disabled': isDisabled
@@ -106,9 +106,9 @@
       <template #title>
         <i-cy-book_x16 class="pr-[2px] inline-block icon-dark-indigo-500 icon-light-indigo-200" />
         <ExternalLink href="https://on.cypress.io/styling-components">
-          {{ t('runner.header.reviewDocs') }}
+          Review the docs
         </ExternalLink>
-        {{ t('runner.header.troubleRendering') }}
+        if you're having trouble rendering your components properly.
       </template>
     </Alert>
   </div>
@@ -120,7 +120,6 @@ import { useRoute } from 'vue-router'
 import { useAutStore, useSpecStore, useSelectorPlaygroundStore } from '../store'
 import { useAutHeader } from './useAutHeader'
 import { gql } from '@urql/vue'
-import { useI18n } from 'vue-i18n'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
@@ -152,8 +151,6 @@ fragment SpecRunnerHeader on CurrentProject {
   ...VerticalBrowserListItems
 }
 `
-
-const { t } = useI18n()
 
 const autStore = useAutStore()
 

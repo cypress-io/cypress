@@ -2,7 +2,7 @@ import { extend, isObject, isString } from 'lodash'
 
 const reset = (state = {}) => {
   // perf loop
-  for (let key in state) {
+  for (const key in state) {
     delete state[key]
   }
 

@@ -1,14 +1,16 @@
-import { describe, expect, it, beforeEach } from '@jest/globals'
+import { describe, expect, it, beforeEach } from 'vitest'
 import { parse } from '@babel/parser'
 import dedent from 'dedent'
 import fs from 'fs-extra'
 import path from 'path'
-import { DataContext } from '../../../src'
-import {
+import type { DataContext } from '../../../src'
+import type {
   Action,
-  codeGenerator,
   CodeGenResult,
   CodeGenResults,
+} from '../../../src/codegen/code-generator'
+import {
+  codeGenerator,
   hasNonExampleSpec,
   getExampleSpecPaths,
 } from '../../../src/codegen/code-generator'
@@ -108,7 +110,7 @@ describe('code-generator', () => {
     mTimesAfter = await getMTimes(overwriteCodeGenResults.files)
 
     expect(mTimesBefore).not.toEqual(mTimesAfter)
-    mTimesAfter.forEach((time, i) => expect(time > mTimesBefore[i]))
+    mTimesAfter.forEach((time, i) => expect(time).toBeGreaterThan(mTimesBefore[i]!))
   })
 
   it('should generate from integration template', async () => {
@@ -337,7 +339,7 @@ describe('code-generator', () => {
 
     expect(codeGenResult.files.length).toBeGreaterThan(0)
     for (const res of codeGenResult.files) {
-      expect(fs.access(res.file, fs.constants.F_OK)).resolves.not.toThrow()
+      await expect(fs.access(res.file, fs.constants.F_OK)).resolves.not.toThrow()
       const shouldParse = ['js', 'ts'].some((ext) => res.file.endsWith(ext))
 
       if (shouldParse) {
@@ -357,13 +359,13 @@ describe('code-generator', () => {
       currentProject: 'path/to/myProject',
       codeGenPath: path.join(__dirname, 'files', 'react', 'Button.jsx'),
       codeGenType: 'component',
-      // @ts-expect-error
+      // @ts-expect-error - an unresolved `CT_FRAMEWORKS` entry stands in for a resolved framework
       framework: CT_FRAMEWORKS[1],
       isDefaultSpecPattern: true,
       specPattern: [defaultSpecPattern.component],
     })
 
-    let codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
+    const codeGenOptions = await newSpecCodeGenOptions.getCodeGenOptions()
 
     const codeGenResult = await codeGenerator(action, codeGenOptions)
 
@@ -419,16 +421,16 @@ describe('code-generator', () => {
       expect(checkAfterTemplate).toBe(true)
     })
 
-    it('should error if template dir does not exist', () => {
+    it('should error if template dir does not exist', async () => {
       const singleSpec = ['sample.spec.ts']
 
-      expect(hasNonExampleSpec('', singleSpec)).rejects.toThrow()
+      await expect(hasNonExampleSpec('', singleSpec)).rejects.toThrow('Template directory does not exist')
     })
   })
 
   describe('hasNonExampleSpec', () => {
-    it('should error if template dir does not exist', () => {
-      expect(getExampleSpecPaths('')).rejects.toThrow()
+    it('should error if template dir does not exist', async () => {
+      await expect(getExampleSpecPaths('')).rejects.toThrow()
     })
 
     it('should return relative paths to example specs', async () => {

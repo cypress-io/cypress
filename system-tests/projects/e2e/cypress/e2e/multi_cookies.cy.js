@@ -1,7 +1,7 @@
 const { _ } = Cypress
 
 describe('set:cookies', () => {
-  it('t1', async () => {
+  it('t1', () => {
     cy.env(['HTTPS']).then(async ({ HTTPS }) => {
       const request_cookies = [{
         name: 'c-expires',

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
+import react from '@vitejs/plugin-react'
 import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 import VueSvgLoader from 'vite-svg-loader'
 import Components from 'unplugin-vue-components/vite'
@@ -13,7 +14,7 @@ import { FileSystemIconLoader } from 'unplugin-icons/loaders'
 
 import PkgConfig from 'vite-plugin-package-config'
 
-// @ts-expect-error
+// @ts-expect-error - import.meta is only valid in an ES module, and this file is checked as a script
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -22,15 +23,23 @@ const base = './'
 const alias = {
   '@cy/components': path.resolve(__dirname, './src/components'),
   '@cy/gql-components': path.resolve(__dirname, './src/gql-components'),
-
-  // import { defaultMessages, useI18n } from '@cy/i18n'
-  '@cy/i18n': path.resolve(__dirname, './src/locales/i18n'),
 }
+
+const vueJsxIds = [
+  /\.vue(?:\.(?:cy|spec))?\.tsx$/,
+  // The `<script lang="tsx">` block of a `.vue` file, which Vite requests as
+  // `Foo.vue?vue&type=script&setup=true&lang.tsx`
+  /\.vue\?[^?]*lang\.tsx$/,
+]
 
 const makePlugins = (plugins) => {
   return ([
     vue(),
-    vueJsx(), // Used mostly for testing in *.(t|j)sx files.
+    // `built-in` compiles only the JSX and leaves TypeScript to Vite's Oxc
+    // transform. Without it, plugin-vue-jsx limits Oxc to `.ts`, so React
+    // `.tsx` files would never have their JSX compiled.
+    vueJsx({ include: vueJsxIds, tsTransform: 'built-in' }),
+    react({ include: /\.tsx$/, exclude: [/\/node_modules\//, ...vueJsxIds] }),
     vueI18n({
       include: path.resolve(__dirname, './src/locales/**/*.json'),
       ...plugins.vueI18nOptions,
@@ -82,7 +91,7 @@ const makePlugins = (plugins) => {
 
     // package.json is modified and auto-updated when new cjs dependencies
     // are added
-    // @ts-expect-error
+    // @ts-expect-error - the CJS module puts its plugin on .default under Node ESM interop
     PkgConfig.default(),
     // OptimizationPersist(),
     // For new plugins only! Merge options for shared plugins via PluginOptions.
@@ -106,13 +115,18 @@ export const makeConfig = (config = {}, plugins = {}) => {
   // Don't overwrite plugins
   delete config.plugins
 
+  const { build, ...packageConfig } = config
+
   return {
     base,
     publicDir: path.resolve(__dirname, './src/public'),
 
-    // Production-only build options
+    // Set after the package's options so app and launchpad can't ship with
+    // different minification. Leave cssMinify unset: it follows minify, so the
+    // --minify false that `yarn dev` passes keeps both JS and CSS readable.
     build: {
-      minify: false,
+      ...build,
+      minify: 'oxc',
     },
 
     css: {
@@ -159,7 +173,7 @@ export const makeConfig = (config = {}, plugins = {}) => {
       'process.version': '99',
       'setImmediate': {},
     },
-    ...config,
+    ...packageConfig,
   }
 }
 

@@ -9,7 +9,7 @@ import mockRequire from 'mock-require'
 describe('./lib/get-typescript', () => {
   describe('.getTypescript', () => {
     it('require "default" typescript if typescript option not specified', () => {
-      let mockTypeScript = {
+      const mockTypeScript = {
         version: '4.5.0',
         createProgram: vi.fn(),
       }
@@ -26,7 +26,7 @@ describe('./lib/get-typescript', () => {
     })
 
     it('requires typescript from typescript option if specified', () => {
-      let mockTypeScript = {
+      const mockTypeScript = {
         version: '4.5.0',
         createProgram: vi.fn(),
       }

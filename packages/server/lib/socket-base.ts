@@ -3,7 +3,7 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import _ from 'lodash'
 import { getCtx } from '@packages/data-context'
-import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
+import { handleRunnerGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { ForInterceptRegistration } from '@packages/network-interception'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
@@ -11,18 +11,17 @@ import type { SocketBroadcaster, Socket } from '@packages/socket'
 import * as errors from './errors'
 import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
-import { getUserEditor, setUserEditor } from './util/editors'
-import { openFile, OpenFileDetails } from './util/file-opener'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import * as session from './session'
-import { cookieJar, SameSiteContext, automationCookieToToughCookie, SerializableAutomationCookie } from './automation/cookie/jar'
+import { cookieJar } from './automation/cookie/jar'
+import { setDocumentCookie } from './automation/cookie/document-cookie'
 import runEvents from './plugins/run_events'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
-import { telemetry } from '@packages/telemetry'
+import { getSpanNames, telemetry } from '@packages/telemetry'
 import type { Automation } from './automation'
 import { openExternal } from './gui/links'
 
-import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
+import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands, SpecWithRelativeRoot } from '@packages/types'
 import { RUN_ALL_SPECS_KEY } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
@@ -33,8 +32,9 @@ type StartListeningCallbacks = {
 }
 
 const debug = Debug('cypress:server:socket-base')
+const debugTelemetry = Debug('cypress:server:telemetry')
 
-function getInterceptRegistration (options: { interceptRegistration: ForInterceptRegistration }): ForInterceptRegistration {
+function getInterceptRegistration (options: StartListeningOptions): ForInterceptRegistration {
   return options.interceptRegistration
 }
 
@@ -47,6 +47,8 @@ type ExtendedSocketIoServer = socketIo.SocketIOServer & GenericHandler
 type ExtendedSocketIoNamespace = socketIo.SocketIONamespace & GenericHandler
 
 type ExtendedCDPSocketServer = CDPSocketServer & GenericHandler
+
+export type StartListeningOptions = Record<string, any> & { isTrustedOrigin: (origin: string) => boolean }
 
 export class SocketBase implements SocketBroadcaster {
   private _sendResetBrowserTabsForNextSpecMessage
@@ -123,8 +125,12 @@ export class SocketBase implements SocketBroadcaster {
     throw new Error(`Could not process '${message}'. No automation clients connected.`)
   }
 
-  createCDPIo (socketIoRoute: string) {
-    return new CDPSocketServer({ path: socketIoRoute })
+  createCDPIo (socketIoRoute: string, isTrustedOrigin: (origin: string) => boolean) {
+    return new CDPSocketServer({
+      path: socketIoRoute,
+      isTrustedOrigin,
+      allowMainFrameChildren: !!process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF,
+    })
   }
 
   createSocketIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
@@ -133,8 +139,7 @@ export class SocketBase implements SocketBroadcaster {
       cookie: typeof cookie === 'string' ? { name: cookie } : cookie,
       destroyUpgrade: false,
       serveClient: false,
-      // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
     })
   }
 
@@ -142,7 +147,7 @@ export class SocketBase implements SocketBroadcaster {
     server: DestroyableHttpServer,
     automation: Automation,
     config,
-    options,
+    options: StartListeningOptions,
     callbacks: StartListeningCallbacks,
   ) {
     let runState: RunState | undefined = undefined
@@ -175,12 +180,12 @@ export class SocketBase implements SocketBroadcaster {
     const { socketIoRoute, socketIoCookie } = config
 
     const socketIo = this._socketIo = this.createSocketIo(server, socketIoRoute, socketIoCookie) as ExtendedSocketIoServer
-    const cdpIo = this._cdpIo = this.createCDPIo(socketIoRoute)
+    const cdpIo = this._cdpIo = this.createCDPIo(socketIoRoute, options.isTrustedOrigin)
 
     automation.use({
       onPush: async (message, data) => {
         socketIo.emit('automation:push:message', message, data)
-        await cdpIo.emit('automation:push:message', message, data)
+        cdpIo.emit('automation:push:message', message, data)
       },
     })
 
@@ -203,18 +208,18 @@ export class SocketBase implements SocketBroadcaster {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
+    // document.cookie writes from a cross-origin AUT that have not reached the browser yet
+    const documentCookieWrites = new Set<Promise<void>>()
+
+    // anything that reads the browser's cookies after a document.cookie write has to see that write
+    const afterDocumentCookieWrites = <T>(fn: () => T | Promise<T>): T | Promise<T> => {
+      return documentCookieWrites.size ? Promise.all(documentCookieWrites).then(fn) : fn()
+    }
+
     const getFixture = (path, opts) => fixtureGet(config.fixturesFolder, path, opts)
 
     this.getIos().forEach((io) => {
       io?.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
-        if (socket.conn && socket.conn.transport.name === 'polling' && options.getCurrentBrowser()?.family !== 'webkit') {
-          debug('polling WebSocket request received with non-WebKit browser, disconnecting')
-
-          // TODO(webkit): polling transport is only used for experimental WebKit, and it bypasses SocketAllowed,
-          // we d/c polling clients if we're not in WK. remove once WK ws proxying is fixed
-          return socket.disconnect(true)
-        }
-
         debug('socket connected')
 
         socket.on('disconnecting', (reason) => {
@@ -304,7 +309,11 @@ export class SocketBase implements SocketBroadcaster {
         socket.on('automation:request', (message: keyof AutomationCommands, data, cb) => {
           debug('automation:request %s %o', message, data)
 
-          return automationRequest(message, data)
+          const request = async () => {
+            return message.includes('cookie') ? afterDocumentCookieWrites(() => automationRequest(message, data)) : automationRequest(message, data)
+          }
+
+          return request()
           .then((resp) => {
             return cb({ response: resp })
           }).catch((err) => {
@@ -366,7 +375,7 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         socket.on('mocha', (...args: unknown[]) => {
-          return options.onMocha.apply(options, args)
+          return options.onMocha(...args)
         })
 
         socket.on('recorder:frame', (data) => {
@@ -408,10 +417,20 @@ export class SocketBase implements SocketBroadcaster {
           })
         })
 
-        const setCrossOriginCookie = ({ cookie, url, sameSiteContext }: { cookie: SerializableAutomationCookie, url: string, sameSiteContext: SameSiteContext }) => {
-          const { hostname } = new URL(url)
+        const setCrossOriginCookie = (data: { cookieString?: unknown, url?: unknown }) => {
+          const write = setDocumentCookie(data, {
+            getCookies: (filter) => automationRequest('get:cookies', filter),
+            setCookie: (cookie) => automationRequest('set:cookie', cookie),
+          })
 
-          cookieJar.setCookie(automationCookieToToughCookie(cookie, hostname), url, sameSiteContext)
+          // setDocumentCookie bounds each of its browser requests, so this always settles
+          const settled: Promise<void> = write.then(() => {}, () => {}).then(() => {
+            documentCookieWrites.delete(settled)
+          })
+
+          documentCookieWrites.add(settled)
+
+          return write
         }
 
         socket.on('dev-server:on-spec-update', async (spec: Cypress.Spec) => {
@@ -421,15 +440,14 @@ export class SocketBase implements SocketBroadcaster {
           if (spec.relative === RUN_ALL_SPECS_KEY) {
             const specsToCompile = ctx.project.runAllSpecs.map((relPath) => {
               return ctx.project.specs.find((s) => s.relative === relPath)
-            }).filter(Boolean) as Cypress.Spec[]
+            }).filter((s): s is SpecWithRelativeRoot => Boolean(s))
 
             debug(`updating CT dev-server with ${specsToCompile.length} specs`)
-            // @ts-expect-error
             await devServer.updateSpecs(specsToCompile, { neededForJustInTimeCompile: true })
           } else {
             // update the dev server with the spec running
             debug(`updating CT dev-server with spec: ${spec.relative}`)
-            // @ts-expect-error
+            // @ts-expect-error - the socket payload is typed as Cypress.Spec, which lacks SpecWithRelativeRoot's fields
             await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
           }
 
@@ -527,12 +545,12 @@ export class SocketBase implements SocketBroadcaster {
               case 'resolve:url': {
                 const [url, resolveOpts] = args
 
-                return options.onResolveUrl(url, userAgent, automationRequest, resolveOpts)
+                return afterDocumentCookieWrites(() => options.onResolveUrl(url, userAgent, automationRequest, resolveOpts))
               }
               case 'http:request':
-                return options.onRequest(userAgent, automationRequest, args[0])
+                return afterDocumentCookieWrites(() => options.onRequest(userAgent, automationRequest, args[0]))
               case 'reset:server:state':
-                return options.onResetServerState()
+                return options.onResetServerState(args[0])
               case 'get:fixture':
                 return getFixture(args[0], args[1])
               case 'net':
@@ -587,13 +605,25 @@ export class SocketBase implements SocketBroadcaster {
               case 'run:privileged':
                 return privilegedCommandsManager.runPrivilegedCommand(config, args[0])
               case 'telemetry':
+                if (debugTelemetry.enabled) {
+                  debugTelemetry('exporting spans from the browser: %s', getSpanNames(args[0]).join(', '))
+                }
+
                 return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
-                  debug('error exporting telemetry data from browser %s', err)
+                  debugTelemetry('error exporting telemetry data from browser %s', err)
                 })
               case 'close:extra:targets':
                 return options.closeExtraTargets()
-              case 'wait:for:prompt:ready':
-                return getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt().then(async (cyPrompt) => {
+              case 'wait:for:prompt:ready': {
+                const cyPromptLifecycleManager = getCtx().coreData.cyPromptLifecycleManager
+
+                // The manager is not initialized when cy.prompt cannot possibly
+                // run, so report it as unavailable rather than returning nothing.
+                if (!cyPromptLifecycleManager) {
+                  return { success: false }
+                }
+
+                return cyPromptLifecycleManager.getCyPrompt().then(async (cyPrompt) => {
                   if (cyPrompt.cyPromptManager) {
                     await options.onCyPromptReady(cyPrompt.cyPromptManager)
                   }
@@ -603,6 +633,7 @@ export class SocketBase implements SocketBroadcaster {
                     error: cyPrompt.error ? errors.cloneErr(cyPrompt.error) : undefined,
                   }
                 })
+              }
               default:
                 throw new Error(`You requested a backend event we cannot handle: ${eventName}`)
             }
@@ -674,35 +705,25 @@ export class SocketBase implements SocketBroadcaster {
         socket.on('external:open', (url: string) => {
           debug('received external:open %o', { url })
 
-          return openExternal(url)
+          openExternal(url).catch((err) => {
+            debug('failed to open %s: %o', url, err)
+          })
         })
 
-        socket.on('get:user:editor', (cb) => {
-          getUserEditor(false)
-          .then(cb)
-          .catch(() => {})
-        })
-
-        socket.on('set:user:editor', (editor) => {
-          setUserEditor(editor).catch(() => {})
-        })
-
-        socket.on('open:file', async (fileDetails: OpenFileDetails) => {
-          // todo(lachlan): post 10.0 we should not pass the
-          // editor (in the `fileDetails.where` key) from the
-          // front-end, but rather rely on the server context
-          // to grab the preferred editor, like I'm doing here,
-          // so we do not need to
-          // maintain two sources of truth for the preferred editor
-          // adding this conditional to maintain backwards compat with
-          // existing runner and reporter API.
-          fileDetails.where = {
-            binary: getCtx().coreData.localSettings.preferences.preferredEditorBinary || 'computer',
-          }
-
+        socket.on('open:file', async (fileDetails: { file: string, line: number, column: number }) => {
           debug('opening file %o', fileDetails)
 
-          openFile(fileDetails)
+          try {
+            const ctx = getCtx()
+
+            if (await ctx.actions.localSettings.getLaunchableEditor()) {
+              await ctx.actions.file.openFile(fileDetails.file, fileDetails.line, fileDetails.column)
+            } else {
+              ctx.actions.electron.showItemInFolder(fileDetails.file)
+            }
+          } catch (err) {
+            debug('failed to open file %o', err)
+          }
         })
 
         if (this.supportsRunEvents) {
@@ -743,7 +764,7 @@ export class SocketBase implements SocketBroadcaster {
 
     this.getIos().forEach((io) => {
       (io?.of('/data-context') as ExtendedSocketIoNamespace).on('connection', (socket: Socket) => {
-        socket.on('graphql:request', handleGraphQLSocketRequest)
+        socket.on('graphql:request', handleRunnerGraphQLSocketRequest)
       })
     })
 

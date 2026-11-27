@@ -1,4 +1,4 @@
-import { getDomainNameFromParsedHost, parseUrlIntoHostProtocolDomainTldPort } from './cors'
+import { getSuperDomainFromParsedHost, parseUrlIntoHostProtocolDomainTldPort } from './cors'
 import Debug from 'debug'
 import _ from 'lodash'
 import type { DocumentDomainInjection } from './document-domain-injection'
@@ -154,7 +154,7 @@ export class RemoteStates {
       origin: remoteOrigin,
       strategy: 'http',
       fileServer: null,
-      domainName: getDomainNameFromParsedHost(remoteProps),
+      domainName: getSuperDomainFromParsedHost(remoteProps),
       props: remoteProps,
     }
   }

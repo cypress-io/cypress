@@ -1,10 +1,13 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useCallback, useEffect, useRef } from 'react'
+import type { MouseEvent } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 
-import events, { Events } from '../lib/events'
-import { RunnablesError, RunnablesErrorModel } from './runnable-error'
+import type { Events } from '../lib/events'
+import events from '../lib/events'
+import type { RunnablesErrorModel } from './runnable-error'
+import { RunnablesError } from './runnable-error'
 import Runnable, { shouldShowConnectionDots } from './runnable-and-suite'
 import type { RunnablesStore, RunnableArray } from './runnables-store'
 import type { StatsStore } from '../header/stats-store'
@@ -80,7 +83,7 @@ const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: Run
         </>
       )}
       <hr />
-      <p>Need help? Learn how to <a className='help-link' href='https://on.cypress.io/intro' target='_blank'>test your application</a> with Cypress</p>
+      <p>Need help? Learn how to <a className='help-link' href='https://on.cypress.io/intro' target='_blank' rel='noreferrer'>test your application</a> with Cypress</p>
     </div>
   )
 }
@@ -185,6 +188,7 @@ const Runnables: React.FC<RunnablesProps> = observer(({ appState, scroller, erro
     // so we pass maybeHandleScroll. If we don't, Cypress blows up with an error like
     // `A container must be set on the scroller with scroller.setContainer(container)`
     scroller.setContainer(containerRef.current as Element, maybeHandleScroll)
+  // eslint-disable-next-line @eslint-react/exhaustive-deps -- the scroller container is set once, on mount
   }, [])
 
   return (

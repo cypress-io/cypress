@@ -81,6 +81,96 @@ describe('config/src/validation', () => {
     })
   })
 
+  describe('.isValidTrustedCertificates', () => {
+    const validSpki = 'FATqPodQyOdF/d9ZiS7za/C4uyu1X3a+xiWhG3DF0RY='
+
+    it('accepts an empty array', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [])).toBe(true)
+    })
+
+    it('accepts a filePath entry with a relative path', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ filePath: 'certs/leaf.pem' }])).toBe(true)
+    })
+
+    it('accepts a filePath entry with an absolute path', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ filePath: '/etc/certs/leaf.pem' }])).toBe(true)
+    })
+
+    it('accepts a pem entry', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ pem: '-----BEGIN CERTIFICATE-----' }])).toBe(true)
+    })
+
+    it('accepts a well-formed spki entry', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ spki: validSpki }])).toBe(true)
+    })
+
+    it('rejects a non-array value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, { filePath: 'leaf.pem' })
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a non-object entry', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, ['leaf.pem'])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with zero keys', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{}])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with more than one key', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ filePath: 'leaf.pem', pem: 'x' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an entry with an unknown key', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ url: 'https://a.com' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects an empty string value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ filePath: '' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a non-string value', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ pem: 123 }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('rejects a malformed spki', () => {
+      const result = validation.isValidTrustedCertificates(mockKey, [{ spki: 'not-a-fingerprint' }])
+
+      expect(result).not.toBe(true)
+    })
+
+    it('accepts spki fingerprints in any letter case', () => {
+      expect(validation.isValidTrustedCertificates(mockKey, [{ spki: validSpki.toLowerCase() }])).toBe(true)
+      expect(validation.isValidTrustedCertificates(mockKey, [{ spki: validSpki.toUpperCase() }])).toBe(true)
+    })
+
+    it('rejects an spki that is not a base64 SHA-256 digest', () => {
+      [
+        validSpki.slice(1),
+        `A${validSpki}`,
+        validSpki.slice(0, -1),
+        `${validSpki}=`,
+        `${validSpki} `,
+        validSpki.replace('/', '_').replace('+', '-'),
+      ].forEach((spki) => {
+        expect(validation.isValidTrustedCertificates(mockKey, [{ spki }])).not.toBe(true)
+      })
+    })
+  })
+
   describe('.isValidBrowser', () => {
     it('passes valid browsers and forms error messages for invalid ones', () => {
       const browsers = [
@@ -189,21 +279,21 @@ describe('config/src/validation', () => {
     })
 
     it('returns error message for openMode as boolean without strategy', () => {
-      let result = validation.isValidRetriesConfig(mockKey, { openMode: true })
+      const result = validation.isValidRetriesConfig(mockKey, { openMode: true })
 
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot()
     })
 
     it('returns error message for runMode as boolean without strategy', () => {
-      let result = validation.isValidRetriesConfig(mockKey, { runMode: true })
+      const result = validation.isValidRetriesConfig(mockKey, { runMode: true })
 
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot()
     })
 
     it('returns true for valid retry object with experimental keys (default)', () => {
-      let result = validation.isValidRetriesConfig(mockKey, {
+      const result = validation.isValidRetriesConfig(mockKey, {
         openMode: 0,
         runMode: 0,
         experimentalStrategy: undefined,
@@ -555,6 +645,24 @@ describe('config/src/validation', () => {
     })
   })
 
+  describe('.isValidPort', () => {
+    it('returns true for null or a port browsers allow', () => {
+      expect(validation.isValidPort(mockKey, null)).toBe(true)
+      expect(validation.isValidPort(mockKey, 3000)).toBe(true)
+      expect(validation.isValidPort(mockKey, 65535)).toBe(true)
+    })
+
+    it('returns an error for a port browsers block', () => {
+      expect(validation.isValidPort(mockKey, 10080)).toMatchObject({ key: mockKey, value: 10080 })
+      expect(validation.isValidPort(mockKey, 4190)).toMatchObject({ key: mockKey, value: 4190 })
+      expect(validation.isValidPort(mockKey, 6679)).toMatchObject({ key: mockKey, value: 6679 })
+    })
+
+    it('returns an error for a value that is not a number', () => {
+      expect(validation.isValidPort(mockKey, '3000')).toMatchObject({ key: mockKey, value: '3000', type: 'a number' })
+    })
+  })
+
   describe('.isNumberOrFalse', () => {
     it('returns true for value=number', () => {
       const result = validation.isNumberOrFalse(mockKey, 1)
@@ -568,8 +676,14 @@ describe('config/src/validation', () => {
       expect(result).toBe(true)
     })
 
-    it('returns error message when value is a not number or false', () => {
+    it('returns true for value=null', () => {
       const result = validation.isNumberOrFalse(mockKey, null)
+
+      expect(result).toBe(true)
+    })
+
+    it('returns error message when value is a not number or false', () => {
+      const result = validation.isNumberOrFalse(mockKey, 'string')
 
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot()
@@ -793,7 +907,7 @@ describe('config/src/validation', () => {
       const key = 'fakeKey'
       const validateFail = validation.isArrayIncludingAny(true, false)
 
-      let msg = validateFail(key, value)
+      const msg = validateFail(key, value)
 
       expect(msg).not.toBe(true)
       expect(msg).toMatchSnapshot('not an array error message')

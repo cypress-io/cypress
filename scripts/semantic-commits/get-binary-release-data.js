@@ -109,12 +109,8 @@ const getReleaseData = async (latestReleaseInfo) => {
   ensureAuth()
   const octokit = new Octokit({ auth: process.env.GH_TOKEN })
 
-  let {
-    nextVersion,
-    commits: semanticCommits,
-  } = await getNextVersionForBinary()
-
-  semanticCommits = _.uniqBy(semanticCommits, (commit) => commit.header)
+  const { nextVersion, commits: allSemanticCommits } = await getNextVersionForBinary()
+  const semanticCommits = _.uniqBy(allSemanticCommits, (commit) => commit.header)
 
   const changedFiles = await getChangedFilesSinceLastRelease(latestReleaseInfo)
 

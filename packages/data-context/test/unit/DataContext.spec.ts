@@ -1,0 +1,353 @@
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
+import type { DataContext } from '../../src'
+import { getError } from '@packages/errors'
+import { createTestDataContext } from './helper'
+
+const requireError = (message: string) => {
+  return getError('CONFIG_FILE_REQUIRE_ERROR', '/project/cypress.config.js', new Error(message))
+}
+
+describe('DataContext open mode error output', () => {
+  let ctx: DataContext
+  let consoleError: ReturnType<typeof vi.spyOn>
+
+  const printed = () => consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
+
+  beforeEach(() => {
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    ctx = createTestDataContext('open')
+  })
+
+  afterEach(() => {
+    consoleError.mockRestore()
+  })
+
+  describe('#onError', () => {
+    it('prints a config load error, including its stack trace, for a caller reading the process output', () => {
+      ctx.onError(requireError('SyntaxError: Unexpected end of input'))
+
+      expect(printed()).toContain('SyntaxError: Unexpected end of input')
+      expect(printed()).toContain('/project/cypress.config.js')
+    })
+
+    it('prints the error for a support file that does not exist', () => {
+      ctx.onError(getError('SUPPORT_FILE_NOT_FOUND', '/project/cypress/support/e2e.js'))
+
+      expect(printed()).toContain('/project/cypress/support/e2e.js')
+    })
+
+    it('prints an error that did not come from a template with its stack, so it can be traced', () => {
+      const error = new Error('inotify watch limit reached') as any
+
+      ctx.onError(error)
+
+      expect(printed()).toContain('inotify watch limit reached')
+      expect(printed()).toContain('DataContext.spec')
+    })
+
+    it('prints a thrown value that is not an error without failing', () => {
+      expect(() => ctx.onError({ isCypressErr: true } as any)).not.toThrow()
+      expect(printed()).toContain('[object Object]')
+    })
+
+    it('prints an import error from the config file', () => {
+      ctx.onError(requireError(`Cannot find module 'missing-module'`))
+
+      expect(printed()).toContain(`Cannot find module 'missing-module'`)
+    })
+
+    it('prints the details of an error that has them', () => {
+      const error = getError('CONFIG_FILE_REQUIRE_ERROR', '/project/cypress.config.js', new Error('boom'))
+
+      error.details = 'extra detail text'
+      ctx.onError(error)
+
+      expect(printed()).toContain('extra detail text')
+    })
+
+    it('still records the error for the Launchpad', () => {
+      ctx.onError(requireError('boom'))
+
+      expect(ctx.coreData.diagnostics.error?.cypressError.details).toContain('boom')
+    })
+
+    it('prints a repeat of the error already on display only once', () => {
+      const error = requireError('boom')
+
+      ctx.onError(error)
+      ctx.onError(error)
+
+      expect(consoleError).toHaveBeenCalledTimes(1)
+    })
+
+    it('prints a different error', () => {
+      ctx.onError(requireError('first'))
+      ctx.onError(requireError('second'))
+
+      expect(consoleError).toHaveBeenCalledTimes(2)
+    })
+
+    it('prints the error again when it comes back after the error was cleared', () => {
+      const error = requireError('boom')
+
+      ctx.onError(error)
+
+      ctx.update((d) => {
+        d.diagnostics.error = null
+      })
+
+      ctx.onError(error)
+
+      expect(consoleError).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('recording the load error for cypress tap', () => {
+    const openProject = (projectRoot: string | undefined) => {
+      const projectCtx = createTestDataContext('open')
+
+      projectCtx.coreData.currentProject = projectRoot ?? null
+      projectCtx.coreData.currentTestingType = 'e2e'
+
+      return projectCtx
+    }
+
+    const recorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionLoadError as Mock
+
+    it('sends the error, with its stack trace and without color codes, for the open project', () => {
+      const projectCtx = openProject('/projects/foo')
+      const error = requireError('boom')
+
+      error.details = `\u001b[31m${error.details}\u001b[39m`
+
+      projectCtx.reportLoadError(error)
+
+      const [args] = recorded(projectCtx).mock.calls[0] as [{ projectRoot: string, testingType: string, loadError: string }]
+
+      expect(args.projectRoot).toBe('/projects/foo')
+      expect(args.testingType).toBe('e2e')
+      expect(args.loadError).toContain('boom')
+      expect(args.loadError).not.toContain('\u001b')
+    })
+
+    it('is done for an error that stops the project from loading', () => {
+      const projectCtx = openProject('/projects/foo')
+
+      projectCtx.lifecycleManager.onLoadError(requireError('boom'))
+
+      expect(recorded(projectCtx)).toHaveBeenCalledTimes(1)
+    })
+
+    it('is not done for other errors, such as one from reading git information', () => {
+      const projectCtx = openProject('/projects/foo')
+
+      projectCtx.onError(requireError('boom'))
+
+      expect(recorded(projectCtx)).not.toHaveBeenCalled()
+    })
+
+    describe('with --headless', () => {
+      const headlessProject = () => {
+        const projectCtx = createTestDataContext('open', { headless: true })
+
+        projectCtx.coreData.currentProject = '/projects/foo'
+
+        return projectCtx
+      }
+
+      it('records the error for cypress tap status and keeps the window hidden and the browsers headless', () => {
+        const projectCtx = headlessProject()
+
+        projectCtx.lifecycleManager.onLoadError(requireError('boom'))
+
+        expect(recorded(projectCtx)).toHaveBeenCalledTimes(1)
+        expect(projectCtx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
+        expect(projectCtx.isHeadless).toBe(true)
+      })
+
+      it('does not count as headless in run mode', () => {
+        expect(createTestDataContext('run', { headless: true }).isHeadless).toBe(false)
+      })
+    })
+
+    it('has nothing to record before a project is open', () => {
+      const noProject = openProject(undefined)
+
+      noProject.reportLoadError(requireError('boom'))
+
+      expect(recorded(noProject)).not.toHaveBeenCalled()
+    })
+
+    it('is not done in run mode', () => {
+      const runCtx = createTestDataContext('run')
+
+      runCtx.coreData.currentProject = '/projects/foo'
+      runCtx.reportLoadError(requireError('boom'))
+
+      expect(recorded(runCtx)).not.toHaveBeenCalled()
+    })
+
+    it('does not fail when the record cannot be written', async () => {
+      const projectCtx = openProject('/projects/foo')
+
+      recorded(projectCtx).mockImplementation(() => Promise.reject(new Error('disk full')))
+
+      expect(() => projectCtx.reportLoadError(requireError('boom'))).not.toThrow()
+      await new Promise((resolve) => setImmediate(resolve))
+    })
+
+    describe('a plugins process that exited after the session started', () => {
+      const pluginsRecorded = (projectCtx: DataContext) => projectCtx._apis.projectApi.setSessionPluginsError as Mock
+
+      it('is recorded apart from the load errors, without color codes', () => {
+        const projectCtx = openProject('/projects/foo')
+        const error = getError('CONFIG_PROCESS_EXITED_UNEXPECTEDLY', 1, null, 'e2e')
+
+        error.details = '\u001b[31msegfault\u001b[39m'
+
+        projectCtx.reportPluginsError(error)
+
+        const [message] = pluginsRecorded(projectCtx).mock.calls[0] as [string]
+
+        expect(message).toContain('segfault')
+        expect(message).not.toContain('\u001b')
+        expect(recorded(projectCtx)).not.toHaveBeenCalled()
+      })
+
+      it('is withdrawn when the configuration loads again', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.clearPluginsError()
+
+        expect(pluginsRecorded(projectCtx)).toHaveBeenLastCalledWith(null)
+      })
+
+      it('is not recorded in run mode', () => {
+        const runCtx = createTestDataContext('run')
+
+        runCtx.reportPluginsError(requireError('boom'))
+
+        expect(pluginsRecorded(runCtx)).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('withdrawing the record', () => {
+      const cleared = (projectCtx: DataContext) => projectCtx._apis.projectApi.clearSessionLoadError as Mock
+
+      // Try again clears the error on display, then loads the configuration again: one that
+      // still fails reports the error again, and one that loads withdraws it once the project starts
+      it('does not happen when the load error on display is cleared to try loading again', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.lifecycleManager.onLoadError(requireError('boom'))
+        projectCtx.actions.error.clearError(projectCtx.coreData.diagnostics.error!.id)
+
+        expect(projectCtx.coreData.diagnostics.error).toBeNull()
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+      })
+
+      it('happens when the project is cleared', async () => {
+        const projectCtx = openProject('/projects/foo')
+
+        vi.spyOn(projectCtx.lifecycleManager, 'clearCurrentProject').mockResolvedValue(undefined)
+        projectCtx._apis.projectApi.closeActiveProject = vi.fn(() => Promise.resolve(undefined)) as any
+
+        await projectCtx.actions.project.clearCurrentProject()
+
+        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+      })
+
+      // `tap run` sets the testing type for a moment to pick a browser for it, then sets it back.
+      // Loading the testing type is what can resolve the error, and withdraws it then.
+      it('does not happen when the testing type is only set, without loading it', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        // @ts-expect-error - only the call that switches the testing type is needed
+        projectCtx.lifecycleManager._configManager = { setTestingType: vi.fn() }
+
+        projectCtx.reportLoadError('Your configFile is invalid')
+        projectCtx.lifecycleManager.setCurrentTestingType('component')
+        projectCtx.lifecycleManager.setCurrentTestingType('e2e')
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+      })
+
+      it('happens for a given kind only when the error is of that kind', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.reportLoadError('component testing is not set up', 'setup')
+        projectCtx.clearLoadError(['config'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+
+        projectCtx.clearLoadError(['config', 'setup'])
+
+        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+      })
+
+      it('reports the older error again when the newer one of another kind is withdrawn', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.reportLoadError('no browser was given', 'browser')
+        projectCtx.reportLoadError('Your configFile is invalid', 'config')
+        projectCtx.clearLoadError(['config', 'setup'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+        expect(recorded(projectCtx)).toHaveBeenLastCalledWith(expect.objectContaining({ loadError: 'no browser was given' }))
+
+        projectCtx.clearLoadError(['browser'])
+
+        expect(cleared(projectCtx)).toHaveBeenCalledTimes(1)
+      })
+
+      it('does not happen for a given kind when no error is recorded', () => {
+        const projectCtx = openProject('/projects/foo')
+
+        projectCtx.clearLoadError(['config'])
+
+        expect(cleared(projectCtx)).not.toHaveBeenCalled()
+      })
+
+      it('is not done in run mode', () => {
+        const runCtx = createTestDataContext('run')
+
+        runCtx.clearLoadError()
+
+        expect(cleared(runCtx)).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('#onWarning', () => {
+    it('prints a warning', () => {
+      ctx.onWarning(getError('CONFIG_FILE_REQUIRE_ERROR', '/project/cypress.config.js', new Error('careful')))
+
+      expect(printed()).toContain('careful')
+    })
+
+    it('prints a repeat of a warning already on display only once', () => {
+      const warning = requireError('careful')
+
+      ctx.onWarning(warning)
+      ctx.onWarning(warning)
+
+      expect(consoleError).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('in run mode', () => {
+    it('leaves error output to the run mode exit path', () => {
+      const runCtx = createTestDataContext('run')
+      const runModeExitEarly = vi.fn()
+
+      // @ts-expect-error - only the exit hook is needed
+      runCtx.lifecycleManager.runModeExitEarly = runModeExitEarly
+
+      runCtx.onError(requireError('boom'))
+
+      expect(runModeExitEarly).toHaveBeenCalledTimes(1)
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+  })
+})

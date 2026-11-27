@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import { withDefaults, h } from 'vue'
+import { h } from 'vue'
 import Button from '@cypress-design/vue-button'
 import { IconTechnologyDashboardFail, IconActionRefresh } from '@cypress-design/vue-icon'
 import StudioPanelContainer from './StudioPanelContainer.vue'
@@ -79,5 +79,6 @@ const props = withDefaults(defineProps<{
       'secondary-stroke-color': 'red-500',
     })
   },
+  learnMoreUrl: undefined,
 })
 </script>

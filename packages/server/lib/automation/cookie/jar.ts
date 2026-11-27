@@ -1,4 +1,4 @@
-import { Cookie, CookieJar as ToughCookieJar } from 'tough-cookie'
+import { Cookie, CookieJar as ToughCookieJar, canonicalDomain } from 'tough-cookie'
 import type { AutomationCookie } from './automation'
 
 interface SerializableAutomationCookie extends Omit<AutomationCookie, 'expiry'> {
@@ -54,11 +54,12 @@ export const automationCookieToToughCookie = (automationCookie: SerializableAuto
 
   return new Cookie({
     domain: automationCookie.domain || defaultDomain,
-    expires: expiry,
+    // tough-cookie reads maxAge ahead of expires and counts it from when this cookie is made,
+    // and the expiry already counts it from when the original was
+    ...(expiry ? { expires: expiry } : { maxAge: automationCookie.maxAge || 'Infinity' }),
     httpOnly: automationCookie.httpOnly,
     // we want to make sure the hostOnly property is respected when syncing with CDP/extension to prevent duplicates
     hostOnly: automationCookie.hostOnly || false,
-    maxAge: automationCookie.maxAge || 'Infinity',
     key: automationCookie.name,
     path: automationCookie.path || undefined,
     sameSite: automationCookie.sameSite === 'no_restriction' ? 'none' : automationCookie.sameSite,
@@ -74,6 +75,8 @@ export const automationCookieToToughCookie = (automationCookie: SerializableAuto
  */
 export class CookieJar {
   _cookieJar: ToughCookieJar
+  // how many times the jar has been emptied
+  generation = 0
 
   static parse (cookie: string) {
     const toughCookie = Cookie.parse(cookie)
@@ -93,9 +96,10 @@ export class CookieJar {
     this._cookieJar = new ToughCookieJar(undefined, { allowSpecialUseDomain: true })
   }
 
-  getCookies (url: string, sameSiteContext: SameSiteContext = undefined) {
-    // @ts-ignore
-    return this._cookieJar.getCookiesSync(url, { sameSiteContext })
+  // `secure` defaults to whether the url is https
+  getCookies (url: string, sameSiteContext: SameSiteContext = undefined, { http = true, secure }: { http?: boolean, secure?: boolean } = {}) {
+    // @ts-expect-error - tough-cookie supports sameSiteContext, but GetCookiesOptions does not declare it
+    return this._cookieJar.getCookiesSync(url, { sameSiteContext, http, secure })
   }
 
   getAllCookies () {
@@ -103,7 +107,7 @@ export class CookieJar {
 
     // have to use the internal memstore. looks like an async api, but
     // it's actually synchronous
-    // @ts-ignore
+    // @ts-expect-error - store is internal to tough-cookie and not on CookieJar's public type
     this._cookieJar.store.getAllCookies((_err, _cookies: Cookie[]) => {
       cookies = _cookies
     })
@@ -111,26 +115,34 @@ export class CookieJar {
     return cookies
   }
 
-  setCookie (cookie: string | Cookie, url: string, sameSiteContext: SameSiteContext) {
-    // @ts-ignore
-    return this._cookieJar.setCookieSync(cookie, url, { sameSiteContext })
+  setCookie (cookie: string | Cookie, url: string, sameSiteContext: SameSiteContext, { http = true }: { http?: boolean } = {}) {
+    // @ts-expect-error - tough-cookie supports sameSiteContext, but SetCookieOptions does not declare it
+    return this._cookieJar.setCookieSync(cookie, url, { sameSiteContext, http })
   }
 
-  removeCookie (cookieData: CookieData) {
-    // have to use the internal memstore. looks like an async api, but
-    // it's actually synchronous
-    // @ts-ignore
-    this._cookieJar.store.removeCookie(
-      cookieData.domain,
-      cookieData.path || '/',
-      cookieData.name,
-      () => {},
-    )
+  // without a path, removes the cookie at every path
+  removeCookie ({ name, domain: givenDomain, path }: CookieData) {
+    // the jar stores an IPv6 host without its brackets
+    const domain = canonicalDomain(givenDomain)
+    const paths = path ? [path] : this.getAllCookies()
+    .filter((cookie) => cookie.key === name && cookie.domain === domain)
+    .map((cookie) => cookie.path)
+
+    paths.forEach((cookiePath) => {
+      // have to use the internal memstore. looks like an async api, but
+      // it's actually synchronous
+      // @ts-expect-error - store is internal to tough-cookie and not on CookieJar's public type
+      this._cookieJar.store.removeCookie(domain, cookiePath, name, () => {})
+    })
   }
 
   removeAllCookies () {
+    this.generation++
     this._cookieJar.removeAllCookiesSync()
   }
 }
 
 export const cookieJar = new CookieJar()
+
+// set:cookie payloads whose cookie the sender has already written to the jar
+export const writtenToJar = new WeakSet<SerializableAutomationCookie>()

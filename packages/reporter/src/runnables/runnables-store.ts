@@ -4,12 +4,16 @@ import { action, observable, makeObservable } from 'mobx'
 import type { AgentProps } from '../agents/agent-model'
 import type { CommandProps } from '../commands/command-model'
 import type { HookProps } from '../hooks/hook-model'
-import appState, { AppState } from '../lib/app-state'
-import scroller, { Scroller } from '../lib/scroller'
+import type { AppState } from '../lib/app-state'
+import appState from '../lib/app-state'
+import type { Scroller } from '../lib/scroller'
+import scroller from '../lib/scroller'
 import type { RouteProps } from '../routes/route-model'
-import TestModel, { TestProps, UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
+import type { TestProps, UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
+import TestModel from '../test/test-model'
 import type RunnableModel from './runnable-model'
-import SuiteModel, { SuiteProps } from './suite-model'
+import type { SuiteProps } from './suite-model'
+import SuiteModel from './suite-model'
 
 const defaults = {
   hasSingleTest: false,
@@ -124,7 +128,7 @@ export class RunnablesStore {
     const parentTitles: string[] = []
 
     // Find the immediate parent suite by looking for the last suite at a lower level
-    let parentLevel = level - 1
+    const parentLevel = level - 1
 
     for (let i = this._runnablesQueue.length - 1; i >= 0; i--) {
       const runnable = this._runnablesQueue[i]
@@ -161,7 +165,7 @@ export class RunnablesStore {
     const suite = new SuiteModel(suiteProps, level)
 
     this._runnablesQueue.push(suite)
-    suite.children = this._createRunnableChildren(props, ++level)
+    suite.children = this._createRunnableChildren(props, level + 1)
 
     return suite
   }

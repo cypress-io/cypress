@@ -90,4 +90,4 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
 
 // Omit 'reset' so $Cy can implement IStability without conflicting with its own reset(test) method.
 // Stability reset is exposed on the cy instance as resetStability.
-export interface IStability extends Omit<ReturnType<typeof create>, 'reset'> {}
+export type IStability = Omit<ReturnType<typeof create>, 'reset'>

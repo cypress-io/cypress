@@ -44,6 +44,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
 
   if (fileServerUrl) {
     mw.req.headers['x-cypress-authorization'] = mw.getFileServerToken()
+    mw.req.isFileServerRequest = true
     requestOptions.url = fileServerUrl
   }
 

@@ -1,11 +1,13 @@
 import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 
-import { FileDetails, TestState } from '@packages/types'
+import type { FileDetails, TestState } from '@packages/types'
 import Attempt from '../attempts/attempt-model'
-import Err, { ErrProps } from '../errors/err-model'
+import type { ErrProps } from '../errors/err-model'
+import Err from '../errors/err-model'
 import type { HookProps } from '../hooks/hook-model'
-import Runnable, { RunnableProps } from '../runnables/runnable-model'
+import type { RunnableProps } from '../runnables/runnable-model'
+import Runnable from '../runnables/runnable-model'
 import type { CommandProps } from '../commands/command-model'
 import type { AgentProps } from '../agents/agent-model'
 import type { RouteProps } from '../routes/route-model'
@@ -55,7 +57,7 @@ export default class Test extends Runnable {
 
   attempts: Attempt[] = []
   _isOpen: boolean | null = null
-  isOpenWhenActive: Boolean | null = null
+  isOpenWhenActive: boolean | null = null
   _isFinished = false
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {

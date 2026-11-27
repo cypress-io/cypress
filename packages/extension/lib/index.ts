@@ -4,19 +4,11 @@ import { readFile } from 'fs/promises'
 export const getPathToExtension = (...args: string[]) => {
   args = [__dirname, '..', 'app-dist', 'v2'].concat(args)
 
-  return path.join.apply(path, args)
+  return path.join(...args)
 }
 
 export const getPathToV3Extension = (...args: string[]) => {
   return path.join(...[__dirname, '..', 'app-dist', 'v3', ...args])
-}
-
-export const getPathToTheme = () => {
-  return path.join(__dirname, '..', 'theme')
-}
-
-export const getPathToRoot = () => {
-  return path.join(__dirname, '..')
 }
 
 export const setHostAndPath = async (host: string, path: string) => {

@@ -7,6 +7,15 @@ const runChildProcess = async (entryPoint) => {
 
 const startCypress = async () => {
   try {
+    // The binary build replaces start-cypress.js with a single bundle of the main process and ships these modules
+    // as JavaScript, so it needs no tsx
+    if (require('fs').existsSync(require('path').join(__dirname, 'start-cypress.bundle.js'))) {
+      require('./lib/util/performance_benchmark').initializeStartTime()
+      await require('./lib/util/start_bundle').loadStartBundle(__dirname)
+
+      return
+    }
+
     const tsx = require('tsx/cjs/api')
 
     // @see https://tsx.hirok.io/dev-api/register-cjs
@@ -22,10 +31,9 @@ const startCypress = async () => {
 
     // No typescript requires before this point please
     // typescript isn't interpreted until the start cypress file
-    // Avoid putting much code here all together since this is prior to v8 snapshots.
     const { hookRequire } = require('./hook-require')
 
-    hookRequire({ forceTypeScript: false })
+    hookRequire()
 
     await require('./start-cypress')
   } catch (error) {

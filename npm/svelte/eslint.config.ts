@@ -1,8 +1,10 @@
-import { baseConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, regexpConfig } from '@packages/eslint-config'
 
 export default [
   { ignores: ['**/dist', '**/*.d.ts', '**/package-lock.json', '**/tsconfig.json', '**/cypress/fixtures'] },
   ...baseConfig,
+  ...regexpConfig,
+  ...jsonConfig,
   {
     files: ['**/*.{js,ts,jsx,tsx}'],
     languageOptions: {
@@ -10,7 +12,7 @@ export default [
     },
     rules: {
       'no-console': 'off',
-      'mocha/no-global-tests': 'off',
+      'mocha/no-top-level-tests': 'off',
     },
   },
 ]

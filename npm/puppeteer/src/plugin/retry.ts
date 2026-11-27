@@ -10,17 +10,19 @@ export async function retry<T> (functionToRetry: () => T, options?: { timeout?: 
   const timeout = options?.timeout !== undefined ? options?.timeout : 4000
   const delayBetweenTries = options?.delayBetweenTries !== undefined ? options?.delayBetweenTries : 200
 
-  const makeAttempt = async (timeElapsed = 0): Promise<T> => {
+  const startTime = Date.now()
+
+  const makeAttempt = async (): Promise<T> => {
     try {
       return await functionToRetry()
     } catch (err: any) {
-      await delay(delayBetweenTries)
-
-      if (timeElapsed >= timeout) {
+      if (Date.now() - startTime >= timeout) {
         throw pluginError(`Failed retrying after ${timeout}ms: ${err.message}`)
       }
 
-      return makeAttempt(timeElapsed + delayBetweenTries)
+      await delay(delayBetweenTries)
+
+      return makeAttempt()
     }
   }
 

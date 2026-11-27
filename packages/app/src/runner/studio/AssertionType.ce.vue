@@ -35,7 +35,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Ref, ref } from 'vue'
+import { ref } from 'vue'
+import type { Ref } from 'vue'
 import AssertionOptions from './AssertionOptions.ce.vue'
 import { IconChevronRightMedium } from '@cypress-design/vue-icon'
 import type { AssertionType } from './types'
@@ -86,7 +87,7 @@ const addAssertion = ({ type, name, value }) => {
 </script>
 
 <style scoped lang="scss">
-@import './assertions-style.scss';
+@use './assertions-style.scss';
 
 .assertion-type {
   cursor: default;
@@ -115,7 +116,7 @@ const addAssertion = ({ type, name, value }) => {
   &:focus {
     color: $indigo-300;
     outline: none;
-    @include box-shadow;
+    @include assertions-style.box-shadow;
   }
 
   &.single-assertion {

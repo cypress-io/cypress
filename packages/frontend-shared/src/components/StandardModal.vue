@@ -62,8 +62,6 @@ import {
   DialogDescription,
 } from '@headlessui/vue'
 
-import { defaultMessages } from '@cy/i18n'
-
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
 }>()
@@ -78,7 +76,7 @@ const props = withDefaults(defineProps<{
   class?: string | string[] | Record<string, any>
 }>(), {
   modelValue: false,
-  helpText: `${defaultMessages.links.needHelp}`,
+  helpText: 'Need help',
   noHelp: false,
   helpLink: 'https://on.cypress.io',
   class: undefined,

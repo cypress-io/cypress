@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import $dom from '../dom'
 import $elements from '../dom/elements'
-import type { Methods, PartialAssertionArgs } from './assertions/assert'
+import type { Callbacks as AssertCallbacks, Methods, PartialAssertionArgs } from './assertions/assert'
 import { assert, assertDom, accessors, selectors, wrap } from './assertions/assert'
 
 const maybeCastNumberToString = (num: number | string) => {
@@ -10,9 +10,8 @@ const maybeCastNumberToString = (num: number | string) => {
   return _.isFinite(num) ? `${num}` : num
 }
 
-interface Callbacks {
-  onInvalid: (method, obj) => void
-  onError: (err, method, obj, negated) => void
+interface Callbacks extends AssertCallbacks {
+  onInvalidArg: (method, description, arg) => void
 }
 
 const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks: Callbacks) => {
@@ -52,7 +51,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
     )
   }
 
-  chai.Assertion.addMethod('data', function (...args) {
+  chai.Assertion.addMethod('data', function (...args: [name: string, value?: unknown, message?: string]) {
     // @ts-expect-error - Custom assertions expect messages for failures
     assertDom(this, chaiUtils, callbacks, 'data')
 
@@ -62,8 +61,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
       a = a.not
     }
 
-    // @ts-expect-error - TODO: Fix this
-    return a.property.apply(a, args)
+    return a.property(...args)
   })
 
   chai.Assertion.addMethod('class', function (className: string) {
@@ -269,6 +267,13 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
         name,
       )
 
+      // jQuery's accessors double as setters when handed an object, which would
+      // mutate the subject instead of asserting on it. Other non-names read back
+      // a value that always satisfies the assertion.
+      if (!_.isString(name) && !_.isFinite(name)) {
+        callbacks.onInvalidArg(acc, description, chaiUtils.inspect(name))
+      }
+
       const actual = wrap(this)[acc](name)
 
       // when we only have 1 argument dont worry about val
@@ -293,13 +298,13 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
         let negatedMessage: string
 
         if (_.isUndefined(actual)) {
-          message = `expected \#{this} to have ${description} ${inspect(name)}`
+          message = `expected #{this} to have ${description} ${inspect(name)}`
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)}`
+          negatedMessage = `expected #{this} not to have ${description} ${inspect(name)}`
         } else {
-          message = `expected \#{this} to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          message = `expected #{this} to have ${description} ${inspect(name)} with the value #{exp}, but the value was #{act}`
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          negatedMessage = `expected #{this} not to have ${description} ${inspect(name)} with the value #{exp}, but the value was #{act}`
         }
 
         // only cast .attr() as a string

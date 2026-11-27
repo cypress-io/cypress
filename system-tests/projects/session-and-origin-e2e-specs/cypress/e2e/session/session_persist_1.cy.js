@@ -27,9 +27,7 @@ describe('creates global session', () => {
       }
     })
 
-    cy.getCookie('token').then((cookie) => {
-      expect(cookie.value).to.eq('1')
-    })
+    cy.getCookie('token').its('value').should('eq', '1')
   })
 
   it('restores global session', () => {
@@ -46,9 +44,7 @@ describe('creates global session', () => {
       }
     })
 
-    cy.getCookie('token').then((cookie) => {
-      expect(cookie.value).to.eq('1')
-    })
+    cy.getCookie('token').its('value').should('eq', '1')
   })
 
   it('creates spec session', () => {
@@ -65,9 +61,7 @@ describe('creates global session', () => {
       }
     })
 
-    cy.getCookie('token').then((cookie) => {
-      expect(cookie.value).to.eq('2')
-    })
+    cy.getCookie('token').its('value').should('eq', '2')
   })
 
   it('restores spec session', () => {
@@ -84,8 +78,6 @@ describe('creates global session', () => {
       }
     })
 
-    cy.getCookie('token').then((cookie) => {
-      expect(cookie.value).to.eq('2')
-    })
+    cy.getCookie('token').its('value').should('eq', '2')
   })
 })

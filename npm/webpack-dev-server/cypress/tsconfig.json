@@ -1,0 +1,9 @@
+{
+  // The support files pull in @packages/app and @packages/frontend-shared cypress
+  // helpers, which only type-check under frontend-shared's compiler options
+  "extends": "../../../packages/frontend-shared/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["**/*.ts", "../cypress.config.ts"]
+}

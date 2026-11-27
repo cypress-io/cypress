@@ -135,6 +135,13 @@ declare namespace CypressCommandLine {
      */
     global: boolean
     /**
+     * Start a session for `cypress tap` to drive, with the browser headless and
+     * the Cypress window hidden so neither takes focus.
+     * Requires `project` and `testingType`, and a browser from `browser` or
+     * `defaultBrowser` in the Cypress config. Not available with `global`.
+     */
+    headless: boolean
+    /**
      * Override default port
      */
     port: number
@@ -151,7 +158,7 @@ declare namespace CypressCommandLine {
     /**
      * Path to the config file to be used.
      *
-     * @default "cypress.config.{js,ts,mjs,cjs}"
+     * @default "cypress.config.{js,ts,mjs,cjs,mts,cts}"
      */
     configFile: string
     /**

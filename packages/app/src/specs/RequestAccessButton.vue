@@ -6,7 +6,7 @@
     data-cy="request-access-button"
     @click="requestAccess"
   >
-    {{ t("specPage.requestAccessButton") }}
+    Request access
   </Button>
   <Button
     v-else-if="projectConnectionStatus === 'ACCESS_REQUESTED'"
@@ -16,15 +16,15 @@
     class="btn-disabled"
     disabled
   >
-    {{ t("specPage.requestSentButton") }}
+    Request sent
   </Button>
 </template>
 
 <script setup lang="ts">
 import Button from '@cy/components/Button.vue'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
-import { RequestAccessButtonFragment, RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
-import { useI18n } from '@cy/i18n'
+import { RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
+import type { RequestAccessButtonFragment } from '../generated/graphql'
 import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 
@@ -58,8 +58,6 @@ mutation RequestAccessButton_RequestAccess( $projectId: String! ) {
   }
 }
 `
-
-const { t } = useI18n()
 
 const props = defineProps<{
   gql: RequestAccessButtonFragment

@@ -13,7 +13,7 @@ export async function getTestCounts (specs: SpecWithRelativeRoot[]) {
   const startTime = performance.now()
 
   const specCountPromises = specs.map((spec) => {
-    return new Promise<{path: string, isExample: boolean, testCounts: number}>((resolve, reject) => {
+    return new Promise<{ path: string, isExample: boolean, testCounts: number }>((resolve, reject) => {
       let testCounts = 0
 
       readline.createInterface({
@@ -21,7 +21,7 @@ export async function getTestCounts (specs: SpecWithRelativeRoot[]) {
       })
       .on('line', (line) => {
         // test for "it(" appearing at beginning of line or with space before
-        const isTest = /(^| )it\(/.test(line)
+        const isTest = /(?:^| )it\(/.test(line)
 
         if (isTest) {
           testCounts++

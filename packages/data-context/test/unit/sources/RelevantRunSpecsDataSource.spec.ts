@@ -1,8 +1,8 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import debugLib from 'debug'
 import { GraphQLInt, GraphQLString, print } from 'graphql'
 
-import { DataContext } from '../../../src'
+import type { DataContext } from '../../../src'
 import { createTestDataContext } from '../helper'
 import { RelevantRunSpecsDataSource } from '../../../src/sources'
 import { FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC } from './fixtures/graphqlFixtures'
@@ -18,7 +18,7 @@ describe('RelevantRunSpecsDataSource', () => {
   beforeEach(() => {
     ctx = createTestDataContext('open')
     dataSource = new RelevantRunSpecsDataSource(ctx)
-    jest.spyOn(ctx.project, 'projectId').mockResolvedValue('test123')
+    vi.spyOn(ctx.project, 'projectId').mockResolvedValue('test123')
   })
 
   describe('getRelevantRunSpecs()', () => {
@@ -29,8 +29,8 @@ describe('RelevantRunSpecsDataSource', () => {
     })
 
     it('returns the runs the cloud sends and sets the polling interval', async () => {
-      // @ts-expect-error
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC)
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT_ONE_RUNNING_RUN_ONE_SPEC)
 
       expect(dataSource.pollingInterval).toEqual(15)
 
@@ -44,11 +44,11 @@ describe('RelevantRunSpecsDataSource', () => {
 
   describe('polling', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
     })
 
     afterEach(() => {
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('polls and emits changes', async () => {
@@ -59,8 +59,8 @@ describe('RelevantRunSpecsDataSource', () => {
 
       const runId = testData.data.cloudNodesByIds[0].id
 
-      // @ts-expect-error
-      jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT)
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
+      vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue(FAKE_PROJECT)
 
       const query = `
         query Test {
@@ -106,7 +106,7 @@ describe('RelevantRunSpecsDataSource', () => {
 
         FAKE_PROJECT.data.cloudNodesByIds[0].totalInstanceCount++
         debug('**** tick after total instance count increase')
-        await jest.runOnlyPendingTimers()
+        await vi.runOnlyPendingTimers()
 
         const secondEmit = await subscriptionIterator.next()
 
@@ -115,7 +115,7 @@ describe('RelevantRunSpecsDataSource', () => {
 
         FAKE_PROJECT.data.cloudNodesByIds[0].scheduledToCompleteAt = (new Date()).toISOString()
         debug('**** tick after adding scheduledToCompleteAt')
-        await jest.runOnlyPendingTimers()
+        await vi.runOnlyPendingTimers()
 
         const thirdEmit = await subscriptionIterator.next()
 
@@ -124,7 +124,7 @@ describe('RelevantRunSpecsDataSource', () => {
 
         FAKE_PROJECT.data.cloudNodesByIds[0].totalTests++
         debug('**** tick after testCounts increase')
-        await jest.runOnlyPendingTimers()
+        await vi.runOnlyPendingTimers()
 
         const forthEmit = await subscriptionIterator.next()
 
@@ -133,7 +133,7 @@ describe('RelevantRunSpecsDataSource', () => {
 
         FAKE_PROJECT.data.cloudNodesByIds[0].status = 'FAILED'
         debug('**** tick after setting status Failed')
-        await jest.runOnlyPendingTimers()
+        await vi.runOnlyPendingTimers()
 
         const finalEmit = await subscriptionIterator.next()
 
@@ -166,8 +166,8 @@ describe('RelevantRunSpecsDataSource', () => {
     })
 
     it('should create query', async () => {
-      // @ts-expect-error
-      const gqlStub = jest.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({ data: {} })
+      // @ts-expect-error - `executeRemoteGraphQL` is generic, so its mocked result is typed `never`
+      const gqlStub = vi.spyOn(ctx.cloud, 'executeRemoteGraphQL').mockResolvedValue({ data: {} })
 
       const fields = {
         value: {
@@ -238,7 +238,7 @@ describe('RelevantRunSpecsDataSource', () => {
       await createGraphQL(query2, fields, async (source, args, context, info) => {
         iterator2 = dataSource.pollForSpecs('runId', info)
 
-        await jest.runOnlyPendingTimers()
+        await vi.runOnlyPendingTimers()
       })
 
       const secondExpected =

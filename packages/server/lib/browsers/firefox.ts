@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Bluebird from 'bluebird'
 import EventEmitter from 'events'
 import fs from 'fs-extra'
 import Debug from 'debug'
@@ -17,9 +18,10 @@ import mimeDb from 'mime-db'
 import type { BidiAutomation } from './bidi_automation'
 import type { Automation } from '../automation'
 import { getCtx } from '@packages/data-context'
-import { getError, CypressError } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
+import { getError } from '@packages/errors'
 import type { BrowserLaunchOpts, BrowserNewTabOpts, RunModeVideoApi } from '@packages/types'
-import type { RemoteConfig } from 'webdriver'
+import type { Client as WebDriverClient, RemoteConfig } from 'webdriver'
 import type { GeckodriverParameters } from 'geckodriver'
 import { WebDriver } from './webdriver'
 
@@ -105,6 +107,9 @@ const defaultPreferences = {
   'browser.tabs.warnOnCloseOtherTabs': false,
   // Do not warn when multiple tabs will be opened
   'browser.tabs.warnOnOpen': false,
+
+  // Do not offer to translate the page under test
+  'browser.translations.enable': false,
 
   // Disable the UI tour.
   'browser.uitour.enabled': false,
@@ -248,13 +253,6 @@ const defaultPreferences = {
 
   'network.proxy.type': 1,
 
-  // necessary for adding extensions
-  'devtools.debugger.remote-enabled': true,
-  // devtools.debugger.remote-port is set per-launch
-
-  'devtools.debugger.prompt-connection': false,
-  // "devtools.debugger.remote-websocket": true
-  'devtools.chrome.enabled': true,
   'app.update.auto': false,
   'app.update.enabled': false,
   'browser.displayedE10SNotice': 4,
@@ -370,9 +368,83 @@ toolbox {
   overflow: hidden !important;
   border: none !important;
 }
+.browserContainer {
+  border-top: none !important;
+}
 `
 
 let browserBidiClient: BidiAutomation | undefined
+
+const DELETE_FAILED_SESSION_TIMEOUT = 10000
+
+// the next launch reuses the profile directory, so it waits for a failed launch's session to finish closing
+let failedLaunchCleanup: Promise<void> = Promise.resolve()
+
+function deleteFailedSession (session: WebDriverClient, killBrowserAndDriver: () => unknown): Promise<void> {
+  return Bluebird.resolve(session.deleteSession())
+  .timeout(DELETE_FAILED_SESSION_TIMEOUT)
+  .then(() => undefined, async (deleteSessionErr) => {
+    debug('error deleting webdriver session after failed launch, killing firefox and geckodriver: %o', deleteSessionErr)
+
+    try {
+      killBrowserAndDriver()
+    } catch (killErr) {
+      debug('error killing firefox and geckodriver after failed launch: %o', killErr)
+    }
+
+    // a killed geckodriver can't remove its copy of the profile, which the next launch would encode into its own
+    const sessionProfile = session.capabilities['moz:profile']
+
+    if (typeof sessionProfile === 'string') {
+      // the killed processes can briefly keep handles open on Windows, failing the first attempt with EPERM or EBUSY
+      await fs.promises.rm(sessionProfile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }).catch((removeErr) => {
+        debug('error removing profile of failed webdriver session: %o', removeErr)
+      })
+    }
+  })
+}
+
+const profileDirsToRemoveOnExit = new Set<string>()
+let isExitListenerRegistered = false
+
+export function _removeProfileDirsOnExit () {
+  const dirs = [...profileDirsToRemoveOnExit]
+
+  profileDirsToRemoveOnExit.clear()
+
+  for (const dir of dirs) {
+    try {
+      // On Windows, Firefox's processes can still hold handles in the profile for a moment after
+      // they are killed, which fails the first attempt with EPERM or EBUSY, so retry before giving up.
+      // eslint-disable-next-line no-restricted-syntax -- 'exit' listeners cannot await
+      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+    } catch (err) {
+      // A leftover run profile can be removed by the profile cleaner when a later run starts
+      debug('could not remove firefox profile %s on exit: %o', dir, err)
+    }
+  }
+}
+
+function removeProfileDirOnExit (dir: string) {
+  if (!isExitListenerRegistered) {
+    process.once('exit', _removeProfileDirsOnExit)
+    isExitListenerRegistered = true
+  }
+
+  profileDirsToRemoveOnExit.add(dir)
+}
+
+// firefox-profile adds an 'exit' and a 'SIGINT' listener for every profile it creates. Cypress removes the
+// profile itself and GracefulExit handles SIGINT, so drop them rather than let them pile up on each relaunch.
+function removeFirefoxProfileProcessListeners (profile: FirefoxProfile) {
+  for (const [event, key] of [['exit', 'onExit'], ['SIGINT', 'onSigInt']] as const) {
+    const listener = Reflect.get(profile, key)
+
+    if (typeof listener === 'function') {
+      process.removeListener(event, listener)
+    }
+  }
+}
 
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
@@ -467,7 +539,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       '-new-instance',
       // if testing against older versions of Firefox to determine when a regression may have been introduced, uncomment the '-allow-downgrade' flag.
       // '-allow-downgrade',
-      '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
       '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
   })
@@ -492,7 +563,9 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
   const ps = options.proxyServer
 
   if (ps) {
-    let { hostname, port, protocol } = urlUtil.parse(ps)
+    const parsedProxy = urlUtil.parse(ps)
+    const { hostname, protocol } = parsedProxy
+    let { port } = parsedProxy
 
     if (port == null) {
       port = protocol === 'https:' ? '443' : '80'
@@ -529,6 +602,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
 
+  await failedLaunchCleanup
+
   // Delete the legacy profile directory if in open mode.
   // Cypress does this because profiles are sourced and created differently with geckodriver/webdriver.
   // the profile creation method before 13.15.0 will no longer work with geckodriver/webdriver
@@ -563,8 +638,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     destinationDirectory: profileDir,
   })
 
-  // make sure the profile that is ported into the session is destroyed when the browser is closed
-  profile.shouldDeleteOnExit(true)
+  removeFirefoxProfileProcessListeners(profile)
+  removeProfileDirOnExit(profileDir)
 
   debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
 
@@ -601,7 +676,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     ...launchOptions.env,
   }
 
-  debug('launching geckodriver with browser envs %o', BROWSER_ENVS)
+  debug('launching geckodriver with browser env names %o', Object.keys(BROWSER_ENVS))
 
   debug('launch in firefox', { url, args: launchOptions.args })
 
@@ -633,10 +708,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
   // since we no longer directly control the browser with webdriver, we need to make the browserInstance
   // a simulated wrapper that kills the process IDs that come back from webdriver
-  // @ts-expect-error
-  let browserInstanceWrapper: BrowserInstance = new EventEmitter()
+  // @ts-expect-error - a bare EventEmitter lacks BrowserInstance's kill until it is assigned below
+  const browserInstanceWrapper: BrowserInstance = new EventEmitter()
 
   browserInstanceWrapper.kill = () => undefined
+
+  let launchedSession: WebDriverClient | undefined
 
   try {
   /**
@@ -677,7 +754,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       },
     }
 
-    debugVerbose(`creating session with capabilities %s`, JSON.stringify(newSessionCapabilities.capabilities))
+    debugVerbose(`creating session with capabilities %s`, JSON.stringify(newSessionCapabilities.capabilities, (key, value) => {
+      // geckodriver's spawn env holds the whole process.env
+      return key === 'env' ? undefined : value
+    }))
 
     const WD = WebDriver.getWebDriverPackage()
 
@@ -686,6 +766,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     // to debug webdriver, set the DEBUG=cypress-verbose:server:browsers:webdriver (debugs a third-party patched package webdriver to enable console output)
     // @see ./firefox_automation.md
     const webdriverClient = await WD.newSession(newSessionCapabilities)
+
+    launchedSession = webdriverClient
 
     debugVerbose(`received capabilities %o`, webdriverClient.capabilities)
 
@@ -706,6 +788,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       debug('closing firefox')
 
       let browserReturnStatus = true
+      let browserKillError: unknown
 
       try {
         browserReturnStatus = process.kill(browserPID)
@@ -713,7 +796,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         if ((error as CypressError)?.code === 'ESRCH') {
           debugVerbose('browser process no longer exists. continuing...')
         } else {
-          throw error
+          browserKillError = error
         }
       }
 
@@ -729,6 +812,10 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         } else {
           throw error
         }
+      }
+
+      if (browserKillError) {
+        throw browserKillError
       }
 
       // needed for closing the browser when switching browsers in open mode to signal
@@ -759,6 +846,12 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     debug('setting up firefox utils')
     browserBidiClient = await firefoxUtil.setup({ automation, url, webdriverClient })
   } catch (err: unknown) {
+    // delete the session so it doesn't leak into the next launch
+    if (launchedSession) {
+      failedLaunchCleanup = deleteFailedSession(launchedSession, browserInstanceWrapper.kill)
+      await failedLaunchCleanup
+    }
+
     errors.throwErr('FIREFOX_COULD_NOT_CONNECT', err as Error)
   }
 

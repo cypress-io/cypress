@@ -1,21 +1,21 @@
 <template>
   <SettingsSection>
     <template #title>
-      {{ t('settingsPage.proxy.title') }}
+      Proxy settings
     </template>
     <template #description>
-      {{ t('settingsPage.proxy.description') }}
+      Cypress auto-detected the following proxy settings from your operating system.
     </template>
     <div class="rounded bg-gray-50 border border-gray-100 grid py-[18px] px-[20px] text-[14px] w-[364px] gap-[12px]">
       <div class="flex justify-between">
-        <span class="font-medium text-gray-800">{{ t('settingsPage.proxy.proxyServer') }}</span>
+        <span class="font-medium text-gray-800">Proxy server</span>
         <span
           class="text-gray-500"
           data-testid="proxy-server"
         >{{ props.gql.localSettings.preferences.proxyServer || '-' }}</span>
       </div>
       <div class="flex justify-between">
-        <span class="font-medium text-gray-800">{{ t('settingsPage.proxy.bypassList') }}</span>
+        <span class="font-medium text-gray-800">Proxy bypass list</span>
         <span
           class="text-gray-500"
           data-testid="bypass-list"
@@ -27,11 +27,8 @@
 
 <script lang="ts" setup>
 import SettingsSection from '../SettingsSection.vue'
-import { useI18n } from '@cy/i18n'
 import { gql } from '@urql/vue'
 import type { ProxySettingsFragment } from '../../generated/graphql'
-
-const { t } = useI18n()
 
 gql`
 fragment ProxySettings on Query {

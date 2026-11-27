@@ -1,25 +1,26 @@
 import React from 'react'
 import Tag from './tag'
+import type { TagType } from './tag'
 
 describe('Tag', () => {
-  const aliases = [
+  const aliases: TagType[] = [
     'route',
     'agent',
     'primitive',
     'dom',
   ]
 
-  const statuses = [
+  const statuses: TagType[] = [
     'successful-status',
     'warned-status',
     'failed-status',
   ]
 
-  const misc = [
+  const misc: TagType[] = [
     'count',
   ]
 
-  const MockCommandContainer = ({ children }) => (
+  const MockCommandContainer = ({ children }: { children: React.ReactNode }) => (
     <div style={{ backgroundColor: '#171926', minHeight: '20px' }}>
       {children}
     </div>

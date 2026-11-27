@@ -2,12 +2,13 @@ import _ from 'lodash'
 import os from 'os'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { Menu, shell } from 'electron'
+import type { MenuItemConstructorOptions } from 'electron'
 import * as appData from '../util/app_data'
 
 // hoist up options and allow calling menu.set({})
 // to override existing options or be called multiple
 // times to preserve existing options
-let options = {}
+const options = {}
 
 export = {
   set (opts) {
@@ -167,7 +168,7 @@ export = {
       })
     }
 
-    let devToolsSubmenu = [
+    const devToolsSubmenu: MenuItemConstructorOptions[] = [
       {
         label: 'Reload',
         accelerator: 'CmdOrCtrl+R',
@@ -202,28 +203,13 @@ export = {
 
     // @ts-expect-error TODO: Update so types sees this as valid
     if (options.withInternalDevTools) {
-      // @ts-expect-error TODO: Update so types sees this as valid
-      devToolsSubmenu = devToolsSubmenu.concat([
-        {
-          label: `GraphQL requests over Fetch (${process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET ? 'on' : 'off'})`,
-          click: (item, focusedWindow) => {
-            if (process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET) {
-              delete process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET
-            } else {
-              process.env.CYPRESS_INTERNAL_GQL_NO_SOCKET = '1'
-            }
-
-            this.set(opts)
-          },
+      devToolsSubmenu.push({
+        label: 'GraphiQL',
+        click () {
+          // @ts-expect-error TODO: Update so types sees this as valid
+          return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
         },
-        {
-          label: 'GraphiQL',
-          click () {
-            // @ts-expect-error TODO: Update so types sees this as valid
-            return shell.openExternal(`http://localhost:${options.getGraphQLPort()}/__launchpad/graphql`)
-          },
-        },
-      ])
+      })
     }
 
     template.push(

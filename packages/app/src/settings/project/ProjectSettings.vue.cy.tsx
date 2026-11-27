@@ -1,0 +1,19 @@
+import { ProjectSettingsFragmentDoc } from '../../generated/graphql-test'
+import ProjectSettings from './ProjectSettings.vue'
+
+describe('<ProjectSettings />', () => {
+  it('displays the experiments section', () => {
+    cy.mountFragment(ProjectSettingsFragmentDoc, {
+
+      render: (gqlVal) => {
+        return (
+          <div class="py-4 px-8 children:py-[24px]">
+            <ProjectSettings gql={gqlVal}/>
+          </div>
+        )
+      },
+    })
+
+    cy.findByText('Experiments').should('be.visible')
+  })
+})

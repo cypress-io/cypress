@@ -12,6 +12,7 @@
     :dismissal-scope="message.dismissal.scope"
   >
     <template #default="{ bannerInstanceId }">
+      <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown with html: false, so raw HTML in the body is escaped -->
       <div
         v-if="message.body"
         ref="bodyTarget"
@@ -19,6 +20,7 @@
         class="cloud-message-body mb-[24px]"
         v-html="bodyMarkdown"
       />
+      <!-- eslint-enable vue/no-v-html -->
       <div
         v-if="message.ctas.length"
         class="flex flex-row flex-wrap gap-x-[12px] gap-y-[8px] mt-[8px]"

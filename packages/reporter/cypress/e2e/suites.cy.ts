@@ -1,8 +1,8 @@
-import { MobxRunnerStore } from '@packages/app/src/store'
+import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 import { EventEmitter } from 'events'
-import { RootRunnable } from '../../src/runnables/runnables-store'
+import type { RootRunnable } from '../../src/runnables/runnables-store'
 
-const runnerStore = new MobxRunnerStore('e2e')
+const runnerStore = new MobxRunnerStore()
 
 runnerStore.setSpec({
   name: 'foo.js',
@@ -139,6 +139,48 @@ describe('suites', () => {
         .should('have.class', 'is-open')
         .find('.collapsible-content').eq(0)
         .should('be.visible')
+      })
+    })
+  })
+
+  describe('header', () => {
+    const suiteHeader = (title: string) => cy.contains('.collapsible-header', title)
+
+    it('updates the status icon when a test changes the suite state', () => {
+      suiteHeader('suite 2').find('.header-icon')
+      .should('have.class', 'icon-dark-secondary-jade-400')
+
+      cy.then(() => {
+        runner.emit('test:after:run', {
+          id: 'r9',
+          state: 'failed',
+          final: true,
+          err: {
+            name: 'AssertionError',
+            message: 'expected 3 to equal 4',
+            stack: 'AssertionError: expected 3 to equal 4\n    at Context.eval (cypress/e2e/math.cy.ts:12:21)',
+          },
+        }, false)
+      })
+
+      suiteHeader('suite 2').find('.header-icon')
+      .should('have.class', 'icon-dark-secondary-red-400')
+      .and('not.have.class', 'icon-dark-secondary-jade-400')
+    })
+
+    it('flips the arrow when the suite collapses and expands', () => {
+      suiteHeader('suite 1').find('.header-collapsible-indicator')
+      .invoke('prop', 'innerHTML')
+      .then((expandedArrow) => {
+        cy.contains('suite 1').click()
+
+        suiteHeader('suite 1').find('.header-collapsible-indicator')
+        .should('not.have.prop', 'innerHTML', expandedArrow)
+
+        cy.contains('suite 1').click()
+
+        suiteHeader('suite 1').find('.header-collapsible-indicator')
+        .should('have.prop', 'innerHTML', expandedArrow)
       })
     })
   })

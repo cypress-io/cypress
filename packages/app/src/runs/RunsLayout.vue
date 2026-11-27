@@ -36,9 +36,7 @@
             v-if="sha === currentCommitInfo?.sha"
             data-cy="tag-checked-out"
             class="inline-flex items-center shrink-0 font-medium text-purple-400 align-middle border border-gray-100 rounded border-1 h-[16px] ml-[8px] px-[4px] text-[12px] leading-[16px]"
-          >
-            {{ t('runs.layout.checkedOut') }}
-          </span>
+          >Checked out</span>
         </div>
         <ul
           v-if="groupByCommit[sha].runs"
@@ -67,7 +65,7 @@
       @click="openLatest"
     >
       <IconTechnologyCypress class="h-[16px] w-[16px] mr-[8px]" />
-      {{ t('runs.layout.viewCloudRuns') }}
+      View runs in Cypress Cloud
     </Button>
   </div>
   <ul
@@ -89,16 +87,14 @@
 
 <script lang="ts" setup>
 import { compact, groupBy } from 'lodash'
-import { computed, h, FunctionalComponent } from 'vue'
-import { useI18n } from '@cy/i18n'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import RunCard from './RunCard.vue'
 import DebugCommitIcon from '../debug/DebugCommitIcon.vue'
 import Button from '@cypress-design/vue-button'
 import { IconTechnologyCypress } from '@cypress-design/vue-icon'
 import type { RunCardFragment } from '../generated/graphql'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
-
-const { t } = useI18n()
 
 const props = defineProps<{
   runs?: RunCardFragment[]
@@ -108,7 +104,11 @@ const props = defineProps<{
   currentCommitInfo?: { sha: string, message: string } | null
 }>()
 
-const openLatest = useExternalLink(props.latestRunUrl)
+const openExternalLink = useExternalLink(props.latestRunUrl)
+
+const openLatest = () => {
+  void openExternalLink()
+}
 
 const Dot: FunctionalComponent = () => {
   return h('span', { ariaHidden: 'true', class: 'px-[8px] text-gray-300' }, '•')
@@ -141,7 +141,7 @@ const groupByCommit = computed(() => {
     mapped[props.currentCommitInfo.sha] = props.currentCommitInfo
   }
 
-  const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {
+  const result = Object.keys(grouped).reduce<Record<string, { sha: string, message: string | undefined | null, runs: typeof props.runs }>>((acc, curr) => {
     acc[curr] = {
       sha: curr,
       message: grouped[curr][0].commitInfo?.summary,

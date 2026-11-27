@@ -25,10 +25,10 @@ export const RunnablesError = observer(({ error }: RunnablesErrorProps) => (
       {error.link &&
         <a href={error.link} target='_blank' rel='noopener noreferrer'>
           <QuestionMarkIcon />
-        </a>
-      }
+        </a>}
     </h2>
     {error.callout && <pre>{error.callout}</pre>}
+    {/* eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml -- markdown-it renders Cypress's own error messages, which embed HTML */}
     <div className='error-message' dangerouslySetInnerHTML={{ __html: md.render(error.message) }} />
   </div>
 ))

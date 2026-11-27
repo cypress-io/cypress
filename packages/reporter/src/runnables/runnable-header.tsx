@@ -1,8 +1,9 @@
 import { observer } from 'mobx-react'
-import React, { ReactElement } from 'react'
+import type { ReactElement } from 'react'
+import React from 'react'
 
 import type { StatsStore } from '../header/stats-store'
-import { RunnablesStore } from './runnables-store'
+import type { RunnablesStore } from './runnables-store'
 import { DebugDismiss } from '../header/DebugDismiss'
 import { Duration } from '../duration/duration'
 import { SpecFileName } from '../shared/SpecFileName'
@@ -21,7 +22,7 @@ const RunnableHeader: React.FC<RunnableHeaderProps> = observer(({ spec, statsSto
   if (spec.relative === '__all') {
     if (spec.specFilter) {
       return renderRunnableHeader(
-        <span><span>Specs matching "{spec.specFilter}"</span></span>,
+        <span><span>Specs matching &quot;{spec.specFilter}&quot;</span></span>,
       )
     }
 

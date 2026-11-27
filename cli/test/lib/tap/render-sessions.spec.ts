@@ -1,0 +1,80 @@
+import { describe, expect, it } from 'vitest'
+import stripAnsi from 'strip-ansi'
+
+import { renderSessionsHuman } from '../../../lib/tap/render/sessions'
+import type { TapSessionSummary } from '../../../lib/tap/commands/sessions'
+
+const render = (sessions: TapSessionSummary[]): string => stripAnsi(renderSessionsHuman(sessions))
+
+describe('lib/tap/render/sessions', () => {
+  it('renders a padded table; missing testing type and detached browser show a dash', () => {
+    const output = render([
+      { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true },
+      { pid: 222, projectRoot: '/projects/other', testingType: null, browserAttached: false, browserName: null, browserSupported: true },
+    ])
+
+    expect(output).toBe([
+      'SESSIONS (2)',
+      '  PID  PROJECT          TYPE  BROWSER',
+      '  111  /projects/app    e2e   Chrome',
+      '  222  /projects/other  —     —',
+    ].join('\n'))
+  })
+
+  // Every command but status refuses it, so it must not read as a session to pick
+  it('marks a project that stopped loading after the session started', () => {
+    const output = render([
+      { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true, loadError: 'Your configFile is invalid' },
+    ])
+
+    expect(output).toBe([
+      'SESSIONS (1)',
+      '  PID  PROJECT                         TYPE  BROWSER',
+      '  111  /projects/app (could not load)  e2e   Chrome',
+    ].join('\n'))
+  })
+
+  it('marks a session whose plugins process stopped after it started', () => {
+    const output = render([
+      { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true, pluginsError: 'The plugins process exited unexpectedly' },
+    ])
+
+    expect(output).toBe([
+      'SESSIONS (1)',
+      '  PID  PROJECT                          TYPE  BROWSER',
+      '  111  /projects/app (plugins stopped)  e2e   Chrome',
+    ].join('\n'))
+  })
+
+  // An attached browser whose page will not answer is the state every other
+  // command fails in, so the row has to say so rather than read as healthy.
+  it('marks an attached browser whose renderer is not answering', () => {
+    const output = render([
+      { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true, rendererResponsive: false },
+      { pid: 222, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: true, browserName: 'Chrome', browserSupported: true, rendererResponsive: true },
+    ])
+
+    expect(output).toBe([
+      'SESSIONS (2)',
+      '  PID  PROJECT        TYPE  BROWSER',
+      '  111  /projects/app  e2e   Chrome (not responding)',
+      '  222  /projects/app  e2e   Chrome',
+    ].join('\n'))
+  })
+
+  // Every way an open browser can be undrivable reads differently from a healthy
+  // one, and from each other, so the row says which.
+  it('marks a browser tap cannot drive, and one it has not attached to yet', () => {
+    const output = render([
+      { pid: 111, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: false, browserName: 'Firefox', browserSupported: false },
+      { pid: 222, projectRoot: '/projects/app', testingType: 'e2e', browserAttached: false, browserName: 'Chrome', browserSupported: true },
+    ])
+
+    expect(output).toBe([
+      'SESSIONS (2)',
+      '  PID  PROJECT        TYPE  BROWSER',
+      '  111  /projects/app  e2e   Firefox (unsupported)',
+      '  222  /projects/app  e2e   Chrome (not attached)',
+    ].join('\n'))
+  })
+})

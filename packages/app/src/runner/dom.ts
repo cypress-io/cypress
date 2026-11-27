@@ -5,7 +5,7 @@ export const INT32_MAX = 2147483647
 function getZIndex (el) {
   const value = getComputedStyle(el, null).getPropertyValue('z-index')
 
-  if (/^(auto|0)$/.test(value)) {
+  if (/^(?:auto|0)$/.test(value)) {
     return INT32_MAX
   }
 
@@ -13,7 +13,7 @@ function getZIndex (el) {
 }
 
 export function getOrCreateHelperDom ({ body, className, css, studioActive = false }) {
-  let containers = body.querySelectorAll(`.${className}`)
+  const containers = body.querySelectorAll(`.${className}`)
 
   if (containers.length > 0) {
     const shadowRoot = containers[0].shadowRoot

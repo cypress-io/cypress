@@ -1,7 +1,8 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import fs from 'fs-extra'
 import Fixtures from '@tooling/system-tests'
-import { detectFramework, detectLanguage, PkgJson, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, WIZARD_DEPENDENCY_WEBPACK } from '../src'
+import type { PkgJson } from '../src'
+import { detectFramework, detectLanguage, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, WIZARD_DEPENDENCY_WEBPACK } from '../src'
 import path from 'path'
 import solidJs, { solidDep } from './fixtures'
 import { fakeDepsInNodeModules, scaffoldMigrationProject } from './scaffolding'
@@ -59,7 +60,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('vue3-vite-ts-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [
-      { devDependency: 'vite', version: '5.0.0' },
+      { devDependency: 'vite', version: '8.0.0' },
       { dependency: 'vue', version: '3.0.0' },
     ])
 
@@ -85,7 +86,7 @@ describe('detectFramework', () => {
     })
   })
 
-  ;['20.1.0', '21.0.0'].forEach((v) => {
+  ;['21.0.0', '22.0.0'].forEach((v) => {
     it(`Angular CLI v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
 
@@ -100,7 +101,7 @@ describe('detectFramework', () => {
     })
   })
 
-  ;['5.0.0', '6.0.0'].forEach((v) => {
+  ;['8.0.0'].forEach((v) => {
     it(`Svelte and Vite v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('svelte-vite-unconfigured')
 
@@ -163,6 +164,15 @@ describe('detectLanguage', () => {
       expect(actual).toEqual('ts')
     })
 
+    it('with `cypress.config.cts` should return `ts`', async () => {
+      const projectRoot = await scaffoldMigrationProject('config-with-ts')
+
+      fs.moveSync(path.join(projectRoot, 'cypress.config.ts'), path.join(projectRoot, 'cypress.config.cts'))
+      const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
+
+      expect(actual).toEqual('ts')
+    })
+
     it('with `cypress.config.js` should return `js`', async () => {
       const projectRoot = await scaffoldMigrationProject('config-with-js')
       const actual = detectLanguage({ projectRoot, pkgJson: {} as PkgJson })
@@ -193,7 +203,7 @@ describe('detectLanguage', () => {
 
       await fs.rm(path.join(projectRoot, 'cypress.config.ts'))
 
-      ;['ts', 'mts'].forEach((extension) => {
+      ;['ts', 'mts', 'cts', 'TS', 'MTS', 'CTS'].forEach((extension) => {
         const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
 
         expect(actual).toEqual('ts')
@@ -205,7 +215,19 @@ describe('detectLanguage', () => {
 
       await fs.rm(path.join(projectRoot, 'cypress.config.js'))
 
-      ;['js', 'cjs', 'mjs'].forEach((extension) => {
+      ;['js', 'cjs', 'mjs', 'ts.js', 'JS'].forEach((extension) => {
+        const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
+
+        expect(actual).toEqual('js')
+      })
+    })
+
+    it('falls back to the project when a custom config file extension only ends in ts', async () => {
+      const projectRoot = await scaffoldMigrationProject('config-with-js')
+
+      await fs.rm(path.join(projectRoot, 'cypress.config.js'))
+
+      ;['mmts', 'xts', 'cypress-ts'].forEach((extension) => {
         const actual = detectLanguage({ projectRoot, customConfigFile: `custom_config/cypress.config-custom.${extension}`, pkgJson: {} as PkgJson })
 
         expect(actual).toEqual('js')

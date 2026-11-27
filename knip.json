@@ -7,10 +7,8 @@
         "scripts/after-pack-hook.js",
         "scripts/after-sign-hook.js",
         "scripts/gulp/tasks/gulpGraphql.ts",
-        "scripts/add-install-comment.js",
-        "scripts/semantic-commits/get-binary-release-data.js",
-        "scripts/binary/binary-entry-point-source.js",
-        "scripts/binary/binary-byte-node-entry-point-source.js"
+        "scripts/add-install-comment.mts",
+        "scripts/semantic-commits/get-binary-release-data.js"
       ],
       "ignoreDependencies": [
         "@electron/fuses",
@@ -29,19 +27,19 @@
         "@octokit/auth-app",
         "@octokit/core",
         "@percy/cli",
-        "bytenode",
         "chai-as-promised",
-        "detect-port",
         "mobx",
         "mocha-banner",
         "mocha-junit-reporter",
         "mocha-multi-reporters",
         "mock-fs",
+        "node-gyp",
         "playwright-webkit",
         "proxyquire",
         "react-dom",
         "semantic-release-monorepo",
         "shelljs",
+        "sinon-chai",
         "snap-shot-it",
         "tar",
         "term-to-html",
@@ -69,6 +67,11 @@
       "ignoreDependencies": [
         "buffer",
         "process"
+      ]
+    },
+    "packages/agent-info": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
       ]
     },
     "packages/app": {
@@ -116,7 +119,6 @@
         "lib/modes/**/*.ts",
         "lib/browsers/**/*.ts",
         "lib/capture.ts",
-        "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
         "lib/network-runtime.ts",
         "lib/privileged-commands/privileged-channel.js",
@@ -158,13 +160,16 @@
         "*.{ts,tsx,js,jsx,mjs}"
       ],
       "ignoreDependencies": [
-        "@graphql-typed-document-node/core"
+        "@graphql-typed-document-node/core",
+        "react",
+        "react-dom"
       ]
     },
     "packages/example": {
       "entry": [
         "gulpfile.js",
-        "lib/example.d.ts"
+        "lib/example.ts",
+        "bin/convert.ts"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
@@ -189,9 +194,6 @@
     "packages/ts": {
       "project": [
         "*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "typescript-cached-transpile"
       ]
     },
     "packages/extension": {
@@ -207,20 +209,15 @@
     },
     "packages/web-config": {
       "entry": [
-        "webpack.config.base.ts",
-        "node-register.js"
+        "webpack.config.base.ts"
       ],
       "project": [
         "**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
-        "@babel/helper-define-map",
-        "@babel/plugin-transform-object-rest-spread",
         "@svgr/webpack",
         "assert",
-        "browser-resolve",
-        "webpack-cli",
         "buffer",
         "process",
         "url"
@@ -257,8 +254,8 @@
       "entry": [
         "src/main.ts",
         "src/cypress/commands.ts",
-        "cypress/plugins/server.js",
-        "cypress/plugins/index.js",
+        "cypress/plugins/server.ts",
+        "cypress/plugins/index.ts",
         "cypress.config.ts",
         "cypress/**/*.{ts,tsx,js,jsx}"
       ],
@@ -287,6 +284,14 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ]
     },
+    "packages/cypress-sessions": {
+      "entry": [
+        "lib/generated/**/*.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/net-stubbing": {
       "entry": [
         "lib/server/index.ts"
@@ -309,11 +314,13 @@
     },
     "packages/data-context": {
       "entry": [
+        "scripts/**/*.{ts,js}",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "graphql/**/*.{ts,tsx,js,jsx}",
+        "scripts/**/*.{ts,js}",
         "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ],
@@ -354,14 +361,6 @@
         "test/**/*.{ts,tsx,js,jsx}"
       ]
     },
-    "packages/v8-snapshot-require": {
-      "entry": [
-        "src/constants.ts"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
     "packages/scaffold-config": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
@@ -376,6 +375,7 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
+        "@electron/get",
         "@electron/packager"
       ]
     },
@@ -391,15 +391,6 @@
         "engine.io",
         "engine.io-client",
         "flatted"
-      ]
-    },
-    "packages/packherd-require": {
-      "entry": [
-        "src/sourcemap-support.ts",
-        "src/transpile-ts.ts"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
       ]
     },
     "packages/stderr-filtering": {
@@ -418,6 +409,11 @@
       ]
     },
     "packages/eslint-config": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/vitest-setup": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
       ]
@@ -446,28 +442,11 @@
         "lib/**/*.{ts,tsx,js,jsx}"
       ]
     },
-    "packages/rewriter": {
-      "entry": [
-        "lib/threads/worker.ts"
-      ],
-      "project": [
-        "lib/**/*.{ts,tsx,js,jsx}",
-        "*.{ts,tsx,js,jsx}"
-      ]
-    },
     "packages/*": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "lib/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
-      ]
-    },
-    "npm/eslint-plugin-dev": {
-      "entry": [
-        "lib/custom-rules/**/*.js"
-      ],
-      "project": [
-        "lib/**/*.{ts,tsx,js,jsx}"
       ]
     },
     "npm/webpack-dev-server": {
@@ -505,7 +484,7 @@
     "npm/webpack-batteries-included-preprocessor": {
       "entry": [
         "index.ts",
-        "test/**/*.{ts,tsx,js,jsx,coffee,mjs,mts}"
+        "test/**/*.{ts,tsx,js,jsx,mjs,mts}"
       ],
       "project": [
         "**/*.{ts,tsx,js,jsx}",
@@ -538,7 +517,8 @@
     },
     "npm/vite-dev-server": {
       "entry": [
-        "cypress/e2e/**/*.{ts,tsx,js,jsx}"
+        "cypress/e2e/**/*.{ts,tsx,js,jsx}",
+        "cypress/support/e2e.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
@@ -564,9 +544,6 @@
     "npm/svelte": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "jiti"
       ]
     },
     "npm/react": {
@@ -637,44 +614,6 @@
         "*.{ts,tsx,js,jsx}"
       ]
     },
-    "tooling/v8-snapshot": {
-      "entry": [
-        "src/v8-snapshot.ts",
-        "src/setup/index.ts",
-        "src/generator/blueprint.ts",
-        "src/blueprint/**/*.js",
-        "src/doctor/process-script.worker.ts"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
-      ],
-      "ignoreDependencies": [
-        "cpr",
-        "stealthy-require",
-        "tslib"
-      ]
-    },
-    "tooling/electron-mksnapshot": {
-      "entry": [
-        "src/mksnapshot-bin.ts"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
-    "tooling/packherd": {
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
-      ]
-    },
-    "tooling/*": {
-      "project": [
-        "src/**/*.{ts,tsx,js,jsx}",
-        "lib/**/*.{ts,tsx,js,jsx}",
-        "scripts/**/*.{ts,js}",
-        "*.{ts,tsx,js,jsx}"
-      ]
-    },
     "system-tests": {
       "entry": [
         "test/**/*.{ts,js}",
@@ -730,11 +669,8 @@
     "packages/frontend-shared/src/utils/isRunMode.ts",
     "packages/frontend-shared/src/utils/isWindows.ts",
     "packages/frontend-shared/src/utils/time.ts",
-    "packages/example/bin/convert.js",
     "packages/extension/app/v3/content.ts",
     "packages/extension/app/v3/service-worker.ts",
-    "npm/eslint-plugin-dev/lib/scripts/lint-pre-push.js",
-    "npm/eslint-plugin-dev/lib/scripts/lint-staged.js",
     "**/*.gen.ts",
     "**/*.gen.js",
     "**/project-fixtures/**",
@@ -746,7 +682,6 @@
     "@types/*",
     "eslint-*",
     "prettier",
-    "chai",
     "sinon",
     "cypress",
     "@cypress/*",
@@ -759,10 +694,11 @@
     "@vue/compiler-dom",
     "@vue/compiler-sfc",
     "edgedriver",
-    "react-15.6.1",
     "react-16.0.0",
-    "react-dom-15.6.1",
+    "react-19.1.1",
     "react-dom-16.0.0",
+    "react-dom-19.1.1",
+    "scheduler-0.26.0",
     "text-mask-addons",
     "vanilla-text-mask",
     "zone.js"
@@ -779,8 +715,10 @@
     "pgrep",
     "rm",
     "tar",
+    "tput",
     "tslint",
-    "wc"
+    "wc",
+    "Xvfb"
   ],
   "rules": {
     "binaries": "error",
@@ -797,6 +735,29 @@
     "unresolved": "off"
   },
   "ignoreIssues": {
+    "cli/lib/cypress-sessions/index.ts": [
+      "types"
+    ],
+    "cli/lib/cypress-sessions/record.ts": [
+      "types"
+    ],
+    "cli/lib/tap/contract.ts": [
+      "exports",
+      "types"
+    ],
+    "cli/lib/tap/tap-connection.ts": [
+      "exports",
+      "types"
+    ],
+    "cli/lib/tap/types.ts": [
+      "types"
+    ],
+    "packages/cypress-sessions/lib/contracts/command.ts": [
+      "types"
+    ],
+    "packages/server/lib/cypress-sessions.ts": [
+      "types"
+    ],
     "cli/types/cy-blob-util.d.ts": [
       "exports"
     ],
@@ -841,9 +802,6 @@
     "packages/network-interception/lib/exchange/network-exchange.ts": [
       "types"
     ],
-    "packages/network-interception/lib/core/route-matching.ts": [
-      "duplicates"
-    ],
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
       "exports"
     ],
@@ -853,6 +811,21 @@
     ],
     "packages/app/src/prompt/prompt-app-types.ts": [
       "types"
+    ],
+    "packages/app/src/tap/commands/pin.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/run-state.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/test-state.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/contract.ts": [
+      "types"
+    ],
+    "packages/app/src/tap/commands/definition.ts": [
+      "exports"
     ],
     "packages/app/src/studio/studio-app-types.ts": [
       "types"
@@ -876,9 +849,6 @@
       "types"
     ],
     "packages/telemetry/src/node.ts": [
-      "exports"
-    ],
-    "packages/proxy/lib/http/util/ast-rewriter.ts": [
       "exports"
     ],
     "packages/errors/src/errTemplate.ts": [
@@ -935,6 +905,9 @@
     "packages/driver/src/cy/commands/querying/focused.ts": [
       "exports"
     ],
+    "packages/driver/src/cy/commands/querying/get_by_role.ts": [
+      "exports"
+    ],
     "packages/driver/src/cy/commands/querying/querying.ts": [
       "exports"
     ],
@@ -944,7 +917,7 @@
     "packages/driver/src/cy/commands/querying/within.ts": [
       "exports"
     ],
-    "npm/react/cypress/component/basic/use-render/my-component.jsx": [
+    "npm/react/cypress/component/basic/use-render/my-component.tsx": [
       "exports"
     ],
     "packages/driver/src/cypress/command.ts": [

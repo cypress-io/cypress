@@ -15,6 +15,6 @@
 
 <script lang="ts" setup>
 withDefaults(defineProps<{
-  expanded: boolean
+  expanded?: boolean
 }>(), { expanded: false })
 </script>

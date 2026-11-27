@@ -1,14 +1,85 @@
-import { vi, describe, it, beforeEach, expect } from 'vitest'
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import assert from 'assert'
 import hasha from 'hasha'
 import util from '../../lib/util'
 import logger from '../../lib/logger'
-import { Systeminformation } from 'systeminformation'
+import type { Systeminformation } from 'systeminformation'
+import path from 'path'
 
 describe('util', () => {
   beforeEach(() => {
     vi.unstubAllEnvs()
     vi.resetModules()
+  })
+
+  describe('.getApplicationDataFolder', () => {
+    beforeEach(() => {
+      vi.stubEnv('CYPRESS_CONFIG_ENV', undefined)
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', undefined)
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', undefined)
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', undefined)
+    })
+
+    it('keeps the default development folder without a workspace selector', () => {
+      expect(path.basename(util.getApplicationDataFolder())).toBe('development')
+    })
+
+    it.each([1, 2, 3, 4, 5])('uses an isolated development folder for workspace %s', (cloudWorkspaceNum) => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', String(cloudWorkspaceNum))
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe(`development-workspace-${cloudWorkspaceNum}`)
+    })
+
+    it('isolates the default development environment and preserves appended paths', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
+
+      const folder = util.getApplicationDataFolder('browsers', 'chrome')
+
+      expect(folder.endsWith(path.join('cy', 'development-workspace-4', 'browsers', 'chrome'))).toBe(true)
+    })
+
+    it.each(['0'])('uses default development storage for workspace selector %j', (workspace) => {
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', workspace)
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe('development')
+    })
+
+    it.each(['staging', 'production', 'test'])('keeps %s storage unchanged even with an invalid selector', (environment) => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', environment)
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', 'invalid')
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe(environment)
+    })
+
+    it('prefers CYPRESS_CONFIG_ENV for storage isolation', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'development')
+      vi.stubEnv('CYPRESS_CONFIG_ENV', 'production')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe('production')
+    })
+
+    it('isolates explicitly configured development storage', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
+      vi.stubEnv('CYPRESS_CONFIG_ENV', 'development')
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe('development-workspace-4')
+    })
+
+    it('places the workspace suffix before the e2e testing suffix', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '4')
+      vi.stubEnv('CYPRESS_INTERNAL_E2E_TESTING_SELF', '1')
+
+      expect(path.basename(util.getApplicationDataFolder())).toBe('development-workspace-4-e2e-test')
+    })
+
+    it('rejects an invalid development workspace selector', () => {
+      vi.stubEnv('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM', '7')
+
+      expect(() => util.getApplicationDataFolder()).toThrow('CYPRESS_INTERNAL_CLOUD_WORKSPACE_NUM must be an integer from 0 to 5')
+    })
   })
 
   describe('.isBrokenGtkDisplay', () => {
@@ -18,6 +89,14 @@ describe('util', () => {
       expect(util.isBrokenGtkDisplay(text)).toEqual(true)
       // and not for the other messages
       expect(util.isBrokenGtkDisplay('display was set incorrectly')).toEqual(false)
+    })
+  })
+
+  describe('.isBrokenGtkDisplay with a missing X server', () => {
+    it('detects the Electron missing X server message', () => {
+      const text = '[1234:0101/000000.000000:ERROR:ozone_platform_x11.cc(245)] Missing X server or $DISPLAY'
+
+      expect(util.isBrokenGtkDisplay(text)).toEqual(true)
     })
   })
 
@@ -152,7 +231,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -171,7 +250,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: false,
@@ -190,7 +269,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -211,7 +290,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: false,
@@ -233,7 +312,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             stdout: true,
@@ -257,7 +336,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             isatty: vi.fn(),
@@ -302,7 +381,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             isatty: vi.fn(),
@@ -335,6 +414,52 @@ describe('util', () => {
         FORCE_STDOUT_TTY: false,
         FORCE_STDERR_TTY: false,
       })
+    })
+  })
+
+  describe('.getTerminalSize', () => {
+    const setStream = (stream: NodeJS.WriteStream, isTTY: boolean, columns?: number, rows?: number) => {
+      vi.spyOn(stream, 'isTTY', 'get').mockReturnValue(isTTY)
+      vi.spyOn(stream, 'columns', 'get').mockReturnValue(columns as number)
+      vi.spyOn(stream, 'rows', 'get').mockReturnValue(rows as number)
+    }
+
+    beforeEach(() => {
+      for (const stream of [process.stdout, process.stderr]) {
+        for (const key of ['isTTY', 'columns', 'rows']) {
+          Object.defineProperty(stream, key, { configurable: true, get: () => undefined })
+        }
+      }
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      for (const stream of [process.stdout, process.stderr]) {
+        for (const key of ['isTTY', 'columns', 'rows']) {
+          delete (stream as any)[key]
+        }
+      }
+    })
+
+    it('forwards the stdout terminal size', () => {
+      setStream(process.stdout, true, 133, 41)
+      setStream(process.stderr, true, 90, 30)
+
+      expect(util.getTerminalSize()).toEqual({ FORCE_TTY_COLUMNS: '133', FORCE_TTY_ROWS: '41' })
+    })
+
+    it('forwards the stderr terminal size when stdout is not a terminal', () => {
+      setStream(process.stdout, false)
+      setStream(process.stderr, true, 90, 30)
+
+      expect(util.getTerminalSize()).toEqual({ FORCE_TTY_COLUMNS: '90', FORCE_TTY_ROWS: '30' })
+    })
+
+    it('forwards nothing when neither stream is a terminal', () => {
+      setStream(process.stdout, false)
+      setStream(process.stderr, false)
+
+      expect(util.getTerminalSize()).toEqual({})
     })
   })
 
@@ -393,6 +518,25 @@ describe('util', () => {
 
     it('is false with file path', () => {
       expect(util.isSemver('0/path/1.2.3/mypath/2.3')).toEqual(false)
+    })
+
+    it('is true with a wildcard last segment', () => {
+      expect(util.isSemver('1.2.*')).toEqual(true)
+      expect(util.isSemver('*')).toEqual(true)
+    })
+
+    it('is false with a wildcard before the last segment', () => {
+      expect(util.isSemver('1.*.3')).toEqual(false)
+    })
+
+    it('is false with more than 3 segments', () => {
+      expect(util.isSemver('1.2.3.4')).toEqual(false)
+    })
+
+    it('is false with a prefix or suffix', () => {
+      expect(util.isSemver('v1.2.3')).toEqual(false)
+      expect(util.isSemver('1.2.3-beta.1')).toEqual(false)
+      expect(util.isSemver('1.2.')).toEqual(false)
     })
   })
 
@@ -472,7 +616,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             platform: vi.fn(),
@@ -485,7 +629,7 @@ describe('util', () => {
         const actual = await importActual()
 
         return {
-          // @ts-expect-error
+          // @ts-expect-error - importActual returns unknown, which cannot be spread
           ...actual,
           default: {
             osInfo: vi.fn(),

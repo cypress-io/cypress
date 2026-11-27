@@ -16,6 +16,18 @@
         body, h5 {
           margin: 0;
         }
+
+        /* Styling the scrollbar forces classic, space-taking scrollbars in Chromium and WebKit, even where the OS default is overlay */
+        #scroll-to-visible-scrollbars::-webkit-scrollbar,
+        #scroll-into-view-visible-scrollbars::-webkit-scrollbar {
+          width: 15px;
+          height: 15px;
+        }
+
+        #scroll-to-visible-scrollbars::-webkit-scrollbar-thumb,
+        #scroll-into-view-visible-scrollbars::-webkit-scrollbar-thumb {
+          background: #888;
+        }
       </style>
 
       <button>button</button>
@@ -54,6 +66,13 @@
         </div>
       </div>
 
+      <div id="scroll-into-view-visible-scrollbars" style="height: 100px; width: 100px; overflow: scroll;">
+        <div style="width: 500px; height: 500px; position: relative;">
+          <div id="end-small" style="position: absolute; top: 490px; left: 490px; width: 10px; height: 10px;"></div>
+          <div id="end-large" style="position: absolute; top: 450px; left: 450px; width: 50px; height: 50px;"></div>
+        </div>
+      </div>
+
       <div id="scroll-to-vertical" style="height: 100px; width: 100px; overflow: auto;">
         <div style="height: 500px;">Vertical Scroll</div>
       </div>
@@ -64,6 +83,11 @@
 
       <div id="scroll-to-both" style="height: 100px; width: 100px; overflow: auto;">
         <div style="width: 500px; height: 500px">Both Scroll</div>
+      </div>
+
+      <!-- padding is narrower than the scrollbar, so the true range differs from one measured from CSS sizes on both axes -->
+      <div id="scroll-to-visible-scrollbars" style="height: 100px; width: 100px; padding: 5px; overflow: scroll;">
+        <div style="width: 500px; height: 500px">Visible Scrollbars</div>
       </div>
 
       <div id="nonscroll-becomes-scrollable">

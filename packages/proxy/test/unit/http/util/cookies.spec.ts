@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateSiteContext, getSameSiteContext, shouldAttachAndSetCookies } from '../../../../lib/http/util/cookies'
+import { calculateSiteContext, getSameSiteContext, shouldAttachAndSetCookies, stripCypressCookies } from '../../../../lib/http/util/cookies'
 
 describe('getSameSiteContext', () => {
   describe('calculates the same site context correctly for', () => {
@@ -257,5 +257,35 @@ describe('.calculateSiteContext', () => {
 
   it('calculates cross-site correctly for cross-origin / cross-site urls', () => {
     expect(calculateSiteContext(autUrl, 'https://staging.google2.com')).toEqual('cross-site')
+  })
+})
+
+describe('stripCypressCookies', () => {
+  it('returns undefined when the header only holds Cypress cookies', () => {
+    expect(stripCypressCookies('__cypress.unload=true; __cypress.initial=true')).toBeUndefined()
+  })
+
+  it('keeps the application\'s cookies', () => {
+    expect(stripCypressCookies('session_id=8f2c1e9a40b7; __cypress.unload=true; theme=dark')).toEqual('session_id=8f2c1e9a40b7; theme=dark')
+  })
+
+  it('removes Cypress cookies delimited without a space', () => {
+    expect(stripCypressCookies('session_id=8f2c1e9a40b7;__cypress.unload=true')).toEqual('session_id=8f2c1e9a40b7')
+  })
+
+  it('drops the empty pair a trailing delimiter leaves', () => {
+    expect(stripCypressCookies('session_id=8f2c1e9a40b7; __cypress.unload=true;')).toEqual('session_id=8f2c1e9a40b7')
+  })
+
+  it('leaves a header without Cypress cookies untouched', () => {
+    expect(stripCypressCookies('session_id=8f2c1e9a40b7;theme=dark')).toEqual('session_id=8f2c1e9a40b7;theme=dark')
+  })
+
+  it('does not strip a cookie whose value mentions a Cypress cookie', () => {
+    expect(stripCypressCookies('return_to=__cypress.unload')).toEqual('return_to=__cypress.unload')
+  })
+
+  it('returns undefined for a missing header', () => {
+    expect(stripCypressCookies(undefined)).toBeUndefined()
   })
 })

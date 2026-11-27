@@ -1,9 +1,11 @@
 import _ from 'lodash'
 import { isIP } from 'net'
-import { PassThrough, Readable } from 'stream'
+import type { Readable } from 'stream'
+import { PassThrough } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
+import { isRedirectStatus } from '@packages/network-interception'
 import { concatStream, httpUtils } from '@packages/network'
 import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
@@ -42,6 +44,23 @@ interface ResponseMiddlewareProps {
   incomingResHadEmptyBody: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
+  /**
+   * Set by the synthetic proxy codec when the CDP Fetch transport deliberately
+   * never read the response body (stream-shaped, e.g. SSE). Consumed by the
+   * network capture adapter so it doesn't record a skipped body as an empty one.
+   */
+  resBodySkipped?: boolean
+  /**
+   * Set by the synthetic proxy codec when the CDP Fetch transport captured a
+   * side-channel stream of the bytes the browser delivered for a
+   * stream-classified response. Consumed by the network capture adapter so
+   * Replay records those bytes instead of skipping the body. Not
+   * incomingResStream, because the two have disjoint lifetimes: the body
+   * middleware drains incomingResStream to completion BEFORE the pause is
+   * released (a never-ending stream there wedges the pipeline), while these
+   * bytes only begin to flow AFTER Fetch.continueResponse.
+   */
+  resCaptureStream?: Readable
 }
 
 export type ResponseMiddleware = HttpMiddleware<ResponseMiddlewareProps>
@@ -81,9 +100,7 @@ const zlibBrotliCompressOptions = {
   },
 }
 
-const SUPPORTED_CONTENT_ENCODINGS = ['gzip', 'br'] as const
-
-type SupportedContentEncoding = typeof SUPPORTED_CONTENT_ENCODINGS[number]
+type SupportedContentEncoding = 'gzip' | 'br'
 
 /**
  * Returns the content-encoding list in application order (first = applied first = innermost).
@@ -98,7 +115,8 @@ function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEnco
   const order: SupportedContentEncoding[] = []
 
   for (const part of raw.split(',')) {
-    const enc = part.trim()
+    const token = part.trim()
+    const enc = token === 'x-gzip' ? 'gzip' : token
 
     if ((enc === 'gzip' || enc === 'br') && !order.includes(enc)) {
       order.push(enc)
@@ -117,7 +135,7 @@ function setCookie (res: CypressOutgoingResponseLike, k: string, v: string, doma
   // `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
   // the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
   // Domain and let the cookie default to host-only. See #34143.
-  let opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
+  const opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
 
   if (!v) {
     v = ''
@@ -293,7 +311,6 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   const ctxDebug = this.debug
 
-  // @ts-expect-error
   this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
@@ -324,6 +341,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
       }
 
       headers[name.toLowerCase()] = [name, value]
+
+      return this
     }
   }
 
@@ -487,8 +506,6 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   return this.networkInterceptionCore.copyCookiesFromResponse(this)
 }
 
-const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
-
 // TODO: this shouldn't really even be necessary?
 const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'maybe:send:redirect:to:client', parentSpan: this.resMiddlewareSpan, isVerbose })
@@ -496,7 +513,7 @@ const MaybeSendRedirectToClient: ResponseMiddleware = async function () {
   const { statusCode, headers } = this.incomingRes
   const newUrl = headers['location']
 
-  const isRedirectNeeded = !REDIRECT_STATUS_CODES.includes(statusCode) || !newUrl
+  const isRedirectNeeded = !isRedirectStatus(statusCode) || !newUrl
 
   span?.setAttributes({
     isRedirectNeeded,
@@ -593,8 +610,10 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 
   span?.setAttributes({ hasServiceWorkerHeader: hasHeader })
 
-  // skip if we don't have the header or we're not in chromium
-  if (!hasHeader || this.getCurrentBrowser().family !== 'chromium') {
+  // skip if we don't have the header or we're not in chromium. On the browser
+  // network path the worker is instrumented over its CDP session instead, so the
+  // script keeps the origin's bytes (see getServiceWorkerInstrumentationExpression).
+  if (!hasHeader || this.getCurrentBrowser().family !== 'chromium' || this.useBrowserNetworkInterception) {
     span?.end()
 
     return this.next()

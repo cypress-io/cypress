@@ -1,20 +1,20 @@
 <template>
   <StandardModal
     model-value
-    :title="t('runs.connect.modal.autoProvision.title')"
+    title="Add your project ID to finish setup"
     help-link="https://on.cypress.io/what-is-a-project-id"
     @update:model-value="emit('close')"
   >
     <div class="w-[640px]">
       <p class="mt-[8px] mb-[16px] text-[16px] leading-[24px] text-gray-700">
-        {{ t('runs.connect.modal.autoProvision.body') }}
+        We couldn't update your config file automatically. Copy the project ID below and paste it into your configuration file.
         <OpenFileInIDE :file-path="props.configFilePath">
           <template #default="{ onClick }">
             <button
               class="text-indigo-500 underline hover:text-indigo-600 ml-[4px]"
               @click="onClick"
             >
-              {{ t('runs.connect.modal.autoProvision.openInIDE') }}
+              Open config file in your IDE
             </button>
           </template>
         </OpenFileInIDE>
@@ -36,7 +36,7 @@
         variant="outline"
         @click="emit('close')"
       >
-        {{ t('runs.connect.modal.autoProvision.close') }}
+        Close
       </Button>
     </template>
   </StandardModal>
@@ -48,10 +48,6 @@ import StandardModal from '@cy/components/StandardModal.vue'
 import Button from '@cy/components/Button.vue'
 import CopyButton from '../CopyButton.vue'
 import OpenFileInIDE from '../OpenFileInIDE.vue'
-import { useI18n } from '@cy/i18n'
-
-const { t } = useI18n()
-
 const emit = defineEmits<{
   (event: 'close'): void
 }>()

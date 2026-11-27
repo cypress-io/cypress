@@ -1,10 +1,9 @@
-/// <reference path="../support/e2e.ts" />
 import type { fixtureDirs } from '@tooling/system-tests'
 import dedent from 'dedent'
 
 type ProjectDirs = typeof fixtureDirs
 
-const WEBPACK_REACT: ProjectDirs[number][] = ['webpack5_wds5-react']
+const WEBPACK_REACT: ProjectDirs[number][] = ['webpack5_wds5-react', 'webpack5_wds6-react']
 
 // Add to this list to focus on a particular permutation
 const ONLY_PROJECTS: ProjectDirs[number][] = []
@@ -134,14 +133,14 @@ for (const project of WEBPACK_REACT) {
 
       // 4. recreate spec, with same name as removed spec
       cy.findByTestId('new-spec-button').click()
-      cy.findByRole('button', { name: 'Create new spec' }).should('be.visible').click()
+      cy.getByRole('button', { name: 'Create new spec' }).should('be.visible').click()
 
-      cy.findByRole('dialog').within(() => {
+      cy.getByRole('dialog', { native: false }).within(() => {
         cy.get('input').clear().type('src/App.cy.jsx')
         cy.contains('button', 'Create spec').click()
       })
 
-      cy.findByRole('dialog').within(() => {
+      cy.getByRole('dialog', { native: false }).within(() => {
         cy.contains('button', 'Okay, run the spec').click()
       })
 

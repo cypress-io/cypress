@@ -58,7 +58,7 @@ const eventCleanseMap = {
   start: () => 'match.date',
   end: () => 'match.date',
   timings: (arg: MochaLifecycleData): SanitizedMochaLifecycleData => {
-    let sanitizedLifecycleData: SanitizedMochaLifecycleData = {
+    const sanitizedLifecycleData: SanitizedMochaLifecycleData = {
       lifecycle: 'match.number',
     }
 
@@ -117,7 +117,7 @@ function removeUnusedKeysForTestSnapshot<T> (obj: T): T {
   }
 
   for (const [key, value] of Object.entries(obj)) {
-    // @ts-expect-error
+    // @ts-expect-error - obj is a generic T, which TypeScript will not let `in` take as its right operand
     if (key in obj) {
       const transform = eventCleanseMap[key]?.(value)
 

@@ -1,4 +1,3 @@
-import zlib from 'zlib'
 import debugModule from 'debug'
 import type {
   HttpHeaders,
@@ -7,6 +6,7 @@ import type {
   TransportCodecPort,
 } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
+import { isOriginBody } from './body-digest'
 import type {
   CdpFetchTransportRequest,
   CdpFetchTransportResponse,
@@ -74,13 +74,6 @@ function toResponseBody (body?: string | Buffer): string | undefined {
 const WIRE_LENGTH_HEADERS = new Set(['content-length', 'transfer-encoding'])
 const WIRE_ENCODING_HEADERS = new Set(['content-encoding', ...WIRE_LENGTH_HEADERS])
 
-const CONTENT_DECODERS: Record<string, (body: Buffer) => Buffer> = {
-  gzip: (body) => zlib.gunzipSync(body),
-  'x-gzip': (body) => zlib.gunzipSync(body),
-  br: (body) => zlib.brotliDecompressSync(body),
-  deflate: (body) => zlib.inflateSync(body),
-}
-
 function stripWireEncodingHeaders (headers?: HttpHeaders): HttpHeaders | undefined {
   if (!headers) {
     return undefined
@@ -95,61 +88,83 @@ function stripWireEncodingHeaders (headers?: HttpHeaders): HttpHeaders | undefin
   }, {})
 }
 
-function stripHeaderEntries (headers: CdpFetchTransportResponse['responseHeaders'], names: ReadonlySet<string>): CdpFetchTransportResponse['responseHeaders'] {
-  return headers?.filter(({ name }) => !names.has(name.toLowerCase()))
+function stripHeaderEntries (headers: Protocol.Fetch.HeaderEntry[], names: ReadonlySet<string>): Protocol.Fetch.HeaderEntry[] {
+  return headers.filter(({ name }) => !names.has(name.toLowerCase()))
 }
 
-// Fetch.fulfillRequest hands the body to the renderer as-is — content
-// decoders do not run for fulfilled responses. The pipeline may emit encoded
-// bodies (CompressBody re-encodes rewritten documents), so decode fulfilled
-// bodies back to identity and drop the encoding headers. If an encoding
-// cannot be decoded, keep the body/header pair intact rather than shipping a
-// body that lies about its encoding.
-function toIdentityResponse (transportResponse: CdpFetchTransportResponse): CdpFetchTransportResponse {
-  const headers = transportResponse.responseHeaders
-  const contentEncoding = headers?.find(({ name }) => name.toLowerCase() === 'content-encoding')?.value
-  const encodings = (contentEncoding ?? '')
-  .split(',')
-  .map((token) => token.trim().toLowerCase())
-  .filter((token) => token && token !== 'identity')
+function pickHeaderEntries (headers: Protocol.Fetch.HeaderEntry[], names: ReadonlySet<string>): Protocol.Fetch.HeaderEntry[] {
+  return headers.filter(({ name }) => names.has(name.toLowerCase()))
+}
 
-  if (!transportResponse.body || !encodings.length) {
-    debugVerbose('toIdentityResponse passthrough %s (no body or encodings)', transportResponse.url)
+function headerEntriesChanged (left: Protocol.Fetch.HeaderEntry[], right: Protocol.Fetch.HeaderEntry[]): boolean {
+  // Compare case-insensitively on name and order-insensitively overall — CDP
+  // pause events and the middleware view can fold the same headers back in a
+  // different order and casing without that being a meaningful change.
+  // Set-Cookie keeps its order: when two lines set the same cookie, the later
+  // one wins, so a handler that only reorders them changes the cookie stored.
+  const normalize = (entries: Protocol.Fetch.HeaderEntry[]) => {
+    const lines = entries.map(({ name, value }) => `${name.toLowerCase()}: ${value}`)
+    const isSetCookie = (line: string) => line.startsWith('set-cookie: ')
 
-    return {
-      ...transportResponse,
-      responseHeaders: stripHeaderEntries(headers, WIRE_ENCODING_HEADERS),
-    }
+    return [...lines.filter((line) => !isSetCookie(line)).sort(), ...lines.filter(isSetCookie)]
   }
 
-  let body = Buffer.from(transportResponse.body, 'base64')
+  const leftNorm = normalize(left)
+  const rightNorm = normalize(right)
 
-  try {
-    debugVerbose('toIdentityResponse decoding %s encodings %o', transportResponse.url, encodings)
-
-    // encodings are listed in the order applied — decode outermost first
-    for (let i = encodings.length - 1; i >= 0; i--) {
-      const decode = CONTENT_DECODERS[encodings[i]]
-
-      if (!decode) {
-        throw new Error(`no decoder for content-encoding ${encodings[i]}`)
-      }
-
-      body = decode(body)
-    }
-  } catch (err) {
-    debugVerbose('toIdentityResponse decode failed for %s, keeping encoded body: %s', transportResponse.url, (err as Error).message)
-
-    return transportResponse
+  if (leftNorm.length !== rightNorm.length) {
+    return true
   }
 
-  debugVerbose('toIdentityResponse decoded %s to %d byte(s)', transportResponse.url, body.length)
+  return leftNorm.some((entry, index) => entry !== rightNorm[index])
+}
 
-  return {
-    ...transportResponse,
-    body: body.toString('base64'),
-    responseHeaders: stripHeaderEntries(headers, WIRE_ENCODING_HEADERS),
+/**
+ * The origin's headers for fulfilling it with its decoded body:
+ * `Content-Encoding` (such as `gzip`), `Content-Length` and `Transfer-Encoding`
+ * are dropped, since they describe the wire body, not the one being sent.
+ */
+export function toUnchangedFulfilledHeaders (headers: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] {
+  return stripHeaderEntries(headers, WIRE_ENCODING_HEADERS)
+}
+
+/**
+ * Middleware headers describe the body the pipeline produced — including any
+ * re-encoding by CompressBody — so keep their content-encoding and only drop
+ * stale length headers. The pause-header fallback describes the wire body, not
+ * the decoded body we fulfill with, so its encoding headers are stripped too.
+ */
+function toFulfilledHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
+  if (middlewareHeaders) {
+    return stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
   }
+
+  return pauseHeaders ? stripHeaderEntries(pauseHeaders, WIRE_ENCODING_HEADERS) : undefined
+}
+
+/**
+ * The browser replays the origin's own wire body on continueResponse, so the
+ * pause's wire encoding headers still describe it and are carried over the
+ * middleware view, which only ever saw the decoded body. An unchanged set is
+ * omitted entirely so CDP keeps the browser's original headers rather than a
+ * lowercased, re-folded reconstruction — the same "don't override what you
+ * didn't touch" rule continueRequestHeaders applies at the request stage.
+ */
+function toContinuedHeaders (middlewareHeaders?: Protocol.Fetch.HeaderEntry[], pauseHeaders?: Protocol.Fetch.HeaderEntry[]): Protocol.Fetch.HeaderEntry[] | undefined {
+  if (!middlewareHeaders) {
+    return undefined
+  }
+
+  const continuedHeaders = [
+    ...stripHeaderEntries(middlewareHeaders, WIRE_ENCODING_HEADERS),
+    ...pickHeaderEntries(pauseHeaders ?? [], WIRE_ENCODING_HEADERS),
+  ]
+
+  if (!headerEntriesChanged(continuedHeaders, pauseHeaders ?? [])) {
+    return undefined
+  }
+
+  return continuedHeaders
 }
 
 function toNetworkHeaders (headers?: HttpHeaders): Protocol.Network.Headers {
@@ -176,6 +191,100 @@ function toRequestPostData (body?: string | Buffer): string | undefined {
   return typeof body === 'string' ? body : body.toString('utf8')
 }
 
+function toPausePostData (entries?: Protocol.Network.PostDataEntry[]): Buffer | undefined {
+  // Missing `bytes` means the browser never buffered the body (a streamed
+  // upload), not that the body is empty.
+  if (!entries?.length || entries.some(({ bytes }) => bytes === undefined)) {
+    return undefined
+  }
+
+  if (entries.length === 1) {
+    return Buffer.from(entries[0].bytes!, 'base64')
+  }
+
+  return Buffer.concat(entries.map(({ bytes }) => Buffer.from(bytes!, 'base64')))
+}
+
+function headerValueOf (entries: Protocol.Fetch.HeaderEntry[] | undefined, headerName: string): string | undefined {
+  const values = entries
+  ?.filter(({ name }) => name.toLowerCase() === headerName)
+  .map(({ value }) => value)
+
+  return values?.length ? values.join(', ') : undefined
+}
+
+// Headers that decide where and how Chrome follows a redirect. Only these are
+// compared, because the pipeline drops hop-by-hop headers such as Connection,
+// so a full comparison would flag every HTTP/1.1 redirect as changed.
+const REDIRECT_FOLLOW_HEADERS = ['location', 'referrer-policy']
+
+/**
+ * Fulfill only when continueResponse would leave the Network record out of
+ * sync with what the page received; continue everything else, since
+ * continueResponse preserves the wire semantics (extraInfo events, streaming,
+ * HTTP caching).
+ *
+ * continueResponse applies overrides to the renderer and records status and
+ * header overrides truthfully in Network.responseReceived — with one gap:
+ * mimeType and charset are derived from the WIRE content-type and are not
+ * recomputed for an override. Consumers of the record (e.g. Test Replay
+ * stylesheet handling keys off mimeType) would see the stale value. So when
+ * cy.intercept mutates either of these, the response takes
+ * Fetch.fulfillRequest:
+ *   - the body, which no longer matches the origin bytes
+ *   - the content-type, which mimeType and charset are derived from
+ *
+ * A redirect whose location or referrer-policy changed is fulfilled too. At a
+ * redirect pause, Chrome records overridden headers but follows the redirect
+ * as the origin sent it: to the origin's location, with the referrer policy
+ * the origin set. CDP cannot read a redirect's body, so it is fulfilled empty.
+ * A handler that removes the location therefore gets an empty body here, where
+ * the MITM path sends the origin's.
+ *
+ * A stream-shaped response (bodySkipped) whose content-type changed is
+ * continued instead: fulfilling needs the body, and its body was never read.
+ * Its Network record keeps the wire mimeType, which Test Replay then sees.
+ *
+ * Spy-only, status, and other header intercepts stay on continueResponse.
+ * If Chrome ever derives another Network.responseReceived field from a header
+ * without recomputing it for overrides, that header joins the fulfill list.
+ *
+ * The intercept pipeline always materializes a body on the response path, so
+ * the presence of a body cannot decide fulfill vs continue on its own.
+ */
+function encodePausedResponse (
+  { originalBodyDigest, ...pausedResponse }: CdpFetchTransportResponse,
+  response: CdpFetchHttpResponse,
+): CdpFetchTransportResponse {
+  const middlewareHeaders = toResponseHeaders(response.headers)
+  const bodyModified = response.body !== undefined && !isOriginBody(response.body, originalBodyDigest)
+  const middlewareContentType = headerValueOf(middlewareHeaders, 'content-type')
+  const contentTypeModified = middlewareContentType !== undefined
+    && middlewareContentType !== headerValueOf(pausedResponse.responseHeaders, 'content-type')
+
+  // A header the middleware removed counts as changed; middleware that
+  // reported no headers at all changed nothing.
+  const redirectModified = pausedResponse.redirectPause === true
+    && middlewareHeaders !== undefined
+    && REDIRECT_FOLLOW_HEADERS.some((headerName) => {
+      return headerValueOf(middlewareHeaders, headerName) !== headerValueOf(pausedResponse.responseHeaders, headerName)
+    })
+
+  // A skipped body was never read, so its placeholder cannot replace the stream.
+  // A taken body can't be continued, so it is fulfilled even when unchanged.
+  const fulfilled = pausedResponse.bodyTaken === true || bodyModified || (contentTypeModified && response.body !== undefined && !pausedResponse.bodySkipped) || redirectModified
+
+  return {
+    ...pausedResponse,
+    fulfilled,
+    responseCode: response.statusCode ?? pausedResponse.responseCode,
+    responseHeaders: fulfilled
+      ? toFulfilledHeaders(middlewareHeaders, pausedResponse.responseHeaders)
+      : toContinuedHeaders(middlewareHeaders, pausedResponse.responseHeaders),
+    ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
+  }
+}
+
 export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequest, CdpFetchTransportResponse> {
   const inFlightRequests = new Map<string, CdpFetchTransportRequest>()
   const inFlightResponses = new Map<string, CdpFetchTransportResponse>()
@@ -199,25 +308,19 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
     return request as CdpFetchTransportRequest & { requestId: string }
   }
 
-  const requireResponse = (id: string): CdpFetchTransportResponse => {
-    const response = inFlightResponses.get(id)
-
-    if (!response) {
-      throw new Error(`No CDP Fetch response pause found for ${id}. HttpIntercept middleware must call next() before returning a response.`)
-    }
-
-    return response
-  }
-
   return {
     decodeRequest (transportRequest: CdpFetchTransportRequest): HttpRequest {
       inFlightRequests.set(transportRequest.id, transportRequest)
+
+      transportRequest.pausePostDataBuffer = toPausePostData(transportRequest.postDataEntries)
 
       debugVerbose('decodeRequest %s %s %o', transportRequest.method, transportRequest.url, {
         id: transportRequest.id,
         requestId: transportRequest.requestId,
         headerNames: Object.keys(transportRequest.headers ?? {}),
-        hasPostData: transportRequest.postData !== undefined,
+        hasPostData: transportRequest.hasPostData,
+        postDataChars: transportRequest.postData?.length,
+        postDataBytes: transportRequest.pausePostDataBuffer?.length,
       })
 
       return {
@@ -225,7 +328,8 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         url: transportRequest.url,
         method: transportRequest.method,
         headers: transportRequest.headers,
-        body: transportRequest.postData,
+        body: transportRequest.pausePostDataBuffer ?? transportRequest.postData,
+        resourceType: transportRequest.resourceType,
       }
     },
 
@@ -250,9 +354,41 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         transportRequest.headers = toNetworkHeaders(httpRequest.headers)
       }
 
-      if (httpRequest.body !== undefined) {
+      // An untouched body comes back as that Buffer, or as net-stubbing's utf8
+      // view of it. The transport reads neither as unchanged, so writing either
+      // field below would upload U+FFFD in place of the browser's own bytes.
+      const pauseBody = transportRequest.pausePostDataBuffer
+      const bodyUnchanged = pauseBody !== undefined && (Buffer.isBuffer(httpRequest.body)
+        ? httpRequest.body.equals(pauseBody)
+        : httpRequest.body === pauseBody.toString('utf8'))
+
+      // postData alone is not enough: it is omitted for a body too big to inline.
+      const pauseCarriedBody = transportRequest.postData !== undefined || pauseBody !== undefined
+
+      // The net-stubbing pipeline normalizes every intercepted request to a
+      // string body, so a request the browser paused without one arrives back
+      // here as `''` — indistinguishable from a body a handler emptied. Sending
+      // that as postData makes Chrome attach `Content-Length: 0` to requests
+      // that never had a body (#24407). Only an empty body the pause itself
+      // carried is a real change worth forwarding.
+      if (!bodyUnchanged && httpRequest.body !== undefined && (httpRequest.body.length > 0 || pauseCarriedBody)) {
         transportRequest.postData = toRequestPostData(httpRequest.body)
+
+        // A Buffer body must reach the transport as bytes: the utf8 string
+        // view above is lossy for binary payloads, and Fetch.continueRequest
+        // transmits base64-encoded bytes.
+        if (Buffer.isBuffer(httpRequest.body)) {
+          transportRequest.postDataBuffer = httpRequest.body
+        }
       }
+
+      // Carries the request-stage route-match result to the transport, which
+      // stashes it on the response-pause deferred for shouldStreamBody.
+      if (httpRequest.hadMatchingRoutes !== undefined) {
+        transportRequest.hadMatchingRoutes = httpRequest.hadMatchingRoutes
+      }
+
+      transportRequest.responseTimeout = httpRequest.responseTimeout
 
       return transportRequest
     },
@@ -273,61 +409,40 @@ export function createCdpFetchCodec (): TransportCodecPort<CdpFetchTransportRequ
         bodyStream: transportResponse.bodyStream,
         headers: stripWireEncodingHeaders(toHttpHeaders(transportResponse.responseHeaders)),
         statusCode: transportResponse.responseCode,
+        statusMessage: transportResponse.responseStatusText,
+        ...(transportResponse.bodySkipped ? { bodySkipped: true } : {}),
+        ...(transportResponse.captureStream ? { captureStream: transportResponse.captureStream } : {}),
       }
     },
 
     encodeResponse (httpResponse: HttpResponse): CdpFetchTransportResponse {
       const response = httpResponse as CdpFetchHttpResponse
       const pausedResponse = inFlightResponses.get(httpResponse.id)
-
-      const fulfilled = response.body !== undefined
-      // Middleware headers describe the body the pipeline produced — including
-      // any re-encoding by CompressBody — so keep their content-encoding and
-      // only drop stale length headers. The pause-header fallback describes
-      // the wire body, not the decoded body we fulfill with, so its encoding
-      // headers are stripped too.
-      const fulfilledHeaders = (headers?: HttpHeaders, pauseHeaders?: CdpFetchTransportResponse['responseHeaders']) => {
-        const middlewareHeaders = toResponseHeaders(headers)
-
-        return middlewareHeaders
-          ? stripHeaderEntries(middlewareHeaders, WIRE_LENGTH_HEADERS)
-          : stripHeaderEntries(pauseHeaders, WIRE_ENCODING_HEADERS)
-      }
-      const transportResponse = pausedResponse ? {
-        ...pausedResponse,
-        fulfilled,
-        responseCode: response.statusCode ?? pausedResponse.responseCode,
-        responseHeaders: fulfilled
-          ? fulfilledHeaders(response.headers, pausedResponse.responseHeaders)
-          : pausedResponse.responseHeaders,
-        ...(fulfilled ? { body: toResponseBody(response.body) } : {}),
-      } : {
+      const transportResponse = pausedResponse ? encodePausedResponse(pausedResponse, response) : {
         // Middleware answered at the request stage, so no response pause exists —
         // rebuild the fulfill params (requestId/sessionId) from the stashed request pause.
         ...requireRequestPause(httpResponse.id),
         fulfilled: true,
         responseCode: response.statusCode ?? 200,
-        responseHeaders: fulfilledHeaders(response.headers),
+        responseHeaders: toFulfilledHeaders(toResponseHeaders(response.headers)),
         body: toResponseBody(response.body),
       }
 
       transportResponse.url = httpResponse.url
       inFlightResponses.delete(httpResponse.id)
 
-      const encoded = transportResponse.fulfilled ? toIdentityResponse(transportResponse) : transportResponse
-
       if (debugVerbose.enabled) {
         debugVerbose('encodeResponse %s %o', httpResponse.url, {
           id: httpResponse.id,
-          fulfilled,
-          statusCode: encoded.responseCode,
-          bodyBytes: encoded.body ? Buffer.from(encoded.body, 'base64').length : undefined,
-          headerNames: encoded.responseHeaders?.map(({ name }) => name),
+          fulfilled: transportResponse.fulfilled,
+          statusCode: transportResponse.responseCode,
+          bodyBytes: transportResponse.body ? Buffer.from(transportResponse.body, 'base64').length : undefined,
+          headerNames: transportResponse.responseHeaders?.map(({ name }) => name),
           usedPausedResponse: !!pausedResponse,
         })
       }
 
-      return encoded
+      return transportResponse
     },
 
     releaseRequest (id: string): void {

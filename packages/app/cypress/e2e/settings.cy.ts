@@ -121,7 +121,7 @@ describe('App: Settings', () => {
       cy.contains('Record key').should('exist')
       cy.findByTestId('sidebar-link-runs-page').click()
       cy.findByTestId('user-avatar-title').click()
-      cy.findByRole('button', { name: 'Log out' }).click()
+      cy.getByRole('button', { name: 'Log out' }).click()
 
       cy.withRetryableCtx((ctx, o) => {
         expect(ctx.actions.auth.logout).to.have.been.calledOnce
@@ -163,8 +163,8 @@ describe('App: Settings', () => {
       cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
-      cy.get('[data-cy="file-match-indicator"]').contains('19 matches')
-      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*.(js|ts|coffee)')
+      cy.get('[data-cy="file-match-indicator"]').contains('13 matches')
+      cy.get('[data-cy="spec-pattern"]').contains('tests/**/*.(js|ts)')
     })
 
     it('shows the Experiments section', () => {
@@ -202,20 +202,20 @@ describe('App: Settings', () => {
             href: 'https://on.cypress.io/after-spec',
           })
         })
-
-        cy.get('[data-cy="experiment-experimentalSourceRewriting"]').within(() => {
-          cy.validateExternalLink({
-            name: '#5273',
-            href: 'https://github.com/cypress-io/cypress/issues/5273',
-          })
-        })
       })
 
-      // makes sure all experiments have an i18n header and description available.
+      // An experiment without its own name and description falls back to its field name with no description.
       // @see https://github.com/cypress-io/cypress/issues/30126.
-      cy.get('[data-cy="settings-experiments"] [role="row"][data-cy^="experiment-"]').each((experimentRow) => {
-        cy.wrap(experimentRow[0]).get('[data-cy="experimentName"]').should('not.contain.text', 'settingsPage.')
-        cy.wrap(experimentRow[0]).get('[data-cy="experimentDescription"]').should('not.contain.text', 'settingsPage.')
+      cy.get('[data-cy="settings-experiments"] [role="row"][data-cy^="experiment-"]').each(($row) => {
+        const field = String($row.attr('data-cy')).slice('experiment-'.length)
+
+        cy.wrap($row).find('[data-cy="experimentName"]').invoke('text').then((name) => {
+          expect(name.trim(), `name for ${field}`).not.to.be.oneOf(['', field])
+        })
+
+        cy.wrap($row).find('[data-cy="experimentDescription"]').invoke('text').then((description) => {
+          expect(description.trim(), `description for ${field}`).not.to.be.empty
+        })
       })
     })
 
@@ -247,7 +247,7 @@ describe('App: Settings', () => {
 
       cy.get('[data-cy="config-code"]').within(() => {
         cy.get('[data-cy-config="config"]').contains('tests/_fixtures')
-        cy.get('[data-cy-config="config"]').contains('tests/**/*.(js|ts|coffee)')
+        cy.get('[data-cy-config="config"]').contains('tests/**/*.(js|ts)')
         cy.get('[data-cy-config="config"]').contains('tests/_support/spec_helper.js')
         cy.get('[data-cy-config="env"]').contains('REMOTE_DEBUGGING_PORT')
         cy.get('[data-cy-config="env"]').contains('INTERNAL_E2E_TESTING_SELF')
@@ -268,7 +268,7 @@ describe('App: Settings', () => {
 
       cy.visitApp('/settings')
       cy.findByText('Project settings').click()
-      cy.findByRole('button', { name: 'Edit' }).click()
+      cy.getByRole('button', { name: 'Edit' }).click()
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.file.openFile as SinonStub).lastCall.args[0]).to.eq(ctx.lifecycleManager.configFilePath)
       })
@@ -345,31 +345,8 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.wait(200)
+      cy.location('hash').should('include', '/settings')
       cy.get('[data-cy="Device settings"]').click()
-
-      cy.get('[data-cy="custom-editor"]').should('not.exist')
-    })
-
-    it('allows custom editor', () => {
-      cy.contains('Choose your editor...').click()
-      cy.contains('Custom').click()
-
-      // doing invoke instead of `type` since `type` enters keys on-by-one, triggering a mutation
-      // for each keystroke, making it hard to intercept **only** the final request, which I want to
-      // assert contains `/usr/local/bin/vim'
-      cy.findByPlaceholderText('/path/to/editor').clear().invoke('val', '/usr/local/bin/vim').trigger('input').trigger('change')
-      cy.withRetryableCtx((ctx) => {
-        expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('/usr/local/bin/vim')
-      })
-
-      // navigate away and come back
-      // preferred editor entered from input should have been persisted
-      cy.findByTestId('sidebar-link-settings-page').click()
-      cy.wait(100)
-      cy.get('[data-cy="Device settings"]').click()
-
-      cy.get('[data-cy="custom-editor"]').should('have.value', '/usr/local/bin/vim')
     })
 
     it('lists file browser as available editor', () => {
@@ -379,8 +356,6 @@ describe('App: Settings', () => {
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.localSettings.setPreferences as SinonStub).lastCall.args[0]).to.include('computer')
       })
-
-      cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
 
     it('handles null binary field in editor', () => {
@@ -395,10 +370,8 @@ describe('App: Settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       cy.findByTestId('sidebar-link-settings-page').click()
-      cy.wait(200)
+      cy.location('hash').should('include', '/settings')
       cy.get('[data-cy="Device settings"]').click()
-
-      cy.get('[data-cy="custom-editor"]').should('not.exist')
     })
   })
 
@@ -494,43 +467,32 @@ describe('App: Settings', () => {
         cy.contains('Notify me when a run completes').should('be.visible')
         cy.findByLabelText('Passed').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        // each preference is saved after a debounce
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['failed', 'passed'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Failed').should('be.visible').should('be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Canceled').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
 
         cy.findByLabelText('Errored').should('be.visible').should('not.be.checked').click()
 
-        // wait for debounce
-        cy.wait(200)
-
-        cy.withCtx((ctx) => {
+        cy.withRetryableCtx((ctx) => {
           expect(setPreferencesStub).to.have.been.calledWith(JSON.stringify({ notifyWhenRunCompletes: ['passed', 'cancelled', 'errored'] }), 'global')
           setPreferencesStub.resetHistory()
-        })
+        }, { retryDelay: 100, retryCount: 20 })
       })
 
       itSkipIfWindows('sends test notification', () => {
@@ -564,7 +526,7 @@ describe('App: Settings without cloud', () => {
     })
 
     cy.contains('button', 'Connect to Cypress Cloud').click()
-    cy.findByRole('dialog', { name: 'Continue in your browser' }).should('be.visible')
+    cy.getByRole('dialog', { name: 'Continue in your browser', native: false }).should('be.visible')
 
     cy.withCtx((ctx, o) => {
       // validate utmSource

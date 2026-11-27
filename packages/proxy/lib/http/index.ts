@@ -3,14 +3,15 @@ import chalk from 'chalk'
 import Debug from 'debug'
 import _ from 'lodash'
 import { errorUtils } from '@packages/errors'
-import { DeferredSourceMapCache } from '@packages/rewriter'
-import { telemetry, Span } from '@packages/telemetry'
+import type { Span } from '@packages/telemetry'
+import { telemetry } from '@packages/telemetry'
 import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
-import { createFetchOrigin } from '../adapters/http-codec'
+import { fetchOrigin } from '../adapters/http-codec'
 import { HttpBuffers } from './util/buffers'
-import { GetPreRequestCb, PendingRequest, PreRequests } from './util/prerequests'
+import type { GetPreRequestCb, PendingRequest } from './util/prerequests'
+import { PreRequests } from './util/prerequests'
 import { ServiceWorkerManager } from './util/service-worker-manager'
 
 import type EventEmitter from 'events'
@@ -26,13 +27,14 @@ import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
 import type { ForNetworkInterception, HttpResponse, InterceptMiddleware, NetworkInterceptionCore, TransportCodecPort } from '@packages/network-interception'
 import type { Readable } from 'stream'
-import type { Request, Response } from 'express'
+import type { Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 import type { Request as ServerRequest } from '@packages/server/lib/request'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
+import { serviceWorkerHeaderIsScript } from '@packages/network-interception'
 
 function getRandomColorFn () {
   return chalk.hex(`#${Number(
@@ -40,8 +42,12 @@ function getRandomColorFn () {
   ).toString(16).padStart(6, 'F').toUpperCase()}`)
 }
 
+// Pure predicate shared with should-stream-response-body.ts (packages/server/lib/browsers/cdp-protocol),
+// which does its own case-insensitive header-name lookup and needs only the
+// value check.
+
 export const hasServiceWorkerHeader = (headers: Record<string, string | string[] | undefined>) => {
-  return headers?.['service-worker'] === 'script' || headers?.['Service-Worker'] === 'script'
+  return serviceWorkerHeaderIsScript(headers?.['service-worker']) || serviceWorkerHeaderIsScript(headers?.['Service-Worker'])
 }
 
 export const isVerboseTelemetry = true
@@ -66,7 +72,7 @@ const createBrowserConnectionClosedError = () => {
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
-  Error
+  Error,
 }
 
 export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
@@ -89,7 +95,6 @@ export type HttpMiddlewareCtx<T> = {
   middleware: HttpMiddlewareStacks
   pendingRequest: PendingRequest | undefined
   getCookieJar: () => CookieJar
-  deferSourceMapRewrite: (opts: { js: string, url: string }) => string
   getPreRequest: (cb: GetPreRequestCb) => PendingRequest | undefined
   addPendingUrlWithoutPreRequest: (url: string) => void
   removePendingRequest: (pendingRequest: PendingRequest) => void
@@ -120,9 +125,17 @@ export type ServerCtx = Readonly<{
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  // Leaves service worker scripts unmodified when set, see
+  // getServiceWorkerInstrumentationExpression. Named to match the launch
+  // option (BrowserLaunchOpts.useBrowserNetworkInterception), not
+  // network-mode.ts's isBrowserNetworkMode() - same concept, but that name
+  // is already an established function/method elsewhere in this codebase
+  // (network-mode.ts, ServerBase), and a plain boolean field of the same
+  // name here would read as callable.
+  useBrowserNetworkInterception?: boolean
 }>
 
-const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
+const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<unknown>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
@@ -151,7 +164,7 @@ export type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<
   onlyRunMiddleware: (names: string[]) => void
 }>
 
-export function _runStage (type: HttpStages, ctx: any, onError: Function) {
+export function _runStage (type: HttpStages, ctx: any, onError: (error: Error) => unknown) {
   ctx.stage = HttpStages[type]
 
   const runMiddlewareStack = (): Promise<void> => {
@@ -206,7 +219,17 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
       function onClose () {
         if (!ctx.res.writableFinished) {
-          _onError(createBrowserConnectionClosedError())
+          const error: Error & { isForceNetworkError?: boolean } = createBrowserConnectionClosedError()
+
+          // forceNetworkError destroys the res itself, so this close is our own
+          // teardown rather than a browser cancel. Carry the tag forward or it
+          // is lost here — this handler runs after the requested error already
+          // set ctx.error, and replaces it.
+          if ((ctx.error as Error & { isForceNetworkError?: boolean } | undefined)?.isForceNetworkError) {
+            error.isForceNetworkError = true
+          }
+
+          _onError(error)
         }
       }
 
@@ -301,7 +324,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 }
 
 function getUniqueRequestId (requestId: string) {
-  const match = /^(.*)-retry-([\d]+)$/.exec(requestId)
+  const match = /^(.*)-retry-(\d+)$/.exec(requestId)
 
   if (match) {
     return `${match[1]}-retry-${Number(match[2]) + 1}`
@@ -314,7 +337,6 @@ export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
   shouldCorrelatePreRequests: () => boolean
-  deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
@@ -326,15 +348,15 @@ export class Http {
   request: ServerRequest
   socket: SocketBroadcaster
   serverBus: EventEmitter
-  renderedHTMLOrigins: {[key: string]: boolean} = {}
+  renderedHTMLOrigins: { [key: string]: boolean } = {}
   autUrl?: string
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
+  useBrowserNetworkInterception?: boolean
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
-    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request.rp)
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
@@ -348,6 +370,7 @@ export class Http {
     this.serverBus = opts.serverBus
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
+    this.useBrowserNetworkInterception = opts.useBrowserNetworkInterception
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -397,10 +420,21 @@ export class Http {
 
         await _runStage(HttpStages.IncomingRequest, ctx, onError)
 
-        // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
-        // In this case we don't want to run the response middleware and should just exit.
-        if (ctx.res.destroyed) {
-          const error = createBrowserConnectionClosedError()
+        // Skip the response middleware only when the browser canceled: destroyed before finishing.
+        // The synthetic response auto-destroys after end(), so a middleware that finished it
+        // (blocked-host 503, unload redirect) also reads as destroyed.
+        if (ctx.res.destroyed && !ctx.res.writableFinished) {
+          const error: Error & { isForceNetworkError?: boolean } = createBrowserConnectionClosedError()
+
+          // forceNetworkError destroys the res itself; carry its tag through
+          // so the CDP Fetch transport can map the rejection to
+          // Fetch.failRequest. Everything else about this path — the error
+          // stage re-run, the thrown type — is unchanged, so MITM behavior
+          // (where the destroyed socket already delivered the network error)
+          // is untouched.
+          if ((ctx.error as Error & { isForceNetworkError?: boolean } | undefined)?.isForceNetworkError) {
+            error.isForceNetworkError = true
+          }
 
           await onError(error)
 
@@ -426,11 +460,15 @@ export class Http {
             }
           } catch (err) {
             span?.end()
-            await onError(err as Error)
+
+            // A browser cancel aborts the exchange; whatever next() rejected with is a side effect of that.
+            const error = ctx.res.destroyed && !ctx.res.writableFinished ? createBrowserConnectionClosedError() : err as Error
+
+            await onError(error)
 
             // Re-throw so transports (e.g. CDP Fetch) fail the pause instead of
             // encoding a synthetic empty success body via decodeResponse.
-            throw err
+            throw error
           }
         }
 
@@ -496,12 +534,6 @@ export class Http {
 
         debugVerbose(`${colorFn!(`%s %s`)} %s ${formatter}`, req.method, debugUrl, chalk.grey(ctx.stage), ...args)
       },
-      deferSourceMapRewrite: (opts) => {
-        this.deferredSourceMapCache.defer({
-          resHeaders: ctx.incomingRes.headers,
-          ...opts,
-        })
-      },
       getRenderedHTMLOrigins: this.getRenderedHTMLOrigins,
       getAUTUrl: this.getAUTUrl,
       setAUTUrl: this.setAUTUrl,
@@ -528,6 +560,7 @@ export class Http {
       },
       protocolManager: this.protocolManager,
       getCurrentBrowser: this.getCurrentBrowser,
+      useBrowserNetworkInterception: this.useBrowserNetworkInterception,
     }
 
     return ctx
@@ -549,7 +582,7 @@ export class Http {
       return onError(new Error('Network interception is not configured for the proxy runtime.'))
     }
 
-    return this.networkInterception.handle(ctx, createFetchOrigin(ctx))
+    return this.networkInterception.handle(ctx, fetchOrigin)
     .catch((err) => {
       // The legacy pipeline may already have run error middleware for this ctx.
       if (ctx.error) {
@@ -570,20 +603,6 @@ export class Http {
 
   setAUTUrl = (url) => {
     this.autUrl = url
-  }
-
-  async handleSourceMapRequest (req: Request, res: Response) {
-    try {
-      const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
-
-      if (!sm) {
-        throw new Error('no sourcemap found')
-      }
-
-      res.json(sm)
-    } catch (err) {
-      res.status(500).json({ err })
-    }
   }
 
   reset (options: { resetBetweenSpecs: boolean }) {

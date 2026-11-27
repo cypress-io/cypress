@@ -1,5 +1,7 @@
 import { createPinia as _createPinia } from 'pinia'
 
+export * from './automation-status'
+
 export * from './specs-store'
 
 export * from './aut-store'

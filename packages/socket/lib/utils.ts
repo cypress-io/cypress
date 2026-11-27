@@ -1,5 +1,4 @@
 import * as socketIoParser from 'socket.io-parser'
-// @ts-ignore
 import * as engineParser from 'engine.io-parser'
 
 // socket.io-parser 4.2.x defaults the Decoder's maxAttachments to 10 as part of
@@ -21,6 +20,15 @@ class UnlimitedAttachmentsDecoder extends socketIoParser.Decoder {
 export const cypressParser = {
   ...socketIoParser,
   Decoder: UnlimitedAttachmentsDecoder,
+}
+
+// the packet string and binary attachments socket.io sends for `data` as an event
+export const encodeEventParts = (data: any): any[] => {
+  return new socketIoParser.Encoder().encode({
+    type: socketIoParser.PacketType.EVENT,
+    data,
+    nsp: '/',
+  })
 }
 
 export const encode = (data: any, namespace: string): Promise<string> => {

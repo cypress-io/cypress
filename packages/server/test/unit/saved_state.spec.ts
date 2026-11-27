@@ -1,0 +1,116 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import path from 'path'
+import os from 'os'
+import fsPromises from 'fs/promises'
+import { fs } from '../../lib/util/fs'
+import { File as FileUtil } from '../../lib/util/file'
+import * as appData from '../../lib/util/app_data'
+import { START_TAG, END_TAG } from '@packages/stderr-filtering'
+import * as savedState from '../../lib/saved_state'
+
+describe('lib/saved_state', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('#create', () => {
+    beforeEach(() => {
+      return savedState.create().then((state) => {
+        return fs.unlinkAsync(state.path)
+      }).catch(() => {}) // ignore error if file didn't exist in the first place
+    })
+
+    it('resolves with an instance of FileUtil', () => {
+      return savedState.create()
+      .then((state) => {
+        expect(state).toBeInstanceOf(FileUtil)
+      })
+    })
+
+    it('resolves with a noop instance if isTextTerminal', () => {
+      return savedState.create('/foo/bar', true)
+      .then((state) => {
+        expect(state).toBe(FileUtil.noopFile)
+      })
+    })
+
+    it('caches state file instance per path', () => {
+      return Promise.all([
+        savedState.create('/foo/bar'),
+        savedState.create('/foo/bar'),
+      ]).then(([a, b]) => {
+        expect(a).toBe(b)
+      })
+    })
+
+    it('returns different state file for different path', () => {
+      const a = savedState.create('/foo/bar')
+      const b = savedState.create('/foo/baz')
+
+      expect(a).not.toBe(b)
+    })
+
+    it('sets path to project name + hash if projectRoot', () => {
+      return savedState.create('/foo/the-project-name')
+      .then((state) => {
+        expect(state.path).toContain('the-project-name')
+      })
+    })
+
+    it('sets path __global__ if no projectRoot', () => {
+      return savedState.create()
+      .then((state) => {
+        const expected = path.join(appData.path(), 'projects', '__global__', 'state.json')
+
+        expect(state.path).toBe(expected)
+      })
+    })
+
+    it('sets path __global__ if no projectRoot, even when the working directory has a cypress.config.js', async () => {
+      const originalCwd = process.cwd()
+      const projectDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'cy-saved-state-'))
+
+      try {
+        await fsPromises.writeFile(path.join(projectDir, 'cypress.config.js'), 'module.exports = {}\n')
+        process.chdir(projectDir)
+
+        expect(await savedState.formStatePath()).toBe(path.join('__global__', 'state.json'))
+      } finally {
+        process.chdir(originalCwd)
+        await fsPromises.rm(projectDir, { recursive: true, force: true })
+      }
+    })
+
+    it('has an empty state by default', () => {
+      return savedState.create()
+      .then((state) => state.get())
+      .then((state) => {
+        expect(Object.keys(state)).toHaveLength(0)
+      })
+    })
+
+    it('only saves allowed keys', () => {
+      return savedState.create()
+      .then((state) => {
+        return state.set({ foo: 'bar', appWidth: 20 })
+        .then(() => {
+          return state.get()
+        })
+      }).then((stateObject) => {
+        expect(stateObject).toStrictEqual({ appWidth: 20 })
+      })
+    })
+
+    it('logs error when attempting to set invalid key(s)', () => {
+      vi.spyOn(console, 'error')
+
+      return savedState.create()
+      .then((state) => {
+        return state.set({ foo: 'bar', baz: 'qux' })
+      }).then(() => {
+        // eslint-disable-next-line no-console
+        expect(console.error).toHaveBeenCalledWith(START_TAG, 'WARNING: attempted to save state for non-allowed key(s): foo, baz. All keys must be allowed in server/lib/saved_state.ts', END_TAG)
+      })
+    })
+  })
+})

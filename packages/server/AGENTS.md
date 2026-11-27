@@ -8,11 +8,13 @@ yarn workspace @packages/server start
 
 # NOTE: Full suite is slow (hundreds of tests); always target a specific file or grep pattern
 
+# Unit tests (test/unit/**/*.spec.ts) run on vitest; integration and performance tests run on mocha
+
 # Run a specific unit test file
 yarn workspace @packages/server test-unit -- <path-to-spec>
 
 # Filter unit tests by name pattern
-yarn workspace @packages/server test-unit -- --grep "handles request"
+yarn workspace @packages/server test-unit -- -t "handles request"
 
 # Run a specific integration test file
 yarn workspace @packages/server test-integration -- <path-to-spec>
@@ -24,9 +26,14 @@ yarn workspace @packages/server test-integration -- --grep "video capture"
 yarn workspace @packages/server build-prod
 ```
 
+**Migrating a unit spec from mocha to vitest**
+
+Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/server-mocha-to-vitest/SKILL.md) first. It covers the runner contract and the conversions that pass while silently proving less than the mocha original. The migration is tracked in [cypress-io/cypress#34846](https://github.com/cypress-io/cypress/issues/34846).
+
 **Architecture**
 
 - `lib/browsers/` — Browser launch, automation, and CDP/BiDi communication for Chrome, Firefox, Electron, and WebKit
+  - `lib/browsers/cdp-protocol/` — The browser network path for Chromium browsers (CDP Fetch interception instead of the HTTP proxy); its [README](./lib/browsers/cdp-protocol/README.md) explains how cookies work there
 - `lib/project-base.ts` — Base project class; orchestrates proxy, socket, and server setup
 - `lib/server-base.ts` — HTTP/HTTPS server setup and routing
 - `lib/socket-base.ts`, `lib/socket-e2e.ts`, `lib/socket-ct.ts` — WebSocket communication with the browser/driver
@@ -37,14 +44,12 @@ yarn workspace @packages/server build-prod
 - `lib/video_capture.ts` — Video recording via ffmpeg
 - `lib/session.ts` — Session management for `cy.session()`
 - `lib/fixture.ts` — Fixture file loading
-- `lib/exec.ts` — `cy.exec()` subprocess handling
 - `lib/config.ts` — Server-side config resolution
 - `lib/makeDataContext.ts` — Data context factory for GraphQL layer
 
 **Gotchas / Notes**
 
 - Do not build `.js` files manually during development; `@packages/ts` provides require-time transpilation.
-- To disable the V8 snapshot for debugging, set `DISABLE_SNAPSHOT_REQUIRE=1`.
 - To update test snapshots, prepend `SNAPSHOT_UPDATE=1` to any test command.
 - E2E/system tests have moved to `system-tests/`; only unit and integration tests live in `test/unit` and `test/integration`.
 - `better-sqlite3` requires native compilation; run `yarn workspace @packages/server rebuild-better-sqlite3` after an Electron version upgrade.
@@ -54,7 +59,7 @@ yarn workspace @packages/server build-prod
 **Integration Points**
 
 - Consumes virtually every other `@packages/*` package in the monorepo.
-- `@packages/proxy` and `@packages/rewriter` handle all HTTP interception.
+- `@packages/proxy` handles all HTTP interception.
 - `@packages/net-stubbing` provides `cy.intercept()` server-side state.
 - `@packages/data-context` provides the GraphQL layer consumed by `@packages/launchpad` and `@packages/app`.
 - `@packages/socket` provides the WebSocket bridge between the server and the browser driver.

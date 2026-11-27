@@ -20,7 +20,7 @@ describe('record pass', { defaultCommandTimeout: 1234 }, () => {
   it('is skipped due to browser', { browser: 'edge' }, () => {})
 })
 
-describe('record pass', { browser: 'edge', requestTimeout: 5500 }, () => {
+describe('record pass skipped by browser at suite level', { browser: 'edge', requestTimeout: 5500 }, () => {
   it('is skipped due to browser at suite level', { defaultCommandTimeout: 3000 }, () => {})
   it('is also skipped due to browser at suite level', { requestTimeout: 100 }, () => {
     cy.get('div')

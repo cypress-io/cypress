@@ -1,0 +1,5 @@
+[31mThe process that loads your [33mconfigFile[39m[31m and runs your Node events exited unexpectedly ([95msignal SIGKILL[39m[31m).[39m
+[31m[39m
+[31mA SIGKILL usually means the operating system ran out of memory and killed the process. In component testing this process also runs your dev server, which can use a lot of memory.[39m
+[31m[39m
+[31mCypress cannot run your Node events without this process.[39m

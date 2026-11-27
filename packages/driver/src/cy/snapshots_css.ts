@@ -5,12 +5,12 @@ import url from 'url'
 import $utils from '../cypress/utils'
 import LimitedMap from '../util/limited_map'
 
-const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
-const screenStylesheetRe = /(screen|all)/
+const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/g
+const screenStylesheetRe = /screen|all/
 
 const reduceText = (arr, fn) => {
   return _.reduce(arr, ((memo, item) => {
-    return memo += fn(item)
+    return memo + fn(item)
   }), '')
 }
 

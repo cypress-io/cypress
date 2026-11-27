@@ -1,6 +1,7 @@
-import { expect, it, describe, beforeEach, vi, Mock } from 'vitest'
+import type { Mock } from 'vitest'
+import { expect, it, describe, beforeEach, vi } from 'vitest'
 import { getTypescript } from '../../lib/get-typescript'
-import { CreateProgramOptions } from 'typescript'
+import type { CreateProgramOptions } from 'typescript'
 
 type Typescript = {
   createProgram: Mock

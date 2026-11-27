@@ -3,10 +3,10 @@
 // requests succeed against the same dual-stack origin.
 //
 // The expected browser protocol is exposed public configuration so the same
-// spec doubles as the downgrade contrast case: with the MITM proxy enabled
-// all browser traffic terminates at the proxy and speaks HTTP/1.1
-// (--expose expectedBrowserProtocol=1.1); with the proxy disabled
-// (CYPRESS_INTERNAL_DISABLE_PROXY=1) the browser negotiates h2 directly.
+// spec doubles as the downgrade contrast case: with `forceHttp1: true` all
+// browser traffic terminates at the MITM proxy and speaks HTTP/1.1
+// (--expose expectedBrowserProtocol=1.1); on the default browser (CDP) network path the
+// browser negotiates h2 directly.
 describe('dual-stack h2 origin', () => {
   const expectedBrowserProtocol = Cypress.expose('expectedBrowserProtocol')
 
@@ -32,5 +32,21 @@ describe('dual-stack h2 origin', () => {
     // HTTP/1.1 regardless of proxy mode — the h2 MVP scopes server-side
     // commands to h1.1 on purpose
     cy.request('/api/data').its('body.protocol').should('eq', '1.1')
+  })
+
+  it('reports res.statusMessage as the wire reason phrase, empty under h2', () => {
+    const expectedStatusMessage = expectedBrowserProtocol === '2.0' ? '' : 'OK'
+
+    let seen
+
+    cy.intercept('/api/data*', (req) => {
+      req.on('response', (res) => {
+        seen = res.statusMessage
+      })
+    }).as('apiData')
+
+    cy.visit('/')
+    cy.wait('@apiData')
+    cy.then(() => expect(seen).to.eq(expectedStatusMessage))
   })
 })

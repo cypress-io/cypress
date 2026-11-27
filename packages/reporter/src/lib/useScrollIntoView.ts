@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AppState } from './app-state'
+import type { AppState } from './app-state'
 import scroller from './scroller'
 
 interface UseScrollIntoViewOptions {
@@ -28,6 +28,7 @@ export const useScrollIntoView = ({ appState, testState, isStudioActive = false 
     if (!isMounted) {
       setIsMounted(true)
     }
+  // eslint-disable-next-line @eslint-react/exhaustive-deps -- isMounted only records that the first scroll ran
   }, [_scrollIntoView])
 
   return {

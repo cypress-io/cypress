@@ -1,19 +1,16 @@
 import cs from 'classnames'
-import React, { CSSProperties, MouseEvent, ReactNode, RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import type { CSSProperties, MouseEvent, ReactNode, RefObject } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { onEnterOrSpace } from '../lib/util'
 import DocumentBlankIcon from '@packages/frontend-shared/src/assets/icons/document-blank_x16.svg'
 import { IconChevronDownSmall } from '@cypress-design/react-icon'
-
-export interface CollapsibleHeaderComponentProps {
-  isOpen: boolean
-}
 
 interface CollapsibleProps {
   isOpen?: boolean
   headerClass?: string
   headerStyle?: CSSProperties
   header?: ReactNode
-  HeaderComponent?: React.FunctionComponent<CollapsibleHeaderComponentProps>
+  renderHeader?: (isOpen: boolean) => ReactNode
   headerExtras?: ReactNode
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
@@ -22,10 +19,12 @@ interface CollapsibleProps {
   onOpenStateChangeRequested?: (isOpen: boolean) => void
 }
 
-const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false, header, headerClass = '', headerStyle = {}, headerExtras, contentClass = '', hideExpander = false, containerRef = null, onOpenStateChangeRequested, children, HeaderComponent }) => {
+const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false, header, headerClass = '', headerStyle = {}, headerExtras, contentClass = '', hideExpander = false, containerRef = null, onOpenStateChangeRequested, children, renderHeader }) => {
   const [isOpenState, setIsOpenState] = useState(isOpenAsProp)
   const headerRef = useRef<HTMLDivElement>(null)
   const fixedElementRef = useRef<HTMLDivElement>(null)
+
+  const isOpen = onOpenStateChangeRequested ? isOpenAsProp : isOpenState
 
   const toggleOpenState = useCallback((e?: MouseEvent) => {
     e?.stopPropagation()
@@ -34,9 +33,7 @@ const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false,
     } else {
       setIsOpenState(!isOpen)
     }
-  }, [isOpenState, onOpenStateChangeRequested])
-
-  const isOpen = onOpenStateChangeRequested ? isOpenAsProp : isOpenState
+  }, [isOpen, onOpenStateChangeRequested])
 
   const toggleHeaderShadow = (entries) => {
     const [entry] = entries
@@ -75,7 +72,7 @@ const Collapsible: React.FC<CollapsibleProps> = ({ isOpen: isOpenAsProp = false,
             {!hideExpander && headerClass === 'hook-header' && <IconChevronDownSmall size='16' strokeColor='gray-800' className='collapsible-indicator' />}
             {!hideExpander && headerClass !== 'hook-header' && <DocumentBlankIcon className='collapsible-indicator' />}
             <span className='collapsible-header-text'>
-              {HeaderComponent ? <HeaderComponent isOpen={isOpen} /> : header}
+              {renderHeader ? renderHeader(isOpen) : header}
             </span>
           </div>
         </div>

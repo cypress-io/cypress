@@ -1,4 +1,5 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import EventEmitter from 'events'
 
 import type { SimpleGit } from 'simple-git'
@@ -10,23 +11,25 @@ const stubbedSimpleGit: {
   // supposed to be the most permissive. However, SimpleGit defines
   // overloads in the opposite order, and we need the one that takes
   // a string.
-  revparse: jest.Mock<(option: string) => R<'revparse'>>
-  branch: jest.Mock<(options: P<'branch'>) => R<'branch'>>
-  status: jest.Mock<(options: P<'status'>) => R<'status'>>
-  log: jest.Mock<(options: P<'log'>) => R<'log'>>
-} = {
-  revparse: jest.fn(),
-  branch: jest.fn(),
-  status: jest.fn(),
-  log: jest.fn(),
-}
+  revparse: Mock<(option: string) => R<'revparse'>>
+  branch: Mock<(options: P<'branch'>) => R<'branch'>>
+  status: Mock<(options: P<'status'>) => R<'status'>>
+  log: Mock<(options: P<'log'>) => R<'log'>>
+} = vi.hoisted(() => {
+  return {
+    revparse: vi.fn(),
+    branch: vi.fn(),
+    status: vi.fn(),
+    log: vi.fn(),
+  }
+})
 
-jest.mock('simple-git', () => {
-  // use a module factory to return the stubbed SimpleGit instance
-  // @see https://jestjs.io/docs/es6-class-mocks#calling-jestmock-with-the-module-factory-parameter
-  return jest.fn().mockImplementation(() => {
-    return stubbedSimpleGit
-  })
+vi.mock('simple-git', () => {
+  return {
+    simpleGit: vi.fn().mockImplementation(() => {
+      return stubbedSimpleGit
+    }),
+  }
 })
 
 type P<F extends keyof SimpleGit> = Parameters<SimpleGit[F]>
@@ -34,10 +37,10 @@ type R<F extends keyof SimpleGit> = ReturnType<SimpleGit[F]>
 
 describe('GitDataSource', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
 
     // @ts-expect-error - incorrect type to stub
-    jest.spyOn(Chokidar, 'watch').mockReturnValue(new EventEmitter())
+    vi.spyOn(Chokidar, 'watch').mockReturnValue(new EventEmitter())
   })
 
   afterEach(() => {
@@ -45,7 +48,7 @@ describe('GitDataSource', () => {
     stubbedSimpleGit.revparse.mockReset()
     stubbedSimpleGit.branch.mockReset()
     stubbedSimpleGit.status.mockReset()
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   describe('Unit', () => {
@@ -59,15 +62,15 @@ describe('GitDataSource', () => {
           return Promise.resolve('/root') as unknown as R<'revparse'>
         })
 
-        const onGitInfoChange = jest.fn()
+        const onGitInfoChange = vi.fn()
 
         const gds = new GitDataSource({
           isRunMode: true,
           projectRoot: '/root',
-          onBranchChange: jest.fn(),
+          onBranchChange: vi.fn(),
           onGitInfoChange,
-          onError: jest.fn(),
-          onGitLogChange: jest.fn(),
+          onError: vi.fn(),
+          onGitLogChange: vi.fn(),
         })
 
         await revparseP.promise
@@ -86,10 +89,10 @@ describe('GitDataSource', () => {
       let gds: GitDataSource
       let projectRoot: string
       let branchName: string
-      let onBranchChange: jest.Mock<(branch: string | null) => void>
-      let onGitInfoChange: jest.Mock<(specPath: string[]) => void>
-      let onError: jest.Mock<(err: any) => void>
-      let onGitLogChange: jest.Mock<(shas: string[]) => void>
+      let onBranchChange: Mock<(branch: string | null) => void>
+      let onGitInfoChange: Mock<(specPath: string[]) => void>
+      let onError: Mock<(err: any) => void>
+      let onGitLogChange: Mock<(shas: string[]) => void>
       const firstHashes = [
         { hash: 'abc' },
       ]
@@ -103,10 +106,10 @@ describe('GitDataSource', () => {
         firstGitLogCall = Promise.withResolvers()
         secondGitLogCall = Promise.withResolvers()
         branchName = 'main'
-        onBranchChange = jest.fn()
-        onGitInfoChange = jest.fn()
-        onError = jest.fn()
-        onGitLogChange = jest.fn()
+        onBranchChange = vi.fn()
+        onGitInfoChange = vi.fn()
+        onError = vi.fn()
+        onGitLogChange = vi.fn()
 
         projectRoot = '/root'
 
@@ -178,7 +181,7 @@ describe('GitDataSource', () => {
 
         describe('after sixty seconds, when there are additional hashes', () => {
           it('returns the current hashes', async () => {
-            await jest.advanceTimersByTimeAsync(60001)
+            await vi.advanceTimersByTimeAsync(60001)
             await secondGitLogCall.promise
             expect(gds.currentHashes).toEqual(secondHashesReturnValue)
           })

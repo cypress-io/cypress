@@ -1,17 +1,19 @@
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
-import { normalizeResourceType } from './cdp-protocol/cdp_automation'
+import { normalizeResourceType } from './cdp-protocol/normalize-resource-type'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
-import { cookieMatches, CyCookieFilter } from '../automation/cookie/util'
+import { cookieMatches } from '../automation/cookie/util'
 import { convertPlaywrightCookieToCyCookie, convertCyCookieToPlaywrightCookie } from '../automation/cookie/converters/webkit'
 import utils from './utils'
-import type { CyCookie } from '../automation/cookie/util'
+import type { CyCookie, CyCookieFilter } from '../automation/cookie/util'
+import type { CDPSocketServer } from '@packages/socket'
+import { WebKitCDPBridge } from './webkit-cdp-bridge'
 import { AUT_FRAME_NAME_IDENTIFIER, isRunnerFrameName } from '@packages/types'
-import { AUT_FRAME_HEADER } from './constants'
+import { AUT_FRAME_HEADER, getMetadataHeaderValue } from './constants'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -27,6 +29,7 @@ type WebKitAutomationOpts = {
   videoApi?: RunModeVideoApi
   userAgent?: string | null
   isHeadless: boolean
+  cdpSocketServer?: CDPSocketServer
 }
 
 export class WebKitAutomation {
@@ -36,12 +39,14 @@ export class WebKitAutomation {
   private page!: playwright.Page
   private userAgent: string | null
   private isHeadless: boolean
+  cdpSocketServer?: CDPSocketServer
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
     this.userAgent = opts.userAgent ?? null
     this.isHeadless = opts.isHeadless
+    this.cdpSocketServer = opts.cdpSocketServer
   }
 
   // static initializer to avoid "not definitively declared"
@@ -84,13 +89,16 @@ export class WebKitAutomation {
       this.automation.onDownloadLinkClicked?.(downloadUrl)
     })
 
+    // the automation socket must attach before the runner navigates so its window bindings exist when the driver connects
+    await this.cdpSocketServer?.attachCDPClient(new WebKitCDPBridge(this.page))
+
     this.handleRequestEvents()
 
     if (options.downloadsFolder) this.handleDownloadEvents(options.downloadsFolder)
 
     if (options.videoApi) this.recordVideo(options.videoApi, contextStarted)
 
-    let promises: Promise<any>[] = []
+    const promises: Promise<any>[] = []
 
     promises.push(this.markAutIframeRequests())
 
@@ -102,11 +110,9 @@ export class WebKitAutomation {
   }
 
   private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
-    const _this = this
-
     videoApi.useVideoController({
-      async endVideoCapture () {
-        const pwVideo = _this.page.video()
+      endVideoCapture: async () => {
+        const pwVideo = this.page.video()
 
         if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
 
@@ -114,7 +120,7 @@ export class WebKitAutomation {
 
         await Promise.all([
           // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
-          _this.page.close(),
+          this.page.close(),
           pwVideo.saveAs(videoApi.videoName),
         ])
       },
@@ -155,7 +161,7 @@ export class WebKitAutomation {
       return route.continue({
         headers: {
           ...request.headers(),
-          [AUT_FRAME_HEADER]: 'true',
+          [AUT_FRAME_HEADER]: getMetadataHeaderValue(),
         },
       })
     })
@@ -208,7 +214,10 @@ export class WebKitAutomation {
       }
 
       debug('received request %o', { browserPreRequest })
-      this.automation.onBrowserPreRequest?.(browserPreRequest)
+      // Playwright ignores a listener's result, so a failure is logged here
+      this.automation.onBrowserPreRequest?.(browserPreRequest)?.catch((error) => {
+        debug('error adding browser pre-request %o', { requestId, error })
+      })
     })
 
     this.page.on('requestfinished', async (request) => {
@@ -216,17 +225,22 @@ export class WebKitAutomation {
 
       if (!requestId) return
 
-      const response = await request.response()
+      // Like 'request' above, Playwright ignores the listener's result, so failures are logged here
+      try {
+        const response = await request.response()
 
-      const responseReceived = {
-        requestId,
-        status: response?.status(),
-        headers: await response?.allHeaders(),
+        const responseReceived = {
+          requestId,
+          status: response?.status(),
+          headers: await response?.allHeaders(),
+        }
+
+        debug('received requestfinished %o', { responseReceived })
+
+        await this.automation.onRequestEvent?.('response:received', responseReceived)
+      } catch (error) {
+        debug('error handling requestfinished %o', { requestId, error })
       }
-
-      debug('received requestfinished %o', { responseReceived })
-
-      this.automation.onRequestEvent?.('response:received', responseReceived)
     })
 
     // When a request fails (e.g. `req.destroy()` / `forceNetworkError` resets the

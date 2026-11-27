@@ -1,3 +1,21 @@
+# [@[secure]/vite-dev-server-v8.0.0](https://github.com/[secure]-io/[secure]/compare/@[secure]/vite-dev-server-v7.3.4...@[secure]/vite-dev-server-v8.0.0) (2026-08-26)
+
+
+### breaking
+
+* **vite-dev-server:** remove Vite 5–7 CT support; require Vite 8+ ([be7ca3a](https://github.com/[secure]-io/[secure]/commit/be7ca3a3cca6855fe6f745ce9bd4817aa8b7de41))
+
+
+### BREAKING CHANGES
+
+* **vite-dev-server:** Component [secure] with @[secure]/vite-dev-server requires Vite 8 or newer. Vite 5–7 are unsupported. When the installed version is too old, getVite throws ViteVersionNotSupportedError.
+
+getVite resolves the published ESM entry only (the separate CJS build is no longer published as of Vite 7). @[secure]/vite-dev-server upgrades Vitest from v2 to v3.
+
+System tests and launchpad e2e are updated for Vite 8–only CT and outdated-dependency scenarios (including React + Vite and Vue fixtures). Knip, scaffold-config, and README/AGENTS copy are aligned with Vite 8–only support.
+
+Review follow-ups: remove dead optimizeDeps.rolldownOptions plugin shaped for the pre–Vite 8 esbuild API; drop unused esbuild from @[secure]/vite-dev-server; remove stale knip ignore; tighten AGENTS.md, devServer, and getVite comments; fix scaffold-config README Vue + Vite adapter row.
+
 # [@cypress/vite-dev-server-v7.3.4](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.3...@cypress/vite-dev-server-v7.3.4) (2026-07-06)
 
 # [@cypress/vite-dev-server-v7.3.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.2...@cypress/vite-dev-server-v7.3.3) (2026-05-20)

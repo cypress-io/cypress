@@ -92,7 +92,7 @@ type dir = 'top' | 'right' | 'bottom' | 'left'
 const getStylePropertyNumber = (computedStyle: CSSStyleDeclaration, property: string): number => {
   const value = computedStyle.getPropertyValue(property)
   // nuke anything thats not a number or a negative symbol
-  const num = _.toNumber(value.replace(/[^0-9\.-]+/, ''))
+  const num = _.toNumber(value.replace(/[^0-9.-]+/, ''))
 
   if (!_.isFinite(num)) {
     throw new Error('Element attr did not return a valid number')

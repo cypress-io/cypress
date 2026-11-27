@@ -20,7 +20,7 @@ export default {
 import type { FunctionalComponent, SVGAttributes } from 'vue'
 
 defineProps<{
-  icon?: FunctionalComponent<SVGAttributes, {}>
+  icon?: FunctionalComponent<SVGAttributes>
   iconClass?: string
 }>()
 </script>

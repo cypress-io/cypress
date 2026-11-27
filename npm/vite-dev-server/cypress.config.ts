@@ -6,7 +6,6 @@ const require = createRequire(import.meta.url)
 
 export default defineConfig({
   projectId: 'ypt4pf',
-  experimentalMemoryManagement: true,
   e2e: {
     defaultCommandTimeout: 10000, // these take a bit longer b/c they're e2e open mode test
     async setupNodeEvents (on, config) {
@@ -36,7 +35,7 @@ export default defineConfig({
   retries: {
     runMode: 2,
   },
-  // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
+  // @ts-expect-error We are setting these namespaces in order to properly test Cypress in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',
   socketIoRoute: '/__app-socket',

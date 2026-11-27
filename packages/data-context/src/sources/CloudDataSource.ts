@@ -1,28 +1,28 @@
-// @ts-ignore
 import pkg from '@packages/root'
 import debugLib from 'debug'
 import DataLoader from 'dataloader'
 import { createBatchingExecutor } from '@graphql-tools/batch-execute'
-import { cacheExchange, Cache } from '@urql/exchange-graphcache'
-import fetch, { Response } from 'cross-fetch'
+import { cacheExchange } from '@urql/exchange-graphcache'
+import type { Cache } from '@urql/exchange-graphcache'
+import type fetch from 'cross-fetch'
+import { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
-import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
+import { print, visit } from 'graphql'
+import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
   fetchExchange,
-  Client,
-  OperationResult,
   stringifyVariables,
-  RequestPolicy,
 } from '@urql/core'
+import type { OperationResult, RequestPolicy, Client } from '@urql/core'
 import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
-import { CLOUD_URLS, resolveCloudEnv } from '../util/cloudUrls'
+import { resolveCloudEnv, resolveCloudUrl } from '../util/cloudUrls'
 import type { CloudEnv } from '../util/cloudUrls'
 import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
@@ -33,7 +33,6 @@ export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationR
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
 const cloudEnv = resolveCloudEnv()
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T : never
 type CloudQueryField = StartsWith<keyof NexusGen['fieldTypes']['Query'], 'cloud'>
 
@@ -90,7 +89,6 @@ interface CloudDataSourceParams {
  */
 export class CloudDataSource {
   #cloudUrqlClient: Client
-  #lastCache?: string
   #batchExecutor: ReturnType<typeof createBatchingExecutor>
   #batchExecutorBatcher: DataLoader<CloudExecuteRemote, OperationResult>
 
@@ -121,32 +119,13 @@ export class CloudDataSource {
       exchanges: [
         dedupExchange,
         cacheExchange({
-          // @ts-ignore
+          // @ts-expect-error - the introspected schema's literal types don't match graphcache's `IntrospectionData`
           schema: urqlSchema,
           ...urqlCacheKeys,
           updates: {
             Mutation: {
-              _cloudCacheInvalidate: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
+              _cloudCacheInvalidate: (parent, { args }: { args: Parameters<Cache['invalidate']> }, cache, info) => {
                 cache.invalidate(...args)
-              },
-              _showUrqlCache: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
-                this.#lastCache = JSON.stringify(cache, function replacer (key, value) {
-                  if (value instanceof Map) {
-                    const reducer = (obj: any, mapKey: any) => {
-                      obj[mapKey] = value.get(mapKey)
-
-                      return obj
-                    }
-
-                    return [...value.keys()].sort().reduce(reducer, {})
-                  }
-
-                  if (value instanceof Set) {
-                    return [...value].sort()
-                  }
-
-                  return value
-                })
               },
             },
           },
@@ -350,25 +329,8 @@ export class CloudDataSource {
     }).toPromise()
   }
 
-  async getCache () {
-    await this.#cloudUrqlClient.mutation(`
-      mutation Internal_showUrqlCache { 
-        _showUrqlCache
-      }
-    `, { }, {
-      fetchOptions: {
-        headers: {
-          // Same note as above on the "invalidate", we could make this a bit clearer
-          INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
-        },
-      },
-    }).toPromise()
-
-    return JSON.parse(this.#lastCache ?? '')
-  }
-
   getCloudUrl (env: CloudEnv) {
-    return CLOUD_URLS[env]
+    return resolveCloudUrl(env)
   }
 
   /**

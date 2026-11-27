@@ -46,6 +46,9 @@ packages/proxy/lib/**/*.js
 # npm packages
 npm/**/cypress/screenshots
 
+# from example, compiled .js files
+packages/example/lib/**/*.js
+
 # from example
 packages/example/app
 packages/example/build
@@ -383,17 +386,6 @@ globbed_node_modules
 *.gen.ts
 *.gen.json
 
-# Snapshot Binaries
-snapshot_blob.bin
-v8_context_snapshot.x86_64.bin
-
-# Legacy snapshot cache files
-tooling/v8-snapshot/cache/dev-darwin
-tooling/v8-snapshot/cache/dev-linux
-tooling/v8-snapshot/cache/dev-win32
-tooling/v8-snapshot/cache/prod-darwin
-tooling/v8-snapshot/cache/prod-linux
-tooling/v8-snapshot/cache/prod-win32
 
 # Cloud API validations
 system-tests/lib/validations
@@ -404,13 +396,16 @@ system-tests/lib/validations
 # IDE files
 .cursor/*
 !.cursor/BUGBOT.md
-!.cursor/skills
 !.cursor/environment.json
 !.cursor/Dockerfile
+!.cursor/skills
 
 settings.local.json
 
 .claude/*
+!.claude/settings.json
+!.claude/skills
+!.claude/rules
 
 # chunk active sidecar tracking
 .chunk/sidecar.json

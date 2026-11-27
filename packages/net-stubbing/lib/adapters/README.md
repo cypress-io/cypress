@@ -31,8 +31,8 @@ Constructed with `NetStubbingState`, `SocketBroadcaster`, `getFixture` — same 
 
 ---
 
-## Later stages
+## Related
 
-Request/response I/O (`handle-intercept-request.ts`, middleware) remains in net-stubbing until stage 3 extracts orchestration into the core.
+Orchestration (route matching, subscription planning, handler merge) lives in `NetworkInterceptionCore`; net-stubbing keeps the I/O it drives — body streaming and the `InterceptedRequest` lifecycle in `handle-intercept-request.ts`, and the middleware that calls the core in `lib/server/middleware/`.
 
 [#33919](https://github.com/cypress-io/cypress/issues/33919)

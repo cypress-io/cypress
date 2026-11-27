@@ -11,7 +11,7 @@ export function asyncRetry<
 > (fn: (...args: TArgs) => Promise<TResult>, options: RetryOptions) {
   return async (...args: TArgs): Promise<TResult> => {
     let attempt = 0
-    let errors: Error[] = []
+    const errors: Error[] = []
 
     const shouldRetry = options.shouldRetry ?? (() => true)
 
@@ -27,7 +27,7 @@ export function asyncRetry<
             throw e
           }
 
-          throw new AggregateError(errors)
+          throw new AggregateError(errors, undefined, { cause: e })
         }
 
         const delay = options.retryDelay ? options.retryDelay(attempt) : undefined

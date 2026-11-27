@@ -1,7 +1,8 @@
 /// <reference path="../driver/types/internal-types-lite.d.ts" />
 
 import type { SocketShape } from '@packages/socket/browser/client'
-import type MobX from 'mobx'
+import type * as MobX from 'mobx'
+import type { TapManager } from './src/tap/tap-manager'
 import type { EventManager } from './src/runner/event-manager'
 
 export {}
@@ -23,6 +24,7 @@ declare global {
   interface Window {
     ws?: SocketShape
     getEventManager: () => EventManager
+    __CYPRESS_TAP_BINDING__?: TapManager
     UnifiedRunner: {
       /**
        * This is the config served from the back-end.
@@ -33,10 +35,9 @@ declare global {
       config: Record<string, any>
 
       /**
-       * To ensure we are only a single copy of React
-       * We get a reference to the copy of React (and React DOM)
-       * that is used in the Reporter and Driver, which are bundled with
-       * webpack.
+       * The app's own React and React DOM, which the runner bundle reads from
+       * the host modules and re-exports here. The reporter, Studio and cy.prompt
+       * mount through them.
        *
        * Unfortunately, attempting to have React in a project
        * using Vue causes mad conflicts because React'S JSX type

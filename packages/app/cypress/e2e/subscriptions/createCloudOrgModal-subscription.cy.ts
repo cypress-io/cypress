@@ -1,5 +1,3 @@
-import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
-
 import type { SinonStub } from 'sinon'
 
 describe('CreateCloudOrgModalSubscription', { viewportWidth: 1200 }, () => {
@@ -35,17 +33,17 @@ describe('CreateCloudOrgModalSubscription', { viewportWidth: 1200 }, () => {
 
       cy.findByTestId('sidebar-link-runs-page').click()
 
-      cy.findByText(defaultMessages.runs.connect.buttonProject).click()
+      cy.findByText('Connect a Cypress Cloud project').click()
       cy.get('[aria-modal="true"]').should('exist')
 
-      cy.findByText(defaultMessages.runs.connect.modal.createOrg.button).click()
+      cy.findByText('Create organization').click()
 
       cy.withRetryableCtx((ctx) => {
         expect((ctx.actions.electron.openExternal as SinonStub).lastCall.lastArg).to.eq(`http://dummy.cypress.io/organizations/create?port=${process.env.CYPRESS_INTERNAL_GRAPHQL_PORT}`)
       })
 
-      cy.contains('button', defaultMessages.runs.connect.modal.createOrg.waitingButton).should('be.visible')
-      cy.contains('a', defaultMessages.links.needHelp).should('have.attr', 'href', 'https://on.cypress.io/adding-new-project')
+      cy.contains('button', 'Waiting for you to create an organization...').should('be.visible')
+      cy.contains('a', 'Need help').should('have.attr', 'href', 'https://on.cypress.io/adding-new-project')
 
       // Clear the current intercept to simulate a response with orgs
       cy.remoteGraphQLIntercept((obj) => {
@@ -56,7 +54,7 @@ describe('CreateCloudOrgModalSubscription', { viewportWidth: 1200 }, () => {
         await ctx.util.fetch(`http://127.0.0.1:${ctx.coreData.servers.gqlServerPort}/cloud-notification?operationName=orgCreated`)
       })
 
-      cy.findByText(defaultMessages.runs.connect.modal.selectProject.manageOrgs)
+      cy.findByText('Manage organizations')
     })
   })
 })

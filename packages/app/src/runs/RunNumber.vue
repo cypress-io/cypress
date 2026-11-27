@@ -17,7 +17,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { CloudRunStatus } from '../generated/graphql'
-import { SolidStatusIcon, StatusType } from '@cypress-design/vue-statusicon'
+import { SolidStatusIcon } from '@cypress-design/vue-statusicon'
+import type { StatusType } from '@cypress-design/vue-statusicon'
 
 const props = defineProps<{
   status: CloudRunStatus

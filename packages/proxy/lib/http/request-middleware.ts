@@ -3,9 +3,11 @@ import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
+import { stripCypressCookies } from './util/cookies'
 import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
+import { getMetadataHeaderValue } from './util/metadata-header-value'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -27,13 +29,12 @@ const LogRequest: RequestMiddleware = function () {
 const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'extract:cypress:metadata:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  this.req.isAUTFrame = !!this.req.headers['x-cypress-is-aut-frame']
-  this.req.isFromExtraTarget = !!this.req.headers['x-cypress-is-from-extra-target']
+  this.req.isAUTFrame = this.req.headers['x-cypress-is-aut-frame'] === getMetadataHeaderValue()
+  this.req.isFromExtraTarget = this.req.headers['x-cypress-is-from-extra-target'] === getMetadataHeaderValue()
   this.req.isSyncRequest = !!this.req.headers['x-cypress-is-sync-request']
 
-  if (this.req.headers['x-cypress-is-aut-frame']) {
-    delete this.req.headers['x-cypress-is-aut-frame']
-  }
+  delete this.req.headers['x-cypress-is-aut-frame']
+  delete this.req.headers['x-cypress-is-from-extra-target']
 
   if (this.req.headers['x-cypress-is-sync-request']) {
     delete this.req.headers['x-cypress-is-sync-request']
@@ -50,9 +51,8 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
   if (this.req.isFromExtraTarget) {
     this.debug('request for [%s %s] is from an extra target', this.req.method, this.req.proxiedUrl)
 
-    delete this.req.headers['x-cypress-is-from-extra-target']
-
     this.onlyRunMiddleware([
+      'StripCypressCookies',
       'MaybeSetBasicAuthHeaders',
     ])
   }
@@ -120,7 +120,7 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
     // in the case of BiDi, cookies come in as foo=bar;bar=baz and not foo=bar; bar=baz,
     // i.e. they are delimited differently, which impacts some of our tests and our cookie splicing.
     // this regex is to help make sure the cookies are fed in consistently
-    const bidiStyleCookie = /;\S/gm
+    const bidiStyleCookie = /;\S/g
 
     if (cookies.match(bidiStyleCookie)) {
       this.req.headers.cookie = cookies.replaceAll(';', '; ')
@@ -130,6 +130,19 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
   delete this.req.headers['x-cypress-is-webdriver-bidi']
 
   return this.next()
+}
+
+// `req.cookies` was parsed before this runs, so the proxy can still read them.
+const StripCypressCookies: RequestMiddleware = function () {
+  const appCookies = stripCypressCookies(this.req.headers.cookie)
+
+  if (appCookies) {
+    this.req.headers.cookie = appCookies
+  } else {
+    delete this.req.headers.cookie
+  }
+
+  this.next()
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = async function () {
@@ -280,6 +293,7 @@ export default {
   CalculateCredentialLevelIfApplicable,
   FormatCookiesIfApplicable,
   MaybeAttachCrossOriginCookies,
+  StripCypressCookies,
   MaybeEndRequestWithBufferedResponse,
   SetMatchingRoutes,
   SendToDriver,

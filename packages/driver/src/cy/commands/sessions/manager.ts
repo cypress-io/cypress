@@ -98,6 +98,24 @@ export default class SessionsManager {
     ])
   }
 
+  // Resolves to the rendered origins that `clearStorage` read before clearing.
+  clearSessionData = async (): Promise<string[]> => {
+    // this prevents a log occurring when we clear session in-between tests
+    if (this.cy.state('duringUserTestExecution')) {
+      this.Cypress.log(getLogProperties('clearCurrentSessionData'))
+    }
+
+    window.localStorage.clear()
+    window.sessionStorage.clear()
+
+    const [renderedOrigins] = await Promise.all([
+      clearStorage(this.Cypress),
+      this.sessions.clearCookies(),
+    ])
+
+    return renderedOrigins
+  }
+
   // this the public api exposed to consumers as Cypress.session
   sessions = {
     clearAllSavedSessions: async () => {
@@ -109,18 +127,8 @@ export default class SessionsManager {
     },
 
     clearCurrentSessionData: async () => {
-      // this prevents a log occurring when we clear session in-between tests
-      if (this.cy.state('duringUserTestExecution')) {
-        this.Cypress.log(getLogProperties('clearCurrentSessionData'))
-      }
-
-      window.localStorage.clear()
-      window.sessionStorage.clear()
-
-      await Promise.all([
-        clearStorage(this.Cypress),
-        this.sessions.clearCookies(),
-      ])
+      // Public API: resolves to nothing, unlike `clearSessionData`
+      await this.clearSessionData()
     },
 
     getCookies: async () => {
@@ -132,6 +140,8 @@ export default class SessionsManager {
     },
 
     clearCookies: async () => {
+      // Sent even when the browser reports no cookies: the server also empties
+      // its cookie jar here, and the jar can hold cookies the browser no longer has.
       return this.Cypress.automation('clear:cookies', await this.sessions.getCookies())
     },
 

@@ -1,8 +1,12 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
+import execa from 'execa'
 import type { DataContext } from '../../../src'
 import { ProjectActions } from '../../../src/actions/ProjectActions'
 import { createTestDataContext } from '../helper'
-import { SpecWithRelativeRoot, TestingType } from '@packages/types'
+import type { SpecWithRelativeRoot, TestingType } from '@packages/types'
+
+vi.mock('execa')
 
 describe('ProjectActions', () => {
   let ctx: DataContext
@@ -131,7 +135,7 @@ describe('ProjectActions', () => {
     describe('no specPattern match', () => {
       beforeEach(() => {
         ctx.coreData.currentProject = '/cy-project'
-        jest.spyOn(ctx.project, 'matchesSpecPattern').mockResolvedValue(false)
+        vi.spyOn(ctx.project, 'matchesSpecPattern').mockResolvedValue(false)
       })
 
       it('should fail with `NO_SPEC_PATTERN_MATCH`', async () => {
@@ -147,7 +151,7 @@ describe('ProjectActions', () => {
     describe('spec file not found', () => {
       beforeEach(() => {
         ctx.coreData.currentProject = '/cy-project'
-        jest.spyOn(ctx.project, 'matchesSpecPattern').mockImplementation((specFile: string) => {
+        vi.spyOn(ctx.project, 'matchesSpecPattern').mockImplementation((specFile: string) => {
           if (specFile.includes('e2e')) {
             return Promise.resolve(true)
           }
@@ -155,7 +159,7 @@ describe('ProjectActions', () => {
           return Promise.resolve(false)
         })
 
-        jest.spyOn(ctx.fs, 'existsSync').mockReturnValue(false)
+        vi.spyOn(ctx.fs, 'existsSync').mockReturnValue(false)
       })
 
       it('should fail with `SPEC_NOT_FOUND`', async () => {
@@ -172,7 +176,7 @@ describe('ProjectActions', () => {
       beforeEach(() => {
         ctx.coreData.currentTestingType = null
         ctx.coreData.currentProject = '/cy-project'
-        jest.spyOn(ctx.project, 'matchesSpecPattern').mockImplementation((specFile: string) => {
+        vi.spyOn(ctx.project, 'matchesSpecPattern').mockImplementation((specFile: string) => {
           if (specFile.includes('e2e')) {
             return Promise.resolve(true)
           }
@@ -180,8 +184,8 @@ describe('ProjectActions', () => {
           return Promise.resolve(false)
         })
 
-        jest.spyOn(ctx.fs, 'existsSync').mockReturnValue(true)
-        jest.spyOn(ctx.lifecycleManager, 'isTestingTypeConfigured').mockImplementation((testingType: TestingType) => {
+        vi.spyOn(ctx.fs, 'existsSync').mockReturnValue(true)
+        vi.spyOn(ctx.lifecycleManager, 'isTestingTypeConfigured').mockImplementation((testingType: TestingType) => {
           if (testingType === 'e2e') {
             return false
           }
@@ -203,7 +207,7 @@ describe('ProjectActions', () => {
     describe('spec can be executed', () => {
       beforeEach(() => {
         ctx.coreData.currentProject = '/cy-project'
-        jest.spyOn(ctx.project, 'matchesSpecPattern').mockImplementation((specFile: string) => {
+        vi.spyOn(ctx.project, 'matchesSpecPattern').mockImplementation((specFile: string) => {
           if (specFile.includes('e2e')) {
             return Promise.resolve(true)
           }
@@ -211,16 +215,16 @@ describe('ProjectActions', () => {
           return Promise.resolve(false)
         })
 
-        jest.spyOn(ctx.fs, 'existsSync').mockReturnValue(true)
-        jest.spyOn(ctx.project, 'getCurrentSpecByAbsolute').mockReturnValue({ id: 'xyz' } as any)
-        jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser')
+        vi.spyOn(ctx.fs, 'existsSync').mockReturnValue(true)
+        vi.spyOn(ctx.project, 'getCurrentSpecByAbsolute').mockReturnValue({ id: 'xyz' } as any)
+        vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser')
         ctx.coreData.activeBrowser = { id: 'abc' } as any
-        jest.spyOn(ctx.lifecycleManager, 'setCurrentTestingType').mockReturnValue(undefined)
-        jest.spyOn(ctx.lifecycleManager, 'setAndLoadCurrentTestingType').mockReturnValue(undefined)
-        jest.spyOn(ctx.actions.project, 'switchTestingTypesAndRelaunch')
-        jest.spyOn(ctx.actions.browser, 'closeBrowser').mockReturnValue(undefined)
+        vi.spyOn(ctx.lifecycleManager, 'setCurrentTestingType').mockReturnValue(undefined)
+        vi.spyOn(ctx.lifecycleManager, 'setAndLoadCurrentTestingType').mockReturnValue(undefined)
+        vi.spyOn(ctx.actions.project, 'switchTestingTypesAndRelaunch')
+        vi.spyOn(ctx.actions.browser, 'closeBrowser').mockReturnValue(undefined)
         ctx.coreData.app.browserStatus = 'open'
-        jest.spyOn(ctx.emitter, 'subscribeTo').mockReturnValue({
+        vi.spyOn(ctx.emitter, 'subscribeTo').mockReturnValue({
           next: () => {},
           return: () => {},
         } as any)
@@ -229,7 +233,7 @@ describe('ProjectActions', () => {
       describe('no current testing type', () => {
         beforeEach(() => {
           ctx.coreData.currentTestingType = null
-          jest.spyOn(ctx.lifecycleManager, 'isTestingTypeConfigured').mockImplementation((testingType: TestingType) => {
+          vi.spyOn(ctx.lifecycleManager, 'isTestingTypeConfigured').mockImplementation((testingType: TestingType) => {
             if (testingType === 'e2e') {
               return true
             }
@@ -256,7 +260,7 @@ describe('ProjectActions', () => {
       describe('testing type needs to change', () => {
         beforeEach(() => {
           ctx.coreData.currentTestingType = 'component'
-          jest.spyOn(ctx.lifecycleManager, 'isTestingTypeConfigured').mockImplementation((testingType: TestingType) => {
+          vi.spyOn(ctx.lifecycleManager, 'isTestingTypeConfigured').mockImplementation((testingType: TestingType) => {
             if (testingType === 'e2e') {
               return true
             }
@@ -277,6 +281,67 @@ describe('ProjectActions', () => {
           expect(ctx.lifecycleManager.setCurrentTestingType).toHaveBeenCalledWith('e2e')
           expect(ctx.actions.project.switchTestingTypesAndRelaunch).toHaveBeenCalledWith('e2e')
           expect(ctx._apis.projectApi.runSpec).toHaveBeenCalled()
+        })
+
+        // The testing type is set for a moment only to pick a browser for it, then set back.
+        // An error that kept the project from loading is still there, so it must still be reported.
+        it('keeps a recorded load error through the brief switch it makes to pick a browser', async () => {
+          vi.spyOn(ctx.lifecycleManager, 'setCurrentTestingType').mockRestore()
+          vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+          vi.spyOn(ctx.actions.project, 'switchTestingTypesAndRelaunch').mockResolvedValue(undefined)
+          const setTestingType = vi.fn()
+
+          // @ts-expect-error - only the call that switches the testing type is needed
+          ctx.lifecycleManager._configManager = { setTestingType }
+
+          ctx.reportLoadError('Your configFile is invalid')
+
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
+
+          // The spec ran, after the switch to its testing type and back
+          expect(result).toMatchObject({ testingType: 'e2e' })
+          expect(setTestingType.mock.calls).toEqual([['e2e'], ['component']])
+          expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+        })
+      })
+
+      // Such as a `--headless` session whose requested browser could not be found or driven, which
+      // chooses no other browser in its place
+      describe('no browser to run in', () => {
+        beforeEach(() => {
+          ctx.coreData.activeBrowser = null
+          vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+          vi.spyOn(ctx.lifecycleManager, 'isTestingTypeConfigured').mockReturnValue(true)
+        })
+
+        it('says so instead of launching, when no browser is running yet', async () => {
+          const launch = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
+
+          ctx._apis.projectApi.launchProject = launch
+          ctx.coreData.currentTestingType = 'e2e'
+          ctx.coreData.app.browserStatus = 'closed'
+
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
+
+          expect(result).toEqual({
+            code: 'GENERAL_ERROR',
+            detailMessage: expect.stringContaining('Cypress has no browser to run the spec in'),
+          })
+
+          expect(launch).not.toHaveBeenCalled()
+        })
+
+        it('says so before switching testing types', async () => {
+          ctx.coreData.currentTestingType = 'component'
+
+          const result = await ctx.actions.project.runSpec({ specPath: '/Users/blah/Desktop/application/e2e/abc.cy.ts' })
+
+          expect(result).toEqual({
+            code: 'GENERAL_ERROR',
+            detailMessage: expect.stringContaining('Cypress has no browser to run the spec in'),
+          })
+
+          expect(ctx.actions.project.switchTestingTypesAndRelaunch).not.toHaveBeenCalled()
         })
       })
 
@@ -303,9 +368,48 @@ describe('ProjectActions', () => {
     })
   })
 
+  describe('launchProject', () => {
+    beforeEach(() => {
+      ctx.coreData.currentProject = '/cy-project'
+      ctx.coreData.currentTestingType = 'e2e'
+      ctx.coreData.activeBrowser = { id: 'abc' } as any
+    })
+
+    it('counts the launch before it settles so a concurrent auto-launch check does not launch again', async () => {
+      let resolveLaunch!: () => void
+      const launchProject = vi.fn().mockReturnValue(new Promise<void>((resolve) => {
+        resolveLaunch = resolve
+      }))
+
+      Object.assign(ctx._apis.projectApi, { launchProject })
+
+      expect(actions.launchCount).toBe(0)
+
+      const launching = actions.launchProject('e2e')
+
+      expect(launchProject).toHaveBeenCalledTimes(1)
+      expect(actions.launchCount).toBe(1)
+
+      resolveLaunch()
+      await launching
+
+      expect(actions.launchCount).toBe(1)
+    })
+
+    it('does not count a launch that rejects', async () => {
+      const launchProject = vi.fn().mockRejectedValue(new Error('browser failed to launch'))
+
+      Object.assign(ctx._apis.projectApi, { launchProject })
+
+      await expect(actions.launchProject('e2e')).rejects.toThrow('browser failed to launch')
+
+      expect(actions.launchCount).toBe(0)
+    })
+  })
+
   describe('debugCloudRun', () => {
     beforeEach(() => {
-      jest.spyOn(ctx.relevantRuns, 'moveToRun')
+      vi.spyOn(ctx.relevantRuns, 'moveToRun')
     })
 
     it('should call moveToRun and routeToDebug', async () => {
@@ -313,6 +417,79 @@ describe('ProjectActions', () => {
 
       expect(ctx.relevantRuns.moveToRun).toHaveBeenCalledWith(123, [])
       expect(ctx._apis.projectApi.routeToDebug).toHaveBeenCalled()
+    })
+  })
+
+  describe('clearCurrentProject', () => {
+    // `after:run` is dispatched from the project server's close and has to be answered by
+    // the plugins process the config manager owns, so the project must close first
+    it('closes the active project before tearing down the lifecycle', async () => {
+      const calls: string[] = []
+
+      // closeActiveProject yields before resolving, so running the two concurrently would
+      // interleave the markers rather than just reordering them
+      ;(ctx._apis.projectApi.closeActiveProject as Mock).mockImplementation(async () => {
+        calls.push('closeActiveProject:start')
+        await new Promise((resolve) => setImmediate(resolve))
+        calls.push('closeActiveProject:end')
+      })
+
+      vi.spyOn(ctx.lifecycleManager, 'clearCurrentProject').mockImplementation(async () => {
+        calls.push('clearCurrentProject:start')
+      })
+
+      await actions.clearCurrentProject()
+
+      expect(calls).toEqual([
+        'closeActiveProject:start',
+        'closeActiveProject:end',
+        'clearCurrentProject:start',
+      ])
+    })
+  })
+
+  describe('openDirectoryInIDE', () => {
+    beforeEach(() => {
+      vi.mocked(execa).mockReset().mockReturnValue(Promise.resolve() as any)
+      ctx._apis.electronApi.showItemInFolder = vi.fn()
+      ctx.coreData.localSettings.availableEditors = [
+        { id: 'computer', name: 'Finder', binary: 'computer' },
+        { id: 'code', name: 'Visual Studio Code', binary: 'code' },
+      ]
+    })
+
+    it('shows the directory in the file manager without running a binary for "computer"', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'computer'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(ctx._apis.electronApi.showItemInFolder).toHaveBeenCalledWith('/project')
+      expect(execa).not.toHaveBeenCalled()
+    })
+
+    it('runs the preferred editor with the directory', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(execa).toHaveBeenCalledWith('code', ['/project'])
+      expect(ctx._apis.electronApi.showItemInFolder).not.toHaveBeenCalled()
+    })
+
+    it('does not let a failed editor launch reject', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = 'code'
+      vi.mocked(execa).mockReturnValueOnce(Promise.reject(new Error('spawn code ENOENT')) as any)
+
+      await expect(actions.openDirectoryInIDE('/project')).resolves.toBeUndefined()
+    })
+
+    it('does not run an editor Cypress did not detect', async () => {
+      ctx.coreData.localSettings.preferences.preferredEditorBinary = '/bin/sh'
+
+      await actions.openDirectoryInIDE('/project')
+
+      expect(execa).not.toHaveBeenCalled()
+      expect(ctx._apis.electronApi.showItemInFolder).not.toHaveBeenCalled()
     })
   })
 })

@@ -1,0 +1,48 @@
+import { describe, it, expect } from 'vitest'
+import humanInterval from 'human-interval'
+import * as humanTime from '../../../lib/util/human_time'
+
+describe('lib/util/human_time', () => {
+  describe('.long', () => {
+    it('outputs minutes + seconds', () => {
+      expect(humanTime.long(humanInterval('2 minutes and 3 seconds'))).toBe('2 minutes, 3 seconds')
+      expect(humanTime.long(humanInterval('65 minutes'))).toBe('65 minutes, 0 seconds')
+
+      expect(humanTime.long(humanInterval('1 minute'))).toBe('1 minute, 0 seconds')
+    })
+
+    it('includes full days in minutes', () => {
+      expect(humanTime.long(humanInterval('24 hours'))).toBe('1440 minutes, 0 seconds')
+      expect(humanTime.long(humanInterval('26 hours and 5 seconds'))).toBe('1560 minutes, 5 seconds')
+    })
+
+    it('outputs seconds', () => {
+      expect(humanTime.long(humanInterval('59 seconds'))).toBe('59 seconds')
+
+      expect(humanTime.long(humanInterval('1 second'))).toBe('1 second')
+    })
+  })
+
+  describe('.short', () => {
+    it('outputs mins', () => {
+      expect(humanTime.short(humanInterval('2 minutes and 3 seconds'))).toBe('2m, 3s')
+      expect(humanTime.short(humanInterval('65 minutes'))).toBe('65m')
+
+      expect(humanTime.short(humanInterval('1 minute'))).toBe('1m')
+    })
+
+    it('includes full days in mins', () => {
+      expect(humanTime.short(humanInterval('24 hours'))).toBe('1440m')
+      expect(humanTime.short(humanInterval('25 hours and 1 minute and 1 second'))).toBe('1501m, 1s')
+    })
+
+    it('outputs seconds', () => {
+      expect(humanTime.short(humanInterval('59 seconds'))).toBe('59s')
+      expect(humanTime.short(humanInterval('1 second'))).toBe('1s')
+      expect(humanTime.short(0)).toBe('0s')
+      expect(humanTime.short(500)).toBe('500ms')
+
+      expect(humanTime.short(10)).toBe('10ms')
+    })
+  })
+})

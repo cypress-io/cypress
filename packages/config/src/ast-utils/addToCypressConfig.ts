@@ -7,7 +7,8 @@ import debugLib from 'debug'
 import { parse, print } from 'recast'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
-import { addComponentDefinition, addE2EDefinition, ASTComponentDefinitionConfig } from './astConfigHelpers'
+import type { ASTComponentDefinitionConfig } from './astConfigHelpers'
+import { addComponentDefinition, addE2EDefinition } from './astConfigHelpers'
 
 const debug = debugLib('cypress:config:addToCypressConfig')
 
@@ -51,7 +52,7 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
     return print(ast).code
   } catch (e: any) {
     debug(`Error adding properties to %s: %s`, filePath, e.stack)
-    throw new Error(`Unable to automerge with the config file`)
+    throw new Error(`Unable to automerge with the config file`, { cause: e })
   }
 }
 
@@ -62,7 +63,7 @@ interface AddProjectIdToCypressConfigOptions {
 
 export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
   try {
-    let result = await fs.readFile(options.filePath, 'utf8')
+    const result = await fs.readFile(options.filePath, 'utf8')
     const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
       t.identifier('projectId'),
       t.identifier(options.projectId),
@@ -115,7 +116,7 @@ export async function addTestingTypeToCypressConfig (options: AddTestingTypeToCy
     // gracefully by adding some default code to use as the AST here, based on the extension
     if (!result || result.trim() === '') {
       resultStatus = 'ADDED'
-      result = getEmptyCodeBlock({ outputType: pathExt as OutputExtension, isProjectUsingESModules: options.isProjectUsingESModules, projectRoot: options.projectRoot })
+      result = getEmptyCodeBlock({ useEsm: emptyConfigUsesEsm(pathExt, options.isProjectUsingESModules), projectRoot: options.projectRoot })
     }
 
     const toPrint = await addToCypressConfig(options.filePath, result, toAdd)
@@ -151,43 +152,49 @@ export function defineConfigAvailable (projectRoot: string) {
   }
 }
 
-type OutputExtension = '.ts' | '.mjs' | '.js'
+// `.mjs` and `.mts` get `import`/`export default`, and `.cjs` and `.cts` get
+// `require`/`module.exports`, whatever the package.json `type`, because Node.js
+// always loads those extensions that way. A `.ts` config also gets ESM syntax,
+// which TypeScript compiles to either module system.
+function emptyConfigUsesEsm (extension: string, isProjectUsingESModules: boolean) {
+  if (extension === '.mjs' || extension === '.mts') {
+    return true
+  }
+
+  if (extension === '.cjs' || extension === '.cts') {
+    return false
+  }
+
+  return extension === '.ts' || isProjectUsingESModules
+}
 
 // Necessary to handle the edge case of them deleting the contents of their Cypress
 // config file, just before we merge in the testing type
-function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }: { outputType: OutputExtension, isProjectUsingESModules: boolean, projectRoot: string}) {
+function getEmptyCodeBlock ({ useEsm, projectRoot }: { useEsm: boolean, projectRoot: string }) {
   if (defineConfigAvailable(projectRoot)) {
-    if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
+    if (useEsm) {
       return dedent`
         import { defineConfig } from 'cypress'
 
-        export default defineConfig({
-          allowCypressEnv: false,
-        })
+        export default defineConfig({})
       `
     }
 
     return dedent`
       const { defineConfig } = require('cypress')
 
-      module.exports = defineConfig({
-        allowCypressEnv: false,
-      })
+      module.exports = defineConfig({})
     `
   }
 
-  if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
+  if (useEsm) {
     return dedent`
-      export default {
-        allowCypressEnv: false,
-      }
+      export default {}
     `
   }
 
   return dedent`
-    module.exports = {
-      allowCypressEnv: false,
-    }
+    module.exports = {}
   `
 }
 

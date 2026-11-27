@@ -1,5 +1,6 @@
 import { isObject } from 'lodash'
-import axios, { AxiosError, AxiosInstance } from 'axios'
+import type { AxiosError, AxiosInstance } from 'axios'
+import axios from 'axios'
 
 declare module 'axios' {
   export interface AxiosError {

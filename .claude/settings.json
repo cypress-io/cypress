@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "extraKnownMarketplaces": {
+    "cypress": {
+      "source": {
+        "source": "github",
+        "repo": "cypress-io/ai-toolkit"
+      }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "cypress@cypress": true,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "permissions": {
+    "deny": [
+      "Read(./packages/frontend-shared/src/shiki/languages/**)",
+      "Read(./packages/app/cypress/e2e/runner/snapshots/**)"
+    ]
+  }
+}

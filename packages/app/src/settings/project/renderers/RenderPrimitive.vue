@@ -20,7 +20,7 @@ import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  value?: string | number| null
+  value?: string | number | null
   from: string
   class?: string
 }>()

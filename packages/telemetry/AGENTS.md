@@ -27,7 +27,7 @@ yarn workspace @packages/telemetry check-ts
   - `websocket-span-exporter.ts` — Sends spans via WebSocket from browser to server
   - `console-trace-link-exporter.ts` — Debug exporter that logs a trace link
 - `src/processors/on-start-span-processor.ts` — Hooks span start lifecycle
-- `src/detectors/` — CI environment detectors (CircleCI, GitHub Actions) for resource attribution
+- `src/detectors/` — CI environment detectors (CircleCI, GitHub Actions) for resource attribution, and the process detector `node.ts` uses in place of OpenTelemetry's
 
 **Gotchas / Notes**
 
@@ -36,6 +36,7 @@ yarn workspace @packages/telemetry check-ts
 - Data is forwarded to Honeycomb only for the internal Cypress Cloud project; all other projects' data is discarded.
 - To develop locally with your own Honeycomb instance, override the exporter URL and supply an `x-honeycomb-team` header.
 - All processes must call `telemetry.shutdown()` before exit or page refresh to ensure in-flight spans are flushed.
+- `node.ts` must use `src/detectors/processDetectorSync.ts`, not `processDetectorSync` from `@opentelemetry/resources`. OpenTelemetry's copies the full command line into every span, and `cypress run` passes the record key on it, as can `--env` and `--config`. Ours keeps only the executable and flag names.
 - Duplicate span names are not deduplicated; `getSpan()` will return only the first match.
 - The browser rollup bundle ships with the binary; the ESM node build is currently unused in production.
 

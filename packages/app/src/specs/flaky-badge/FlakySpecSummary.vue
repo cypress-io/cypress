@@ -28,17 +28,17 @@
         <span
           class="ml-4 text-gray-800"
           data-cy="flaky-rate"
-        >{{ t('specPage.flaky.flakyRate', [flakyRate]) }}</span>
+        >{{ flakyRate }}% flaky rate</span>
       </div>
 
       <div class="flex flex-row text-gray-700 text-sm items-center">
-        <span data-cy="flaky-runs">{{ t('specPage.flaky.flakyRuns', { count: totalFlakyRuns, flakyRuns: totalFlakyRuns, totalRuns }) }}</span>
+        <span data-cy="flaky-runs">{{ flakyRunsText }}</span>
         <i-cy-dot-solid_x4
           width="4"
           height="4"
           class="mx-2 icon-light-gray-200"
         />
-        <span data-cy="last-flaky">{{ t('specPage.flaky.lastFlaky', { count: runsSinceLastFlake, runsSinceLastFlake }) }}</span>
+        <span data-cy="last-flaky">{{ lastFlakyText }}</span>
       </div>
     </template>
   </div>
@@ -47,13 +47,10 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-import { useI18n } from '@cy/i18n'
 import SpecNameDisplay from '../SpecNameDisplay.vue'
 import LowRateIcon from '~icons/cy/rate-low_x16'
 import MediumRateIcon from '~icons/cy/rate-medium_x16'
 import HighRateIcon from '~icons/cy/rate-high_x16'
-
-const { t } = useI18n()
 
 const SEVERITIES = {
   LOADING: {
@@ -65,19 +62,19 @@ const SEVERITIES = {
   LOW: {
     accentClass: 'border-t-orange-400',
     textClass: 'text-orange-400',
-    label: t('specPage.flaky.severityLow'),
+    label: 'Low',
     icon: LowRateIcon,
   },
   MEDIUM: {
     accentClass: 'border-t-orange-500',
     textClass: 'text-orange-500',
-    label: t('specPage.flaky.severityMedium'),
+    label: 'Medium',
     icon: MediumRateIcon,
   },
   HIGH: {
     accentClass: 'border-t-orange-600',
     textClass: 'text-orange-600',
-    label: t('specPage.flaky.severityHigh'),
+    label: 'High',
     icon: HighRateIcon,
   },
 }
@@ -104,6 +101,18 @@ const flakyRate = computed(() => {
   }
 
   return Math.ceil(rawRate)
+})
+
+const flakyRunsText = computed(() => {
+  return `${props.totalFlakyRuns} ${props.totalFlakyRuns === 1 ? 'flaky run' : 'flaky runs'} / ${props.totalRuns} total`
+})
+
+const lastFlakyText = computed(() => {
+  if (props.runsSinceLastFlake === 0) {
+    return 'Last run flaky'
+  }
+
+  return `Last flaky ${props.runsSinceLastFlake} ${props.runsSinceLastFlake === 1 ? 'run' : 'runs'} ago`
 })
 
 const severity = computed(() => SEVERITIES[props.severity?.toUpperCase()] || SEVERITIES.LOADING)

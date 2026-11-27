@@ -26,7 +26,7 @@
             prefix-icon-class="icon-dark-indigo-500"
             @click="emit('retry', baseError.id)"
           >
-            {{ t('launchpadErrors.generic.retryButton') }}
+            Try again
           </Button>
 
           <Button
@@ -34,9 +34,9 @@
             data-testid="error-docs-button"
             :prefix-icon="BookIcon"
             prefix-icon-class="icon-dark-indigo-500 group-hocus:icon-dark-indigo-500 group-hocus:icon-light-indigo-50"
-            :href="t(`launchpadErrors.generic.docsButton.${docsType}.link`)"
+            :href="docsButtons[docsType].link"
           >
-            {{ t(`launchpadErrors.generic.docsButton.${docsType}.text`) }}
+            {{ docsButtons[docsType].text }}
           </Button>
         </div>
       </div>
@@ -55,12 +55,14 @@
           max-height="none"
         >
           <div class="border-b border-b-red-100 p-[16px] pt-0">
+            <!-- eslint-disable vue/no-v-html -- markdown rendered by useMarkdown, which passes raw HTML through (html: true) -->
             <div
               ref="markdownTarget"
               class="text-red-500"
               data-testid="error-message"
               v-html="markdown"
             />
+            <!-- eslint-enable vue/no-v-html -->
             <ErrorCodeFrame
               v-if="baseError.codeFrame"
               :gql="baseError.codeFrame"
@@ -89,15 +91,14 @@
                     class="cursor-pointer font-medium outline-none text-red-600 hocus:underline"
                     @click="toggle()"
                     @keypress.space.enter.self.prevent="toggle()"
-                  >{{ t('launchpadErrors.generic.stackTraceLabel') }}</a>
+                  >Stack trace</a>
                 </p>
               </template>
               <pre
                 data-testid="error-header"
                 tabindex="0"
                 class="bg-white rounded font-light border border-red-200 p-[16px] overflow-auto"
-                v-html="baseError.errorStack"
-              />
+              >{{ baseError.errorStack }}</pre>
             </Collapsible>
           </div>
         </Alert>
@@ -113,7 +114,6 @@
 import { ref, computed } from 'vue'
 import { gql } from '@urql/vue'
 import Button from '@cy/components/Button.vue'
-import { useI18n } from '@cy/i18n'
 import type { BaseErrorFragment } from '../../generated/graphql'
 import Alert from '@cy/components/Alert.vue'
 import Collapsible from '@cy/components/Collapsible.vue'
@@ -138,8 +138,6 @@ fragment BaseError on ErrorWrapper {
 }
 `
 
-const { t } = useI18n()
-
 const props = withDefaults(defineProps<{
   gql: BaseErrorFragment
   showButtons?: boolean
@@ -153,7 +151,24 @@ const markdownTarget = ref()
 const baseError = computed(() => props.gql)
 const { markdown } = useMarkdown(markdownTarget, computed(() => props.gql.errorMessage), { classes: { code: ['bg-error-200'] } })
 
-const getDocsType = (): string => {
+type DocsType = 'configGuide' | 'cloudGuide' | 'docsHomepage'
+
+const docsButtons: Record<DocsType, { text: string, link: string }> = {
+  configGuide: {
+    text: 'Configuration guide',
+    link: 'https://on.cypress.io/configuration',
+  },
+  cloudGuide: {
+    text: 'Cypress Cloud guide',
+    link: 'https://on.cypress.io/features-dashboard',
+  },
+  docsHomepage: {
+    text: 'Cypress docs',
+    link: 'https://docs.cypress.io',
+  },
+}
+
+const getDocsType = (): DocsType => {
   const { errorType, errorStack } = baseError.value
 
   // Full list of errors lives in "packages/errors/src/errors.ts", but cannot be imported to Vue
@@ -170,6 +185,6 @@ const getDocsType = (): string => {
   }
 }
 
-const docsType: string = getDocsType()
+const docsType: DocsType = getDocsType()
 
 </script>

@@ -1,8 +1,8 @@
-import { AppComponent } from './app.component'
+import { App } from './app'
 
 describe('AppComponent', () => {
   it('should mount', () => {
-    cy.mount(AppComponent)
+    cy.mount(App)
     cy.contains('h1', 'Hello World!')
   })
 })

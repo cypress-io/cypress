@@ -1,11 +1,18 @@
+declare global {
+  namespace NodeJS {
+    interface Process {
+      // Electron adds process.log on Windows
+      log?: (str: string) => void
+    }
+  }
+}
+
 const _write = process.stdout.write
-// @ts-expect-error - process.log is not defined in the type system
 const _log = process.log
 
 export const restore = function () {
   // restore to the originals
   process.stdout.write = _write
-  // @ts-expect-error
   process.log = _log
 }
 
@@ -14,17 +21,16 @@ export const stdout = function () {
 
   // lazily backup write to enable injection
   const { write } = process.stdout
-  // @ts-expect-error
   const { log } = process
 
   // electron adds a new process.log
   // method for windows instead of process.stdout.write
   // https://github.com/cypress-io/cypress/issues/977
   if (log) {
-    // @ts-expect-error
     process.log = function (str: string) {
       logs.push(str)
 
+      // @ts-expect-error - IArguments does not match process.log's parameter tuple
       return log.apply(this, arguments)
     }
   }
@@ -32,7 +38,7 @@ export const stdout = function () {
   process.stdout.write = function (str: string) {
     logs.push(str)
 
-    // @ts-expect-error
+    // @ts-expect-error - IArguments does not match stdout.write's parameter tuple
     return write.apply(this, arguments)
   }
 

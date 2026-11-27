@@ -5,8 +5,24 @@ import files from './files'
 import type { Cfg } from '../project-base'
 import type { FoundSpec } from '@packages/types'
 import type { RemoteStates } from '@packages/network-tools'
+import { GracefulExit } from '../util/graceful-exit'
+import Bluebird from 'bluebird'
 
 const debug = Debug('cypress:server:iframes')
+
+// The dev server's socket can close before Node reports that the config process (which hosts the dev server) exited.
+// Its unexpected exit ends the run through GracefulExit, so a proxy error is given a moment for that to start.
+// Reaping the killed process is slowest on a machine that is out of memory, so the bound is generous.
+const SHUTDOWN_WAIT_MS = 5000
+const SHUTDOWN_POLL_MS = 50
+
+const shutdownStartsSoon = async () => {
+  for (let waited = 0; waited < SHUTDOWN_WAIT_MS && !GracefulExit.isShuttingDown; waited += SHUTDOWN_POLL_MS) {
+    await Bluebird.delay(SHUTDOWN_POLL_MS)
+  }
+
+  return GracefulExit.isShuttingDown
+}
 
 interface IFramesController {
   config: Cfg
@@ -57,11 +73,19 @@ export const iframesController = {
 
     // use the node proxy here instead of the network proxy to avoid
     // the user accidentally intercepting and modifying our internal index.html handler
-    nodeProxy.web(req, res, {}, (e) => {
+    nodeProxy.web(req, res, {}, async (e) => {
       if (e) {
         if (config.isTextTerminal) {
           // if we are in run mode and we receive an error, we need to throw an error so the app doesn't hang
           debug('Error interacting with the dev server.', e)
+
+          if (await shutdownStartsSoon()) {
+            debug('not rethrowing: the process is shutting down')
+            res.destroy()
+
+            return
+          }
+
           throw e
         } else {
           // if we are in open mode, there can be multiple reasons we can't interact with the dev server (e.g. the config changed and the dev server has restarted, reruns, etc.),

@@ -46,7 +46,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
 
-    // @ts-ignore
+    // @ts-expect-error - deliberately passes an invalid origin
     cy.origin(false, () => {})
   })
 
@@ -136,6 +136,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
         })
       })
 
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- keeps cy.origin() open long enough for the async error to fire
       cy.wait(300)
     })
 

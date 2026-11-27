@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const { _checkCanaries } = require('../circle-env')
 
 describe('circle-env', () => {
-  let cachedEnv = { ...process.env }
+  const cachedEnv = { ...process.env }
 
   afterEach(() => {
     process.env = cachedEnv

@@ -9,32 +9,32 @@ describe('cy.origin Cypress API', { browser: '!webkit' }, () => {
   context('Commands', () => {
     it('adds a custom command', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        // @ts-ignore
+        // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
         Cypress.Commands.add('foo', () => 'bar')
 
-        // @ts-ignore
+        // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
         cy.foo().should('equal', 'bar')
       })
 
       // persists added command through spec bridge
       cy.origin('http://www.foobar.com:3500', () => {
-        // @ts-ignore
+        // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
         cy.foo().should('equal', 'bar')
       })
     })
 
     it('overwrites an existing command in the spec bridge', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        // @ts-ignore
+        // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
         Cypress.Commands.overwrite('foo', () => 'baz')
 
-        // @ts-ignore
+        // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
         cy.foo().should('equal', 'baz')
       })
 
       // persists overwritten command through spec bridge
       cy.origin('http://www.foobar.com:3500', () => {
-        // @ts-ignore
+        // @ts-expect-error - `foo` is a test-only custom command not declared on Chainable
         cy.foo().should('equal', 'baz')
       })
     })

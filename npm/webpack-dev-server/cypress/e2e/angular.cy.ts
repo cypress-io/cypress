@@ -1,12 +1,9 @@
 /// <reference types="cypress" />
-/// <reference path="../support/e2e.ts" />
 import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
 const WEBPACK_ANGULAR: ProjectFixtureDir[] = [
-  'angular-18',
-  'angular-19',
-  'angular-20',
   'angular-21',
+  'angular-22',
 ]
 
 // Add to this list to focus on a particular permutation

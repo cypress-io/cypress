@@ -6,6 +6,7 @@ import type { Configuration, RuleSetRule } from 'webpack'
 import type { PresetHandlerResult, WebpackDevServerConfig } from '../devServer'
 import { sourceDefaultWebpackDependencies } from './sourceRelativeWebpackModules'
 import debugLib from 'debug'
+import micromatch from 'micromatch'
 import type { logging as AngularLogging } from '@angular-devkit/core'
 
 const debugPrefix = 'cypress:webpack-dev-server:angularHandler'
@@ -13,7 +14,7 @@ const debug = debugLib(debugPrefix)
 
 export type BuildOptions = Record<string, any>
 
-export type AngularWebpackDevServerConfig = Extract<WebpackDevServerConfig, {framework: 'angular'}>
+export type AngularWebpackDevServerConfig = Extract<WebpackDevServerConfig, { framework: 'angular' }>
 
 type Configurations = {
   configurations?: {
@@ -121,7 +122,15 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
 
   const getProjectFilePath = (...fileParts: string[]): string => toPosix(path.join(...fileParts))
 
-  const includePaths = [...specPattern.map((pattern) => getProjectFilePath(projectRoot, pattern))]
+  // `**/*.cy.{ts,tsx}` becomes `**/*.cy.ts` and `**/*.cy.tsx`. TypeScript's
+  // `include` only understands `*`, `?` and `**/`, so a brace pattern, such as
+  // the default specPattern, would match no files. Expanding before joining
+  // projectRoot keeps braces in the project's own path literal. The result
+  // stays a list of globs rather than files because @ngtools/webpack re-reads
+  // `include` on every rebuild, which is how it picks up a newly created spec.
+  const expandedSpecPatterns = new Set(specPattern.flatMap((pattern) => micromatch.braces(pattern, { expand: true })))
+
+  const includePaths = [...expandedSpecPatterns].map((pattern) => getProjectFilePath(projectRoot, pattern))
 
   if (cypressConfig.supportFile) {
     includePaths.push(toPosix(cypressConfig.supportFile))
@@ -200,7 +209,7 @@ export async function getAngularCliModules (projectRoot: string) {
 
       return module
     } catch (e) {
-      throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`)
+      throw new Error(`Could not resolve "${dep}". Do you have "@angular-devkit/build-angular" and "@angular-devkit/core" installed?`, { cause: e })
     }
   }))
 

@@ -28,13 +28,13 @@
               class="font-medium text-sm mr-[4px] ml-[8px] text-indigo-500"
               :class="{'sr-only': !latestIsCurrentlySelected}"
             >
-              {{ t('debugPage.switchRun') }}
+              Switch run
             </span>
           </button>
 
           <Dot v-if="latestIsCurrentlySelected" />
           <LightText v-if="latestIsCurrentlySelected">
-            {{ t('debugPage.mostRecentRun') }}
+            You are on the most recent run
           </LightText>
 
           <template v-else-if="latest?.status && latest.runNumber">
@@ -62,7 +62,7 @@
           class="shrink-0 ml-[8px]"
           @click="$event => changeRun(latest!)"
         >
-          {{ t('debugPage.switchToLatestRun') }}
+          Switch to latest run
         </Button>
       </div>
     </div>
@@ -133,19 +133,18 @@ import { gql, useMutation } from '@urql/vue'
 import DebugRunNavigationRow from './DebugRunNavigationRow.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { compact, groupBy } from 'lodash'
-import { computed, FunctionalComponent, h } from 'vue'
-import { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment, DebugRunNavigation_MoveToRunDocument } from '../generated/graphql'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
+import { DebugRunNavigation_MoveToRunDocument } from '../generated/graphql'
+import type { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment } from '../generated/graphql'
 import RunResults from '../runs/RunResults.vue'
 import RunNumber from '../runs/RunNumber.vue'
 import DebugCommitIcon from './DebugCommitIcon.vue'
 import DebugRunNavigationLimitMessage from './DebugRunNavigationLimitMessage.vue'
 import { IconChevronRightSmall } from '@cypress-design/vue-icon'
 import { useDebugRunSummary } from './useDebugRunSummary'
-import { useI18n } from '@cy/i18n'
 import { useToggle } from '@vueuse/core'
 import TransitionQuickFadeVue from '@cy/components/transitions/TransitionQuickFade.vue'
-
-const { t } = useI18n()
 
 gql`
 fragment DebugRunNavigationRunInfo on CloudRun {
@@ -237,7 +236,7 @@ const groupByCommit = computed(() => {
     mapped[props.currentCommitInfo.sha] = props.currentCommitInfo
   }
 
-  const result = Object.keys(grouped).reduce<Record<string, {sha: string, message: string | undefined | null, runs: typeof props.runs}>>((acc, curr) => {
+  const result = Object.keys(grouped).reduce<Record<string, { sha: string, message: string | undefined | null, runs: typeof props.runs }>>((acc, curr) => {
     acc[curr] = {
       sha: curr,
       message: grouped[curr][0].commitInfo?.summary,
@@ -271,10 +270,14 @@ function isCurrentRun (run: DebugRunNavigationRunInfoFragment) {
 }
 
 function specsCompleted (run: DebugRunNavigationRunInfoFragment) {
+  const total = run.totalInstanceCount || 0
+
   if (run.status === 'RUNNING') {
-    return t('debugPage.specCounts.whenRunning', { n: run.totalInstanceCount || 0, completed: run.completedInstanceCount || 0, total: run.totalInstanceCount || 0 })
+    const completed = run.completedInstanceCount || 0
+
+    return `${completed} of ${total} ${total === 1 ? 'spec' : 'specs'} completed`
   }
 
-  return t('debugPage.specCounts.whenCompleted', { n: run.totalInstanceCount || 0 })
+  return `${total} ${total === 1 ? 'spec' : 'specs'}`
 }
 </script>

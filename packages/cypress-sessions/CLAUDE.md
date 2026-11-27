@@ -1,0 +1,3 @@
+# Cypress Sessions
+
+@AGENTS.md

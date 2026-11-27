@@ -43,7 +43,6 @@ context('cy.origin files', { browser: '!webkit' }, () => {
         expect(Cypress.backend).to.be.calledWith(
           'run:privileged',
           {
-            args: ['6998637248317671', '4581875909943693'],
             commandName: 'writeFile',
             options: {
               fileName: 'foo.json',

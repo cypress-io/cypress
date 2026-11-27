@@ -2,7 +2,6 @@
 // the project root, so this file must not import from 'cypress'.
 export default {
   retries: 0,
-  allowCypressEnv: false,
   // the expected browser protocol is public configuration — the proxy-enabled
   // contrast run overrides it with `--expose expectedBrowserProtocol=1.1`
   expose: {

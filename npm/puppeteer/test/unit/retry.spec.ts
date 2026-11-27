@@ -46,4 +46,47 @@ describe('#retry', () => {
       retry(fn, { timeout: 5, delayBetweenTries: 1 }),
     ).rejects.toThrow('Failed retrying after 5ms: fail')
   })
+
+  it('fails after timeout when there is no delay between tries', async () => {
+    const fn = vi.fn().mockImplementation(() => {
+      throw new Error('fail')
+    })
+
+    await expect(
+      retry(fn, { timeout: 20, delayBetweenTries: 0 }),
+    ).rejects.toThrow('Failed retrying after 20ms: fail')
+  })
+
+  it('counts time spent running the function toward the timeout', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+
+    try {
+      const fn = vi.fn().mockImplementation(() => {
+        vi.setSystemTime(Date.now() + 1000)
+        throw new Error('fail')
+      })
+
+      await expect(
+        retry(fn, { timeout: 1500, delayBetweenTries: 1 }),
+      ).rejects.toThrow('Failed retrying after 1500ms: fail')
+
+      expect(fn).toHaveBeenCalledTimes(2)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('fails without waiting another delay once the timeout is reached', async () => {
+    const fn = vi.fn().mockImplementation(() => {
+      throw new Error('fail')
+    })
+    const start = Date.now()
+
+    await expect(
+      retry(fn, { timeout: 0, delayBetweenTries: 1000 }),
+    ).rejects.toThrow('Failed retrying after 0ms: fail')
+
+    expect(fn).toHaveBeenCalledOnce()
+    expect(Date.now() - start).toBeLessThan(1000)
+  })
 })

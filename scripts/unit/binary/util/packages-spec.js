@@ -99,7 +99,6 @@ describe('transformRequires', () => {
 
     if (debug.enabled) {
       debug('returned file system')
-      /* eslint-disable-next-line no-console */
       console.error(files)
     }
 
@@ -203,6 +202,36 @@ describe('testStaticAssets', () => {
     .property('message').contain('minified')
   })
 
+  it('can detect asset that was not minified', async () => {
+    const buildDir = 'resources/app'
+    const unminified = 'const greeting = "Welcome to Cypress"\n'.repeat(200)
+
+    mockfs({
+      [buildDir]: {
+        'packages': {
+          'launchpad': {
+            'dist': {
+              'assets': {
+                'index-DL0Y2ITL.js': unminified,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/launchpad/dist/assets/*.js`,
+      maxLineCount: 100,
+    })).to.rejected.with.eventually
+    .property('message').contain('not minified')
+
+    await expect(testPackageStaticAssets({
+      assetGlob: `${buildDir}/packages/launchpad/dist/assets/*.js`,
+      maxLineCount: 1000,
+    })).not.be.rejected
+  })
+
   it('can detect asset that includes specified number of goodStrings', async () => {
     const buildDir = 'resources/app'
 
@@ -282,7 +311,6 @@ const getFs = () => {
         if (d < 0) {
           nextDepth = d + 1
         } else if (!(d > cwd.length) && key === cwd[d]) {
-          key = 'foo'
           nextDepth = d + 1
 
           if (d === cwd.length - 1) {

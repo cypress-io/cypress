@@ -35,7 +35,8 @@
 
 <script lang="ts" setup>
 import { createPopper } from '@popperjs/core'
-import { onMounted, ref, nextTick, Ref } from 'vue'
+import { onMounted, ref, nextTick } from 'vue'
+import type { Ref } from 'vue'
 import type { AssertionOption } from './types'
 
 interface Props {
@@ -92,10 +93,10 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import './assertions-style.scss';
+@use './assertions-style.scss';
 
 .assertion-options {
-  @include menu-style;
+  @include assertions-style.menu-style;
 
   font-size: 14px;
   max-width: 150px;
@@ -130,7 +131,7 @@ onMounted(() => {
       background-color: $gray-950;
       color: $indigo-300;
       outline: none;
-      @include box-shadow;
+      @include assertions-style.box-shadow;
     }
   }
 }

@@ -3,7 +3,7 @@
     :banner-id="bannerId"
     data-cy="record-banner"
     status="info"
-    :title="t('specPage.banners.record.title')"
+    title="Record your first run"
     class="mb-[16px]"
     :icon="RecordIcon"
     dismissible
@@ -15,7 +15,7 @@
     }"
   >
     <p class="mb-[24px]">
-      {{ t('specPage.banners.record.content') }}
+      Record a run to see your test results in Cypress Cloud. You can then optimize your test suite, debug failing and flaky tests, and integrate with your favorite tools.
     </p>
     <RecordPromptAdapter />
   </TrackedBanner>
@@ -23,7 +23,6 @@
 
 <script setup lang="ts">
 import RecordIcon from '~icons/cy/action-record_x16.svg'
-import { useI18n } from '@cy/i18n'
 import TrackedBanner from './TrackedBanner.vue'
 import { BannerIds } from '@packages/types'
 import RecordPromptAdapter from '@packages/frontend-shared/src/gql-components/RecordPromptAdapter.vue'
@@ -32,7 +31,6 @@ defineProps<{
   hasBannerBeenShown: boolean
 }>()
 
-const { t } = useI18n()
 const bannerId = BannerIds.ACI_082022_RECORD
 
 </script>

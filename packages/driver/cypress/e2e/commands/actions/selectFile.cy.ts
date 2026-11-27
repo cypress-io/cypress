@@ -382,7 +382,7 @@ describe('src/cy/commands/actions/selectFile', () => {
     }, () => {
       it('is a child command', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('A child command must be chained after a parent because it operates on a previous subject.')
+          expect(err.message).to.include('`cy.selectFile()` runs on the subject yielded by the command it is chained off')
           done()
         })
 
@@ -763,7 +763,7 @@ is being covered by another element:
         cy.get('#scroll').selectFile({ contents: '@foo' }, { scrollBehavior: 'bottom' })
 
         cy.get('#scroll').then((el) => {
-          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
         })
       })
     })
@@ -828,7 +828,7 @@ is being covered by another element:
 
       it('drops files onto any element and triggers events', (done) => {
         const $body = cy.$$('body')
-        let events: any[] = []
+        const events: any[] = []
 
         $body.on('input', (e) => {
           throw new Error('should not trigger input')

@@ -151,7 +151,6 @@ export const replaceLocalNpmVersions = async function (basePath: string) {
         const localPkgPath = path.join(basePath, 'npm', pkgName)
 
         json.dependencies[depName] = `file:${localPkgPath}`
-        shouldWriteFile = true
 
         if (!visited.has(localPkgPath)) {
           await updatePackageJson(`./npm/${pkgName}`)

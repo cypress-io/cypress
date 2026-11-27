@@ -12,7 +12,7 @@
 
 #### Notes
 
-When migrating some of these projects away from the `ts-node` entry [see `@packages/scaffold-config` example](https://github.com/cypress-io/cypress/blob/v15.2.0/packages/scaffold-config/index.js), it is somewhat difficult to make separate browser/node entries as the v8-snapshot [tsconfig.json](https://github.com/cypress-io/cypress/blob/v15.2.0/tooling/v8-snapshot/tsconfig.json) is using an older style of module resolution where the `exports` key inside a package's `package.json` is not well supported. Because of this, we need to find ways to bundle code that is needed internally in the browser vs in node without them being a part of the same bundle. This is a temporary work around until we are able to get every package being able to build as an ES Module, which as that point we can re assess how the Cypress binary is being built as well as v8-snapshots, and will allow us to reconfigure this packages to export content in a more proper fashion. We are currently doing something similar in the following packages:
+When migrating some of these projects away from the `ts-node` entry [see `@packages/scaffold-config` example](https://github.com/cypress-io/cypress/blob/v15.2.0/packages/scaffold-config/index.js), some packages bundle the code needed in the browser separately from the code needed in Node instead of declaring separate entries with the `exports` key in `package.json`, because the base `@packages/ts` tsconfig uses `node` module resolution, which ignores `exports`. The following packages still use separate bundles:
 
 * `@packages/scaffold-config`
 * `@packages/socket`
@@ -25,7 +25,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] cli ✅ **COMPLETED** 
 - [x] npm/angular ✅ **COMPLETED** 
 - [x] npm/cypress-schematic ✅ **COMPLETED**
-- [ ] npm/eslint-plugin-dev
+- ~~npm/eslint-plugin-dev~~ — **SKIP**: deleted; its rules live in `@packages/eslint-config`.
 - [x] npm/grep ✅ **COMPLETED** 
 - [x] npm/mount-utils ✅ **COMPLETED**  
 - [x] npm/puppeteer ✅ **COMPLETED** 
@@ -58,11 +58,9 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/net-stubbing ✅ **COMPLETED**
 - [x] packages/network ✅ **COMPLETED**
 - [x] packages/network-tools ✅ **COMPLETED**
-- [x] packages/packherd-require ✅ **COMPLETED**
 - [ ] packages/proxy **PARTIAL** - entry point is JS
 - [x] packages/reporter ✅ **COMPLETED**
 - [x] packages/resolve-dist ✅ **COMPLETED**
-- [ ] packages/rewriter **PARTIAL** - entry point is JS
 - [x] packages/root ✅ **COMPLETED**
 - [x] packages/runner ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
@@ -72,7 +70,6 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts **PARTIAL** - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
-- [x] packages/v8-snapshot-require
 - [x] packages/web-config
 
 
@@ -95,7 +92,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 ##### Binary Packages
 
 - [x] packages/config ✅ **COMPLETED**
-- [x] packages/data-context **COMPLETED** (migrated from `mocha`/`sinon`/`chai` to `jest`). See package README for more details as to why `jest` over `vitest`
+- [x] packages/data-context ✅ **COMPLETED**
 - [x] packages/driver ✅ **COMPLETED**
 - [x] packages/electron ✅ **COMPLETED**
 - [x] packages/error ✅ **COMPLETED**
@@ -107,9 +104,7 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/net-stubbing ✅ **COMPLETED**
 - [x] packages/network ✅ **COMPLETED**
 - [x] packages/network-tools ✅ **COMPLETED**
-- [x] packages/packherd-require ✅ **COMPLETED**
 - [x] packages/proxy ✅ **COMPLETED**
-- [x] packages/rewriter ✅ **COMPLETED**
 - [x] packages/scaffold-config ✅ **COMPLETED**
 - [ ] packages/server
 - [x] packages/socket ✅ **COMPLETED**
@@ -117,11 +112,12 @@ When migrating some of these projects away from the `ts-node` entry [see `@packa
 - [x] packages/telemetry ✅ **COMPLETED**
 - [ ] packages/ts - ultimate goal is removal and likely not worth the effort to convert
 - [x] packages/types ✅ **COMPLETED**
-- [x] packages/v8-snapshot-require ✅ **COMPLETED**
 
 ### Phase 3: Bundle ESM/CJS versions of NPM packages 
 
 TBD: details will be clearer at the end of Phase 2
+
+Lint ignores build output centrally, so a package that emits `cjs/` and `esm/` needs no ignore entries of its own: `baseConfig.ts` `ignores` covers every workspace, so any emitter is covered as soon as it is added. Two things to keep in mind if Phase 3 changes the output layout: the `linux-lint` job restores a built workspace, so generated output is on disk when ESLint runs and an uncovered emitter fails CI rather than only local `yarn build && yarn lint`; and output directories nested below a package's root (or named something other than `cjs`/`esm`/`dist`) need their pattern added centrally. See [`@packages/eslint-config`'s ignores](../packages/eslint-config/AGENTS.md#ignores).
 
 ### Phase 4: Run Cypress server as an ESM package
 

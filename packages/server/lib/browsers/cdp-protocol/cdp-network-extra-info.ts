@@ -112,8 +112,17 @@ export class CDPNetworkExtraInfo {
   constructor (private readonly client: CDPNetworkExtraInfoClient) {}
 
   /**
-   * Relies on the Network domain already being enabled on this client
-   * (initializeCDP).
+   * Only registers listeners — it does not send Network.enable itself, and
+   * does not require it to have settled yet. On the main target it's already
+   * enabled by the time this runs (initializeCDP). On an extra target
+   * (popup/_blank), attachExtraTarget sends Network.enable without awaiting
+   * it: that target is auto-attached debugger-paused, and the enable's
+   * response is withheld until the renderer unpauses, which only happens
+   * after attachExtraTarget itself returns — awaiting it there deadlocks
+   * (#34512). So here, Network enabling late, or never (target closes first),
+   * is an expected, load-bearing case, not just a theoretical race: entries
+   * with no extraInfo promised skip the hold below instead of hanging on
+   * events that may never come.
    */
   start (): void {
     this.client.on('Network.requestWillBeSentExtraInfo', this.onRequestWillBeSentExtraInfo)

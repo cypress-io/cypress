@@ -39,7 +39,7 @@ yarn gulp downloadPromptTypes
 or to reference a local `cypress_services` repo:
 
 ```sh
-CYPRESS_LOCAL_CY_PROMPT_PATH=<path-to-cypress-services/app/cy-prompt/dist/development-directory> yarn gulp downloadPromptTypes
+CYPRESS_LOCAL_CY_PROMPT_PATH=<path-to-cypress-services/app/packages/cy-prompt/dist/development-directory> yarn gulp downloadPromptTypes
 ```
 
 ## Testing

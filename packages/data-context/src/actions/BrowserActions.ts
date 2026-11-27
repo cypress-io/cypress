@@ -32,6 +32,10 @@ export class BrowserActions {
       d.activeBrowser = browser
     })
 
+    if (this.ctx.isRunMode) {
+      return
+    }
+
     this.ctx._apis.projectApi.insertProjectPreferencesToCache(this.ctx.lifecycleManager.projectTitle, {
       lastBrowser: {
         name: browser.name,

@@ -7,8 +7,8 @@ const args = minimist(process.argv.slice(2), {
 })
 
 const sanitizeCliInfo = () => {
-  const chromiumVersion = /- Version: (<.+>)(\d{2,3}.\d\.\d+.\d+)(<.+>)/g
-  const firefoxVersion = /- Version: (<.+>)(\d{2,3}.\d\.\d+|\d+\.[0-9a-z])(<.+>)+/g
+  const chromiumVersion = /- Version: (<.+>)(\d{2,3}\.\d\.\d+\.\d+)(<.+>)/g
+  const firefoxVersion = /- Version: (<.+>)(\d{2,3}\.\d\.\d+|\d+\.[0-9a-z])(<.+>)+/g
   const browserArgument = /--browser (\w+:?\w+)/g
   // there is only a single line with memory usage
   const systemMemory = /System Memory: (<.+>)([\w.]+ \w+)(<.+>) free (<.+>)([\w.]+ \w+)(<.+>)/

@@ -1,10 +1,13 @@
-import express, { Request } from 'express'
+import express from 'express'
+import type { Request } from 'express'
 import type { AddressInfo, Socket } from 'net'
-import { DataContext, getCtx, globalPubSub, GraphQLRequestInfo } from '../src'
+import { DataContext, getCtx, globalPubSub } from '../src'
+import type { GraphQLRequestInfo } from '../src'
 import cors from 'cors'
-import { corsOriginDelegate, isOriginAllowed } from './corsOriginDelegate'
-import { SocketIONamespace, SocketIOServer } from '@packages/socket'
-import type { Server } from 'http'
+import { corsOriginDelegate, isHostAllowed, isOriginAllowed } from './corsOriginDelegate'
+import { SocketIOServer } from '@packages/socket'
+import type { SocketIONamespace } from '@packages/socket'
+import type { IncomingHttpHeaders, Server } from 'http'
 import { graphqlHTTP } from 'express-graphql'
 import serverDestroy from 'server-destroy'
 import send from 'send'
@@ -14,10 +17,16 @@ import debugLib from 'debug'
 import { Server as WebSocketServer } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 
+import { getSpanNames, telemetry } from '@packages/telemetry'
+import type { OTLPTraceExporterCloud } from '@packages/telemetry'
+
 import { graphqlSchema } from './schema'
-import { DefinitionNode, DocumentNode, execute, Kind, OperationDefinitionNode, OperationTypeNode, parse } from 'graphql'
+import { runnerMutationRule, tapOperationRule } from './rootFieldRules'
+import { execute, Kind, locatedError, parse, specifiedRules, validate } from 'graphql'
+import type { DefinitionNode, DocumentNode, ExecutionResult, GraphQLError, OperationDefinitionNode, OperationTypeNode, ValidationRule } from 'graphql'
 
 const debug = debugLib(`cypress-verbose:graphql:operation`)
+const debugTelemetry = debugLib(`cypress:data-context:graphql:telemetry`)
 
 const IS_DEVELOPMENT = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
@@ -32,9 +41,17 @@ globalPubSub.on('reset:data-context', (ctx) => {
   ctx.actions.servers.setGqlGraphqlWsDispose(gqlGraphqlWsDispose)
 })
 
+function isUpgradeAllowed (req: { headers: IncomingHttpHeaders, socket: { localPort?: number } }): boolean {
+  return isHostAllowed(req.headers.host, req.socket.localPort) && isOriginAllowed(req.headers.origin, req.socket.localPort)
+}
+
 export async function makeGraphQLServer () {
   const dfd = Promise.withResolvers<number>()
   const app = express()
+
+  app.use((req, res, next) => {
+    return isHostAllowed(req.headers.host, req.socket.localPort) ? next() : res.sendStatus(403)
+  })
 
   app.use(cors(corsOriginDelegate))
 
@@ -66,7 +83,9 @@ export async function makeGraphQLServer () {
     res.sendStatus(200)
   })
 
-  app.use('/__launchpad/graphql/:operationName?', graphQLHTTP)
+  app.use('/__launchpad/graphql/:operationName?', (req, res, next) => {
+    return isOriginAllowed(req.headers.origin, req.socket.localPort) ? next() : res.sendStatus(403)
+  }, graphQLHTTP)
 
   function makeProxy (): express.Handler {
     if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
@@ -84,6 +103,12 @@ export async function makeGraphQLServer () {
         root: getPathToDist('launchpad'),
       }).pipe(res)
     }
+  }
+
+  if (telemetry.isEnabled()) {
+    app.get('/__launchpad/index.html', (req, res, next) => {
+      getCtx().html.launchpadHtml().then((html) => res.type('html').send(html), next)
+    })
   }
 
   app.get('/__launchpad/*', makeProxy())
@@ -112,7 +137,7 @@ export async function makeGraphQLServer () {
     dfd.resolve(port)
   }
 
-  srv = graphqlPort ? app.listen(graphqlPort, listenCallback) : app.listen(listenCallback)
+  srv = app.listen(Number(graphqlPort) || 0, '127.0.0.1', listenCallback)
 
   serverDestroy(srv)
 
@@ -120,7 +145,7 @@ export async function makeGraphQLServer () {
     path: '/__launchpad/socket',
     transports: ['websocket'],
     allowRequest: (req, callback) => {
-      callback(null, isOriginAllowed(req.headers.origin, req.socket.localPort))
+      callback(null, isUpgradeAllowed(req))
     },
   })
 
@@ -137,7 +162,38 @@ export async function makeGraphQLServer () {
 
   ctx.actions.servers.setGqlSocketServer(gqlSocketServer)
 
+  if (telemetry.isEnabled()) {
+    socketSrv.of('/telemetry').on('connection', (socket) => {
+      socket.on('backend:request', handleTelemetrySocketRequest)
+    })
+  }
+
   return dfd.promise
+}
+
+/**
+ * The browser's websocket span exporter sends spans as a `backend:request`
+ * event named `telemetry`, so that is the only event this accepts.
+ */
+function handleTelemetrySocketRequest (eventName: unknown, payload: unknown, callback?: (res?: { error: Error }) => void) {
+  if (typeof callback !== 'function') {
+    return
+  }
+
+  if (eventName !== 'telemetry' || typeof payload !== 'string') {
+    // A plain object, since socket.io serializes an Error instance to {}
+    return callback({ error: { name: 'Error', message: `The launchpad telemetry socket cannot handle: ${String(eventName)}` } })
+  }
+
+  if (debugTelemetry.enabled) {
+    debugTelemetry('exporting spans from launchpad: %s', getSpanNames(payload).join(', '))
+  }
+
+  (telemetry.exporter() as OTLPTraceExporterCloud | undefined)?.send(payload, () => {}, (err) => {
+    debugTelemetry('error exporting telemetry data from launchpad %s', err)
+  })
+
+  callback()
 }
 
 interface GraphQLSocketPayload {
@@ -155,13 +211,50 @@ interface GraphQLSocketPayload {
  * @param data
  * @param callback
  */
-export async function handleGraphQLSocketRequest (uid: string, payload: string, callback: Function) {
-  try {
-    const operation = JSON.parse(payload) as GraphQLSocketPayload
-    const context = getCtx()
-    const document = parse(operation.query)
+export const handleGraphQLSocketRequest = makeGraphQLSocketHandler([])
 
-    DataContext.addActiveRequest()
+/**
+ * The runner server's socket entry point, which also restricts mutations to
+ * the ones the runner app sends.
+ */
+export const handleRunnerGraphQLSocketRequest = makeGraphQLSocketHandler([runnerMutationRule])
+
+function makeGraphQLSocketHandler (validationRules: readonly ValidationRule[]) {
+  const rules = [...specifiedRules, ...validationRules]
+
+  // The rules are fixed here because socket.io passes every emitted argument to the handler.
+  return (uid: string, payload: string, callback: (result: ExecutionResult) => void) => executeGraphQLSocketRequest(rules, uid, payload, callback)
+}
+
+async function executeGraphQLSocketRequest (validationRules: readonly ValidationRule[], uid: string, payload: string, callback: (result: ExecutionResult) => void) {
+  if (typeof callback !== 'function') {
+    return
+  }
+
+  let operation: GraphQLSocketPayload
+  let document: DocumentNode
+  let validationErrors: readonly GraphQLError[]
+
+  try {
+    operation = JSON.parse(payload) as GraphQLSocketPayload
+    document = parse(operation.query)
+    // Validation recurses through fragment spreads, so a long chain can throw.
+    validationErrors = validate(graphqlSchema, document, validationRules)
+  } catch (e) {
+    callback({ data: null, errors: [locatedError(e, undefined)] })
+
+    return
+  }
+
+  if (validationErrors.length) {
+    callback({ data: null, errors: validationErrors })
+
+    return
+  }
+
+  DataContext.addActiveRequest()
+
+  try {
     const result = await execute({
       operationName: operation.operationName,
       variableValues: operation.variables,
@@ -169,7 +262,7 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
       schema: graphqlSchema,
       contextValue: graphqlRequestContext({
         app: 'app',
-        context,
+        context: getCtx(),
         document,
         variables: operation.variables ?? null,
       }),
@@ -177,7 +270,7 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
 
     callback(result)
   } catch (e) {
-    callback({ data: null, errors: [e] })
+    callback({ data: null, errors: [locatedError(e, undefined)] })
   } finally {
     DataContext.finishActiveRequest()
   }
@@ -189,7 +282,8 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
  *
  * @param httpServer The http server we are utilizing for the websocket
  * @param targetRoute Route to target in the server upgrade event
- * @param options.enforceOrigin Defaults to true: reject upgrades whose Origin port does not match the server's listen port. Set to false only when the server receives proxied upgrades whose Origin reflects an upstream host (i.e. the test-runner server) and another allowlist gates inbound connections.
+ * @param options.enforceOrigin Defaults to true: reject upgrades whose Host or Origin is not localhost on the server's listen port. Set to false only when the server receives proxied upgrades whose Origin reflects an upstream host (i.e. the test-runner server) and another allowlist gates inbound connections.
+ * @param options.validationRules Applied to every operation in addition to the specified rules.
  * @returns WebSocket server and graphql-ws dispose — call `dispose()` before destroying the HTTP server.
  */
 export interface GraphqlWsHandle {
@@ -197,13 +291,19 @@ export interface GraphqlWsHandle {
   dispose: () => Promise<void>
 }
 
-export const graphqlWS = (httpServer: Server, targetRoute: string, options: { enforceOrigin?: boolean } = {}): GraphqlWsHandle => {
-  const { enforceOrigin = true } = options
+export interface GraphqlWsOptions {
+  enforceOrigin?: boolean
+  validationRules?: readonly ValidationRule[]
+}
+
+export const graphqlWS = (httpServer: Server, targetRoute: string, options: GraphqlWsOptions = {}): GraphqlWsHandle => {
+  const { enforceOrigin = true, validationRules = [] } = options
+  const rules = [...specifiedRules, ...validationRules]
   const graphqlWs = new WebSocketServer({ noServer: true })
 
   httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
     if (req.url?.startsWith(targetRoute)) {
-      if (enforceOrigin && !isOriginAllowed(req.headers.origin, req.socket.localPort)) {
+      if (enforceOrigin && !isUpgradeAllowed(req)) {
         socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
         socket.destroy()
 
@@ -219,6 +319,7 @@ export const graphqlWS = (httpServer: Server, targetRoute: string, options: { en
   const { dispose } = useServer({
     schema: graphqlSchema,
     context: () => getCtx(),
+    validate: (schema, document) => validate(schema, document, rules),
   }, graphqlWs)
 
   return {
@@ -227,51 +328,62 @@ export const graphqlWS = (httpServer: Server, targetRoute: string, options: { en
   }
 }
 
+const makeGraphQLHTTP = (validationRules: readonly ValidationRule[]) => {
+  return graphqlHTTP((req, res, params) => {
+    const context = getCtx()
+    let document: DocumentNode | undefined
+
+    // Parse the query ahead-of-time, so we can use in the graphqlRequestContext
+    try {
+      // @ts-expect-error - express-graphql types `params` as optional and `query` as nullable; parse() throws on a missing query, which the catch handles
+      document = parse(params.query)
+    } catch {
+      // error will be re-thrown in customParseFn below
+    }
+
+    return {
+      schema: graphqlSchema,
+      graphiql: IS_DEVELOPMENT,
+      validationRules,
+      context: params && document ? graphqlRequestContext({
+        req: req as Request,
+        context,
+        document,
+        variables: params.variables,
+      }) : undefined,
+      customParseFn: (source) => {
+        // No need to re-parse if we have a document, otherwise re-parse to throw the error
+        return document ?? parse(source)
+      },
+      customExecuteFn: (args) => {
+        const date = new Date()
+        const prefix = `${args.operationName ?? '(anonymous)'}`
+
+        DataContext.addActiveRequest()
+
+        return Promise.resolve(execute(args)).then((val) => {
+          debug(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
+
+          return val
+        }).finally(() => {
+          DataContext.finishActiveRequest()
+        })
+      },
+    }
+  })
+}
+
 /**
  * An Express middleware function handler which can be added to
  * routes expected to service a GraphQL request from an HTTP client.
  */
-export const graphQLHTTP = graphqlHTTP((req, res, params) => {
-  const context = getCtx()
-  let document: DocumentNode | undefined
+const graphQLHTTP = makeGraphQLHTTP([])
 
-  // Parse the query ahead-of-time, so we can use in the graphqlRequestContext
-  try {
-    // @ts-expect-error
-    document = parse(params.query)
-  } catch {
-    // error will be re-thrown in customParseFn below
-  }
-
-  return {
-    schema: graphqlSchema,
-    graphiql: IS_DEVELOPMENT,
-    context: params && document ? graphqlRequestContext({
-      req: req as Request,
-      context,
-      document,
-      variables: params.variables,
-    }) : undefined,
-    customParseFn: (source) => {
-      // No need to re-parse if we have a document, otherwise re-parse to throw the error
-      return document ?? parse(source)
-    },
-    customExecuteFn: (args) => {
-      const date = new Date()
-      const prefix = `${args.operationName ?? '(anonymous)'}`
-
-      DataContext.addActiveRequest()
-
-      return Promise.resolve(execute(args)).then((val) => {
-        debug(`${prefix} completed in ${new Date().valueOf() - date.valueOf()}ms with ${val.errors?.length ?? 0} errors`)
-
-        return val
-      }).finally(() => {
-        DataContext.finishActiveRequest()
-      })
-    },
-  }
-})
+/**
+ * The runner server's HTTP handler for `cypress tap`, which also restricts
+ * operations to the ones `cypress tap` sends.
+ */
+export const tapGraphQLHTTP = makeGraphQLHTTP([tapOperationRule])
 
 interface GraphQLRequestContextOptions {
   app?: 'launchpad' | 'app'

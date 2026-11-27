@@ -1,13 +1,17 @@
-import { baseConfig, cliOverrides } from '@packages/eslint-config'
+import { baseConfig, cliOverrides, jsonConfig, nodeConfig, regexpConfig, vitestConfig } from '@packages/eslint-config'
 
 export default [
   ...baseConfig,
+  ...regexpConfig,
+  ...jsonConfig,
+  ...nodeConfig,
+  ...vitestConfig,
   ...cliOverrides,
   {
     files: ['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx'],
     rules: {
       'no-restricted-syntax': 'off',
-      'mocha/no-global-tests': 'off',
+      'mocha/no-top-level-tests': 'off',
     },
     languageOptions: {
       parserOptions: {
@@ -27,7 +31,7 @@ export default [
     },
   },
   {
-    files: ['src/**/*.js', 'src/**/*.ts', 'expects/**/*.js', 'expects/**/*.ts'],
+    files: ['src/**/*.js', 'src/**/*.ts'],
     languageOptions: {
       globals: {
         process: 'readonly',

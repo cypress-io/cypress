@@ -10,18 +10,23 @@ import path from 'path'
 import _ from 'lodash'
 import fs from 'fs'
 
-import { getError, CypressError } from '@packages/errors'
+import { getError } from '@packages/errors'
+import type { CypressError } from '@packages/errors'
 import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
 import { autoBindDebug } from '../util/autoBindDebug'
 import { EventCollectorSource, GitDataSource } from '../sources'
-import { OnFinalConfigLoadedOptions, ProjectConfigManager } from './ProjectConfigManager'
+import { ProjectConfigManager } from './ProjectConfigManager'
+import type { OnFinalConfigLoadedOptions } from './ProjectConfigManager'
 import { EventRegistrar } from './EventRegistrar'
 import { getServerPluginHandlers, resetPluginHandlers } from '../util/pluginHandlers'
 import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
+import { isAgentMode } from '@packages/agent-info'
+import { isTapSupportedBrowser } from '@packages/cypress-sessions'
+import { logError } from '@packages/stderr-filtering'
 import { telemetry } from '@packages/telemetry'
 
 const POTENTIAL_CONFIG_FILES = [
@@ -29,6 +34,8 @@ const POTENTIAL_CONFIG_FILES = [
   'cypress.config.mjs',
   'cypress.config.cjs',
   'cypress.config.js',
+  'cypress.config.mts',
+  'cypress.config.cts',
 ]
 
 interface ProjectMetaState {
@@ -211,6 +218,14 @@ export class ProjectLifecycleManager {
       onInitialConfigLoaded: (initialConfig: Cypress.ConfigOptions) => {
         this._cachedInitialConfig = initialConfig
 
+        // With no testing type, no session will start to replace an error that kept the
+        // configuration from loading, so loading it is what withdraws the error. With one,
+        // `onFinalConfigLoaded` withdraws it once the session has started. A setup or browser
+        // error stays: loading the file does not fix it.
+        if (!this._currentTestingType) {
+          this.ctx.clearLoadError(['config'])
+        }
+
         this.ctx.emitter.toLaunchpad()
         this.ctx.emitter.toApp()
       },
@@ -244,6 +259,12 @@ export class ProjectLifecycleManager {
            *      The empty specs are handled within the @cypress/webpack-dev-server package as this has no impact on vite.
            */
           const devServerOptions = await this.ctx._apis.projectApi.getDevServer().start({ specs: this.ctx.project.specs, config: finalConfig })
+          .catch((err) => {
+            span?.end()
+            const devServer = this.loadedConfigFile?.component?.devServer
+
+            throw getError('DEV_SERVER_START_FAILED', this.configFile, typeof devServer === 'object' ? devServer.bundler : undefined, err)
+          })
 
           // If we received a cypressConfig.port we want to null it out
           // because we propagated it into the devServer.port and it is
@@ -289,9 +310,16 @@ export class ProjectLifecycleManager {
           }
 
           if (pingBaseUrl) {
-            this.ctx.actions.project.pingBaseUrl().catch(this.onLoadError)
+            this.ctx.actions.project.pingBaseUrl().catch((err) => this.onLoadError(err, { stopsProject: false }))
           }
         }
+
+        // The configuration loaded with its testing type set up, so an error with either no
+        // longer applies. Withdrawn only once the session has started, so a project that failed
+        // to start keeps its error until the session replaces it, instead of `cypress tap status`
+        // reporting nothing in between. A browser error is for choosing the browser to settle.
+        this.ctx.clearLoadError(['config', 'setup'])
+        this.ctx.clearPluginsError()
 
         await this.setInitialActiveBrowser()
 
@@ -303,11 +331,51 @@ export class ProjectLifecycleManager {
   }
 
   /**
+   * No person is there to answer the Launchpad: an agent drives Cypress, or `--headless` hid the window
+   */
+  private get isUnattended () {
+    return this.ctx.isOpenMode && Boolean(this.ctx.modeOptions.headless || isAgentMode())
+  }
+
+  /**
+   * An unattended launch that names the project and testing type on the command line, and has a
+   * browser from `--browser` or from `defaultBrowser` in the config, has no one to dismiss the
+   * welcome screen that would otherwise launch the browser. The dismissal is not saved, so a
+   * person's first launch still sees the welcome.
+   */
+  get isWelcomeBypassed () {
+    const { project, testingType, isBrowserGivenByCli } = this.ctx.modeOptions
+
+    // Neither `cliBrowser` nor `modeOptions.browser` is evidence of this: a config reload copies the
+    // active browser into both. `isBrowserGivenByCli` is set once, from the command line.
+    const hasBrowser = Boolean(isBrowserGivenByCli || this.configDefaultBrowser)
+
+    return this.isUnattended && Boolean(project && testingType && hasBrowser)
+  }
+
+  /**
+   * The Launchpad asks about the welcome screen as soon as the config file loads, while
+   * `setupNodeEvents` may still be running, so until the full config exists this reads
+   * `defaultBrowser` from the config file, where a testing type's own value wins.
+   */
+  private get configDefaultBrowser () {
+    if (this.loadedFullConfig) {
+      return this.loadedFullConfig.defaultBrowser
+    }
+
+    const testingType = this.ctx.modeOptions.testingType
+
+    return (testingType && this.loadedConfigFile?.[testingType]?.defaultBrowser) || this.loadedConfigFile?.defaultBrowser
+  }
+
+  /**
    * Sets the initial `activeBrowser` depending on these criteria, in order of preference:
    *  1. The value of `--browser` passed via CLI.
    *  2. The value of `defaultBrowser` in `cypress.config`.
    *  3. The last browser selected in `open` mode (by name and channel) for this project.
    *  4. The first browser found.
+   * A `--headless` session stops after the second: when its browser cannot be found or driven, or
+   * none was given, it is left with no `activeBrowser`.
    */
   async setInitialActiveBrowser () {
     // if we no longer have a project, just return
@@ -333,13 +401,20 @@ export class ProjectLifecycleManager {
     if (this.ctx.coreData.cliBrowser) {
       await this.setActiveBrowserByNameOrPath(this.ctx.coreData.cliBrowser)
 
+      // A `--headless` session runs only the browser it was given. Falling back to another
+      // would have the next reload launch that one in its place and withdraw the error, so the
+      // session is left with no browser and keeps reporting why.
+      if (this.ctx.isHeadless && !this.ctx.coreData.activeBrowser) {
+        return
+      }
+
       const preferences = await this.ctx._apis.localSettingsApi.getPreferences()
 
-      const hasWelcomeBeenDismissed = Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
+      const hasWelcomeBeenDismissed = this.isWelcomeBypassed || Boolean(preferences.majorVersionWelcomeDismissed?.[GET_MAJOR_VERSION_FOR_CONTENT()])
 
-      // only continue if the browser was successfully set - we must have an activeBrowser once this function resolves
-      // but if the user needs to dismiss a landing page, don't continue, the active browser will be opened
-      // by a mutation called from the client side when the user dismisses the welcome screen
+      // only launch if the browser was successfully set; otherwise fall through to choose another
+      // but if the user needs to dismiss a landing page, don't continue: dismissing it renders OpenBrowser
+      // in the launchpad, whose auto-launch opens the active browser once the config is ready
       if (this.ctx.coreData.activeBrowser && hasWelcomeBeenDismissed) {
         // if `cypress open` was launched with a `--project` and `--testingType`, go ahead and launch the `--browser`
         if (this.ctx.modeOptions.project && this.ctx.modeOptions.testingType) {
@@ -348,6 +423,17 @@ export class ProjectLifecycleManager {
 
         return
       }
+    }
+
+    // Nobody can pick a browser in the window `--headless` keeps hidden, and a remembered or first-found
+    // one may be a browser `cypress tap` cannot drive
+    if (this.ctx.isHeadless) {
+      const message = 'Cypress could not start this `--headless` session, because no browser was given. Pass `--browser`, or set `defaultBrowser` in your Cypress config, then start Cypress again.'
+
+      logError(message)
+      this.ctx.reportLoadError(message, 'browser')
+
+      return
     }
 
     // lastBrowser is cached per-project.
@@ -373,11 +459,29 @@ export class ProjectLifecycleManager {
 
       this.ctx.debug('browser found to set', browser.name)
 
+      // A hidden session only `cypress tap` can see, in a browser it cannot drive, is of no use
+      // to anyone, so nothing launches
+      if (this.ctx.isHeadless && !isTapSupportedBrowser(browser.family)) {
+        const message = `Cypress could not start this \`--headless\` session in ${browser.displayName}, because \`cypress tap\` can only drive Chromium-based browsers, such as Chrome, Edge and Electron. Pass one of them with \`--browser\`, or set it as \`defaultBrowser\` in your Cypress config, then start Cypress again.`
+
+        logError(message)
+        this.ctx.reportLoadError(message, 'browser')
+
+        return
+      }
+
+      this.ctx.clearLoadError(['browser'])
       this.ctx.actions.browser.setActiveBrowser(browser)
     } catch (e) {
       const error = e as CypressError
 
       this.ctx.onWarning(error)
+
+      // Without the browser it was asked for, nothing launches on its own, and no one can pick
+      // another in a window `--headless` keeps hidden, so the session cannot start
+      if (this.ctx.isHeadless) {
+        this.ctx.reportLoadError(error, 'browser')
+      }
     }
   }
 
@@ -399,14 +503,14 @@ export class ProjectLifecycleManager {
       return this._activeLifecycleRefresh
     }
 
-    // Capture the IIFE locally so the finally only clears the slot if it
+    // Capture the promise locally so the finally only clears the slot if it
     // still owns it. If `resetInternalState` (project switch) wipes
     // `_activeLifecycleRefresh` while this iteration is in flight, a fresh
     // chain may have taken its place — we don't want to clobber the new
     // chain's slot when this old one finally settles.
-    let invokedLifecycleRefresh!: Promise<void>
+    let invokedLifecycleRefresh: Promise<void> | undefined
 
-    invokedLifecycleRefresh = (async () => {
+    const runLifecycleRefresh = async () => {
       try {
         do {
           this._isLifecycleRefreshQueued = false
@@ -417,7 +521,9 @@ export class ProjectLifecycleManager {
           this._activeLifecycleRefresh = null
         }
       }
-    })()
+    }
+
+    invokedLifecycleRefresh = runLifecycleRefresh()
 
     this._activeLifecycleRefresh = invokedLifecycleRefresh
 
@@ -489,13 +595,14 @@ export class ProjectLifecycleManager {
     this._configManager = this.createConfigManager()
 
     // Preemptively load these so that they are available when we need them later
-    this.ctx.browser.machineBrowsers().catch(this.onLoadError)
+    this.ctx.browser.machineBrowsers().catch((err) => this.onLoadError(err, { stopsProject: false }))
 
     const packageManagerUsed = this.getPackageManagerUsed(projectRoot)
 
     this.ctx.update((s) => {
       s.currentProject = projectRoot
-      s.currentProjectGitInfo?.destroy()
+      // destroy swallows the watcher's close errors, so it can't reject
+      void s.currentProjectGitInfo?.destroy()
       s.currentProjectGitInfo = new GitDataSource({
         isRunMode: this.ctx.isRunMode,
         projectRoot,
@@ -519,6 +626,8 @@ export class ProjectLifecycleManager {
       s.diagnostics = { error: null, warnings: [] }
       s.packageManager = packageManagerUsed
     })
+
+    this.ctx.clearLoadError()
 
     this.verifyProjectRoot(projectRoot)
 
@@ -546,7 +655,6 @@ export class ProjectLifecycleManager {
 
   /**
    * Handles pre-initialization checks. These will display warnings or throw with errors if catastrophic.
-   * Returns false, if we're not ready to initialize due to needing to migrate
    *
    * @param projectRoot the project's root
    * @returns true if we can initialize and false if not
@@ -668,7 +776,7 @@ export class ProjectLifecycleManager {
     await this.resetInternalState()
   }
 
-  registerEvent (event: string, callback: Function) {
+  registerEvent (event: string, callback: (...args: any[]) => any) {
     return this._eventRegistrar.registerEvent(event, callback)
   }
 
@@ -749,7 +857,6 @@ export class ProjectLifecycleManager {
     // And we *still* didn't find anything. Set the configFilePath to JS or TS.
     if (!configFilePathSet) {
       this.setConfigFilePath(`cypress.config.${metaState.isUsingTypeScript ? 'ts' : 'js'}`)
-      configFilePathSet = true
     }
 
     this._projectMetaState = metaState
@@ -817,10 +924,72 @@ export class ProjectLifecycleManager {
     if (testingType === 'e2e') {
       // E2E doesn't have a wizard, so if we have a testing type on load we just create/update their cypress.config.js.
       await this.ctx.actions.wizard.scaffoldTestingType()
+      await this.completeE2ESetupUnattended()
     } else if (testingType === 'component') {
       await this.ctx.actions.wizard.detectFrameworks()
       await this.ctx.actions.wizard.initialize()
+      this.reportComponentSetupForHeadless()
     }
+  }
+
+  /**
+   * Component testing is set up through choices in the Launchpad's wizard, which a `--headless`
+   * session keeps hidden, so the session cannot start
+   */
+  private reportComponentSetupForHeadless () {
+    const { project, testingType } = this.ctx.modeOptions
+
+    if (!this.ctx.isHeadless || !project || testingType !== 'component') {
+      return
+    }
+
+    const message = 'Cypress could not start component testing for this project on its own, because it is not set up yet. Set it up by running `cypress open --component` without `--headless`, then start Cypress again.'
+
+    logError(message)
+    this.ctx.reportLoadError(message, 'setup')
+  }
+
+  /**
+   * The Launchpad's Continue button is what loads the new config after the e2e scaffold, so
+   * without it the project never starts. An unattended session has no one to press it, so it
+   * continues on its own, unless a file needs a person to merge changes into it.
+   */
+  private async completeE2ESetupUnattended () {
+    const { project, testingType } = this.ctx.modeOptions
+    const scaffolded = this.ctx.coreData.scaffoldedFiles
+
+    if (!this.isUnattended || !project || testingType !== 'e2e' || !scaffolded) {
+      return
+    }
+
+    const relativePaths = (statuses: string[]) => {
+      return scaffolded
+      .filter((scaffoldedFile) => statuses.includes(scaffoldedFile.status))
+      .map((scaffoldedFile) => path.relative(this.projectRoot, scaffoldedFile.file.absolute))
+    }
+
+    const needsAPerson = relativePaths(['changes', 'error'])
+
+    if (needsAPerson.length) {
+      const message = `Cypress could not finish setting up e2e testing for this project on its own, because these files need changes made by hand: ${needsAPerson.join(', ')}. Make the changes, then start Cypress again.`
+
+      logError(message)
+      this.ctx.reportLoadError(message, 'setup')
+
+      return
+    }
+
+    const created = relativePaths(['valid'])
+
+    if (created.length) {
+      // A success notice, so not stderr, where an unattended caller reads it as a failure
+      // eslint-disable-next-line no-console
+      console.log(`Cypress set up e2e testing for this project by creating or updating: ${created.join(', ')}. Review these files and commit them.`)
+    }
+
+    // A config that fails to load after the scaffold is reported like any other load error. Nothing
+    // above this awaits the result, so a rejection would be unhandled in the main process.
+    await this.ctx.actions.wizard.completeSetup().catch(this.onLoadError)
   }
 
   async initializeRunMode (testingType: TestingType | null) {
@@ -855,7 +1024,7 @@ export class ProjectLifecycleManager {
     }
 
     if (this.metaState.allFoundConfigFiles.length > 1) {
-      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, this.metaState.allFoundConfigFiles))
+      this.onLoadError(getError('CONFIG_FILES_LANGUAGE_CONFLICT', this.projectRoot, this.metaState.allFoundConfigFiles), { stopsProject: false })
     }
   }
 
@@ -863,13 +1032,21 @@ export class ProjectLifecycleManager {
    * When there is an error during any part of the lifecycle
    * initiation, we pass it through here. This allows us to intercept
    * centrally in the e2e tests, as well as notify the "pending initialization"
-   * for run mode
+   * for run mode.
+   *
+   * An error that leaves the project running, such as two config files of different languages,
+   * is not reported to `cypress tap status`, which would otherwise tell a poller to give up
+   * on a start that is going to succeed.
    */
-  onLoadError = (err: CypressError) => {
+  onLoadError = (err: CypressError, { stopsProject = true }: { stopsProject?: boolean } = {}) => {
     if (this.ctx.isRunMode && this._pendingInitialize) {
       this._pendingInitialize.reject(err)
     } else {
       this.ctx.onError(err, 'Cypress configuration error')
+
+      if (stopsProject) {
+        this.ctx.reportLoadError(err)
+      }
     }
   }
 

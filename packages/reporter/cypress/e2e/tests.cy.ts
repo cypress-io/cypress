@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { RootRunnable } from '../../src/runnables/runnables-store'
+import type { RootRunnable } from '../../src/runnables/runnables-store'
 import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 
 let runner: EventEmitter
@@ -12,7 +12,7 @@ function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: b
 
   runner = new EventEmitter()
 
-  const runnerStore = new MobxRunnerStore('e2e')
+  const runnerStore = new MobxRunnerStore()
 
   runnerStore.setSpec({
     name: 'foo.js',

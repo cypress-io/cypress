@@ -2910,55 +2910,6 @@
     ],
     [
       "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 1,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
-      }
-    ],
-    [
-      "mocha",
       "hook end",
       {
         "id": "r3",
@@ -3216,55 +3167,6 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
-      }
-    ],
-    [
-      "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 2,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
       }
     ],
     [
@@ -3530,55 +3432,6 @@
     ],
     [
       "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 3,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
-      }
-    ],
-    [
-      "mocha",
       "hook end",
       {
         "id": "r3",
@@ -3836,55 +3689,6 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
-      }
-    ],
-    [
-      "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 4,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
       }
     ],
     [
@@ -12614,55 +12418,6 @@
     ],
     [
       "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 1,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
-      }
-    ],
-    [
-      "mocha",
       "hook end",
       {
         "id": "r3",
@@ -12924,55 +12679,6 @@
     ],
     [
       "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 2,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
-      }
-    ],
-    [
-      "mocha",
       "hook end",
       {
         "id": "r3",
@@ -13234,55 +12940,6 @@
     ],
     [
       "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 3,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
-      }
-    ],
-    [
-      "mocha",
       "hook end",
       {
         "id": "r3",
@@ -13544,55 +13201,6 @@
     ],
     [
       "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 4,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
-      }
-    ],
-    [
-      "mocha",
       "hook end",
       {
         "id": "r3",
@@ -13850,55 +13458,6 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
-      }
-    ],
-    [
-      "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 5,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
       }
     ],
     [
@@ -14164,55 +13723,6 @@
     ],
     [
       "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 6,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
-      }
-    ],
-    [
-      "mocha",
       "hook end",
       {
         "id": "r3",
@@ -14474,55 +13984,6 @@
     ],
     [
       "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 7,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
-      }
-    ],
-    [
-      "mocha",
       "hook end",
       {
         "id": "r3",
@@ -14780,55 +14241,6 @@
         "currentRetry": 0,
         "retries": -1,
         "_slow": 10000
-      }
-    ],
-    [
-      "mocha",
-      "retry",
-      {
-        "id": "r3",
-        "order": 1,
-        "title": "test 1",
-        "hookName": "after each",
-        "err": {
-          "message": "[error message]",
-          "name": "AssertionError",
-          "stack": "match.string",
-          "parsedStack": "match.array"
-        },
-        "state": "failed",
-        "pending": false,
-        "failedFromHookId": "h1",
-        "failedFromHookName": "after each",
-        "body": "[body]",
-        "type": "test",
-        "duration": "match.number",
-        "wallClockStartedAt": "match.date",
-        "timings": {
-          "lifecycle": "match.number",
-          "test": {
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          },
-          "after each": [
-            {
-              "hookId": "h1",
-              "fnDuration": "match.number",
-              "afterFnDuration": "match.number"
-            }
-          ]
-        },
-        "file": null,
-        "final": false,
-        "currentRetry": 8,
-        "retries": 9,
-        "_slow": 10000
-      },
-      {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "parsedStack": "match.array"
       }
     ],
     [

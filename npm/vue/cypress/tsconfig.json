@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["component/**/*.ts", "component/**/*.tsx", "component/**/*.vue"],
+  "exclude": ["**/Translated*.vue"]
+}

@@ -4,11 +4,6 @@ import { writeMochaEventSnapshot, readMochaEventSnapshot } from './cypress/tasks
 import { setupCyInCyVariables } from '@packages/frontend-shared/cypress/tasks/cy-in-cy-variables'
 
 export default defineConfig({
-  /**
-   * NOTE: currently using Cypress.env() in the test config, so we need to set allowCypressEnv to true
-   * @percy/cypress: https://github.com/percy/percy-cypress/blob/master/index.js#L13
-   */
-  allowCypressEnv: true,
   projectId: 'ypt4pf',
   retries: {
     runMode: 2,
@@ -18,7 +13,6 @@ export default defineConfig({
   reporterOptions: {
     configFile: '../../mocha-reporter-config.json',
   },
-  experimentalMemoryManagement: true,
   experimentalCspAllowList: false,
   experimentalInteractiveRunEvents: true,
   experimentalRunAllSpecs: true,
@@ -68,7 +62,7 @@ export default defineConfig({
       return await e2ePluginSetup(on, config)
     },
   },
-  // @ts-ignore We are setting these namespaces in order to properly test Cypress in Cypress
+  // @ts-expect-error - clientRoute and the routes below are internal options the public config type leaves out; they let Cypress test itself in Cypress
   clientRoute: '/__app/',
   namespace: '__cypress-app',
   socketIoRoute: '/__app-socket',

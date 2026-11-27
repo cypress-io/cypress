@@ -1,4 +1,5 @@
-import { isDependencyInstalled, WizardBundler } from './frameworks'
+import type { WizardBundler } from './frameworks'
+import { isDependencyInstalled } from './frameworks'
 import { WIZARD_BUNDLERS } from './dependencies'
 import path from 'path'
 import fs from 'fs'
@@ -128,8 +129,8 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson }: Dete
     if (customConfigFile) {
       debug('Evaluating custom Cypress config file \'%s\'', customConfigFile)
 
-      // .ts, .mts extensions
-      if (/\.[m]?ts$/i.test(customConfigFile)) {
+      // .ts, .mts, .cts extensions
+      if (/\.[cm]?ts$/i.test(customConfigFile)) {
         debug('Custom config file is Typescript - using TS')
 
         return 'ts'
@@ -147,7 +148,7 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson }: Dete
 
     debug('Checking for default Cypress config file')
 
-    for (let extension of ['ts', 'mts']) {
+    for (const extension of ['ts', 'mts', 'cts']) {
       if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
         debug(`Detected cypress.config.${extension} - using TS`)
 
@@ -155,7 +156,7 @@ export function detectLanguage ({ projectRoot, customConfigFile, pkgJson }: Dete
       }
     }
 
-    for (let extension of ['js', 'cjs', 'mjs']) {
+    for (const extension of ['js', 'cjs', 'mjs']) {
       if (fs.existsSync(path.join(projectRoot, `cypress.config.${extension}`))) {
         debug(`Detected cypress.config.${extension} - using JS`)
 

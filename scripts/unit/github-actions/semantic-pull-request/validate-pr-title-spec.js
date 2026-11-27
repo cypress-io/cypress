@@ -18,7 +18,7 @@ describe('semantic-pull-request/validate-pr-title', () => {
         ]
 
         const myAsyncIterable = {
-          async *[Symbol.asyncIterator] () {
+          async* [Symbol.asyncIterator] () {
             yield { data: commits }
           },
         }
@@ -50,7 +50,7 @@ describe('semantic-pull-request/validate-pr-title', () => {
         ]
 
         const myAsyncIterable = {
-          async *[Symbol.asyncIterator] () {
+          async* [Symbol.asyncIterator] () {
             yield { data: commits }
           },
         }
@@ -80,7 +80,7 @@ describe('semantic-pull-request/validate-pr-title', () => {
           { parents: ['dev'], commit: { message: 'fix issue with server and add test' } },
         ]
         const myAsyncIterable = {
-          async *[Symbol.asyncIterator] () {
+          async* [Symbol.asyncIterator] () {
             yield { data: commits }
           },
         }

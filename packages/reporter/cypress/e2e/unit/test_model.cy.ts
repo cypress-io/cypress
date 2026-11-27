@@ -1,9 +1,11 @@
-import Err from '../../../src/errors/err-model'
-import TestModel, { TestProps, UpdatableTestProps } from '../../../src/test/test-model'
-import CommandModel, { CommandProps } from '../../../src/commands/command-model'
-import { RouteProps } from '../../../src/routes/route-model'
-import { RunnablesStore } from '../../../src/runnables/runnables-store'
-import { AgentProps } from '../../../src/agents/agent-model'
+import type { ErrProps } from '../../../src/errors/err-model'
+import type { TestProps, UpdatableTestProps } from '../../../src/test/test-model'
+import TestModel from '../../../src/test/test-model'
+import type { CommandProps } from '../../../src/commands/command-model'
+import type CommandModel from '../../../src/commands/command-model'
+import type { RouteProps } from '../../../src/routes/route-model'
+import type { RunnablesStore } from '../../../src/runnables/runnables-store'
+import type { AgentProps } from '../../../src/agents/agent-model'
 
 const { _ } = Cypress
 
@@ -296,15 +298,15 @@ describe('Test model', () => {
     it('updates the test err', () => {
       const test = createTest()
 
-      test.finish({ err: { name: 'SomeError' } as Err } as UpdatableTestProps, false)
-      expect(test.err.name).to.equal('SomeError')
+      test.finish({ err: { name: 'SomeError' } as ErrProps } as unknown as UpdatableTestProps, false)
+      expect(test.err!.name).to.equal('SomeError')
     })
 
     it('sets the hook to failed if it exists', () => {
       const test = createTest({ hooks: [{ hookId: 'h1', hookName: 'before each' }] })
 
       test.addLog(createCommand({ instrument: 'command' }))
-      test.finish({ state: 'failed', failedFromHookId: 'h1', err: { message: 'foo' } as Err } as UpdatableTestProps, false)
+      test.finish({ state: 'failed', failedFromHookId: 'h1', err: { message: 'foo' } as ErrProps } as unknown as UpdatableTestProps, false)
       expect(test.lastAttempt.hooks[1].failed).to.be.true
     })
 
@@ -319,21 +321,21 @@ describe('Test model', () => {
 
   context('#commandMatchingErr', () => {
     it('returns last command matching the error', () => {
-      const test = createTest({ err: { message: 'SomeError' } as Err, hooks: [
+      const test = createTest({ err: { message: 'SomeError' } as ErrProps, hooks: [
         { hookId: 'h1', hookName: 'before each' },
         { hookId: 'h2', hookName: 'before each' },
       ] })
 
-      test.addLog(createCommand({ err: { message: 'SomeError' } as Err, hookId: 'h1' }))
-      test.addLog(createCommand({ err: {} as Err, hookId: 'h1' }))
-      test.addLog(createCommand({ err: { message: 'SomeError' } as Err, hookId: 'h1' }))
-      test.addLog(createCommand({ err: {} as Err, hookId: 'h2' }))
-      test.addLog(createCommand({ name: 'The One', err: { message: 'SomeError' } as Err, hookId: 'h2' }))
+      test.addLog(createCommand({ err: { message: 'SomeError' } as ErrProps, hookId: 'h1' }))
+      test.addLog(createCommand({ err: {} as ErrProps, hookId: 'h1' }))
+      test.addLog(createCommand({ err: { message: 'SomeError' } as ErrProps, hookId: 'h1' }))
+      test.addLog(createCommand({ err: {} as ErrProps, hookId: 'h2' }))
+      test.addLog(createCommand({ name: 'The One', err: { message: 'SomeError' } as ErrProps, hookId: 'h2' }))
       expect(test.commandMatchingErr()!.name).to.equal('The One')
     })
 
     it('returns undefined if there are no commands with errors', () => {
-      const test = createTest({ err: { message: 'SomeError' } as Err, hooks: [
+      const test = createTest({ err: { message: 'SomeError' } as ErrProps, hooks: [
         { hookId: 'h1', hookName: 'before each' },
         { hookId: 'h2', hookName: 'before each' },
         { hookId: 'h3', hookName: 'before each' },

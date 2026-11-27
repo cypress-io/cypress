@@ -1,10 +1,12 @@
 import _ from 'lodash'
 
-import {
-  SERIALIZABLE_REQ_PROPS,
+import type {
   Interception,
   CyHttpMessages,
   Subscription,
+} from '../types'
+import {
+  SERIALIZABLE_REQ_PROPS,
 } from '../types'
 
 import { parseJsonBody, stringifyJsonBody } from './utils'
@@ -68,8 +70,8 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
     debug('created request subscription %o', { eventName, request, subscription, handler })
 
-    // tslint:disable:no-floating-promises
-    emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
+    // emitNetEvent reports errors through cy.fail, and only rejects if cy.fail rethrows
+    void emitNetEvent('subscribe', { requestId, subscription } as NetEvent.ToServer.Subscribe)
   }
 
   const getCanonicalInterception = (): Interception => {
@@ -113,7 +115,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       const urlSearchParams = new URLSearchParams(url.search)
       const result = {}
 
-      for (let pair of urlSearchParams.entries()) {
+      for (const pair of urlSearchParams.entries()) {
         result[pair[0]] = pair[1]
       }
 
@@ -185,7 +187,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       queryObj = createQueryObject()
       queryProxy = createQueryProxy(queryObj)
     },
-    // tslint:disable:no-floating-promises
     on (eventName, handler) {
       if (!validEvents.includes(eventName)) {
         $errUtils.throwErrByPath('net_stubbing.request_handling.unknown_event', {
@@ -200,7 +201,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
       }
 
-      // tslint:disable:no-floating-promises
       subscribe(eventName, handler)
 
       return userReq
@@ -225,7 +225,6 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       }
 
       // allow `req` to be sent outgoing, then pass the response body to `responseHandler`
-      // tslint:disable:no-floating-promises
       subscribe('response:callback', responseHandler)
 
       return finish(true)

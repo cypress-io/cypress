@@ -1,7 +1,6 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  allowCypressEnv: false,
   env: {
     CY_ENV_FOO: 'foo',
     CY_ENV_BAR: 'bar',

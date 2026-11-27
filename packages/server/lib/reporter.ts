@@ -8,7 +8,7 @@ import Mocha from 'mocha-7.2.0'
 import mochaReporters from 'mocha-7.2.0/lib/reporters'
 import mochaCreateStatsCollector from 'mocha-7.2.0/lib/stats-collector'
 import Debug from 'debug'
-import { overrideRequire } from './override_require'
+import { overrideResolve } from './override_resolve'
 import type {
   CypressTestStatusInfo,
   InternalRunnable,
@@ -30,7 +30,7 @@ const debug = Debug('cypress:server:reporter')
 const mochaColor = mochaReporters.Base.color
 const mochaSymbols = mochaReporters.Base.symbols
 
-// override calls to `require('mocha*')` when to always resolve with a mocha we control
+// override `require('mocha*')` and `require.resolve('mocha*')` to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
 const customReporterMochaPath = path.dirname(require.resolve('mocha-7.2.0'))
 
@@ -75,10 +75,12 @@ const getIconStatus = (status: RunnableState | undefined): IconStatus => {
   }
 }
 
-overrideRequire((depPath, _load) => {
-  if ((depPath === 'mocha') || depPath.startsWith('mocha/')) {
-    return _load(depPath.replace('mocha', customReporterMochaPath))
+overrideResolve((request) => {
+  if ((request === 'mocha') || request.startsWith('mocha/')) {
+    return request.replace('mocha', customReporterMochaPath)
   }
+
+  return undefined
 })
 
 // if Mocha.Suite.prototype.titlePath
@@ -105,12 +107,16 @@ const getTitlePath = function (runnable: InternalRunnable, titles: string[] = []
     runnable.title = runnable.originalTitle
   }
 
-  if (runnable.title) {
+  // only the root suite is omitted (matching Mocha's native `titlePath()`);
+  // a non-root suite/test with an empty title still contributes a segment,
+  // so this stays byte-for-byte compatible with the title path Cloud stores
+  // for the rerun keep-list (built from the driver's native `titlePath()`)
+  if (!runnable.root) {
     // sanitize the title which may have been altered by a suite-/
     // test-level browser skip to ensure the original title is used
     const BROWSER_SKIP_TITLE = ' (skipped due to browser)'
 
-    titles.unshift(runnable.title.replace(BROWSER_SKIP_TITLE, ''))
+    titles.unshift((runnable.title || '').replace(BROWSER_SKIP_TITLE, ''))
   }
 
   if (runnable.parent) {
@@ -173,7 +179,7 @@ const mochaProps = {
 
 const toMochaProps = (testProps: Record<string, unknown>) => {
   return _.each(mochaProps, (val, key) => {
-    if (testProps.hasOwnProperty(key)) {
+    if (Object.hasOwn(testProps, key)) {
       testProps[val] = testProps[key]
 
       delete testProps[key]
@@ -334,6 +340,11 @@ export class Reporter {
   stats!: ReporterStats
   retriesConfig!: RetriesConfig
   runnables!: Record<string, InternalRunnable>
+  // When Cloud arms test-level rerun optimization, this holds the full titles of
+  // the tests that were executed. Non-executed (filtered-out) tests are then
+  // omitted from `results()`, so they are never reported to Cloud — the same way
+  // fully-skipped specs contribute nothing.
+  testFilter?: Set<string>
   mocha!: Mocha
   runner!: Mocha.Runner
   reporter!: Mocha.reporters.Base & { done?: (failures: number, resolve: () => void) => void }
@@ -365,6 +376,8 @@ export class Reporter {
     this.stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0, wallClockDuration: 0 }
     this.retriesConfig = config?.retries ?? {}
     this.runnables = {}
+    // reset per spec; set again by `setTestFilter` if this spec is filtered
+    this.testFilter = undefined
     rootRunnable = this._createRunnable(rootRunnable as RunnablePayload, 'suite')
     const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
 
@@ -489,6 +502,14 @@ export class Reporter {
     }
   }
 
+  // Restricts `results()` to the given tests (by full title). Used for test-level
+  // rerun optimization: the non-executed tests remain in `this.runnables` (so the
+  // reporter can render the spec tree) but are omitted from the results reported
+  // to Cloud. An empty/absent list means "no filtering" — report every test.
+  setTestFilter (eligibleFullTitles?: string[]) {
+    this.testFilter = eligibleFullTitles?.length ? new Set(eligibleFullTitles) : undefined
+  }
+
   _createRunnable (runnableProps: RunnablePayload, type: 'suite' | 'test', parent?: InternalRunnable): InternalRunnable {
     const runnable = (() => {
       switch (type) {
@@ -537,7 +558,7 @@ export class Reporter {
 
     const args = this.parseArgs(event as ReporterEventName, arg)
 
-    return this.runner && this.runner.emit.apply(this.runner, args as Parameters<Mocha.Runner['emit']>)
+    return this.runner && this.runner.emit(...(args as Parameters<Mocha.Runner['emit']>))
   }
 
   parseArgs (event: ReporterEventName, arg?: RunnablePayload): [string, ...unknown[]] {
@@ -682,9 +703,14 @@ export class Reporter {
   }
 
   results (): ReporterResults {
+    const testFilter = this.testFilter
+
     const tests = _
     .chain(this.runnables)
     .filter({ type: 'test' })
+    // omit tests that were filtered out for a test-level rerun so they are not
+    // reported to Cloud (no partial/shallow records for non-executed tests)
+    .filter((test) => !testFilter || testFilter.has(getTitlePath(test).join(' ')))
     .map(this.normalizeTest)
     .value()
 
@@ -757,14 +783,13 @@ export class Reporter {
 
     debug('trying to load reporter:', reporterName)
 
-    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
+    // Built-in reporters are required by name so the start bundle includes them
     if (reporterName === 'teamcity') {
       debug(`${reporterName} is built-in reporter`)
 
       return require('mocha-teamcity-reporter')
     }
 
-    // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
     if (reporterName === 'junit') {
       debug(`${reporterName} is built-in reporter`)
 

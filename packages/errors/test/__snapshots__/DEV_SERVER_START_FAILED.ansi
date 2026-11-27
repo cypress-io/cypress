@@ -1,0 +1,9 @@
+[31mCypress could not start the [33mwebpack[39m[31m dev server for component testing. Fix the error below, then run Cypress again.[39m
+[31m[39m
+[31mRead about configuring the dev server: https://on.cypress.io/dev-server[39m
+[31m[39m
+[31mThe [33mcomponent.devServer[39m[31m set in [94mcypress.config.ts[39m[31m threw this error:[39m
+[35m[39m
+[35mError: fail whale[39m
+[35m    at makeErr (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
+[35m    at DEV_SERVER_START_FAILED (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m

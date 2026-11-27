@@ -1,24 +1,9 @@
 import { hookRequire } from '@packages/server/hook-require'
 
-hookRequire({ forceTypeScript: false })
+hookRequire()
 
-// Important!!! Ensure to import the prod dependencies (i.e. things that will be executing from the inner Cypress of Cypress in Cypress)
-// from ./prod-dependencies.ts as this is pre-loaded in the v8 snapshot via ./v8-snapshot-entry.ts. Otherwise, these dependencies
-// will not properly be marked as loaded in the v8 snapshot and may be reloaded when referenced from within the snapshot itself.
-import {
-  getOperationName,
-  Response,
-  makeGraphQLServer,
-  clearCtx,
-  DataContext,
-  globalPubSub,
-  setCtx,
-  buildSchema,
-  execute,
-  ExecutionResult,
-  GraphQLError,
-  parse,
-} from './prod-dependencies'
+import { getOperationName, Response, makeGraphQLServer, clearCtx, globalPubSub, setCtx, buildSchema, execute, GraphQLError, parse } from './prod-dependencies'
+import type { ExecutionResult } from './prod-dependencies'
 
 import path from 'path'
 import execa from 'execa'
@@ -65,12 +50,12 @@ chai.use(chaiSubset)
 chai.use(sinonChai)
 
 export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
-  // @ts-ignore getSnapshotResult is injected by the snapshot script
-  if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) && typeof global.getSnapshotResult === 'undefined') {
-    throw new Error('getSnapshotResult is undefined. v8 snapshots are not being used in Cypress in Cypress. This can happen if CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT is not set')
-  }
-
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+
+  // The app under test runs in this process and reads its environment, so a run started from
+  // an AI agent's shell would skip the welcome screen and the setup confirmation these tests
+  // expect to see.
+  process.env.CYPRESS_AGENT_MODE = '0'
 
   delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
@@ -132,7 +117,6 @@ async function makeE2ETasks () {
     // interceptCloudExecute: (config: CloudExecuteRemote) => {}
   }
 
-  let ctx: DataContext
   let testState: Record<string, any> = {}
   let remoteGraphQLIntercept: RemoteGraphQLInterceptor | undefined
   let remoteGraphQLOptions: Record<string, any> | undefined
@@ -143,11 +127,31 @@ async function makeE2ETasks () {
   const cachedCwd = process.cwd()
 
   await clearCtx()
-  ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
+  const ctx = setCtx(makeDataContext({ mode: 'open', modeOptions: { cwd: process.cwd() } }))
 
   const launchpadPort = await makeGraphQLServer()
 
-  const __internal_scaffoldProject = async (projectName: string, isRetry = false): Promise<string> => {
+  const scaffoldsInProgress = new Map<string, Promise<string>>()
+
+  const __internal_scaffoldProject = async (projectName: string): Promise<string> => {
+    // A timed-out cy.task leaves its install running, so a test retry must not
+    // re-scaffold the project until that install finishes.
+    const scaffold = (scaffoldsInProgress.get(projectName) ?? Promise.resolve())
+    .catch(() => {})
+    .then(() => scaffoldProjectWithDeps(projectName))
+
+    scaffoldsInProgress.set(projectName, scaffold)
+
+    try {
+      return await scaffold
+    } finally {
+      if (scaffoldsInProgress.get(projectName) === scaffold) {
+        scaffoldsInProgress.delete(projectName)
+      }
+    }
+  }
+
+  const scaffoldProjectWithDeps = async (projectName: string, isRetry = false): Promise<string> => {
     if (fs.existsSync(Fixtures.projectPath(projectName))) {
       Fixtures.removeProject(projectName)
     }
@@ -174,7 +178,7 @@ async function makeE2ETasks () {
       await execa('yarn', { cwd: Fixtures.projectFixturePath(projectName), stdio: 'inherit', shell: true })
       await fs.remove(path.join(Fixtures.projectFixturePath(projectName), 'node_modules'))
 
-      return await __internal_scaffoldProject(projectName, true)
+      return await scaffoldProjectWithDeps(projectName, true)
     }
 
     scaffoldedProjects.add(projectName)
@@ -201,6 +205,8 @@ async function makeE2ETasks () {
      */
     __internal__afterEach () {
       delete process.env.CYPRESS_IN_CYPRESS_MOCK_FULL_SNAPSHOT
+      // A test that turned agent mode on does not leave it on for the next one
+      process.env.CYPRESS_AGENT_MODE = '0'
       nock.cleanAll()
 
       return null
@@ -293,7 +299,7 @@ async function makeE2ETasks () {
             // we return the resolved data. We then expect that you return the data for the individual row
             //
             for (const [key, val] of Object.entries(result.data as Record<string, any>)) {
-              const re = /^_(\d+)_(.*?)$/.exec(key)
+              const re = /^_(\d+)_(.*)$/.exec(key)
 
               if (!re) {
                 finalVal[key] = val

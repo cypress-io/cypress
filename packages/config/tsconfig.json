@@ -1,6 +1,6 @@
 {
   "include": [
-    "src/*.ts"
+    "src"
   ],
   "exclude": [
     "test"

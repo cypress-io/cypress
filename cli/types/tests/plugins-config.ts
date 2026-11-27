@@ -15,6 +15,15 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config.testingType // $ExpectType TestingType
   config.browsers // $ExpectType Browser[]
 
+  // https://github.com/cypress-io/cypress/issues/30420
+  on('before:run', (details) => {
+    details.config // $ExpectType PluginConfigOptions
+    details.config.projectRoot // $ExpectType string
+    details.config.configFile // $ExpectType string
+    details.config.testingType // $ExpectType TestingType
+    details.config.browsers // $ExpectType Browser[]
+  })
+
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string
     options.extensions // $ExpectType string[]
@@ -22,6 +31,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
     options.env // $ExpectType { [key: string]: any; }
 
     console.log('launching browser', browser.displayName)
+
     return options
   })
 
@@ -60,15 +70,15 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    foo() {
+    foo () {
       return true
-    }
+    },
   })
 
   return {
     e2e: {
-      baseUrl: 'http://localhost:3000'
-    }
+      baseUrl: 'http://localhost:3000',
+    },
   }
 }
 
@@ -101,21 +111,21 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    foo() {
+    foo () {
       return Promise.resolve([])
-    }
+    },
   })
 
   return Promise.resolve({
     e2e: {
-      baseUrl: 'http://localhost:3000'
-    }
+      baseUrl: 'http://localhost:3000',
+    },
   })
 }
 
 // does not allow returning unknown properties
 const pluginConfig5: Cypress.PluginConfig = (on, config) => { // $ExpectError
   return {
-    unknownKey: 42
+    unknownKey: 42,
   }
 }

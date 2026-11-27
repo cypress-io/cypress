@@ -1,5 +1,4 @@
 module.exports = {
-  allowCypressEnv: false,
   projectId: 'abc123',
   experimentalInteractiveRunEvents: true,
   component: {

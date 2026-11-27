@@ -6,7 +6,7 @@
     <button
       class="flex h-full w-full items-center justify-center"
       data-cy="run-all-specs-button"
-      :aria-label="t('specPage.runSelectedSpecs', specNumber)"
+      :aria-label="runSelectedSpecsLabel"
       :disabled="specNumber === 0"
       @click.stop="emits('runAllSpecs')"
     >
@@ -27,7 +27,7 @@
         class="font-normal text-sm inline-flex"
         data-cy="tooltip-content"
       >
-        {{ t('specPage.runSelectedSpecs', specNumber) }}
+        {{ runSelectedSpecsLabel }}
       </span>
     </template>
   </Tooltip>
@@ -36,11 +36,9 @@
 <script lang="ts" setup>
 import { IconActionPlaySmall } from '@cypress-design/vue-icon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
-import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 
-const { t } = useI18n()
-
-defineProps<{
+const props = defineProps<{
   specNumber: number
   directory: string
   grayscale?: boolean
@@ -50,4 +48,5 @@ const emits = defineEmits<{
   (event: 'runAllSpecs'): void
 }>()
 
+const runSelectedSpecsLabel = computed(() => props.specNumber === 1 ? 'Run 1 spec' : `Run ${props.specNumber} specs`)
 </script>

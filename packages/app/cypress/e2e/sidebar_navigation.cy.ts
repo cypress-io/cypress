@@ -167,21 +167,24 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
         cy.contains('todos').should('be.visible')
       }).as('switchTestingType').click()
 
-      cy.findByRole('dialog', {
+      cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('be.visible')
 
       cy.get('[data-cy-testingtype=e2e]').within(() => {
         cy.contains('Running')
       }).click()
 
-      cy.findByRole('dialog', {
+      cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('not.exist')
 
       cy.get('@switchTestingType').click()
-      cy.findByRole('dialog', {
+      cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('be.visible')
 
       cy.get('[data-cy-testingtype=e2e]').within(() => {
@@ -329,21 +332,24 @@ describe('Sidebar Navigation', { viewportWidth: 1280 }, () => {
       cy.specsPageIsVisible('new-project')
 
       cy.get('[data-cy="sidebar-header"]').as('switchTestingType').click()
-      cy.findByRole('dialog', {
+      cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('be.visible')
 
       cy.get('[data-cy-testingtype=component]').within(() => {
         cy.contains('Running')
       }).click()
 
-      cy.findByRole('dialog', {
+      cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('not.exist')
 
       cy.get('@switchTestingType').click()
-      cy.findByRole('dialog', {
+      cy.getByRole('dialog', {
         name: 'Choose a testing type',
+        native: false,
       }).should('be.visible')
 
       cy.withCtx((ctx, o) => {

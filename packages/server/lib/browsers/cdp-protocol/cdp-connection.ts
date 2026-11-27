@@ -3,7 +3,9 @@ import Debug from 'debug'
 import EventEmitter from 'events'
 import CDP from 'chrome-remote-interface'
 import type { CypressError } from '@packages/errors'
-import { debugCdpConnection, DebuggableCDPClient } from './debug-cdp-connection'
+import type { DebuggableCDPClient } from './debug-cdp-connection'
+import { debugCdpConnection } from './debug-cdp-connection'
+import { sendLargeMessagesInFragments } from './send-large-messages-in-fragments'
 import type { CdpEvent, CdpCommand } from './cdp_automation'
 import { CDPDisconnectedError, CDPTerminatedError, CDPAlreadyConnectedError } from './cri-errors'
 import { asyncRetry } from '../../util/async_retry'
@@ -38,6 +40,9 @@ type CDPConnectionEventListeners = {
   'cdp-connection-reconnect-error': (err: CypressError) => void
   'cdp-connection-reconnect': () => void
   'cdp-connection-closed': () => void
+  // Only for a socket that closed without disconnect() being called, which
+  // 'cdp-connection-closed' can't tell apart from one Cypress closed itself.
+  'cdp-connection-lost': () => void
   'cdp-connection-reconnect-attempt': (attemptNumber: number) => void
 }
 export type CDPConnectionEvent = keyof CDPConnectionEventListeners
@@ -64,8 +69,9 @@ export class CDPConnection {
   }
 
   get ws () {
-    // this is reached into by browser-cri-client to detect close events - needs rethinking
-    return (this._connection as { _ws?: WebSocket })._ws
+    // this is reached into by browser-cri-client to detect close events - needs rethinking.
+    // _connection can be undefined after a terminal disconnect, so this must stay optional
+    return (this._connection as { _ws?: WebSocket } | undefined)?._ws
   }
 
   on<T extends CdpEvent> (event: T, callback: CDPListener<T>) {
@@ -98,13 +104,37 @@ export class CDPConnection {
 
     this._connection = await CDP(this._options) as CdpClient
 
+    // Before the debug logger, which wraps `_ws.send` too and parses each call
+    // as JSON, so it has to see whole messages rather than fragments.
+    sendLargeMessagesInFragments(this._connection)
+
     debugCdpConnection(this.verboseDebug.namespace, this._connection as DebuggableCDPClient)
 
     this._connection.on('event', this._broadcastEvent)
 
     if (this._autoReconnect) {
       this._connection.on('disconnect', this._reconnect)
+    } else {
+      // Without reconnection, a closed socket is permanent - there is no retry loop
+      // that will ever bring the connection back. Treat it as terminated so pending
+      // and future senders reject instead of waiting on a reconnect that never comes.
+      this._connection.on('disconnect', this._onTerminalDisconnect)
     }
+  }
+
+  private _onTerminalDisconnect = async () => {
+    this.debug('terminal disconnect for target %s (reconnection disabled)', this._options.target)
+
+    this._terminated = true
+
+    try {
+      await this._gracefullyDisconnect()
+    } catch (e) {
+      this.debug('error cleaning up terminally-disconnected CDP connection: ', e)
+    }
+
+    this._emitter.emit('cdp-connection-closed')
+    this._emitter.emit('cdp-connection-lost')
   }
 
   async disconnect () {
@@ -124,6 +154,7 @@ export class CDPConnection {
   private _gracefullyDisconnect = async () => {
     this._connection?.off('event', this._broadcastEvent)
     this._connection?.off('disconnect', this._reconnect)
+    this._connection?.off('disconnect', this._onTerminalDisconnect)
 
     await this._connection?.close()
     this._connection = undefined

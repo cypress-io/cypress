@@ -75,6 +75,7 @@ describe('src/cy/commands/querying - shadow dom', () => {
         }
 
         beforeEach(reset)
+
         afterEach(reset)
 
         it('turns option on and off at will', () => {
@@ -261,5 +262,17 @@ describe('src/cy/commands/querying - shadow dom', () => {
         })
       })
     })
+  })
+})
+
+describe('src/cy/commands/querying - shadow dom - first command in the test', () => {
+  it('throws when cy.shadow() has no previous subject', (done) => {
+    cy.on('fail', (err) => {
+      expect(err.message).to.match(/^`cy\.shadow\(\)` failed because it is not chained off a command that yields a subject\./)
+
+      done()
+    })
+
+    cy.shadow()
   })
 })

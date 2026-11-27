@@ -1,4 +1,5 @@
 import Debug from 'debug'
+import { wasConfigProcessExitReported } from './util/config_process_exit'
 const debug = Debug('cypress:server:unhandled_exceptions')
 
 export function handle (shouldExitCb?: (err: Error) => boolean) {
@@ -11,6 +12,15 @@ export function handle (shouldExitCb?: (err: Error) => boolean) {
     }
 
     process.exitCode = 1
+
+    // The graceful exit that reported the config process exit is running with code 1. Exiting here would cut
+    // its teardown short, so this error (a consequence of that exit) is only logged for debugging.
+    if (wasConfigProcessExitReported()) {
+      debug('not exiting, a graceful exit is already in progress after the config process exit %o', { err })
+      handle(shouldExitCb)
+
+      return
+    }
 
     return require('./errors').logException(err)
     .then(() => {

@@ -8,7 +8,7 @@ const whitespaces = /\s+/g
 
 // When multiple space characters are considered as a single whitespace in all tags except <pre>.
 export const normalizeWhitespaces = (elem) => {
-  let testText = elem.textContent || elem.innerText || $(elem).text()
+  const testText = elem.textContent || elem.innerText || $(elem).text()
 
   if (elem.tagName === 'PRE') {
     return testText
@@ -24,7 +24,9 @@ export const isSame = function ($el1, $el2) {
   return el1 && el2 && _.isEqual(el1, el2)
 }
 
-export const isSelector = ($el: JQuery<HTMLElement>, selector) => {
+export const isSelector = (elOrJquery: HTMLElement | JQuery<HTMLElement>, selector) => {
+  const $el = $jquery.isJquery(elOrJquery) ? elOrJquery : $jquery.wrap(elOrJquery)
+
   return $el.is(selector)
 }
 

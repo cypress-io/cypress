@@ -64,7 +64,7 @@ describe('basic login', { browser: '!webkit' }, () => {
   describe('visit secondary first', () => {
     describe('How to determine primary origin', () => {
       // NOTE: Enable to set the top origin to foobar before running the next test.
-      it.skip('reset top', () => {
+      it.skip('reset top before logging in with primary set via baseurl', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
       })
 
@@ -82,7 +82,7 @@ describe('basic login', { browser: '!webkit' }, () => {
         .should('equal', 'Welcome FJohnson')
       })
 
-      it('reset top', () => {
+      it('reset top before logging in with primary set via visit', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/auth/index.html')
       })
 

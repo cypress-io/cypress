@@ -1,9 +1,8 @@
 import path from 'path'
-import globby from 'globby'
+import { glob } from 'tinyglobby'
 import { z } from 'zod'
 import fs from 'fs-extra'
 import Debug from 'debug'
-import findUp from 'find-up'
 
 const debug = Debug('cypress:scaffold-config:ct-detect-third-party')
 
@@ -58,6 +57,23 @@ async function hasWorkspacePackageJson (directory: string) {
   }
 }
 
+function* directoryAndAncestors (from: string): Generator<string> {
+  let directory = path.resolve(from)
+
+  while (true) {
+    yield directory
+
+    const parent = path.dirname(directory)
+
+    // `path.dirname` returns the same path once we reach the filesystem root
+    if (parent === directory) {
+      return
+    }
+
+    directory = parent
+  }
+}
+
 export async function isRepositoryRoot (directory: string) {
   if (ROOT_PATHS.some((rootPath) => fs.existsSync(path.join(directory, rootPath)))) {
     return true
@@ -80,8 +96,10 @@ const ThirdPartyComponentFrameworkSchema = z.object({
   componentIndexHtml: z.optional(z.function()),
 })
 
-const CT_FRAMEWORK_GLOBAL_GLOB = path.join('node_modules', 'cypress-ct-*', 'package.json')
-const CT_FRAMEWORK_NAMESPACED_GLOB = path.join('node_modules', '@*?/cypress-ct-*?', 'package.json')
+const CT_FRAMEWORK_GLOBS = [
+  'node_modules/cypress-ct-*/package.json',
+  'node_modules/@*?/cypress-ct-*?/package.json',
+]
 
 export interface ErroredFramework {
   path: string
@@ -94,20 +112,19 @@ export async function detectThirdPartyCTFrameworks (
   const erroredFrameworks: ErroredFramework[] = []
 
   try {
-    let fullPathGlobs
     let packageJsonPaths: string[] = []
 
     // Start at the project root and check each directory above it until we see
     // an indication that the current directory is the root of the repository.
-    await findUp(async (directory: string): Promise<findUp.Match> => {
-      fullPathGlobs = [
-        path.join(directory, CT_FRAMEWORK_GLOBAL_GLOB),
-        path.join(directory, CT_FRAMEWORK_NAMESPACED_GLOB),
-      ].map((x) => x.replaceAll('\\', '/'))
+    for (const directory of directoryAndAncestors(projectRoot)) {
+      debug('searching for third-party dependencies in %s', directory)
 
-      debug('searching for third-party dependencies with globs %o', fullPathGlobs)
-
-      const newPackagePaths = await globby(fullPathGlobs)
+      // Keep the directory in `cwd`, not the pattern: glob syntax would read the
+      // brackets and parentheses in a path like `my-app (v2) [beta]` and match nothing
+      const newPackagePaths = (await glob(CT_FRAMEWORK_GLOBS, {
+        cwd: directory,
+        absolute: true,
+      })).sort()
 
       if (newPackagePaths.length > 0) {
         debug('found third-party dependencies %o', newPackagePaths)
@@ -115,17 +132,12 @@ export async function detectThirdPartyCTFrameworks (
 
       packageJsonPaths = [...packageJsonPaths, ...newPackagePaths]
 
-      const isCurrentRepositoryRoot = await isRepositoryRoot(directory)
-
-      if (isCurrentRepositoryRoot) {
+      if (await isRepositoryRoot(directory)) {
         debug('stopping search at %s because it is believed to be the repository root', directory)
 
-        return findUp.stop
+        break
       }
-
-      // Return undefined to keep searching
-      return undefined
-    }, { cwd: projectRoot })
+    }
 
     if (packageJsonPaths.length === 0) {
       debug('no third-party dependencies detected')
@@ -172,7 +184,7 @@ export async function detectThirdPartyCTFrameworks (
 
           debug('Module is %o', mod)
 
-          let defaultEntry = mod?.default ?? mod
+          const defaultEntry = mod?.default ?? mod
 
           debug('Import successful: %o', defaultEntry)
 

@@ -23,7 +23,9 @@
 <script setup lang="ts">
 import { Dialog, DialogOverlay } from '@headlessui/vue'
 import { init, loadRemote } from '@module-federation/runtime'
+import { federationShared } from '../runner/federationShared'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import type { VNode } from 'vue'
 import type { CyPromptAppDefaultShape, GetCodeModalContentsShape } from './prompt-app-types'
 import { usePromptStore } from '../store/prompt-store'
 import PromptErrorMessage from './PromptErrorMessage.vue'
@@ -34,7 +36,7 @@ interface CyPromptApp { default: CyPromptAppDefaultShape }
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
 interface Root {
-  render: (element: JSX.Element) => void
+  render: (element: VNode) => void
   unmount: () => void
 }
 
@@ -43,7 +45,7 @@ const emit = defineEmits<{
 }>()
 
 withDefaults(defineProps<{
-  isOpen: boolean
+  isOpen?: boolean
 }>(), {
   isOpen: false,
 })
@@ -116,17 +118,7 @@ init({
     shareScope: 'default',
   }],
   name: 'app',
-  shared: {
-    react: {
-      scope: 'default',
-      version: '18.3.1',
-      lib: () => window.UnifiedRunner.React,
-      shareConfig: {
-        singleton: true,
-        requiredVersion: '^18.3.1',
-      },
-    },
-  },
+  shared: federationShared,
 })
 
 // We are not using any kind of loading state, because when we get

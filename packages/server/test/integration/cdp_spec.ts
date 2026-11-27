@@ -3,7 +3,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 import Debug from 'debug'
 import _ from 'lodash'
 import WebSocket from 'ws'
-import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp-protocol/cdp_automation'
+import type { CdpCommand, CdpEvent } from '../../lib/browsers/cdp-protocol/cdp_automation'
 import { CriClient } from '../../lib/browsers/cdp-protocol/cri-client'
 import { expect, nock } from '../spec_helper'
 import sinon from 'sinon'
@@ -322,7 +322,7 @@ describe('CDP Clients', () => {
     })
 
     it('reattaches subscriptions, reenables enablements, and sends pending commands on reconnect', async () => {
-      let reconnectPromise = Promise.withResolvers()
+      const reconnectPromise = Promise.withResolvers()
       let commandSent = Promise.withResolvers()
       let wsClient
       const reconnectOnThirdTry = sinon.stub().onThirdCall().callsFake(async () => {

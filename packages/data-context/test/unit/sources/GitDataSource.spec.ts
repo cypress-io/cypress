@@ -1,7 +1,7 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
 import path from 'path'
 import os from 'os'
-import simpleGit from 'simple-git'
+import { simpleGit } from 'simple-git'
 import fs from 'fs-extra'
 import chokidar from 'chokidar'
 
@@ -21,15 +21,15 @@ describe('GitDataSource', () => {
     e2eFolder = path.join(projectPath, 'cypress', 'e2e')
     const allSpecs = await fs.readdir(e2eFolder)
 
-    if (process.env.CI) {
-      // need to set a user on CI
-      // run sequentially: concurrent writes to ~/.gitconfig race on the
-      // .gitconfig.lock file and intermittently fail with "could not lock"
-      await git.addConfig('user.name', 'Test User', true, 'global')
-      await git.addConfig('user.email', 'test-user@example.com', true, 'global')
-    }
-
     await git.init()
+
+    // scope the identity to this throwaway repo. Writing it to the global
+    // gitconfig would leave the machine committing as `Test User` afterwards,
+    // and signing is irrelevant here but fails without the machine's key
+    await git.addConfig('user.name', 'Test User')
+    await git.addConfig('user.email', 'test-user@example.com')
+    await git.addConfig('commit.gpgsign', 'false')
+
     await git.add(allSpecs.map((spec) => path.join(e2eFolder, spec)))
     await git.commit('add all specs')
   })
@@ -43,7 +43,7 @@ describe('GitDataSource', () => {
   })
 
   it(`gets correct status for files on ${os.platform()}`, async function () {
-    const onBranchChange = jest.fn()
+    const onBranchChange = vi.fn()
     const dfd = Promise.withResolvers()
 
     // create a file and modify a file to express all
@@ -75,19 +75,19 @@ describe('GitDataSource', () => {
     const unmodified = gitInfo.gitInfoFor(aRecordSpec)!
     const modified = gitInfo.gitInfoFor(xhrSpec)!
 
-    expect(created.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(created.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(created.statusType).toEqual('created')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(created.author).not.toBeUndefined()
     expect(created.lastModifiedTimestamp).not.toBeUndefined()
 
-    expect(unmodified.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(unmodified.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(unmodified.statusType).toEqual('unmodified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(unmodified.author).not.toBeUndefined()
     expect(unmodified.lastModifiedTimestamp).not.toBeUndefined()
 
-    expect(modified.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+    expect(modified.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
     expect(modified.statusType).toEqual('modified')
     // do not want to set this explicitly in the test, since it can mess up your local git instance
     expect(modified.author).not.toBeUndefined()
@@ -124,9 +124,9 @@ describe('GitDataSource', () => {
     gitInfo = new GitDataSource({
       isRunMode: false,
       projectRoot: projectPath,
-      onBranchChange: jest.fn(),
+      onBranchChange: vi.fn(),
       onGitInfoChange: dfd.resolve,
-      onError: jest.fn(),
+      onError: vi.fn(),
     })
 
     await Promise.all(
@@ -146,13 +146,156 @@ describe('GitDataSource', () => {
     filepaths.forEach((filepath, index) => {
       const result = results[index]
 
-      expect(result?.lastModifiedHumanReadable).toMatch(/(a few|[0-9]) seconds? ago/)
+      expect(result?.lastModifiedHumanReadable).toMatch(/(a few|\d) seconds? ago/)
       expect(result?.statusType).toEqual('created')
     })
   })
 
+  it(`reads committed files whose names contain shell or pathspec syntax as literal paths on ${os.platform()}`, async () => {
+    const filenames = [
+      'pwn$(touch${IFS}injected).cy.js',
+      'pwn`touch${IFS}injected`.cy.js',
+      'file withSpace.cy.js',
+      'file\'withOneSingleQuote.cy.js',
+      '[xy].cy.js',
+    ]
+
+    if (os.platform() !== 'win32') {
+      // Double quote not a legal character on NTFS
+      filenames.push('file"withOneDoubleQuote.cy.js')
+    }
+
+    const specs = filenames.map((filename) => toPosix(path.join(e2eFolder, filename)))
+
+    await Promise.all(specs.map((spec) => fs.createFile(spec)))
+    await git.add(specs)
+    await git.commit('add specs with special names')
+
+    // a later commit that `[xy].cy.js` would match if it were read as a glob
+    const globMatch = path.join(e2eFolder, 'x.cy.js')
+
+    await fs.createFile(globMatch)
+    await git.add([globMatch])
+    await git.commit('add glob match')
+
+    const projectContents = await fs.readdir(projectPath)
+    const dfd = Promise.withResolvers()
+
+    gitInfo = new GitDataSource({
+      isRunMode: false,
+      projectRoot: projectPath,
+      onBranchChange: vi.fn(),
+      onGitInfoChange: dfd.resolve,
+      onError: vi.fn(),
+    })
+
+    gitInfo.setSpecs(specs)
+
+    await dfd.promise
+
+    expect(await fs.readdir(projectPath)).toEqual(projectContents)
+
+    for (const spec of specs) {
+      expect(gitInfo.gitInfoFor(spec)).toMatchObject({
+        statusType: 'unmodified',
+        author: 'Test User',
+        subject: 'add specs with special names',
+      })
+    }
+  })
+
+  describe('reading the last commit of a committed spec', () => {
+    const HOUR = 60 * 60 * 1000
+    const DAY = 24 * HOUR
+
+    const commitSpec = async (filename: string, { author, ageMs, subject }: { author: string, ageMs: number, subject: string }) => {
+      const spec = toPosix(path.join(e2eFolder, filename))
+      const date = new Date(Date.now() - ageMs).toISOString()
+
+      await fs.createFile(spec)
+      await git.add([spec])
+      await git.commit(subject, [spec], { '--author': `${author} <${author.toLowerCase().replace(' ', '.')}@example.com>`, '--date': date })
+
+      const [timestamp, shortHash] = (await git.raw(['log', '-1', '--pretty=format:%ci|%h', '--', spec])).split('|')
+
+      return { spec, timestamp, shortHash }
+    }
+
+    const loadGitInfo = async (specs: string[]) => {
+      const dfd = Promise.withResolvers()
+
+      gitInfo = new GitDataSource({
+        isRunMode: false,
+        projectRoot: projectPath,
+        onBranchChange: vi.fn(),
+        onGitInfoChange: dfd.resolve,
+        onError: vi.fn(),
+      })
+
+      gitInfo.setSpecs(specs)
+
+      await dfd.promise
+    }
+
+    it('reads the timestamp, age, author, short hash and subject', async () => {
+      const { spec, timestamp, shortHash } = await commitSpec('typical.cy.js', { author: 'Marisol Okafor', ageMs: 2 * DAY + HOUR, subject: 'add typical spec' })
+
+      await loadGitInfo([spec])
+
+      expect(timestamp).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [-+]\d{4}$/)
+      expect(gitInfo.gitInfoFor(spec)).toEqual({
+        lastModifiedTimestamp: timestamp,
+        lastModifiedHumanReadable: '2 days ago',
+        author: 'Marisol Okafor',
+        statusType: 'unmodified',
+        subject: 'add typical spec',
+        shortHash,
+      })
+    })
+
+    it('reads a commit dated after the local clock, which git words as "in the future"', async () => {
+      const { spec, timestamp, shortHash } = await commitSpec('future.cy.js', { author: 'Priya Natarajan', ageMs: -3 * HOUR - 60 * 1000, subject: 'add spec from a skewed clock' })
+
+      await loadGitInfo([spec])
+
+      expect(gitInfo.gitInfoFor(spec)).toEqual({
+        lastModifiedTimestamp: timestamp,
+        lastModifiedHumanReadable: 'in 3 hours',
+        author: 'Priya Natarajan',
+        statusType: 'unmodified',
+        subject: 'add spec from a skewed clock',
+        shortHash,
+      })
+    })
+
+    it('keeps an author whose first name ends in "ago" out of the age', async () => {
+      const { spec } = await commitSpec('iago.cy.js', { author: 'Iago Smith', ageMs: 2 * DAY + HOUR, subject: 'add iago spec' })
+
+      await loadGitInfo([spec])
+
+      expect(gitInfo.gitInfoFor(spec)).toMatchObject({
+        lastModifiedHumanReadable: '2 days ago',
+        author: 'Iago Smith',
+        subject: 'add iago spec',
+      })
+    })
+
+    it('reads the subject up to the first "|"', async () => {
+      const { spec, shortHash } = await commitSpec('pipe.cy.js', { author: 'Test User', ageMs: 2 * DAY + HOUR, subject: 'fix a|b ago c|d' })
+
+      await loadGitInfo([spec])
+
+      expect(gitInfo.gitInfoFor(spec)).toMatchObject({
+        lastModifiedHumanReadable: '2 days ago',
+        author: 'Test User',
+        shortHash,
+        subject: 'fix a',
+      })
+    })
+  })
+
   it(`watches switching branches on ${os.platform()}`, async () => {
-    const stub = jest.fn()
+    const stub = vi.fn()
     const dfd = Promise.withResolvers()
 
     stub.mockImplementationOnce(dfd.resolve)
@@ -161,8 +304,8 @@ describe('GitDataSource', () => {
       isRunMode: false,
       projectRoot: projectPath,
       onBranchChange: stub,
-      onGitInfoChange: jest.fn(),
-      onError: jest.fn(),
+      onGitInfoChange: vi.fn(),
+      onError: vi.fn(),
     })
 
     const result = await dfd.promise
@@ -178,7 +321,7 @@ describe('GitDataSource', () => {
   })
 
   it(`handles error while watching .git on ${os.platform()}`, async () => {
-    jest.spyOn(chokidar, 'watch').mockImplementation(() => {
+    vi.spyOn(chokidar, 'watch').mockImplementation(() => {
       const mockWatcher = {
         on: (event, fn) => {
           if (event === 'error') {
@@ -191,8 +334,8 @@ describe('GitDataSource', () => {
       return mockWatcher as chokidar.FSWatcher
     })
 
-    const errorStub = jest.fn()
-    const stub = jest.fn()
+    const errorStub = vi.fn()
+    const stub = vi.fn()
     const dfd = Promise.withResolvers()
 
     stub.mockImplementationOnce(dfd.resolve)
@@ -201,7 +344,7 @@ describe('GitDataSource', () => {
       isRunMode: false,
       projectRoot: projectPath,
       onBranchChange: stub,
-      onGitInfoChange: jest.fn(),
+      onGitInfoChange: vi.fn(),
       onError: errorStub,
     })
 
@@ -216,7 +359,7 @@ describe('GitDataSource', () => {
     it('does not include commits that are part of the Git tree from a merge', async () => {
       const dfd = Promise.withResolvers()
 
-      const logCallback = jest.fn()
+      const logCallback = vi.fn()
 
       logCallback.mockImplementationOnce(dfd.resolve)
 
@@ -250,9 +393,9 @@ describe('GitDataSource', () => {
       gitInfo = new GitDataSource({
         isRunMode: false,
         projectRoot: projectPath,
-        onBranchChange: jest.fn(),
-        onGitInfoChange: jest.fn(),
-        onError: jest.fn(),
+        onBranchChange: vi.fn(),
+        onGitInfoChange: vi.fn(),
+        onError: vi.fn(),
         onGitLogChange: logCallback,
       })
 

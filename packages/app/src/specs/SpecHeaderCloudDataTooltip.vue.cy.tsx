@@ -1,0 +1,220 @@
+import { SpecHeaderCloudDataTooltipFragmentDoc } from '../generated/graphql-test'
+import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
+import { set } from 'lodash'
+import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+
+const tooltipContentSelector = '.v-popper'
+
+describe('<SpecHeaderCloudDataTooltip />', () => {
+  function mountWithStatus (
+    status: 'NOT_FOUND' | 'LOGGED_OUT' | 'CONNECTED' | 'NOT_CONNECTED' | 'UNAUTHORIZED' | 'ACCESS_REQUESTED',
+    mode: string,
+    messages: {
+      header: string
+      connected: string
+      notConnected: string
+      noAccess: string
+    },
+  ) {
+    const userProjectStatusStore = useUserProjectStatusStore()
+
+    cy.mountFragment(SpecHeaderCloudDataTooltipFragmentDoc, {
+      onResult: (result) => {
+        set(result, 'cloudViewer', { __typename: 'CloudUser', id: 'abc123' })
+
+        switch (status) {
+          case 'LOGGED_OUT':
+            userProjectStatusStore.setUserFlag('isLoggedIn', false)
+            break
+          case 'NOT_CONNECTED':
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setUserFlag('isOrganizationLoaded', true)
+            userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
+            userProjectStatusStore.setProjectFlag('isProjectConnected', false)
+            userProjectStatusStore.setProjectFlag('isConfigLoaded', true)
+            break
+          case 'NOT_FOUND':
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setProjectFlag('isNotFound', true)
+            break
+          case 'ACCESS_REQUESTED':
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setProjectFlag('isNotAuthorized', true)
+
+            set(result, 'currentProject.cloudProject', {
+              __typename: 'CloudProjectUnauthorized',
+              message: '',
+              hasRequestedAccess: true,
+            })
+
+            break
+          case 'UNAUTHORIZED':
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setProjectFlag('isNotAuthorized', true)
+
+            break
+          case 'CONNECTED':
+          default:
+            userProjectStatusStore.setUserFlag('isLoggedIn', true)
+            userProjectStatusStore.setUserFlag('isOrganizationLoaded', true)
+            userProjectStatusStore.setUserFlag('isMemberOfOrganization', true)
+            userProjectStatusStore.setProjectFlag('isProjectConnected', true)
+            break
+        }
+      },
+      render: (gql) => {
+        const showLoginConnectSpy = cy.spy().as('showLoginConnectSpy')
+
+        return (
+          <div class="flex justify-around">
+            <SpecHeaderCloudDataTooltip
+              gql={gql}
+              mode={mode as any}
+              onShowLoginConnect={showLoginConnectSpy}
+            />
+          </div>)
+      },
+    })
+  }
+
+  [{
+    mode: 'AVG_DURATION',
+    messages: {
+      header: 'Average duration',
+      connected: 'The average spec durations of your latest runs in Cypress Cloud',
+      notConnected: 'Connect to Cypress Cloud to see the average spec durations of your latest runs',
+      noAccess: 'Request access to this project in Cypress Cloud to view the average spec durations of your latest runs',
+    },
+  }, {
+    mode: 'LATEST_RUNS',
+    messages: {
+      header: 'Latest runs',
+      connected: 'The status of your latest runs in Cypress Cloud',
+      notConnected: 'Connect to Cypress Cloud to see the status of your latest runs',
+      noAccess: 'Request access to this project in Cypress Cloud to view the status of your latest runs',
+    },
+  }].forEach(({ mode, messages }) => {
+    context(mode, () => {
+      context('connected', () => {
+        beforeEach(() => {
+          mountWithStatus('CONNECTED', mode, messages)
+        })
+
+        it('should render expected tooltip content', () => {
+          cy.get(tooltipContentSelector).trigger('mouseenter')
+
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', messages.connected)
+
+          cy.findByTestId('cloud-data-tooltip-content').find('button').should('not.exist')
+        })
+      })
+
+      context('not connected', () => {
+        beforeEach(() => {
+          mountWithStatus('NOT_CONNECTED', mode, messages)
+        })
+
+        it('should render expected tooltip content', () => {
+          cy.get(tooltipContentSelector).trigger('mouseenter')
+
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', messages.notConnected)
+
+          cy.findByTestId('connect-button')
+          .should('be.visible')
+          .click()
+
+          cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
+        })
+      })
+
+      context('unauthorized', () => {
+        beforeEach(() => {
+          mountWithStatus('UNAUTHORIZED', mode, messages)
+        })
+
+        it('should render expected tooltip content', () => {
+          cy.get(tooltipContentSelector).trigger('mouseenter')
+
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', messages.noAccess)
+
+          cy.contains('button', 'Request access').should('be.visible')
+        })
+      })
+
+      context('access requested', () => {
+        beforeEach(() => {
+          mountWithStatus('ACCESS_REQUESTED', mode, messages)
+        })
+
+        it('should render expected tooltip content', () => {
+          cy.get(tooltipContentSelector).trigger('mouseenter')
+
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', messages.noAccess)
+
+          cy.contains('button', 'Request sent').should('be.visible').should('be.disabled')
+        })
+      })
+
+      context('logged out', () => {
+        beforeEach(() => {
+          mountWithStatus('LOGGED_OUT', mode, messages)
+        })
+
+        it('should render expected tooltip content', () => {
+          cy.get(tooltipContentSelector).trigger('mouseenter')
+
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', messages.notConnected)
+
+          cy.findByTestId('login-button')
+          .should('be.visible')
+          .click()
+
+          cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
+        })
+      })
+
+      context('not found', () => {
+        beforeEach(() => {
+          mountWithStatus('NOT_FOUND', mode, messages)
+        })
+
+        it('should render expected tooltip content', () => {
+          cy.get(tooltipContentSelector).trigger('mouseenter')
+
+          cy.findByTestId('cloud-data-tooltip-content')
+          .should('be.visible')
+          .and('contain', messages.notConnected)
+
+          cy.findByTestId('reconnect-button')
+          .should('be.visible')
+          .click()
+
+          cy.get('@showLoginConnectSpy').should('have.been.calledOnce')
+        })
+      })
+
+      it('delays popping tooltip', () => {
+        cy.clock()
+        mountWithStatus('CONNECTED', mode, messages)
+        cy.get(tooltipContentSelector).trigger('mouseenter')
+        cy.findByTestId('cloud-data-tooltip-content')
+        .should('not.exist')
+
+        cy.tick(500)
+
+        cy.findByTestId('cloud-data-tooltip-content')
+        .should('be.visible')
+      })
+    })
+  })
+})

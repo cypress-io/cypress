@@ -11,17 +11,17 @@ describe('Error handling', () => {
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
+    .contains('Stack trace')
 
     cy.log('Fix error and validate it reloads configuration')
     cy.withCtx(async (ctx) => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', `module.exports = { e2e: { baseUrl: 'https://cypress.com', supportFile: false } }`)
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('not.contain.text', 'Cypress configuration error')
   })
 
   it('it handles a configuration file error', () => {
@@ -41,12 +41,12 @@ describe('Error handling', () => {
     cy.visitLaunchpad()
 
     cy.get('body')
-    .should('contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('contain.text', 'Cypress configuration error')
     .and('contain.text', 'Error thrown from Config')
 
     cy.get('[data-cy="collapsible-header"]')
     .should('have.attr', 'aria-expanded', 'true')
-    .contains(cy.i18n.launchpadErrors.generic.stackTraceLabel)
+    .contains('Stack trace')
 
     cy.log('Fix error and validate it reloads configuration')
 
@@ -54,10 +54,10 @@ describe('Error handling', () => {
       await ctx.actions.file.writeFileInProject('cypress.config.js', 'module.exports = {}')
     })
 
-    cy.findByRole('button', { name: 'Try again' }).click()
+    cy.getByRole('button', { name: 'Try again' }).click()
 
     cy.get('body')
-    .should('not.contain.text', cy.i18n.launchpadErrors.generic.configErrorTitle)
+    .should('not.contain.text', 'Cypress configuration error')
   })
 
   describe('using bundler: "vite" with missing config', () => {
@@ -66,11 +66,12 @@ describe('Error handling', () => {
       cy.openProject('missing-vite-config', ['--component'])
       cy.visitLaunchpad()
 
-      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.cjs', 'vite.config.mts', 'vite.config.cts'].forEach((idiomaticConfigFile) => {
+      ;['vite.config.js', 'vite.config.ts', 'vite.config.mjs', 'vite.config.mts'].forEach((idiomaticConfigFile) => {
         cy.contains(idiomaticConfigFile)
       })
 
-      cy.wait(1000) // ensure the error doesn't get cleared (process.exit)
+      // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the error is not cleared when the child process exits, so give it time to exit first
+      cy.wait(1000)
 
       cy.contains('You are using vite for your dev server, but a configuration file was not found.')
       cy.contains('Add your vite config at one of the above paths, or import your configuration file and provide it to the devServer config as a viteConfig option.')
@@ -120,7 +121,8 @@ describe('Error handling', () => {
           cy.contains(idiomaticConfigFile)
         })
 
-        cy.wait(1000) // ensure the error doesn't get cleared (process.exit)
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- asserts the error is not cleared when the child process exits, so give it time to exit first
+        cy.wait(1000)
 
         cy.contains('You are using webpack for your dev server, but a configuration file was not found.')
         cy.contains('Add your webpack config at one of the above paths, or import your configuration file and provide it to the devServer config as a webpackConfig option.')

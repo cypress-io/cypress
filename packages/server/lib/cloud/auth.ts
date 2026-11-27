@@ -5,8 +5,6 @@ const os = require('os')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
 const url = require('url')
-// tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
-const { shell } = require('electron')
 
 const machineId = require('./machine_id')
 import { id as randomId } from '../util/random'
@@ -36,7 +34,7 @@ const buildLoginRedirectUrl = (server) => {
   return `http://127.0.0.1:${port}/redirect-to-auth`
 }
 
-const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, flow = 'login', remoteOrigin) => {
+const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, flow = 'login') => {
   const { port } = server.address()
   const authFlow = AUTH_FLOWS[flow] || AUTH_FLOWS.login
 
@@ -56,10 +54,6 @@ const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent
       platform: os.platform(),
     }
 
-    if (remoteOrigin) {
-      authUrl.query.remoteOrigin = remoteOrigin
-    }
-
     if (utmMedium) {
       authUrl.query = {
         utm_source: utmSource,
@@ -74,12 +68,12 @@ const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent
   })
 }
 
-const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, remoteOrigin) => {
-  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'login', remoteOrigin)
+const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent) => {
+  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'login')
 }
 
-const buildFullSignupUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, remoteOrigin) => {
-  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'signup', remoteOrigin)
+const buildFullSignupUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent) => {
+  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'signup')
 }
 
 const getOriginFromUrl = (originalUrl) => {
@@ -91,7 +85,7 @@ const getOriginFromUrl = (originalUrl) => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent, flow = 'login', remoteOrigin) => {
+const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent, flow = 'login') => {
   if (!server) {
     // launch an express server to listen for the auth callback from Cypress Cloud
     const origin = getOriginFromUrl(baseLoginUrl)
@@ -102,7 +96,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, flow, remoteOrigin)
+      buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, flow)
       .then((fullAuthUrl) => {
         debug('Received GET to /redirect-to-auth, redirecting: %o', { fullAuthUrl })
 
@@ -195,6 +189,11 @@ const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
 
   openExternalAttempted = true
 
+  // Required lazily so that loading cloud code (e.g. `cypress run --record`)
+  // does not require Electron; only the interactive login flow needs it
+  // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
+  const { shell } = require('electron')
+
   return shell.openExternal(loginUrl)
   .catch((err) => {
     debug('Error launching native auth: %o', { err })
@@ -220,7 +219,7 @@ const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
+const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent) => {
   function sendMessage (name, message) {
     onMessage({
       name,
@@ -233,7 +232,7 @@ const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent, remoteOrig
 
   return authFlow.getBaseUrl()
   .then((baseAuthUrl) => {
-    return _internal.launchServer(baseAuthUrl, sendMessage, utmSource, utmMedium, utmContent, flow, remoteOrigin)
+    return _internal.launchServer(baseAuthUrl, sendMessage, utmSource, utmMedium, utmContent, flow)
   })
   .then(() => {
     return _internal.buildLoginRedirectUrl(server)
@@ -262,12 +261,12 @@ const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent, remoteOrig
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
-  return startAuth('login', onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
+const start = (onMessage, utmSource, utmMedium, utmContent) => {
+  return startAuth('login', onMessage, utmSource, utmMedium, utmContent)
 }
 
-const startSignup = (onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
-  return startAuth('signup', onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
+const startSignup = (onMessage, utmSource, utmMedium, utmContent) => {
+  return startAuth('signup', onMessage, utmSource, utmMedium, utmContent)
 }
 
 export = {

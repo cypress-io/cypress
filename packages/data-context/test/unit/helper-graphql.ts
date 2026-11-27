@@ -1,4 +1,5 @@
-import { GraphQLObjectTypeConfig, GraphQLFieldResolver, GraphQLObjectType, GraphQLSchema, graphql } from 'graphql'
+import type { GraphQLObjectTypeConfig, GraphQLFieldResolver } from 'graphql'
+import { GraphQLObjectType, GraphQLSchema, graphql } from 'graphql'
 
 export const createGraphQL = <TSource = any, TArgs = any, TContext = any>(
   query: string,

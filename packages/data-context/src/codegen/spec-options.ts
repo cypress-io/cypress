@@ -3,7 +3,8 @@ import type { CodeGenType } from '../gen/nxs.gen'
 import fs from 'fs-extra'
 import { uniq, upperFirst } from 'lodash'
 import path from 'path'
-import { FileExtension, getDefaultSpecFileName } from '../util/files'
+import { getDefaultSpecFileName } from '../util/files'
+import type { FileExtension } from '../util/files'
 import { toPosix } from '../util'
 import type { FoundSpec } from '@packages/types'
 
@@ -172,13 +173,13 @@ export class SpecOptions {
   private buildComponentNameFromFilename (fileNameWithoutExt: string): string {
     const sanitizedName = fileNameWithoutExt
     // Remove any characters from the filename that aren't allowed within a JS variable name (but leave periods and hyphens)
-    .replaceAll(/[^a-z_\d$.-]/gi, '')
+    .replaceAll(/[^\w$.-]/g, '')
     // Remove any groupings of multiple periods (eg, '...all') but leave single periods alone
-    .replaceAll(/[.]{2,}/g, '')
+    .replaceAll(/\.{2,}/g, '')
 
     // Convert period- and hyphen-delimited portions to PascalCase
     // eg, 'test.page.ts' => 'TestPage', 'about.component.vue' => 'AboutComponent'
-    return sanitizedName.split(/[-.]/g)
+    return sanitizedName.split(/[-.]/)
     .map(upperFirst)
     .join('')
   }

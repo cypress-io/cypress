@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-type JSX = Function & { displayName: string }
+type JSX = { displayName?: unknown, name?: string }
 
 /**
  * Gets the display name of the component when possible.

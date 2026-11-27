@@ -4,4 +4,5 @@
 export const $Cypress: Cypress.Cypress
 
 export const $: JQuery
+
 export default $Cypress

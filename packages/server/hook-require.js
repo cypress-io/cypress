@@ -1,40 +1,26 @@
-const path = require('path')
 const env = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'prod' : 'dev'
-
-process.env.PROJECT_BASE_DIR = process.env.PROJECT_BASE_DIR ?? path.join(__dirname, '..', '..')
 
 const isDev = env === 'dev'
 
-function runWithSnapshot (forceTypeScript) {
-  const { snapshotRequire } = require('@packages/v8-snapshot-require')
-  const projectBaseDir = process.env.PROJECT_BASE_DIR
+// The binary ships compiled JavaScript and no TypeScript compiler, so registering ts-node there
+// only spends startup time. The source tree still needs it when run with CYPRESS_INTERNAL_ENV=production.
+function canRegisterTypeScript () {
+  if (isDev) {
+    return true
+  }
 
-  const supportTS = forceTypeScript || typeof global.getSnapshotResult === 'undefined' || global.supportTypeScript
+  try {
+    require.resolve('typescript')
 
-  snapshotRequire(projectBaseDir, {
-    diagnosticsEnabled: isDev,
-    useCache: true,
-    transpileOpts: {
-      supportTS,
-      initTranspileCache: supportTS
-        ? () => require('dirt-simple-file-cache').DirtSimpleFileCache.initSync(projectBaseDir, { cacheDir: path.join(projectBaseDir, 'node_modules', '.dsfc'), keepInMemoryCache: true })
-        : undefined,
-      tsconfig: {
-        compilerOptions: {
-          useDefineForClassFields: false, // default
-          importsNotUsedAsValues: 'remove', // default
-        },
-      },
-    },
-
-  })
+    return true
+  } catch (e) {
+    return false
+  }
 }
 
-const hookRequire = ({ forceTypeScript }) => {
-  if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof getSnapshotResult === 'undefined') {
+const hookRequire = () => {
+  if (canRegisterTypeScript()) {
     require('@packages/ts/register')
-  } else {
-    runWithSnapshot(forceTypeScript)
   }
 }
 

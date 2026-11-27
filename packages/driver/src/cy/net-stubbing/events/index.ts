@@ -56,15 +56,14 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
   }
 
   function sendStaticResponse (requestId: string, staticResponse: StaticResponse) {
-    // tslint:disable:no-floating-promises
-    emitNetEvent('send:static:response', {
+    // emitNetEvent reports errors through cy.fail, and only rejects if cy.fail rethrows
+    void emitNetEvent('send:static:response', {
       requestId,
       staticResponse: getBackendStaticResponse(staticResponse),
     })
   }
 
   function failCurrentTest (err: Error) {
-    // @ts-ignore
     cy.fail(err, { async: true })
   }
 
@@ -94,8 +93,7 @@ export function registerEvents (Cypress: Cypress.Cypress, cy: Cypress.cy) {
       if (!route) {
         if (frame.subscription.await) {
           // route not found, just resolve so the request can continue
-          // tslint:disable:no-floating-promises
-          emitResolved(frame.data)
+          void emitResolved(frame.data)
         }
 
         return

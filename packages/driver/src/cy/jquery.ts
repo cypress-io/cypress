@@ -42,4 +42,4 @@ export const create = (state: StateFunc) => ({
   },
 })
 
-export interface IJQuery extends ReturnType<typeof create> {}
+export type IJQuery = ReturnType<typeof create>

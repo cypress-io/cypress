@@ -4,9 +4,9 @@
 /// <reference path="typedefs/cypress-request-promise.d.ts" />
 
 declare module 'http' {
-  import { Socket } from 'net'
-  import { Url } from 'url'
-  import { Duplex } from 'stream'
+  import type { Socket } from 'net'
+  import type { Url } from 'url'
+  import type { Duplex } from 'stream'
 
     type SocketCallback = (err: Optional<Error>, sock: Optional<Socket>) => void
 
@@ -20,10 +20,7 @@ declare module 'http' {
     interface ClientRequest {
       _header?: { [key: string]: string }
       _implicitHeader: () => void
-      output: string[]
       agent: Agent
-      insecureHTTPParser: boolean
-      maxHeaderSize?: number
     }
 
     interface RequestOptions extends ClientRequestArgs {
@@ -36,12 +33,6 @@ declare module 'http' {
       socket: Optional<Socket>
       uri?: Url
     }
-
-    interface OutgoingMessage {
-      destroy(error?: Error): this
-    }
-
-    export const CRLF: string
 }
 
 declare module 'https' {
@@ -56,24 +47,23 @@ declare interface InternalStream {
 
 declare module 'net' {
   type family = 4 | 6
-  type TCPSocket = {}
 
   interface Address {
     address: string
     family: family
   }
-
-  interface Socket {
-    _handle: TCPSocket | null
-  }
-
-}
-
-declare interface Object {
-  assign(...obj: any[]): any
 }
 
 declare type Optional<T> = T | void
+
+declare module 'launch-editor' {
+  function launchEditor (
+    file: string,
+    specifiedEditor?: string,
+    onErrorCallback?: (fileName: string, errorMessage: string | null) => void,
+  ): void
+  export = launchEditor
+}
 
 declare module 'plist' {
   interface Plist {
@@ -81,18 +71,4 @@ declare module 'plist' {
   }
   const plist: Plist
   export = plist
-}
-
-declare module 'proxy-from-env' {
-  const getProxyForUrl: (url: string) => string
-}
-
-declare interface SymbolConstructor {
-  for(str: string): SymbolConstructor
-}
-
-declare module 'url' {
-  interface UrlWithStringQuery {
-    format(): string
-  }
 }

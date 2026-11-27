@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-const specialKeywords = /(debug)/
+const specialKeywords = /debug/
 
 const $LocalStorage = {
   localStorage: null,
@@ -77,7 +77,7 @@ const $LocalStorage = {
   // if item matches by string or regex
   // any key in our keys then callback
   _ifItemMatchesAnyKey (item, keys, fn) {
-    for (let key of keys) {
+    for (const key of keys) {
       const re = this._normalizeRegExpOrString(key)
 
       if (re?.test(item)) {

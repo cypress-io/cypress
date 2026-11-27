@@ -16,7 +16,7 @@ export const onAfterResponse: HandlerFn<CyHttpMessages.ResponseComplete> = async
 
   request.state = 'Complete'
 
-  // @ts-ignore
+  // @ts-expect-error - the handler expects a ResponseComplete, not the IncomingResponse
   userHandler && await userHandler(request.response!)
 
   return null

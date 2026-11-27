@@ -1,0 +1,93 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`lib/reporter > #stats > has reporterName stats, reporterStats, etc 1`] = `
+{
+  "hooks": [],
+  "reporter": "foo",
+  "reporterStats": {
+    "failures": 1,
+    "passes": 0,
+    "pending": 0,
+    "suites": 0,
+    "tests": 1,
+  },
+  "stats": {
+    "failures": 1,
+    "passes": 0,
+    "pending": 1,
+    "skipped": 0,
+    "suites": 2,
+    "tests": 2,
+    "wallClockDuration": 0,
+  },
+  "tests": [
+    {
+      "attempts": [
+        {
+          "error": {
+            "codeFrame": {
+              "absoluteFile": "/path/to/cypress/integration/spec.js",
+              "column": 8,
+              "frame": "   5 | 
+   6 |   it('fails', () => {
+>  7 |     cy.get('nope', { timeout: 1 })
+     |        ^
+   8 |   })
+   9 | })
+  10 | ",
+              "language": "js",
+              "line": 7,
+              "originalFile": "cypress/integration/spec.js",
+              "relativeFile": "cypress/integration/spec.js",
+            },
+            "message": "foo",
+            "name": undefined,
+            "stack": "at foo:1:1
+at bar:1:1
+at baz:1:1",
+          },
+          "failedFromHookId": null,
+          "state": "failed",
+          "timings": null,
+          "videoTimestamp": null,
+          "wallClockDuration": null,
+          "wallClockStartedAt": null,
+        },
+      ],
+      "body": "",
+      "displayError": "at foo:1:1
+at bar:1:1
+at baz:1:1",
+      "state": "failed",
+      "testId": "r4",
+      "title": [
+        "TodoMVC - React",
+        "When page is initially opened",
+        "should focus on the todo input field",
+      ],
+    },
+    {
+      "attempts": [
+        {
+          "error": null,
+          "failedFromHookId": null,
+          "state": "pending",
+          "timings": null,
+          "videoTimestamp": null,
+          "wallClockDuration": null,
+          "wallClockStartedAt": null,
+        },
+      ],
+      "body": "",
+      "displayError": null,
+      "state": "pending",
+      "testId": "r5",
+      "title": [
+        "TodoMVC - React",
+        "When page is initially opened",
+        "does something good",
+      ],
+    },
+  ],
+}
+`;

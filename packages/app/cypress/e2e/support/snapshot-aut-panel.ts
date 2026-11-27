@@ -4,7 +4,6 @@ export const snapshotAUTPanel = (name) => {
   }
 
   cy.percySnapshot(name, {
-    // @ts-ignore
     width: 536,
     elementOverrides: {
       '[data-cy=sidebar]': hideEl,

@@ -70,7 +70,7 @@ defineProps<{
 }>()
 
 defineEmits<{
-  (eventName: 'selectItem', value: {file: FileListItemFragment, item: any})
+  (eventName: 'selectItem', value: { file: FileListItemFragment, item: any })
 }>()
 
 // [...all].vue returns as [ when using the normal fileName

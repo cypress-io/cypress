@@ -149,7 +149,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   it('increases the timeout delta', () => {
     cy.spy(cy, 'timeout')
 
-    cy.get(':text:first').type('foo{enter}').then(() => {
+    cy.get(':text:first').type('foo{enter}', { delay: 10 }).then(() => {
       expect(cy.timeout).to.be.calledWith(40, true, 'type')
 
       expect(cy.timeout).to.be.calledWith(50, true, 'type')
@@ -198,7 +198,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   it('should trigger KeyboardEvent, not Event, for event listeners', (done) => {
     cy.$$('input:first').on('keydown', (e) => {
       // @ts-expect-error - TODO: Need to get this to not throw error
-      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView?.KeyboardEvent) {
+      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView.KeyboardEvent) {
         done()
 
         return
@@ -356,7 +356,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('passes config.animationDistanceThreshold to ensureElementIsNotAnimating', () => {
-      let old = Cypress.config('animationDistanceThreshold')
+      const old = Cypress.config('animationDistanceThreshold')
 
       Cypress.config('animationDistanceThreshold', 1000)
 
@@ -378,7 +378,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo', { scrollBehavior: 'bottom' })
 
       cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
       })
     })
 
@@ -391,66 +391,6 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       cy.get(':text:first').then((el) => {
         expect(el[0].scrollIntoView).not.to.be.called
-      })
-    })
-
-    it('can specify scrollBehavior bottom in config', { scrollBehavior: 'bottom' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end', inline: 'end' })
-      })
-    })
-
-    it('can specify scrollBehavior center in config', { scrollBehavior: 'center' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'center', inline: 'center' })
-      })
-    })
-
-    it('can specify scrollBehavior nearest in config', { scrollBehavior: 'nearest' }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'nearest', inline: 'nearest' })
-      })
-    })
-
-    it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).not.to.be.called
-      })
-    })
-
-    it('calls scrollIntoView by default', () => {
-      cy.get(':text:first').then((el) => {
-        cy.spy(el[0], 'scrollIntoView')
-      })
-
-      cy.get(':text:first').type('foo')
-
-      cy.get(':text:first').then((el) => {
-        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start', inline: 'start' })
       })
     })
 
@@ -710,11 +650,11 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('delay', () => {
-    it('adds default delay to delta for each key sequence', () => {
+    it('adds delay to delta for each key sequence when delay is set', () => {
       cy.spy(cy, 'timeout')
 
       cy.get(':text:first')
-      .type('foo{enter}bar{leftarrow}')
+      .type('foo{enter}bar{leftarrow}', { delay: 10 })
       .then(() => {
         expect(cy.timeout).to.be.calledWith(10 * 8, true, 'type')
       })
@@ -742,11 +682,10 @@ describe('src/cy/commands/actions/type - #type', () => {
           expect(text).to.have.value('foo')
 
           done()
-        }
-        , 50)
+        }, 50)
       })
 
-      cy.get(':text:first').type('foo{enter}bar{leftarrow}')
+      cy.get(':text:first').type('foo{enter}bar{leftarrow}', { delay: 10 })
     })
 
     it('test config keystrokeDelay overrides global value', { keystrokeDelay: 5 }, () => {
@@ -1027,6 +966,10 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.$$('#input-without-value').val('0').mouseup(function () {
         $(this).select()
       })
+
+      cy.get('#input-without-value')
+      .type('50')
+      .should('have.value', '50')
     })
 
     // https://github.com/cypress-io/cypress/issues/5703
@@ -1076,12 +1019,6 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get('#email-without-value')
       .type('b@foo.com')
       .should('have.value', 'b@foo.com')
-    })
-
-    it('overwrites text when selectAll in mouseup handler', () => {
-      cy.$$('#input-without-value').val('0').mouseup(function () {
-        $(this).select()
-      })
     })
 
     it('responsive to keydown handler', () => {
@@ -1163,7 +1100,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      cy.get('#input-without-value').type('foo').then(($input) => {
+      cy.get('#input-without-value').type('foo', { delay: 10 }).then(($input) => {
         expect($input).to.have.value('f-o-o-')
       })
     })
@@ -1255,6 +1192,16 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('#number-without-value').type('42').then(($text) => {
           expect($text).to.have.value('42')
         })
+      })
+
+      // TODO(webkit): fix+unskip for experimental webkit
+      // https://github.com/cypress-io/cypress/issues/7170
+      it('appends to the existing value when the input is already focused', { browser: '!webkit' }, () => {
+        cy.visit('fixtures/issue-7170.html')
+        cy.get('button').click()
+        cy.get('input')
+        .type('2')
+        .should('have.value', '12')
       })
 
       it('can input decimal', () => {
@@ -1434,6 +1381,80 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    describe('input[type=url]', () => {
+      beforeEach(() => {
+        cy.get('#url-with-value').invoke('val', 'https://www.example.com')
+      })
+
+      it('moves the caret with {leftarrow}', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}').then(($input) => {
+          expect($input).to.have.value('https://www.example.com')
+          expect($input[0].selectionStart).to.eq('https://www.example.'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.example.'.length)
+        })
+      })
+
+      it('inserts text in the middle of the value', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}{leftarrow}/shop').then(($input) => {
+          expect($input).to.have.value('https://www.example/shop.com')
+          expect($input[0].selectionStart).to.eq('https://www.example/shop'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.example/shop'.length)
+        })
+      })
+
+      it('types at the caret position the app set', () => {
+        cy.get('#url-with-value').invoke('val', 'www.example.com')
+
+        cy.get<HTMLInputElement>('#url-with-value').then(($input) => {
+          $input[0].focus()
+          $input[0].setSelectionRange(0, 0)
+        })
+
+        cy.get<HTMLInputElement>('#url-with-value').type('https://').then(($input) => {
+          expect($input).to.have.value('https://www.example.com')
+          expect($input[0].selectionStart).to.eq('https://'.length)
+          expect($input[0].selectionEnd).to.eq('https://'.length)
+        })
+      })
+
+      it('replaces the value with {selectall}', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{selectall}https://shop.example.com').then(($input) => {
+          expect($input).to.have.value('https://shop.example.com')
+          expect($input[0].selectionStart).to.eq('https://shop.example.com'.length)
+          expect($input[0].selectionEnd).to.eq('https://shop.example.com'.length)
+        })
+      })
+
+      it('deletes before the caret with {backspace}', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}{leftarrow}{backspace}').then(($input) => {
+          expect($input).to.have.value('https://www.exampl.com')
+          expect($input[0].selectionStart).to.eq('https://www.exampl'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.exampl'.length)
+        })
+      })
+
+      it('deletes after the caret with {del}', () => {
+        cy.get<HTMLInputElement>('#url-with-value').type('{leftarrow}{leftarrow}{leftarrow}{leftarrow}{del}').then(($input) => {
+          expect($input).to.have.value('https://www.examplecom')
+          expect($input[0].selectionStart).to.eq('https://www.example'.length)
+          expect($input[0].selectionEnd).to.eq('https://www.example'.length)
+        })
+      })
+
+      it('replaces text the app selected with select()', () => {
+        cy.get<HTMLInputElement>('#url-with-value').then(($input) => {
+          $input[0].focus()
+          $input[0].select()
+        })
+
+        cy.get<HTMLInputElement>('#url-with-value').type('https://shop.example.com').then(($input) => {
+          expect($input).to.have.value('https://shop.example.com')
+          expect($input[0].selectionStart).to.eq('https://shop.example.com'.length)
+          expect($input[0].selectionEnd).to.eq('https://shop.example.com'.length)
+        })
+      })
+    })
+
     describe('input[type=password]', () => {
       it('can change values', () => {
         cy.get('#password-without-value').type('password').then(($text) => {
@@ -1520,7 +1541,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     // https://github.com/cypress-io/cypress/issues/3661
     describe('various focusable elements', () => {
       it('<select> element', () => {
-        let keydown = cy.stub()
+        const keydown = cy.stub()
 
         cy.get('select:first')
         .then(($el) => $el.on('keydown', keydown))
@@ -1531,7 +1552,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
 
       it('<a> element', () => {
-        let keydown = cy.stub()
+        const keydown = cy.stub()
 
         cy.get('a:first')
         .then(($el) => $el.on('keydown', keydown))
@@ -1549,7 +1570,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           <img usemap="#map" src="/fixtures/media/cypress.png" alt="image" />
           `).prependTo(cy.$$('body'))
 
-        let keydown = cy.stub()
+        const keydown = cy.stub()
 
         cy.$$('area:first').on('keydown', keydown)
 
@@ -1565,8 +1586,8 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       // https://github.com/cypress-io/cypress/issues/2166
       it('<button> element', () => {
-        let keydown = cy.stub()
-        let click = cy.stub()
+        const keydown = cy.stub()
+        const click = cy.stub()
 
         cy.get('button:first')
         .then(($el) => {
@@ -2909,16 +2930,13 @@ describe('src/cy/commands/actions/type - #type', () => {
           this.lastLog = log
         }
       })
-
-      null
     })
 
     it('eventually passes the assertion', () => {
       cy.$$('input:first').keyup(function () {
         _.delay(() => {
           $(this).addClass('typed')
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('input:first').type('f').should('have.class', 'typed').then(function () {
@@ -3199,6 +3217,15 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/14864
+  describe('input handler that updates the value asynchronously', () => {
+    it('defers keyup until the handler microtasks have run', () => {
+      cy.visit('/fixtures/issue-14864.html')
+      cy.get('input').type('/')
+      cy.get('#feedback').should('have.text', 'You typed Slash')
+    })
+  })
+
   describe('user experience', () => {
     it('can print table of keys on click', () => {
       cy.get('input:first').type('foo')
@@ -3273,6 +3300,32 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#date-without-value').should('have.value', '1999-12-31')
         })
 
+        it('consecutive {upArrow} increases day once per arrow', () => {
+          cy.get('#date-without-value').type('1999-12-30').type('{upArrow}{upArrow}')
+          cy.get('#date-without-value').should('have.value', '2000-01-01')
+        })
+
+        it('consecutive {downArrow} decreases day once per arrow', () => {
+          cy.get('#date-without-value').type('2000-01-01').type('{downArrow}{downArrow}')
+          cy.get('#date-without-value').should('have.value', '1999-12-30')
+        })
+
+        it('mixed {upArrow} and {downArrow} step the day in order', () => {
+          cy.get('#date-without-value').type('2000-01-01').type('{upArrow}{downArrow}{upArrow}')
+          cy.get('#date-without-value').should('have.value', '2000-01-02')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid date')
+            expect(err.message).to.include('{ArrowUp}{ArrowLeft}')
+
+            done()
+          })
+
+          cy.get('#date-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#date-with-value')
           .then(($input) => {
@@ -3316,6 +3369,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#month-without-value').then(($input) => $input.val('2000-01'))
           cy.get('#month-without-value').type('{downArrow}')
           cy.get('#month-without-value').should('have.value', '1999-12')
+        })
+
+        it('consecutive {upArrow} and {downArrow} step the month once per arrow', () => {
+          cy.get('#month-without-value').type('1999-11').type('{upArrow}{upArrow}')
+          cy.get('#month-without-value').should('have.value', '2000-01')
+          cy.get('#month-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#month-without-value').should('have.value', '1999-12')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid month')
+
+            done()
+          })
+
+          cy.get('#month-without-value').type('{upArrow}{leftArrow}')
         })
 
         it('{upArrow} triggers events on input', () => {
@@ -3363,6 +3433,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#week-without-value').should('have.value', '2017-W04')
         })
 
+        it('consecutive {upArrow} and {downArrow} step the week once per arrow', () => {
+          cy.get('#week-without-value').type('2017-W05').type('{upArrow}{upArrow}')
+          cy.get('#week-without-value').should('have.value', '2017-W07')
+          cy.get('#week-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#week-without-value').should('have.value', '2017-W06')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid week')
+
+            done()
+          })
+
+          cy.get('#week-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#week-with-value')
           .then(($input) => {
@@ -3408,6 +3495,23 @@ describe('src/cy/commands/actions/type - #type', () => {
           cy.get('#time-without-value').should('have.value', '01:22')
         })
 
+        it('consecutive {upArrow} and {downArrow} step the minute once per arrow', () => {
+          cy.get('#time-without-value').type('01:59').type('{upArrow}{upArrow}')
+          cy.get('#time-without-value').should('have.value', '02:01')
+          cy.get('#time-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#time-without-value').should('have.value', '02:00')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid time')
+
+            done()
+          })
+
+          cy.get('#time-without-value').type('{upArrow}{leftArrow}')
+        })
+
         it('{upArrow} triggers events on input', () => {
           cy.get('#time-with-value')
           .then(($input) => {
@@ -3447,6 +3551,23 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         it('{downArrow} decreases time value', () => {
           cy.get('#datetime-local-without-value').type('{downArrow}')
+        })
+
+        it('consecutive {upArrow} and {downArrow} step the value once per arrow', () => {
+          cy.get('#datetime-local-without-value').type('2000-01-01T01:30').type('{upArrow}{upArrow}')
+          cy.get('#datetime-local-without-value').should('have.value', '2000-01-01T01:32')
+          cy.get('#datetime-local-without-value').type('{downArrow}{downArrow}{upArrow}')
+          cy.get('#datetime-local-without-value').should('have.value', '2000-01-01T01:31')
+        })
+
+        it('throws when {upArrow} is followed by a key that is not an arrow', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('requires a valid datetime')
+
+            done()
+          })
+
+          cy.get('#datetime-local-without-value').type('{upArrow}{leftArrow}')
         })
 
         it('{upArrow} triggers events on input', () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, jest } from '@jest/globals'
+import { describe, expect, it, beforeAll, vi } from 'vitest'
 import type { DataContext } from '../../../src'
 import { DataEmitterActions } from '../../../src/actions/DataEmitterActions'
 import { createTestDataContext } from '../helper'
@@ -19,7 +19,6 @@ describe('DataEmitterActions', () => {
       let completed = false
 
       const testIterator = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _value of subscription) {
           items += 1
         }
@@ -55,7 +54,6 @@ describe('DataEmitterActions', () => {
       let completed = false
 
       const testIterator = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _value of subscription) {
           items += 1
         }
@@ -86,7 +84,6 @@ describe('DataEmitterActions', () => {
       let completed = false
 
       const testIterator = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _value of subscription) {
           items += 1
         }
@@ -114,7 +111,6 @@ describe('DataEmitterActions', () => {
       }
 
       const testIterator = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _value of subscription) {
           returnVal.items += 1
         }
@@ -129,7 +125,7 @@ describe('DataEmitterActions', () => {
     it('handles multiple subscriptions', async () => {
       const actions = new DataEmitterActions(ctx)
 
-      const unsubscribe1 = jest.fn()
+      const unsubscribe1 = vi.fn()
 
       const subscription1 = actions.subscribeTo('specsChange', { sendInitial: true, onUnsubscribe: unsubscribe1 })
 
@@ -145,7 +141,7 @@ describe('DataEmitterActions', () => {
       let subscription2
       let iteratorFactory2
       let iteratorPromise2
-      let unsubscribe2 = jest.fn()
+      const unsubscribe2 = vi.fn()
 
       setImmediate(() => {
         subscription2 = actions.subscribeTo('specsChange', { sendInitial: true, onUnsubscribe: unsubscribe2 })

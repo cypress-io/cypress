@@ -1,7 +1,8 @@
 /**
  * @vitest-environment jsdom
  */
-import { vi, describe, it, expect, beforeEach, MockedObject } from 'vitest'
+import type { MockedObject } from 'vitest'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { urlQueryCommand, hashQueryCommand, locationQueryCommand } from '../../../../src/cy/commands/location'
 import { getUrlFromAutomation } from '../../../../src/cy/commands/helpers/location'
 
@@ -17,14 +18,15 @@ describe('cy/commands/location', () => {
 
   beforeEach(() => {
     mockCypress = {
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.log
       log: vi.fn(),
       automation: vi.fn(),
       isBrowser: vi.fn(),
+      // @ts-expect-error - partial Ensure mock
       ensure: {
-        // @ts-expect-error
         commandCanCommunicateWithAUT: vi.fn(),
       },
-      // @ts-expect-error
+      // @ts-expect-error - vi.fn() can't reproduce the overloads of Cypress.config
       config: vi.fn(),
     }
 
@@ -32,14 +34,12 @@ describe('cy/commands/location', () => {
       set: vi.fn(),
     }
 
-    //@ts-expect-error
-    getUrlFromAutomation.mockReset()
+    vi.mocked(getUrlFromAutomation).mockReset()
   })
 
   describe('url', () => {
     it('returns the url href from the automation client', () => {
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
+      vi.mocked(getUrlFromAutomation).mockReturnValue(() => {
         return {
           href: 'https://www.example.com/#foobar',
         }
@@ -51,8 +51,7 @@ describe('cy/commands/location', () => {
     })
 
     it('supports the decode option', () => {
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
+      vi.mocked(getUrlFromAutomation).mockReturnValue(() => {
         return {
           href: 'https://www.example.com/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B',
         }
@@ -70,8 +69,7 @@ describe('cy/commands/location', () => {
 
   describe('hash', () => {
     it('returns the hash of the url from the automation client', () => {
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
+      vi.mocked(getUrlFromAutomation).mockReturnValue(() => {
         return {
           hash: 'foobar',
         }
@@ -85,8 +83,7 @@ describe('cy/commands/location', () => {
 
   describe('location', () => {
     it('returns the location of the url from the automation client', () => {
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
+      vi.mocked(getUrlFromAutomation).mockReturnValue(() => {
         return {
           protocol: 'https:',
           host: 'www.example.com',
@@ -126,8 +123,7 @@ describe('cy/commands/location', () => {
     })
 
     it('works with a string key', () => {
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
+      vi.mocked(getUrlFromAutomation).mockReturnValue(() => {
         return {
           protocol: 'https:',
           host: 'www.example.com',
@@ -156,8 +152,7 @@ describe('cy/commands/location', () => {
     })
 
     it('returns null if the location is empty', () => {
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
+      vi.mocked(getUrlFromAutomation).mockReturnValue(() => {
         return ''
       })
 
@@ -175,8 +170,7 @@ describe('cy/commands/location', () => {
     })
 
     it('throws if the string key is invalid', () => {
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
+      vi.mocked(getUrlFromAutomation).mockReturnValue(() => {
         return {
           protocol: 'https:',
           host: 'www.example.com',
@@ -197,8 +191,7 @@ describe('cy/commands/location', () => {
     })
 
     it('retries the command even after the location has resolved', () => {
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValueOnce((opts) => {
+      vi.mocked(getUrlFromAutomation).mockReturnValueOnce((opts) => {
         expect(opts).toEqual({ retryAfterResolve: true })
 
         return {
@@ -215,8 +208,7 @@ describe('cy/commands/location', () => {
         }
       })
 
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValueOnce((opts) => {
+      vi.mocked(getUrlFromAutomation).mockReturnValueOnce((opts) => {
         expect(opts).toEqual({ retryAfterResolve: true })
 
         return {

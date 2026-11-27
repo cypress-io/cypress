@@ -1,2 +1,0 @@
-before ->
-  console.log "before"

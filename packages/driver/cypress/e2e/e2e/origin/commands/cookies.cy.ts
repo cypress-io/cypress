@@ -288,6 +288,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
         cy.wait('@headers')
 
         cy.contains('"cookie":"foo=bar"')
+        // eslint-disable-next-line cypress/no-unnecessary-waiting -- cy.getCookie() does not retry, so give the server time to set the cookie first
         cy.wait(0) // Give the server a chance to catch up
         cy.getCookie('foo').its('value').should('equal', 'bar')
       })

@@ -1,1 +1,3 @@
-export const log = require('debug')('cypress:launcher:test')
+import debug from 'debug'
+
+export const log = debug('cypress:launcher:test')

@@ -3,17 +3,31 @@ import type { DataContext } from '..'
 import * as path from 'path'
 import os from 'os'
 
-import globby, { GlobbyOptions } from 'globby'
+import globby from 'globby'
+import type { GetFilesByGlob } from '@packages/config'
 import Debug from 'debug'
 import { toPosix } from '../util/file'
 
 const debug = Debug('cypress:data-context:sources:FileDataSource')
 
-export const matchGlobs = async (globs: string | string[], globbyOptions?: GlobbyOptions) => {
-  return await globby(globs, globbyOptions)
+export interface GlobOptions {
+  absolute?: boolean
+  expandDirectories?: boolean
+  ignore?: string[]
+  // Set by getFilesByGlob's retry, which tolerates filesystem errors to return partial results
+  suppressErrors?: boolean
 }
 
-export class FileDataSource {
+const matchGlobs = async (globs: string | string[], options?: GlobOptions & { cwd?: string, onlyFiles?: boolean }) => {
+  return await globby(globs, options)
+}
+
+// @packages/config receives getFilesByGlob as a callback for resolving the support file
+interface ConfigGlobSource {
+  getFilesByGlob: GetFilesByGlob
+}
+
+export class FileDataSource implements ConfigGlobSource {
   constructor (private ctx: DataContext) {}
 
   async checkIfFileExists (relativePath: string) {
@@ -34,7 +48,7 @@ export class FileDataSource {
     return this.ctx.fs.readFile(path.join(this.ctx.currentProject, relative), 'utf-8')
   }
 
-  async getFilesByGlob (cwd: string, glob: string | string[], globOptions: GlobbyOptions = {}): Promise<string[]> {
+  async getFilesByGlob (cwd: string, glob: string | string[], globOptions: GlobOptions = {}): Promise<string[]> {
     const globs = ([] as string[]).concat(glob).map((globPattern) => {
       const workingDirectoryPrefix = path.join(cwd, path.sep)
 

@@ -1,9 +1,11 @@
-import { baseConfig } from '@packages/eslint-config'
+import { baseConfig, jsonConfig, regexpConfig } from '@packages/eslint-config'
 import vueParser from 'vue-eslint-parser'
 
 export default [
   { ignores: ['**/dist', '**/*.d.ts', '**/package-lock.json', '**/tsconfig.json', '**/cypress/fixtures'] },
   ...baseConfig,
+  ...regexpConfig,
+  ...jsonConfig,
   {
     files: ['**/*.{js,ts,jsx,tsx,vue}'],
     languageOptions: {
@@ -15,7 +17,7 @@ export default [
     },
     rules: {
       'no-console': 'off',
-      'mocha/no-global-tests': 'off',
+      'mocha/no-top-level-tests': 'off',
       'vue/no-required-prop-with-default': 'off',
     },
   },

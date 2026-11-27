@@ -1,18 +1,15 @@
 <template>
   <CreateSpecCard
     :disabled="disabled"
-    :header="t('createSpec.e2e.importFromScaffold.header')"
-    :description="t('createSpec.e2e.importFromScaffold.description')"
+    header="Scaffold example specs"
+    description="We'll generate several example specs to help guide you on how to write tests in Cypress."
     :icon="BoxOpenIcon"
   />
 </template>
 
 <script lang="ts" setup>
 import CreateSpecCard from '../../CreateSpecCard.vue'
-import { useI18n } from '@cy/i18n'
 import BoxOpenIcon from '~icons/cy/box-open_x48'
-
-const { t } = useI18n()
 
 defineProps<{
   disabled?: boolean

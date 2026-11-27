@@ -49,7 +49,7 @@ describe('Server', () => {
         // get all the config defaults
         // and allow us to override them
         // for each test
-        return setupFullConfigWithDefaults(obj, getCtx().file.getFilesByGlob)
+        return setupFullConfigWithDefaults(obj, (...args) => getCtx().file.getFilesByGlob(...args))
         .then((cfg) => {
           // use a jar for each test
           // but reset it automatically
@@ -96,6 +96,11 @@ describe('Server', () => {
               const automationStub = {
                 use: () => { },
               }
+
+              // these requests arrive in absolute form, and CONNECT for https,
+              // like a proxied browser — which only happens on the MITM path,
+              // and the server refuses CONNECT until a launch resolves it
+              await this.server.setNetworkMode(false)
 
               await this.server.startWebsockets(automationStub, config, {})
               if (initialUrl) {
@@ -491,12 +496,17 @@ describe('Server', () => {
         // invalid, but let's be tolerant
         .get('/d').reply(200, 'notHtml', { 'content-type': 'text/html;' })
         .get('/e').reply(200, 'notHtml', { 'content-type': 'application/xhtml+xml' })
+        // invalid headers are matched as sent rather than parsed and lowercased
+        .get('/f').reply(200, 'notHtml', { 'content-type': 'Text/HTML;' })
+        .get('/g').reply(200, '<html></html>', { 'content-type': 'text/plain; profile=text/html;' })
 
-        const bad = await this.server._onResolveUrl('http://example.com/a', {}, this.automationRequest)
+        for (const path of ['/a', '/g']) {
+          const bad = await this.server._onResolveUrl(`http://example.com${path}`, {}, this.automationRequest)
 
-        expect(bad.isHtml).to.be.false
+          expect(bad.isHtml).to.be.false
+        }
 
-        for (const path of ['/b', '/c', '/d', '/e']) {
+        for (const path of ['/b', '/c', '/d', '/e', '/f']) {
           const details = await this.server._onResolveUrl(`http://example.com${path}`, {}, this.automationRequest)
 
           expect(details.isHtml).to.be.true
@@ -1300,7 +1310,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${superDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${superDomain}"`)
         })
       })
 
@@ -1312,7 +1322,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${secondSuperDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${secondSuperDomain}"`)
         })
       })
 
@@ -1324,7 +1334,7 @@ describe('Server', () => {
           await this.server._onResolveUrl(url, {}, this.automationRequest)
           const res = await this.rp(url)
 
-          expect(res.body).to.include(`document.domain = \'${superDomain}\'`)
+          expect(res.body).to.include(`document.domain = "${superDomain}"`)
         })
       })
     })

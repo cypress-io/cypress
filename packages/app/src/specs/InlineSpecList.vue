@@ -7,10 +7,10 @@
       @close="showModal = false"
     />
     <InlineSpecListHeader
-      v-model:specFilterModel="specFilterModel"
+      v-model:spec-filter-model="specFilterModel"
       :result-count="specs.length"
       :is-run-all-specs-allowed="runAllSpecsStore.isRunAllSpecsAllowed"
-      @newSpec="showModal = true"
+      @new-spec="showModal = true"
       @run-all-specs="runAllSpecsStore.runAllSpecs"
     />
     <InlineSpecListTree

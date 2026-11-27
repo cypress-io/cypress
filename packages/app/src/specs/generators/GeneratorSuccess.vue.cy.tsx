@@ -1,0 +1,54 @@
+import GeneratorSuccess from './GeneratorSuccess.vue'
+import data from '../../../cypress/fixtures/GeneratorSuccess.json'
+import type { FileListItemFragment } from '../../generated/graphql-test'
+
+const targetSelector = '[data-cy=file-row]'
+const spec = data[0] as FileListItemFragment
+const content = `
+import ${spec.baseName} from './${spec.baseName}'
+import { mount } from '@cypress/react'
+
+describe('<${spec.baseName} />', () => {
+  it('renders', () => {
+    // https://on.cypress.io/mount
+    mount(<${spec.baseName} />)
+  }) 
+})
+`.trim()
+
+describe('<GeneratorSuccess />', () => {
+  it('renders the relative file path', () => {
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
+    .get('body')
+    .contains(spec.relative)
+  })
+
+  it('can be collapsed to hide the content', () => {
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
+    .get(targetSelector)
+    .click()
+    // The Collapsible wrapper sets aria-hidden="true" and collapses to
+    // max-height: 0 when closed. The modern visibility algorithm doesn't
+    // detect the resulting overflow clipping, so assert aria-hidden instead.
+    .get('code .line').first().closest('[aria-hidden]').should('have.attr', 'aria-hidden', 'true')
+    .get(targetSelector)
+    .click()
+    .get('code .line')
+    .should('be.visible')
+    .should('have.length', content.split('\n').length)
+  })
+
+  it('handles really long file names and really long content', () => {
+    const relative = 'src/components/deep/nested/path/to/deep/nested/path/to/component/MyComponent/MyComponent.spec.tsx'
+    const longContent = Object.keys(Array.from(Array(100))).map((c) => content).join('\n')
+
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, relative, contents: longContent }} />))
+    cy.percySnapshot()
+  })
+
+  it('does not render a copy button', () => {
+    cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
+    .get('body')
+    .findByTestId('copy-button').should('not.exist')
+  })
+})

@@ -48,7 +48,7 @@
         size="lg"
         @click="emits('close')"
       >
-        {{ t('createSpec.e2e.importFromScaffold.specsAddedButton') }}
+        Okay, I got it!
       </Button>
     </StandardModalFooter>
   </div>
@@ -62,10 +62,7 @@ import { buildSpecTree } from '../../../specs/tree/useCollapsibleTree'
 import { useCollapsibleTree } from '../../tree/useCollapsibleTree'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
-import { useI18n } from '@cy/i18n'
 import type { FoundSpec } from '@packages/types/src'
-
-const { t } = useI18n()
 
 gql`
 mutation ScaffoldGeneratorStepOne_e2eExamples {
@@ -92,9 +89,9 @@ const emits = defineEmits<{
 const mutation = useMutation(ScaffoldGeneratorStepOne_E2eExamplesDocument)
 
 onMounted(async () => {
-  emits('update:title', t('createSpec.e2e.importFromScaffold.specsAddingHeader'))
+  emits('update:title', 'Adding specs...')
   await mutation.executeMutation({})
-  emits('update:title', t('createSpec.e2e.importFromScaffold.specsAddedHeader'))
+  emits('update:title', 'Great! We added the following files to your project:')
 })
 
 const scaffoldedFiles = computed(() => mutation.data.value?.e2eExamples || [])

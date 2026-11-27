@@ -46,7 +46,6 @@
 <script lang="ts" setup>
 
 import { computed } from 'vue'
-import { useI18n } from '@cy/i18n'
 import type { SpecDataAggregate } from '@packages/data-context/src/gen/graphcache-config.gen'
 import type { TestingTypeEnum, StatsMetadata_GroupsFragment } from '../generated/graphql'
 import {
@@ -62,7 +61,6 @@ import {
 
 import LayeredBrowserIcon from './LayeredBrowserIcons.vue'
 import { gql } from '@urql/vue'
-const { t } = useI18n()
 
 gql`
   fragment StatsMetadata_Groups on CloudRunGroup {
@@ -127,7 +125,7 @@ const results = computed(() => {
 })
 
 const arrMapping = computed(() => {
-  const acc: {browsers: string[], oses: string[], firstBrowser: string, firstOs: string} = { browsers: [], oses: [], firstBrowser: '', firstOs: '' }
+  const acc: { browsers: string[], oses: string[], firstBrowser: string, firstOs: string } = { browsers: [], oses: [], firstBrowser: '', firstOs: '' }
   const uniqueBrowsers = new Set<string>()
   const uniqueOSes = new Set<string>()
 
@@ -174,17 +172,17 @@ const ORDER_MAP = computed<Record<StatType, Metadata>>(() => {
       name: 'testing-type',
     },
     'GROUPS': {
-      value: t('debugPage.stats.groups', props.groups!.length),
+      value: `${props.groups!.length} ${props.groups!.length === 1 ? 'group' : 'groups'}`,
       icon: IconTechnologyServer,
       name: 'group-server',
     },
     'G_OS': {
-      value: t('debugPage.stats.operatingSystems', arrMapping.value.oses.length),
+      value: `${arrMapping.value.oses.length} ${arrMapping.value.oses.length === 1 ? 'operating system' : 'operating systems'}`,
       icon: OS_MAP['GROUP'],
       name: 'operating-system-groups',
     },
     'G_BROWSERS': {
-      value: t('debugPage.stats.browsers', arrMapping.value.browsers.length),
+      value: `${arrMapping.value.browsers.length} ${arrMapping.value.browsers.length === 1 ? 'browser' : 'browsers'}`,
       icon: arrMapping.value.browsers,
       name: 'browser-groups',
     },

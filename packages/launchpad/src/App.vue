@@ -29,7 +29,7 @@ mutation App_DevRelaunch($action: DevRelaunchAction!) {
 
 const relaunchMutation = useMutation(App_DevRelaunchDocument)
 
-let isShowingRelaunch = ref(false)
+const isShowingRelaunch = ref(false)
 
 const toast = useToast()
 

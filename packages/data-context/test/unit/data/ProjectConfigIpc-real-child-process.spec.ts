@@ -1,21 +1,29 @@
-import { describe, expect, it, beforeAll, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeAll, beforeEach, afterEach, vi } from 'vitest'
+import fs from 'fs-extra'
+import os from 'os'
 import path from 'path'
 import { scaffoldCommonNodeModules } from '@tooling/system-tests/lib/dep-installer'
-import { scaffoldMigrationProject as scaffoldProject } from '../helper'
+import { createTestDataContext, scaffoldMigrationProject as scaffoldProject } from '../helper'
 import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
+import { ProjectConfigManager } from '../../../src/data/ProjectConfigManager'
+import { EventRegistrar } from '../../../src/data/EventRegistrar'
 
-jest.mock('debug', () => {
-  globalThis.debugMessages = []
-  const originalDebugModule = jest.requireActual('debug')
+const debugMessages = vi.hoisted(() => [] as string[])
 
-  const debug = (namespace) => {
-    // @ts-expect-error - mock
+vi.mock('debug', async (importOriginal) => {
+  const { default: originalDebugModule } = await importOriginal<typeof import('debug')>()
+
+  const debug = (namespace: string) => {
     const originalDebug = originalDebugModule(namespace)
 
+    // other namespaces get the real debugger, since callers such as
+    // simple-git call instance methods like `extend` on it
+    if (namespace !== 'cypress:lifecycle:ProjectConfigIpc') {
+      return originalDebug
+    }
+
     return ((message) => {
-      if (namespace === 'cypress:lifecycle:ProjectConfigIpc') {
-        globalThis.debugMessages.push(message)
-      }
+      debugMessages.push(message)
 
       originalDebug(message)
     })
@@ -23,12 +31,13 @@ jest.mock('debug', () => {
 
   debug.formatters = {}
 
-  return debug
+  return { default: debug }
 })
 
 describe('ProjectConfigIpc', () => {
   describe('real-child-process', () => {
     let projectConfigIpc
+    let projectRoot: string
 
     beforeAll(async () => {
       await scaffoldCommonNodeModules()
@@ -37,8 +46,9 @@ describe('ProjectConfigIpc', () => {
     beforeEach(async () => {
       const projectPath = await scaffoldProject('e2e')
 
+      projectRoot = projectPath
+
       projectConfigIpc = new ProjectConfigIpc(
-        undefined,
         undefined,
         projectPath,
         path.join(projectPath, 'cypress.config.js'),
@@ -52,6 +62,63 @@ describe('ProjectConfigIpc', () => {
     afterEach(() => {
       projectConfigIpc.cleanupIpc()
     })
+
+    it('reports a SIGKILLed child once and rejects an in-flight node event', async () => {
+      // A handler that never settles keeps the event in flight until the child
+      // is killed, however long the kill signal takes to arrive.
+      const configFile = 'cypress.hanging-after-spec.config.js'
+
+      await fs.writeFile(path.join(projectRoot, configFile), `module.exports = {
+  e2e: {
+    setupNodeEvents (on) {
+      on('after:spec', () => new Promise(() => {}))
+    },
+  },
+}
+`)
+
+      const onError = vi.fn()
+      const ipc = new ProjectConfigIpc(undefined, projectRoot, path.join(projectRoot, configFile), configFile, onError, () => {}, () => {})
+      const eventRegistrar = new EventRegistrar()
+      const manager: any = new ProjectConfigManager({
+        ctx: createTestDataContext('open'),
+        configFile: false,
+        projectRoot,
+        handlers: [],
+        hasCypressEnvFile: false,
+        eventRegistrar,
+        onError: () => {},
+        onInitialConfigLoaded: () => {},
+        onFinalConfigLoaded: () => Promise.resolve(),
+        refreshLifecycle: () => Promise.resolve(),
+      })
+
+      manager.loadCypressEnvFile = async () => ({})
+      manager.buildBaseFullConfig = async () => ({ resolved: {} })
+      manager.watchFiles = () => {}
+
+      try {
+        const loadConfigReply = await ipc.loadConfig()
+        const reply = await ipc.callSetupNodeEventsWithConfig('e2e', {} as any, [])
+
+        await manager.handleSetupTestingTypeReply(ipc, loadConfigReply, reply)
+
+        const inFlight = eventRegistrar.executeNodeEvent('after:spec', [])
+
+        process.kill(ipc.childProcessPid!, 'SIGKILL')
+
+        await expect(inFlight).rejects.toMatchObject({ type: 'CONFIG_PROCESS_EXITED_UNEXPECTEDLY' })
+        expect(onError).toHaveBeenCalledTimes(1)
+        expect(onError.mock.calls[0][0]).toMatchObject({ type: 'CONFIG_PROCESS_EXITED_UNEXPECTEDLY', message: expect.stringContaining('exited unexpectedly') })
+
+        // Windows has no signals, so a killed child reports an exit code instead
+        if (os.platform() !== 'win32') {
+          expect(onError.mock.calls[0][0].message).toContain('SIGKILL')
+        }
+      } finally {
+        ipc.cleanupIpc()
+      }
+    }, 30_000)
 
     it('EPIPE error test', async () => {
       const err: NodeJS.ErrnoException = new Error
@@ -76,8 +143,8 @@ describe('ProjectConfigIpc', () => {
 
       projectConfigIpc._childProcess.emit('error', err)
 
-      expect(globalThis.debugMessages.at(-2)).toEqual('EPIPE error in loadConfig() of child process %s')
-      expect(globalThis.debugMessages.at(-1)).toEqual('EPIPE error in registerSetupIpcHandlers() of child process %s')
+      expect(debugMessages.at(-2)).toEqual('EPIPE error in loadConfig() of child process %s')
+      expect(debugMessages.at(-1)).toEqual('EPIPE error in registerSetupIpcHandlers() of child process %s')
     }, 20_000)
   })
 })

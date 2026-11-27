@@ -122,9 +122,8 @@ const getHandlersByType = (type) => {
         onTask: {},
       }
 
-    default: () => {
+    default:
       throw new Error('config.env.BEFORE_BROWSER_LAUNCH_HANDLER must be set to a valid handler type')
-    }
   }
 }
 

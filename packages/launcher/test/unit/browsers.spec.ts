@@ -1,17 +1,142 @@
-import { describe, it, expect } from 'vitest'
-import _ from 'lodash'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { EventEmitter } from 'events'
+import { PassThrough } from 'stream'
+import { format } from 'util'
+import type { ChildProcessByStdio } from 'child_process'
+import type { Readable } from 'stream'
+import type { FoundBrowser } from '@packages/types'
 import { knownBrowsers } from '../../lib/known-browsers'
+import { getVersionNumber } from '../../lib/linux'
+import { launch, debug } from '../../lib/browsers'
+import { utils } from '../../lib/utils'
+
+describe('launch', () => {
+  const recordKey = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d'
+  const apiToken = 'tok_7Hq2LmR9vXc4NpZ8sWd3'
+  const { enabled, log } = debug
+
+  afterEach(() => {
+    debug.enabled = enabled
+    debug.log = log
+    vi.unstubAllEnvs()
+    vi.restoreAllMocks()
+  })
+
+  it('writes the names of the browser env vars to the debug log, but no env var values', () => {
+    const browserProcess = Object.assign(new EventEmitter(), { stdout: new PassThrough(), stderr: new PassThrough() })
+    const lines: string[] = []
+
+    // Safe because launch only listens to stdout, stderr and 'exit' on the returned process
+    vi.spyOn(utils, 'spawnWithArch').mockReturnValue(browserProcess as unknown as ChildProcessByStdio<null, Readable, Readable>)
+    vi.stubEnv('CYPRESS_RECORD_KEY', recordKey)
+    debug.enabled = true
+    debug.log = (...args: unknown[]) => lines.push(format(...args))
+
+    launch({ name: 'chrome', path: '/usr/bin/google-chrome' } as FoundBrowser, 'about:blank', 9222, [], { MY_API_TOKEN: apiToken })
+
+    const output = lines.join('\n')
+
+    expect(output).toContain('spawning browser')
+    expect(output).toContain('MY_API_TOKEN')
+    expect(output).not.toContain(recordKey)
+    expect(output).not.toContain(apiToken)
+  })
+})
+
+const knownBrowser = (displayName: string) => {
+  const browser = knownBrowsers.find((b) => b.displayName === displayName)
+
+  if (!browser) {
+    throw new Error(`no known browser named ${displayName}`)
+  }
+
+  return browser
+}
+
+// `--version` output of each channel, and the version Cypress should read from it
+const versionOutputs = [
+  { displayName: 'Chrome', stdout: 'Google Chrome 120.0.6099.71', version: '120.0.6099.71' },
+  { displayName: 'Chrome Beta', stdout: 'Google Chrome 121.0.6167.16 beta', version: '121.0.6167.16' },
+  { displayName: 'Chrome Canary', stdout: 'Google Chrome Canary 122.0.6200.0', version: '122.0.6200.0' },
+  { displayName: 'Chrome for Testing', stdout: 'Google Chrome for Testing 120.0.6099.71', version: '120.0.6099.71' },
+  { displayName: 'Chromium', stdout: 'Chromium 120.0.6099.71', version: '120.0.6099.71' },
+  { displayName: 'Chromium', stdout: 'Chromium 64.2.3 snap', version: '64.2.3' },
+  { displayName: 'Firefox', stdout: 'Mozilla Firefox 140.0.1', version: '140.0.1' },
+  { displayName: 'Firefox Developer Edition', stdout: 'Mozilla Firefox 73.0b12', version: '73.0b12' },
+  { displayName: 'Firefox Nightly', stdout: 'Mozilla Firefox 75.0a1', version: '75.0a1' },
+  { displayName: 'Edge', stdout: 'Microsoft Edge 120.0.2210.61', version: '120.0.2210.61' },
+  { displayName: 'Edge', stdout: 'microsoft edge 120.0.2210.61', version: '120.0.2210.61' },
+  { displayName: 'Edge Beta', stdout: 'Microsoft Edge 121.0.2277.4 beta', version: '121.0.2277.4' },
+  { displayName: 'Edge Beta', stdout: 'Microsoft Edge Beta 121.0.2277.4', version: '121.0.2277.4' },
+  { displayName: 'Edge Canary', stdout: 'Microsoft Edge 122.0.2300.0 canary', version: '122.0.2300.0' },
+  { displayName: 'Edge Canary', stdout: 'Microsoft Edge Canary 122.0.2300.0', version: '122.0.2300.0' },
+  { displayName: 'Edge Dev', stdout: 'Microsoft Edge 122.0.2290.1 dev', version: '122.0.2290.1' },
+  { displayName: 'Edge Dev', stdout: 'Microsoft Edge Dev 122.0.2290.1', version: '122.0.2290.1' },
+]
 
 describe('browsers', () => {
   it('returns the expected list of browsers', () => {
     expect(knownBrowsers).toMatchSnapshot()
   })
 
-  // https://github.com/cypress-io/cypress/issues/6669
-  it('exports multiline versionRegexes', () => {
-    expect(_.every(knownBrowsers.map(({ versionRegex }) => {
-      return versionRegex.multiline
-    }))).toBe(true)
+  describe('versionRegex', () => {
+    versionOutputs.forEach(({ displayName, stdout, version }) => {
+      it(`${displayName}: reads ${version} from "${stdout}"`, () => {
+        expect(getVersionNumber(stdout, knownBrowser(displayName))).toBe(version)
+      })
+
+      // https://github.com/cypress-io/cypress/issues/6669
+      it(`${displayName}: reads ${version} when "${stdout}" follows another line`, () => {
+        const multiline = `Running without a11y support!\n${stdout}\n`
+
+        expect(getVersionNumber(multiline, knownBrowser(displayName))).toBe(version)
+      })
+    })
+
+    // detectByPath picks the first known browser whose versionRegex matches
+    const firstMatch = (stdout: string) => knownBrowsers.find(({ versionRegex }) => versionRegex.test(stdout))?.displayName
+
+    it('recognizes each Chrome, Chromium and Firefox channel by its own output', () => {
+      expect(firstMatch('Google Chrome 120.0.6099.71')).toBe('Chrome')
+      expect(firstMatch('Google Chrome for Testing 120.0.6099.71')).toBe('Chrome for Testing')
+      expect(firstMatch('Chromium 120.0.6099.71')).toBe('Chromium')
+      expect(firstMatch('Mozilla Firefox 140.0.1')).toBe('Firefox')
+      expect(firstMatch('Mozilla Firefox 73.0b12')).toBe('Firefox Developer Edition')
+      expect(firstMatch('Mozilla Firefox 75.0a1')).toBe('Firefox Nightly')
+      expect(firstMatch('Microsoft Edge 120.0.2210.61')).toBe('Edge')
+    })
+
+    it('does not mistake Chrome for Testing for Chrome, which shares its binary name', () => {
+      expect(knownBrowser('Chrome').versionRegex.test('Google Chrome for Testing 120.0.6099.71')).toBe(false)
+      expect(knownBrowser('Chrome for Testing').versionRegex.test('Google Chrome 120.0.6099.71')).toBe(false)
+    })
+
+    it('tells the Firefox channels apart, since they can share the firefox binary name', () => {
+      const firefox = knownBrowser('Firefox').versionRegex
+      const dev = knownBrowser('Firefox Developer Edition').versionRegex
+      const nightly = knownBrowser('Firefox Nightly').versionRegex
+
+      expect(firefox.test('Mozilla Firefox 73.0b12')).toBe(false)
+      expect(firefox.test('Mozilla Firefox 75.0a1')).toBe(false)
+      expect(dev.test('Mozilla Firefox 140.0.1')).toBe(false)
+      expect(dev.test('Mozilla Firefox 75.0a1')).toBe(false)
+      expect(nightly.test('Mozilla Firefox 140.0.1')).toBe(false)
+      expect(nightly.test('Mozilla Firefox 73.0b12')).toBe(false)
+    })
+
+    it('only matches pre-release Edge channels on their own output', () => {
+      const stable = 'Microsoft Edge 120.0.2210.61'
+
+      expect(knownBrowser('Edge Beta').versionRegex.test(stable)).toBe(false)
+      expect(knownBrowser('Edge Canary').versionRegex.test(stable)).toBe(false)
+      expect(knownBrowser('Edge Dev').versionRegex.test(stable)).toBe(false)
+      expect(knownBrowser('Edge Beta').versionRegex.test('Microsoft Edge 122.0.2290.1 dev')).toBe(false)
+      expect(knownBrowser('Edge Dev').versionRegex.test('Microsoft Edge 121.0.2277.4 beta')).toBe(false)
+    })
+
+    it('does not match Chrome Beta on stable Chrome output', () => {
+      expect(knownBrowser('Chrome Beta').versionRegex.test('Google Chrome 120.0.6099.71')).toBe(false)
+    })
   })
 
   describe('browser.validator', () => {
@@ -78,7 +203,7 @@ describe('browsers', () => {
 
         FIREFOX_KNOWN_BROWSER_CHANNELS.forEach((browser) => {
           it(`${browser.channel}: fails validation when Firefox major version is below 140`, () => {
-            // @ts-expect-error
+            // @ts-expect-error - validator is optional and called without its second argument
             const result = browser.validator({
               majorVersion: '139',
               displayName: 'Firefox',

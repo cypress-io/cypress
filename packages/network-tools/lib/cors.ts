@@ -9,13 +9,11 @@ export type Policy = 'same-origin' | 'same-super-domain-origin' | 'schemeful-sam
 const debug = debugModule('cypress:network:cors')
 
 export function getSuperDomain (url: string) {
-  const parsed = parseUrlIntoHostProtocolDomainTldPort(url)
-
-  return _.compact([parsed.domain, parsed.tld]).join('.')
+  return getSuperDomainFromParsedHost(parseUrlIntoHostProtocolDomainTldPort(url))
 }
 
 export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
-  let hostname = ''
+  let hostname: string
   let port = ''
   let protocol = ''
 
@@ -76,13 +74,7 @@ export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
   return obj
 }
 
-export function getDomainNameFromUrl (url: string) {
-  const parsedHost = parseUrlIntoHostProtocolDomainTldPort(url)
-
-  return getDomainNameFromParsedHost(parsedHost)
-}
-
-export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
+export function getSuperDomainFromParsedHost (parsedHost: ParsedHost) {
   return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
 }
 
@@ -201,7 +193,6 @@ export function urlMatchesOriginProtectionSpace (urlStr: string, origin: string)
  * ex: http://www.example.com:8081/my/path -> http://example.com:8081
  */
 export function getSuperDomainOrigin (url: string) {
-  // @ts-ignore
   const { port, protocol } = new URL(url)
 
   // super domain origin is comprised of:

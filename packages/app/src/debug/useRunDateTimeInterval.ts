@@ -1,8 +1,9 @@
 import type { CloudRun } from '@packages/frontend-shared/cypress/support/generated/test-graphql-types.gen'
 import { useIntervalFn } from '@vueuse/core'
 import dayjs from 'dayjs'
-import { computed, Ref, ref, unref, watchEffect } from 'vue'
+import { computed, ref, unref, watchEffect } from 'vue'
 import { formatDuration, formatCreatedAt } from './utils/formatTime'
+import type { Ref } from 'vue'
 
 type RunDateTimeType = Pick<CloudRun, 'status' | 'createdAt' | 'totalDuration'>
 

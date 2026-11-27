@@ -1,10 +1,11 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import type { DataContext } from '../../../src'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import { createTestDataContext } from '../helper'
-import { FoundBrowser, FullConfig } from '@packages/types'
+import type { FoundBrowser, FullConfig } from '@packages/types'
 
 const browsers = [
   { name: 'electron', family: 'chromium', channel: 'stable', displayName: 'Electron', path: '', version: '' },
@@ -15,15 +16,15 @@ const browsers = [
 
 let ctx: DataContext
 
-function createDataContext (modeOptions?: Parameters<typeof createTestDataContext>[1]) {
-  const context = createTestDataContext('open', modeOptions)
+function createDataContext (modeOptions?: Parameters<typeof createTestDataContext>[1], mode: Parameters<typeof createTestDataContext>[0] = 'open') {
+  const context = createTestDataContext(mode, modeOptions)
 
-  jest.spyOn(context._apis.browserApi, 'getBrowsers').mockResolvedValue(browsers)
-  context._apis.projectApi.insertProjectPreferencesToCache = jest.fn()
-  jest.spyOn(context.actions.project, 'launchProject').mockResolvedValue(undefined)
-  jest.spyOn(context.project, 'getProjectPreferences').mockResolvedValue(null)
+  vi.spyOn(context._apis.browserApi, 'getBrowsers').mockResolvedValue(browsers)
+  context._apis.projectApi.insertProjectPreferencesToCache = vi.fn()
+  vi.spyOn(context.actions.project, 'launchProject').mockResolvedValue(undefined)
+  vi.spyOn(context.project, 'getProjectPreferences').mockResolvedValue(null)
 
-  // @ts-expect-error
+  // @ts-expect-error - `_projectRoot` is private
   context.lifecycleManager._projectRoot = 'foo'
 
   return context
@@ -37,12 +38,298 @@ const fullConfig: FullConfig = {
 describe('ProjectLifecycleManager', () => {
   beforeEach(() => {
     ctx = createDataContext()
-    jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+    vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
   })
 
   afterEach(() => {
     // reset the working directory to the root of @packages/data-context
     process.chdir(path.join(__dirname, '../../../'))
+  })
+
+  describe('#onLoadError', () => {
+    const loadErrorCtx = () => {
+      const context = createDataContext({ project: 'foo' })
+      const setSessionLoadError = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
+
+      context._apis.projectApi.setSessionLoadError = setSessionLoadError as any
+      context.coreData.currentProject = '/projects/foo'
+      vi.spyOn(context, 'onError').mockImplementation(() => {})
+
+      return { context, setSessionLoadError }
+    }
+
+    it('records an error that stops the project for cypress tap status', () => {
+      const { context, setSessionLoadError } = loadErrorCtx()
+
+      context.lifecycleManager.onLoadError(new Error('boom') as any)
+
+      expect(setSessionLoadError).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not record an error that leaves the project running', () => {
+      const { context, setSessionLoadError } = loadErrorCtx()
+
+      context.lifecycleManager.onLoadError(new Error('both config files') as any, { stopsProject: false })
+
+      expect(context.onError).toHaveBeenCalledTimes(1)
+      expect(setSessionLoadError).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('#initializeProjectSetup', () => {
+    const originalEnv = process.env
+    let consoleError: ReturnType<typeof vi.spyOn>
+    let consoleLog: ReturnType<typeof vi.spyOn>
+
+    const scaffolded = (...statuses: Array<'valid' | 'changes' | 'skipped' | 'error'>) => {
+      return statuses.map((status, index) => ({ status, description: '', file: { absolute: `/projects/foo/file-${index}.js`, contents: '' } }))
+    }
+
+    const setupCtx = (files: ReturnType<typeof scaffolded>, modeOptions: Parameters<typeof createDataContext>[0] = { project: 'foo', testingType: 'e2e' }, mode: Parameters<typeof createDataContext>[1] = 'open') => {
+      const setup = createDataContext(modeOptions, mode)
+
+      vi.spyOn(setup.lifecycleManager, 'isTestingTypeConfigured').mockReturnValue(false)
+      vi.spyOn(setup.actions.wizard, 'completeSetup').mockResolvedValue(undefined)
+      vi.spyOn(setup.actions.wizard, 'detectFrameworks').mockResolvedValue(undefined)
+      vi.spyOn(setup.actions.wizard, 'initialize').mockResolvedValue(undefined)
+      vi.spyOn(setup.actions.wizard, 'scaffoldTestingType').mockImplementation(async () => {
+        setup.coreData.scaffoldedFiles = files
+      })
+
+      return setup
+    }
+
+    beforeEach(() => {
+      process.env = { PATH: originalEnv.PATH }
+      consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      process.env = originalEnv
+      consoleError.mockRestore()
+      consoleLog.mockRestore()
+    })
+
+    it('completes the setup after the e2e scaffold when an agent opens a project', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('valid', 'valid', 'skipped'))
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.scaffoldTestingType).toHaveBeenCalledTimes(1)
+      expect(setup.actions.wizard.completeSetup).toHaveBeenCalledTimes(1)
+
+      const scaffoldOrder = (setup.actions.wizard.scaffoldTestingType as Mock).mock.invocationCallOrder[0]
+      const completeOrder = (setup.actions.wizard.completeSetup as Mock).mock.invocationCallOrder[0]
+
+      expect(scaffoldOrder).toBeLessThan(completeOrder)
+    })
+
+    it('tells the agent which files it created', async () => {
+      process.env.CLAUDECODE = '1'
+
+      await setupCtx(scaffolded('valid', 'skipped', 'valid')).lifecycleManager.initializeProjectSetup('e2e')
+
+      const printed = consoleLog.mock.calls.map((args) => args.join(' ')).join('\n')
+
+      expect(printed).toContain(path.relative('foo', '/projects/foo/file-0.js'))
+      expect(printed).toContain(path.relative('foo', '/projects/foo/file-2.js'))
+      expect(printed).not.toContain('file-1.js')
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    it('completes the setup when CYPRESS_AGENT_MODE forces agent mode on', async () => {
+      process.env.CYPRESS_AGENT_MODE = '1'
+
+      const setup = setupCtx(scaffolded('valid'))
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.completeSetup).toHaveBeenCalledTimes(1)
+    })
+
+    it('leaves the Continue step to a person when no agent is detected', async () => {
+      const setup = setupCtx(scaffolded('valid'))
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.scaffoldTestingType).toHaveBeenCalledTimes(1)
+      expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+    })
+
+    describe('with --headless', () => {
+      const headlessCtx = (files: ReturnType<typeof scaffolded>, testingType: 'e2e' | 'component' = 'e2e') => {
+        const setup = setupCtx(files, { project: 'foo', testingType, headless: true })
+
+        setup.coreData.currentProject = '/projects/foo'
+        setup._apis.projectApi.setSessionLoadError = vi.fn<() => Promise<void>>().mockResolvedValue(undefined) as any
+
+        return setup
+      }
+
+      it('completes the e2e setup without an agent, since the window that has the Continue button is hidden', async () => {
+        const setup = headlessCtx(scaffolded('valid'))
+
+        await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+        expect(setup.actions.wizard.completeSetup).toHaveBeenCalledTimes(1)
+        expect(setup._apis.projectApi.setSessionLoadError).not.toHaveBeenCalled()
+      })
+
+      it('reports a scaffolded file that needs changes made by a person, and keeps the window hidden', async () => {
+        const setup = headlessCtx(scaffolded('valid', 'changes'))
+
+        await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+        expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+        expect(setup._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+          loadError: expect.stringContaining('need changes made by hand'),
+        }))
+
+        expect(setup.isHeadless).toBe(true)
+      })
+
+      it('reports that component testing needs setting up, and keeps the window hidden', async () => {
+        const setup = headlessCtx([], 'component')
+
+        await setup.lifecycleManager.initializeProjectSetup('component')
+
+        const printed = consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
+
+        expect(printed).toContain('could not start component testing')
+        expect(setup._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+          loadError: expect.stringContaining('could not start component testing'),
+        }))
+
+        expect(setup.isHeadless).toBe(true)
+      })
+    })
+
+    it('leaves the component wizard to a person without --headless', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx([], { project: 'foo', testingType: 'component' })
+
+      await setup.lifecycleManager.initializeProjectSetup('component')
+
+      expect(setup.actions.wizard.initialize).toHaveBeenCalledTimes(1)
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    it('leaves the Continue step to a person when CYPRESS_AGENT_MODE forces agent mode off', async () => {
+      process.env.CLAUDECODE = '1'
+      process.env.CYPRESS_AGENT_MODE = '0'
+
+      const setup = setupCtx(scaffolded('valid'))
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+    })
+
+    it('does not continue without --project', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('valid'), { testingType: 'e2e' })
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+    })
+
+    it('does not continue when a scaffolded file needs changes merged by a person, and says which', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('valid', 'changes'))
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+
+      const printed = consoleError.mock.calls.map((args) => args.join(' ')).join('\n')
+
+      expect(printed).toContain('could not finish setting up e2e testing')
+      expect(printed).toContain(path.relative('foo', '/projects/foo/file-1.js'))
+      expect(printed).not.toContain('file-0.js')
+    })
+
+    it('reports a config that fails to load after the scaffold instead of rejecting', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('valid'))
+      const failure = new Error('Cannot find module cypress')
+
+      vi.spyOn(setup.actions.wizard, 'completeSetup').mockRejectedValue(failure)
+
+      const onLoadError = vi.spyOn(setup.lifecycleManager, 'onLoadError').mockImplementation(() => {})
+
+      await expect(setup.lifecycleManager.initializeProjectSetup('e2e')).resolves.toBeUndefined()
+
+      expect(onLoadError).toHaveBeenCalledWith(failure)
+    })
+
+    it('records the reason for cypress tap status when a file needs changes made by a person', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('valid', 'changes'))
+      const setSessionLoadError = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
+
+      setup._apis.projectApi.setSessionLoadError = setSessionLoadError as any
+      setup.coreData.currentProject = '/projects/foo'
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+        loadError: expect.stringContaining('need changes made by hand'),
+      }))
+    })
+
+    it('says nothing about created files when every file was skipped', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('skipped', 'skipped'))
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.completeSetup).toHaveBeenCalledTimes(1)
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    it('does not continue when a scaffolded file errored', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('error'))
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+    })
+
+    it('does not continue for component testing, which needs a framework and bundler chosen', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('valid'), { project: 'foo', testingType: 'component' })
+
+      await setup.lifecycleManager.initializeProjectSetup('component')
+
+      expect(setup.actions.wizard.scaffoldTestingType).not.toHaveBeenCalled()
+      expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+    })
+
+    it('does nothing when the testing type is already configured', async () => {
+      process.env.CLAUDECODE = '1'
+
+      const setup = setupCtx(scaffolded('valid'))
+
+      vi.spyOn(setup.lifecycleManager, 'isTestingTypeConfigured').mockReturnValue(true)
+
+      await setup.lifecycleManager.initializeProjectSetup('e2e')
+
+      expect(setup.actions.wizard.scaffoldTestingType).not.toHaveBeenCalled()
+      expect(setup.actions.wizard.completeSetup).not.toHaveBeenCalled()
+    })
   })
 
   describe('#setInitialActiveBrowser', () => {
@@ -57,7 +344,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('uses cli --browser option if one is set', async () => {
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'electron') {
           return Promise.resolve(browsers[0])
         }
@@ -81,7 +368,7 @@ describe('ProjectLifecycleManager', () => {
         testingType: 'e2e',
       })
 
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'electron') {
           return Promise.resolve(browsers[0])
         }
@@ -99,8 +386,314 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.actions.project.launchProject).toHaveBeenCalledTimes(1)
     })
 
+    describe('when the welcome screen has not been dismissed', () => {
+      const originalEnv = process.env
+
+      const agentCtx = (modeOptions: Parameters<typeof createDataContext>[0] = { project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true }) => {
+        const agent = createDataContext(modeOptions)
+
+        vi.spyOn(agent.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        vi.spyOn(agent._apis.localSettingsApi, 'getPreferences').mockResolvedValue({})
+        vi.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[0])
+        agent.coreData.activeBrowser = null
+        agent.coreData.cliBrowser = 'electron'
+
+        return agent
+      }
+
+      beforeEach(() => {
+        process.env = { PATH: originalEnv.PATH }
+      })
+
+      afterEach(() => {
+        process.env = originalEnv
+      })
+
+      it('launches the project for an agent that gave --project, --testingType and --browser', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx()
+
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.actions.project.launchProject).toHaveBeenCalledTimes(1)
+      })
+
+      it('launches the project when CYPRESS_AGENT_MODE forces agent mode on', async () => {
+        process.env.CYPRESS_AGENT_MODE = '1'
+
+        const agent = agentCtx()
+
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.actions.project.launchProject).toHaveBeenCalledTimes(1)
+      })
+
+      it('does not launch when the browser it was given cannot be found', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx()
+
+        vi.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+        vi.spyOn(agent.project, 'getProjectPreferences').mockResolvedValue(null)
+
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.actions.project.launchProject).not.toHaveBeenCalled()
+      })
+
+      it('waits for the person to dismiss it when no agent is detected', async () => {
+        const person = agentCtx()
+
+        await person.lifecycleManager.setInitialActiveBrowser()
+
+        expect(person.actions.project.launchProject).not.toHaveBeenCalled()
+      })
+
+      it('waits for the person to dismiss it when CYPRESS_AGENT_MODE forces agent mode off', async () => {
+        process.env.CLAUDECODE = '1'
+        process.env.CYPRESS_AGENT_MODE = '0'
+
+        const person = agentCtx()
+
+        await person.lifecycleManager.setInitialActiveBrowser()
+
+        expect(person.actions.project.launchProject).not.toHaveBeenCalled()
+      })
+
+      it('applies when the browser comes from defaultBrowser in the config, which stands in for --browser', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        agent.coreData.cliBrowser = null
+
+        vi.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'electron' } as unknown as FullConfig)
+
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.actions.project.launchProject).toHaveBeenCalledTimes(1)
+      })
+
+      it('applies to a defaultBrowser in the config file before setupNodeEvents finishes', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        vi.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
+
+        expect(agent.lifecycleManager.loadedFullConfig).toBeNull()
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(true)
+      })
+
+      it('applies to a defaultBrowser in the config file\'s testing type before setupNodeEvents finishes', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        vi.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ e2e: { defaultBrowser: 'electron' } })
+
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(true)
+      })
+
+      it('follows the full config once it exists, even when setupNodeEvents removed the defaultBrowser', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: false })
+
+        vi.spyOn(agent.lifecycleManager, 'loadedConfigFile', 'get').mockReturnValue({ defaultBrowser: 'electron' })
+        vi.spyOn(agent.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: null } as unknown as FullConfig)
+
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
+      })
+
+      it('is not bypassed without --testingType', () => {
+        process.env.CLAUDECODE = '1'
+
+        expect(agentCtx({ project: 'foo' }).lifecycleManager.isWelcomeBypassed).toBe(false)
+      })
+
+      it('is not bypassed without --browser or a defaultBrowser', () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e' })
+
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
+      })
+
+      it('is not bypassed by a browser that a config reload copied into cliBrowser', async () => {
+        process.env.CLAUDECODE = '1'
+
+        const agent = agentCtx({ project: 'foo', testingType: 'e2e' })
+
+        agent.coreData.cliBrowser = null
+
+        // the first load has no browser to launch, so one is chosen without launching it
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.coreData.activeBrowser).not.toBeNull()
+
+        // a reload then copies the active browser into cliBrowser
+        await agent.lifecycleManager.setInitialActiveBrowser()
+
+        expect(agent.coreData.cliBrowser).not.toBeNull()
+        expect(agent.lifecycleManager.isWelcomeBypassed).toBe(false)
+        expect(agent.actions.project.launchProject).not.toHaveBeenCalled()
+      })
+
+      it('is not bypassed in run mode', () => {
+        process.env.CLAUDECODE = '1'
+
+        const runCtx = createDataContext({ project: 'foo', testingType: 'e2e' }, 'run')
+
+        runCtx.coreData.cliBrowser = 'electron'
+
+        expect(runCtx.lifecycleManager.isWelcomeBypassed).toBe(false)
+      })
+
+      describe('--headless', () => {
+        it('launches the project without an agent, since no one can dismiss the welcome screen', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true, headless: true })
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.lifecycleManager.isWelcomeBypassed).toBe(true)
+          expect(headless.actions.project.launchProject).toHaveBeenCalledTimes(1)
+        })
+
+        it('is not bypassed without a testing type', () => {
+          expect(agentCtx({ project: 'foo', isBrowserGivenByCli: true, headless: true }).lifecycleManager.isWelcomeBypassed).toBe(false)
+        })
+
+        it('is not bypassed in run mode', () => {
+          const runCtx = createDataContext({ project: 'foo', testingType: 'e2e', isBrowserGivenByCli: true, headless: true }, 'run')
+
+          expect(runCtx.lifecycleManager.isWelcomeBypassed).toBe(false)
+        })
+
+        it('reports the browser it was given when it cannot be found, and keeps the window hidden', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'nope', isBrowserGivenByCli: true, headless: true })
+
+          vi.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.isHeadless).toBe(true)
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+            loadError: expect.stringContaining('Browser not found'),
+          }))
+
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+        })
+
+        // A config reload chooses the browser again: falling back to another the first time would
+        // have the reload launch it in place of the one asked for, and withdraw the error
+        it('falls back to no other browser, so a reload asks for the same one again and keeps the error', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'chrome', isBrowserGivenByCli: true, headless: true })
+          const ensure = vi.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+
+          headless.coreData.currentProject = '/projects/foo'
+          headless.coreData.cliBrowser = 'chrome'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.activeBrowser).toBeNull()
+          expect(ensure.mock.calls.map(([nameOrPath]) => nameOrPath)).toEqual(['chrome', 'chrome'])
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledTimes(2)
+          expect(headless._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+        })
+
+        it('withdraws a browser error once the browser it was given is found', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'electron', isBrowserGivenByCli: true, headless: true })
+
+          headless.coreData.currentProject = '/projects/foo'
+          headless.reportLoadError('Browser not found', 'browser')
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless._apis.projectApi.clearSessionLoadError).toHaveBeenCalledTimes(1)
+        })
+
+        it('launches nothing, and reports why, for a browser cypress tap cannot drive', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true, headless: true })
+
+          vi.spyOn(headless._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+          // A config reload, which must not settle on some other browser
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.activeBrowser).toBeNull()
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+          expect(headless._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+            loadError: expect.stringContaining('`cypress tap` can only drive Chromium-based browsers'),
+          }))
+        })
+
+        it('launches the defaultBrowser from the config when --browser is not given', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', headless: true })
+
+          vi.spyOn(headless.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'electron' } as unknown as FullConfig)
+          headless.coreData.cliBrowser = null
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.cliBrowser).toBe('electron')
+          expect(headless.coreData.activeBrowser).not.toBeNull()
+          expect(headless.actions.project.launchProject).toHaveBeenCalledTimes(1)
+          expect(headless._apis.projectApi.setSessionLoadError).not.toHaveBeenCalled()
+        })
+
+        it('reports the missing browser, and falls back to no other, when neither --browser nor defaultBrowser is given', async () => {
+          const headless = agentCtx({ project: 'foo', testingType: 'e2e', headless: true })
+
+          headless.coreData.cliBrowser = null
+          headless.coreData.currentProject = '/projects/foo'
+
+          await headless.lifecycleManager.setInitialActiveBrowser()
+
+          expect(headless.coreData.activeBrowser).toBeNull()
+          expect(headless.actions.project.launchProject).not.toHaveBeenCalled()
+          expect(headless._apis.projectApi.setSessionLoadError).toHaveBeenCalledWith(expect.objectContaining({
+            loadError: expect.stringContaining('no browser was given'),
+          }))
+        })
+
+        it('launches a browser cypress tap cannot drive when not --headless', async () => {
+          process.env.CLAUDECODE = '1'
+
+          const agent = agentCtx({ project: 'foo', testingType: 'e2e', browser: 'firefox', isBrowserGivenByCli: true })
+
+          vi.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+
+          await agent.lifecycleManager.setInitialActiveBrowser()
+
+          expect(agent.coreData.activeBrowser).toEqual(browsers[3])
+        })
+
+        it('does not report a missing browser for cypress tap status without --headless', async () => {
+          process.env.CLAUDECODE = '1'
+
+          const agent = agentCtx()
+
+          vi.spyOn(agent._apis.browserApi, 'ensureAndGetByNameOrPath').mockRejectedValue(new Error('Browser not found'))
+          agent.coreData.currentProject = '/projects/foo'
+
+          await agent.lifecycleManager.setInitialActiveBrowser()
+
+          expect(agent._apis.projectApi.setSessionLoadError).not.toHaveBeenCalled()
+        })
+      })
+    })
+
     it('uses lastBrowser if available', async () => {
-      jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
+      vi.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
@@ -111,7 +704,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('falls back to browsers[0] if lastBrowser does not exist', async () => {
-      jest.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'dev' } })
+      vi.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'dev' } })
       ctx.coreData.activeBrowser = null
       ctx.coreData.cliBrowser = null
 
@@ -128,7 +721,7 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: false,
       })
 
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'chrome') {
           return Promise.resolve(browsers[1])
         }
@@ -136,7 +729,7 @@ describe('ProjectLifecycleManager', () => {
         throw new Error('Browser not found')
       })
 
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
 
       expect(ctx.modeOptions.browser).toEqual(undefined)
       expect(ctx.coreData.cliBrowser).toEqual(null)
@@ -157,8 +750,8 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: true,
       })
 
-      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'firefox') {
           return Promise.resolve(browsers[3])
         }
@@ -166,7 +759,7 @@ describe('ProjectLifecycleManager', () => {
         throw new Error('Browser not found')
       })
 
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'chrome' } as unknown as FullConfig)
 
       expect(ctx.modeOptions.browser).toEqual('firefox')
       expect(ctx.coreData.cliBrowser).toEqual('firefox')
@@ -186,8 +779,8 @@ describe('ProjectLifecycleManager', () => {
         isBrowserGivenByCli: false,
       })
 
-      jest.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
-      jest.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
+      vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+      vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockImplementation((name) => {
         if (name === 'chrome:beta') {
           return Promise.resolve(browsers[2])
         }
@@ -196,7 +789,7 @@ describe('ProjectLifecycleManager', () => {
       })
 
       // the default browser will be ignored since we have an active browser
-      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'firefox' } as unknown as FullConfig)
+      vi.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ defaultBrowser: 'firefox' } as unknown as FullConfig)
 
       // set the active browser to chrome:beta
       ctx.actions.browser.setActiveBrowser(browsers[2] as FoundBrowser)
@@ -223,6 +816,36 @@ describe('ProjectLifecycleManager', () => {
       await expect(ctx.lifecycleManager.setInitialActiveBrowser()).resolves.toBeUndefined()
       expect(ctx.coreData.activeBrowser).toBeNull()
     })
+
+    describe('in run mode', () => {
+      it('uses lastBrowser without writing it back to the cache', async () => {
+        ctx = createDataContext({}, 'run')
+        vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        vi.spyOn(ctx.project, 'getProjectPreferences').mockResolvedValue({ lastBrowser: { name: 'chrome', channel: 'beta' } })
+
+        await ctx.lifecycleManager.setInitialActiveBrowser()
+
+        expect(ctx.coreData.activeBrowser).toEqual(expect.objectContaining({ name: 'chrome', displayName: 'Chrome Beta' }))
+        expect(ctx._apis.projectApi.insertProjectPreferencesToCache).not.toHaveBeenCalled()
+      })
+
+      it('uses the --browser option without writing it to the cache', async () => {
+        ctx = createDataContext({
+          project: 'foo',
+          testingType: 'e2e',
+          browser: 'firefox',
+          isBrowserGivenByCli: true,
+        }, 'run')
+
+        vi.spyOn(ctx.lifecycleManager, 'getFullInitialConfig').mockResolvedValue(fullConfig)
+        vi.spyOn(ctx._apis.browserApi, 'ensureAndGetByNameOrPath').mockResolvedValue(browsers[3])
+
+        await ctx.lifecycleManager.setInitialActiveBrowser()
+
+        expect(ctx.coreData.activeBrowser).toEqual(browsers[3])
+        expect(ctx._apis.projectApi.insertProjectPreferencesToCache).not.toHaveBeenCalled()
+      })
+    })
   })
 
   describe('onFinalConfigLoaded', () => {
@@ -236,8 +859,8 @@ describe('ProjectLifecycleManager', () => {
       const configManager = ctx.lifecycleManager.createConfigManager()
       const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
 
-      const setSpecsSpy = jest.spyOn(ctx.actions.project, 'setSpecsFoundBySpecPattern').mockResolvedValue(undefined)
-      const setInitialActiveBrowserSpy = jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+      const setSpecsSpy = vi.spyOn(ctx.actions.project, 'setSpecsFoundBySpecPattern').mockResolvedValue(undefined)
+      const setInitialActiveBrowserSpy = vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
 
       // @ts-expect-error - private field
       ctx.lifecycleManager._projectRoot = undefined
@@ -248,6 +871,102 @@ describe('ProjectLifecycleManager', () => {
       expect(setInitialActiveBrowserSpy).not.toHaveBeenCalled()
       // @ts-expect-error - private field
       expect(ctx.lifecycleManager._cachedFullConfig).toBeUndefined()
+    })
+
+    // Withdrawn only after the session has started, so a project that failed to start keeps
+    // its error until the session replaces it, and before the browser is chosen, so a browser
+    // that cannot be found is recorded again
+    it('withdraws a load error for cypress tap status once the session has started again', async () => {
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+      // Safe because the config manager keeps the options it was created with, private, as `options`
+      const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
+
+      const initialize = vi.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
+      const chooseBrowser = vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+      const cleared = ctx._apis.projectApi.clearSessionLoadError as Mock
+
+      ctx.coreData.currentProject = '/projects/foo'
+      ctx.reportLoadError('Your configFile is invalid')
+
+      await onFinalConfigLoaded(fullConfig, { shouldRestartBrowser: false })
+
+      expect(cleared).toHaveBeenCalledTimes(1)
+      expect(initialize.mock.invocationCallOrder[0]).toBeLessThan(cleared.mock.invocationCallOrder[0])
+      expect(cleared.mock.invocationCallOrder[0]).toBeLessThan(chooseBrowser.mock.invocationCallOrder[0])
+    })
+
+    // Loading the configuration again starts a new plugins process, so a crash of the old one no
+    // longer applies. Withdrawn after the session starts, since a session that is not running yet
+    // has no live state to withdraw it from.
+    it('withdraws a plugins error for cypress tap once the session has started again', async () => {
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+      // Safe because the config manager keeps the options it was created with, private, as `options`
+      const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
+
+      const initialize = vi.spyOn(ctx.actions.project, 'initializeActiveProject').mockResolvedValue(undefined)
+
+      vi.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+
+      const setPluginsError = ctx._apis.projectApi.setSessionPluginsError as Mock
+
+      ctx.coreData.currentProject = '/projects/foo'
+
+      await onFinalConfigLoaded(fullConfig, { shouldRestartBrowser: false })
+
+      expect(setPluginsError).toHaveBeenCalledTimes(1)
+      expect(setPluginsError).toHaveBeenCalledWith(null)
+      expect(initialize.mock.invocationCallOrder[0]).toBeLessThan(setPluginsError.mock.invocationCallOrder[0])
+    })
+  })
+
+  describe('onInitialConfigLoaded', () => {
+    const onInitialConfigLoaded = () => {
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+
+      // Safe because the config manager keeps the options it was created with, private, as `options`
+      return (configManager as any).options.onInitialConfigLoaded as (config: Cypress.ConfigOptions) => void
+    }
+
+    const recordError = (kind?: 'config' | 'setup' | 'browser') => {
+      ctx.coreData.currentProject = '/projects/foo'
+      ctx.reportLoadError('boom', kind)
+    }
+
+    // Such as Try again once a configuration that failed at startup is fixed. A testing type passed
+    // on the command line, such as `--e2e`, is applied only once the configuration first loads, so
+    // after a failure there is none and no session will replace the error.
+    it('withdraws a configuration error when no testing type is set, since no session will replace it', () => {
+      ctx = createDataContext({ project: 'foo', testingType: 'e2e' })
+      recordError('config')
+
+      onInitialConfigLoaded()({})
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).toHaveBeenCalledTimes(1)
+    })
+
+    // Such as `--headless --e2e` whose scaffold needs a hand merge: a refresh that finds e2e still
+    // unconfigured drops the testing type, and the error says what setup is missing
+    it('leaves a setup or browser error, which loading the file does not fix', () => {
+      recordError('setup')
+      onInitialConfigLoaded()({})
+
+      recordError('browser')
+      onInitialConfigLoaded()({})
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
+    })
+
+    it('leaves a configuration error for the session to replace when a testing type is set', () => {
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._currentTestingType = 'e2e'
+      recordError('config')
+
+      onInitialConfigLoaded()({})
+
+      expect(ctx._apis.projectApi.clearSessionLoadError).not.toHaveBeenCalled()
     })
   })
 
@@ -277,9 +996,81 @@ describe('ProjectLifecycleManager', () => {
     })
   })
 
+  describe('#refreshMetaState', () => {
+    let tmpDir: string
+
+    beforeEach(async () => {
+      tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-plm-meta-'))
+
+      // @ts-expect-error - `_projectRoot` is private
+      ctx.lifecycleManager._projectRoot = tmpDir
+      // @ts-expect-error - a partial config manager stub on the private `_configManager`
+      ctx.lifecycleManager._configManager = {
+        configFilePath: '',
+        destroy: () => {},
+      }
+    })
+
+    afterEach(async () => {
+      await fs.remove(tmpDir).catch(() => {})
+    })
+
+    it.each(['ts', 'mts', 'cts', 'js', 'mjs', 'cjs'])('detects cypress.config.%s without --config-file', async (extension) => {
+      const fileName = `cypress.config.${extension}`
+
+      await fs.writeFile(path.join(tmpDir, fileName), 'export default {}\n')
+
+      const metaState = ctx.lifecycleManager.refreshMetaState()
+
+      expect(metaState.hasValidConfigFile).toBe(true)
+      expect(metaState.allFoundConfigFiles).toEqual([fileName])
+      expect(ctx.lifecycleManager.configFilePath).toEqual(path.join(tmpDir, fileName))
+    })
+
+    it('keeps loading cypress.config.ts and reports a conflict when cypress.config.mts sits next to it', async () => {
+      await fs.writeFile(path.join(tmpDir, 'cypress.config.ts'), 'export default {}\n')
+      await fs.writeFile(path.join(tmpDir, 'cypress.config.mts'), 'export default {}\n')
+      const onLoadError = vi.spyOn(ctx.lifecycleManager, 'onLoadError').mockImplementation(() => {})
+
+      ctx.lifecycleManager.refreshMetaState()
+      // @ts-expect-error — private method
+      ctx.lifecycleManager.configFileWarningCheck()
+
+      expect(ctx.lifecycleManager.configFilePath).toEqual(path.join(tmpDir, 'cypress.config.ts'))
+      expect(onLoadError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'CONFIG_FILES_LANGUAGE_CONFLICT',
+          messageMarkdown: expect.stringContaining('cypress.config.ts, cypress.config.mts'),
+        }),
+        { stopsProject: false },
+      )
+    })
+
+    it.each(['mts', 'cts'])('keeps loading cypress.config.js and reports a conflict when cypress.config.%s sits next to it', async (extension) => {
+      const newFileName = `cypress.config.${extension}`
+
+      await fs.writeFile(path.join(tmpDir, 'cypress.config.js'), 'module.exports = {}\n')
+      await fs.writeFile(path.join(tmpDir, newFileName), 'export default {}\n')
+      const onLoadError = vi.spyOn(ctx.lifecycleManager, 'onLoadError').mockImplementation(() => {})
+
+      ctx.lifecycleManager.refreshMetaState()
+      // @ts-expect-error — private method
+      ctx.lifecycleManager.configFileWarningCheck()
+
+      expect(ctx.lifecycleManager.configFilePath).toEqual(path.join(tmpDir, 'cypress.config.js'))
+      expect(onLoadError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'CONFIG_FILES_LANGUAGE_CONFLICT',
+          messageMarkdown: expect.stringContaining(`cypress.config.js, ${newFileName}`),
+        }),
+        { stopsProject: false },
+      )
+    })
+  })
+
   describe('#eventProcessPid', () => {
     it('returns process id from config manager', () => {
-      // @ts-expect-error
+      // @ts-expect-error - a partial config manager stub on the private `_configManager`
       ctx.lifecycleManager._configManager = {
         eventProcessPid: 12399,
         destroy: () => {},
@@ -289,7 +1080,7 @@ describe('ProjectLifecycleManager', () => {
     })
 
     it('does not throw if config manager is not initialized', () => {
-      // @ts-expect-error
+      // @ts-expect-error - `_configManager` is private
       ctx.lifecycleManager._configManager = undefined
       expect(ctx.lifecycleManager.eventProcessPid).toEqual(undefined)
     })
@@ -300,7 +1091,7 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._projectMetaState = { hasValidConfigFile: false }
 
-      const getConfigSpy = jest.spyOn(ctx.project, 'getConfig')
+      const getConfigSpy = vi.spyOn(ctx.project, 'getConfig')
 
       await expect(ctx.lifecycleManager.getProjectId()).resolves.toBeNull()
       expect(getConfigSpy).not.toHaveBeenCalled()
@@ -310,7 +1101,7 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._projectMetaState = { hasValidConfigFile: true }
 
-      const getConfigSpy = jest.spyOn(ctx.project, 'getConfig').mockResolvedValue({ projectId: 'abc123' } as FullConfig)
+      const getConfigSpy = vi.spyOn(ctx.project, 'getConfig').mockResolvedValue({ projectId: 'abc123' } as FullConfig)
 
       await expect(ctx.lifecycleManager.getProjectId()).resolves.toEqual('abc123')
       expect(getConfigSpy).toHaveBeenCalledTimes(1)
@@ -335,11 +1126,11 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._configManager = { destroy: () => {} }
       // @ts-expect-error - private method
-      jest.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
+      vi.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
     }
 
     it('skips when the project is not ready to initialize', async () => {
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
 
       // _projectRoot is set in createDataContext, but _configManager is undefined
       // and readyToInitialize will be false in this state
@@ -350,7 +1141,7 @@ describe('ProjectLifecycleManager', () => {
 
     it('runs the refresh exactly once for a single call', async () => {
       setupReady()
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
 
       await ctx.lifecycleManager.refreshLifecycle()
 
@@ -364,7 +1155,7 @@ describe('ProjectLifecycleManager', () => {
       const second = deferred()
       const calls: Array<Deferred> = [first, second]
 
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
       .mockImplementation(() => calls.shift()?.promise ?? Promise.resolve())
 
       // First call kicks off the refresh
@@ -400,7 +1191,7 @@ describe('ProjectLifecycleManager', () => {
       const calls = [first, second]
       const resolved: string[] = []
 
-      jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
       .mockImplementation(() => calls.shift()?.promise ?? Promise.resolve())
 
       const a = ctx.lifecycleManager.refreshLifecycle().then(() => resolved.push('a'))
@@ -431,16 +1222,16 @@ describe('ProjectLifecycleManager', () => {
       // @ts-expect-error - private field
       ctx.lifecycleManager._configManager = { destroy: () => {}, resetLoadingState: () => {} }
       // @ts-expect-error - private method
-      jest.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
+      vi.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
       ctx._apis.projectApi.getRemoteStates = (() => undefined) as any
-      jest.spyOn(ctx.lifecycleManager, 'setAndLoadCurrentTestingType').mockImplementation(() => {})
+      vi.spyOn(ctx.lifecycleManager, 'setAndLoadCurrentTestingType').mockImplementation(() => {})
 
       let inFlight = 0
       let maxInFlight = 0
       const gates = [deferred(), deferred()]
       let callIndex = 0
 
-      jest.spyOn(ctx.lifecycleManager, 'initializeConfig').mockImplementation(async () => {
+      vi.spyOn(ctx.lifecycleManager, 'initializeConfig').mockImplementation(async () => {
         inFlight++
         maxInFlight = Math.max(maxInFlight, inFlight)
         await gates[callIndex++]?.promise
@@ -473,7 +1264,7 @@ describe('ProjectLifecycleManager', () => {
       const oldRefresh = deferred()
       const newRefresh = deferred()
 
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
       .mockImplementationOnce(() => oldRefresh.promise)
       .mockImplementationOnce(() => newRefresh.promise)
       .mockImplementation(() => Promise.resolve())
@@ -503,7 +1294,7 @@ describe('ProjectLifecycleManager', () => {
       await a.catch(() => {})
 
       // The new chain is still in flight, so a follow-up call should reuse
-      // it (no new `_doRefreshLifecycle` call). Without the ownership-check
+      // that chain without a new `_doRefreshLifecycle` call. Without the ownership-check
       // guard, the old IIFE's finally would have nulled
       // `_activeLifecycleRefresh` and this call would synchronously kick
       // off a third chain.
@@ -521,7 +1312,7 @@ describe('ProjectLifecycleManager', () => {
       const failing = deferred()
       const succeeding = deferred()
 
-      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      const spy = vi.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
       .mockImplementationOnce(() => failing.promise)
       .mockImplementationOnce(() => succeeding.promise)
 

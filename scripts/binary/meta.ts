@@ -14,7 +14,7 @@ if (!Object.values(platforms).includes(PLATFORM)) {
   throw new Error(`Invalid build platform  ${PLATFORM}`)
 }
 
-export type PlatformName = {[K in keyof typeof platforms]: typeof platforms[K]}[keyof typeof platforms]
+export type PlatformName = { [K in keyof typeof platforms]: typeof platforms[K] }[keyof typeof platforms]
 
 export const buildRootDir = () => {
   return path.join(TMP_BUILD_DIR, 'build')

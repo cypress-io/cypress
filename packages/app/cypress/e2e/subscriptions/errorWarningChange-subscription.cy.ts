@@ -23,7 +23,6 @@ describe('errorWarningChange subscription', () => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: '20',
@@ -37,7 +36,6 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: 20,
@@ -45,7 +43,7 @@ module.exports = {
 }`)
         })
 
-        cy.contains(cy.i18n.launchpadErrors.generic.retryButton).click()
+        cy.contains('Try again').click()
         cy.contains('Error').should('not.exist')
       })
 
@@ -55,7 +53,6 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: ,
@@ -70,7 +67,6 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
-  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: 20,
@@ -78,7 +74,7 @@ module.exports = {
 }`)
         })
 
-        cy.contains(cy.i18n.launchpadErrors.generic.retryButton).click()
+        cy.contains('Try again').click()
         cy.contains('h2', 'SyntaxError').should('not.exist')
       })
     })

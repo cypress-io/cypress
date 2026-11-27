@@ -10,7 +10,7 @@ vi.mock('os', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       platform: vi.fn(),
     },
@@ -22,7 +22,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 
   return {
     default: {
-      // @ts-expect-error
+      // @ts-expect-error - importActual returns unknown, so .default is untyped
       ...actual.default,
       isInstalledGlobally: vi.fn(),
     },

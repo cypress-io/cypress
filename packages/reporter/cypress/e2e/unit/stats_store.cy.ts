@@ -1,4 +1,5 @@
-import sinon, { SinonFakeTimers } from 'sinon'
+import type { SinonFakeTimers } from 'sinon'
+import sinon from 'sinon'
 
 import statsStore, { StatsStore } from '../../../src/header/stats-store'
 

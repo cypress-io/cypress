@@ -1,0 +1,145 @@
+import FileRow from './FileRow.vue'
+
+const content = `import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  component: {
+    devServer: {
+      bundler: 'vite',
+      framework: 'vue',
+    },
+    indexHtmlFile: 'cypress/component/support/entry.html'
+  },
+})`
+
+const description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod.'
+const changesRequiredDescription = 'Please merge the code below with your existing '
+
+describe('FileRow', () => {
+  it('renders each status, the expected files, and expected styles', () => {
+    cy.mount(() => (
+      <div class="w-full p-5">
+        <FileRow
+          status="valid"
+          content={content}
+          filePath="cypress/integration/support.ts"
+          description={description}
+          fileExtension=".ts"
+        />
+        <FileRow
+          status="changes"
+          content={content}
+          filePath="cypress/integration/command.js"
+          description={description}
+          fileExtension=".js"
+        />
+        <FileRow
+          status="skipped"
+          content={content}
+          filePath="cypress.config.js"
+          description={description}
+          fileExtension=".js"
+        />
+        <FileRow
+          status="error"
+          content={content}
+          filePath="cypress/integration/index.js"
+          description={description}
+          fileExtension=".js"
+        />
+        <FileRow
+          status="valid"
+          content={content}
+          filePath="cypress/integration/function.ts"
+          description={description}
+          fileExtension=".ts"
+        />
+      </div>
+    ))
+
+    cy.get('pre.shiki').should('exist')
+
+    cy.contains('cypress/integration/support.ts')
+    cy.contains('cypress/integration/command.js')
+    cy.contains('cypress.config.js')
+    cy.contains('cypress/integration/index.js')
+    cy.contains('cypress/integration/function.ts')
+
+    cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+    })
+
+    cy.get('[data-cy=changes] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'true')
+    })
+
+    cy.get('[data-cy=skipped] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
+    })
+
+    cy.get('[data-cy=error] [data-cy=collapsible-header]').each((element) => {
+      cy.wrap(element).should('have.attr', 'aria-expanded', 'true')
+    })
+
+    cy.percySnapshot()
+  })
+
+  it('opens on click', () => {
+    cy.mount(() => (
+      <div class="w-full p-5">
+        <FileRow
+          status="valid"
+          content={content}
+          filePath="cypress/integration/support.js"
+          description={description}
+          fileExtension=".js"
+        />
+        <FileRow
+          status="changes"
+          content={content}
+          filePath="cypress/integration/command.js"
+          description={description}
+          fileExtension=".js"
+        />
+      </div>
+    ))
+
+    cy.contains('cypress/integration/command.js')
+    cy.contains('Changes required').should('be.visible')
+    cy.get('[data-cy=changes-required-badge]').should('not.exist') // Hide badge when row is expanded
+    cy.contains(changesRequiredDescription).should('be.visible')
+    cy.get('pre').should('have.length', 2)
+
+    cy.get('.shiki').should('be.visible')
+    cy.contains('cypress/integration/command.js').click()
+
+    // The Collapsible wrapper sets aria-hidden="true" and collapses to
+    // max-height: 0 when closed. The modern visibility algorithm doesn't
+    // detect the resulting overflow clipping, so assert aria-hidden instead.
+    cy.get('.shiki').closest('[aria-hidden]').should('have.attr', 'aria-hidden', 'true')
+  })
+
+  it('responds nice to small screens', { viewportWidth: 500 }, () => {
+    const lorem = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+
+    cy.mount(() => (
+      <div class="w-full p-5">
+        <FileRow
+          status="changes"
+          content={content}
+          filePath="cypress/integration/command.js"
+          description={lorem}
+          fileExtension=".js"
+        />
+      </div>
+    ))
+
+    cy.contains('cypress/integration/command.js')
+    cy.contains('Changes required').should('be.visible')
+    cy.get('[data-cy=changes-required-badge]').should('not.exist')
+    cy.contains(changesRequiredDescription).should('be.visible')
+    cy.get('pre').should('exist')
+
+    cy.percySnapshot()
+  })
+})

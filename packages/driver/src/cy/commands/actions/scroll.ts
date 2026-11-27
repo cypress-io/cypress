@@ -30,12 +30,17 @@ const isNaNOrInfinity = (item) => {
   return _.isNaN(num) || !_.isFinite(num)
 }
 
-interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollToOptions> {
+// jQuery's animate() reads only a number as milliseconds, and animates any
+// other value that isn't 'fast' or 'slow' for its 400ms default
+const toMilliseconds = (duration: unknown) => {
+  return Number.parseFloat(String(duration))
+}
+
+interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollIntoViewOptions> {
   _log?: Log
   $el: JQuery
   $parent: any
   axis: string
-  offset?: object
 }
 
 interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
@@ -49,15 +54,9 @@ interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'element' }, {
-    scrollIntoView (subject, userOptions: Partial<Cypress.ScrollToOptions> = {}) {
+    scrollIntoView (subject, userOptions: Partial<Cypress.ScrollIntoViewOptions> = {}) {
       if (!_.isObject(userOptions)) {
         $errUtils.throwErrByPath('scrollIntoView.invalid_argument', { args: { arg: userOptions } })
-      }
-
-      // ensure the subject is not window itself
-      // cause how are you gonna scroll the window into view...
-      if (subject === state('window')) {
-        $errUtils.throwErrByPath('scrollIntoView.subject_is_window')
       }
 
       // throw if we're trying to scroll to multiple elements
@@ -73,9 +72,6 @@ export default (Commands, Cypress, cy, state) => {
         easing: 'swing',
         axis: 'xy',
       })
-
-      // figure out the options which actually change the behavior of clicks
-      let deltaOptions = $utils.filterOutOptions(options)
 
       // here we want to figure out what has to actually
       // be scrolled to get to this element, cause we need
@@ -97,11 +93,14 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollIntoView.invalid_duration', { args: { duration: options.duration } })
       }
 
+      const duration = toMilliseconds(options.duration)
+
       if (!((options.easing === 'swing') || (options.easing === 'linear'))) {
         $errUtils.throwErrByPath('scrollIntoView.invalid_easing', { args: { easing: options.easing } })
       }
 
-      deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
+      // figure out the options which actually change the behavior of the scroll
+      const deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
 
       options._log = Cypress.log({
         $el: options.$el,
@@ -128,11 +127,10 @@ export default (Commands, Cypress, cy, state) => {
       const scrollIntoView = () => {
         return new Promise((resolve, reject) => {
           // scroll our axes
-          // @ts-ignore - scrollTo does not define a 'done()' key on its config object.
           return $(options.$parent).scrollTo(options.$el, {
             axis: options.axis,
             easing: options.easing,
-            duration: options.duration,
+            duration,
             offset: options.offset,
             done () {
               return resolve(options.$el)
@@ -266,6 +264,8 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollTo.invalid_duration', { args: { duration: options.duration } })
       }
 
+      const duration = toMilliseconds(options.duration)
+
       if (!((options.easing === 'swing') || (options.easing === 'linear'))) {
         $errUtils.throwErrByPath('scrollTo.invalid_easing', { args: { easing: options.easing } })
       }
@@ -380,11 +380,10 @@ export default (Commands, Cypress, cy, state) => {
       const scrollTo = () => {
         return new Promise((resolve, reject) => {
           // scroll our axis
-          // @ts-ignore
           $(options.$el).scrollTo({ left: x, top: y }, {
             axis: options.axis,
             easing: options.easing,
-            duration: options.duration,
+            duration,
             done () {
               return resolve(options.$el)
             },

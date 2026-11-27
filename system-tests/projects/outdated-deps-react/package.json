@@ -1,0 +1,8 @@
+{
+  "name": "outdated-deps-react",
+  "dependencies": {
+    "react": "17.0.2",
+    "vite": "^8.0.9"
+  },
+  "type": "module"
+}

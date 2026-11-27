@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 
 import type { DataContext } from '../../../src'
 import { EventCollectorActions } from '../../../src/actions/EventCollectorActions'
@@ -12,7 +12,7 @@ describe('EventCollectorActions', () => {
   beforeEach(() => {
     ctx = createTestDataContext('open')
 
-    jest.spyOn(ctx.util, 'fetch').mockResolvedValue({} as any)
+    vi.spyOn(ctx.util, 'fetch').mockResolvedValue({} as any)
 
     actions = new EventCollectorActions(ctx)
   })
@@ -51,7 +51,7 @@ describe('EventCollectorActions', () => {
     })
 
     it('resolve true if request succeeds', async () => {
-      jest.spyOn(ctx.util, 'fetch').mockResolvedValue({} as any)
+      vi.spyOn(ctx.util, 'fetch').mockResolvedValue({} as any)
 
       const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' }, false)
 
@@ -59,11 +59,24 @@ describe('EventCollectorActions', () => {
     })
 
     it('resolves false if request fails', async () => {
-      jest.spyOn(ctx.util, 'fetch').mockRejectedValue({} as any)
+      vi.spyOn(ctx.util, 'fetch').mockRejectedValue({} as any)
 
       const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' }, false)
 
       expect(result).toBe(false)
+    })
+
+    it('records nothing when guest telemetry is disabled', async () => {
+      process.env.CYPRESS_DISABLE_GUEST_TELEMETRY = '1'
+
+      try {
+        const result = await actions.recordEvent({ campaign: '', medium: '', messageId: '', cohort: '' }, false)
+
+        expect(result).toBe(false)
+        expect(ctx.util.fetch).not.toHaveBeenCalled()
+      } finally {
+        delete process.env.CYPRESS_DISABLE_GUEST_TELEMETRY
+      }
     })
   })
 })
