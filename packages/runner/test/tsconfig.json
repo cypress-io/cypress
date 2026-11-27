@@ -11,7 +11,8 @@
   "compilerOptions": {
     "noEmit": true,
     // The cross-origin injection bundles @packages/server's cookie modules,
-    // which narrow on null and only type-check with these on
+    // which are written for the server's strict settings and only type-check
+    // with these on
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "lib": ["es2021", "es2022.error", "esnext.promise", "dom"]

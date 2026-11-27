@@ -2,9 +2,9 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SerializableAutomationCookie } from '@packages/server/lib/automation/cookie/jar'
 
-// The patches and timers each have their own behavior covered by the driver's
-// cy.origin() e2e specs; here they are mocked so the tests can check how the
-// entry wires them up.
+// The timers have their own spec and the patches are covered by the driver's
+// cy.origin() e2e specs, so here they are mocked to check how the entry wires
+// them up.
 vi.mock('../../../injection/timers', () => {
   return {
     createTimers: vi.fn(() => ({ wrap: vi.fn(), reset: vi.fn(), pause: vi.fn() })),
@@ -53,7 +53,8 @@ const createFakeCypress = ({ withCy = true } = {}) => {
 
 const sameOriginFrame = (Cypress = createFakeCypress()): FakeFrame => ({ Cypress, location: { origin: AUT_ORIGIN } })
 
-// What Chrome throws when a script reads a property of a cross-origin frame
+// A frame on another origin, which throws a SecurityError when a script reads
+// its properties
 const crossOriginBlockedFrame = () => {
   return {
     get Cypress (): never {
