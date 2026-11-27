@@ -8,7 +8,7 @@
 **Bugfixes:**
 
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
-- Fixed an issue where the `junit` reporter, and custom reporters that use `mocha-junit-reporter`, printed `Couldn't determine Mocha version` on every run. Failed assertions in the JUnit XML now include the expected and actual values. Fixed in [#35561](https://github.com/cypress-io/cypress/pull/35561).
+- Fixed an issue where the `junit` reporter, and custom reporters that use `mocha-junit-reporter`, printed `Couldn't determine Mocha version` on every run. Fixed in [#35561](https://github.com/cypress-io/cypress/pull/35561).
 
 ## 16.4.0
 
