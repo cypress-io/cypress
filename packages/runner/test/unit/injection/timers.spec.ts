@@ -318,6 +318,29 @@ describe('injection/timers', () => {
       timers.pause(false)
       expect(calls).toEqual(['first', 'second', 'third'])
     })
+
+    it('still replays on the next unpause after a flushed callback throws', () => {
+      const calls: string[] = []
+
+      timers.pause(true)
+
+      window.setTimeout(() => {
+        throw new TypeError('Cannot read properties of undefined (reading \'width\')')
+      }, 10)
+
+      window.setTimeout(() => calls.push('second'), 20)
+      vi.advanceTimersByTime(20)
+
+      expect(() => timers.pause(false)).toThrow('Cannot read properties of undefined (reading \'width\')')
+      expect(calls).toEqual([])
+
+      timers.pause(true)
+      window.setTimeout(() => calls.push('third'), 10)
+      vi.advanceTimersByTime(10)
+      timers.pause(false)
+
+      expect(calls).toEqual(['second', 'third'])
+    })
   })
 
   // Fake timers draw frame and timeout ids from one counter, so they never
