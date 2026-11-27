@@ -9,11 +9,11 @@ const script = path.join(repoRoot, '.circleci', 'scripts', 'generate-pipeline-pa
 
 const readPackageJson = (dir: string) => JSON.parse(fs.readFileSync(path.join(repoRoot, dir, 'package.json'), 'utf8'))
 
-// `--scope=cypress --scope=@packages/{a,b}` becomes `['cypress', '@packages/a', '@packages/b']`
+// `--scope=cypress --scope @packages/{a,b}` becomes `['cypress', '@packages/a', '@packages/b']`
 const rootTestScopes = (): string[] => {
   const { scripts } = readPackageJson('.')
 
-  return [...scripts.test.matchAll(/--scope=(\S+)/g)].flatMap(([, scope]) => {
+  return [...scripts.test.matchAll(/--scope[= ](\S+)/g)].flatMap(([, scope]) => {
     const braces = scope.match(/^([^{]*)\{([^}]*)\}$/)
 
     return braces ? braces[2].split(',').map((name) => `${braces[1]}${name}`) : [scope]
@@ -32,8 +32,17 @@ const workspaceDirsByName = (): Map<string, string> => {
   }))
 }
 
+// Drops inherited GIT_* variables, which a git hook sets and which would point
+// these commands at the caller's repository, and ignores the caller's git
+// config, so commit signing or global hooks can't fail the scratch commits.
+const isolatedEnv = (): NodeJS.ProcessEnv => {
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')))
+
+  return { ...env, GIT_CONFIG_GLOBAL: os.devNull, GIT_CONFIG_NOSYSTEM: '1' }
+}
+
 const git = (cwd: string, ...args: string[]) => {
-  execFileSync('git', ['-c', 'user.name=Jordan Avery', '-c', 'user.email=jordan.avery@example.com', ...args], { cwd, stdio: 'ignore' })
+  execFileSync('git', ['-c', 'user.name=Jordan Avery', '-c', 'user.email=jordan.avery@example.com', ...args], { cwd, env: isolatedEnv(), stdio: 'ignore' })
 }
 
 // Runs the script the way a webhook push to develop does, so it diffs against
@@ -52,7 +61,7 @@ const parametersForChange = (changedFile: string) => {
     const { status, stdout, stderr } = spawnSync('bash', [script], {
       cwd,
       encoding: 'utf8',
-      env: { ...process.env, CIRCLE_BRANCH: 'develop', TRIGGER_SOURCE: 'webhook', BASE_REVISION: '', RUN_ALL_JOBS: 'false' },
+      env: { ...isolatedEnv(), CIRCLE_BRANCH: 'develop', TRIGGER_SOURCE: 'webhook', BASE_REVISION: '', RUN_ALL_JOBS: 'false' },
     })
 
     expect(status, stderr).to.equal(0)
@@ -63,7 +72,12 @@ const parametersForChange = (changedFile: string) => {
   }
 }
 
-describe('generate-pipeline-parameters.sh', () => {
+// NOTE: CircleCI only runs this script on Linux, but windows-unit-tests also
+// picks up this spec, where `bash` may be WSL's and the script may have CRLF
+// line endings.
+const describeOnPosix = process.platform === 'win32' ? describe.skip : describe
+
+describeOnPosix('generate-pipeline-parameters.sh', () => {
   // A scope that isn't a real workspace name, such as an unexpanded
   // `@packages/{a,b}`, fails the next test, so this only has to catch the
   // parser finding nothing at all.
