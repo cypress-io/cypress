@@ -1,14 +1,14 @@
 import os from 'os'
 import Xvfb from '@cypress/xvfb'
+import type { TestProject } from 'vitest/node'
 
-// Starts a virtual display on Linux and points DISPLAY at it, so the browsers
-// and Electron windows these specs launch can open on a headless host. The
-// screen size matches the one the CLI uses (cli/lib/exec/xvfb.ts); without an
-// explicit screen, Electron crashes (https://github.com/cypress-io/cypress/issues/6184).
-// The sanitized environment never carries the host's DISPLAY, so every Linux
-// run gets the same virtual display.
-export default async function setup (): Promise<(() => Promise<void>) | undefined> {
-  if (os.platform() !== 'linux') {
+// Starts a virtual display on Linux hosts that have none and points DISPLAY at
+// it, so the browsers and Electron windows these specs launch can open on a
+// headless host. The screen size matches the one the CLI uses
+// (cli/lib/exec/xvfb.ts); without an explicit screen, Electron crashes
+// (https://github.com/cypress-io/cypress/issues/6184).
+export default async function setup (project: TestProject): Promise<(() => Promise<void>) | undefined> {
+  if (os.platform() !== 'linux' || project.config.env.DISPLAY) {
     return undefined
   }
 

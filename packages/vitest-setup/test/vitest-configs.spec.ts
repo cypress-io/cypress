@@ -13,7 +13,7 @@ const stripComments = (source: string) => {
 
 it('every package vitest config runs the sanitize-env global setup', async () => {
   // HOME is stripped, so git can't read a global safe.directory entry
-  const configs = execFileSync('git', ['-c', `safe.directory=${repoRoot}`, 'ls-files', ':(glob)**/vitest.config.*'], { cwd: repoRoot, encoding: 'utf8' })
+  const configs = execFileSync('git', ['-c', `safe.directory=${repoRoot}`, 'ls-files', ':(glob)**/vitest*.config.*'], { cwd: repoRoot, encoding: 'utf8' })
     .split('\n')
     .filter((file) => file && file !== 'vitest.config.ts')
 

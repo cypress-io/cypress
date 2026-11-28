@@ -2,8 +2,8 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    // The virtual display has to start after the environment is sanitized,
-    // which would otherwise strip the DISPLAY it sets
+    // The Xvfb setup runs after the environment is sanitized, which would
+    // otherwise strip the DISPLAY it sets
     globalSetup: ['@packages/vitest-setup/sanitize-env', './test/integration/support/xvfb.ts'],
     name: '@packages/server integration',
     environment: 'node',
@@ -16,6 +16,9 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
       CYPRESS_INTERNAL_ENV: 'test',
+      // sanitize-env strips DISPLAY, so a host display is passed through here,
+      // and the Xvfb setup starts a virtual one only when there is none
+      ...(process.env.DISPLAY ? { DISPLAY: process.env.DISPLAY } : {}),
     },
     poolOptions: {
       forks: {

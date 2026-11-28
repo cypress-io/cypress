@@ -3,6 +3,7 @@ const _ = require('lodash')
 const chalk = require('chalk')
 const minimist = require('minimist')
 const execa = require('execa')
+const fs = require('fs')
 const path = require('path')
 const os = require('os')
 
@@ -54,6 +55,22 @@ if (!run || !run.length) {
       $ yarn test-unit
       $ yarn test-integration
       $ yarn test-performance
+  `)
+}
+
+// mocha ignores *.spec.ts below, so a request that only names vitest specs
+// would otherwise end in a bare "No test files found"
+const matched = run.flatMap((pattern) => fs.globSync(pattern))
+
+if (matched.length && matched.every((file) => file.endsWith('.spec.ts'))) {
+  const script = matched.every((file) => file.startsWith(path.join('test', 'unit'))) ? 'test-unit' : 'test-integration-vitest'
+
+  return exitErr(`
+    Error: ${matched.join(', ')} run${matched.length === 1 ? 's' : ''} on vitest, not mocha.
+
+    Run ${matched.length === 1 ? 'it' : 'them'} with:
+
+      $ yarn workspace @packages/server ${script} -- ${matched.join(' ')}
   `)
 }
 

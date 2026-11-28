@@ -4,7 +4,7 @@ Shared vitest setup for every workspace that runs vitest. Its `sanitize-env` glo
 
 ## Using it
 
-Every `vitest.config.*` in the repo lists it, and `test/vitest-configs.spec.ts` fails if one doesn't:
+Every `vitest.config.*` and `vitest.*.config.*` in the repo lists it, and `test/vitest-configs.spec.ts` fails if one doesn't:
 
 ```ts
 test: {

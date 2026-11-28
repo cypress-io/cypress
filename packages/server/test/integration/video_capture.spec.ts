@@ -74,24 +74,29 @@ describe('Video Capture', () => {
     // https://github.com/cypress-io/cypress/issues/16648
     describe('deduping frames', () => {
       it('does not dedupe when not webminput', async () => {
-        const { writeVideoFrameAsBuffer, write } = await startSpiedVideoCapture(tmpFilename)
+        const { writeVideoFrameAsBuffer, write, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
 
         writeVideoFrameAsBuffer('foo')
         writeVideoFrameAsBuffer('foo')
         writeVideoFrameAsBuffer('foo')
         writeVideoFrameAsBuffer('foo')
         expect(write).toHaveBeenCalledTimes(4)
+
+        await expect(endVideoCapture(false)).rejects.toThrow(END_OF_FILE_ERROR)
       })
     })
 
     it('does dedupe when webminput', async () => {
-      const { writeVideoFrameAsBuffer, write } = await startSpiedVideoCapture(tmpFilename, { webmInput: true })
+      const { writeVideoFrameAsBuffer, write, endVideoCapture } = await startSpiedVideoCapture(tmpFilename, { webmInput: true })
 
       writeVideoFrameAsBuffer('foo')
       writeVideoFrameAsBuffer('foo')
       writeVideoFrameAsBuffer('foo')
       writeVideoFrameAsBuffer('foo')
       expect(write).toHaveBeenCalledTimes(1)
+
+      // One frame was written, so waiting for more would never resolve
+      await expect(endVideoCapture(false)).rejects.toThrow('Insufficient frames captured to create video.')
     })
   })
 

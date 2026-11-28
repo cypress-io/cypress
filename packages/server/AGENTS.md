@@ -18,15 +18,16 @@ yarn workspace @packages/server test-unit -- <path-to-spec>
 # Filter unit tests by name pattern
 yarn workspace @packages/server test-unit -- -t "handles request"
 
-# Run both integration runners
+# Run every integration spec on both runners; it takes no arguments
 yarn workspace @packages/server test-integration
 
-# Run a specific vitest integration spec, or filter by name pattern
-yarn workspace @packages/server test-integration-vitest -- test/integration/video_capture.spec.ts
+# Run the vitest integration specs whose path contains a fragment, or filter by name pattern
+yarn workspace @packages/server test-integration-vitest -- video_capture
 yarn workspace @packages/server test-integration-vitest -- -t "video capture"
 
-# Run a specific mocha integration spec, or filter by name pattern
-yarn workspace @packages/server test-integration-mocha -- <path-to-spec>
+# Run the mocha integration specs whose file name contains a fragment (not a
+# path: run.js wraps it in test/integration/**/*<fragment>*), or filter by name pattern
+yarn workspace @packages/server test-integration-mocha -- cli_spec
 yarn workspace @packages/server test-integration-mocha -- --grep "http requests"
 
 # Build TypeScript to JS (production)
