@@ -2251,6 +2251,7 @@ describe('e2e record', () => {
           record: true,
           parallel: true,
           ciBuildId: 'ciBuildId123',
+          snapshot: true,
           expectedExitCode: 1,
         })
         .then(() => {
@@ -2272,6 +2273,7 @@ describe('e2e record', () => {
           group: 'foo',
           record: true,
           ciBuildId: 'ciBuildId123',
+          snapshot: true,
           expectedExitCode: 1,
         })
         .then(() => {
