@@ -4,7 +4,7 @@
     "unit",
     "../vitest.config.ts",
     // Declares the backend tasks the injection sends, which the public types
-    // leave out. The runner build gets it through index.d.ts.
+    // leave out. The package's main tsconfig gets it through index.d.ts.
     "../../driver/types/internal-types-lite.d.ts"
   ],
   "exclude": [],
