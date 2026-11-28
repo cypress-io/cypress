@@ -5,7 +5,7 @@ const chdir = require('chdir-promise')
 const join = require('path').join
 const fromFolder = join.bind(null, __dirname)
 const snapshot = require('snap-shot-it')
-const { lazyAss: la } = require('lazy-ass')
+const assert = require('assert')
 const is = require('check-more-types')
 const debug = require('debug')('test')
 const R = require('ramda')
@@ -28,11 +28,11 @@ const importantProperties = [
 const pickImportant = R.pick(importantProperties)
 
 const normalize = (output) => {
-  la(is.unemptyString(output.cypressVersion), 'has Cypress version', output)
-  la(is.positive(output.totalDuration), 'has duration', output)
-  la(is.unemptyString(output.browserVersion), 'has browserVersion', output)
-  la(is.unemptyString(output.osName), 'has osName', output)
-  la(is.unemptyString(output.osVersion), 'has osVersion', output)
+  assert(is.unemptyString(output.cypressVersion), `has Cypress version, got ${output.cypressVersion}`)
+  assert(is.positive(output.totalDuration), `has duration, got ${output.totalDuration}`)
+  assert(is.unemptyString(output.browserVersion), `has browserVersion, got ${output.browserVersion}`)
+  assert(is.unemptyString(output.osName), `has osName, got ${output.osName}`)
+  assert(is.unemptyString(output.osVersion), `has osVersion, got ${output.osVersion}`)
 
   output.cypressVersion = '0.0.0'
   output.totalDuration = 'X seconds'
@@ -65,7 +65,7 @@ describe('successful tests', () => {
       spec: 'cypress/e2e/a-spec.cy.js',
     }).then(R.tap(debug))
     .then((result) => {
-      la(result.totalTests === 1, 'there should be single test', result.totalTests)
+      assert.strictEqual(result.totalTests, 1, 'there should be single test')
     })
   })
 
@@ -78,7 +78,7 @@ describe('successful tests', () => {
       spec: absoluteSpec,
     }).then(R.tap(debug))
     .then((result) => {
-      la(result.totalTests === 1, 'there should be single test', result.totalTests)
+      assert.strictEqual(result.totalTests, 1, 'there should be single test')
     })
   })
 
@@ -87,7 +87,7 @@ describe('successful tests', () => {
       spec: 'cypress/e2e/a-*.js',
     }).then(R.tap(debug))
     .then((result) => {
-      la(result.totalTests === 1, 'there should be single test', result.totalTests)
+      assert.strictEqual(result.totalTests, 1, 'there should be single test')
     })
   })
 
@@ -96,7 +96,7 @@ describe('successful tests', () => {
       spec: 'cypress/e2e/a-*.js,cypress/e2e/b-*.js',
     }).then(R.tap(debug))
     .then((result) => {
-      la(result.totalTests === 2, 'found both tests', result.totalTests)
+      assert.strictEqual(result.totalTests, 2, 'found both tests')
     })
   })
 })

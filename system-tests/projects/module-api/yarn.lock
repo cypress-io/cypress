@@ -438,11 +438,6 @@ lazy-ass@1.6.0:
   resolved "https://registry.npmjs.org/lazy-ass/-/lazy-ass-1.6.0.tgz#7999655e8646c17f089fdd187d150d3324d54513"
   integrity "sha1-eZllXoZGwX8In90YfRUNMyTVRRM= sha512-cc8oEVoctTvsFZ/Oje/kGnHbpWHYBe8IAJe4C0QNc3t8uM/0Y8+erSz/7Y1ALuXTEZTMvxXwO6YbX1ey3ujiZw=="
 
-lazy-ass@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.npmjs.org/lazy-ass/-/lazy-ass-2.0.3.tgz#1e8451729f2bebdff1218bb18921566a08f81b36"
-  integrity sha512-/O3/DoQmI1XAhklDvF1dAjFf/epE8u3lzOZegQfLZ8G7Ud5bTRSZiFOpukHCu6jODrCA4gtIdwUCC7htxcDACA==
-
 locate-path@^6.0.0:
   version "6.0.0"
   resolved "https://registry.npmjs.org/locate-path/-/locate-path-6.0.0.tgz#55321eb309febbc59c4801d931a72452a681d286"

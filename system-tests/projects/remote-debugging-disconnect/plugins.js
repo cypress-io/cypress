@@ -1,4 +1,4 @@
-const la = require('lazy-ass')
+const assert = require('assert')
 const net = require('net')
 
 const realPort = process.env.CYPRESS_REMOTE_DEBUGGING_PORT
@@ -52,14 +52,14 @@ const startTcpProxy = () => {
 
 module.exports = (on, config) => {
   on('before:browser:launch', (browser = {}, options) => {
-    la(browser.family === 'chromium', 'this test can only be run with a chromium-family browser')
+    assert(browser.family === 'chromium', 'this test can only be run with a chromium-family browser')
 
     // set debugging port to go through our lil TCP proxy
     const newArgs = options.args.filter((arg) => !arg.startsWith('--remote-debugging-port='))
 
     newArgs.push(`--remote-debugging-port=${fakePort}`)
 
-    la(newArgs.length === options.args.length, 'arg list length should stay the same length')
+    assert(newArgs.length === options.args.length, 'arg list length should stay the same length')
 
     options.args = newArgs
 

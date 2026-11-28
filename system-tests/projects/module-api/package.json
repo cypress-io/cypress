@@ -11,7 +11,6 @@
     "chdir-promise": "0.6.2",
     "check-more-types": "2.24.0",
     "debug": "4.3.7",
-    "lazy-ass": "2.0.3",
     "mocha": "10.8.2",
     "mocha-banner": "1.1.2",
     "ramda": "0.30.1",

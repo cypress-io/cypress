@@ -347,7 +347,6 @@ export async function scaffoldCommonNodeModules () {
     'fs-extra',
     'https-proxy-agent',
     'jimp',
-    'lazy-ass',
     'lodash',
     'playwright-webkit',
     'proxyquire',
