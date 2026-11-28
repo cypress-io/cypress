@@ -39,5 +39,5 @@ export async function waitUntilExists (dir: string, { freq, maxAttempts }: WaitO
 }
 
 export async function waitUntilIconsBuilt (): Promise<void> {
-  await waitUntilExists(path.join(__dirname, '..', 'packages', 'icons', 'dist', 'favicon'), { freq: 1000, maxAttempts: 10 })
+  await waitUntilExists(path.join(__dirname, '..', 'packages', 'icons', 'dist', 'favicon'), { freq: 1000, maxAttempts: 12 })
 }

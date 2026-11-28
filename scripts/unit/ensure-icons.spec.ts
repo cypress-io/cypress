@@ -26,13 +26,14 @@ describe('waitUntilExists', () => {
   it('resolves once the path appears on a later attempt', async () => {
     const favicon = path.join(tmpDir, 'favicon')
 
-    vi.mocked(console.log).mockImplementationOnce(() => {
-      void fs.mkdir(favicon)
-    })
+    vi.spyOn(fs, 'access')
+    .mockRejectedValueOnce(Object.assign(new Error(`ENOENT: no such file or directory, access '${favicon}'`), { code: 'ENOENT' }))
+    .mockResolvedValueOnce(undefined)
 
-    const wait = waitUntilExists(favicon, { freq: 50, maxAttempts: 3 })
+    await expect(waitUntilExists(favicon, { freq: 1, maxAttempts: 3 })).resolves.toBeUndefined()
 
-    await expect(wait).resolves.toBeUndefined()
+    expect(fs.access).toHaveBeenCalledTimes(2)
+    expect(console.log).toHaveBeenCalledTimes(1)
   })
 
   it('checks exactly maxAttempts times before failing', async () => {
@@ -47,14 +48,17 @@ describe('waitUntilExists', () => {
     ])
   })
 
+  // Stubbed because no real filesystem setup gives the same non-ENOENT error on every
+  // platform: Windows reports a path through a regular file as ENOENT, not ENOTDIR
   it('rethrows errors other than a missing path instead of retrying', async () => {
-    const file = path.join(tmpDir, 'dist')
+    const favicon = path.join(tmpDir, 'favicon')
 
-    await fs.writeFile(file, '')
+    vi.spyOn(fs, 'access').mockRejectedValue(Object.assign(new Error(`EACCES: permission denied, access '${favicon}'`), { code: 'EACCES' }))
 
-    await expect(waitUntilExists(path.join(file, 'favicon'), { freq: 1, maxAttempts: 3 }))
-    .rejects.toMatchObject({ code: 'ENOTDIR' })
+    await expect(waitUntilExists(favicon, { freq: 1, maxAttempts: 3 }))
+    .rejects.toMatchObject({ code: 'EACCES' })
 
+    expect(fs.access).toHaveBeenCalledTimes(1)
     expect(console.log).not.toHaveBeenCalled()
   })
 })
