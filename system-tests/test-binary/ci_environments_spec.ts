@@ -4,6 +4,7 @@ import systemTests from '../lib/system-tests'
 function smokeTestDockerImage (title: string, dockerImage: string, expectedExitCode: number, onRun?: ItOptions['onRun']) {
   systemTests.it(title, {
     withBinary: true,
+    // These images ship no browser but the Electron bundled in the binary
     browser: 'electron',
     dockerImage,
     spec: 'test1.js',
