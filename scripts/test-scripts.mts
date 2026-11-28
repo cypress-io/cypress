@@ -9,6 +9,6 @@ if (process.argv.length > 2) {
 // `shell` lets Windows resolve `yarn` to `yarn.cmd`.
 const runners = ['test-scripts:vitest', 'test-scripts:mocha']
 
-const failed = runners.filter((script) => spawnSync('yarn', [script], { stdio: 'inherit', shell: true }).status !== 0)
+const failed = runners.filter((script) => spawnSync(`yarn ${script}`, { stdio: 'inherit', shell: true }).status !== 0)
 
-process.exit(failed.length ? 1 : 0)
+process.exitCode = failed.length ? 1 : 0
