@@ -9,7 +9,7 @@ export default defineConfig({
     include: ['unit/**/*.spec.{js,ts}'],
     // Matches the globals `vitestConfig` declares to ESLint for these specs
     globals: true,
-    // `test-scripts` runs this project on every platform, including when `unit/` holds no `*.spec` files
+    // Lets `test-scripts:vitest` pass when `unit/` holds no `*.spec` files
     passWithNoTests: true,
   },
 })
