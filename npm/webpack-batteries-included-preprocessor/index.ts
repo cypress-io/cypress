@@ -306,7 +306,7 @@ const preprocessor = (options: {
   typescript?: string | boolean
   webpackOptions?: any
 } = {}) => {
-  return (file: FileEvent) => {
+  return (file: FileEvent): Promise<string> => {
     if (!options.typescript && typescriptExtensionRegex.test(file.filePath)) {
       return Promise.reject(new Error(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support.\n\nThe file: ${file.filePath}`))
     }
