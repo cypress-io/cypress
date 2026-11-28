@@ -17,7 +17,7 @@ export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, a
   // https://github.com/lodash/lodash/issues/2964
   // @see https://github.com/cypress-io/cypress/issues/15898
   _.mergeWith(before, after, (_a, b) => {
-    if (b instanceof Buffer) {
+    if (b instanceof Buffer || Array.isArray(b)) {      
       return b
     }
 
