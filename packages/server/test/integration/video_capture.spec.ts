@@ -95,7 +95,7 @@ describe('Video Capture', () => {
       writeVideoFrameAsBuffer('foo')
       expect(write).toHaveBeenCalledTimes(1)
 
-      // One frame was written, so waiting for more would never resolve
+      // One frame was written, so the default would wait 3s for a second one first
       await expect(endVideoCapture(false)).rejects.toThrow('Insufficient frames captured to create video.')
     })
   })

@@ -37,7 +37,7 @@ yarn workspace @packages/server build-prod
 ```
 
 * `yarn test-unit` executes unit tests in [`test/unit`](./test/unit) with vitest
-* `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
+* `yarn test-integration` executes every integration test in [`test/integration`](./test/integration): `*.spec.ts` files with vitest, then `*_spec.{js,ts}` files with mocha
 * `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
 
 You can also use the `test-watch` command to rerun a test file whenever there is a change:
@@ -56,11 +56,16 @@ yarn test-unit routes ## filters spec files by substring
 
 ### Running individual integration tests
 
+`yarn test-integration` takes no arguments. To run part of the suite, call the runner the spec uses:
+
 ```bash
-yarn test <path/to/test>
+## vitest (*.spec.ts)
+yarn test-integration-vitest test/integration/video_capture.spec.ts
+yarn test-integration-vitest video_capture ## filters spec files by substring
+
+## mocha (*_spec.{js,ts})
 yarn test test/integration/cli_spec.js
-## or
-yarn test-integration cli_spec ## shorthand, uses globbing to find spec
+yarn test-integration-mocha cli_spec ## shorthand, uses globbing to find spec
 ```
 
 ### Running e2e/system tests

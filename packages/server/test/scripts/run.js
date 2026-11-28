@@ -58,19 +58,46 @@ if (!run || !run.length) {
   `)
 }
 
-// mocha ignores *.spec.ts below, so a request that only names vitest specs
-// would otherwise end in a bare "No test files found"
+// The directories whose *.spec.ts files run on vitest, and the script for each
+const VITEST_DIRS = {
+  'test/unit': 'test-unit',
+  'test/integration': 'test-integration-vitest',
+}
+
+// The vitest specs, plus the vitest integration config's global setup, which
+// test/integration/** would otherwise load as a mocha spec
+const MOCHA_IGNORES = [
+  ...Object.keys(VITEST_DIRS).map((dir) => `${dir}/**/*.spec.ts`),
+  'test/integration/support/**',
+]
+
+const vitestScriptFor = (file) => {
+  const relative = path.relative(process.cwd(), path.resolve(file)).split(path.sep).join('/')
+
+  if (!relative.endsWith('.spec.ts')) {
+    return undefined
+  }
+
+  const dir = Object.keys(VITEST_DIRS).find((d) => relative.startsWith(`${d}/`))
+
+  return dir && VITEST_DIRS[dir]
+}
+
+// mocha ignores these specs below, so a request that only names them would
+// otherwise end in a bare "No test files found"
 const matched = run.flatMap((pattern) => fs.globSync(pattern))
 
-if (matched.length && matched.every((file) => file.endsWith('.spec.ts'))) {
-  const script = matched.every((file) => file.startsWith(path.join('test', 'unit'))) ? 'test-unit' : 'test-integration-vitest'
+if (matched.length && matched.every(vitestScriptFor)) {
+  const commands = _.map(_.groupBy(matched, vitestScriptFor), (files, script) => {
+    return `$ yarn workspace @packages/server ${script} -- ${files.join(' ')}`
+  })
 
   return exitErr(`
     Error: ${matched.join(', ')} run${matched.length === 1 ? 's' : ''} on vitest, not mocha.
 
     Run ${matched.length === 1 ? 'it' : 'them'} with:
 
-      $ yarn workspace @packages/server ${script} -- ${matched.join(' ')}
+      ${commands.join('\n      ')}
   `)
 }
 
@@ -137,9 +164,8 @@ commandAndArguments.args.push(
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
   '--extension=js,ts',
-  // *.spec.ts files run on vitest (vitest.integration.config.ts)
   // Quoted so the shell leaves the glob to mocha; cmd.exe would pass quotes through literally
-  isWindows() ? '--ignore=**/*.spec.ts' : `--ignore='**/*.spec.ts'`,
+  ...MOCHA_IGNORES.map((glob) => (isWindows() ? `--ignore=${glob}` : `--ignore='${glob}'`)),
   // restore mocha 2.x behavior to force end process after spec run
   '--exit',
 )

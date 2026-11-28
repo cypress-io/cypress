@@ -10,7 +10,10 @@ description: >-
 
 # Migrate a `@packages/server` unit spec from mocha to vitest
 
-Scope: `packages/server/test/unit` only. Integration and performance suites stay on mocha.
+Scope: `packages/server/test/unit`. Integration specs follow the same `*_spec` / `*.spec.ts`
+split under `test/integration`, run by `vitest.integration.config.ts`, which supplies the Xvfb
+display, header size and timeout that `test/scripts/run.js` gives mocha. Its "Verify" commands
+are `test-integration-vitest` and `test-integration`. Performance specs stay on mocha.
 
 This skill lists the things that go wrong *silently*: a converted spec that is green while
 its mocks never engaged, or that asserts less than the mocha original did. Plain API
