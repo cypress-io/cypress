@@ -956,7 +956,7 @@ Read about configuring the dev server: https://on.cypress.io/dev-server
 The component.devServer set in cypress-webpack.config.ts threw this error:
 
 CypressWebpackDevServerError: Incompatible versions of webpack and webpack-dev-server!
-webpack-dev-server 6.0.0 requires webpack 5.101.0 or newer, but found webpack 5.100.2.
+webpack-dev-server 6.1.0 requires webpack 5.101.0 or newer, but found webpack 5.100.2.
 Upgrade webpack to 5.101.0 or newer, or install webpack-dev-server 5 to use with @cypress/webpack-dev-server.
       [stack trace lines]
 `
