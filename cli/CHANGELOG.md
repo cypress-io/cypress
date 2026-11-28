@@ -11,6 +11,10 @@
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
 - Fixed an issue where the `junit` reporter, and custom reporters that use `mocha-junit-reporter`, printed `Couldn't determine Mocha version` on every run. Fixed in [#35561](https://github.com/cypress-io/cypress/pull/35561).
 
+**Misc:**
+
+- Renderer-crash errors during [`cypress run`](https://on.cypress.io/command-line#cypress-run) no longer suggest lowering [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global), an option normally ignored in run mode. The suggestion remains available during `cypress open`. Addresses [#28578](https://github.com/cypress-io/cypress/issues/28578).
+
 ## 16.4.0
 
 **Features:**

@@ -33,6 +33,25 @@ describe('lib/errors', () => {
     chalk.level = previousChalkLevel
   })
 
+  describe('renderer crash memory advice', () => {
+    // https://github.com/cypress-io/cypress/issues/28578
+    it('omits open-mode memory advice in run mode', () => {
+      const err = errors.get('RENDERER_CRASHED', 'Chrome', true)
+
+      expect(err.message).not.toContain('numTestsKeptInMemory')
+      expect(err.message).toContain('Try increasing the CPU/memory')
+      expect(err.message).toContain('machine you\'re running on.\n\nYou can learn more here:')
+    })
+
+    it('retains snapshot memory advice in open mode', () => {
+      const err = errors.get('RENDERER_CRASHED', 'Electron', false)
+
+      expect(err.message).toContain('numTestsKeptInMemory')
+      expect(err.message).toContain('cypress open')
+      expect(err.message).toContain('machine you\'re running on.\n  - Try lowering')
+    })
+  })
+
   describe('.log', () => {
     it('uses red by default', () => {
       const err = errors.get('TESTS_DID_NOT_START_FAILED')
