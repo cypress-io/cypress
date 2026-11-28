@@ -37,6 +37,7 @@ lib/
 
 - `proxy.spec.ts` and `server.spec.ts` cannot run in parallel because both bind to overlapping ports. The `test-unit` script uses `vitest run` without `--pool=forks`; the `test-debug` script explicitly passes `--no-file-parallelism`.
 - Test helper certificates live in `test/helpers/certs/`. Regenerate them with `regenerate:certs` (requires OpenSSL in `$PATH`) when they expire or when the CA key needs to rotate.
+- `esm/` is real ESM: `build:esm` writes `esm/package.json` with `"type": "module"`, so relative imports in `lib/` need a `.js` extension (`n/file-extension-in-import` enforces this). Import CommonJS dependencies such as `node-forge` by their default export, since Node can't always read their named exports.
 - The `semaphore` package throttles concurrent certificate generation to avoid race conditions under high load.
 
 ## Integration Points

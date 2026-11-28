@@ -13,7 +13,7 @@
   "scripts": {
     "build": "yarn build:esm && yarn build:cjs",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
-    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json && node -e \"require('fs').writeFileSync('esm/package.json', JSON.stringify({ type: 'module' }))\"",
     "build-prod": "yarn build",
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
     "clean-deps": "rimraf node_modules",
