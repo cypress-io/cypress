@@ -4,6 +4,7 @@ import systemTests from '../lib/system-tests'
 function smokeTestDockerImage (title: string, dockerImage: string, expectedExitCode: number, onRun?: ItOptions['onRun']) {
   systemTests.it(title, {
     withBinary: true,
+    // These checks are about the zero-config experience on each OS, and the images ship no browser but the bundled Electron
     browser: 'electron',
     dockerImage,
     spec: 'test1.js',

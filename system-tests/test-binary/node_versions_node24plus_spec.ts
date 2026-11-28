@@ -1,6 +1,7 @@
 import systemTests from '../lib/system-tests'
 import { beforePrePullImages } from '../lib/docker'
 
+// Each `browser: 'electron'` below checks the zero-config default per Node version; cypress/base has no other browser
 const IMAGES = [
   'cypress/base:24.0.0',
   'cypress/base:26.0.0',
