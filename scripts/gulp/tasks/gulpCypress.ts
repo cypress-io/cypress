@@ -1,6 +1,6 @@
 /**
  * How the Cypress backend is started and watched. Formerly
- * `node scripts/cypress.mts open` or `node scripts/cypress.mts run`
+ * `node scripts/cypress.js open` or `node scripts/cypress.js run`
  *
  * @summary Gulp tasks to run the Cypress app.
  */
@@ -55,7 +55,7 @@ export async function runCypressProd () {
 
 /**------------------------------------------------------------------------
  *                         Start and Watch Utils
- *  * spawnCypressWithMode - Formerly known as: `node ./scripts/cypress.mts run`
+ *  * spawnCypressWithMode - Formerly known as: `node ./scripts/cypress.js run`
  *  * watchCypress - Watch the dev server and graphql files
  *------------------------------------------------------------------------**/
 
