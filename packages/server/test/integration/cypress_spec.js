@@ -634,6 +634,7 @@ describe('lib/cypress', () => {
           fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
           fs.statAsync(path.join(this.pristinePath, 'cypress.config.js')).reflect(),
         ])
+        .each(ensureDoesNotExist)
       })
     })
 
@@ -837,8 +838,9 @@ describe('lib/cypress', () => {
         ])
         .then(() => {
           // includes folder name + path to the spec
-          this.expectExitWithErr('NO_SPECS_FOUND', `/path/to/spec`)
-          expect(errors.log).not.to.be.calledWithMatch(this.todospath)
+          const err = this.expectExitWithErr('NO_SPECS_FOUND', `/path/to/spec`)
+
+          expect(stripAnsi(err.message)).not.to.include(this.todosPath)
         })
       })
 
