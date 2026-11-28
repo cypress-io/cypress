@@ -1,5 +1,5 @@
-import { CA } from './ca'
-import { create as createServer, reset as resetServer } from './server'
+import { CA } from './ca.js'
+import { create as createServer, reset as resetServer } from './server.js'
 
 export async function create (dir: string, port: number, options: any) {
   const ca = await CA.create(dir)

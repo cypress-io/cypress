@@ -37,9 +37,10 @@ lib/
 
 - `proxy.spec.ts` and `server.spec.ts` cannot run in parallel because both bind to overlapping ports. The `test-unit` script uses `vitest run` without `--pool=forks`; the `test-debug` script explicitly passes `--no-file-parallelism`.
 - Test helper certificates live in `test/helpers/certs/`. Regenerate them with `regenerate:certs` (requires OpenSSL in `$PATH`) when they expire or when the CA key needs to rotate.
+- `esm/` is real ESM: `build:esm` writes `esm/package.json` with `"type": "module"`, so relative imports in `lib/` need a `.js` extension (`n/file-extension-in-import` enforces this). Use a default import for a CommonJS dependency whose named exports Node can't read, such as `node-forge`. Named imports from tsc-compiled CommonJS like `@packages/network` work; check an unfamiliar one with `node --input-type=module`.
 - The `semaphore` package throttles concurrent certificate generation to avoid race conditions under high load.
 
 ## Integration Points
 
 - Consumed by **@packages/proxy** and **@packages/server** which instantiate the HTTPS proxy server as part of the Cypress HTTP interception pipeline.
-- Depends on **@packages/network** (dev dep) for HTTP agent utilities used in integration tests.
+- Depends on **@packages/network** at runtime: `lib/server.ts` uses its connection and HTTP helpers.
