@@ -113,6 +113,65 @@ describe('injection/timers', () => {
       expect(timerWindow.codeRan).toBe(true)
     })
 
+    it('replays a held requestAnimationFrame callback with the time it runs, not the time it came due', () => {
+      const callback = vi.fn()
+
+      timers.pause(true)
+      window.requestAnimationFrame(callback)
+      vi.advanceTimersToNextFrame()
+      vi.advanceTimersByTime(5000)
+
+      expect(callback).not.toHaveBeenCalled()
+
+      timers.pause(false)
+
+      expect(callback).toHaveBeenCalledExactlyOnceWith(5016)
+    })
+
+    it('gives every requestAnimationFrame callback held in one flush the same timestamp', () => {
+      const first = vi.fn(() => vi.advanceTimersByTime(4))
+      const second = vi.fn()
+
+      timers.pause(true)
+      window.requestAnimationFrame(first)
+      window.requestAnimationFrame(second)
+      vi.advanceTimersToNextFrame()
+      vi.advanceTimersByTime(5000)
+
+      timers.pause(false)
+
+      expect(first).toHaveBeenCalledExactlyOnceWith(5016)
+      expect(second).toHaveBeenCalledExactlyOnceWith(5016)
+    })
+
+    it('times a held requestAnimationFrame callback after the held callbacks queued ahead of it run', () => {
+      const frame = vi.fn()
+
+      timers.pause(true)
+      window.setTimeout(() => vi.advanceTimersByTime(200), 10)
+      window.requestAnimationFrame(frame)
+      vi.advanceTimersByTime(100)
+
+      timers.pause(false)
+
+      expect(frame).toHaveBeenCalledExactlyOnceWith(300)
+    })
+
+    it('times a held requestAnimationFrame callback by the clock frames use when performance.now is replaced after wrapping', () => {
+      const frame = vi.fn()
+      const replacedNow = vi.spyOn(performance, 'now').mockReturnValue(0)
+
+      timers.pause(true)
+      window.requestAnimationFrame(frame)
+      vi.advanceTimersToNextFrame()
+      vi.advanceTimersByTime(5000)
+
+      timers.pause(false)
+      replacedNow.mockRestore()
+
+      expect(frame).toHaveBeenCalledExactlyOnceWith(5016)
+    })
+
     it('holds a timer scheduled before pausing that comes due while paused', () => {
       const callback = vi.fn()
 
