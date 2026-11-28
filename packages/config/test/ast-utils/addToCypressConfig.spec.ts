@@ -105,6 +105,109 @@ describe('addToCypressConfig', () => {
     expect(result.result).toEqual('ADDED')
   })
 
+  it('will add a component definition to an empty ts file', async () => {
+    const result = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/empty.config.ts'),
+      info: {
+        testingType: 'component',
+        framework: 'react',
+        bundler: 'vite',
+      },
+      isProjectUsingESModules: false,
+      projectRoot: __dirname,
+    })
+
+    expect(getWrittenConfig()).toEqual(dedent`
+      import { defineConfig } from "cypress";
+
+      export default defineConfig({
+        component: {
+          devServer: {
+            framework: "react",
+            bundler: "vite",
+          },
+        },
+      });
+    `)
+
+    expect(result.result).toEqual('ADDED')
+  })
+
+  it('will merge a component definition into a config that uses TypeScript-only syntax', async () => {
+    const result = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/typed-e2e.config.ts'),
+      info: {
+        testingType: 'component',
+        framework: 'react',
+        bundler: 'vite',
+      },
+      isProjectUsingESModules: false,
+      projectRoot: __dirname,
+    })
+
+    expect(getWrittenConfig()).toEqual(dedent`
+      import { defineConfig } from "cypress";
+
+      const baseUrl: string = "http://localhost:3000";
+      const viewport = { viewportWidth: 1280, viewportHeight: 720 } as const;
+
+      export default defineConfig({
+        e2e: {
+          baseUrl,
+          ...viewport,
+          setupNodeEvents(
+            on: Cypress.PluginEvents,
+            config: Cypress.PluginConfigOptions
+          ) {
+            return config;
+          },
+        },
+
+        component: {
+          devServer: {
+            framework: "react",
+            bundler: "vite",
+          },
+        },
+      });
+    `)
+
+    expect(result.result).toEqual('MERGED')
+  })
+
+  it('will keep comments in the existing config when merging', async () => {
+    const result = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/commented.config.ts'),
+      info: {
+        testingType: 'component',
+        framework: 'react',
+        bundler: 'vite',
+      },
+      isProjectUsingESModules: false,
+      projectRoot: __dirname,
+    })
+
+    expect(getWrittenConfig()).toEqual(dedent`
+      import { defineConfig } from "cypress";
+
+      export default defineConfig({
+        // Matches the port the storefront dev server listens on
+        e2e: {
+          baseUrl: "http://localhost:3000",
+        },
+
+        component: {
+          devServer: {
+            framework: "react",
+            bundler: "vite",
+          },
+        },
+      });
+    `)
+
+    expect(result.result).toEqual('MERGED')
+  })
+
   const esmConfig = dedent`
     import { defineConfig } from "cypress";
 

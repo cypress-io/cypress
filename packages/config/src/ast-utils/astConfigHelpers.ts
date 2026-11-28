@@ -1,5 +1,6 @@
 import * as t from '@babel/types'
 import { parse, visit } from 'recast'
+import * as typescriptParser from 'recast/parsers/typescript'
 import dedent from 'dedent'
 import assert from 'assert'
 
@@ -59,7 +60,7 @@ export function addComponentDefinition (config: ASTComponentDefinitionConfig): t
 
 function extractProperty (str: string) {
   const toParse = parse(dedent(str), {
-    parser: require('recast/parsers/typescript'),
+    parser: typescriptParser,
   })
 
   let complete = false
