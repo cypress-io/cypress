@@ -88,7 +88,7 @@ const handleErrorEvent = (event: ErrorEvent) => {
     data.message = error
   }
 
-  // The AUT runs in an iframe, so it always has a top window
+  // Safe because the AUT runs in an iframe, so it always has a top window
   window.top!.postMessage({ event: 'cross:origin:aut:throw:error', data }, '*')
 }
 
@@ -130,10 +130,10 @@ function assertSpecBridgeCypress (Cypress: Cypress.Cypress): asserts Cypress is 
 }
 
 const attachToCypress = (Cypress: Cypress.Cypress) => {
+  assertSpecBridgeCypress(Cypress)
+
   // A spec bridge has attached so we don't need to forward errors to top anymore.
   window.removeEventListener('error', handleErrorEvent)
-
-  assertSpecBridgeCypress(Cypress)
 
   documentCookiePatch.onCypress(Cypress)
 

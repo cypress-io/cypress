@@ -96,6 +96,16 @@ const loadInjection = async ({
   }
 }
 
+// Safe because the injection only calls the members the fake defines
+const attachFakeCypress = (Cypress: Partial<ReturnType<typeof createFakeCypress>>) => {
+  window.__attachToCypress?.(Cypress as unknown as Cypress.Cypress)
+}
+
+// Safe because the injection only calls postMessage on the port it replies on
+const postToAut = (data: string, port: { postMessage: ReturnType<typeof vi.fn> }) => {
+  window.dispatchEvent(new MessageEvent('message', { data, ports: [port as unknown as MessagePort] }))
+}
+
 const throwInAut = (error: unknown) => {
   window.dispatchEvent(new ErrorEvent('error', { error, message: String(error) }))
 }
@@ -123,6 +133,7 @@ describe('injection/cross-origin', () => {
     })
 
     fakeParent = { frames: [], postMessage: vi.fn() }
+    // Safe because the injection only reads `frames` and calls `postMessage` on its parent
     vi.spyOn(window, 'parent', 'get').mockReturnValue(fakeParent as unknown as Window)
 
     // jsdom will not let `top` be redefined, and in a top-level jsdom
@@ -153,7 +164,7 @@ describe('injection/cross-origin', () => {
 
       const port = { postMessage: vi.fn() }
 
-      window.dispatchEvent(new MessageEvent('message', { data: 'aut:cypress:location', ports: [port as unknown as MessagePort] }))
+      postToAut('aut:cypress:location', port)
 
       expect(port.postMessage).toHaveBeenCalledExactlyOnceWith(AUT_URL)
     })
@@ -163,7 +174,7 @@ describe('injection/cross-origin', () => {
 
       const port = { postMessage: vi.fn() }
 
-      window.dispatchEvent(new MessageEvent('message', { data: 'cross:origin:bridge:ready', ports: [port as unknown as MessagePort] }))
+      postToAut('cross:origin:bridge:ready', port)
 
       expect(port.postMessage).not.toHaveBeenCalled()
     })
@@ -255,7 +266,7 @@ describe('injection/cross-origin', () => {
       const { documentCookiePatch, timers } = await loadInjection()
       const Cypress = createFakeCypress()
 
-      window.__attachToCypress?.(Cypress as unknown as Cypress.Cypress)
+      attachFakeCypress(Cypress)
 
       expect(documentCookiePatch.onCypress).toHaveBeenCalledExactlyOnceWith(Cypress)
       expect(Cypress.removeAllListeners).toHaveBeenCalledWith('app:timers:reset')
@@ -269,7 +280,7 @@ describe('injection/cross-origin', () => {
     it('stops forwarding uncaught errors to top once a spec bridge attaches', async () => {
       await loadInjection()
 
-      window.__attachToCypress?.(createFakeCypress() as unknown as Cypress.Cypress)
+      attachFakeCypress(createFakeCypress())
       throwInAut(new Error('payment widget failed to load'))
 
       expect(postMessageToTop).not.toHaveBeenCalled()
@@ -278,7 +289,7 @@ describe('injection/cross-origin', () => {
     it('removes itself after attaching', async () => {
       await loadInjection()
 
-      window.__attachToCypress?.(createFakeCypress() as unknown as Cypress.Cypress)
+      attachFakeCypress(createFakeCypress())
 
       expect(window).not.toHaveProperty('__attachToCypress')
     })
@@ -287,10 +298,25 @@ describe('injection/cross-origin', () => {
       const { documentCookiePatch } = await loadInjection()
       const { removeAllListeners: _removeAllListeners, ...withoutEmitter } = createFakeCypress()
 
-      expect(() => window.__attachToCypress?.(withoutEmitter as unknown as Cypress.Cypress))
+      expect(() => attachFakeCypress(withoutEmitter))
       .toThrow('The spec bridge passed a Cypress without an event emitter to `window.__attachToCypress`')
 
       expect(documentCookiePatch.onCypress).not.toHaveBeenCalled()
+    })
+
+    it('keeps forwarding uncaught errors to top when it refuses a Cypress', async () => {
+      await loadInjection()
+      const { removeAllListeners: _removeAllListeners, ...withoutEmitter } = createFakeCypress()
+
+      expect(() => attachFakeCypress(withoutEmitter)).toThrow()
+      throwInAut('checkout failed')
+
+      expect(postMessageToTop).toHaveBeenCalledExactlyOnceWith({
+        event: 'cross:origin:aut:throw:error',
+        data: { href: AUT_URL, message: 'checkout failed' },
+      }, '*')
+
+      expect(window.__attachToCypress).toBeTypeOf('function')
     })
   })
 
@@ -337,7 +363,8 @@ describe('injection/cross-origin', () => {
     })
 
     it('rethrows errors other than SecurityError from reading a frame', async () => {
-      const error = new TypeError('frame.location is null')
+      // Any error that isn't a SecurityError; the message is not from a real browser
+      const error = new TypeError('not a SecurityError')
 
       await expect(loadInjection({
         frames: [{
