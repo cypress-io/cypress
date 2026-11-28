@@ -725,9 +725,36 @@ commands:
                       name: Install unzip
                       command: |
                         apt-get update && apt-get install -y unzip
+                  # On Linux the orb unzips to /opt/chrome-for-testing and links
+                  # <install_dir>/chrome to it, the binary launcher detection resolves with `which chrome`
                   - browser-tools/install_chrome_for_testing:
                       version: << parameters.google-chrome-for-testing-version >>
                       install_chromedriver: false
+                      install_dir: /usr/local/bin
+                  - run:
+                      name: Verify Chrome for Testing is detectable
+                      command: |
+                        set -euo pipefail
+                        EXPECTED_VERSION="<< parameters.google-chrome-for-testing-version >>"
+
+                        if ! CHROME_PATH="$(command -v chrome)"; then
+                          echo "No 'chrome' on PATH after installing Chrome for Testing (PATH=$PATH)"
+                          exit 1
+                        fi
+
+                        CHROME_VERSION_OUTPUT="$(chrome --version)"
+                        echo "$CHROME_PATH -> $(readlink -f "$CHROME_PATH"): $CHROME_VERSION_OUTPUT"
+
+                        # Same pattern as chrome-for-testing's versionRegex in packages/launcher/lib/known-browsers.ts
+                        if [[ ! "$CHROME_VERSION_OUTPUT" =~ Google\ Chrome\ for\ Testing\ ([^[:space:]]+) ]]; then
+                          echo "'chrome --version' does not report Google Chrome for Testing, so Cypress will not detect it"
+                          exit 1
+                        fi
+
+                        if [[ "$EXPECTED_VERSION" != "latest" && "${BASH_REMATCH[1]}" != "$EXPECTED_VERSION" ]]; then
+                          echo "Expected Chrome for Testing $EXPECTED_VERSION, found ${BASH_REMATCH[1]}"
+                          exit 1
+                        fi
 
   # This code builds better-sqlite3 on Ubuntu 20 (Focal). This is necessary because Ubuntu 20 has the oldest glibc version (2.31) that we support.
   #
@@ -863,6 +890,12 @@ commands:
             - install-browsers:
                 install-firefox: true
                 firefox-version: *firefox-beta-version
+      - when:
+          condition:
+            equal: [ chrome-for-testing, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-chrome-for-testing: true
       - when:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -1023,6 +1056,13 @@ commands:
           steps:
             - install-browsers:
                 install-firefox: true
+                executor: << parameters.executor >>
+      - when:
+          condition:
+            equal: [ chrome-for-testing, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-chrome-for-testing: true
                 executor: << parameters.executor >>
       - windows-install-chrome:
           browser: <<parameters.browser>>
