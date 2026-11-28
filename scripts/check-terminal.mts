@@ -1,6 +1,7 @@
 // checks if the terminal has all the variables set (especially on Linux Docker)
 
-const assert = require('assert')
+import assert from 'node:assert'
+
 const isMainLinux = process.platform === 'linux' && process.arch === 'x64'
 
 if (isMainLinux) {
