@@ -1,5 +1,5 @@
 /* global sinon */
-const questionsRemain = require('../../../binary/util/questions-remain')
+const questionsRemain = require('../../../binary/util/questions-remain').default
 const la = require('lazy-ass')
 const snapshot = require('snap-shot-it')
 
