@@ -28,6 +28,10 @@ describe('src/cy/snapshots_css', () => {
       ['all'],
       ['only screen and (min-width: 400px)'],
       ['print, screen'],
+      // https://github.com/cypress-io/cypress/issues/34982
+      ['(min-width: 735px)'],
+      ['not print'],
+      [''],
     ])('keeps a stylesheet with media %j', (media) => {
       addStyle('p { color: blue; }', { media })
 
@@ -43,7 +47,7 @@ describe('src/cy/snapshots_css', () => {
     it.each([
       ['print'],
       ['speech'],
-      [''],
+      ['print and (orientation: landscape)'],
     ])('drops a stylesheet with media %j', (media) => {
       addStyle('p { color: blue; }', { media })
 

@@ -257,5 +257,49 @@ describe('AutIframe', () => {
 
       iframe.remove()
     })
+
+    // https://github.com/cypress-io/cypress/issues/34982
+    it('restores the media of stylesheets', () => {
+      const iframe = document.createElement('iframe')
+
+      document.body.appendChild(iframe)
+
+      const eventManager = createEventManager()
+
+      eventManager._testingOnlySetCypress({
+        cy: {
+          getStyles: () => {
+            return {
+              headStyles: [
+                { css: '.nav { display: flex; }', media: '(min-width: 735px)' },
+                { href: 'http://localhost:3501/fixtures/generic_styles.css', media: '(min-width: 735px)' },
+              ],
+              bodyStyles: [
+                { css: '.footer { display: grid; }', media: '(min-width: 735px)' },
+              ],
+            }
+          },
+        },
+      })
+
+      autIframe = new AutIframe('Test Project', eventManager, Cypress.$)
+      autIframe.$iframe = Cypress.$(iframe) as JQuery<HTMLIFrameElement>
+      autIframe.doesAUTMatchTopSuperDomainOrigin = () => true
+
+      // the AUT still has the same <link> without media from another snapshot
+      iframe.contentDocument!.head.innerHTML = '<style></style><link rel="stylesheet" href="http://localhost:3501/fixtures/generic_styles.css">'
+
+      const $body = Cypress.$('<body />')
+
+      autIframe.restoreDom({ body: { get: () => $body }, htmlAttrs: {} })
+
+      const { head, body } = iframe.contentDocument!
+
+      expect(head.querySelector('style')!.getAttribute('media')).to.equal('(min-width: 735px)')
+      expect(head.querySelector('link')!.getAttribute('media')).to.equal('(min-width: 735px)')
+      expect(body.querySelector('style')!.getAttribute('media')).to.equal('(min-width: 735px)')
+
+      iframe.remove()
+    })
   })
 })

@@ -85,6 +85,21 @@ describe('driver/src/cy/snapshots_css', () => {
       expect(headStyleIds).to.have.length(3)
     })
 
+    // https://github.com/cypress-io/cypress/issues/34982
+    it('works for media query stylesheets', () => {
+      return Cypress.Promise.all([
+        addStyles('<link media="(min-width: 735px)" rel="stylesheet" href="/fixtures/generic_styles_2.css" />', 'head'),
+        addStyles('<style media="(min-width: 735px)">p { color: red; }</style>', 'head'),
+        addStyles('<style media="print">p { color: black; }</style>', 'head'),
+      ]).then(() => {
+        const { headStyleIds } = snapshotCss.getStyleIds()
+
+        expect(headStyleIds).to.have.length(5)
+        expect(headStyleIds[3]).to.eql({ media: '(min-width: 735px)', styleId: { hrefId: 'http://localhost:3500/fixtures/generic_styles_2.css' } })
+        expect(headStyleIds[4]).to.eql({ media: '(min-width: 735px)', styleId: 'p { color: red; }' })
+      })
+    })
+
     it('returns new id if css has been modified', () => {
       const idsBefore = snapshotCss.getStyleIds()
 
@@ -156,6 +171,21 @@ describe('driver/src/cy/snapshots_css', () => {
       const { headStyles } = getStyles()
 
       expect(headStyles[2]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles.css' })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/34982
+    it('returns the media of media query stylesheets', () => {
+      return Cypress.Promise.all([
+        addStyles('<link media="(min-width: 735px)" rel="stylesheet" href="/fixtures/generic_styles_2.css" />', 'head'),
+        addStyles('<style media="screen and (max-width: 734px)">p { color: red; }</style>', 'head'),
+        addStyles('<link media="(min-width: 735px)" rel="stylesheet" href="http://localhost:3501/fixtures/generic_styles_2.css" />', 'head'),
+      ]).then(() => {
+        const { headStyles } = getStyles()
+
+        expect(headStyles[3]).to.eql({ css: '.bar { color: red; }', media: '(min-width: 735px)' })
+        expect(headStyles[4]).to.eql({ css: 'p { color: red; }', media: 'screen and (max-width: 734px)' })
+        expect(headStyles[5]).to.eql({ href: 'http://localhost:3501/fixtures/generic_styles_2.css', media: '(min-width: 735px)' })
+      })
     })
 
     it('includes rules injected by JavaScript', () => {
