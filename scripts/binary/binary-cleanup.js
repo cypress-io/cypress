@@ -141,6 +141,8 @@ const getDependencyPathsToKeep = async (buildAppDir, additionalEntryPoints = [])
         'uglify-js',
         'esbuild',
         'enhanced-resolve/lib/createInnerCallback',
+        // the server redirects reporters' `require('mocha')` to mocha-7.2.0, which is kept above
+        'mocha',
       ],
     })
 
