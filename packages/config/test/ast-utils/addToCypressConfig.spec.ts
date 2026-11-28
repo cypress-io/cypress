@@ -105,6 +105,34 @@ describe('addToCypressConfig', () => {
     expect(result.result).toEqual('ADDED')
   })
 
+  it('will add a component definition to an empty ts file', async () => {
+    const result = await addTestingTypeToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/empty.config.ts'),
+      info: {
+        testingType: 'component',
+        framework: 'react',
+        bundler: 'vite',
+      },
+      isProjectUsingESModules: false,
+      projectRoot: __dirname,
+    })
+
+    expect(getWrittenConfig()).toEqual(dedent`
+      import { defineConfig } from "cypress";
+
+      export default defineConfig({
+        component: {
+          devServer: {
+            framework: "react",
+            bundler: "vite",
+          },
+        },
+      });
+    `)
+
+    expect(result.result).toEqual('ADDED')
+  })
+
   const esmConfig = dedent`
     import { defineConfig } from "cypress";
 
