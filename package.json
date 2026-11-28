@@ -249,7 +249,7 @@
     "mobx": "6.13.6",
     "mocha": "3.5.3",
     "mocha-banner": "1.1.2",
-    "mocha-junit-reporter": "2.2.0",
+    "mocha-junit-reporter": "2.2.1",
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "5.4.0",
     "node-gyp": "12.4.0",
