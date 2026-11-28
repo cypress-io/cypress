@@ -5,11 +5,11 @@ export default defineConfig({
     globalSetup: ['@packages/vitest-setup/sanitize-env'],
     name: 'internal-scripts',
     environment: 'node',
-    // The complement of `test-scripts:mocha`'s `*[!.]spec.{js,ts}`, so every spec under `unit/` runs on exactly one runner
-    include: ['unit/**/*.spec.{js,ts,mts}'],
+    // `test-scripts:mocha` takes every other `*spec.{js,ts}` under `unit/`
+    include: ['unit/**/*.spec.{js,ts}'],
     // Matches the globals `vitestConfig` declares to ESLint for these specs
     globals: true,
-    // Keeps `test-scripts` green while every spec is a mocha `*-spec`
+    // `test-scripts` runs this project on every platform, including when `unit/` holds no `*.spec` files
     passWithNoTests: true,
   },
 })

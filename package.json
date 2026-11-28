@@ -106,7 +106,7 @@
     "test-integration": "lerna exec yarn test-integration --ignore=@packages/{driver,root,static,web-config}",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-npm-package-release-script": "SEMANTIC_RELEASE_SKIP_NPM_PUBLISH=1 npx lerna exec --concurrency 4 --no-private --scope=@cypress/* -- npx --no-install semantic-release --dry-run",
-    "test-scripts": "yarn test-scripts:vitest && yarn test-scripts:mocha",
+    "test-scripts": "node scripts/test-scripts.mts",
     "test-scripts:mocha": "mocha -r packages/ts/register --reporter spec 'scripts/unit/**/*[!.]spec.{js,ts}'",
     "test-scripts:vitest": "vitest run --root scripts",
     "test-scripts-watch": "yarn test-scripts:mocha --watch --watch-extensions 'ts,js'",
