@@ -142,7 +142,7 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
-            const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
+            const { createPullRequest } = require('./scripts/github-actions/create-pull-request.ts')
 
             await createPullRequest({
               context,
