@@ -1,7 +1,6 @@
 import systemTests from '../lib/system-tests'
 import { beforePrePullImages } from '../lib/docker'
 
-// Each `browser: 'electron'` below checks the zero-config default per Node version; cypress/base has no other browser
 const IMAGES = [
   'cypress/base:22.0.0',
   'cypress/base:22.7.0',
@@ -11,11 +10,14 @@ const IMAGES = [
 
 beforePrePullImages(IMAGES)
 
+// cypress/base ships no browser but the Electron bundled in the binary
+const BROWSER = 'electron'
+
 function smokeTestDockerImage (dockerImage: string) {
   context('e2e', () => {
     systemTests.it(`can run in ${dockerImage}`, {
       withBinary: true,
-      browser: 'electron',
+      browser: BROWSER,
       dockerImage,
       spec: 'test1.js',
       specDir: 'tests',
@@ -26,7 +28,7 @@ function smokeTestDockerImage (dockerImage: string) {
   context('component', () => {
     systemTests.it(`can run in ${dockerImage}`, {
       withBinary: true,
-      browser: 'electron',
+      browser: BROWSER,
       dockerImage,
       testingType: 'component',
       project: 'simple-ct',
@@ -47,7 +49,7 @@ describe('type: module', () => {
       dockerImage,
       testingType: 'e2e',
       spec: 'app.cy.js',
-      browser: 'electron',
+      browser: BROWSER,
       expectedExitCode: 0,
     })
   })
