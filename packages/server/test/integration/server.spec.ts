@@ -1,46 +1,106 @@
-require('../spec_helper')
+import _ from 'lodash'
+import http from 'http'
+import requestPromise from '@cypress/request-promise'
+import evilDns from 'evil-dns'
+import nock from 'nock'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { setupFullConfigWithDefaults } from '@packages/config'
+import * as httpsServer from '@packages/https-proxy/test/helpers/https_server'
+import Fixtures from '@tooling/system-tests'
+import * as config from '../../lib/config'
+import { ServerBase } from '../../lib/server-base'
+import { SocketE2E } from '../../lib/socket-e2e'
+import { createRoutes } from '../../lib/routes'
+import { clearCtx, getCtx, makeDataContext, setCtx } from '../../lib/makeDataContext'
+import { GracefulExit } from '../../lib/util/graceful-exit'
+import { configureLongStackTraces } from '../../lib/environment'
 
-const _ = require('lodash')
-const http = require('http')
-const rp = require('@cypress/request-promise')
-const evilDns = require('evil-dns')
+// `_onResolveUrl` cancels the in-flight request through Bluebird cancellation.
+configureLongStackTraces(undefined)
+
+// `GracefulExit.resetForTesting` refuses to clear its singleton without this.
+const testGlobals = globalThis as { IS_TEST?: boolean }
+
+testGlobals.IS_TEST = true
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-const { setupFullConfigWithDefaults } = require('@packages/config')
-const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
-const config = require(`../../lib/config`)
-const { ServerBase } = require(`../../lib/server-base`)
-const { SocketE2E } = require(`../../lib/socket-e2e`)
-const Fixtures = require('@tooling/system-tests')
-const { createRoutes } = require(`../../lib/routes`)
-const { getCtx } = require('../../lib/makeDataContext')
 
 const s3StaticHtmlUrl = 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html'
+
+const originalEnv = { ...process.env }
 
 const expectToEqDetails = function (actual, expected) {
   actual = _.omit(actual, 'totalTime')
 
-  expect(actual).to.deep.eq(expected)
+  expect(actual).toStrictEqual(expected)
+}
+
+// Stringifies first, so an absent header passes; `not.toMatch` throws on a non-string.
+const expectNotToMatch = (actual, re: RegExp) => {
+  expect(re.test(String(actual))).toBe(false)
+}
+
+const expectNotEmpty = (actual) => {
+  expect(Object.keys(actual).length).toBeGreaterThan(0)
 }
 
 describe('Server', () => {
-  require('mocha-banner').register()
+  beforeEach(async () => {
+    GracefulExit.resetForTesting()
+    await clearCtx()
+    setCtx(makeDataContext({} as Parameters<typeof makeDataContext>[0]))
 
-  beforeEach(() => {
-    return sinon.stub(ServerBase.prototype, 'reset')
+    if (!nock.isActive()) {
+      nock.activate()
+    }
+
+    nock.disableNetConnect()
+    nock.enableNetConnect(/localhost/)
   })
 
-  context('resolving url', () => {
-    beforeEach(function () {
+  afterEach(async () => {
+    await getCtx()._reset()
+    await clearCtx()
+    vi.restoreAllMocks()
+
+    nock.cleanAll()
+    nock.enableNetConnect()
+
+    process.env = { ...originalEnv }
+  })
+
+  beforeEach(() => {
+    vi.spyOn(ServerBase.prototype, 'reset').mockImplementation(() => {})
+  })
+
+  describe('resolving url', () => {
+    let automationRequest: any
+    let setup: (initialUrl: any, obj?: any) => Promise<any>
+    let rp: (options?: any) => Promise<any>
+    let server: any
+    let proxy: string
+    let buffers: any
+    let fileServer: any
+
+    beforeEach(() => {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
+      // nock judges a proxied request by its target host, though it only reaches the local proxy
       nock.enableNetConnect()
 
-      this.automationRequest = sinon.stub()
-      this.automationRequest.withArgs('get:cookies').resolves([])
-      this.automationRequest.withArgs('set:cookie').resolves({})
+      automationRequest = vi.fn((message) => {
+        if (message === 'get:cookies') {
+          return Promise.resolve([])
+        }
 
-      this.setup = (initialUrl, obj = {}) => {
+        if (message === 'set:cookie') {
+          return Promise.resolve({})
+        }
+
+        return undefined
+      })
+
+      setup = (initialUrl, obj = {}) => {
         if (_.isObject(initialUrl)) {
           obj = initialUrl
           initialUrl = null
@@ -54,12 +114,12 @@ describe('Server', () => {
           // use a jar for each test
           // but reset it automatically
           // between test
-          const jar = rp.jar()
+          const jar = requestPromise.jar()
 
           // use a custom request promise
           // to automatically backfill these
           // options including our proxy
-          this.rp = (options = {}) => {
+          rp = (options = {}) => {
             let url
 
             if (_.isString(options)) {
@@ -69,14 +129,14 @@ describe('Server', () => {
 
             _.defaults(options, {
               url,
-              proxy: this.proxy,
+              proxy,
               jar,
               simple: false,
               followRedirect: false,
               resolveWithFullResponse: true,
             })
 
-            return rp(options)
+            return requestPromise(options)
           }
 
           return Promise.all([
@@ -84,9 +144,9 @@ describe('Server', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new ServerBase(cfg)),
+            (server = new ServerBase(cfg)),
 
-            this.server.open(cfg, {
+            server.open(cfg, {
               SocketCtor: SocketE2E,
               createRoutes,
               testingType: 'e2e',
@@ -100,42 +160,40 @@ describe('Server', () => {
               // these requests arrive in absolute form, and CONNECT for https,
               // like a proxied browser — which only happens on the MITM path,
               // and the server refuses CONNECT until a launch resolves it
-              await this.server.setNetworkMode(false)
+              await server.setNetworkMode(false)
 
-              await this.server.startWebsockets(automationStub, config, {})
+              await server.startWebsockets(automationStub, config, {})
               if (initialUrl) {
-                this.server.remoteStates.set(initialUrl)
+                server.remoteStates.set(initialUrl)
               }
 
-              this.srv = this.server.getHttpServer()
+              proxy = `http://localhost:${port}`
 
-              this.proxy = `http://localhost:${port}`
+              buffers = server._networkProxy.http.buffers
 
-              this.buffers = this.server._networkProxy.http.buffers
-
-              this.fileServer = this.server._fileServer.address()
+              fileServer = server._fileServer.address()
             }),
           ])
         })
       }
     })
 
-    afterEach(function () {
+    afterEach(() => {
       nock.cleanAll()
 
       evilDns.clear()
 
       return Promise.all([
-        this.server.close(),
+        server.close(),
         httpsServer.stop(),
       ])
     })
 
     describe('file', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Fixtures.scaffold('no-server')
 
-        return this.setup({
+        return setup({
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
             port: 2000,
@@ -145,8 +203,8 @@ describe('Server', () => {
         })
       })
 
-      it('can serve static assets', async function () {
-        const obj = await this.server._onResolveUrl('/index.html', {}, this.automationRequest)
+      it('can serve static assets', async () => {
+        const obj = await server._onResolveUrl('/index.html', {}, automationRequest)
 
         await expectToEqDetails(obj, {
           isOkStatusCode: true,
@@ -162,19 +220,19 @@ describe('Server', () => {
           cookies: [],
         })
 
-        const res = await this.rp('http://localhost:2000/index.html')
+        const res = await rp('http://localhost:2000/index.html')
 
-        expect(res.statusCode).to.eq(200)
-        expect(res.headers['etag']).to.exist
-        expect(res.headers['set-cookie']).not.to.match(/initial=;/)
-        expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
-        expect(res.body).to.include('index.html content')
-        expect(res.body).to.include('.action("app:window:before:load",window)')
-        expect(res.body).to.include('</script>\n  </head>')
+        expect(res.statusCode).toBe(200)
+        expect(res.headers['etag']).toEqual(expect.anything())
+        expectNotToMatch(res.headers['set-cookie'], /initial=;/)
+        expect(res.headers['cache-control']).toBe('no-cache, no-store, must-revalidate')
+        expect(res.body).toContain('index.html content')
+        expect(res.body).toContain('.action("app:window:before:load",window)')
+        expect(res.body).toContain('</script>\n  </head>')
       })
 
-      it('sends back the content type', async function () {
-        const obj = await this.server._onResolveUrl('/assets/foo.json', {}, this.automationRequest)
+      it('sends back the content type', async () => {
+        const obj = await server._onResolveUrl('/assets/foo.json', {}, automationRequest)
 
         await expectToEqDetails(obj, {
           isOkStatusCode: true,
@@ -191,10 +249,10 @@ describe('Server', () => {
         })
       })
 
-      it('buffers the response', function () {
-        sinon.spy(this.server.request, 'sendStream')
+      it('buffers the response', () => {
+        const sendStreamSpy = vi.spyOn(server.request, 'sendStream')
 
-        return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
+        return server._onResolveUrl('/index.html', {}, automationRequest)
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -210,9 +268,9 @@ describe('Server', () => {
             cookies: [],
           })
 
-          expect(this.buffers.buffer).to.include({ url: 'http://localhost:2000/index.html' })
+          expect(buffers.buffer).toMatchObject({ url: 'http://localhost:2000/index.html' })
         }).then(() => {
-          return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
+          return server._onResolveUrl('/index.html', {}, automationRequest)
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -228,21 +286,21 @@ describe('Server', () => {
               cookies: [],
             })
 
-            expect(this.server.request.sendStream).to.be.calledTwice
+            expect(sendStreamSpy).toHaveBeenCalledTimes(2)
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/index.html')
+          return rp('http://localhost:2000/index.html')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('Cypress')
+            expect(res.statusCode).toBe(200)
+            expect(res.body).toContain('Cypress')
 
-            expect(this.buffers.buffer).to.be.undefined
+            expect(buffers.buffer).toBeUndefined()
           })
         })
       })
 
-      it('can follow static file redirects', function () {
-        return this.server._onResolveUrl('/sub', {}, this.automationRequest)
+      it('can follow static file redirects', () => {
+        return server._onResolveUrl('/sub', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -258,24 +316,24 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/sub/')
+          return rp('http://localhost:2000/sub/')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
+            expect(res.statusCode).toBe(200)
 
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               origin: 'http://localhost:2000',
               strategy: 'file',
               domainName: 'localhost',
-              fileServer: this.fileServer,
+              fileServer: fileServer,
               props: null,
             })
           })
         })
       })
 
-      it('gracefully handles 404', function () {
-        return this.server._onResolveUrl('/does-not-exist', {}, this.automationRequest)
+      it('gracefully handles 404', () => {
+        return server._onResolveUrl('/does-not-exist', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: false,
@@ -291,24 +349,24 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp({
+          return rp({
             url: 'http://localhost:2000/does-not-exist',
             headers: {
               'Accept-Encoding': 'identity',
             },
           })
           .then((res) => {
-            expect(res.statusCode).to.eq(404)
-            expect(res.body).to.include('Cypress errored trying to serve this file from your system:')
-            expect(res.body).to.include('does-not-exist')
+            expect(res.statusCode).toBe(404)
+            expect(res.body).toContain('Cypress errored trying to serve this file from your system:')
+            expect(res.body).toContain('does-not-exist')
 
-            expect(res.body).to.include('The file was not found')
+            expect(res.body).toContain('The file was not found')
           })
         })
       })
 
-      it('handles urls with hashes', function () {
-        return this.server._onResolveUrl('/index.html#/foo/bar', {}, this.automationRequest)
+      it('handles urls with hashes', () => {
+        return server._onResolveUrl('/index.html#/foo/bar', {}, automationRequest)
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -324,21 +382,21 @@ describe('Server', () => {
             cookies: [],
           })
 
-          expect(this.buffers.buffer).to.include({ url: 'http://localhost:2000/index.html' })
+          expect(buffers.buffer).toMatchObject({ url: 'http://localhost:2000/index.html' })
         }).then(() => {
-          return this.rp('http://localhost:2000/index.html')
+          return rp('http://localhost:2000/index.html')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
+            expect(res.statusCode).toBe(200)
 
-            expect(this.buffers.buffer).to.be.undefined
+            expect(buffers.buffer).toBeUndefined()
           })
         })
       })
     })
 
     describe('http', () => {
-      beforeEach(function () {
-        return this.setup({
+      beforeEach(() => {
+        return setup({
           projectRoot: '/foo/bar/',
           config: {
             port: 2000,
@@ -347,9 +405,13 @@ describe('Server', () => {
         })
       })
 
-      context('only having one request in flight at a time', () => {
-        beforeEach(function (done) {
-          this.httpServer = http.createServer((req, res) => {
+      describe('only having one request in flight at a time', () => {
+        let httpServer: any
+        let httpPort: number
+        let runOneReqTest: (path: string) => Promise<void>
+
+        beforeEach(async () => {
+          httpServer = http.createServer((req, res) => {
             const [path, ms] = req.url.split('/').slice(1)
 
             switch (path) {
@@ -374,56 +436,60 @@ describe('Server', () => {
             }
           })
 
-          this.httpServer.listen(() => {
-            this.httpPort = this.httpServer.address().port
+          const listening = new Promise<void>((resolve) => {
+            httpServer.listen(() => {
+              httpPort = httpServer.address().port
 
-            return done()
+              return resolve()
+            })
           })
 
-          this.runOneReqTest = (path) => {
+          runOneReqTest = (path) => {
             // put the first request in flight
-            const p1 = this.server._onResolveUrl(`http://localhost:${this.httpPort}/${path}/1000`, {}, this.automationRequest)
+            const p1 = server._onResolveUrl(`http://localhost:${httpPort}/${path}/1000`, {}, automationRequest)
 
             return delay(100)
             .then(() => {
               // the p1 should not have a current promise phase or reqStream until it's canceled
-              expect(p1).not.to.have.property('currentPromisePhase')
-              expect(p1).not.to.have.property('reqStream')
+              expect(p1).not.toHaveProperty('currentPromisePhase')
+              expect(p1).not.toHaveProperty('reqStream')
 
               // fire the 2nd request now that the first one has had some time to reach out
-              return this.server._onResolveUrl(`http://localhost:${this.httpPort}/${path}/100`, {}, this.automationRequest)
+              return server._onResolveUrl(`http://localhost:${httpPort}/${path}/100`, {}, automationRequest)
             }).then((obj) => {
               expectToEqDetails(obj, {
                 isOkStatusCode: true,
                 isPrimarySuperDomainOrigin: true,
                 isHtml: true,
                 contentType: 'text/html',
-                url: `http://localhost:${this.httpPort}/${path}/100`,
-                originalUrl: `http://localhost:${this.httpPort}/${path}/100`,
+                url: `http://localhost:${httpPort}/${path}/100`,
+                originalUrl: `http://localhost:${httpPort}/${path}/100`,
                 status: 200,
                 statusText: 'OK',
                 redirects: [],
                 cookies: [],
               })
 
-              expect(p1.isCancelled()).to.be.true
-              expect(p1).to.have.property('currentPromisePhase')
+              expect(p1.isCancelled()).toBe(true)
+              expect(p1).toHaveProperty('currentPromisePhase')
 
-              expect(p1.reqStream.aborted).to.be.true
+              expect(p1.reqStream.aborted).toBe(true)
             })
           }
+
+          await listening
         })
 
-        it('cancels and aborts the 1st request when it hasn\'t loaded headers and a 2nd request is made', function () {
-          return this.runOneReqTest('pause-before-headers')
+        it('cancels and aborts the 1st request when it hasn\'t loaded headers and a 2nd request is made', () => {
+          return runOneReqTest('pause-before-headers')
         })
 
-        it('cancels and aborts the 1st request when it hasn\'t loaded body and a 2nd request is made', function () {
-          return this.runOneReqTest('pause-before-body')
+        it('cancels and aborts the 1st request when it hasn\'t loaded body and a 2nd request is made', () => {
+          return runOneReqTest('pause-before-body')
         })
       })
 
-      it('can serve http requests', function () {
+      it('can serve http requests', () => {
         nock('http://getbootstrap.com')
         .matchHeader('user-agent', 'foobarbaz')
         .matchHeader('accept', 'text/html,*/*')
@@ -436,7 +502,7 @@ describe('Server', () => {
 
         const userAgent = 'foobarbaz'
 
-        return this.server._onResolveUrl('http://getbootstrap.com/', userAgent, this.automationRequest)
+        return server._onResolveUrl('http://getbootstrap.com/', userAgent, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -451,26 +517,26 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://getbootstrap.com/')
+          return rp('http://getbootstrap.com/')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.headers['set-cookie']).not.to.match(/initial=;/)
-            expect(res.headers['x-foo-bar']).to.eq('true')
-            expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
-            expect(res.body).to.include('content')
+            expect(res.statusCode).toBe(200)
+            expectNotToMatch(res.headers['set-cookie'], /initial=;/)
+            expect(res.headers['x-foo-bar']).toBe('true')
+            expect(res.headers['cache-control']).toBe('no-cache, no-store, must-revalidate')
+            expect(res.body).toContain('content')
 
-            expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</head>content</html>')
+            expect(res.body).toContain('.action("app:window:before:load",window)')
+            expect(res.body).toContain('</head>content</html>')
           })
         })
       })
 
-      it('sends back the content type', function () {
+      it('sends back the content type', () => {
         nock('http://getbootstrap.com')
         .get('/user.json')
         .reply(200, {})
 
-        return this.server._onResolveUrl('http://getbootstrap.com/user.json', {}, this.automationRequest)
+        return server._onResolveUrl('http://getbootstrap.com/user.json', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -488,7 +554,7 @@ describe('Server', () => {
       })
 
       // @see https://github.com/cypress-io/cypress/issues/8506
-      it('yields isHtml true for unconventional HTML content-types', async function () {
+      it('yields isHtml true for unconventional HTML content-types', async () => {
         const scope = nock('http://example.com')
         .get('/a').reply(200, 'notHtml')
         .get('/b').reply(200, 'notHtml', { 'content-type': 'Text/Html' })
@@ -501,26 +567,26 @@ describe('Server', () => {
         .get('/g').reply(200, '<html></html>', { 'content-type': 'text/plain; profile=text/html;' })
 
         for (const path of ['/a', '/g']) {
-          const bad = await this.server._onResolveUrl(`http://example.com${path}`, {}, this.automationRequest)
+          const bad = await server._onResolveUrl(`http://example.com${path}`, {}, automationRequest)
 
-          expect(bad.isHtml).to.be.false
+          expect(bad.isHtml).toBe(false)
         }
 
         for (const path of ['/b', '/c', '/d', '/e', '/f']) {
-          const details = await this.server._onResolveUrl(`http://example.com${path}`, {}, this.automationRequest)
+          const details = await server._onResolveUrl(`http://example.com${path}`, {}, automationRequest)
 
-          expect(details.isHtml).to.be.true
+          expect(details.isHtml).toBe(true)
         }
 
         scope.done()
       })
 
-      it('yields isHtml true for HTML-shaped responses', function () {
+      it('yields isHtml true for HTML-shaped responses', () => {
         nock('http://example.com')
         .get('/')
         .reply(200, '<html>foo</html>')
 
-        return this.server._onResolveUrl('http://example.com', {}, this.automationRequest)
+        return server._onResolveUrl('http://example.com', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -537,12 +603,12 @@ describe('Server', () => {
         })
       })
 
-      it('yields isHtml false for non-HTML-shaped responses', function () {
+      it('yields isHtml false for non-HTML-shaped responses', () => {
         nock('http://example.com')
         .get('/')
         .reply(200, '{ foo: "bar" }')
 
-        return this.server._onResolveUrl('http://example.com', {}, this.automationRequest)
+        return server._onResolveUrl('http://example.com', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -559,7 +625,7 @@ describe('Server', () => {
         })
       })
 
-      it('can follow multiple http redirects', function () {
+      it('can follow multiple http redirects', () => {
         nock('http://espn.com')
         .get('/')
         .reply(301, undefined, {
@@ -576,7 +642,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://espn.com/', {}, this.automationRequest)
+        return server._onResolveUrl('http://espn.com/', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -594,14 +660,14 @@ describe('Server', () => {
             ],
           })
         }).then(() => {
-          return this.rp('http://espn.go.com/')
+          return rp('http://espn.go.com/')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('content')
-            expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</head>content</html>')
+            expect(res.statusCode).toBe(200)
+            expect(res.body).toContain('content')
+            expect(res.body).toContain('.action("app:window:before:load",window)')
+            expect(res.body).toContain('</head>content</html>')
 
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               origin: 'http://espn.go.com',
               strategy: 'http',
@@ -619,8 +685,8 @@ describe('Server', () => {
         })
       })
 
-      it('buffers the http response', function () {
-        sinon.spy(this.server.request, 'sendStream')
+      it('buffers the http response', () => {
+        const sendStreamSpy = vi.spyOn(server.request, 'sendStream')
 
         nock('http://espn.com')
         .get('/')
@@ -641,7 +707,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://espn.com/', {}, this.automationRequest)
+        return server._onResolveUrl('http://espn.com/', {}, automationRequest)
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -659,9 +725,9 @@ describe('Server', () => {
             ],
           })
 
-          expect(this.buffers.buffer).to.include({ url: 'http://espn.go.com/' })
+          expect(buffers.buffer).toMatchObject({ url: 'http://espn.go.com/' })
         }).then(() => {
-          return this.server._onResolveUrl('http://espn.com/', {}, this.automationRequest)
+          return server._onResolveUrl('http://espn.com/', {}, automationRequest)
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -679,22 +745,22 @@ describe('Server', () => {
               ],
             })
 
-            expect(this.server.request.sendStream).to.be.calledTwice
+            expect(sendStreamSpy).toHaveBeenCalledTimes(2)
           })
         }).then(() => {
-          return this.rp('http://espn.go.com/')
+          return rp('http://espn.go.com/')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script></head><body>espn</body></html>')
+            expect(res.statusCode).toBe(200)
+            expect(res.body).toContain('.action("app:window:before:load",window)')
+            expect(res.body).toContain('</script></head><body>espn</body></html>')
 
-            expect(this.buffers.buffer).to.be.undefined
+            expect(buffers.buffer).toBeUndefined()
           })
         })
       })
 
-      it('does not buffer \'bad\' responses', function () {
-        sinon.spy(this.server.request, 'sendStream')
+      it('does not buffer \'bad\' responses', () => {
+        const sendStreamSpy = vi.spyOn(server.request, 'sendStream')
 
         nock('http://espn.com')
         .get('/')
@@ -714,7 +780,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://espn.com/', {}, this.automationRequest)
+        return server._onResolveUrl('http://espn.com/', {}, automationRequest)
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: false,
@@ -729,7 +795,7 @@ describe('Server', () => {
             redirects: [],
           })
 
-          return this.server._onResolveUrl('http://espn.com/', {}, this.automationRequest)
+          return server._onResolveUrl('http://espn.com/', {}, automationRequest)
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -747,12 +813,12 @@ describe('Server', () => {
               ],
             })
 
-            expect(this.server.request.sendStream).to.be.calledTwice
+            expect(sendStreamSpy).toHaveBeenCalledTimes(2)
           })
         })
       })
 
-      it('gracefully handles 500', function () {
+      it('gracefully handles 500', () => {
         nock('http://mlb.com')
         .get('/')
         .reply(307, undefined, {
@@ -765,7 +831,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://mlb.com/', {}, this.automationRequest)
+        return server._onResolveUrl('http://mlb.com/', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: false,
@@ -782,24 +848,23 @@ describe('Server', () => {
         })
       })
 
-      it('gracefully handles http errors', function () {
-        return this.server._onResolveUrl('http://localhost:64646', {}, this.automationRequest)
-        .catch((err) => {
-          expect(err.message).to.eq('connect ECONNREFUSED 127.0.0.1:64646')
-          expect(err.port).to.eq(64646)
-
-          expect(err.code).to.eq('ECONNREFUSED')
+      // `localhost` can resolve to both ::1 and 127.0.0.1, which turns the refusal into an AggregateError
+      it('gracefully handles http errors', async () => {
+        await expect(server._onResolveUrl('http://127.0.0.1:64646', {}, automationRequest)).rejects.toMatchObject({
+          message: 'connect ECONNREFUSED 127.0.0.1:64646',
+          port: 64646,
+          code: 'ECONNREFUSED',
         })
       })
 
-      it('handles url hashes', function () {
+      it('handles url hashes', () => {
         nock('http://getbootstrap.com')
         .get('/')
         .reply(200, 'content page', {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://getbootstrap.com/#/foo', {}, this.automationRequest)
+        return server._onResolveUrl('http://getbootstrap.com/#/foo', {}, automationRequest)
         .then((obj = {}) => {
           expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -814,18 +879,18 @@ describe('Server', () => {
             cookies: [],
           })
 
-          expect(this.buffers.buffer).to.include({ url: 'http://getbootstrap.com/' })
+          expect(buffers.buffer).toMatchObject({ url: 'http://getbootstrap.com/' })
         }).then(() => {
-          return this.rp('http://getbootstrap.com/')
+          return rp('http://getbootstrap.com/')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
+            expect(res.statusCode).toBe(200)
 
-            expect(this.buffers.buffer).to.be.undefined
+            expect(buffers.buffer).toBeUndefined()
           })
         })
       })
 
-      it('can serve non 2xx status code requests when option set', function () {
+      it('can serve non 2xx status code requests when option set', () => {
         nock('http://cypress.io')
         .matchHeader('user-agent', 'foobarbaz')
         .matchHeader('accept', 'text/html,*/*')
@@ -838,7 +903,7 @@ describe('Server', () => {
 
         const userAgent = 'foobarbaz'
 
-        return this.server._onResolveUrl('http://cypress.io/foo', userAgent, this.automationRequest, { failOnStatusCode: false })
+        return server._onResolveUrl('http://cypress.io/foo', userAgent, automationRequest, { failOnStatusCode: false })
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -853,21 +918,21 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://cypress.io/foo')
+          return rp('http://cypress.io/foo')
           .then((res) => {
-            expect(res.statusCode).to.eq(404)
-            expect(res.headers['set-cookie']).not.to.match(/initial=;/)
-            expect(res.headers['x-foo-bar']).to.eq('true')
-            expect(res.headers['cache-control']).to.eq('no-cache, no-store, must-revalidate')
-            expect(res.body).to.include('content')
+            expect(res.statusCode).toBe(404)
+            expectNotToMatch(res.headers['set-cookie'], /initial=;/)
+            expect(res.headers['x-foo-bar']).toBe('true')
+            expect(res.headers['cache-control']).toBe('no-cache, no-store, must-revalidate')
+            expect(res.body).toContain('content')
 
-            expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</head>content</html>')
+            expect(res.body).toContain('.action("app:window:before:load",window)')
+            expect(res.body).toContain('</head>content</html>')
           })
         })
       })
 
-      it('passes auth through', function () {
+      it('passes auth through', () => {
         const username = 'u'
         const password = 'p'
 
@@ -892,7 +957,7 @@ describe('Server', () => {
 
         const userAgent = 'foobarbaz'
 
-        return this.server._onResolveUrl('http://google.com/index', userAgent, this.automationRequest, { auth })
+        return server._onResolveUrl('http://google.com/index', userAgent, automationRequest, { auth })
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -907,12 +972,12 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://google.com/index2')
+          return rp('http://google.com/index2')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
+            expect(res.statusCode).toBe(200)
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth,
             origin: 'http://google.com',
             strategy: 'http',
@@ -929,7 +994,7 @@ describe('Server', () => {
         })
       })
 
-      it('respects Accept-Encoding when passed with Title-Case key in options.headers (HTTP header names are case-insensitive)', function () {
+      it('respects Accept-Encoding when passed with Title-Case key in options.headers (HTTP header names are case-insensitive)', () => {
         nock('http://www.cypress.io')
         .get('/')
         .matchHeader('accept-encoding', 'br')
@@ -937,7 +1002,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {
+        return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest, {
           headers: { 'Accept-Encoding': 'br' },
         })
         .then((obj = {}) => {
@@ -956,7 +1021,7 @@ describe('Server', () => {
         })
       })
 
-      it('sends accept-encoding: gzip when options.headers includes Accept-Encoding: gzip', function () {
+      it('sends accept-encoding: gzip when options.headers includes Accept-Encoding: gzip', () => {
         nock('http://www.cypress.io')
         .get('/')
         .matchHeader('accept-encoding', 'gzip')
@@ -964,7 +1029,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {
+        return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest, {
           headers: { 'Accept-Encoding': 'gzip' },
         })
         .then((obj = {}) => {
@@ -983,7 +1048,7 @@ describe('Server', () => {
         })
       })
 
-      it('sends accept-encoding: identity when options.headers includes only unsupported encodings (e.g. deflate, identity)', function () {
+      it('sends accept-encoding: identity when options.headers includes only unsupported encodings (e.g. deflate, identity)', () => {
         nock('http://www.cypress.io')
         .get('/')
         .matchHeader('accept-encoding', 'identity')
@@ -991,7 +1056,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {
+        return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest, {
           headers: { 'Accept-Encoding': 'deflate, identity' },
         })
         .then((obj = {}) => {
@@ -1010,7 +1075,7 @@ describe('Server', () => {
         })
       })
 
-      it('sends accept-encoding: gzip,identity when options.headers is empty (no accept-encoding)', function () {
+      it('sends accept-encoding: gzip,identity when options.headers is empty (no accept-encoding)', () => {
         nock('http://www.cypress.io')
         .get('/')
         .matchHeader('accept-encoding', 'gzip,identity')
@@ -1018,7 +1083,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { headers: {} })
+        return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest, { headers: {} })
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -1035,7 +1100,7 @@ describe('Server', () => {
         })
       })
 
-      it('sends accept-encoding: gzip,identity when options has no headers key (normalizes and uses default)', function () {
+      it('sends accept-encoding: gzip,identity when options has no headers key (normalizes and uses default)', () => {
         nock('http://www.cypress.io')
         .get('/')
         .matchHeader('accept-encoding', 'gzip,identity')
@@ -1043,7 +1108,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {})
+        return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest, {})
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -1060,7 +1125,7 @@ describe('Server', () => {
         })
       })
 
-      it('sends accept-encoding: gzip,br when options.headers includes gzip, deflate, br', function () {
+      it('sends accept-encoding: gzip,br when options.headers includes gzip, deflate, br', () => {
         nock('http://www.cypress.io')
         .get('/')
         .matchHeader('accept-encoding', 'gzip,br')
@@ -1068,7 +1133,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {
+        return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest, {
           headers: { 'Accept-Encoding': 'gzip, deflate, br' },
         })
         .then((obj = {}) => {
@@ -1087,26 +1152,26 @@ describe('Server', () => {
         })
       })
 
-      context('cross-origin', () => {
-        it('adds a remote state and buffers the response when the request is from within cy.origin and the origins match', function () {
+      describe('cross-origin', () => {
+        it('adds a remote state and buffers the response when the request is from within cy.origin and the origins match', () => {
           nock('http://www.cypress.io/')
           .get('/')
           .reply(200, '<html>content</html>', {
             'Content-Type': 'text/html',
           })
 
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             props: null,
             origin: 'http://localhost:2000',
             strategy: 'file',
             domainName: 'localhost',
-            fileServer: this.fileServer,
+            fileServer: fileServer,
           })
 
-          this.server.remoteStates.set('http://cypress.io', {}, false)
+          server.remoteStates.set('http://cypress.io', {}, false)
 
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             props: {
               domain: 'cypress',
@@ -1121,9 +1186,9 @@ describe('Server', () => {
             fileServer: null,
           })
 
-          expect(this.server.remoteStates.isPrimarySuperDomainOrigin('http://cypress.io')).to.be.false
+          expect(server.remoteStates.isPrimarySuperDomainOrigin('http://cypress.io')).toBe(false)
 
-          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { isFromSpecBridge: true })
+          return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest, { isFromSpecBridge: true })
           .then((obj = {}) => {
             expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -1139,13 +1204,13 @@ describe('Server', () => {
             })
 
             // Verify the cross origin request was buffered
-            const buffer = this.buffers.take('http://www.cypress.io/')
+            const buffer = buffers.take('http://www.cypress.io/')
 
-            expect(buffer).to.not.be.empty
-            expect(buffer.urlDoesNotMatchPolicyBasedOnDomain).to.be.true
+            expectNotEmpty(buffer)
+            expect(buffer.urlDoesNotMatchPolicyBasedOnDomain).toBe(true)
 
             // Verify the secondary remote state is returned
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               props: {
                 domain: 'cypress',
@@ -1162,7 +1227,7 @@ describe('Server', () => {
           })
         })
 
-        it('adds a remote state and buffers the response when a url has already been visited and the origins match', function () {
+        it('adds a remote state and buffers the response when a url has already been visited and the origins match', () => {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {
@@ -1170,17 +1235,17 @@ describe('Server', () => {
           })
 
           // this will be the current origin
-          this.server.remoteStates.set('http://localhost:3500/')
+          server.remoteStates.set('http://localhost:3500/')
 
-          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { hasAlreadyVisitedUrl: true })
+          return server._onResolveUrl('http://localhost:3500/', {}, automationRequest, { hasAlreadyVisitedUrl: true })
           .then((obj = {}) => {
             // Verify the cross origin request was buffered
-            const buffer = this.buffers.take('http://localhost:3500/')
+            const buffer = buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.not.be.empty
+            expectNotEmpty(buffer)
 
             // Verify the secondary remote state is returned
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               props: {
                 domain: '',
@@ -1197,22 +1262,22 @@ describe('Server', () => {
           })
         })
 
-        it('does set a remote state and buffer the response when a url has already been visited and the origins don\'t match', function () {
+        it('does set a remote state and buffer the response when a url has already been visited and the origins don\'t match', () => {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {
             'Content-Type': 'text/html',
           })
 
-          this.server.remoteStates.set('http://localhost:3500/')
+          server.remoteStates.set('http://localhost:3500/')
 
           // this will be the current origin
-          this.server.remoteStates.set('http://cypress.io', {}, false)
+          server.remoteStates.set('http://cypress.io', {}, false)
 
-          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { hasAlreadyVisitedUrl: true })
+          return server._onResolveUrl('http://localhost:3500/', {}, automationRequest, { hasAlreadyVisitedUrl: true })
           .then(() => {
             // Verify the remote state was not updated
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               props: {
                 domain: '',
@@ -1228,28 +1293,28 @@ describe('Server', () => {
             })
 
             // Verify the cross origin request was buffered
-            const buffer = this.buffers.take('http://localhost:3500/')
+            const buffer = buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.not.be.empty
+            expectNotEmpty(buffer)
           })
         })
 
-        it('does set a remote state or buffer the response when the request is from within cy.origin and the origins don\'t match', function () {
+        it('does set a remote state or buffer the response when the request is from within cy.origin and the origins don\'t match', () => {
           nock('http://localhost:3500/')
           .get('/')
           .reply(200, '<html>content</html>', {
             'Content-Type': 'text/html',
           })
 
-          this.server.remoteStates.set('http://localhost:3500/')
+          server.remoteStates.set('http://localhost:3500/')
 
           // this will be the current origin
-          this.server.remoteStates.set('http://cypress.io', {}, false)
+          server.remoteStates.set('http://cypress.io', {}, false)
 
-          return this.server._onResolveUrl('http://localhost:3500/', {}, this.automationRequest, { isFromSpecBridge: true })
+          return server._onResolveUrl('http://localhost:3500/', {}, automationRequest, { isFromSpecBridge: true })
           .then(() => {
             // Verify the remote state was not updated
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               props: {
                 domain: '',
@@ -1265,9 +1330,9 @@ describe('Server', () => {
             })
 
             // Verify the cross origin request was buffered
-            const buffer = this.buffers.take('http://localhost:3500/')
+            const buffer = buffers.take('http://localhost:3500/')
 
-            expect(buffer).to.not.be.empty
+            expectNotEmpty(buffer)
           })
         })
       })
@@ -1284,8 +1349,8 @@ describe('Server', () => {
       const contentText = 'content'
       const path = '/'
 
-      beforeEach(async function () {
-        await this.setup(origin, {
+      beforeEach(async () => {
+        await setup(origin, {
           projectRoot: '/foo/bar/',
           config: {
             port: 2000,
@@ -1303,47 +1368,47 @@ describe('Server', () => {
         })
       })
 
-      describe('when navigating to a different subdomain of the same superdomain without cy.origin', function () {
-        it('injects document.domain', async function () {
+      describe('when navigating to a different subdomain of the same superdomain without cy.origin', () => {
+        it('injects document.domain', async () => {
           const url = `${sameSuperdomainOrigin}${path}`
 
-          await this.server._onResolveUrl(url, {}, this.automationRequest)
-          const res = await this.rp(url)
+          await server._onResolveUrl(url, {}, automationRequest)
+          const res = await rp(url)
 
-          expect(res.body).to.include(`document.domain = "${superDomain}"`)
+          expect(res.body).toContain(`document.domain = "${superDomain}"`)
         })
       })
 
-      describe('when navigating to a different superdomain with cy.origin', function () {
-        it('injects document.domain', async function () {
+      describe('when navigating to a different superdomain with cy.origin', () => {
+        it('injects document.domain', async () => {
           const url = `${differentSuperdomainOrigin}${path}`
 
-          this.server.remoteStates.set(differentSuperdomainOrigin, {}, false)
-          await this.server._onResolveUrl(url, {}, this.automationRequest)
-          const res = await this.rp(url)
+          server.remoteStates.set(differentSuperdomainOrigin, {}, false)
+          await server._onResolveUrl(url, {}, automationRequest)
+          const res = await rp(url)
 
-          expect(res.body).to.include(`document.domain = "${secondSuperDomain}"`)
+          expect(res.body).toContain(`document.domain = "${secondSuperDomain}"`)
         })
       })
 
-      describe('when navigating to the same origin', function () {
-        it('injects document.domain', async function () {
+      describe('when navigating to the same origin', () => {
+        it('injects document.domain', async () => {
           const url = `${origin}${path}`
 
-          this.server.remoteStates.set(differentSuperdomainOrigin)
-          await this.server._onResolveUrl(url, {}, this.automationRequest)
-          const res = await this.rp(url)
+          server.remoteStates.set(differentSuperdomainOrigin)
+          await server._onResolveUrl(url, {}, automationRequest)
+          const res = await rp(url)
 
-          expect(res.body).to.include(`document.domain = "${superDomain}"`)
+          expect(res.body).toContain(`document.domain = "${superDomain}"`)
         })
       })
     })
 
     describe('both', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Fixtures.scaffold('no-server')
 
-        return this.setup({
+        return setup({
           projectRoot: Fixtures.projectPath('no-server'),
           config: {
             port: 2000,
@@ -1353,14 +1418,14 @@ describe('Server', () => {
         })
       })
 
-      it('can go from file -> http -> file', function () {
+      it('can go from file -> http -> file', () => {
         nock('http://www.cypress.io')
         .get('/')
         .reply(200, 'content page', {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
+        return server._onResolveUrl('/index.html', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -1376,12 +1441,12 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/index.html')
+          return rp('http://localhost:2000/index.html')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
+            expect(res.statusCode).toBe(200)
           })
         }).then(() => {
-          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest)
+          return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest)
         }).then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -1396,12 +1461,12 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://www.cypress.io/')
+          return rp('http://www.cypress.io/')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
+            expect(res.statusCode).toBe(200)
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             origin: 'http://www.cypress.io',
             strategy: 'http',
@@ -1416,7 +1481,7 @@ describe('Server', () => {
             },
           })
         }).then(() => {
-          return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
+          return server._onResolveUrl('/index.html', {}, automationRequest)
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -1433,23 +1498,23 @@ describe('Server', () => {
             })
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/index.html')
+          return rp('http://localhost:2000/index.html')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
+            expect(res.statusCode).toBe(200)
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
             domainName: 'localhost',
-            fileServer: this.fileServer,
+            fileServer: fileServer,
             props: null,
           })
         })
       })
 
-      it('can go from http -> file -> http', function () {
+      it('can go from http -> file -> http', () => {
         nock('http://www.cypress.io')
         .get('/')
         .reply(200, '<html><head></head><body>cypress</body></html>', {
@@ -1460,7 +1525,7 @@ describe('Server', () => {
           'Content-Type': 'text/html',
         })
 
-        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest)
+        return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -1475,15 +1540,15 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('http://www.cypress.io/')
+          return rp('http://www.cypress.io/')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
+            expect(res.statusCode).toBe(200)
 
-            expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script></head><body>cypress</body></html>')
+            expect(res.body).toContain('.action("app:window:before:load",window)')
+            expect(res.body).toContain('</script></head><body>cypress</body></html>')
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             origin: 'http://www.cypress.io',
             strategy: 'http',
@@ -1498,7 +1563,7 @@ describe('Server', () => {
             },
           })
         }).then(() => {
-          return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
+          return server._onResolveUrl('/index.html', {}, automationRequest)
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -1515,22 +1580,22 @@ describe('Server', () => {
             })
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/index.html')
+          return rp('http://localhost:2000/index.html')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.statusCode).toBe(200)
+            expect(res.body).toContain('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
             domainName: 'localhost',
-            fileServer: this.fileServer,
+            fileServer: fileServer,
             props: null,
           })
         }).then(() => {
-          return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest)
+          return server._onResolveUrl('http://www.cypress.io/', {}, automationRequest)
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -1545,15 +1610,15 @@ describe('Server', () => {
               cookies: [],
             })
           }).then(() => {
-            return this.rp('http://www.cypress.io/')
+            return rp('http://www.cypress.io/')
             .then((res) => {
-              expect(res.statusCode).to.eq(200)
+              expect(res.statusCode).toBe(200)
 
-              expect(res.body).to.include('.action("app:window:before:load",window)')
-              expect(res.body).to.include('</script></head><body>cypress</body></html>')
+              expect(res.body).toContain('.action("app:window:before:load",window)')
+              expect(res.body).toContain('</script></head><body>cypress</body></html>')
             })
           }).then(() => {
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               origin: 'http://www.cypress.io',
               strategy: 'http',
@@ -1571,10 +1636,10 @@ describe('Server', () => {
         })
       })
 
-      it('can go from https -> file -> https', function () {
+      it('can go from https -> file -> https', () => {
         evilDns.add('*.foobar.com', '127.0.0.1')
 
-        return this.server._onResolveUrl('https://www.foobar.com:8443/', {}, this.automationRequest)
+        return server._onResolveUrl('https://www.foobar.com:8443/', {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -1589,14 +1654,14 @@ describe('Server', () => {
             cookies: [],
           })
         }).then(() => {
-          return this.rp('https://www.foobar.com:8443/')
+          return rp('https://www.foobar.com:8443/')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('.action("app:window:before:load",window)')
-            expect(res.body).to.include('</script></head><body>https server</body></html>')
+            expect(res.statusCode).toBe(200)
+            expect(res.body).toContain('.action("app:window:before:load",window)')
+            expect(res.body).toContain('</script></head><body>https server</body></html>')
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             origin: 'https://www.foobar.com:8443',
             strategy: 'http',
@@ -1611,7 +1676,7 @@ describe('Server', () => {
             },
           })
         }).then(() => {
-          return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
+          return server._onResolveUrl('/index.html', {}, automationRequest)
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -1628,22 +1693,22 @@ describe('Server', () => {
             })
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/index.html')
+          return rp('http://localhost:2000/index.html')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.statusCode).toBe(200)
+            expect(res.body).toContain('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
             domainName: 'localhost',
-            fileServer: this.fileServer,
+            fileServer: fileServer,
             props: null,
           })
         }).then(() => {
-          return this.server._onResolveUrl('https://www.foobar.com:8443/', {}, this.automationRequest)
+          return server._onResolveUrl('https://www.foobar.com:8443/', {}, automationRequest)
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -1658,14 +1723,14 @@ describe('Server', () => {
               cookies: [],
             })
           }).then(() => {
-            return this.rp('https://www.foobar.com:8443/')
+            return rp('https://www.foobar.com:8443/')
             .then((res) => {
-              expect(res.statusCode).to.eq(200)
-              expect(res.body).to.include('.action("app:window:before:load",window)')
-              expect(res.body).to.include('</script></head><body>https server</body></html>')
+              expect(res.statusCode).toBe(200)
+              expect(res.body).toContain('.action("app:window:before:load",window)')
+              expect(res.body).toContain('</script></head><body>https server</body></html>')
             })
           }).then(() => {
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               origin: 'https://www.foobar.com:8443',
               strategy: 'http',
@@ -1683,10 +1748,18 @@ describe('Server', () => {
         })
       })
 
-      it('can go from https -> file -> https without a port', function () {
-        this.timeout(5000)
+      it('can go from https -> file -> https without a port', { timeout: 5000 }, () => {
+        nock.disableNetConnect()
+        nock.enableNetConnect(/localhost/)
 
-        return this.server._onResolveUrl(s3StaticHtmlUrl, {}, this.automationRequest)
+        nock('https://s3.amazonaws.com')
+        .persist()
+        .get('/internal-test-runner-assets.cypress.io/index.html')
+        .reply(200, '<html><head><title>Cypress</title></head><body></body></html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return server._onResolveUrl(s3StaticHtmlUrl, {}, automationRequest)
         .then((obj = {}) => {
           return expectToEqDetails(obj, {
             isOkStatusCode: true,
@@ -1710,13 +1783,13 @@ describe('Server', () => {
           //     "Content-Type": "text/html"
           //   }
 
-          return this.rp(s3StaticHtmlUrl)
+          return rp(s3StaticHtmlUrl)
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('Cypress')
+            expect(res.statusCode).toBe(200)
+            expect(res.body).toContain('Cypress')
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             origin: 'https://s3.amazonaws.com',
             strategy: 'http',
@@ -1731,7 +1804,7 @@ describe('Server', () => {
             },
           })
         }).then(() => {
-          return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
+          return server._onResolveUrl('/index.html', {}, automationRequest)
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -1748,22 +1821,22 @@ describe('Server', () => {
             })
           })
         }).then(() => {
-          return this.rp('http://localhost:2000/index.html')
+          return rp('http://localhost:2000/index.html')
           .then((res) => {
-            expect(res.statusCode).to.eq(200)
-            expect(res.body).to.include('.action("app:window:before:load",window)')
+            expect(res.statusCode).toBe(200)
+            expect(res.body).toContain('.action("app:window:before:load",window)')
           })
         }).then(() => {
-          expect(this.server.remoteStates.current()).to.deep.eq({
+          expect(server.remoteStates.current()).toStrictEqual({
             auth: undefined,
             origin: 'http://localhost:2000',
             strategy: 'file',
             domainName: 'localhost',
-            fileServer: this.fileServer,
+            fileServer: fileServer,
             props: null,
           })
         }).then(() => {
-          return this.server._onResolveUrl(s3StaticHtmlUrl, {}, this.automationRequest)
+          return server._onResolveUrl(s3StaticHtmlUrl, {}, automationRequest)
           .then((obj = {}) => {
             return expectToEqDetails(obj, {
               isOkStatusCode: true,
@@ -1785,13 +1858,13 @@ describe('Server', () => {
             //     "Content-Type": "text/html"
             //   }
 
-            return this.rp(s3StaticHtmlUrl)
+            return rp(s3StaticHtmlUrl)
             .then((res) => {
-              expect(res.statusCode).to.eq(200)
-              expect(res.body).to.include('Cypress')
+              expect(res.statusCode).toBe(200)
+              expect(res.body).toContain('Cypress')
             })
           }).then(() => {
-            expect(this.server.remoteStates.current()).to.deep.eq({
+            expect(server.remoteStates.current()).toStrictEqual({
               auth: undefined,
               origin: 'https://s3.amazonaws.com',
               strategy: 'http',

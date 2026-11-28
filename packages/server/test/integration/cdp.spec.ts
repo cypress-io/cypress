@@ -3,10 +3,10 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 import Debug from 'debug'
 import _ from 'lodash'
 import WebSocket from 'ws'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Mock } from 'vitest'
 import type { CdpCommand, CdpEvent } from '../../lib/browsers/cdp-protocol/cdp_automation'
 import { CriClient } from '../../lib/browsers/cdp-protocol/cri-client'
-import { expect, nock } from '../spec_helper'
-import sinon from 'sinon'
 
 const debug = Debug('cypress:server:tests')
 
@@ -19,14 +19,28 @@ type CDPCommands = {
 
 type OnWSConnection = (wsClient: WebSocket) => void
 
-describe('CDP Clients', () => {
-  require('mocha-banner').register()
+// Runs `onThirdCall` on the third call since the mock was created or last cleared,
+// and returns undefined on every other call.
+const mockOnThirdCall = (onThirdCall: () => Promise<void>): Mock => {
+  const mock = vi.fn()
 
+  mock.mockImplementation(() => {
+    if (mock.mock.calls.length === 3) {
+      return onThirdCall()
+    }
+
+    return undefined
+  })
+
+  return mock
+}
+
+describe('CDP Clients', () => {
   let wsSrv: WebSocket.Server
   let criClient: CriClient
   let wsClient: WebSocket
   let messages: object[]
-  let onMessage: sinon.SinonStub
+  let onMessage: Mock
   let messageResponse: ReturnType<typeof Promise.withResolvers> | undefined
   let neverAck: boolean
 
@@ -103,9 +117,7 @@ describe('CDP Clients', () => {
     messageResponse = undefined
     messages = []
 
-    onMessage = sinon.stub()
-
-    nock.enableNetConnect()
+    onMessage = vi.fn()
 
     wsSrv = await startWsServer((client) => {
       wsClient = client
@@ -122,11 +134,11 @@ describe('CDP Clients', () => {
     const sessionId = 'abc123'
     const method = `Network.responseReceived`
     const sessionDeferred = Promise.withResolvers<void>()
-    const sessionCb = sinon.stub().callsFake(sessionDeferred.resolve)
+    const sessionCb = vi.fn(sessionDeferred.resolve)
     const eventDeferred = Promise.withResolvers<void>()
-    const eventCb = sinon.stub().callsFake(eventDeferred.resolve)
+    const eventCb = vi.fn(eventDeferred.resolve)
     const globalDeferred = Promise.withResolvers<void>()
-    const globalCb = sinon.stub().callsFake(globalDeferred.resolve)
+    const globalCb = vi.fn(globalDeferred.resolve)
     const params = { foo: 'bar' }
 
     criClient = await CriClient.create({
@@ -154,14 +166,14 @@ describe('CDP Clients', () => {
       globalDeferred.promise,
     ])
 
-    expect(sessionCb).to.have.been.calledWith(params)
-    expect(eventCb).to.have.been.calledWith(params, sessionId)
-    expect(globalCb).to.have.been.calledWith({ method, params, sessionId })
+    expect(sessionCb).toHaveBeenCalledWith(params)
+    expect(eventCb).toHaveBeenCalledWith(params, sessionId)
+    expect(globalCb).toHaveBeenCalledWith({ method, params, sessionId })
   })
 
-  context('reconnect after disconnect', () => {
+  describe('reconnect after disconnect', () => {
     it('retries to connect', async () => {
-      const stub = sinon.stub()
+      const stub = vi.fn()
 
       return new Promise(async (resolve, reject) => {
         const onAsynchronousError = reject
@@ -182,15 +194,15 @@ describe('CDP Clients', () => {
         wsSrv = await startWsServer()
       })
       .then((client) => {
-        expect(client).to.eq(criClient)
+        expect(client).toBe(criClient)
 
-        expect(stub).to.be.calledWith(1)
-        expect(stub.callCount).to.be.gte(1)
+        expect(stub).toHaveBeenCalledWith(1)
+        expect(stub.mock.calls.length).toBeGreaterThanOrEqual(1)
       })
     })
 
     it('retries up to 20 times and then throws an error', () => {
-      const stub = sinon.stub()
+      const stub = vi.fn()
 
       return new Promise(async (resolve, reject) => {
         const onAsynchronousError = resolve
@@ -209,19 +221,19 @@ describe('CDP Clients', () => {
         ])
       })
       .then((err) => {
-        expect(err).to.have.property('type', 'CDP_COULD_NOT_RECONNECT')
-        expect(err).to.have.property('isFatalApiErr', true)
+        expect(err).toHaveProperty('type', 'CDP_COULD_NOT_RECONNECT')
+        expect(err).toHaveProperty('isFatalApiErr', true)
 
-        expect(stub).to.be.calledWith(20)
-        expect(stub.callCount).to.be.eq(20)
+        expect(stub).toHaveBeenCalledWith(20)
+        expect(stub).toHaveBeenCalledTimes(20)
       })
     })
 
     it('stops trying to reconnect if .close() is called, and does not trigger an async error', async () => {
-      const stub = sinon.stub()
-      const onCriConnectionClosed = sinon.stub()
+      const stub = vi.fn()
+      const onCriConnectionClosed = vi.fn()
       const haltedReconnection = new Promise<void>(async (resolve, reject) => {
-        onCriConnectionClosed.callsFake(resolve)
+        onCriConnectionClosed.mockImplementation(resolve)
         criClient = await CriClient.create({
           target: `ws://127.0.0.1:${wsServerPort}`,
           onAsynchronousError: reject,
@@ -241,7 +253,7 @@ describe('CDP Clients', () => {
       await haltedReconnection
       // Macrotask queue needs to flush for the event to trigger
       await (new Promise((resolve) => setImmediate(resolve)))
-      expect(onCriConnectionClosed).to.have.been.called
+      expect(onCriConnectionClosed).toHaveBeenCalled()
     })
 
     it('continuously re-sends commands that fail due to disconnect, until target is closed', async () => {
@@ -269,12 +281,12 @@ describe('CDP Clients', () => {
       }
       let reconnectPromise = Promise.withResolvers()
       let commandSent = Promise.withResolvers()
-      const reconnectOnThirdTry = sinon.stub().onThirdCall().callsFake(async () => {
+      const reconnectOnThirdTry = mockOnThirdCall(async () => {
         wsSrv = await startWsServer((ws) => {
         })
       })
 
-      const onReconnect = sinon.stub().callsFake(() => {
+      const onReconnect = vi.fn(() => {
         reconnectPromise.resolve()
       })
 
@@ -285,7 +297,7 @@ describe('CDP Clients', () => {
         onReconnectAttempt: reconnectOnThirdTry,
       })
 
-      onMessage.callsFake(() => {
+      onMessage.mockImplementation(() => {
         commandSent.resolve()
       })
 
@@ -295,15 +307,15 @@ describe('CDP Clients', () => {
       await Promise.all([clientDisconnected(), closeWsServer()])
 
       commandSent = Promise.withResolvers()
-      onMessage.resetHistory()
+      onMessage.mockClear()
 
-      reconnectOnThirdTry.resetHistory()
+      reconnectOnThirdTry.mockClear()
 
       await commandSent.promise
 
       await Promise.all([clientDisconnected(), closeWsServer()])
 
-      reconnectOnThirdTry.resetHistory()
+      reconnectOnThirdTry.mockClear()
 
       reconnectPromise = Promise.withResolvers()
 
@@ -316,22 +328,22 @@ describe('CDP Clients', () => {
 
       const res: any = await cmdExecution
 
-      expect(res.response).to.eq(true)
+      expect(res.response).toBe(true)
 
-      expect(reconnectPromise.promise).to.be.fulfilled
+      await expect(reconnectPromise.promise).resolves.toBeUndefined()
     })
 
     it('reattaches subscriptions, reenables enablements, and sends pending commands on reconnect', async () => {
       const reconnectPromise = Promise.withResolvers()
       let commandSent = Promise.withResolvers()
       let wsClient
-      const reconnectOnThirdTry = sinon.stub().onThirdCall().callsFake(async () => {
+      const reconnectOnThirdTry = mockOnThirdCall(async () => {
         wsSrv = await startWsServer((ws) => {
           wsClient = ws
         })
       })
 
-      const onReconnect = sinon.stub().callsFake(() => {
+      const onReconnect = vi.fn(() => {
         reconnectPromise.resolve()
       })
 
@@ -342,7 +354,7 @@ describe('CDP Clients', () => {
         onReconnectAttempt: reconnectOnThirdTry,
       })
 
-      onMessage.callsFake(() => {
+      onMessage.mockImplementation(() => {
         commandSent.resolve()
       })
 
@@ -355,12 +367,12 @@ describe('CDP Clients', () => {
 
       const networkRequestSubscription = {
         eventName: 'Network.requestWillBeSent',
-        cb: sinon.stub(),
+        cb: vi.fn(),
         mockEvent: { foo: 'bar' },
       }
       const networkResponseSubscription = {
         eventName: 'Network.responseReceived',
-        cb: sinon.stub(),
+        cb: vi.fn(),
         mockEvent: { baz: 'quux' },
       }
 
@@ -395,7 +407,7 @@ describe('CDP Clients', () => {
         await commandSent.promise
       }
 
-      onMessage.resetHistory()
+      onMessage.mockClear()
       // disconnect the websocket, causing enqueued commands to be enqueued
       await Promise.all([clientDisconnected(), closeWsServer()])
 
@@ -406,52 +418,44 @@ describe('CDP Clients', () => {
       // this promise is resolved when: CDP is reconnected, state is restored, and queue is drained
       await reconnectPromise.promise
 
-      // onMessage call history was reset prior to reconnection - these are assertions about
-      // calls made after that reset
+      // onMessage call history was cleared prior to reconnection - these are assertions about
+      // calls made after that reset. The message id is brittle, so match on command and params only.
       for (const { command, params } of enablements) {
-        /**
-         * sinon/sinon-chai's expect(stub).to.have.been.calledWith({
-         *    partial: object
-         * })
-         * does not work as advertised, at least with our version of sinon/chai/sinon-chai.
-         * because the message id has the potential to be brittle, we want to assert that
-         * onmessage was called with a specific command and params, regardless of message id
-         */
-        const sentArgs = onMessage.args.filter(([arg]) => {
+        const sentArgs = onMessage.mock.calls.filter(([arg]) => {
           return arg.method === command && _.isEqual(arg.params, params)
         })
 
-        expect(sentArgs, `onMessage args for enqueued command ${command}`).to.have.lengthOf(1)
+        expect(sentArgs, `onMessage args for enqueued command ${command}`).toHaveLength(1)
       }
       for (const { command, params } of commandsToEnqueue) {
-        const sentArgs = onMessage.args.filter(([{ method, params: p }]) => {
+        const sentArgs = onMessage.mock.calls.filter(([{ method, params: p }]) => {
           return method === command && _.isEqual(p, params)
         })
 
-        expect(sentArgs, `onMessage args for enqueued command ${command}`).to.have.lengthOf(1)
+        expect(sentArgs, `onMessage args for enqueued command ${command}`).toHaveLength(1)
       }
       // for full integration, send events that should be subscribed to, and expect that subscription
       // callback to be called
       for (const { eventName, cb, mockEvent } of subscriptions) {
         const deferred = Promise.withResolvers()
 
-        cb.onFirstCall().callsFake(deferred.resolve)
+        cb.mockImplementationOnce(deferred.resolve)
         wsClient.send(JSON.stringify({
           method: eventName,
           params: mockEvent,
         }))
 
         await deferred.promise
-        expect(cb).to.have.been.calledWith(mockEvent)
+        expect(cb.mock.calls.map(([arg]) => arg)).toContainEqual(mockEvent)
       }
     })
 
     it('stops reconnecting after close is called', () => {
-      return new Promise(async (resolve, reject) => {
+      return new Promise<Mock>(async (resolve, reject) => {
         const onAsynchronousError = reject
         const onReconnect = reject
 
-        const stub = sinon.stub().onThirdCall().callsFake(async () => {
+        const stub = mockOnThirdCall(async () => {
           criClient.close()
           .finally(() => {
             resolve(stub)
@@ -471,8 +475,8 @@ describe('CDP Clients', () => {
         ])
       })
       .then((stub) => {
-        expect(criClient.closed).to.be.true
-        expect((stub as sinon.SinonStub).callCount).to.be.eq(3)
+        expect(criClient.closed).toBe(true)
+        expect(stub).toHaveBeenCalledTimes(3)
       })
     })
   })

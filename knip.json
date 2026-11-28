@@ -113,6 +113,12 @@
       ]
     },
     "packages/server": {
+      "vitest": {
+        "config": [
+          "vitest.config.ts",
+          "vitest.integration.config.ts"
+        ]
+      },
       "entry": [
         "start-cypress.js",
         "lib/cypress.ts",

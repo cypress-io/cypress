@@ -47,12 +47,10 @@ if (!run || !run.length) {
 
     It should look something like this:
 
-      $ yarn test ./test/unit/api_spec.js
+      $ yarn test ./test/performance/cy_visit_performance_spec.ts
 
     If you want to run all a specific group of tests:
 
-      $ yarn test-unit
-      $ yarn test-integration
       $ yarn test-performance
   `)
 }

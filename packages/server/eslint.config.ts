@@ -11,9 +11,9 @@ export default [
     ...userNodeConfig,
     files: ['lib/plugins/child/**'],
   },
-  // Only the unit specs run on Vitest; integration and performance specs run on mocha
-  ...vitestConfig.map((block) => ({ ...block, files: ['test/unit/**'] })),
-  ...mochaConfig.map((block) => ({ ...block, files: ['test/**'], ignores: [...(block.ignores ?? []), 'test/unit/**'] })),
+  // Unit and integration specs run on Vitest; performance specs run on mocha
+  ...vitestConfig.map((block) => ({ ...block, files: ['test/unit/**', 'test/integration/**'] })),
+  ...mochaConfig.map((block) => ({ ...block, files: ['test/**'], ignores: [...(block.ignores ?? []), 'test/unit/**', 'test/integration/**'] })),
   {
     languageOptions: {
       parserOptions: {

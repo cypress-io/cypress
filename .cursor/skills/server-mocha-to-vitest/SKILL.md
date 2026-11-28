@@ -1,16 +1,16 @@
 ---
 name: server-mocha-to-vitest
 description: >-
-  Converts one @packages/server unit spec from mocha (test/unit/**/*_spec.ts) to
+  Converts one @packages/server unit or integration spec from mocha (*_spec.ts) to
   vitest (*.spec.ts) without changing what the test proves. Use when migrating a
-  server unit spec, when a converted spec passes but its mocks may not be
+  server spec, when a converted spec passes but its mocks may not be
   intercepting, or when the user mentions spec_helper, mockery, proxyquire,
   sinon, snap-shot-it, or the mocha/vitest split in packages/server.
 ---
 
-# Migrate a `@packages/server` unit spec from mocha to vitest
+# Migrate a `@packages/server` spec from mocha to vitest
 
-Scope: `packages/server/test/unit` only. Integration and performance suites stay on mocha.
+Scope: `packages/server/test/unit` and `test/integration`. The performance suite stays on mocha.
 
 This skill lists the things that go wrong *silently*: a converted spec that is green while
 its mocks never engaged, or that asserts less than the mocha original did. Plain API
@@ -20,7 +20,7 @@ is not covered; you already know it. Parent issue: cypress-io/cypress#34846.
 ## The contract
 
 - `*_spec.ts` runs on mocha via `test/scripts/run.js`. `*.spec.ts` runs on vitest via
-  `packages/server/vitest.config.ts`. `yarn test-unit` runs both.
+  `packages/server/vitest.config.ts` (unit) or `vitest.integration.config.ts` (integration).
 - Convert by `git mv foo_spec.ts foo.spec.ts` and rewriting the file. The mocha file must be
   gone when you finish. Never leave a file half-converted: every `it` in the original is
   ported, or the file is not touched at all.
@@ -176,8 +176,9 @@ spec; it stays in the pool.
 ## Verify
 
 ```bash
-yarn workspace @packages/server test-unit-vitest -- test/unit/<dir>/foo.spec.ts
-yarn workspace @packages/server test-unit          # both runners, from a real terminal
+yarn workspace @packages/server test-unit -- test/unit/<dir>/foo.spec.ts
+yarn workspace @packages/server test-integration -- test/integration/foo.spec.ts
+yarn workspace @packages/server test-unit          # from a real terminal
 yarn lint --scope @packages/server
 yarn workspace @packages/server check-ts
 ```
