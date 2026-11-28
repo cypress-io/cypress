@@ -1,8 +1,8 @@
-// Builds must use the same major Node version as the one in `.node-version`
+// Builds must use the same major Node version as the one in `.node-version`.
+// Plain `.mjs` with a URL path keeps this runnable on any Node, including the outdated ones it exists to reject.
 import { readFileSync } from 'node:fs'
-import path from 'node:path'
 
-const nodeVersionNeededString = readFileSync(path.join(import.meta.dirname, '..', '.node-version'), 'utf8')
+const nodeVersionNeededString = readFileSync(new URL('../.node-version', import.meta.url), 'utf8').trim()
 const [majorNeeded] = nodeVersionNeededString.split('.')
 const [currentMajor] = process.versions.node.split('.')
 

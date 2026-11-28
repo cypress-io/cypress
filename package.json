@@ -61,7 +61,7 @@
     "check-lockfile": "yarn dedupe-lockfile --list --fail",
     "check-lockfile-drift": "./scripts/check-lockfile-drift.sh",
     "check-markdown-links": "markdown-link-check --quiet --config scripts/markdown-link-check.json $(git ls-files '*.md' '*.mdx')",
-    "check-node-version": "node scripts/check-node-version.mts",
+    "check-node-version": "node scripts/check-node-version.mjs",
     "check-regex": "node scripts/check-regex.js",
     "check-terminal": "node scripts/check-terminal.js",
     "check-ts": "yarn lerna run check-ts",

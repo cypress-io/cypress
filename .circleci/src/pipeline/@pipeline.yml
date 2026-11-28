@@ -637,12 +637,13 @@ commands:
             source ./scripts/ensure-node.sh
             echo "Installing Yarn"
             npm install yarn --location=global # ensure yarn is installed with the correct node engine
-            yarn check-node-version
+            # plain `node` rather than `yarn`, whose engines check would reject a wrong Node before the script explains why
+            node scripts/check-node-version.mjs
       - run:
           name: Check Node
           command: |
             source ./scripts/ensure-node.sh
-            yarn check-node-version
+            node scripts/check-node-version.mjs
 
   install-browsers:
     description: Install Google Chrome or Firefox
