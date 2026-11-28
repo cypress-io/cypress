@@ -5,6 +5,7 @@ import dedent from 'dedent'
 import path from 'path'
 import debugLib from 'debug'
 import { parse, print } from 'recast'
+import * as typescriptParser from 'recast/parsers/typescript'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
 import type { ASTComponentDefinitionConfig } from './astConfigHelpers'
@@ -44,7 +45,7 @@ const debug = debugLib('cypress:config:addToCypressConfig')
 export async function addToCypressConfig (filePath: string, code: string, toAdd: t.ObjectProperty) {
   try {
     const ast = parse(code, {
-      parser: require('recast/parsers/typescript'),
+      parser: typescriptParser,
     })
 
     traverse(ast, addToCypressConfigPlugin(toAdd).visitor)
@@ -144,6 +145,8 @@ export function defineConfigAvailable (projectRoot: string) {
     const cypress = require.resolve('cypress', {
       paths: [projectRoot],
     })
+    // Loads the user's own install, resolved from projectRoot at runtime, so a
+    // static import would bind to the copy bundled with Cypress instead
     const api = require(cypress)
 
     return 'defineConfig' in api
@@ -200,6 +203,8 @@ function getEmptyCodeBlock ({ useEsm, projectRoot }: { useEsm: boolean, projectR
 
 function maybeFormatWithPrettier (code: string, filePath: string) {
   try {
+    // Resolved at runtime against the user's project, so the config is formatted
+    // with their Prettier rather than one bound in at build time
     const prettier = require('prettier') as typeof import('prettier')
 
     return prettier.format(code, {
