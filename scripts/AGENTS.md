@@ -4,6 +4,7 @@ This workspace (`internal-scripts`) contains the monorepo's build tooling, relea
 
 - `yarn build` — no-op (no compilation step required)
 - `yarn lint` — lint all `.js`, `.ts`, and `.json` files with ESLint
+- `yarn check-ts` — type-check the top-level `*.mts` scripts (`tsconfig.json`). Node runs them through native type stripping, which drops types without checking them. The `.ts` files under `gulp/`, `binary/` and `unit/` aren't covered yet: they pull other workspaces' sources into the program, and those don't type-check under this config
 - `yarn gulp <task>` — run a gulp task (tasks are defined in `gulp/gulpfile.ts`); run from the monorepo root, e.g. `yarn dev`
 - `node scripts/get-next-version.js` — compute the next semantic version based on conventional commits
 - `node scripts/npm-release.js` — orchestrate an npm package release

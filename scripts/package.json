@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "echo 'internal-scripts build: no build necessary'",
+    "check-ts": "tsc --noEmit",
     "lint": "eslint"
   },
   "lint-staged": {
