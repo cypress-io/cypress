@@ -7,9 +7,9 @@ export default [
   ...jsonConfig,
   ...nodeConfig,
   chaiFriendlyConfig(['unit/**']),
-  // The root `test-scripts` script runs `*.spec.ts` on Vitest and the rest on mocha
-  ...vitestConfig.map((block) => ({ ...block, files: ['unit/**/*.spec.ts'] })),
-  ...mochaConfig.map((block) => ({ ...block, files: ['unit/**'], ignores: [...(block.ignores ?? []), 'unit/**/*.spec.ts'] })),
+  // `*.spec.*` runs on Vitest (`vitest.config.ts`); the rest of `unit/` runs on mocha
+  ...vitestConfig.map((block) => ({ ...block, files: ['unit/**/*.spec.*'] })),
+  ...mochaConfig.map((block) => ({ ...block, files: ['unit/**'], ignores: [...(block.ignores ?? []), 'unit/**/*.spec.*'] })),
   {
     languageOptions: {
       parserOptions: {
