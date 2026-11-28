@@ -1,11 +1,12 @@
 // from https://medium.com/@TwitterArchiveEraser/notarize-electron-apps-7a5f988406db
 // to enable running this hook, set in "electron-builder.json" the option
-// "afterSign": "./scripts/after-sign-hook.js"
-const fs = require('fs')
-const path = require('path')
-const electron_notarize = require('@electron/notarize')
+// "afterSign": "./scripts/after-sign-hook.ts"
+import fs from 'fs'
+import path from 'path'
+import { notarize } from '@electron/notarize'
+import type { AfterPackContext } from 'electron-builder'
 
-module.exports = async function (params) {
+export default async function afterSign (params: AfterPackContext): Promise<void> {
   // Only notarize the app on Mac OS.
   if (process.platform !== 'darwin') {
     console.log('not Mac, skipping after sign hook')
@@ -32,25 +33,26 @@ module.exports = async function (params) {
 
   console.log(`Notarizing ${appId} found at ${appPath}`)
 
-  if (!process.env.NOTARIZE_APP_APPLE_ID) {
+  const { NOTARIZE_APP_APPLE_ID, NOTARIZE_APP_PASSWORD, NOTARIZE_APP_TEAM_ID } = process.env
+
+  if (!NOTARIZE_APP_APPLE_ID) {
     throw new Error('Missing Apple id for notarization: NOTARIZE_APP_APPLE_ID')
   }
 
-  if (!process.env.NOTARIZE_APP_PASSWORD) {
+  if (!NOTARIZE_APP_PASSWORD) {
     throw new Error('Missing Apple password for notarization: NOTARIZE_APP_PASSWORD')
   }
 
-  if (!process.env.NOTARIZE_APP_TEAM_ID) {
+  if (!NOTARIZE_APP_TEAM_ID) {
     throw new Error('Missing Apple team id for notarization: NOTARIZE_APP_TEAM_ID')
   }
 
   try {
-    await electron_notarize.notarize({
-      appBundleId: appId,
+    await notarize({
       appPath,
-      appleId: process.env.NOTARIZE_APP_APPLE_ID,
-      appleIdPassword: process.env.NOTARIZE_APP_PASSWORD,
-      teamId: process.env.NOTARIZE_APP_TEAM_ID,
+      appleId: NOTARIZE_APP_APPLE_ID,
+      appleIdPassword: NOTARIZE_APP_PASSWORD,
+      teamId: NOTARIZE_APP_TEAM_ID,
     })
   } catch (error) {
     console.error('could not notarize application')
