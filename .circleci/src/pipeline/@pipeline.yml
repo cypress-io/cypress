@@ -717,44 +717,155 @@ commands:
                             name: remove linked google-chrome binary
                             command: |
                               rm /usr/bin/google-chrome
-            - when:
-                condition:
-                  equal: [ true, << parameters.install-chrome-for-testing >> ]
-                steps:
-                  - run:
-                      name: Install unzip
-                      command: |
-                        apt-get update && apt-get install -y unzip
-                  # On Linux the orb unzips to /opt/chrome-for-testing and links
-                  # <install_dir>/chrome to it, the binary launcher detection resolves with `which chrome`
-                  - browser-tools/install_chrome_for_testing:
-                      version: << parameters.google-chrome-for-testing-version >>
-                      install_chromedriver: false
-                      install_dir: /usr/local/bin
-                  - run:
-                      name: Verify Chrome for Testing is detectable
-                      command: |
-                        set -euo pipefail
-                        EXPECTED_VERSION="<< parameters.google-chrome-for-testing-version >>"
+      # Outside the Windows guard above: install-chrome-for-testing handles every platform itself
+      - when:
+          condition:
+            equal: [ true, << parameters.install-chrome-for-testing >> ]
+          steps:
+            - install-chrome-for-testing:
+                version: << parameters.google-chrome-for-testing-version >>
 
-                        if ! CHROME_PATH="$(command -v chrome)"; then
-                          echo "No 'chrome' on PATH after installing Chrome for Testing (PATH=$PATH)"
-                          exit 1
-                        fi
+  # Installs Chrome for Testing where packages/launcher looks for it, then checks the version
+  # the same way the launcher reads it. This replaces browser-tools/install_chrome_for_testing,
+  # which always installs the x64 Linux and arm64 mac builds, links a path the mac build lacks,
+  # and has no Windows support.
+  install-chrome-for-testing:
+    parameters:
+      version:
+        description: Chrome for Testing version to install, or latest for the current Stable
+        type: string
+    steps:
+      - run:
+          name: Install Chrome for Testing
+          no_output_timeout: 10m
+          command: |
+            set -euo pipefail
 
-                        CHROME_VERSION_OUTPUT="$(chrome --version)"
-                        echo "$CHROME_PATH -> $(readlink -f "$CHROME_PATH"): $CHROME_VERSION_OUTPUT"
+            VERSION="<< parameters.version >>"
+            if [[ "$VERSION" == "latest" ]]; then
+              VERSION="$(curl -fsSL --retry 3 https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE)"
+            fi
 
-                        # Same pattern as chrome-for-testing's versionRegex in packages/launcher/lib/known-browsers.ts
-                        if [[ ! "$CHROME_VERSION_OUTPUT" =~ Google\ Chrome\ for\ Testing\ ([^[:space:]]+) ]]; then
-                          echo "'chrome --version' does not report Google Chrome for Testing, so Cypress will not detect it"
-                          exit 1
-                        fi
+            case "$(uname -s)-$(uname -m)" in
+              Linux-x86_64) PLATFORM=linux64 ;;
+              Linux-aarch64 | Linux-arm64) PLATFORM=linux-arm64 ;;
+              Darwin-x86_64) PLATFORM=mac-x64 ;;
+              Darwin-arm64) PLATFORM=mac-arm64 ;;
+              MINGW*-x86_64 | MSYS*-x86_64) PLATFORM=win64 ;;
+              *)
+                echo "Chrome for Testing has no build for $(uname -s) $(uname -m)"
+                exit 1
+                ;;
+            esac
 
-                        if [[ "$EXPECTED_VERSION" != "latest" && "${BASH_REMATCH[1]}" != "$EXPECTED_VERSION" ]]; then
-                          echo "Expected Chrome for Testing $EXPECTED_VERSION, found ${BASH_REMATCH[1]}"
-                          exit 1
-                        fi
+            as_root() {
+              if [[ "$EUID" -eq 0 ]]; then
+                "$@"
+              elif command -v sudo >/dev/null 2>&1; then
+                sudo -n "$@"
+              else
+                echo "Installing Chrome for Testing needs root to run: $*"
+                exit 1
+              fi
+            }
+
+            WORK_DIR="$(mktemp -d)"
+            ZIP="$WORK_DIR/chrome-for-testing.zip"
+            URL="https://storage.googleapis.com/chrome-for-testing-public/$VERSION/$PLATFORM/chrome-$PLATFORM.zip"
+            echo "Downloading $URL"
+            curl -fsSL --retry 3 -o "$ZIP" "$URL"
+
+            # Same pattern as chrome-for-testing's versionRegex in packages/launcher/lib/known-browsers.ts
+            check_version_output() {
+              local output
+              if ! output="$("$1" --version 2>&1)"; then
+                echo "'$1 --version' failed: $output"
+                exit 1
+              fi
+              echo "$1: $output"
+              if [[ ! "$output" =~ Google\ Chrome\ for\ Testing\ ([^[:space:]]+) ]]; then
+                echo "'$1 --version' does not report Google Chrome for Testing, so Cypress will not detect it"
+                exit 1
+              fi
+              FOUND_VERSION="${BASH_REMATCH[1]}"
+            }
+
+            case "$PLATFORM" in
+              linux*)
+                if ! command -v unzip >/dev/null 2>&1; then
+                  as_root apt-get update
+                  as_root apt-get install -y unzip
+                fi
+                unzip -q "$ZIP" -d "$WORK_DIR"
+                as_root rm -rf /opt/chrome-for-testing
+                as_root mv "$WORK_DIR/chrome-$PLATFORM" /opt/chrome-for-testing
+
+                # deb.deps lists the shared libraries this build needs, one apt dependency per line
+                for attempt in 1 2 3; do
+                  as_root apt-get update && break
+                  [[ "$attempt" -lt 3 ]] || exit 1
+                  sleep 5
+                done
+                while read -r pkg; do
+                  as_root apt-get satisfy -y --no-install-recommends "$pkg"
+                done < /opt/chrome-for-testing/deb.deps
+
+                # Linux detection resolves the browser with `which chrome`
+                as_root ln -sfn /opt/chrome-for-testing/chrome /usr/local/bin/chrome
+                if [[ "$(readlink -f "$(command -v chrome)")" != /opt/chrome-for-testing/chrome ]]; then
+                  echo "'chrome' on PATH is $(command -v chrome || echo missing), not Chrome for Testing (PATH=$PATH)"
+                  exit 1
+                fi
+                check_version_output chrome
+                ;;
+
+              mac*)
+                # macOS detection looks the bundle up by id with Spotlight, then in /Applications
+                APP="/Applications/Google Chrome for Testing.app"
+                in_applications() {
+                  if [[ -w /Applications ]]; then "$@"; else as_root "$@"; fi
+                }
+                ditto -x -k "$ZIP" "$WORK_DIR"
+                in_applications rm -rf "$APP"
+                in_applications mv "$WORK_DIR/chrome-$PLATFORM/Google Chrome for Testing.app" "$APP"
+                check_version_output "$APP/Contents/MacOS/Google Chrome for Testing"
+                PLIST_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")"
+                if [[ "$PLIST_VERSION" != "$FOUND_VERSION" ]]; then
+                  echo "Info.plist reports $PLIST_VERSION, the binary reports $FOUND_VERSION"
+                  exit 1
+                fi
+                # Spotlight wins over /Applications, so a copy left elsewhere on a reused machine can shadow this one
+                OTHER_COPIES="$(mdfind "kMDItemCFBundleIdentifier=='com.google.chrome.for.testing'" 2>/dev/null | grep -vxF "$APP" || true)"
+                if [[ -n "$OTHER_COPIES" ]]; then
+                  echo "Warning: Spotlight also finds Chrome for Testing at:"
+                  echo "$OTHER_COPIES"
+                fi
+                ;;
+
+              win64)
+                # Windows detection checks this path and reads chrome.exe's FileVersion;
+                # chrome.exe --version prints nothing there
+                DEST="/c/Program Files/Google/Chrome for Testing"
+                if command -v unzip >/dev/null 2>&1; then
+                  unzip -q "$ZIP" -d "$WORK_DIR"
+                else
+                  powershell.exe -NoProfile -Command "Expand-Archive -LiteralPath '$(cygpath -w "$ZIP")' -DestinationPath '$(cygpath -w "$WORK_DIR")'"
+                fi
+                rm -rf "$DEST"
+                mkdir -p "$(dirname "$DEST")"
+                mv "$WORK_DIR/chrome-win64" "$DEST"
+                FOUND_VERSION="$(powershell.exe -NoProfile -Command "(Get-Item -LiteralPath '$(cygpath -w "$DEST/chrome.exe")').VersionInfo.FileVersion" | tr -d '\r')"
+                echo "$DEST/chrome.exe: FileVersion $FOUND_VERSION"
+                ;;
+            esac
+
+            rm -rf "$WORK_DIR"
+
+            if [[ "$FOUND_VERSION" != "$VERSION" ]]; then
+              echo "Expected Chrome for Testing $VERSION, found $FOUND_VERSION"
+              exit 1
+            fi
+            echo "Chrome for Testing $VERSION installed for $PLATFORM"
 
   # This code builds better-sqlite3 on Ubuntu 20 (Focal). This is necessary because Ubuntu 20 has the oldest glibc version (2.31) that we support.
   #
