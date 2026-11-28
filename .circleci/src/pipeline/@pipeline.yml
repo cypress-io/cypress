@@ -1134,14 +1134,19 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
-      # WebKit runs only launch the WebKit from playwright-webkit (tap_open_spec, which opens Chrome itself, is skipped below)
-      - unless:
+      # Each job launches only << parameters.browser >>; skip unused installs so flaky CDN downloads cannot fail unrelated jobs
+      - when:
           condition:
-            equal: [ webkit, << parameters.browser >> ]
+            equal: [ chrome, << parameters.browser >> ]
           steps:
             - install-browsers:
                 install-chrome: true
                 install-chrome-for-testing: true
+      - when:
+          condition:
+            equal: [ firefox, << parameters.browser >> ]
+          steps:
+            - install-browsers:
                 install-firefox: true
       - restore_cache:
           name: Restore Bun install cache
