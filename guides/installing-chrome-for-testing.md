@@ -21,6 +21,12 @@ So a test that checks `Cypress.browser.name === 'chrome'` won’t match CfT. Whe
 npx @puppeteer/browsers install chrome@stable --path ~/.cache/chrome-for-testing
 ```
 
+PowerShell doesn’t expand `~` in arguments to other programs, so on Windows spell out the home directory:
+
+```powershell
+npx @puppeteer/browsers install chrome@stable --path "$HOME\.cache\chrome-for-testing"
+```
+
 When it finishes, it prints the version it installed and the absolute path to the executable, in the form `chrome@<version> <path>`. Under the `--path` directory, the executable lands here:
 
 - **Linux x64:** `chrome/linux-<version>/chrome-linux64/chrome`
@@ -45,11 +51,13 @@ Because detection only looks at the first `chrome` it finds, any other `chrome` 
 
 ### macOS
 
-Detection asks Spotlight for the bundle ID `com.google.chrome.for.testing`, then falls back to `/Applications/Google Chrome for Testing.app` ([`darwin/index.ts`](../packages/launcher/lib/darwin/index.ts)). Spotlight doesn’t index every directory, so copying the app into `/Applications` is the reliable option:
+Detection asks Spotlight for the bundle ID `com.google.chrome.for.testing`, then falls back to `/Applications/Google Chrome for Testing.app` ([`darwin/index.ts`](../packages/launcher/lib/darwin/index.ts)). Spotlight may not have indexed the install directory, and detection checks `/Applications` either way, so copying the app there is the reliable option:
 
 ```bash
 cp -R ~/.cache/chrome-for-testing/chrome/mac_arm-<version>/chrome-mac-arm64/"Google Chrome for Testing.app" /Applications/
 ```
+
+On an Intel Mac, the app is under `mac-<version>/chrome-mac-x64` instead.
 
 ### Windows
 
@@ -62,24 +70,27 @@ Copy-Item -Recurse "$HOME\.cache\chrome-for-testing\chrome\win64-<version>\chrom
 
 ## Pointing Cypress at the binary instead
 
-`--browser` also takes a path to the executable, which skips detection entirely. Reach for it when the steps above don’t fit:
+`--browser` also takes a path to the executable, so Cypress doesn’t have to search for an installed copy. Reach for it when the steps above don’t fit:
 
 - You can’t write to `/Applications` or `C:\Program Files`, for example on a managed machine without admin rights.
 - You keep more than one CfT version and want to choose one per run. Detection finds only one, but a path picks exactly the build you name.
 - Another `chrome` sits earlier on your Linux `PATH`, and you’d rather not reorder it.
 - You only need CfT for a one-off run and don’t want to change your shell profile.
 
-On Linux and macOS, Cypress runs `<path> --version` and still resolves the result to `chrome-for-testing`, listing it as “Custom Chrome for Testing”. On macOS, give the executable inside the bundle, not the `.app` itself:
+On Linux and macOS, Cypress runs `<path> --version` and resolves the result to `chrome-for-testing`, listing it as “Custom Chrome for Testing”. On macOS, give the executable inside the bundle, not the `.app` itself:
 
 ```bash
+# Linux
 yarn cypress:run -- --browser ~/.cache/chrome-for-testing/chrome/linux-<version>/chrome-linux64/chrome
-yarn cypress:run -- --browser "/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
+
+# macOS (Apple silicon; on Intel, use mac-<version>/chrome-mac-x64)
+yarn cypress:run -- --browser ~/.cache/chrome-for-testing/chrome/mac_arm-<version>/chrome-mac-arm64/"Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
 ```
 
 Windows reads the version from the file’s metadata rather than its output, and treats any path ending in `chrome.exe` as Chrome. Add `:chrome-for-testing` to the path so Cypress picks the right browser:
 
 ```powershell
-yarn cypress:run -- --browser "C:\Program Files\Google\Chrome for Testing\chrome.exe:chrome-for-testing"
+yarn cypress:run -- --browser "$HOME\.cache\chrome-for-testing\chrome\win64-<version>\chrome-win64\chrome.exe:chrome-for-testing"
 ```
 
 ## Checking which browser ran
