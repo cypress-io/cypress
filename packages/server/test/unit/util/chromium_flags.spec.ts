@@ -34,6 +34,12 @@ describe('lib/util/chromium_flags', () => {
       expect(disableFeatures).toContain('HttpsUpgrades')
     })
 
+    it('disables HttpsFirstBalancedMode', () => {
+      const disableFeatures = DEFAULT_CHROME_FLAGS.find((flag) => flag.startsWith('--disable-features='))
+
+      expect(disableFeatures).toContain('HttpsFirstBalancedMode')
+    })
+
     it('keeps unload events firing', () => {
       const disableFeatures = DEFAULT_CHROME_FLAGS.find((flag) => flag.startsWith('--disable-features='))
 
@@ -46,6 +52,12 @@ describe('lib/util/chromium_flags', () => {
       const disableFeatures = DEFAULT_ELECTRON_FLAGS.find((flag) => flag.name === '--disable-features')
 
       expect(disableFeatures?.value).toContain('HttpsUpgrades')
+    })
+
+    it('disables HttpsFirstBalancedMode', () => {
+      const disableFeatures = DEFAULT_ELECTRON_FLAGS.find((flag) => flag.name === '--disable-features')
+
+      expect(disableFeatures?.value).toContain('HttpsFirstBalancedMode')
     })
 
     it('keeps unload events firing', () => {

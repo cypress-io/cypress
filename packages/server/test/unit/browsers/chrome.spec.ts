@@ -1714,6 +1714,20 @@ describe('lib/browsers/chrome', () => {
 
         expect(disableFeatures).toContain('HttpsUpgrades')
       })
+
+      it('disables HttpsFirstBalancedMode on the browser (CDP) network path', () => {
+        const args = chrome._getArgs({} as any, { useBrowserNetworkInterception: true } as any, undefined as any)
+        const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).toContain('HttpsFirstBalancedMode')
+      })
+
+      it('disables HttpsFirstBalancedMode on the MITM path', () => {
+        const args = chrome._getArgs({} as any, { useBrowserNetworkInterception: false } as any, undefined as any)
+        const disableFeatures = args.find((arg) => arg.startsWith('--disable-features='))
+
+        expect(disableFeatures).toContain('HttpsFirstBalancedMode')
+      })
     })
 
     describe('service worker auto preload', () => {
