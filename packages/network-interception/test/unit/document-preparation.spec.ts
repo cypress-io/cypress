@@ -27,6 +27,44 @@ describe('core/document-preparation', () => {
       })).toBe('fullCrossOrigin')
     })
 
+    for (const isReqMatchSuperDomainOrigin of [false, true]) {
+      it(`returns full for a primary AUT navigation with current-origin match ${isReqMatchSuperDomainOrigin}`, () => {
+        expect(resolveInjectionLevel({
+          hasFileServerError: false,
+          isInitial: false,
+          isHTML: true,
+          isRenderedHTML: true,
+          isReqMatchSuperDomainOrigin,
+          isAUTFrame: true,
+          urlDoesNotMatchPolicyBasedOnDomain: false,
+        })).toBe('full')
+      })
+    }
+
+    it('keeps partial injection for a non-AUT primary-origin document', () => {
+      expect(resolveInjectionLevel({
+        hasFileServerError: false,
+        isInitial: false,
+        isHTML: true,
+        isRenderedHTML: true,
+        isReqMatchSuperDomainOrigin: true,
+        isAUTFrame: false,
+        urlDoesNotMatchPolicyBasedOnDomain: false,
+      })).toBe('partial')
+    })
+
+    it('does not inject into a non-rendered primary AUT HTML response', () => {
+      expect(resolveInjectionLevel({
+        hasFileServerError: false,
+        isInitial: false,
+        isHTML: true,
+        isRenderedHTML: false,
+        isReqMatchSuperDomainOrigin: true,
+        isAUTFrame: true,
+        urlDoesNotMatchPolicyBasedOnDomain: false,
+      })).toBe(false)
+    })
+
     it('returns full for initial HTML document loads', () => {
       expect(resolveInjectionLevel({
         hasFileServerError: false,
