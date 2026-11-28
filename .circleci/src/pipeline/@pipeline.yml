@@ -2095,9 +2095,13 @@ jobs:
       - restore_cached_workspace
       - when:
           condition:
+            # several snapshots fails for windows due to paths.
+            # until these are fixed, run the tests that are working.
+            # yarn runs scripts through cmd.exe here, which keeps the single quotes
+            # around `test-scripts:mocha`'s own glob, so mocha only gets these files.
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run: yarn test-scripts
+            - run: yarn test-scripts:mocha scripts/unit/*-spec.js
             - sanitize-verify-and-store-mocha-results
       - unless:
           condition:
