@@ -9,8 +9,7 @@ interface RequestReviewersParams {
   owner: string
   repo: string
   pull_number: number
-  reviewers?: string[]
-  team_reviewers?: string[]
+  team_reviewers: string[]
 }
 
 // The subset of the Octokit client that `actions/github-script` passes in as `github`
@@ -38,11 +37,10 @@ interface CreatePullRequestOptions {
   branchName: string
   description: string
   body: string
-  reviewers?: string[]
   team_reviewers?: string[]
 }
 
-export const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, reviewers, team_reviewers }: CreatePullRequestOptions) => {
+export const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, team_reviewers }: CreatePullRequestOptions) => {
   const { data: { number } } = await github.rest.pulls.create({
     owner: context.repo.owner,
     repo: context.repo.repo,
@@ -53,19 +51,14 @@ export const createPullRequest = async ({ context, github, baseBranch, branchNam
     maintainer_can_modify: true,
   })
 
-  if (reviewers || team_reviewers) {
-    const requestReviewersParams: RequestReviewersParams = {
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      pull_number: number,
-    }
-
-    if (reviewers) requestReviewersParams.reviewers = reviewers
-
-    if (team_reviewers) requestReviewersParams.team_reviewers = team_reviewers
-
+  if (team_reviewers) {
     try {
-      await github.rest.pulls.requestReviewers(requestReviewersParams)
+      await github.rest.pulls.requestReviewers({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: number,
+        team_reviewers,
+      })
     } catch (err) {
       // Requesting a team reviewer requires the token to have org `members: read`
       // permission. Don't fail the workflow over reviewer assignment - the PR
