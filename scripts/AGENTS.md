@@ -18,7 +18,7 @@ This workspace (`internal-scripts`) contains the monorepo's build tooling, relea
 - `semantic-commits/` — Conventional commit helpers: `get-current-release-data.js`, `get-linked-issues.js`, `validate-binary-changelog.js`
 - `github-actions/semantic-pull-request/` — GitHub Action that validates PR titles against the conventional commit format
 - `unit/` — Unit tests for the scripts themselves (mirrors the top-level directory structure). `*.spec.{js,ts}` runs on Vitest (`vitest.config.ts`) and every other `*spec.{js,ts}` on mocha. Write new specs as `*.spec.ts`. From the repo root, `yarn test-scripts` runs both and fails if either does. To narrow or watch a run, call one runner: `yarn test-scripts:vitest <path>` or `yarn test-scripts:mocha --grep <pattern>` (mocha adds a path to its full run rather than narrowing to it), and `yarn test-scripts-watch:vitest` or `yarn test-scripts-watch`. Windows CI runs every Vitest spec but only the top-level `unit/*-spec.js` files on mocha (see the `unit-tests` job in `.circleci/src/pipeline/@pipeline.yml`).
-- Top-level loose scripts — one-off utilities: electron-builder hooks named in `electron-builder.json` (packaging, signing, notarization), CI cache and environment helpers, mocha result sanitizers, and similar.
+- Top-level loose scripts — one-off utilities: electron-builder hooks named in `electron-builder.json` (packaging, signing, notarization), CI cache and environment helpers, mocha result sanitizing and verification, and similar.
 
 **Gotchas / Notes**
 
