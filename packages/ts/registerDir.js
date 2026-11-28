@@ -21,6 +21,8 @@ module.exports = function (scopeDir) {
         project,
         transpileOnly: true,
         preferTsExts: true, // Helps when the files are compiled locally, resolves the TS file
+        // ts-node refuses to `require` an `.mts` file, so leave those to Node, which strips their types and loads them as ES modules
+        ignore: ['(?:^|/)node_modules/', '\\.mts$'],
         scope: Boolean(scopeDir),
         scopeDir,
       })

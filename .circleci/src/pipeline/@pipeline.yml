@@ -1883,7 +1883,7 @@ jobs:
           name: Check env canaries
           command: |
             IS_CONTRIBUTOR_PR=$([[ "<< pipeline.git.branch >>" =~ ^pull/[0-9]+$ ]] && echo "true" || echo "false")
-            node ./scripts/circle-env.js --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
+            node ./scripts/circle-env.mts --check-canaries --is-contributor-pr $IS_CONTRIBUTOR_PR
       - build-and-persist
 
   check-lockfile:

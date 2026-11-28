@@ -4,7 +4,7 @@
 const Bluebird = require('bluebird')
 const fs = require('fs').promises
 const path = require('path')
-const { readProcessEnv } = require('./circle-env')
+const { readProcessEnv } = require('./circle-env.mts')
 
 const REPORTS_PATH = '/tmp/cypress/junit'
 

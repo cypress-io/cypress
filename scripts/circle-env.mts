@@ -1,5 +1,5 @@
 // check if the project env canary and context canary are both present to verify that this script is reading the right env
-function checkCanaries ({ isContributorPR }) {
+function checkCanaries ({ isContributorPR }: { isContributorPR: boolean }): void {
   if (!process.env.CI) console.warn('This script will not work outside of CI.')
 
   const circleEnv = readProcessEnv()
@@ -21,20 +21,17 @@ function checkCanaries ({ isContributorPR }) {
   }
 }
 
-function readProcessEnv () {
+export function readProcessEnv (): NodeJS.ProcessEnv {
   return process.env
 }
 
-module.exports = {
-  readProcessEnv,
-  _checkCanaries: checkCanaries,
-}
+export { checkCanaries as _checkCanaries }
 
-if (require.main === module) {
+if (process.argv[1] === import.meta.filename) {
   const args = process.argv.slice(2)
 
   if (args.length !== 3 || args[0] !== '--check-canaries' || args[1] !== '--is-contributor-pr') {
-    console.error(`Invalid arguments. Usage: ${__filename} --check-canaries --is-contributor-pr <isContributorPR>`)
+    console.error(`Invalid arguments. Usage: ${import.meta.filename} --check-canaries --is-contributor-pr <isContributorPR>`)
     process.exit(1)
   }
 
