@@ -36,7 +36,9 @@
     "start": "node ../../scripts/cypress open --dev --global",
     "sync-cloud-validations": "tsx ./scripts/sync-cloud-validations.ts sync",
     "test": "node ./test/scripts/run.js",
-    "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
+    "test-integration": "yarn test-integration-vitest && yarn test-integration-mocha",
+    "test-integration-mocha": "node ./test/scripts/run.js --glob-in-dir=test/integration",
+    "test-integration-vitest": "vitest run --config vitest.integration.config.ts",
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
     "test-unit": "vitest run",
     "test-watch": "./test/scripts/watch test"
@@ -143,6 +145,7 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/webpack-dev-server": "0.0.0-development",
+    "@cypress/xvfb": "^1.2.4",
     "@electron/rebuild": "4.0.4",
     "@packages/config": "0.0.0-development",
     "@packages/cypress-sessions": "0.0.0-development",

@@ -1,4 +1,4 @@
-const { expect, sinon } = require('../spec_helper')
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as videoCapture from '../../lib/video_capture'
 import path from 'path'
 import fse from 'fs-extra'
@@ -14,7 +14,7 @@ async function startSpiedVideoCapture (videoName, options = {}) {
   const END_OF_FILE_ERROR = `ffmpeg exited with code 1: Output #0, mp4, to '${videoName}':
 Output file #0 does not contain any stream\n`
 
-  sinon.spy(props._pt, 'write')
+  const write = vi.spyOn(props._pt, 'write')
 
   function writeVideoFrameAsBuffer (data) {
     const buf = Buffer.from(data)
@@ -26,13 +26,18 @@ Output file #0 does not contain any stream\n`
 
   return {
     ...props,
+    write,
     writeVideoFrameAsBuffer,
     END_OF_FILE_ERROR,
   }
 }
 
 describe('Video Capture', () => {
-  context('#start.writeVideoFrame', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('#start.writeVideoFrame', () => {
     let tmpFilename
 
     beforeEach(() => {
@@ -40,20 +45,20 @@ describe('Video Capture', () => {
     })
 
     it('writes video frames to passthru stream', async () => {
-      const { _pt, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
+      const { write, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
 
       const [buf] = [
         writeVideoFrameAsBuffer('foo'),
         writeVideoFrameAsBuffer('foobar'),
       ]
 
-      expect(_pt.write).calledWith(buf)
+      expect(write).toHaveBeenCalledWith(buf)
 
-      await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)
+      await expect(endVideoCapture()).rejects.toThrow(END_OF_FILE_ERROR)
     })
 
     it('does not write anything on empty chunk', async () => {
-      const { _pt, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
+      const { write, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
 
       const [, buf2] = [
         writeVideoFrameAsBuffer('foo'),
@@ -61,37 +66,36 @@ describe('Video Capture', () => {
         writeVideoFrameAsBuffer(''),
       ]
 
-      // @ts-expect-error - write is stubbed with sinon
-      expect(_pt.write.lastCall).calledWith(buf2)
+      expect(write).toHaveBeenLastCalledWith(buf2)
 
-      await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)
+      await expect(endVideoCapture()).rejects.toThrow(END_OF_FILE_ERROR)
     })
 
     // https://github.com/cypress-io/cypress/issues/16648
-    context('deduping frames', () => {
+    describe('deduping frames', () => {
       it('does not dedupe when not webminput', async () => {
-        const { writeVideoFrameAsBuffer, _pt } = await startSpiedVideoCapture(tmpFilename)
+        const { writeVideoFrameAsBuffer, write } = await startSpiedVideoCapture(tmpFilename)
 
         writeVideoFrameAsBuffer('foo')
         writeVideoFrameAsBuffer('foo')
         writeVideoFrameAsBuffer('foo')
         writeVideoFrameAsBuffer('foo')
-        expect(_pt.write).callCount(4)
+        expect(write).toHaveBeenCalledTimes(4)
       })
     })
 
     it('does dedupe when webminput', async () => {
-      const { writeVideoFrameAsBuffer, _pt } = await startSpiedVideoCapture(tmpFilename, { webmInput: true })
+      const { writeVideoFrameAsBuffer, write } = await startSpiedVideoCapture(tmpFilename, { webmInput: true })
 
       writeVideoFrameAsBuffer('foo')
       writeVideoFrameAsBuffer('foo')
       writeVideoFrameAsBuffer('foo')
       writeVideoFrameAsBuffer('foo')
-      expect(_pt.write).calledOnce
+      expect(write).toHaveBeenCalledTimes(1)
     })
   })
 
-  context('#start.startedVideoCapture', () => {
+  describe('#start.startedVideoCapture', () => {
     let tmpFilename
 
     beforeEach(() => {
@@ -107,7 +111,7 @@ describe('Video Capture', () => {
 
       controller.writeVideoFrame(fse.readFileSync(image1Path))
 
-      expect(controller.startedVideoCapture.getTime()).to.be.at.least(beforeFirstFrame)
+      expect(controller.startedVideoCapture.getTime()).toBeGreaterThanOrEqual(beforeFirstFrame)
 
       await controller.endVideoCapture(false)
     })
@@ -124,13 +128,13 @@ describe('Video Capture', () => {
       controller.writeVideoFrame(fse.readFileSync(image2Path))
       controller.writeVideoFrame(fse.readFileSync(image3Path))
 
-      expect(controller.startedVideoCapture).to.eq(firstFrameAt)
+      expect(controller.startedVideoCapture).toBe(firstFrameAt)
 
       await controller.endVideoCapture(false)
     })
   })
 
-  context('#start.endVideoCapture', () => {
+  describe('#start.endVideoCapture', () => {
     let tmpFilename
 
     beforeEach(() => {

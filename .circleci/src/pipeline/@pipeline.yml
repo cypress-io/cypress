@@ -2235,8 +2235,9 @@ jobs:
       - install-browsers:
           install-chrome: true
       - run: yarn test-integration --scope=@packages/server
+      # one report from vitest, one from mocha
       - sanitize-verify-and-store-mocha-results:
-          expectedResultCount: 1
+          expectedResultCount: 2
 
   server-performance-tests:
     <<: *defaults

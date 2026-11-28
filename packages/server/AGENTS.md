@@ -8,7 +8,9 @@ yarn workspace @packages/server start
 
 # NOTE: Full suite is slow (hundreds of tests); always target a specific file or grep pattern
 
-# Unit tests (test/unit/**/*.spec.ts) run on vitest; integration and performance tests run on mocha
+# Unit tests (test/unit/**/*.spec.ts) run on vitest. Integration tests are split by
+# file name: test/integration/**/*.spec.ts run on vitest (vitest.integration.config.ts),
+# *_spec.{js,ts} on mocha. Performance tests run on mocha.
 
 # Run a specific unit test file
 yarn workspace @packages/server test-unit -- <path-to-spec>
@@ -16,11 +18,16 @@ yarn workspace @packages/server test-unit -- <path-to-spec>
 # Filter unit tests by name pattern
 yarn workspace @packages/server test-unit -- -t "handles request"
 
-# Run a specific integration test file
-yarn workspace @packages/server test-integration -- <path-to-spec>
+# Run both integration runners
+yarn workspace @packages/server test-integration
 
-# Filter integration tests by name pattern
-yarn workspace @packages/server test-integration -- --grep "video capture"
+# Run a specific vitest integration spec, or filter by name pattern
+yarn workspace @packages/server test-integration-vitest -- test/integration/video_capture.spec.ts
+yarn workspace @packages/server test-integration-vitest -- -t "video capture"
+
+# Run a specific mocha integration spec, or filter by name pattern
+yarn workspace @packages/server test-integration-mocha -- <path-to-spec>
+yarn workspace @packages/server test-integration-mocha -- --grep "http requests"
 
 # Build TypeScript to JS (production)
 yarn workspace @packages/server build-prod

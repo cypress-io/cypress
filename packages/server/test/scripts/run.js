@@ -120,6 +120,9 @@ commandAndArguments.args.push(
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
   '--extension=js,ts',
+  // *.spec.ts files run on vitest (vitest.integration.config.ts)
+  // Quoted so the shell leaves the glob to mocha; cmd.exe would pass quotes through literally
+  isWindows() ? '--ignore=**/*.spec.ts' : `--ignore='**/*.spec.ts'`,
   // restore mocha 2.x behavior to force end process after spec run
   '--exit',
 )
