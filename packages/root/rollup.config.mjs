@@ -16,7 +16,7 @@ const SENTINEL_VERSION = '0.0.0-development'
  * silently shipped in the bundle.
  */
 function getNextVersion () {
-  const scriptPath = resolve(__dirname, '../../scripts/get-next-version.js')
+  const scriptPath = resolve(__dirname, '../../scripts/get-next-version.mts')
 
   return execSync(`node "${scriptPath}"`, { encoding: 'utf8' }).trim()
 }
@@ -35,7 +35,7 @@ export default {
           return null
         }
 
-        // Throws if get-next-version.js fails — a broken sentinel must never
+        // Throws if get-next-version.mts fails — a broken sentinel must never
         // be silently shipped in the bundle.
         const version = getNextVersion()
 

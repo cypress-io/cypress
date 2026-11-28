@@ -1,25 +1,44 @@
-const path = require('path')
-const semver = require('semver')
-const bumpCb = require('conventional-recommended-bump')
-const { promisify } = require('util')
-const minimist = require('minimist')
+import { execSync } from 'node:child_process'
+import path from 'node:path'
+import { promisify } from 'node:util'
+import { gt, inc, major } from 'semver'
+import type { ReleaseType } from 'semver'
+import bumpCb from 'conventional-recommended-bump'
+import minimist from 'minimist'
+import rootPackageJson from '../package.json' with { type: 'json' }
+import { changeCatagories } from './semantic-commits/change-categories.js'
+import { getCurrentReleaseData } from './semantic-commits/get-current-release-data.js'
 
-const checkedInBinaryVersion = require('../package.json').version
+interface Commit {
+  type?: string | null
+}
+
+// semantic version bump: 0 - major, 1 - minor, 2 - patch
+type BumpLevel = 0 | 1 | 2
+
+interface BumpOptions {
+  path: string
+  whatBump: (commits: Commit[]) => { level: BumpLevel, reason: string }
+}
+
+interface NextVersion {
+  nextVersion: string
+  commits: Commit[]
+}
+
+const checkedInBinaryVersion: string = rootPackageJson.version
 const SENTINEL_VERSION = '0.0.0-development'
 const isSentinelVersion = checkedInBinaryVersion === SENTINEL_VERSION
-const { changeCatagories } = require('./semantic-commits/change-categories')
-const { getCurrentReleaseData } = require('./semantic-commits/get-current-release-data')
 
-const bump = promisify(bumpCb)
+const bump: (options: BumpOptions) => Promise<{ releaseType?: ReleaseType }> = promisify(bumpCb)
 const paths = ['packages', 'cli']
 
-const getNextVersionForPath = async (path) => {
+export const getNextVersionForPath = async (path: string): Promise<NextVersion> => {
   const { version: releasedVersion, isPreviousMajor } = await getCurrentReleaseData(false)
 
-  let commits
-  const whatBump = (foundCommits) => {
-    // semantic version bump: 0 - major, 1 - minor, 2 - patch
-    let level = 2
+  let commits: Commit[] = []
+  const whatBump = (foundCommits: Commit[]) => {
+    let level: BumpLevel = 2
     let breakings = 0
     let features = 0
 
@@ -51,7 +70,7 @@ const getNextVersionForPath = async (path) => {
     path,
   })
 
-  let nextVersion = semver.inc(releasedVersion, releaseType || 'patch')
+  let nextVersion = inc(releasedVersion, releaseType || 'patch')
 
   // See ../guides/next-version.md for documentation.
   // for the time being, honoring this ENV -- ideally this will be deleted to remove manually overriding without a PR
@@ -62,8 +81,12 @@ const getNextVersionForPath = async (path) => {
     nextVersion = checkedInBinaryVersion
   }
 
-  if (isPreviousMajor && semver.major(nextVersion) > semver.major(releasedVersion)) {
-    throw new Error(`The next version ${nextVersion} is outside the ${semver.major(releasedVersion)}.x line this branch releases.`)
+  if (!nextVersion) {
+    throw new Error(`Unable to increment the released version ${releasedVersion}.`)
+  }
+
+  if (isPreviousMajor && major(nextVersion) > major(releasedVersion)) {
+    throw new Error(`The next version ${nextVersion} is outside the ${major(releasedVersion)}.x line this branch releases.`)
   }
 
   return {
@@ -72,14 +95,14 @@ const getNextVersionForPath = async (path) => {
   }
 }
 
-const getNextVersionForBinary = async () => {
-  let commits = []
-  let nextVersion
+export const getNextVersionForBinary = async (): Promise<NextVersion> => {
+  let commits: Commit[] = []
+  let nextVersion: string | undefined
 
   for (const path of paths) {
     const { nextVersion: pathNextVersion, commits: pathCommits } = await getNextVersionForPath(path)
 
-    if (!nextVersion || semver.gt(pathNextVersion, nextVersion)) {
+    if (!nextVersion || gt(pathNextVersion, nextVersion)) {
       nextVersion = pathNextVersion
     }
 
@@ -96,17 +119,8 @@ const getNextVersionForBinary = async () => {
   }
 }
 
-if (require.main !== module) {
-  module.exports = {
-    getNextVersionForBinary,
-    getNextVersionForPath,
-  }
-
-  return
-}
-
-(async () => {
-  process.chdir(path.join(__dirname, '..'))
+const main = async () => {
+  process.chdir(path.join(import.meta.dirname, '..'))
 
   const args = minimist(process.argv.slice(2))
 
@@ -116,9 +130,16 @@ if (require.main !== module) {
     const cmd = `npm --no-git-tag-version version ${nextVersion}`
 
     console.log(`Running '${cmd}'...`)
+    execSync(cmd)
 
-    return require('child_process').execSync(cmd)
+    return
   }
 
   console.log(nextVersion)
-})()
+}
+
+// Not awaited: top-level await would make `require()` of this module throw
+// ERR_REQUIRE_ASYNC_MODULE in CommonJS callers such as get-binary-release-data.js.
+if (process.argv[1] === import.meta.filename) {
+  void main()
+}

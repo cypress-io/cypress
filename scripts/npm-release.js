@@ -70,7 +70,7 @@ const getPackageVersions = async (packages) => {
 
   if (binaryVersion === SENTINEL_VERSION) {
     binaryVersion = require('child_process')
-    .execSync('node ./scripts/get-next-version.js')
+    .execSync('node ./scripts/get-next-version.mts')
     .toString()
     .trim()
   }

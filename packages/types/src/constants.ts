@@ -22,7 +22,7 @@ export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun'] as const
 
 export const GET_MAJOR_VERSION_FOR_CONTENT = () => {
   // @packages/root's Rollup build replaces the 0.0.0-development sentinel with
-  // the next computed release version (via scripts/get-next-version.js), so
+  // the next computed release version (via scripts/get-next-version.mts), so
   // semverMajor always returns the correct major (e.g. 15) rather than 0.
   return semverMajor(packageInfo.version).toString()
 }

@@ -1301,7 +1301,7 @@ commands:
             # cypress/package.json pins.
             NEXT_VERSION_DEPS=$(node -p "const deps = require('./cypress/package.json').devDependencies; ['semver', 'conventional-recommended-bump', 'minimist'].map((name) => name + '@' + deps[name]).join(' ')")
             npm i $NEXT_VERSION_DEPS
-            NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
+            NEXT_VERSION=$(node ./cypress/scripts/get-next-version.mts)
             cd -
 
             # Prefer a `release/<version>` branch (current convention), then a
@@ -1608,7 +1608,7 @@ commands:
           name: Download the binary if this commit already has one
           command: |
             source ./scripts/ensure-node.sh
-            yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.js) --out cdn-reuse/cypress
+            yarn check-binary-on-cdn --version $(node ./scripts/get-next-version.mts) --out cdn-reuse/cypress
       - persist_to_workspace:
           root: cdn-reuse
           paths:
@@ -1689,7 +1689,7 @@ commands:
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
             fi
-            yarn binary-build --version $(node ./scripts/get-next-version.js)
+            yarn binary-build --version $(node ./scripts/get-next-version.mts)
       - run:
           name: Package the Cypress binary
           environment:
@@ -1704,13 +1704,13 @@ commands:
               sudo apt-get update
               sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
             fi
-            yarn binary-package --version $(node ./scripts/get-next-version.js)
+            yarn binary-package --version $(node ./scripts/get-next-version.mts)
       - run:
           name: Smoke Test the Cypress binary
           command: |
             source ./scripts/ensure-node.sh
             node --version
-            yarn binary-smoke-test --version $(node ./scripts/get-next-version.js)
+            yarn binary-smoke-test --version $(node ./scripts/get-next-version.mts)
       - run:
           name: Zip the binary
           command: |
@@ -1781,14 +1781,14 @@ commands:
             node scripts/binary.js upload-build-artifact \
               --type binary \
               --file cypress.zip \
-              --version $(node ./scripts/get-next-version.js)
+              --version $(node ./scripts/get-next-version.mts)
       - run:
           name: Upload NPM package to S3
           command: |
             node scripts/binary.js upload-build-artifact \
               --type npm-package \
               --file cypress.tgz \
-              --version $(node ./scripts/get-next-version.js)
+              --version $(node ./scripts/get-next-version.mts)
       - run: ls -l
       - run: cat binary-url.json
       - run: cat npm-package-url.json

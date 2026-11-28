@@ -5,7 +5,7 @@ const { Octokit } = require('@octokit/core')
 const debugLib = require('debug')
 
 const { getCurrentReleaseData } = require('./get-current-release-data')
-const { getNextVersionForBinary } = require('../get-next-version')
+const { getNextVersionForBinary } = require('../get-next-version.mts')
 const { getLinkedIssues } = require('./get-linked-issues')
 const debug = debugLib('scripts:semantic-commits:get-binary-release-data')
 

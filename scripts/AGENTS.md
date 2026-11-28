@@ -5,7 +5,7 @@ This workspace (`internal-scripts`) contains the monorepo's build tooling, relea
 - `yarn build` — no-op (no compilation step required)
 - `yarn lint` — lint all `.js`, `.ts`, and `.json` files with ESLint
 - `yarn gulp <task>` — run a gulp task (tasks are defined in `gulp/gulpfile.ts`); run from the monorepo root, e.g. `yarn dev`
-- `node scripts/get-next-version.js` — compute the next semantic version based on conventional commits
+- `node scripts/get-next-version.mts` — compute the next semantic version based on conventional commits
 - `node scripts/npm-release.js` — orchestrate an npm package release
 - `node scripts/prepare-release-artifacts.js` — prepare binary artifacts for a release
 - `node scripts/binary.js` — entry point for binary build/upload/smoke-test operations

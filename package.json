@@ -84,7 +84,7 @@
     "docker": "./scripts/run-docker-local.sh",
     "docker-dev": "./scripts/run-docker-local.sh dev",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
-    "get-next-version": "node scripts/get-next-version.js",
+    "get-next-version": "node scripts/get-next-version.mts",
     "gulp:debug": "node --inspect-brk ./node_modules/.bin/gulp",
     "health-check": "knip",
     "postinstall": "node ./scripts/run-postInstall.js",
