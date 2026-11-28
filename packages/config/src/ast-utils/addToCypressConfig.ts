@@ -1,4 +1,4 @@
-import * as t from '@babel/types'
+import type * as t from '@babel/types'
 import traverse from '@babel/traverse'
 import fs from 'fs-extra'
 import dedent from 'dedent'
@@ -54,32 +54,6 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
   } catch (e: any) {
     debug(`Error adding properties to %s: %s`, filePath, e.stack)
     throw new Error(`Unable to automerge with the config file`, { cause: e })
-  }
-}
-
-interface AddProjectIdToCypressConfigOptions {
-  filePath: string
-  projectId: string
-}
-
-export async function addProjectIdToCypressConfig (options: AddProjectIdToCypressConfigOptions) {
-  try {
-    const result = await fs.readFile(options.filePath, 'utf8')
-    const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
-      t.identifier('projectId'),
-      t.stringLiteral(options.projectId),
-    ))
-
-    await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))
-
-    return {
-      result: 'MERGED',
-    }
-  } catch (e) {
-    return {
-      result: 'NEEDS_MERGE',
-      error: e,
-    }
   }
 }
 
