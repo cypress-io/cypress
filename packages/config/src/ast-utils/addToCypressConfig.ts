@@ -5,6 +5,7 @@ import dedent from 'dedent'
 import path from 'path'
 import debugLib from 'debug'
 import { parse, print } from 'recast'
+import * as typescriptParser from 'recast/parsers/typescript'
 
 import { addToCypressConfigPlugin } from './addToCypressConfigPlugin'
 import type { ASTComponentDefinitionConfig } from './astConfigHelpers'
@@ -44,7 +45,7 @@ const debug = debugLib('cypress:config:addToCypressConfig')
 export async function addToCypressConfig (filePath: string, code: string, toAdd: t.ObjectProperty) {
   try {
     const ast = parse(code, {
-      parser: require('recast/parsers/typescript'),
+      parser: typescriptParser,
     })
 
     traverse(ast, addToCypressConfigPlugin(toAdd).visitor)
