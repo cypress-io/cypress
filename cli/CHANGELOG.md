@@ -31,6 +31,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where [`cy.wait()`](https://on.cypress.io/wait) could time out waiting for a route's response even when the response arrived within [`responseTimeout`](https://on.cypress.io/configuration#Timeouts), because time spent waiting for the request counted against the response timeout budget. Fixed in [#34940](https://github.com/cypress-io/cypress/pull/34940).
 - Fixed a regression in [16.0.0](#16-0-0) where tests in Chromium-based browsers ran slower on pages that load large files, such as a WebAssembly module, and commands such as [`cy.task()`](https://on.cypress.io/task) could take hundreds of milliseconds while the page loaded. You no longer need `forceHttp1: true` to avoid the slowdown. Fixes [#35209](https://github.com/cypress-io/cypress/issues/35209).
 - Selected text in the Cypress App and the Launchpad is now highlighted in a light indigo that is easy to see on both light and dark backgrounds, such as in text inputs, the sidebars and the Command Log. Previously the highlight was a faint gray that was barely visible on white backgrounds. Fixes [#22322](https://github.com/cypress-io/cypress/issues/22322).
 - Fixed an issue where headless Firefox 157 and later showed pages 1 pixel shorter than the 1280x720 browser window, so screenshots taken with `capture: 'runner'`, including the screenshot taken automatically when a test fails, were 1280x719. Fixed in [#33885](https://github.com/cypress-io/cypress/pull/33885).
