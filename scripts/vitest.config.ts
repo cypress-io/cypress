@@ -5,6 +5,8 @@ export default defineConfig({
     globalSetup: ['@packages/vitest-setup/sanitize-env'],
     name: 'internal-scripts',
     environment: 'node',
+    // Specs and the CommonJS scripts they load require TypeScript modules through Node, which vite doesn't transform
+    setupFiles: ['@packages/ts/register'],
     // `test-scripts:mocha` takes every other `*spec.{js,ts}` under `unit/`
     include: ['unit/**/*.spec.{js,ts}'],
     // Matches the globals `vitestConfig` declares to ESLint for these specs

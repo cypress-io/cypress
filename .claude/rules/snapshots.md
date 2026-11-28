@@ -15,6 +15,8 @@ Four mechanisms live in this repo — using the wrong one is a hard error, not a
   `__snapshots__/`) — `SNAPSHOT_UPDATE=1 <test command>`
 - **vitest `.snap`** (`cli`, `@packages/{config,launcher}`, `npm/webpack-dev-server`) —
   `yarn test -u` in that workspace
+- **`scripts` vitest `.snap`** — `yarn test-scripts:vitest -u` from the repo root.
+  `internal-scripts` has no `test` script
 - **`npm/webpack-preprocessor` `.snap`** — `yarn test-e2e -u`. Its `test` script is the
   webpack-5 matrix runner, which swallows `-u`, rewrites `package.json`, and reinstalls
   deps

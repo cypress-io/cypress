@@ -1,16 +1,18 @@
-const snapshot = require('snap-shot-it')
+const sinon = require('sinon')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const { expect } = require('chai')
 
 const uploadUtils = require('../../binary/util/upload')
 const s3helpers = require('../../binary/s3-api').s3helpers
 
-/* global sinon */
 describe('move-binaries', () => {
+  afterEach(() => {
+    sinon.restore()
+  })
+
   const moveBinaries = require('../../binary/move-binaries')
 
-  context('parseBuildPath', () => {
+  describe('parseBuildPath', () => {
     const parseBuildPath = moveBinaries.parseBuildPath
 
     it('parses into SHA and build', () => {
@@ -21,14 +23,14 @@ describe('move-binaries', () => {
       la(is.commitId(parsed.commit), 'missing commit', parsed)
       la(is.positive(parsed.build), 'missing build', parsed)
 
-      snapshot({
+      expect({
         path,
         parsed,
-      })
+      }).toMatchSnapshot()
     })
   })
 
-  context('findBuildByCommit', () => {
+  describe('findBuildByCommit', () => {
     const findBuildByCommit = moveBinaries.findBuildByCommit
     const sha = '47e98fa1d0b18867a74da91a719d0f1ae73fcbc7'
 
@@ -75,7 +77,7 @@ describe('move-binaries', () => {
     })
   })
 
-  context('moveBinaries', () => {
+  describe('moveBinaries', () => {
     const move = moveBinaries.moveBinaries
 
     beforeEach(() => {
@@ -157,9 +159,9 @@ describe('move-binaries', () => {
       return move(args).then((result) => {
         la(is.object(result), 'expected a result', result)
 
-        expect(uploadUtils.purgeDesktopAppAllPlatforms).to.be.calledWith(version, 'cypress.zip')
+        sinon.assert.calledWith(uploadUtils.purgeDesktopAppAllPlatforms, version, 'cypress.zip')
 
-        snapshot('collected builds and copied desktop', result)
+        expect(result).toMatchSnapshot('collected builds and copied desktop')
       })
     })
   })
