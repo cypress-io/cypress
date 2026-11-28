@@ -22,6 +22,7 @@ export default defineConfig({
     ],
   },
   test: {
+    globalSetup: ['@packages/vitest-setup/sanitize-env'],
     include: ['test/**/*.spec.ts'],
     environment: 'node',
     // ProjectLifecycleManager calls process.chdir, which worker threads reject

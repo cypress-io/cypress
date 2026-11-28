@@ -178,21 +178,26 @@ describe('driver/src/cy/timers', () => {
 
         expect(id1).to.eq(1)
 
+        let unpausedAt: number
+
         cy
         .wait(100)
         .log('requestAnimationFrame should NOT have fired when paused')
         .window().its('bar').should('be.null')
         .log('requestAnimationFrame should now fire when unpaused')
         .then(() => {
+          unpausedAt = win.performance.now()
+
           // now go ahead and run all the queued timers
           return cy.pauseTimers(false)
         })
 
         cy.window().its('bar').should('eq', 'bar')
         .and(() => {
-          // requestAnimationFrame should have passed through
-          // its high res timestamp from performance.now()
-          expect(rafStub).to.be.calledWithMatch(Number)
+          // The callback's frame came due during the wait, so a timestamp from
+          // before unpausing means it was given that frame's stale time
+          expect(rafStub).to.be.calledOnce
+          expect(rafStub.firstCall.args[0]).to.be.at.least(unpausedAt)
         })
         .then(() => {
           win.bar = 'foo'

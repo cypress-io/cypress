@@ -2,11 +2,19 @@
   "extends": "../tsconfig.json",
   "include": [
     "unit",
-    "../vitest.config.ts"
+    "../vitest.config.ts",
+    // Declares the backend tasks the injection sends, which the public types
+    // leave out. The package's main tsconfig gets it through index.d.ts.
+    "../../driver/types/internal-types-lite.d.ts"
   ],
   "exclude": [],
   "compilerOptions": {
     "noEmit": true,
+    // The cross-origin injection bundles @packages/server's cookie modules,
+    // which are written for the server's strict settings and only type-check
+    // with these on
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
     "lib": ["es2021", "es2022.error", "esnext.promise", "dom"]
   }
 }

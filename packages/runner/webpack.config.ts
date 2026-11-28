@@ -97,7 +97,7 @@ const crossOriginInjectionConfig: webpack.Configuration = {
   ...getSimpleConfig(),
   mode: 'production',
   entry: {
-    injection_cross_origin: [path.resolve(__dirname, 'injection/cross-origin.js')],
+    injection_cross_origin: [path.resolve(__dirname, 'injection/cross-origin.ts')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

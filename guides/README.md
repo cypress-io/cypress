@@ -20,6 +20,7 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 * [E2E Open Mode Testing](./e2e-open-testing.md)
 * [Error handling](./error-handling.md)
 * [GraphQL Subscriptions - Overview and Test Guide](./graphql-subscriptions.md)
+* [Installing Chrome for Testing](./installing-chrome-for-testing.md)
 * [Patching packages](./patch-package.md)
 * [Protocol development](./protocol-development.md)
 * [Purging Specific URLs from Cloudflare cache](./purging-cloudflare-cache.md)
