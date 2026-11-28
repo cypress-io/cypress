@@ -23,5 +23,5 @@
     "target": "dir"
   },
   "afterPack": "./scripts/after-pack-hook.js",
-  "afterSign": "./scripts/after-sign-hook.js"
+  "afterSign": "./scripts/after-sign-hook.ts"
 }

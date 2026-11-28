@@ -5,7 +5,7 @@
       "entry": [
         "gulpfile.js",
         "scripts/after-pack-hook.js",
-        "scripts/after-sign-hook.js",
+        "scripts/after-sign-hook.ts",
         "scripts/gulp/tasks/gulpGraphql.ts",
         "scripts/add-install-comment.mts",
         "scripts/semantic-commits/get-binary-release-data.js"
