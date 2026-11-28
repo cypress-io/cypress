@@ -505,15 +505,17 @@ describe('e2e record', () => {
     })
   })
 
-  context('platform.browserFamily', () => {
+  context('platform browser', () => {
     setupStubbedServer(createRoutes())
 
-    const familyByBrowser = {
-      electron: 'chromium',
-      chrome: 'chromium',
-      'chrome-for-testing': 'chromium',
-      firefox: 'firefox',
-      webkit: 'webkit',
+    // Electron, Chrome and Chrome for Testing share the `chromium` family, so
+    // only the display name shows which of them the run reported.
+    const platformByBrowser = {
+      electron: { browserFamily: 'chromium', browserName: 'Electron' },
+      chrome: { browserFamily: 'chromium', browserName: 'Chrome' },
+      'chrome-for-testing': { browserFamily: 'chromium', browserName: 'Chrome for Testing' },
+      firefox: { browserFamily: 'firefox', browserName: 'Firefox' },
+      webkit: { browserFamily: 'webkit', browserName: 'WebKit' },
     }
 
     systemTests.it('is sent on POST /runs and instance create matching the launched browser', {
@@ -528,22 +530,24 @@ describe('e2e record', () => {
       expectedExitCode: 0,
       onRun (execFn, browser) {
         return execFn().then(() => {
-          const expectedFamily = familyByBrowser[browser]
+          const expected = platformByBrowser[browser]
 
-          expect(expectedFamily, `no browserFamily mapping for browser: ${browser}`).to.exist
+          expect(expected, `no platform mapping for browser: ${browser}`).to.exist
 
           const requests = getRequests()
           const postRun = requests.find((r) => r.url === 'POST /runs')
 
           expect(postRun, 'POST /runs').to.exist
-          expect(postRun.body.platform.browserFamily).to.eq(expectedFamily)
+          expect(postRun.body.platform).to.include(expected)
+          expect(postRun.body.platform.browserVersion).to.be.a('string').and.not.empty
 
           const instanceCreate = requests.find((r) => {
             return r.url.startsWith('POST /runs/') && r.url.endsWith('/instances')
           })
 
           expect(instanceCreate, 'POST /runs/:id/instances').to.exist
-          expect(instanceCreate.body.platform.browserFamily).to.eq(expectedFamily)
+          expect(instanceCreate.body.platform).to.include(expected)
+          expect(instanceCreate.body.platform.browserVersion).to.eq(postRun.body.platform.browserVersion)
         })
       },
     })
