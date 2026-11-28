@@ -1,3 +1,5 @@
+import { realpathSync } from 'node:fs'
+
 // check if the project env canary and context canary are both present to verify that this script is reading the right env
 function checkCanaries ({ isContributorPR }: { isContributorPR: boolean }): void {
   if (!process.env.CI) console.warn('This script will not work outside of CI.')
@@ -27,7 +29,8 @@ export function readProcessEnv (): NodeJS.ProcessEnv {
 
 export { checkCanaries as _checkCanaries }
 
-if (process.argv[1] === import.meta.filename) {
+// Node resolves symlinks in `import.meta.filename` but not in `argv[1]`, so resolve both the same way
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const args = process.argv.slice(2)
 
   if (args.length !== 3 || args[0] !== '--check-canaries' || args[1] !== '--is-contributor-pr') {
