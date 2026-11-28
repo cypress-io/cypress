@@ -48,17 +48,27 @@ describe('waitUntilExists', () => {
     ])
   })
 
-  // Stubbed because no real filesystem setup gives the same non-ENOENT error on every
-  // platform: Windows reports a path through a regular file as ENOENT, not ENOTDIR
-  it('rethrows errors other than a missing path instead of retrying', async () => {
+  // Stubbed because a directory that is mid-delete only reports EPERM on Windows
+  it('retries through errors other than a missing path', async () => {
+    const favicon = path.join(tmpDir, 'favicon')
+
+    vi.spyOn(fs, 'access')
+    .mockRejectedValueOnce(Object.assign(new Error(`EPERM: operation not permitted, access '${favicon}'`), { code: 'EPERM' }))
+    .mockResolvedValueOnce(undefined)
+
+    await expect(waitUntilExists(favicon, { freq: 1, maxAttempts: 3 })).resolves.toBeUndefined()
+
+    expect(fs.access).toHaveBeenCalledTimes(2)
+  })
+
+  it('reports the last error when every attempt fails', async () => {
     const favicon = path.join(tmpDir, 'favicon')
 
     vi.spyOn(fs, 'access').mockRejectedValue(Object.assign(new Error(`EACCES: permission denied, access '${favicon}'`), { code: 'EACCES' }))
 
     await expect(waitUntilExists(favicon, { freq: 1, maxAttempts: 3 }))
-    .rejects.toMatchObject({ code: 'EACCES' })
+    .rejects.toThrow(`Failed to detect path at ${favicon} after 3 attempts. Last error: EACCES: permission denied, access '${favicon}'`)
 
-    expect(fs.access).toHaveBeenCalledTimes(1)
-    expect(console.log).not.toHaveBeenCalled()
+    expect(fs.access).toHaveBeenCalledTimes(3)
   })
 })

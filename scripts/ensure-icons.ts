@@ -7,25 +7,18 @@ interface WaitOptions {
   maxAttempts: number
 }
 
-async function pathExists (dir: string): Promise<boolean> {
-  try {
-    await fs.access(dir)
-
-    return true
-  } catch (err) {
-    // Only a missing path means the build isn't done; anything else (EACCES, ENOTDIR) won't fix itself by waiting
-    if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
-      return false
-    }
-
-    throw err
-  }
-}
-
 export async function waitUntilExists (dir: string, { freq, maxAttempts }: WaitOptions): Promise<void> {
+  let lastError: unknown
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    if (await pathExists(dir)) {
+    // Any error is retried, not just ENOENT: the icons build deletes and recreates
+    // `dist/`, and Windows reports a directory that is mid-delete as EPERM
+    try {
+      await fs.access(dir)
+
       return
+    } catch (err) {
+      lastError = err
     }
 
     if (attempt < maxAttempts) {
@@ -35,7 +28,9 @@ export async function waitUntilExists (dir: string, { freq, maxAttempts }: WaitO
     }
   }
 
-  throw new Error(`Failed to detect path at ${dir} after ${maxAttempts} attempts.`)
+  const reason = lastError instanceof Error ? lastError.message : String(lastError)
+
+  throw new Error(`Failed to detect path at ${dir} after ${maxAttempts} attempts. Last error: ${reason}`)
 }
 
 export async function waitUntilIconsBuilt (): Promise<void> {
