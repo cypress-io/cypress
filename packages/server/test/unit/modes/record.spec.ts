@@ -1,21 +1,16 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Mock } from 'vitest'
 import * as errors from '../../../lib/errors'
 import api from '../../../lib/cloud/api'
 import exception from '../../../lib/cloud/exception'
 import commitInfo from '../../../lib/util/commit-info'
 import recordMode from '../../../lib/modes/record'
 import * as ciProvider from '../../../lib/util/ci_provider'
+import { expectCalledWith } from '../../support/helpers/sinon_calls'
 
 const debug = Debug('test')
 const initialEnv = _.clone(process.env)
-
-// sinon's calledWith matches leading arguments only
-const callsStartingWith = (mock: Mock, ...args: unknown[]) => {
-  return mock.mock.calls.filter((call) => _.isEqual(call.slice(0, args.length), args))
-}
 
 // NOTE: the majority of the logic of record_spec is
 // tested as an e2e/record_spec
@@ -451,7 +446,7 @@ describe('lib/modes/record', () => {
         spec: { relative: 'cypress/e2e/app_spec.cy.js' },
       })).rejects.toThrow()
 
-      expect(callsStartingWith(vi.mocked(errors.get), 'CLOUD_CANNOT_PROCEED_IN_SERIAL')).not.toHaveLength(0)
+      expectCalledWith(errors.get, 'CLOUD_CANNOT_PROCEED_IN_SERIAL')
     })
   })
 
@@ -477,7 +472,7 @@ describe('lib/modes/record', () => {
         recordKey: true, // instead of a string
       })).rejects.toThrow()
 
-      expect(callsStartingWith(vi.mocked(errors.throwErr), 'CLOUD_RECORD_KEY_NOT_VALID', 'undefined')).not.toHaveLength(0)
+      expectCalledWith(errors.throwErr, 'CLOUD_RECORD_KEY_NOT_VALID', 'undefined')
     })
   })
 })
