@@ -5,7 +5,8 @@
   "scripts": {
     "build": "echo 'internal-scripts build: no build necessary'",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test-watch": "vitest"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"

@@ -2100,6 +2100,11 @@ jobs:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
             - run: yarn test-scripts scripts/**/*spec.js
+            - run:
+                name: Test scripts on vitest
+                command: yarn workspace internal-scripts test
+                # report vitest failures even when the mocha step above failed
+                when: always
             - sanitize-verify-and-store-mocha-results
       - unless:
           condition:
@@ -2124,6 +2129,13 @@ jobs:
                 command: |
                   source ./scripts/ensure-node.sh
                   yarn test-scripts
+            - run:
+                name: Test scripts on vitest
+                command: |
+                  source ./scripts/ensure-node.sh
+                  yarn workspace internal-scripts test
+                # report vitest failures even when the mocha step above failed
+                when: always
             - run:
                 name: Test each individual package
                 command: |
