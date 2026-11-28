@@ -1,4 +1,4 @@
-import { baseConfig, chaiFriendlyConfig, jsonConfig, mochaConfig, nodeConfig, regexpConfig } from '@packages/eslint-config'
+import { baseConfig, chaiFriendlyConfig, jsonConfig, mochaConfig, nodeConfig, regexpConfig, vitestConfig } from '@packages/eslint-config'
 import globals from 'globals'
 
 export default [
@@ -7,8 +7,9 @@ export default [
   ...jsonConfig,
   ...nodeConfig,
   chaiFriendlyConfig(['unit/**']),
-  // The root `test-scripts` script runs these on mocha
-  ...mochaConfig.map((block) => ({ ...block, files: ['unit/**'] })),
+  // `*.spec.{js,ts}` runs on Vitest (`vitest.config.ts`); the rest of `unit/` runs on mocha
+  ...vitestConfig.map((block) => ({ ...block, files: ['unit/**/*.spec.{js,ts}'] })),
+  ...mochaConfig.map((block) => ({ ...block, files: ['unit/**'], ignores: [...(block.ignores ?? []), 'unit/**/*.spec.{js,ts}'] })),
   {
     languageOptions: {
       parserOptions: {

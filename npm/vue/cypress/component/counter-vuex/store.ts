@@ -1,8 +1,13 @@
 import { createStore } from 'vuex'
+import type { ActionTree, GetterTree, MutationTree } from 'vuex'
+
+interface State {
+  count: number
+}
 
 // root state object.
 // each Vuex instance is just a single state tree.
-const state = {
+const state: State = {
   count: 0,
 }
 
@@ -11,7 +16,7 @@ const state = {
 // first argument, followed by additional payload arguments.
 // mutations must be synchronous and can be recorded by plugins
 // for debugging purposes.
-const mutations = {
+const mutations: MutationTree<State> = {
   set (state, value) {
     state.count = value
   },
@@ -25,7 +30,7 @@ const mutations = {
 
 // actions are functions that cause side effects and can involve
 // asynchronous operations.
-const actions = {
+const actions: ActionTree<State, State> = {
   increment: ({ commit }) => commit('increment'),
   decrement: ({ commit }) => commit('decrement'),
   incrementIfOdd ({ commit, state }) {
@@ -34,7 +39,7 @@ const actions = {
     }
   },
   incrementAsync ({ commit }) {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       setTimeout(() => {
         commit('increment')
         resolve()
@@ -44,13 +49,13 @@ const actions = {
 }
 
 // getters are functions
-const getters = {
+const getters: GetterTree<State, State> = {
   evenOrOdd: (state) => (state.count % 2 === 0 ? 'even' : 'odd'),
 }
 
 // A Vuex instance is created by combining the state, mutations, actions,
 // and getters.
-export default createStore({
+export default createStore<State>({
   state,
   getters,
   actions,

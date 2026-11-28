@@ -3,8 +3,11 @@ import { promisify } from 'util'
 import debugModule from 'debug'
 import os from 'os'
 import path from 'path'
-import { pki, md } from 'node-forge'
+import forge from 'node-forge'
 import fs from 'fs-extra'
+
+// node-forge is CommonJS, so native ESM can't import its members by name
+const { pki, md } = forge
 
 const debug = debugModule('cypress:https-proxy:ca')
 
@@ -122,8 +125,8 @@ export class CA {
   baseCAFolder: string
   certsFolder: string
   keysFolder: string
-  CAcert: pki.Certificate
-  CAkeys: pki.rsa.KeyPair
+  CAcert: forge.pki.Certificate
+  CAkeys: forge.pki.rsa.KeyPair
 
   constructor (caFolder?: string) {
     if (!caFolder) {

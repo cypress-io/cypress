@@ -35,7 +35,7 @@ describe.skip('Vue Router - Pizza Shop', () => {
     cy.get('a.order-veggie')
     .click()
     .then(() => {
-      const { path, params } = Cypress.vue.$route
+      const { path, params } = router.currentRoute.value
 
       expect(path).to.eql('/order/veggie')
       expect(params).to.eql({ preset: 'veggie' })
@@ -54,7 +54,7 @@ describe.skip('Vue Router - Pizza Shop', () => {
     cy.get('a.home')
     .click()
     .then(() => {
-      const { path, query, params } = Cypress.vue.$route
+      const { path, query, params } = router.currentRoute.value
 
       expect(path).to.eql('/')
       expect(query).to.be.empty
@@ -66,7 +66,7 @@ describe.skip('Vue Router - Pizza Shop', () => {
     cy.get('a.order-meatlover')
     .click()
     .then(() => {
-      const { path, params } = Cypress.vue.$route
+      const { path, params } = router.currentRoute.value
 
       expect(path).to.eql('/order/meatlover')
       expect(params).to.eql({ preset: 'meatlover' })
@@ -75,16 +75,14 @@ describe.skip('Vue Router - Pizza Shop', () => {
 
   it('order cheese option', () => {
     // directly control the router from your test
-    cy.wrap(Cypress.vue.$router).then(($router) => {
-      return $router.push({ name: 'home' })
-    })
+    cy.then(() => router.push({ name: 'home' }))
 
     // order just a cheese
     // to: /order?cheese=true
     cy.get('a.order-cheese')
     .click()
     .then(() => {
-      const { path, query } = Cypress.vue.$route
+      const { path, query } = router.currentRoute.value
 
       expect(path).to.eql('/order')
       expect(query).to.eql({ cheese: 'true' })
@@ -95,13 +93,12 @@ describe.skip('Vue Router - Pizza Shop', () => {
   })
 
   it('order hawaiian + peppers pizza without using UI', () => {
-    cy.wrap(Cypress.vue.$router)
-    .then(($router) => $router.push({ name: 'home' }))
-    .then(($router) => {
-      return $router.push({
+    cy.then(() => router.push({ name: 'home' }))
+    .then(() => {
+      return router.push({
         name: 'order',
         params: { preset: 'hawaiian' },
-        query: { peppers: true },
+        query: { peppers: 'true' },
       })
     })
   })
