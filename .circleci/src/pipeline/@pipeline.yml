@@ -1778,14 +1778,14 @@ commands:
       - run:
           name: Upload unique binary to S3
           command: |
-            node scripts/binary.js upload-build-artifact \
+            node scripts/binary.mts upload-build-artifact \
               --type binary \
               --file cypress.zip \
               --version $(node ./scripts/get-next-version.js)
       - run:
           name: Upload NPM package to S3
           command: |
-            node scripts/binary.js upload-build-artifact \
+            node scripts/binary.mts upload-build-artifact \
               --type npm-package \
               --file cypress.tgz \
               --version $(node ./scripts/get-next-version.js)

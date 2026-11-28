@@ -8,7 +8,7 @@ This workspace (`internal-scripts`) contains the monorepo's build tooling, relea
 - `node scripts/get-next-version.js` — compute the next semantic version based on conventional commits
 - `node scripts/npm-release.js` — orchestrate an npm package release
 - `node scripts/prepare-release-artifacts.js` — prepare binary artifacts for a release
-- `node scripts/binary.js` — entry point for binary build/upload/smoke-test operations
+- `node scripts/binary.mts` — entry point for binary build/upload/smoke-test operations
 - `yarn check-regex '/<source>/<flags>'` — static ReDoS check and timing table for a regex; see [Writing performant regular expressions](../guides/writing-performant-regular-expressions.md)
 
 **Architecture**

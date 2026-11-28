@@ -15,7 +15,7 @@ npm ERR!
 When this happens, the Cloudflare URL cache for the pre-released binary likely needs to be cleared. This can be done with the following command:
 
 ```sh
-node ./scripts/binary.js purge-urls --f ./path_to_file_with_urls_to_purge
+node ./scripts/binary.mts purge-urls --f ./path_to_file_with_urls_to_purge
 ```
 
 Where `./path_to_file_with_urls_to_purge` is a text file of URLs separated by new lines. For example, the below text file would clear the cache for a given pre-release:

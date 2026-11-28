@@ -24,7 +24,7 @@ const exec = args['dry-run'] ?
   : (...args) => execSync(...args)
 
 log('Running `move-binaries`...')
-exec(`node ./scripts/binary.js move-binaries --sha ${args.sha} --version ${args.version}`, { stdio: 'inherit' })
+exec(`node ./scripts/binary.mts move-binaries --sha ${args.sha} --version ${args.version}`, { stdio: 'inherit' })
 
 const prereleaseNpmUrl = `https://cdn.cypress.io/beta/npm/${args.version}/linux-x64/${branch}-${args.sha}/cypress.tgz`
 
