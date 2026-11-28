@@ -15,7 +15,7 @@ export default [
   },
   noFloatingPromisesConfig(['lib/**/*.ts']),
   {
-    // esm/ is loaded by Node's own ESM loader, which won't guess a missing extension
+    // Keeps esm/ loadable by anyone importing it through Node's ESM loader, which won't guess a missing extension
     files: ['lib/**/*.ts'],
     rules: {
       'n/file-extension-in-import': ['error', 'always'],
