@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
-import la from 'lazy-ass'
+import assert from 'assert'
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
@@ -385,8 +385,8 @@ async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunMode
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
 const _navigateUsingCRI = async function (client, url) {
-  la(_.isString(url) && url.match(/^https?:\/\/.*$/), 'missing url to navigate to', url)
-  la(client, 'could not get CRI client')
+  assert(_.isString(url) && url.match(/^https?:\/\/.*$/), `missing url to navigate to: ${url}`)
+  assert(client, 'could not get CRI client')
   debug('received CRI client')
   debug('navigating to page %s', url)
 
@@ -930,7 +930,7 @@ export = {
     // we will load the actual page
     const launchedBrowser = await launch(browser, 'about:blank', port, args, launchOptions.env) as unknown as BrowserInstance & { browserCriClient: BrowserCriClient }
 
-    la(launchedBrowser, 'did not get launched browser instance')
+    assert(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
@@ -957,7 +957,7 @@ export = {
       onExtraTargetCriClientReady: options.onExtraTargetCriClientReady,
     })
 
-    la(browserCriClient, 'expected Chrome remote interface reference', browserCriClient)
+    assert(browserCriClient, 'expected Chrome remote interface reference')
 
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill

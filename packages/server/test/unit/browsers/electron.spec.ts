@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Mock } from 'vitest'
 import _ from 'lodash'
 import EE from 'events'
-import la from 'lazy-ass'
 import { Automation } from '../../../lib/automation'
 import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import * as electronApp from '../../../lib/util/electron-app'
@@ -175,7 +174,7 @@ describe('lib/browsers/electron', () => {
 
       return savedState.create()
       .then((savedStateInstance) => {
-        la(_.isFunction(savedStateInstance.get), 'state is missing .get to stub', savedStateInstance)
+        expect(savedStateInstance.get).toBeTypeOf('function')
 
         return vi.spyOn(savedStateInstance, 'get').mockResolvedValue(state)
       })

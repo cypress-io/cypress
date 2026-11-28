@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
-import la from 'lazy-ass'
+import { inspect } from 'util'
 import Debug from 'debug'
 import Promise from 'bluebird'
 import isForkPr from 'is-fork-pr'
@@ -209,7 +209,9 @@ const postInstanceResults = (options: any = {}) => {
 }
 
 const getCommitFromGitOrCi = (git: any): PostRunRequest_v3Type['commit'] => {
-  la(_.isPlainObject(git), 'expected git information object', git)
+  if (!_.isPlainObject(git)) {
+    throw new Error(`expected git information object, got ${inspect(git)}`)
+  }
 
   return ciProvider.commitDefaults({
     sha: git.sha,

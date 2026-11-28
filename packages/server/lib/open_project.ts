@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import la from 'lazy-ass'
 import Debug from 'debug'
 import assert from 'assert'
+import { inspect } from 'util'
 import { EventEmitter } from 'events'
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
@@ -76,7 +76,9 @@ export class OpenProject extends EventEmitter {
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
       browser.name, spec, prevOptions)
 
-    la(_.isPlainObject(browser), 'expected browser object:', browser)
+    if (!_.isPlainObject(browser)) {
+      throw new Error(`expected browser object, got ${inspect(browser)}`)
+    }
 
     // reset to reset server and socket state because
     // of potential domain changes, request buffers, etc

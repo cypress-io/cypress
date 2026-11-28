@@ -1,7 +1,7 @@
 import os from 'os'
 import { parse, normalize, join, dirname, relative, basename, isAbsolute } from 'path'
 import ospath from 'ospath'
-import la from 'lazy-ass'
+import assert from 'assert'
 import Debug from 'debug'
 import pkg from '@packages/root'
 import { fs } from '../util/fs'
@@ -149,11 +149,10 @@ export const removeSymlink = (): Promise<void> => {
 export const path = (...paths: string[]): string => {
   const { env } = process
 
-  la(typeof env.CYPRESS_INTERNAL_ENV === 'string' && Boolean(env.CYPRESS_INTERNAL_ENV),
-    'expected CYPRESS_INTERNAL_ENV, found', env.CYPRESS_INTERNAL_ENV)
+  assert(env.CYPRESS_INTERNAL_ENV, `expected CYPRESS_INTERNAL_ENV, found ${env.CYPRESS_INTERNAL_ENV}`)
 
   // allow overriding the app_data folder
-  const internalEnv = env.CYPRESS_INTERNAL_ENV as string
+  const internalEnv = env.CYPRESS_INTERNAL_ENV
   let folder: string = env.CYPRESS_CONFIG_ENV || internalEnv
   const cloudWorkspaceNum = resolveDevelopmentCloudWorkspaceNumber(folder, env)
   const hasCloudWorkspace = cloudWorkspaceNum !== undefined

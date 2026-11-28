@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import la from 'lazy-ass'
+import assert from 'assert'
 import _ from 'lodash'
 import type si from 'systeminformation'
 import { concatStream } from '@packages/network'
@@ -39,9 +39,9 @@ const formatPidDisplay = (groupedProcesses) => {
 
 export const groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) => {
   const cyProcesses: Process[] = []
-  const thisProcess: Process = _.find(list, { pid: process.pid })!
+  const thisProcess: Process | undefined = _.find(list, { pid: process.pid })
 
-  la(thisProcess, 'expected to find current pid in process list', process.pid)
+  assert(thisProcess, `expected to find current pid ${process.pid} in process list`)
 
   const isParentProcessInGroup = (proc: Process, group: Group) => {
     return _.chain(cyProcesses).filter({ group }).map('pid').includes(proc.parentPid).value()

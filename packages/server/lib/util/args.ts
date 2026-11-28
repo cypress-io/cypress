@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import la from 'lazy-ass'
+import assert from 'assert'
 import path from 'path'
 import Debug from 'debug'
 import minimist from 'minimist'
@@ -177,7 +177,7 @@ const JSONOrCoerce = (str: unknown): unknown => {
 }
 
 const sanitizeAndConvertNestedArgs = (str: unknown, argName: string): Record<string, unknown> => {
-  la(_.isString(argName) && Boolean(argName), 'missing config argName to be parsed')
+  assert(_.isString(argName) && Boolean(argName), 'missing config argName to be parsed')
 
   try {
     if (typeof str === 'object') {

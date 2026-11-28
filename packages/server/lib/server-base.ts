@@ -11,7 +11,7 @@ import httpProxy from 'http-proxy'
 import _ from 'lodash'
 import type { AddressInfo } from 'net'
 import url from 'url'
-import la from 'lazy-ass'
+import { inspect } from 'util'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest } from '@packages/network-interception'
@@ -451,7 +451,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._projectBlockHosts = config.blockHosts
     this.shouldCorrelatePreRequests = shouldCorrelatePreRequests
 
-    la(_.isPlainObject(config), 'expected plain config object', config)
+    if (!_.isPlainObject(config)) {
+      throw new Error(`expected plain config object, got ${inspect(config, { depth: 2 })}`)
+    }
 
     if (!config.baseUrl && testingType === 'component') {
       throw new Error('Server#open called without config.baseUrl.')
