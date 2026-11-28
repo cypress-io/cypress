@@ -11,6 +11,10 @@
 - Fixed an issue where setting up a testing type wrote `import` and `export default` into an empty `cypress.config.cjs` when your `package.json` has `"type": "module"`, so the configuration file then failed to load. Fixed in [#35543](https://github.com/cypress-io/cypress/pull/35543).
 - Fixed an issue where the `junit` reporter, and custom reporters that use `mocha-junit-reporter`, printed `Couldn't determine Mocha version` on every run. Fixed in [#35561](https://github.com/cypress-io/cypress/pull/35561).
 
+**Misc:**
+
+- The TypeScript types now allow custom queries to set and read a numeric `timeout` on their command instance. Addresses [#30198](https://github.com/cypress-io/cypress/issues/30198). Addressed in [#35135](https://github.com/cypress-io/cypress/pull/35135).
+
 ## 16.4.0
 
 **Features:**
