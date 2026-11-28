@@ -13,11 +13,6 @@ interface RequestReviewersParams {
   team_reviewers?: string[]
 }
 
-interface ProjectBoardNodeIds {
-  organization: { projectV2: { id: string } }
-  repository: { pullRequest: { id: string } }
-}
-
 // The subset of the Octokit client that `actions/github-script` passes in as `github`
 interface GitHubClient {
   rest: {
@@ -34,7 +29,6 @@ interface GitHubClient {
       requestReviewers: (params: RequestReviewersParams) => Promise<unknown>
     }
   }
-  graphql: <T>(query: string, variables: Record<string, unknown>) => Promise<T>
 }
 
 interface CreatePullRequestOptions {
@@ -46,10 +40,9 @@ interface CreatePullRequestOptions {
   body: string
   reviewers?: string[]
   team_reviewers?: string[]
-  addToProjectBoard?: boolean
 }
 
-export const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, reviewers, team_reviewers, addToProjectBoard }: CreatePullRequestOptions) => {
+export const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, reviewers, team_reviewers }: CreatePullRequestOptions) => {
   const { data: { number } } = await github.rest.pulls.create({
     owner: context.repo.owner,
     repo: context.repo.repo,
@@ -79,54 +72,5 @@ export const createPullRequest = async ({ context, github, baseBranch, branchNam
       // itself was already created successfully.
       console.log(`Could not request reviewers for PR #${number}:`, err instanceof Error ? err.message : err)
     }
-  }
-
-  //add to firewatch board
-  if (addToProjectBoard) {
-    const getProjectV2NodeIdQuery = `
-      query ($org: String!, $project_id: Int!, $repo: String!, $issueNumber: Int!) {
-        organization(login: $org) {
-          projectV2(number: $project_id) {
-            id
-          }
-        }
-        repository(owner: $org, name: $repo) {
-          pullRequest(number: $issueNumber) {
-            id
-          }
-        }
-      }`
-
-    const getProjectV2NodeIdQueryVars = {
-      org: context.repo.owner,
-      project_id: 9,
-      repo: context.repo.repo,
-      issueNumber: number,
-    }
-
-    const projectBoardNodeId = await github.graphql<ProjectBoardNodeIds>(
-      getProjectV2NodeIdQuery,
-      getProjectV2NodeIdQueryVars,
-    )
-
-    const addToProjectBoardQuery = `
-          mutation ($project_id: ID!, $item_id: ID!) {
-            addProjectV2ItemById(input: {contentId: $item_id, projectId: $project_id}) {
-              clientMutationId
-              item {
-                id
-              }
-            }
-          }`
-
-    const addToProjectBoardQueryVars = {
-      project_id: projectBoardNodeId.organization.projectV2.id,
-      item_id: projectBoardNodeId.repository.pullRequest.id,
-    }
-
-    await github.graphql(
-      addToProjectBoardQuery,
-      addToProjectBoardQueryVars,
-    )
   }
 }
