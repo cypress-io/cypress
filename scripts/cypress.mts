@@ -10,7 +10,7 @@ const args = process.argv.slice(2)
 const pathToCli = path.resolve(import.meta.dirname, '..', 'cli', 'bin', 'cypress')
 
 if (inspector.url()) {
-  process.env.CYPRESS_INTERNAL_DEV_DEBUG = `--inspect=${process.debugPort + 1}`
+  Object.assign(process, { CYPRESS_INTERNAL_DEV_DEBUG: `--inspect=${process.debugPort + 1}` })
 }
 
 // always run the CLI in dev mode
