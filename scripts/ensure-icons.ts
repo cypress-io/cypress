@@ -12,25 +12,30 @@ async function pathExists (dir: string): Promise<boolean> {
     await fs.access(dir)
 
     return true
-  } catch {
-    return false
+  } catch (err) {
+    // Only a missing path means the build isn't done; anything else (EACCES, ENOTDIR) won't fix itself by waiting
+    if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+      return false
+    }
+
+    throw err
   }
 }
 
-async function waitUntilExists (dir: string, { freq, maxAttempts }: WaitOptions, numAttempts = 0): Promise<true> {
-  if (await pathExists(dir)) {
-    return true
+export async function waitUntilExists (dir: string, { freq, maxAttempts }: WaitOptions): Promise<void> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (await pathExists(dir)) {
+      return
+    }
+
+    if (attempt < maxAttempts) {
+      console.log(`[scripts/ensure-icons]: ${dir} not found. Will check again in ${freq}ms. Attempt: ${attempt}/${maxAttempts}`)
+
+      await delay(freq)
+    }
   }
 
-  if (numAttempts > maxAttempts) {
-    throw Error(`Failed to detect path at ${dir} after ${maxAttempts}.`)
-  }
-
-  console.log(`[@packages/runner/webpack.config.ts]: ${dir} not found. Will check again in ${freq}ms. Attempt: ${numAttempts}/${maxAttempts}`)
-
-  await delay(freq)
-
-  return waitUntilExists(dir, { freq, maxAttempts }, numAttempts + 1)
+  throw new Error(`Failed to detect path at ${dir} after ${maxAttempts} attempts.`)
 }
 
 export async function waitUntilIconsBuilt (): Promise<void> {
