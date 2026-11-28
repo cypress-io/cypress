@@ -1,21 +1,28 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import uploadUtils from '../../binary/util/upload'
-import { s3helpers } from '../../binary/s3-api'
-import { findBuildByCommit, moveBinaries, parseBuildPath, prompts } from '../../binary/move-binaries'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+const sinon = require('sinon')
+const la = require('lazy-ass')
+const is = require('check-more-types')
+
+const uploadUtils = require('../../binary/util/upload')
+const s3helpers = require('../../binary/s3-api').s3helpers
 
 describe('move-binaries', () => {
   afterEach(() => {
-    vi.restoreAllMocks()
+    sinon.restore()
   })
 
+  const moveBinaries = require('../../binary/move-binaries')
+
   describe('parseBuildPath', () => {
+    const parseBuildPath = moveBinaries.parseBuildPath
+
     it('parses into SHA and build', () => {
       const path =
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/'
       const parsed = parseBuildPath(path)
 
-      expect(parsed?.commit).toMatch(/^[0-9a-f]{40}$/)
-      expect(parsed?.build).toBeGreaterThan(0)
+      la(is.commitId(parsed.commit), 'missing commit', parsed)
+      la(is.positive(parsed.build), 'missing build', parsed)
 
       expect({
         path,
@@ -25,51 +32,78 @@ describe('move-binaries', () => {
   })
 
   describe('findBuildByCommit', () => {
+    const findBuildByCommit = moveBinaries.findBuildByCommit
     const sha = '47e98fa1d0b18867a74da91a719d0f1ae73fcbc7'
+
+    it('is a function', () => {
+      la(is.fn(findBuildByCommit))
+    })
 
     it('finds single matching path', () => {
       const paths = [
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
       ]
+      const found = findBuildByCommit(sha, paths)
 
-      expect(findBuildByCommit(sha, paths)).toBe(paths[0])
+      la(found === paths[0], 'expected to find the only path', found)
     })
 
     it('finds single matching path among several', () => {
       const paths = [
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
+        // these are not matching
         'beta/binary/3.3.0/darwin-x64/circle-develop-ffff8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
         'beta/binary/3.3.0/darwin-x64/circle-develop-aaaa8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
       ]
+      const found = findBuildByCommit(sha, paths)
 
-      expect(findBuildByCommit(sha, paths)).toBe(paths[0])
+      la(found === paths[0], 'expected to find the only path', found)
     })
 
     it('finds last matching build', () => {
       const paths = [
+        // matching, but not the last one
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-50/',
-        // the highest build number for the commit wins, wherever it sits in the list
+        // this is both matching and is the latest build (100)
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-100/',
+        // these are not matching
         'beta/binary/3.3.0/darwin-x64/circle-develop-ffff8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
         'beta/binary/3.3.0/darwin-x64/circle-develop-aaaa8fa1d0b18867a74da91a719d0f1ae73fcbc7-101843/',
+        // this one is matching, but not the latest one
         'beta/binary/3.3.0/darwin-x64/circle-develop-47e98fa1d0b18867a74da91a719d0f1ae73fcbc7-2/',
       ]
+      const found = findBuildByCommit(sha, paths)
 
-      expect(findBuildByCommit(sha, paths)).toBe(paths[1])
+      la(found === paths[1], 'expected to find the only path', found)
     })
   })
 
   describe('moveBinaries', () => {
+    const move = moveBinaries.moveBinaries
+
     beforeEach(() => {
-      vi.spyOn(uploadUtils, 'purgeDesktopAppAllPlatforms').mockResolvedValue(undefined)
+      sinon.stub(uploadUtils, 'purgeDesktopAppAllPlatforms').resolves()
     })
 
-    it('finds and copies latest build for each platform', async () => {
+    it('is a function', () => {
+      la(is.fn(move))
+    })
+
+    it('finds and copies latest build for each platform', () => {
+      // realistic end-to-end test
+      // stubs S3 method calls
+      // and lets our "moveBinaries" function collect builds
+      // find latest build for each platform (for the same commit)
+      // then call S3 to copy the desktop zip file to the final destination folder
+
       const sha = '455046b928c861d4457b2ec5426a51de1fda74fd'
       const version = '3.3.0'
 
-      vi.spyOn(uploadUtils, 'getValidPlatformArchs').mockReturnValue(['darwin-x64'])
+      // limit ourselves to single platform
+      sinon.stub(uploadUtils, 'getValidPlatformArchs').returns(['darwin-x64'])
 
+      // Mac builds for several commits in the beta folder
+      // below is the latest build matching the commit
       const latestMacBuild =
         'beta/binary/3.3.0/darwin-x64/circle-develop-455046b928c861d4457b2ec5426a51de1fda74fd-102457/'
       const darwinBuilds = [
@@ -84,40 +118,52 @@ describe('move-binaries', () => {
         'beta/binary/3.3.0/darwin-x64/circle-issue-3996-6d539513e709ddd5aad866f6bf653280db6622cd-98450/',
       ]
 
-      const credentials = {
-        accessKeyId: 'AKIAIOSFODNN7EXAMPLE',
-        secretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-        sessionToken: 'FwoGZXIvYXdzEBYaDEXAMPLESESSIONTOKEN',
+      // fake AWS config
+      const aws = {
+        bucket: 'cdn.cypress.io',
+        folder: 'desktop', // destination for test runner downloads
       }
+
+      sinon.stub(uploadUtils, 'getS3Credentials').returns(aws)
+
+      // fake S3 api
       const s3 = {}
 
-      vi.spyOn(uploadUtils, 'getS3Credentials').mockResolvedValue(credentials)
-      vi.spyOn(s3helpers, 'makeS3').mockReturnValue(s3 as ReturnType<typeof s3helpers.makeS3>)
-      vi.spyOn(s3helpers, 'listS3Objects').mockResolvedValue(darwinBuilds)
-      vi.spyOn(s3helpers, 'verifyZipFileExists').mockResolvedValue(undefined)
-      vi.spyOn(s3helpers, 'copyS3').mockResolvedValue(undefined)
-      vi.spyOn(prompts, 'shouldCopy').mockResolvedValue(undefined)
+      sinon.stub(s3helpers, 'makeS3').returns(s3)
+      sinon
+      .stub(s3helpers, 'listS3Objects')
+      .withArgs('beta/binary/3.3.0/darwin-x64', aws.bucket)
+      .resolves(darwinBuilds)
 
-      // moveBinaries drops the first two entries, as it does with process.argv
-      const args = ['node', 'binary.js', '--sha', sha, '--version', version]
+      sinon
+      .stub(s3helpers, 'verifyZipFileExists')
+      .withArgs(`${latestMacBuild}cypress.zip`, aws.bucket)
+      .resolves()
 
-      const result = await moveBinaries(args)
+      // our method will ask user to confirm copying
+      sinon.stub(moveBinaries.prompts, 'shouldCopy').resolves()
 
-      expect(s3helpers.makeS3).toHaveBeenCalledWith(credentials)
-      expect(s3helpers.listS3Objects).toHaveBeenCalledWith('beta/binary/3.3.0/darwin-x64', 'cdn.cypress.io', s3)
-      expect(s3helpers.verifyZipFileExists).toHaveBeenCalledWith(`${latestMacBuild}cypress.zip`, 'cdn.cypress.io', s3)
-      expect(s3helpers.copyS3).toHaveBeenCalledWith(
+      sinon
+      .stub(s3helpers, 'copyS3')
+      .withArgs(
         `${latestMacBuild}cypress.zip`,
         'desktop/3.3.0/darwin-x64/cypress.zip',
-        'cdn.cypress.io',
-        'application/zip',
-        'public-read',
-        s3,
+        aws.bucket,
       )
+      .resolves()
 
-      expect(uploadUtils.purgeDesktopAppAllPlatforms).toHaveBeenCalledWith(version, 'cypress.zip')
+      // first two arguments are sliced anyway
+      const nodeName = null
+      const scriptName = null
+      const args = [nodeName, scriptName, '--sha', sha, '--version', version]
 
-      expect(result).toMatchSnapshot('collected builds and copied desktop')
+      return move(args).then((result) => {
+        la(is.object(result), 'expected a result', result)
+
+        sinon.assert.calledWith(uploadUtils.purgeDesktopAppAllPlatforms, version, 'cypress.zip')
+
+        expect(result).toMatchSnapshot('collected builds and copied desktop')
+      })
     })
   })
 })

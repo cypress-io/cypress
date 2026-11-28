@@ -135,6 +135,6 @@ module.exports = {
   uploadArtifactToS3,
 }
 
-if (require.main === module) {
+if (!module.parent) {
   uploadArtifactToS3(process.argv)
 }
