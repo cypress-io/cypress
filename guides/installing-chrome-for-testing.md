@@ -18,18 +18,19 @@ So a test that checks `Cypress.browser.name === 'chrome'` won’t match CfT. Whe
 [`@puppeteer/browsers`](https://www.npmjs.com/package/@puppeteer/browsers) downloads CfT for your platform. By default it installs into a `chrome/` directory under the current working directory, so pass `--path` to keep it out of your checkout:
 
 ```bash
-npx @puppeteer/browsers install chrome@stable --path ~/.cache/chrome-for-testing
+npx -y @puppeteer/browsers install chrome@stable --path ~/.cache/chrome-for-testing
 ```
 
-PowerShell doesn’t expand `~` in arguments to other programs, so on Windows spell out the home directory:
+`-y` answers `npx`’s “Ok to proceed?” prompt, so the command also runs unattended, for example from a script or a coding agent. PowerShell doesn’t expand `~` in arguments to other programs, so on Windows spell out the home directory:
 
 ```powershell
-npx @puppeteer/browsers install chrome@stable --path "$HOME\.cache\chrome-for-testing"
+npx -y @puppeteer/browsers install chrome@stable --path "$HOME\.cache\chrome-for-testing"
 ```
 
 When it finishes, it prints the version it installed and the absolute path to the executable, in the form `chrome@<version> <path>`. Under the `--path` directory, the executable lands here:
 
 - **Linux x64:** `chrome/linux-<version>/chrome-linux64/chrome`
+- **Linux arm64:** `chrome/linux_arm-<version>/chrome-linux-arm64/chrome`
 - **macOS (Apple silicon):** `chrome/mac_arm-<version>/chrome-mac-arm64/Google Chrome for Testing.app`
 - **macOS (Intel):** `chrome/mac-<version>/chrome-mac-x64/Google Chrome for Testing.app`
 - **Windows:** `chrome\win64-<version>\chrome-win64\chrome.exe`
@@ -46,6 +47,8 @@ Detection runs `chrome --version` on the first binary named `chrome` on your `PA
 export PATH="$HOME/.cache/chrome-for-testing/chrome/linux-<version>/chrome-linux64:$PATH"
 chrome --version   # Google Chrome for Testing <version>
 ```
+
+On arm64, the directory is `linux_arm-<version>/chrome-linux-arm64` instead.
 
 Because detection only looks at the first `chrome` it finds, any other `chrome` earlier on your `PATH` hides CfT, and only one CfT version is detected at a time. If CfT fails to start because of missing system libraries, add `--install-deps` to the install command (it needs root).
 
