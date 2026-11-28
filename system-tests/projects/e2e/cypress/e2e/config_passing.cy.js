@@ -20,8 +20,8 @@ describe('Cypress static methods + props', () => {
     expect(browser.name).to.be.oneOf(['electron', 'chrome', 'chrome-for-testing', 'chromium'])
     expect(browser.displayName).to.be.oneOf(['Electron', 'Chrome', 'Chrome for Testing', 'Canary', 'Chromium'])
     expect(browser.version).to.be.a('string')
-    // we are parsing major version, so it should be a number
-    expect(browser.majorVersion).to.be.a('number')
+    // Electron reports majorVersion as a number, detected browsers as a string
+    expect(String(browser.majorVersion)).to.eq(browser.version.split('.')[0]).and.match(/^\d+$/)
     expect(browser.path).to.be.a('string')
 
     if (browser.isHeadless === true) {
