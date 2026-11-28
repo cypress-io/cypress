@@ -2,10 +2,11 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
+    "baseUrl": ".",
     "paths": {
       // vuex 4's package.json "exports" has no "types" condition, so bundler
       // resolution can't find the declarations it ships under types/
-      "vuex": ["../../node_modules/vuex/types/index.d.ts"]
+      "vuex": ["../../../node_modules/vuex/types/index.d.ts"]
     }
   },
   "include": ["component/**/*.ts", "component/**/*.tsx", "component/**/*.vue"],
