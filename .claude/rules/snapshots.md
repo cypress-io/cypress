@@ -11,10 +11,10 @@ paths:
 Never hand-edit a snapshot file, and never regenerate one to make a failure go away.
 Four mechanisms live in this repo — using the wrong one is a hard error, not a no-op.
 
-- **snap-shot-it `.js`** (`@packages/server`, `system-tests`, root
-  `__snapshots__/`) — `SNAPSHOT_UPDATE=1 <test command>`
-- **vitest `.snap`** (`cli`, `@packages/{config,launcher}`, `npm/webpack-dev-server`) —
-  `yarn test -u` in that workspace
+- **snap-shot-it `.js`** (`system-tests`, root `__snapshots__/`) —
+  `SNAPSHOT_UPDATE=1 <test command>`
+- **vitest `.snap`** (`cli`, `@packages/{config,launcher,server}`, `npm/webpack-dev-server`) —
+  `yarn test -u` in that workspace (`yarn test-unit -u` in `@packages/server`)
 - **`npm/webpack-preprocessor` `.snap`** — `yarn test-e2e -u`. Its `test` script is the
   webpack-5 matrix runner, which swallows `-u`, rewrites `package.json`, and reinstalls
   deps

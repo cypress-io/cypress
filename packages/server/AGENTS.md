@@ -50,7 +50,7 @@ Read [`.cursor/skills/server-mocha-to-vitest/SKILL.md`](../../.cursor/skills/ser
 **Gotchas / Notes**
 
 - Do not build `.js` files manually during development; `@packages/ts` provides require-time transpilation.
-- To update test snapshots, prepend `SNAPSHOT_UPDATE=1` to any test command.
+- To update test snapshots, pass vitest's `-u` flag to `test-unit`.
 - E2E/system tests have moved to `system-tests/`; only unit and integration tests live in `test/unit` and `test/integration`.
 - `better-sqlite3` requires native compilation; run `yarn workspace @packages/server rebuild-better-sqlite3` after an Electron version upgrade.
 - Several dependencies (e.g., `axios`, `devtools-protocol`, `geckodriver`) are nohoisted to avoid version conflicts.

@@ -1137,7 +1137,7 @@ describe('e2e record', () => {
         },
       }))
 
-      // the other 422 tests for this are in integration/cypress_spec
+      // the other 422 tests for this are in packages/server/test/unit/cypress.spec.ts
       it('errors and exits when group name is in use', function () {
         process.env.CIRCLECI = '1'
 
@@ -2142,7 +2142,7 @@ describe('e2e record', () => {
           },
         }))
 
-        // the other 422 tests for this are in integration/cypress_spec
+        // the other 422 tests for this are in packages/server/test/unit/cypress.spec.ts
         it('errors and exits when group name is in use', function () {
           process.env.CIRCLECI = '1'
 

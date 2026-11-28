@@ -69,9 +69,8 @@ yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 
 ### Updating snapshots
 
-For integration tests, prepend `SNAPSHOT_UPDATE=1` to the test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info. For unit tests, pass vitest's `-u` flag.
+Every server snapshot lives in a vitest unit spec, so pass vitest's `-u` flag.
 
 ```bash
-SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
 yarn test-unit test/unit/reporter.spec.ts -u
 ```
