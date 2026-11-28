@@ -726,9 +726,7 @@ commands:
                 version: << parameters.google-chrome-for-testing-version >>
 
   # Installs Chrome for Testing where packages/launcher looks for it, then checks the version
-  # the same way the launcher reads it. This replaces browser-tools/install_chrome_for_testing,
-  # which always installs the x64 Linux and arm64 mac builds, links a path the mac build lacks,
-  # and has no Windows support.
+  # the same way the launcher reads it
   install-chrome-for-testing:
     parameters:
       version:
@@ -769,7 +767,14 @@ commands:
               fi
             }
 
+            # The lock timeout waits out apt-daily on freshly booted machine executors; stdin is
+            # closed so no package's prompt can read input meant for this script
+            apt_get() {
+              as_root env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=300 "$@" < /dev/null
+            }
+
             WORK_DIR="$(mktemp -d)"
+            trap 'rm -rf "$WORK_DIR"' EXIT
             ZIP="$WORK_DIR/chrome-for-testing.zip"
             URL="https://storage.googleapis.com/chrome-for-testing-public/$VERSION/$PLATFORM/chrome-$PLATFORM.zip"
             echo "Downloading $URL"
@@ -793,8 +798,8 @@ commands:
             case "$PLATFORM" in
               linux*)
                 if ! command -v unzip >/dev/null 2>&1; then
-                  as_root apt-get update
-                  as_root apt-get install -y unzip
+                  apt_get update
+                  apt_get install -y unzip
                 fi
                 unzip -q "$ZIP" -d "$WORK_DIR"
                 as_root rm -rf /opt/chrome-for-testing
@@ -802,13 +807,12 @@ commands:
 
                 # deb.deps lists the shared libraries this build needs, one apt dependency per line
                 for attempt in 1 2 3; do
-                  as_root apt-get update && break
+                  apt_get update && break
                   [[ "$attempt" -lt 3 ]] || exit 1
                   sleep 5
                 done
-                while read -r pkg; do
-                  as_root apt-get satisfy -y --no-install-recommends "$pkg"
-                done < /opt/chrome-for-testing/deb.deps
+                mapfile -t DEPENDENCIES < /opt/chrome-for-testing/deb.deps
+                apt_get satisfy -y --no-install-recommends "${DEPENDENCIES[@]}"
 
                 # Linux detection resolves the browser with `which chrome`
                 as_root ln -sfn /opt/chrome-for-testing/chrome /usr/local/bin/chrome
@@ -834,11 +838,20 @@ commands:
                   echo "Info.plist reports $PLIST_VERSION, the binary reports $FOUND_VERSION"
                   exit 1
                 fi
-                # Spotlight wins over /Applications, so a copy left elsewhere on a reused machine can shadow this one
-                OTHER_COPIES="$(mdfind "kMDItemCFBundleIdentifier=='com.google.chrome.for.testing'" 2>/dev/null | grep -vxF "$APP" || true)"
+                # Detection takes Spotlight's first match over /Applications, so a copy left elsewhere
+                # on a reused machine would be the one Cypress launches
+                OTHER_COPIES=""
+                while IFS= read -r copy; do
+                  # Spotlight's index can lag the disk, so skip paths that are already gone
+                  if [[ "$copy" != "$APP" && -e "$copy" ]]; then
+                    OTHER_COPIES="$OTHER_COPIES$copy"$'\n'
+                  fi
+                done < <(mdfind "kMDItemCFBundleIdentifier=='com.google.chrome.for.testing'" 2>/dev/null || true)
                 if [[ -n "$OTHER_COPIES" ]]; then
-                  echo "Warning: Spotlight also finds Chrome for Testing at:"
+                  echo "Spotlight finds other copies of Chrome for Testing, which Cypress may detect instead of $APP."
+                  echo "Remove them from this machine:"
                   echo "$OTHER_COPIES"
+                  exit 1
                 fi
                 ;;
 
@@ -858,8 +871,6 @@ commands:
                 echo "$DEST/chrome.exe: FileVersion $FOUND_VERSION"
                 ;;
             esac
-
-            rm -rf "$WORK_DIR"
 
             if [[ "$FOUND_VERSION" != "$VERSION" ]]; then
               echo "Expected Chrome for Testing $VERSION, found $FOUND_VERSION"
@@ -1174,7 +1185,6 @@ commands:
           steps:
             - install-browsers:
                 install-chrome-for-testing: true
-                executor: << parameters.executor >>
       - windows-install-chrome:
           browser: <<parameters.browser>>
       - run:
