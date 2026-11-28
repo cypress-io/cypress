@@ -544,7 +544,7 @@ describe('src/cy/commands/actions/click', () => {
 
       cy.get('button:first span').click()
 
-      if (Cypress.browser.name === 'chrome') {
+      if (Cypress.isBrowser({ family: 'chromium' })) {
         cy.getAll('btn', 'mouseenter mousedown mouseup').each(shouldBeCalled)
       }
 
