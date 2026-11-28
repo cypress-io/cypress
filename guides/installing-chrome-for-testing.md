@@ -6,12 +6,10 @@ Chrome for Testing (CfT) is the Chrome build Google publishes for automated test
 
 Cypress detects CfT as a browser of its own, separate from Chrome. The definition lives in [`known-browsers.ts`](../packages/launcher/lib/known-browsers.ts).
 
-| | Value |
-| --- | --- |
-| `--browser` name | `chrome-for-testing` |
-| Display name | Chrome for Testing |
-| `Cypress.browser.name` | `chrome-for-testing`, never `chrome` |
-| `Cypress.browser.family` | `chromium` |
+- **`--browser` name:** `chrome-for-testing`
+- **Display name:** Chrome for Testing
+- **`Cypress.browser.name`:** `chrome-for-testing`, never `chrome`
+- **`Cypress.browser.family`:** `chromium`
 
 So a test that checks `Cypress.browser.name === 'chrome'` won’t match CfT. When any Chromium-based browser will do, check the family instead.
 
@@ -25,12 +23,10 @@ npx @puppeteer/browsers install chrome@stable --path ~/.cache/chrome-for-testing
 
 When it finishes, it prints the version it installed and the absolute path to the executable, in the form `chrome@<version> <path>`. Under the `--path` directory, the executable lands here:
 
-| Platform | Executable |
-| --- | --- |
-| Linux x64 | `chrome/linux-<version>/chrome-linux64/chrome` |
-| macOS (Apple silicon) | `chrome/mac_arm-<version>/chrome-mac-arm64/Google Chrome for Testing.app` |
-| macOS (Intel) | `chrome/mac-<version>/chrome-mac-x64/Google Chrome for Testing.app` |
-| Windows | `chrome\win64-<version>\chrome-win64\chrome.exe` |
+- **Linux x64:** `chrome/linux-<version>/chrome-linux64/chrome`
+- **macOS (Apple silicon):** `chrome/mac_arm-<version>/chrome-mac-arm64/Google Chrome for Testing.app`
+- **macOS (Intel):** `chrome/mac-<version>/chrome-mac-x64/Google Chrome for Testing.app`
+- **Windows:** `chrome\win64-<version>\chrome-win64\chrome.exe`
 
 Cypress doesn’t look in that directory, though. Each OS needs one more step before Cypress detects it.
 
@@ -66,7 +62,14 @@ Copy-Item -Recurse "$HOME\.cache\chrome-for-testing\chrome\win64-<version>\chrom
 
 ## Pointing Cypress at the binary instead
 
-Would you rather skip the copying? `--browser` also takes a path to the executable. On Linux and macOS, Cypress runs `<path> --version` and still resolves the result to `chrome-for-testing`, listing it as “Custom Chrome for Testing”. On macOS, give the executable inside the bundle, not the `.app` itself:
+`--browser` also takes a path to the executable, which skips detection entirely. Reach for it when the steps above don’t fit:
+
+- You can’t write to `/Applications` or `C:\Program Files`, for example on a managed machine without admin rights.
+- You keep more than one CfT version and want to choose one per run. Detection finds only one, but a path picks exactly the build you name.
+- Another `chrome` sits earlier on your Linux `PATH`, and you’d rather not reorder it.
+- You only need CfT for a one-off run and don’t want to change your shell profile.
+
+On Linux and macOS, Cypress runs `<path> --version` and still resolves the result to `chrome-for-testing`, listing it as “Custom Chrome for Testing”. On macOS, give the executable inside the bundle, not the `.app` itself:
 
 ```bash
 yarn cypress:run -- --browser ~/.cache/chrome-for-testing/chrome/linux-<version>/chrome-linux64/chrome
