@@ -1,44 +1,36 @@
 // this build utility script posts on the commit in the default branch "develop"
 // telling the user how they can install pre-release build of the Test Runner
 
-import lazyAss from 'lazy-ass'
-import is from 'check-more-types'
+import assert from 'node:assert/strict'
 import os from 'node:os'
 import { Octokit } from '@octokit/core'
 import { createAppAuth } from '@octokit/auth-app'
 import { stripIndent } from 'common-tags'
 import utils from './utils.js'
 
-// check-more-types has `commitId` at runtime, but its typings leave it out
-const isCommitId: (value: unknown) => boolean = Reflect.get(is, 'commitId')
-
-// lazy-ass throws when the predicate is falsy, but its typings return `void`,
-// so without this signature TypeScript can't narrow what a call checked
-const la: (predicate: unknown, message: string) => asserts predicate = lazyAss
-
 const { getNameAndBinary, getShortCommit, getCIName, getCIBuildUrl } = utils
 
 const { npm, binary } = getNameAndBinary(process.argv)
 
-la(is.unemptyString(npm), 'missing npm url')
-la(is.unemptyString(binary), 'missing binary url')
+assert(typeof npm === 'string' && npm !== '', 'missing npm url')
+assert(typeof binary === 'string' && binary !== '', 'missing binary url')
 
 const commitInfo = getShortCommit()
 
-la(is.object(commitInfo), 'could not determine current commit information')
+assert(commitInfo, 'could not determine current commit information')
 const { sha } = commitInfo
 
-la(isCommitId(sha), 'could not find commit SHA')
+assert(typeof sha === 'string' && /^[0-9a-f]{40}$/.test(sha), 'could not find commit SHA')
 
 const appId = process.env.GITHUB_APP_ID
 
-la(appId, 'missing GITHUB_APP_ID')
+assert(appId, 'missing GITHUB_APP_ID')
 const privateKey = process.env.GITHUB_PRIVATE_KEY
 
-la(privateKey, 'missing GITHUB_PRIVATE_KEY')
+assert(privateKey, 'missing GITHUB_PRIVATE_KEY')
 const installationId = process.env.GITHUB_APP_CYPRESS_INSTALLATION_ID
 
-la(installationId, 'missing GITHUB_APP_CYPRESS_INSTALLATION_ID')
+assert(installationId, 'missing GITHUB_APP_CYPRESS_INSTALLATION_ID')
 
 const platform = os.platform()
 const arch = os.arch()
