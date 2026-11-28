@@ -67,7 +67,7 @@ export async function addProjectIdToCypressConfig (options: AddProjectIdToCypres
     const result = await fs.readFile(options.filePath, 'utf8')
     const toPrint = await addToCypressConfig(options.filePath, result, t.objectProperty(
       t.identifier('projectId'),
-      t.identifier(options.projectId),
+      t.stringLiteral(options.projectId),
     ))
 
     await fs.writeFile(options.filePath, maybeFormatWithPrettier(toPrint, options.filePath))

@@ -2,7 +2,7 @@ import { vi, describe, it, expect } from 'vitest'
 import fs from 'fs-extra'
 import path from 'path'
 import dedent from 'dedent'
-import { addTestingTypeToCypressConfig } from '../../src/ast-utils/addToCypressConfig'
+import { addProjectIdToCypressConfig, addTestingTypeToCypressConfig } from '../../src/ast-utils/addToCypressConfig'
 
 vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual<{ default: typeof import('fs-extra') }>()
@@ -322,5 +322,27 @@ describe('addToCypressConfig', () => {
 
     expect(result.result).toEqual('NEEDS_MERGE')
     expect(result.error?.message).toEqual('Unable to automerge with the config file')
+  })
+})
+
+describe('addProjectIdToCypressConfig', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+  })
+
+  it('will add the projectId as a string to an existing config', async () => {
+    const result = await addProjectIdToCypressConfig({
+      filePath: path.join(__dirname, '../__fixtures__/has-e2e.config.ts'),
+      projectId: 'ypt4pf',
+    })
+
+    expect(getWrittenConfig()).toEqual(dedent`
+      export default {
+        e2e: {},
+        projectId: "ypt4pf",
+      };
+    `)
+
+    expect(result.result).toEqual('MERGED')
   })
 })
