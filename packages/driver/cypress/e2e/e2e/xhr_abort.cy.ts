@@ -56,7 +56,7 @@ describe('aborting XHRs started in a previous test', () => {
 // simply check to ensure the XHR has been
 // canceled internally by Cypress
 // https://github.com/cypress-io/cypress/issues/3973
-if (Cypress.isBrowser('chrome')) {
+if (Cypress.isBrowser(['chrome', 'chrome-for-testing'])) {
   describe('XHRs still pending when the page unloads in chrome >= 71', () => {
     // TODO: When Intercepted, aborted XHR requests do not resolve the cy.wait command. https://github.com/cypress-io/cypress/issues/24492
     it.skip('cancels pending requests that are incomplete', () => {

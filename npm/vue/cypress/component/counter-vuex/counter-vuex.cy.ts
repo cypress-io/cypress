@@ -18,8 +18,8 @@ describe.skip('Vuex Counter', () => {
   const template = '<counter />'
 
   // define count get and set helpers
-  const getCount = () => Cypress.vue.$store.state.count
-  const setCount = (value) => Cypress.vue.$store.commit('set', value)
+  const getCount = () => store.state.count
+  const setCount = (value: number) => store.commit('set', value)
 
   // initialize a fresh Vue app before each test
   beforeEach(() => {

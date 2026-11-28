@@ -9,7 +9,7 @@ describe('smoke test', () => {
       },
     })
 
-    mount(comp)
+    const _mounted: Cypress.Chainable = mount(comp)
 
     cy.get('div').contains('hello world')
   })

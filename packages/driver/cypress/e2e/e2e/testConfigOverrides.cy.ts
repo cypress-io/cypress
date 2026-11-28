@@ -6,6 +6,7 @@ describe('per-test config', () => {
   const testState = {
     ranFirefox: false,
     ranChrome: false,
+    ranChromeForTesting: false,
     ranChromium: false,
     ranElectron: false,
     ranWebKit: false,
@@ -18,6 +19,7 @@ describe('per-test config', () => {
 
     expect(testState).deep.eq({
       ranChrome: name === 'chrome',
+      ranChromeForTesting: name === 'chrome-for-testing',
       ranChromium: name === 'chromium',
       ranFirefox: name === 'firefox',
       ranElectron: name === 'electron',
@@ -57,6 +59,13 @@ describe('per-test config', () => {
   }, () => {
     testState.ranChrome = true
     expect(Cypress.browser.name).eq('chrome')
+  })
+
+  it('can specify only run in chrome for testing', {
+    browser: 'chrome-for-testing',
+  }, () => {
+    testState.ranChromeForTesting = true
+    expect(Cypress.browser.name).eq('chrome-for-testing')
   })
 
   it('can specify only run in chromium', {

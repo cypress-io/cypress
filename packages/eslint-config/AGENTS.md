@@ -237,7 +237,7 @@ These opt in:
 - `server`: `test/**` except `test/unit/**`, which runs on Vitest.
 - `system-tests`: `test/**`, `test-binary/**` and `lib/**` (the mocha harness), plus `projects/**` and `project-fixtures/**`, whose Cypress specs sit wherever each project's `specPattern` points.
 - `tooling/packherd`, `tooling/v8-snapshot`, `tooling/electron-mksnapshot`: `test/**`.
-- `scripts`: `unit/**` except `unit/**/*.spec.ts`, which runs on Vitest. The root `test-scripts` script runs the rest.
+- `scripts`: `unit/**` except `unit/**/*.spec.{js,ts}`, which runs on Vitest.
 - `app`: `src/**/*.spec.*`, which its component `specPattern` includes.
 
 A workspace whose specs move to another runner drops its opt-in. A new mocha suite outside these globs needs adding, or `mocha/no-exclusive-tests` won't see a `.only` in it.

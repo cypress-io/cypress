@@ -1,6 +1,4 @@
 /// <reference types="cypress" />
-'use strict'
-
 import AjaxList from './AjaxList.vue'
 import { mount } from '@cypress/vue'
 

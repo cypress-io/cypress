@@ -8,6 +8,7 @@ beforePrePullImages([IMAGE])
 describe('typescript 7', () => {
   systemTests.it(`can run a typescript 7 project in ${IMAGE}`, {
     withBinary: true,
+    // cypress/base ships no browser but the bundled Electron
     browser: 'electron',
     dockerImage: IMAGE,
     project: 'ts-proj-7',
