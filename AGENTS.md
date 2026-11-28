@@ -225,6 +225,7 @@ Orientation, not a registry — the directories under `packages/` and `npm/` are
 - **Explain the why** — When a comment is necessary, use it to explain the *why* and anything relevant that is not directly expressed by the code itself.
 - **Don't repeat yourself** — Do not restate the same comment multiple times in a file as the code flows through each step.
 - **Present state only** — Keep comments relevant to the current state of the code. Do not describe what changed or how the code used to be different.
+- **Carried-over comments count too** — When you convert, rename or move a file, hold its existing comments to these rules as if they were new: drop any that restate the code, explain how to set up something that is already set up, or only credit a source.
 - **Name the reason, not the predecessor** — "Matches what the old plugin did" is not a *why*, and it rots once that plugin is deleted. State the reason the old code had, and put parity with replaced tooling in the commit message or guide.
 - **Show the effect first** — For code that rewrites a value (a parser, a sanitizer, a name or path normalizer), open with what it does to its input, with a concrete example such as `` `outer/</<` becomes `outer` ``. Background on why the input looks that way comes after, if at all.
 - **No measurements** — Don't cite benchmark numbers in a comment. They depend on the machine they came from and go stale with the code around them. State the reason instead, and keep the numbers in the commit message or pull request.

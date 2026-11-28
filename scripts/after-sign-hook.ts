@@ -1,13 +1,9 @@
-// from https://medium.com/@TwitterArchiveEraser/notarize-electron-apps-7a5f988406db
-// to enable running this hook, set in "electron-builder.json" the option
-// "afterSign": "./scripts/after-sign-hook.ts"
 import fs from 'fs'
 import path from 'path'
 import { notarize } from '@electron/notarize'
 import type { AfterPackContext } from 'electron-builder'
 
 export default async function afterSign (params: AfterPackContext): Promise<void> {
-  // Only notarize the app on Mac OS.
   if (process.platform !== 'darwin') {
     console.log('not Mac, skipping after sign hook')
 
@@ -22,9 +18,7 @@ export default async function afterSign (params: AfterPackContext): Promise<void
 
   console.log('afterSign hook triggered in', params.appOutDir)
 
-  // Same appId in electron-builder.
-  const appId = 'com.electron.cypress'
-
+  const appId = params.packager.appInfo.id
   const appPath = path.join(params.appOutDir, `${params.packager.appInfo.productFilename}.app`)
 
   if (!fs.existsSync(appPath)) {
