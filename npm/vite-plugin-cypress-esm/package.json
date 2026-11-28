@@ -19,8 +19,8 @@
   "scripts": {
     "build": "tsc || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit && tsc -p test/tsconfig.json",
-    "cypress:open": "node ../../scripts/cypress open --project . --component",
-    "cypress:run": "node ../../scripts/cypress run --project . --component",
+    "cypress:open": "node ../../scripts/cypress.mts open --project . --component",
+    "cypress:run": "node ../../scripts/cypress.mts run --project . --component",
     "lint": "eslint",
     "test": "npm run test-unit && npm run cypress:run",
     "test-unit": "vitest run",

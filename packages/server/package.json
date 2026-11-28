@@ -33,7 +33,7 @@
     "postinstall": "patch-package",
     "lint": "eslint",
     "rebuild-better-sqlite3": "cross-env npm_config_force_build=1 electron-rebuild -f -o better-sqlite3",
-    "start": "node ../../scripts/cypress open --dev --global",
+    "start": "node ../../scripts/cypress.mts open --dev --global",
     "sync-cloud-validations": "tsx ./scripts/sync-cloud-validations.ts sync",
     "test": "node ./test/scripts/run.js",
     "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",

@@ -15,7 +15,7 @@ yarn test           # vitest run; specs live in test/unit/**/*.spec.ts
 yarn test -- test/unit/setup.spec.ts   # run a single vitest spec
 yarn test-watch     # vitest in watch mode
 yarn test-debug     # vitest with --inspect-brk, no file parallelism
-yarn cypress:open   # open the package's own e2e tests via ../../scripts/cypress.js
+yarn cypress:open   # open the package's own e2e tests via ../../scripts/cypress.mts
 yarn cypress:run -- --spec cypress/e2e/multi-tab.cy.ts   # already passes --browser chrome; don't add another --browser
 ```
 

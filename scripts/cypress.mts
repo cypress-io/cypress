@@ -1,14 +1,16 @@
-const path = require('path')
-const execa = require('execa')
-const inspector = require('inspector')
-const debug = require('debug')('cypress:scripts')
+import inspector from 'node:inspector'
+import path from 'node:path'
+import Debug from 'debug'
+import execa from 'execa'
+
+const debug = Debug('cypress:scripts')
 
 const args = process.argv.slice(2)
 
-const pathToCli = path.resolve(__dirname, '..', 'cli', 'bin', 'cypress')
+const pathToCli = path.resolve(import.meta.dirname, '..', 'cli', 'bin', 'cypress')
 
 if (inspector.url()) {
-  process.CYPRESS_INTERNAL_DEV_DEBUG = `--inspect=${process.debugPort + 1}`
+  process.env.CYPRESS_INTERNAL_DEV_DEBUG = `--inspect=${process.debugPort + 1}`
 }
 
 // always run the CLI in dev mode
@@ -21,7 +23,7 @@ debug('starting the CLI in dev mode with args %o', {
   args,
 })
 
-const exit = ({ exitCode }) => {
+const exit = ({ exitCode }: { exitCode?: number }) => {
   if (typeof exitCode !== 'number') {
     console.error(`missing exit code from execa (received ${exitCode})`)
     process.exit(1)
