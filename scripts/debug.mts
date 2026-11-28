@@ -1,6 +1,6 @@
-const cp = require('child_process')
-const chalk = require('chalk')
-const pkg = require('../package.json')
+import { spawn } from 'node:child_process'
+import chalk from 'chalk'
+import pkg from '../package.json' with { type: 'json' }
 
 const INSPECT_PORT = 5566
 
@@ -10,7 +10,8 @@ if (!script) {
   throw new Error('Missing script argument')
 }
 
-const pkgScript = pkg.scripts[script]
+const scripts: Record<string, string> = pkg.scripts
+const pkgScript = scripts[script]
 
 if (!pkgScript) {
   throw new Error(`package.json scripts not found for script: ${script}`)
@@ -22,7 +23,7 @@ const userArgs = process.argv.slice(3)
 args.unshift(`--inspect-brk=${INSPECT_PORT}`)
 args.push(...userArgs)
 
-const log = (k, v) => {
+const log = (k: string, v: string) => {
   console.log(chalk.yellow(k), chalk.cyan(v))
 }
 
@@ -30,6 +31,6 @@ log('Node:', process.version)
 log('Script:', script)
 log('Spawning:', pkgScript)
 
-cp.spawn(cmd, args, {
+spawn(cmd, args, {
   stdio: 'inherit',
 })
