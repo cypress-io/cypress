@@ -5,6 +5,7 @@ export default defineConfig({
     projects: [
       '{packages,tooling,scripts}/*/vitest.config.{ts,mjs}',
       'cli/vitest.config.*',
+      'scripts/vitest.config.ts',
     ],
     exclude: ['**/node_modules/**', '**/dist/**', 'system-tests/**'],
     coverage: {
