@@ -17,8 +17,15 @@ describe('Cypress static methods + props', () => {
     const { browser } = Cypress
 
     expect(browser).to.be.an('object')
-    expect(browser.name).to.be.oneOf(['electron', 'chrome', 'chrome-for-testing', 'chromium'])
-    expect(browser.displayName).to.be.oneOf(['Electron', 'Chrome', 'Chrome for Testing', 'Canary', 'Chromium'])
+    const displayNames = {
+      'electron': 'Electron',
+      'chrome': 'Chrome',
+      'chrome-for-testing': 'Chrome for Testing',
+      'chromium': 'Chromium',
+    }
+
+    expect(browser.name).to.be.oneOf(Object.keys(displayNames))
+    expect(browser.displayName).to.eq(displayNames[browser.name])
     expect(browser.version).to.be.a('string')
     // Electron reports majorVersion as a number, detected browsers as a string
     expect(String(browser.majorVersion)).to.eq(browser.version.split('.')[0]).and.match(/^\d+$/)
